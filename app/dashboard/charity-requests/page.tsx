@@ -23,7 +23,9 @@ import {
   submitBeneficiarySupportRequest,
   getUserBeneficiaryRequests,
   createSensitiveDocumentMetadata,
+  createBeneficiaryDocumentMetadata,
 } from '@/lib/beneficiary-queries'
+import { uploadBeneficiaryDocument } from '@/lib/beneficiary-document-upload'
 import { BeneficiarySupportRequest, BeneficiaryConsent } from '@/lib/types'
 import crypto from 'crypto'
 
@@ -35,6 +37,7 @@ export default function CharityRequestsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [step, setStep] = useState(1) // Step 1: Form, Step 2: Consent & Review
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<string>('')
 
   // Form state - All 11 required fields
   const [formData, setFormData] = useState({
@@ -185,17 +188,131 @@ export default function CharityRequestsPage() {
         consentData
       )
 
-      // Create document metadata for each file
+      // Upload documents to Firebase Storage and create metadata
+      const uploadedDocuments: Array<{ type: string; documentId: string; url: string }> = []
+
+      // Upload Emirates ID
       if (formData.emiratesId.file) {
-        const metadata = await createSensitiveDocumentMetadata(
+        setUploadProgress('Uploading Emirates ID...')
+        const uploadedDoc = await uploadBeneficiaryDocument(
           requestId,
           'emirates_id',
-          formData.emiratesId.file.name,
-          formData.emiratesId.file.size,
-          Buffer.from(await formData.emiratesId.file.arrayBuffer())
+          formData.emiratesId.file
         )
-        // Update request with document reference
+        const documentId = await createBeneficiaryDocumentMetadata(
+          requestId,
+          'emirates_id',
+          uploadedDoc.fileName,
+          uploadedDoc.fileSize,
+          uploadedDoc.fileHash,
+          uploadedDoc.downloadUrl,
+          uploadedDoc.storagePath
+        )
+        uploadedDocuments.push({ type: 'emirates_id', documentId, url: uploadedDoc.downloadUrl })
       }
+
+      // Upload Passport
+      if (formData.passport.file) {
+        setUploadProgress('Uploading Passport...')
+        const uploadedDoc = await uploadBeneficiaryDocument(
+          requestId,
+          'passport',
+          formData.passport.file
+        )
+        const documentId = await createBeneficiaryDocumentMetadata(
+          requestId,
+          'passport',
+          uploadedDoc.fileName,
+          uploadedDoc.fileSize,
+          uploadedDoc.fileHash,
+          uploadedDoc.downloadUrl,
+          uploadedDoc.storagePath
+        )
+        uploadedDocuments.push({ type: 'passport', documentId, url: uploadedDoc.downloadUrl })
+      }
+
+      // Upload Visa
+      if (formData.visa.file) {
+        setUploadProgress('Uploading Visa...')
+        const uploadedDoc = await uploadBeneficiaryDocument(
+          requestId,
+          'visa',
+          formData.visa.file
+        )
+        const documentId = await createBeneficiaryDocumentMetadata(
+          requestId,
+          'visa',
+          uploadedDoc.fileName,
+          uploadedDoc.fileSize,
+          uploadedDoc.fileHash,
+          uploadedDoc.downloadUrl,
+          uploadedDoc.storagePath
+        )
+        uploadedDocuments.push({ type: 'visa', documentId, url: uploadedDoc.downloadUrl })
+      }
+
+      // Upload Salary Document
+      if (formData.salaryDoc.file) {
+        setUploadProgress('Uploading Salary Document...')
+        const uploadedDoc = await uploadBeneficiaryDocument(
+          requestId,
+          'salary_certificate',
+          formData.salaryDoc.file
+        )
+        const documentId = await createBeneficiaryDocumentMetadata(
+          requestId,
+          'salary_certificate',
+          uploadedDoc.fileName,
+          uploadedDoc.fileSize,
+          uploadedDoc.fileHash,
+          uploadedDoc.downloadUrl,
+          uploadedDoc.storagePath
+        )
+        uploadedDocuments.push({ type: 'salary_certificate', documentId, url: uploadedDoc.downloadUrl })
+      }
+
+      // Upload Bank Statement
+      if (formData.bankStatement.file) {
+        setUploadProgress('Uploading Bank Statement...')
+        const uploadedDoc = await uploadBeneficiaryDocument(
+          requestId,
+          'bank_statement',
+          formData.bankStatement.file
+        )
+        const documentId = await createBeneficiaryDocumentMetadata(
+          requestId,
+          'bank_statement',
+          uploadedDoc.fileName,
+          uploadedDoc.fileSize,
+          uploadedDoc.fileHash,
+          uploadedDoc.downloadUrl,
+          uploadedDoc.storagePath
+        )
+        uploadedDocuments.push({ type: 'bank_statement', documentId, url: uploadedDoc.downloadUrl })
+      }
+
+      // Upload Supporting Documents
+      for (let i = 0; i < formData.supportingDocs.length; i++) {
+        const doc = formData.supportingDocs[i]
+        setUploadProgress(`Uploading Supporting Document ${i + 1}/${formData.supportingDocs.length}...`)
+        const uploadedDoc = await uploadBeneficiaryDocument(
+          requestId,
+          'supporting_docs',
+          doc.file
+        )
+        const documentId = await createBeneficiaryDocumentMetadata(
+          requestId,
+          'supporting_docs',
+          uploadedDoc.fileName,
+          uploadedDoc.fileSize,
+          uploadedDoc.fileHash,
+          uploadedDoc.downloadUrl,
+          uploadedDoc.storagePath
+        )
+        uploadedDocuments.push({ type: 'supporting_docs', documentId, url: uploadedDoc.downloadUrl })
+      }
+
+      setUploadProgress('Finalizing submission...')
 
       // Submit request
       await submitBeneficiarySupportRequest(requestId)
@@ -223,11 +340,12 @@ export default function CharityRequestsPage() {
       })
       setStep(1)
       setShowForm(false)
+      setUploadProgress('')
 
       alert('Request submitted successfully! Our team will review it shortly.')
     } catch (error) {
       console.error('[v0] Error submitting request:', error)
-      alert('Error submitting request. Please try again.')
+      alert(`Error submitting request: ${error instanceof Error ? error.message : 'Please try again.'}`)
     } finally {
       setSubmitLoading(false)
     }
@@ -1032,6 +1150,31 @@ export default function CharityRequestsPage() {
                       {submitLoading ? 'Submitting...' : 'Submit Request'}
                     </Button>
                   </div>
+                  
+                  {uploadProgress && (
+                    <div style={{
+                      marginTop: '12px',
+                      padding: '12px',
+                      backgroundColor: '#f0f7ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      color: '#1e40af',
+                      fontWeight: 500,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        backgroundColor: '#3b82f6',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      {uploadProgress}
+                    </div>
+                  )}
                 </div>
               </>
             )}

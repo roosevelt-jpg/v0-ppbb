@@ -332,6 +332,45 @@ export async function createSensitiveDocumentMetadata(
   }
 }
 
+/**
+ * Create document metadata with Firebase Storage download URL
+ * This function stores the actual download URL instead of encrypted file content
+ */
+export async function createBeneficiaryDocumentMetadata(
+  beneficiaryRequestId: string,
+  documentType: SensitiveDocumentMetadata['documentType'],
+  fileName: string,
+  fileSize: number,
+  fileHash: string,
+  downloadUrl: string,
+  storagePath: string
+): Promise<string> {
+  try {
+    const documentId = doc(collection(db, 'beneficiarySensitiveDocuments')).id
+
+    await setDoc(doc(db, 'beneficiarySensitiveDocuments', documentId), {
+      id: documentId,
+      beneficiaryRequestId,
+      documentType,
+      fileName,
+      fileSize,
+      fileHash,
+      uploadedAt: Timestamp.now(),
+      downloadUrl, // Firebase Storage download URL
+      storagePath, // Firebase Storage path
+      encryptedStoragePath: storagePath,
+      isEncrypted: false, // URL is public, encryption handled at transport level (HTTPS)
+      accessLog: [],
+      createdAt: Timestamp.now(),
+    })
+
+    return documentId
+  } catch (error) {
+    console.error('[v0] Error creating document metadata:', error)
+    throw error
+  }
+}
+
 export async function getSensitiveDocumentMetadata(
   documentId: string
 ): Promise<SensitiveDocumentMetadata | null> {
