@@ -32,14 +32,11 @@ export default function OrdersPage() {
         where('userId', '==', firebaseUser.uid)
       ),
       (snapshot) => {
-        setOrders(
-          snapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            })) as any[]
-            .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))
-        )
+        const orderData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as any[]
+        setOrders(orderData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
         setLoading(false)
       },
       (error) => {
