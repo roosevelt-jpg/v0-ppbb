@@ -80,8 +80,13 @@ export function EditCharityModal({ open, onOpenChange, charity, onSuccess }: Edi
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="Edit Charity Request" description="Update charity case details">
-      <div className="space-y-4 p-6">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit Charity Request</DialogTitle>
+          <DialogDescription>Update charity case details</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
               {error}
@@ -214,7 +219,7 @@ export function EditCharityModal({ open, onOpenChange, charity, onSuccess }: Edi
             </div>
           </div>
         </div>
-      </div>
+      </DialogContent>
     </Dialog>
   )
 }
