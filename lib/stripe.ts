@@ -1,7 +1,23 @@
 import Stripe from 'stripe'
-import { db } from '@/lib/firebase'
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
-import { Donation } from '@/lib/types'
+
+let db: any = null
+let firebaseImports: any = null
+
+// Lazy initialize Firebase on first use
+async function initFirebase() {
+  if (!firebaseImports) {
+    try {
+      const firebase = await import('@/lib/firebase')
+      db = firebase.db
+      firebaseImports = await import('firebase/firestore')
+      return true
+    } catch (error) {
+      console.warn('[v0] Firebase initialization skipped')
+      return false
+    }
+  }
+  return !!firebaseImports
+}
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-05-27.dahlia',
@@ -33,7 +49,13 @@ export async function recordDonation(
   isAnonymous: boolean = false
 ) {
   try {
-    const donation: Donation = {
+    const initialized = await initFirebase()
+    if (!initialized) return null
+
+    const { Donation } = require('@/lib/types')
+    const { doc, setDoc } = firebaseImports
+
+    const donation = {
       id: `${Date.now()}-${Math.random()}`,
       donorId,
       campaignId,
@@ -57,6 +79,10 @@ export async function recordDonation(
 
 export async function getDonations(donorId?: string, campaignId?: string) {
   try {
+    const initialized = await initFirebase()
+    if (!initialized) return []
+
+    const { collection, query, where, getDocs } = firebaseImports
     let constraints = []
 
     if (donorId) {
@@ -70,10 +96,10 @@ export async function getDonations(donorId?: string, campaignId?: string) {
     const q = query(collection(db, 'donations'), ...constraints)
     const snapshot = await getDocs(q)
 
-    return snapshot.docs.map((doc) => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
-    })) as Donation[]
+    }))
   } catch (error) {
     console.error('[v0] Error fetching donations:', error)
     return []

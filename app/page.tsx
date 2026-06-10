@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { Logo } from '@/components/logo'
 import { Card } from '@/components/ui/card'
 import { ArrowRight, Users, Calendar, Heart } from 'lucide-react'
@@ -157,45 +158,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer
-        className="py-8 px-6 border-t"
-        style={{
-          backgroundColor: '#ffffff',
-          borderColor: '#e4e1da',
-          color: '#888888',
-        }}
-      >
-        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 mb-8">
-          <div>
-            <Logo size="sm" />
-            <p className="text-xs mt-3" style={{ color: '#888888' }}>
-              Community platform for events, volunteering, and welfare.
-            </p>
-          </div>
-          {['About', 'Events', 'Volunteer', 'Contact'].map((section) => (
-            <div key={section}>
-              <p className="text-xs font-bold mb-3" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                {section}
-              </p>
-              <ul className="space-y-2">
-                {['Link 1', 'Link 2', 'Link 3'].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-xs hover:text-charcoal transition" style={{ color: '#888888' }}>
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className="border-t pt-8" style={{ borderColor: '#e4e1da' }}>
-          <p className="text-xs text-center" style={{ color: '#888888' }}>
-            © {new Date().getFullYear()} Passive Blessings. All rights reserved. ESTD 2025
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

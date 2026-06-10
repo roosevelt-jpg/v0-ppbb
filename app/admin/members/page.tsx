@@ -3,6 +3,7 @@
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
+import { EditMemberModal } from '@/components/edit-member-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -10,6 +11,8 @@ import { formatDistanceToNow } from 'date-fns'
 export default function MembersPage() {
   const [members, setMembers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [selectedMember, setSelectedMember] = React.useState<any>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     // Subscribe to real-time member updates
@@ -83,6 +86,17 @@ export default function MembersPage() {
     },
   ]
 
+  const handleEditMember = (member: any) => {
+    setSelectedMember(member)
+    setEditModalOpen(true)
+  }
+
+  const handleDeleteMember = (member: any) => {
+    if (confirm(`Are you sure you want to delete ${member.name}?`)) {
+      console.log('Delete member:', member)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <AdminHeader title="Members" subtitle="Manage member accounts and profile information" />
@@ -93,16 +107,21 @@ export default function MembersPage() {
           data={members}
           loading={loading}
           searchPlaceholder="Search by name, email, or location..."
-          onEdit={(item) => {
-            // TODO: Open member detail modal
-            console.log('Edit member:', item)
-          }}
-          onDelete={(item) => {
-            // TODO: Open delete confirmation
-            console.log('Delete member:', item)
-          }}
+          onEdit={handleEditMember}
+          onDelete={handleDeleteMember}
         />
       </div>
+
+      {/* Edit Member Modal */}
+      <EditMemberModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        member={selectedMember}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          setSelectedMember(null)
+        }}
+      />
     </div>
   )
 }

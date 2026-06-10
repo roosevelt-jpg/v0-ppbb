@@ -1,11 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyStripeWebhook, recordDonation } from '@/lib/stripe'
+
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+// Lazy load stripe to avoid build issues
+async function getStripeModule() {
+  try {
+    return await import('@/lib/stripe')
+  } catch (error) {
+    console.error('[v0] Stripe module load error:', error)
+    return null
+  }
+}
 
 export async function POST(req: NextRequest) {
+  const stripe = await getStripeModule()
+  if (!stripe) {
+    return NextResponse.json({ error: 'Stripe not available' }, { status: 503 })
+  }
+
   const body = await req.text()
   const signature = req.headers.get('stripe-signature') || ''
 
-  const event = await verifyStripeWebhook(body, signature)
+  const event = await stripe.verifyStripeWebhook(body, signature)
 
   if (!event) {
     return NextResponse.json(
@@ -21,19 +38,18 @@ export async function POST(req: NextRequest) {
         const { donorId, campaignId, amount, isAnonymous } = paymentIntent.metadata
 
         if (donorId && campaignId) {
-          await recordDonation(donorId, campaignId, parseInt(amount), paymentIntent.id, isAnonymous === 'true')
+          await stripe.recordDonation(donorId, campaignId, parseInt(amount), paymentIntent.id, isAnonymous === 'true')
         }
         break
       }
 
       case 'payment_intent.payment_failed': {
         console.log('[v0] Payment failed:', event.data.object)
-        // Handle failed payment
         break
       }
 
       default:
-        console.log(`[v0] Unhandled event type: ${event.type}`)
+        console.log('[v0] Unhandled event type:', event.type)
     }
 
     return NextResponse.json({ received: true })
