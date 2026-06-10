@@ -7,12 +7,14 @@ import {
   query, 
   where, 
   getDocs,
-  serverTimestamp 
+  serverTimestamp,
+  Timestamp
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { YouTubeConfig, YouTubeVideo } from './types'
 
 const YOUTUBE_COLLECTION = 'youtubeConfig'
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
 export async function getYouTubeConfig(): Promise<YouTubeConfig | null> {
   try {
@@ -41,6 +43,32 @@ export async function saveYouTubeConfig(config: YouTubeConfig): Promise<boolean>
     return true
   } catch (error) {
     console.error('[v0] Error saving YouTube config:', error)
+    return false
+  }
+}
+
+export async function shouldRefreshYouTubeVideos(config: YouTubeConfig): Promise<boolean> {
+  try {
+    if (!config.lastFetched) {
+      return true // Never fetched, should fetch now
+    }
+
+    // Convert Firestore Timestamp to milliseconds
+    let lastFetchedTime: number
+    if (config.lastFetched instanceof Timestamp) {
+      lastFetchedTime = config.lastFetched.toMillis()
+    } else if (config.lastFetched instanceof Date) {
+      lastFetchedTime = config.lastFetched.getTime()
+    } else {
+      lastFetchedTime = new Date(config.lastFetched).getTime()
+    }
+
+    const now = Date.now()
+    const timeSinceLastFetch = now - lastFetchedTime
+    
+    return timeSinceLastFetch > CACHE_DURATION
+  } catch (error) {
+    console.error('[v0] Error checking if refresh needed:', error)
     return false
   }
 }
