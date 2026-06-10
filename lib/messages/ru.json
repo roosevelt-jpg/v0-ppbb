@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Passive Blessings",
+    "estd": "ESTD 2025",
+    "signIn": "Войти",
+    "signUp": "Присоединяйтесь сейчас",
+    "signOut": "Выход",
+    "dashboard": "Панель управления",
+    "admin": "Администратор",
+    "business": "Бизнес",
+    "about": "О нас",
+    "contact": "Контакты",
+    "events": "События",
+    "volunteer": "Волонтер",
+    "marketplace": "Рынок",
+    "partnerships": "Партнерства",
+    "donations": "Пожертвования",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успех",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать"
+  },
+  "signup": {
+    "title": "Создайте свой аккаунт",
+    "description": "Присоединяйтесь к сообществу Passive Blessings",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "email": "Адрес электронной почты",
+    "password": "Создать пароль",
+    "selectLocation": "Выберите свое местоположение",
+    "currentLocation": "Использовать текущее местоположение",
+    "profileImage": "Фото профиля",
+    "uploadImage": "Нажмите, чтобы загрузить фото профиля",
+    "requiredField": "Это поле обязательно"
+  }
+}

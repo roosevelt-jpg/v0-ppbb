@@ -8,14 +8,26 @@ import {
   browserLocalPersistence,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
-import { User, UserRole } from '@/lib/types'
+import { User, UserRole, LocationData, UploadedImage } from '@/lib/types'
+
+interface RegisterUserOptions {
+  dateOfBirth?: string
+  gender?: string
+  nationality?: string
+  emiratesId?: string
+  location?: LocationData
+  profession?: string
+  employer?: string
+  avatar?: UploadedImage
+}
 
 export async function registerUser(
   email: string,
   password: string,
   firstName: string,
   lastName: string,
-  role: UserRole = 'member'
+  role: UserRole = 'member',
+  options?: RegisterUserOptions
 ): Promise<{ user: User | null; error: string | null }> {
   try {
     // Set persistence to local
@@ -31,7 +43,15 @@ export async function registerUser(
       email,
       firstName,
       lastName,
+      dateOfBirth: options?.dateOfBirth,
+      gender: options?.gender,
+      nationality: options?.nationality,
+      emiratesId: options?.emiratesId,
+      avatar: options?.avatar,
       role,
+      location: options?.location,
+      profession: options?.profession,
+      employer: options?.employer,
       volunteeredHours: 0,
       totalDonated: 0,
       membershipTier: 'standard',

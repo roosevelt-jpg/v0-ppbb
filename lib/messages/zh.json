@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Passive Blessings",
+    "estd": "ESTD 2025",
+    "signIn": "登录",
+    "signUp": "立即加入",
+    "signOut": "登出",
+    "dashboard": "仪表板",
+    "admin": "管理员",
+    "business": "业务",
+    "about": "关于我们",
+    "contact": "联系方式",
+    "events": "活动",
+    "volunteer": "志愿者",
+    "marketplace": "市场",
+    "partnerships": "合作伙伴关系",
+    "donations": "捐款",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑"
+  },
+  "signup": {
+    "title": "创建你的账户",
+    "description": "加入Passive Blessings社区",
+    "firstName": "名字",
+    "lastName": "姓氏",
+    "email": "电子邮件地址",
+    "password": "创建密码",
+    "selectLocation": "选择你的位置",
+    "currentLocation": "使用当前位置",
+    "profileImage": "个人资料图片",
+    "uploadImage": "点击上传个人资料图片",
+    "requiredField": "此字段为必填项"
+  }
+}

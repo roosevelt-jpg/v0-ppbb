@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Passive Blessings",
+    "estd": "ESTD 2025",
+    "signIn": "로그인",
+    "signUp": "지금 가입",
+    "signOut": "로그아웃",
+    "dashboard": "대시보드",
+    "admin": "관리자",
+    "business": "사업",
+    "about": "우리 소개",
+    "contact": "문의",
+    "events": "이벤트",
+    "volunteer": "자원봉사자",
+    "marketplace": "마켓플레이스",
+    "partnerships": "파트너십",
+    "donations": "기부금",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "cancel": "취소",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집"
+  },
+  "signup": {
+    "title": "계정 만들기",
+    "description": "Passive Blessings 커뮤니티에 참여하세요",
+    "firstName": "이름",
+    "lastName": "성",
+    "email": "이메일 주소",
+    "password": "비밀번호 만들기",
+    "selectLocation": "위치 선택",
+    "currentLocation": "현재 위치 사용",
+    "profileImage": "프로필 이미지",
+    "uploadImage": "클릭하여 프로필 이미지 업로드",
+    "requiredField": "필수 입력 항목입니다"
+  }
+}

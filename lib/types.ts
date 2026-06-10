@@ -1,22 +1,40 @@
 // User roles and types
 export type UserRole = 'member' | 'volunteer' | 'business' | 'admin'
 
+export interface LocationData {
+  latitude: number
+  longitude: number
+  city: string
+  state: string
+  country: string
+  countryCode: string
+  address: string
+}
+
+export interface UploadedImage {
+  base64: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  uploadedAt: number
+}
+
 export interface User {
   id: string
   email: string
   firstName: string
   lastName: string
-  avatar?: string
+  dateOfBirth?: string
+  gender?: string
+  nationality?: string
+  emiratesId?: string
+  avatar?: UploadedImage
+  avatarUrl?: string
   role: UserRole
   phone?: string
-  nationality?: string
-  location?: {
-    city: string
-    emirate: string
-    country: string
-    area?: string
-  }
+  location?: LocationData
   profession?: string
+  employer?: string
   skills?: string[]
   hourlyRate?: number
   volunteeredHours: number
@@ -33,8 +51,12 @@ export interface BusinessProfile extends User {
   businessType: string
   registrationNumber?: string
   website?: string
+  logo?: UploadedImage
   logoUrl?: string
-  description: string
+  businessDescription: string
+  businessEmail?: string
+  businessPhone?: string
+  businessLocation?: LocationData
   activeOpportunities: number
   revenue?: number
   referralEarnings: number
@@ -48,6 +70,7 @@ export interface Event {
   title: string
   slug: string
   description: string
+  image?: UploadedImage
   imageUrl?: string
   location: string
   date: Date
@@ -107,6 +130,7 @@ export interface Campaign {
   raised: number
   currency: string
   status: 'active' | 'completed' | 'paused'
+  image?: UploadedImage
   imageUrl?: string
   createdAt: Date
   endsAt: Date
@@ -123,6 +147,7 @@ export interface Page {
   seoTitle: string
   seoDescription: string
   keywords: string[]
+  image?: UploadedImage
   imageUrl?: string
   status: 'draft' | 'published'
   order: number
@@ -135,8 +160,11 @@ export interface SiteSettings {
   id: string
   siteName: string
   siteDescription: string
+  logo?: UploadedImage
   logoUrl: string
+  logoDark?: UploadedImage
   logoUrlDark: string
+  favicon?: UploadedImage
   faviconUrl: string
   primaryColor: string
   secondaryColor: string
@@ -209,3 +237,4 @@ export interface AuditLog {
   timestamp: Date
   ipAddress?: string
 }
+

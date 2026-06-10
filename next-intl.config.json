@@ -1,5 +1,5 @@
 {
-  "locales": ["en", "ar"],
+  "locales": ["en", "ar", "es", "fr", "de", "pt", "ja", "zh", "ko", "it", "nl", "ru"],
   "defaultLocale": "en",
   "pathnames": {
     "/": "/",
@@ -9,6 +9,8 @@
     "/events": "/events",
     "/marketplace": "/marketplace",
     "/volunteer": "/volunteer",
-    "/donations": "/donations"
+    "/donations": "/donations",
+    "/login": "/login",
+    "/signup": "/signup"
   }
 }

@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Passive Blessings",
+    "estd": "ESTD 2025",
+    "signIn": "Inloggen",
+    "signUp": "Nu deelnemen",
+    "signOut": "Uitloggen",
+    "dashboard": "Dashboard",
+    "admin": "Beheerder",
+    "business": "Bedrijf",
+    "about": "Over ons",
+    "contact": "Contact",
+    "events": "Evenementen",
+    "volunteer": "Vrijwilliger",
+    "marketplace": "Marktplaats",
+    "partnerships": "Partnerschappen",
+    "donations": "Donaties",
+    "loading": "Bezig met laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "delete": "Verwijderen",
+    "edit": "Bewerken"
+  },
+  "signup": {
+    "title": "Maak je account aan",
+    "description": "Sluit je aan bij de Passive Blessings-gemeenschap",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "email": "E-mailadres",
+    "password": "Wachtwoord maken",
+    "selectLocation": "Selecteer uw locatie",
+    "currentLocation": "Huidige locatie gebruiken",
+    "profileImage": "Profielfoto",
+    "uploadImage": "Klik om profielfoto te uploaden",
+    "requiredField": "Dit veld is verplicht"
+  }
+}

@@ -12,6 +12,12 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
+## Google Maps API (for Geolocation)
+```
+# Required for location detection during signup
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
 ## Stripe Configuration
 ```
 # Stripe API Keys
@@ -41,6 +47,14 @@ NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your_vercel_analytics_id
 3. Go to Project Settings → Service Accounts
 4. Copy your config values
 
+### Google Maps API
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project
+3. Enable Maps JavaScript API, Geocoding API, and Places API
+4. Go to Credentials → Create API Key
+5. Restrict API key to your domain(s)
+6. Copy the API key to `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
+
 ### Stripe
 1. Go to [Stripe Dashboard](https://dashboard.stripe.com)
 2. Navigate to Developers → API Keys
@@ -61,6 +75,9 @@ NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your_vercel_analytics_id
 - Secret keys must be kept private and configured in your deployment platform
 - For production, configure these in your hosting platform's environment variables (Vercel, etc.)
 - The Admin Dashboard allows runtime configuration of Stripe and SendGrid keys encrypted in Firestore
+- Images uploaded during signup are stored as Base64 in Firestore (no external storage required)
+- Location data is captured automatically when user allows geolocation permission
+- Date/time fields are populated with current values automatically
 
 ## Production Deployment
 
@@ -76,4 +93,6 @@ After configuration:
 1. Admin panel at `/admin` (requires authentication)
 2. Visit `/admin/health` to check service status
 3. Check `/admin/settings` to verify API configuration is saved
-4. Test by making a donation to verify Stripe integration
+4. Test signup flow to verify geolocation and image upload work
+5. Test by making a donation to verify Stripe integration
+

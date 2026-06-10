@@ -1,0 +1,39 @@
+{
+  "common": {
+    "appName": "Passive Blessings",
+    "estd": "ESTD 2025",
+    "signIn": "Entrar",
+    "signUp": "Junte-se agora",
+    "signOut": "Sair",
+    "dashboard": "Painel de controle",
+    "admin": "Admin",
+    "business": "Negócio",
+    "about": "Sobre nós",
+    "contact": "Contato",
+    "events": "Eventos",
+    "volunteer": "Voluntário",
+    "marketplace": "Mercado",
+    "partnerships": "Parcerias",
+    "donations": "Doações",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar"
+  },
+  "signup": {
+    "title": "Crie sua conta",
+    "description": "Junte-se à comunidade Passive Blessings",
+    "firstName": "Primeiro nome",
+    "lastName": "Sobrenome",
+    "email": "Endereço de email",
+    "password": "Criar senha",
+    "selectLocation": "Selecione sua localização",
+    "currentLocation": "Usar localização atual",
+    "profileImage": "Imagem de perfil",
+    "uploadImage": "Clique para enviar imagem de perfil",
+    "requiredField": "Este campo é obrigatório"
+  }
+}
