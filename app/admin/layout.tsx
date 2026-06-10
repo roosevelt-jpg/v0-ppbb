@@ -14,7 +14,7 @@ export default function AdminLayout({
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null)
 
   React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user: any) => {
       if (!user) {
         router.push('/login')
         return

@@ -64,10 +64,11 @@ export default function ProfileEditPage() {
     setFormData(prev => ({
       ...prev,
       volunteerAvailability: {
-        ...(prev.volunteerAvailability || {}),
-        days: (prev.volunteerAvailability?.days || []).includes(day)
-          ? prev.volunteerAvailability.days.filter(d => d !== day)
-          : [...(prev.volunteerAvailability?.days || []), day]
+        days: ((prev?.volunteerAvailability?.days as string[]) || []).includes(day)
+          ? (prev?.volunteerAvailability?.days as string[]).filter(d => d !== day)
+          : [...((prev?.volunteerAvailability?.days as string[]) || []), day],
+        hoursPerMonth: prev?.volunteerAvailability?.hoursPerMonth || 0,
+        preferredDepartment: prev?.volunteerAvailability?.preferredDepartment,
       }
     }))
   }
@@ -89,6 +90,7 @@ export default function ProfileEditPage() {
         doc(db, 'users', firebaseUser.uid),
         {
           ...formData,
+          id: firebaseUser.uid,
           updatedAt: new Date(),
         },
         { merge: true }

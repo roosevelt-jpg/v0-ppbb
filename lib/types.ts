@@ -2,13 +2,16 @@
 export type UserRole = 'member' | 'volunteer' | 'business' | 'admin'
 
 export interface LocationData {
-  latitude: number
-  longitude: number
-  city: string
-  state: string
-  country: string
-  countryCode: string
-  address: string
+  latitude?: number
+  longitude?: number
+  city?: string
+  state?: string
+  country?: string
+  countryCode?: string
+  address?: string
+  emirate?: string
+  area?: string
+  postalCode?: string
 }
 
 export interface UploadedImage {

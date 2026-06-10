@@ -80,7 +80,7 @@ export default function BusinessLayout({
   const [isLoading, setIsLoading] = React.useState(true)
 
   React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser: any) => {
       if (!firebaseUser) {
         router.push('/login')
         return
