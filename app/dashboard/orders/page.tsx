@@ -1,12 +1,13 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { ShoppingBag, Truck, CheckCircle, Clock } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 const STATUS_CONFIG = {
   pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pending' },
@@ -17,6 +18,7 @@ const STATUS_CONFIG = {
 }
 
 export default function OrdersPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -58,6 +60,8 @@ export default function OrdersPage() {
       <MemberHeader
         title="My Orders"
         subtitle="Track your merchandise and purchases"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8">

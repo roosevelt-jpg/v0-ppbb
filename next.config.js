@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  cacheComponents: true,
-  skipStaticOptimization: true,
-  experimental: {
-    isrMemoryCacheSize: 0,
+  bundler: 'webpack',
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 

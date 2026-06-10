@@ -1,6 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, addDoc, orderBy } from 'firebase/firestore'
@@ -10,7 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Send, Users } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default function MessagesPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [conversations, setConversations] = useState<any[]>([])
   const [selectedConversation, setSelectedConversation] = useState<any>(null)
   const [messages, setMessages] = useState<any[]>([])
@@ -91,6 +93,8 @@ export default function MessagesPage() {
       <MemberHeader
         title="Messages"
         subtitle="Connect with other members and community leaders"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8">

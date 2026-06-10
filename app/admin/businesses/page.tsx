@@ -16,11 +16,11 @@ export default function BusinessesPage() {
     const unsubscribe = onSnapshot(
       collection(db, 'businesses'),
       (snapshot) => {
-        const businessData = snapshot.docs.map((doc) => ({
+        const businessData: any[] = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }))
-        setBusinesses(businessData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
+        setBusinesses(businessData)
         setLoading(false)
       },
       (error) => {

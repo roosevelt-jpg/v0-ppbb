@@ -1,6 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query } from 'firebase/firestore'
@@ -9,7 +8,10 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BookOpen, Video, FileText, Users } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default function LearningPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [resources, setResources] = useState<any[]>([])
   const [workshops, setWorkshops] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
@@ -69,6 +71,8 @@ export default function LearningPage() {
       <MemberHeader
         title="Learning Center"
         subtitle="Access resources, workshops, and recordings"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8 space-y-8">

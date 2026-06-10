@@ -1,6 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
@@ -8,6 +7,8 @@ import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Check, Crown } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 const MEMBERSHIP_TIERS = [
   {
@@ -35,6 +36,7 @@ const MEMBERSHIP_TIERS = [
 ]
 
 export default function MembershipPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [upgrading, setUpgrading] = useState(false)
@@ -90,6 +92,8 @@ export default function MembershipPage() {
       <MemberHeader
         title="Membership Plans"
         subtitle="Choose your membership tier to unlock exclusive benefits"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8">
