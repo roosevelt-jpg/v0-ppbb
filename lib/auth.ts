@@ -158,7 +158,8 @@ export async function promoteUserToAdmin(
     const userRef = doc(db, 'users', userId)
     await setDoc(userRef, { role: 'admin' }, { merge: true })
 
-    // Set admin role and permissions
+    // Set admin role and permissions using dynamic import
+    const { setAdminUser } = await import('@/lib/admin-access')
     const result = await setAdminUser(userId, adminRole)
     return result
   } catch (error: any) {
