@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser } from '@/lib/auth'
 import { verifyAccessCode } from '@/lib/access-code'
+import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
 import { AlertCircle } from 'lucide-react'
 
@@ -19,6 +20,22 @@ export default function LoginPage() {
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
   const [rememberMe, setRememberMe] = React.useState(false)
+  const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
+  const [statsLoading, setStatsLoading] = React.useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getCommunityStats()
+        setStats(data)
+      } catch (err) {
+        console.error('[v0] Error fetching stats:', err)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
 
   // Verify access code for admin login
   const handleVerifyAccessCode = async (e: React.FormEvent) => {
