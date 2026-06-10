@@ -27,15 +27,15 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="w-64 bg-card border-r border-border min-h-screen flex flex-col">
+    <aside className="w-44 min-h-screen flex flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       {/* Logo */}
-      <div className="p-6 border-b border-border">
-        <Logo size="md" href="/admin" />
-        <p className="text-xs text-muted-foreground mt-2">ESTD 2025</p>
+      <div className="p-4 border-b" style={{ borderColor: '#e4e1da' }}>
+        <Logo size="sm" href="/admin" />
+        <p className="text-xs mt-2" style={{ color: '#888888' }}>ESTD 2025</p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-3 space-y-1">
         {adminMenuItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -43,31 +43,34 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-foreground hover:bg-secondary'
-              }`}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+              style={{
+                backgroundColor: isActive ? '#111111' : 'transparent',
+                color: isActive ? '#f7f6f2' : '#333333',
+              }}
             >
               <Icon className="h-4 w-4" />
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="font-medium">{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border space-y-3">
+      <div className="p-3 border-t space-y-2" style={{ borderColor: '#e4e1da' }}>
         <ThemeToggle />
-        <Button
+        <button
           onClick={handleLogout}
-          variant="outline"
-          size="sm"
-          className="w-full justify-start"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition"
+          style={{
+            backgroundColor: '#f7f6f2',
+            color: '#111111',
+            border: '1px solid #e4e1da',
+          }}
         >
-          <LogOut className="h-4 w-4 mr-2" />
+          <LogOut className="h-4 w-4" />
           Sign out
-        </Button>
+        </button>
       </div>
     </aside>
   )
@@ -75,9 +78,11 @@ export function AdminSidebar() {
 
 export function AdminHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="bg-background border-b border-border px-8 py-6">
-      <h1 className="text-3xl font-bold text-foreground">{title}</h1>
-      {subtitle && <p className="text-muted-foreground mt-1">{subtitle}</p>}
+    <div className="border-b px-8 py-6" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+      <h1 className="text-2xl font-bold" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+        {title}
+      </h1>
+      {subtitle && <p className="text-xs mt-1" style={{ color: '#888888' }}>{subtitle}</p>}
     </div>
   )
 }

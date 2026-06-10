@@ -2,14 +2,9 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { Logo } from './logo'
-import { ThemeToggle } from './theme-toggle'
-import { LanguageSwitcher } from './language-switcher'
 
 export function Navbar() {
-  const pathname = usePathname()
-
   const navLinks = [
     { href: '#about', label: 'About us' },
     { href: '#join', label: 'Join' },
@@ -17,8 +12,6 @@ export function Navbar() {
     { href: '#marketplace', label: 'Marketplace' },
     { href: '#contact', label: 'Contact' },
   ]
-
-  const isAuthenticated = false // TODO: Check auth state from context
 
   return (
     <nav
@@ -52,50 +45,21 @@ export function Navbar() {
         ))}
       </div>
 
-      {/* Right side - theme toggle, language switcher, auth */}
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
-        <LanguageSwitcher />
-
-        {isAuthenticated ? (
-          <Link
-            href="/dashboard"
-            className="px-3 py-1 rounded-lg text-xs font-medium transition"
-            style={{
-              fontSize: '12px',
-              fontWeight: 500,
-              backgroundColor: '#f7f6f2',
-              color: '#111111',
-            }}
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <>
-            <Link
-              href="/login"
-              className="px-3 py-1 text-xs transition"
-              style={{
-                fontSize: '12px',
-                color: '#888888',
-              }}
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/signup"
-              className="px-3 py-1 rounded-lg text-xs font-medium transition"
-              style={{
-                fontSize: '12px',
-                fontWeight: 500,
-                backgroundColor: '#f7f6f2',
-                color: '#111111',
-              }}
-            >
-              Join now
-            </Link>
-          </>
-        )}
+      {/* Right side actions */}
+      <div className="flex items-center gap-4">
+        <Link href="/login" className="text-xs font-medium transition hover:text-warm-white" style={{ color: '#888888' }}>
+          Sign in
+        </Link>
+        <Link
+          href="/signup"
+          className="px-3 py-1 text-xs font-medium rounded-lg transition"
+          style={{
+            backgroundColor: '#f7f6f2',
+            color: '#111111',
+          }}
+        >
+          Join now
+        </Link>
       </div>
     </nav>
   )
