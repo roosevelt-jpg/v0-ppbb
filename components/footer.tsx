@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Logo } from '@/components/logo'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, getCountFromServer, query, where } from 'firebase/firestore'
+import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 
 interface Stats {
   members: number
