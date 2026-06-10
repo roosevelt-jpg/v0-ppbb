@@ -78,204 +78,206 @@ export function Navbar() {
   ]
 
   return (
-    <nav
-      className="relative h-12 flex items-center justify-between px-6 border-b"
-      style={{
-        backgroundColor: '#111111',
-        borderColor: '#e4e1da',
-      }}
-    >
-      {/* Logo */}
-      <div className="w-24 flex-shrink-0">
-        <Link href="/">
-          <Logo size="sm" />
-        </Link>
-      </div>
-
+    <nav className="w-full bg-white border-b" style={{ borderColor: '#e4e1da' }}>
       {/* Desktop Navigation */}
-      <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
-        {navItems.map((item) => (
-          <div
-            key={item.label}
-            className="relative group"
-            onMouseEnter={() => setOpenDropdown(item.label)}
-            onMouseLeave={() => setOpenDropdown(null)}
-          >
-            <button
-              className="px-3 py-2 text-xs font-medium rounded transition flex items-center gap-1"
-              style={{
-                color: '#888888',
-              }}
-              onMouseEnter={() => setOpenDropdown(item.label)}
-            >
-              {item.label}
-              <ChevronDown size={12} className="mt-0.5" />
-            </button>
+      <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-8">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link href="/">
+              <Logo size="sm" />
+            </Link>
+          </div>
 
-            {/* Dropdown Menu */}
-            {openDropdown === item.label && (
+          {/* Center Menu Items */}
+          <div className="flex-1 flex items-center justify-center gap-0 lg:gap-2">
+            {navItems.map((item) => (
               <div
-                className="absolute left-0 mt-0 pt-1 w-48 rounded-lg shadow-lg z-50"
-                style={{
-                  backgroundColor: '#f7f6f2',
-                  borderColor: '#e4e1da',
-                  border: '1px solid',
-                }}
+                key={item.label}
+                className="relative group"
                 onMouseEnter={() => setOpenDropdown(item.label)}
                 onMouseLeave={() => setOpenDropdown(null)}
               >
-                {item.items.map((subItem) => (
+                <button
+                  className="px-2 sm:px-3 lg:px-4 py-2 text-xs sm:text-sm font-medium rounded transition flex items-center gap-1 whitespace-nowrap"
+                  style={{
+                    color: '#888888',
+                    backgroundColor: openDropdown === item.label ? '#f7f6f2' : 'transparent',
+                  }}
+                  onMouseEnter={() => setOpenDropdown(item.label)}
+                >
+                  {item.label}
+                  <ChevronDown size={14} className={`transition-transform ${openDropdown === item.label ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {openDropdown === item.label && (
+                  <div
+                    className="absolute left-0 mt-0 pt-1 min-w-max rounded-lg shadow-lg z-50"
+                    style={{
+                      backgroundColor: '#f7f6f2',
+                      borderColor: '#e4e1da',
+                      border: '1px solid',
+                    }}
+                    onMouseEnter={() => setOpenDropdown(item.label)}
+                    onMouseLeave={() => setOpenDropdown(null)}
+                  >
+                    {item.items.map((subItem) => (
+                      <Link
+                        key={subItem.href}
+                        href={subItem.href}
+                        className="block px-4 py-2.5 text-xs sm:text-sm transition hover:bg-white first:rounded-t-lg last:rounded-b-lg"
+                        style={{
+                          color: '#333333',
+                        }}
+                      >
+                        {subItem.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Right side actions */}
+          <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+            {/* LOGIN / DASHBOARD Dropdown */}
+            <div
+              className="relative group"
+              onMouseEnter={() => setOpenDropdown('LOGIN')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button
+                className="px-2 sm:px-3 lg:px-4 py-2 text-xs sm:text-sm font-medium rounded transition flex items-center gap-1 whitespace-nowrap"
+                style={{
+                  color: '#888888',
+                  backgroundColor: openDropdown === 'LOGIN' ? '#f7f6f2' : 'transparent',
+                }}
+                onMouseEnter={() => setOpenDropdown('LOGIN')}
+              >
+                Account
+                <ChevronDown size={14} className={`transition-transform ${openDropdown === 'LOGIN' ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Login Dropdown Menu */}
+              {openDropdown === 'LOGIN' && (
+                <div
+                  className="absolute right-0 mt-0 pt-1 min-w-max rounded-lg shadow-lg z-50"
+                  style={{
+                    backgroundColor: '#f7f6f2',
+                    borderColor: '#e4e1da',
+                    border: '1px solid',
+                  }}
+                  onMouseEnter={() => setOpenDropdown('LOGIN')}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                >
                   <Link
-                    key={subItem.href}
-                    href={subItem.href}
-                    className="block px-4 py-2 text-xs transition hover:bg-gray-200 first:rounded-t-lg last:rounded-b-lg"
+                    href="/login"
+                    className="block px-4 py-2.5 text-xs sm:text-sm transition hover:bg-white rounded-t-lg"
                     style={{
                       color: '#333333',
                     }}
                   >
-                    {subItem.label}
+                    Sign In
                   </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Right side actions */}
-      <div className="hidden md:flex items-center gap-4 flex-shrink-0">
-        {/* LOGIN / DASHBOARD Dropdown */}
-        <div
-          className="relative group"
-          onMouseEnter={() => setOpenDropdown('LOGIN')}
-          onMouseLeave={() => setOpenDropdown(null)}
-        >
-          <button
-            className="px-3 py-2 text-xs font-medium rounded transition flex items-center gap-1"
-            style={{
-              color: '#888888',
-            }}
-            onMouseEnter={() => setOpenDropdown('LOGIN')}
-          >
-            LOGIN / DASHBOARD
-            <ChevronDown size={12} className="mt-0.5" />
-          </button>
-
-          {/* Login Dropdown Menu */}
-          {openDropdown === 'LOGIN' && (
-            <div
-              className="absolute right-0 mt-0 pt-1 w-48 rounded-lg shadow-lg z-50"
-              style={{
-                backgroundColor: '#f7f6f2',
-                borderColor: '#e4e1da',
-                border: '1px solid',
-              }}
-              onMouseEnter={() => setOpenDropdown('LOGIN')}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
-              <Link
-                href="/login"
-                className="block px-4 py-2 text-xs transition hover:bg-gray-200 rounded-t-lg"
-                style={{
-                  color: '#333333',
-                }}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/dashboard"
-                className="block px-4 py-2 text-xs transition hover:bg-gray-200"
-                style={{
-                  color: '#333333',
-                }}
-              >
-                Member Portal
-              </Link>
-              <Link
-                href="/dashboard/sponsor-dashboard"
-                className="block px-4 py-2 text-xs transition hover:bg-gray-200"
-                style={{
-                  color: '#333333',
-                }}
-              >
-                Sponsor Portal
-              </Link>
-              <Link
-                href="/admin"
-                className="block px-4 py-2 text-xs transition hover:bg-gray-200 rounded-b-lg"
-                style={{
-                  color: '#333333',
-                }}
-              >
-                Admin Portal
-              </Link>
+                  <Link
+                    href="/dashboard"
+                    className="block px-4 py-2.5 text-xs sm:text-sm transition hover:bg-white"
+                    style={{
+                      color: '#333333',
+                    }}
+                  >
+                    Member Portal
+                  </Link>
+                  <Link
+                    href="/dashboard/sponsor-dashboard"
+                    className="block px-4 py-2.5 text-xs sm:text-sm transition hover:bg-white"
+                    style={{
+                      color: '#333333',
+                    }}
+                  >
+                    Sponsor Portal
+                  </Link>
+                  <Link
+                    href="/admin"
+                    className="block px-4 py-2.5 text-xs sm:text-sm transition hover:bg-white rounded-b-lg"
+                    style={{
+                      color: '#333333',
+                    }}
+                  >
+                    Admin Portal
+                  </Link>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <Link
-          href="/signup"
-          className="px-3 py-1 text-xs font-medium rounded-lg transition"
-          style={{
-            backgroundColor: '#f7f6f2',
-            color: '#111111',
-          }}
-        >
-          Join now
-        </Link>
+            <Link
+              href="/signup"
+              className="px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-lg transition hover:shadow-md whitespace-nowrap"
+              style={{
+                backgroundColor: '#111111',
+                color: '#ffffff',
+              }}
+            >
+              Join Now
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {/* Mobile Menu Button */}
-      <button
-        className="md:hidden flex-shrink-0"
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        style={{ color: '#888888' }}
-      >
-        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      {/* Mobile Navigation */}
+      <div className="md:hidden px-4 py-3 flex items-center justify-between">
+        <Link href="/">
+          <Logo size="sm" />
+        </Link>
+        <button
+          className="p-2 -mr-2"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          style={{ color: '#111111' }}
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div
-          className="absolute top-12 left-0 right-0 z-50 max-h-[calc(100vh-48px)] overflow-y-auto rounded-b-lg shadow-lg"
+          className="md:hidden max-h-[calc(100vh-64px)] overflow-y-auto border-t"
           style={{
-            backgroundColor: '#111111',
+            backgroundColor: '#ffffff',
             borderColor: '#e4e1da',
-            borderTop: '1px solid #e4e1da',
           }}
         >
           {navItems.map((item) => (
             <div key={item.label}>
               <button
-                className="w-full text-left px-6 py-3 text-xs font-medium flex items-center justify-between border-b"
+                className="w-full text-left px-4 py-3 text-sm font-medium flex items-center justify-between border-b transition hover:bg-gray-50"
                 style={{
-                  color: '#888888',
+                  color: '#111111',
                   borderColor: '#e4e1da',
                 }}
                 onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
               >
                 {item.label}
                 <ChevronDown
-                  size={14}
-                  className={`transition transform ${openDropdown === item.label ? 'rotate-180' : ''}`}
+                  size={18}
+                  className={`transition-transform flex-shrink-0 ${openDropdown === item.label ? 'rotate-180' : ''}`}
                 />
               </button>
 
               {/* Mobile Dropdown */}
               {openDropdown === item.label && (
-                <div
-                  style={{
-                    backgroundColor: '#222222',
-                  }}
-                >
+                <div style={{ backgroundColor: '#f7f6f2' }}>
                   {item.items.map((subItem) => (
                     <Link
                       key={subItem.href}
                       href={subItem.href}
-                      className="block px-8 py-2 text-xs border-b"
+                      className="block px-8 py-2.5 text-sm transition hover:bg-white border-b"
                       style={{
-                        color: '#888888',
-                        borderColor: '#333333',
+                        color: '#333333',
+                        borderColor: '#e4e1da',
                       }}
                       onClick={() => {
                         setMobileMenuOpen(false)
@@ -291,17 +293,12 @@ export function Navbar() {
           ))}
 
           {/* Mobile Login Section */}
-          <div
-            className="border-t"
-            style={{
-              borderColor: '#e4e1da',
-            }}
-          >
+          <div style={{ borderTop: '1px solid #e4e1da' }}>
             <Link
               href="/login"
-              className="block w-full px-6 py-3 text-xs font-medium border-b"
+              className="block w-full px-4 py-3 text-sm font-medium border-b text-center transition hover:bg-gray-50"
               style={{
-                color: '#888888',
+                color: '#111111',
                 borderColor: '#e4e1da',
               }}
               onClick={() => setMobileMenuOpen(false)}
@@ -310,14 +307,14 @@ export function Navbar() {
             </Link>
             <Link
               href="/signup"
-              className="block w-full px-6 py-3 text-xs font-medium"
+              className="block w-full px-4 py-3 text-sm font-semibold text-center transition hover:shadow-md"
               style={{
-                backgroundColor: '#f7f6f2',
-                color: '#111111',
+                backgroundColor: '#111111',
+                color: '#ffffff',
               }}
               onClick={() => setMobileMenuOpen(false)}
             >
-              Join now
+              Join Now
             </Link>
           </div>
         </div>

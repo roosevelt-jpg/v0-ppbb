@@ -171,23 +171,23 @@ export default function SignupPage() {
 
       case 2:
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6">Personal Information</h2>
-            <div className="space-y-4">
-              <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" required />
-              <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" required />
-              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" required />
-              <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" required />
-              <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" required />
-              <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" required />
-              <select name="gender" value={formData.gender} onChange={handleInputChange} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400">
+          <div className="space-y-5 sm:space-y-6">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 sm:mb-8" style={{ color: '#111111' }}>Personal Information</h2>
+            <div className="space-y-4 sm:space-y-5">
+              <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }} required />
+              <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }} required />
+              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }} required />
+              <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }} required />
+              <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }} required />
+              <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }} required />
+              <select name="gender" value={formData.gender} onChange={handleInputChange} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-sm sm:text-base" style={{ borderColor: '#e4e1da' }}>
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-gray-400" />
-              {formData.profileImageBase64 && <p className="text-sm text-green-600">Profile image uploaded</p>}
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full px-4 py-3 sm:py-3.5 border rounded-lg focus:outline-none text-xs sm:text-sm" style={{ borderColor: '#e4e1da' }} />
+              {formData.profileImageBase64 && <p className="text-xs sm:text-sm font-medium" style={{ color: '#10b981' }}>✓ Profile image uploaded</p>}
             </div>
           </div>
         )
@@ -239,7 +239,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen w-full flex flex-col bg-white">
       {/* Top Navigation */}
-      <nav className="w-full px-4 sm:px-6 py-4 border-b" style={{ borderColor: '#e4e1da' }}>
+      <nav className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b" style={{ borderColor: '#e4e1da' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Logo />
           <Link href="/login" className="text-sm sm:text-base font-medium" style={{ color: '#111111' }}>
@@ -249,54 +249,73 @@ export default function SignupPage() {
       </nav>
 
       {/* Main Content */}
-      <div className="flex-1 w-full px-4 sm:px-6 py-8 sm:py-12">
-        <div className="max-w-lg mx-auto">
+      <div className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="max-w-2xl mx-auto">
           {/* Step Indicator */}
-          <div className="mb-8">
-            <div className="text-xs sm:text-sm font-medium mb-3" style={{ color: '#888888' }}>
+          <div className="mb-10 sm:mb-12">
+            <div className="text-xs sm:text-sm font-medium mb-3 sm:mb-4 leading-relaxed" style={{ color: '#888888' }}>
               STEP {currentStep} OF {STEPS.length}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 sm:gap-3">
               {STEPS.map(step => (
-                <div key={step.id} className="flex-1 h-1 rounded-full" style={{ backgroundColor: currentStep >= step.id ? '#111111' : '#e4e1da' }} />
+                <div key={step.id} className="flex-1 h-1.5 sm:h-2 rounded-full transition-all" style={{ backgroundColor: currentStep >= step.id ? '#111111' : '#e4e1da' }} />
               ))}
             </div>
           </div>
 
           {/* Form Content */}
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12">
+            {error && (
+              <div className="w-full p-4 sm:p-5 bg-red-50 border border-red-200 rounded-lg text-sm sm:text-base text-red-700 leading-relaxed">
+                {error}
+              </div>
+            )}
 
             <div>{renderStep()}</div>
 
-            {/* Buttons */}
-            <div className="flex gap-3 sm:gap-4">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 sm:pt-8">
               {currentStep > 1 && (
-                <button type="button" onClick={() => setCurrentStep(prev => prev - 1)} className="flex-1 px-4 py-3 border rounded-lg font-medium transition hover:bg-gray-50 flex items-center justify-center gap-2" style={{ borderColor: '#e4e1da', color: '#111111' }}>
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Back</span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(prev => prev - 1)}
+                  className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 border rounded-lg font-medium transition hover:bg-gray-50 flex items-center justify-center gap-2 text-sm sm:text-base"
+                  style={{ borderColor: '#e4e1da', color: '#111111' }}
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Back</span>
                 </button>
               )}
 
               {currentStep < STEPS.length ? (
-                <button type="button" onClick={() => setCurrentStep(prev => prev + 1)} className="flex-1 sm:flex-1 px-4 py-3 rounded-lg font-medium text-white transition flex items-center justify-center gap-2" style={{ backgroundColor: '#111111' }}>
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(prev => prev + 1)}
+                  className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 rounded-lg font-medium text-white transition flex items-center justify-center gap-2 text-sm sm:text-base"
+                  style={{ backgroundColor: '#111111' }}
+                >
                   <span>Next</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               ) : (
-                <button type="submit" disabled={loading} className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition disabled:opacity-50" style={{ backgroundColor: '#111111' }}>
-                  {loading ? 'Creating Account...' : 'Create Account'}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 rounded-lg font-semibold text-white transition disabled:opacity-60 text-sm sm:text-base"
+                  style={{ backgroundColor: loading ? '#cccccc' : '#111111' }}
+                >
+                  {loading ? 'Creating account...' : 'Create Account'}
                 </button>
               )}
             </div>
           </form>
 
           {/* Sign In Link */}
-          <div className="text-center mt-8">
-            <p className="text-sm" style={{ color: '#888888' }}>
-              Already a member?{' '}
-              <Link href="/login" className="font-semibold" style={{ color: '#111111' }}>
-                Sign In
+          <div className="mt-8 sm:mt-10 text-center">
+            <p className="text-sm sm:text-base" style={{ color: '#888888' }}>
+              Already have an account?{' '}
+              <Link href="/login" className="font-semibold hover:underline transition" style={{ color: '#111111' }}>
+                Sign in here
               </Link>
             </p>
           </div>
