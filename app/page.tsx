@@ -6,8 +6,13 @@ import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, limit } from 'firebase/firestore'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { HeroSlider } from '@/components/hero-slider'
+import { YouTubeWidget } from '@/components/youtube-widget'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Users2, Heart, Zap, Building2, BookOpen, Briefcase, TrendingUp } from 'lucide-react'
+import { getHeroSliderSettings } from '@/lib/hero-slider'
+import { getYouTubeConfig } from '@/lib/youtube-service'
+import { HeroSliderSettings, YouTubeConfig } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,11 +24,19 @@ export default function HomePage() {
   const [sponsors, setSponsors] = useState<any[]>([])
   const [news, setNews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [heroSliderSettings, setHeroSliderSettings] = useState<HeroSliderSettings | null>(null)
+  const [youtubeConfig, setYoutubeConfig] = useState<YouTubeConfig | null>(null)
 
   useEffect(() => {
     const statsListeners: any[] = []
     
     try {
+      // Load hero slider settings
+      getHeroSliderSettings().then(setHeroSliderSettings)
+      
+      // Load YouTube config
+      getYoutubeConfig().then(setYoutubeConfig)
+
       // Members count
       const usersQuery = query(collection(db, 'users'), where('role', '==', 'member'))
       statsListeners.push(onSnapshot(usersQuery, (snapshot) => {
@@ -86,6 +99,13 @@ export default function HomePage() {
   return (
     <div className="w-full bg-background text-foreground">
       <Navbar />
+
+      {/* HERO SLIDER - Full Width Image Carousel */}
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto">
+          <HeroSlider settings={heroSliderSettings} />
+        </div>
+      </section>
 
       {/* HERO SECTION - Mobile First */}
       <section className="relative w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-28 overflow-hidden">
@@ -330,6 +350,15 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* YOUTUBE WIDGET - Latest Videos */}
+      {youtubeConfig && youtubeConfig.videos.length > 0 && (
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
+          <div className="max-w-6xl mx-auto">
+            <YouTubeWidget videos={youtubeConfig.videos} />
           </div>
         </section>
       )}
