@@ -181,23 +181,27 @@ export function Footer() {
             </p>
           <div className="flex gap-4 mt-4 sm:mt-0">
               {[
-                { label: 'Facebook', href: 'https://facebook.com/passiveblessings' },
-                { label: 'Twitter', href: 'https://twitter.com/passiveblessings' },
-                { label: 'Instagram', href: 'https://instagram.com/passiveblessings' },
-                { label: 'LinkedIn', href: 'https://linkedin.com/company/passiveblessings' },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-200"
-                  style={{ color: '#888888' }}
-                  aria-label={social.label}
-                  title={social.label}
-                >
-                  <span className="text-xs font-bold">{social.label.charAt(0)}</span>
-                </a>
+                { label: 'Facebook', href: 'https://facebook.com/passiveblessings', icon: Facebook },
+                { label: 'Twitter', href: 'https://twitter.com/passiveblessings', icon: Twitter },
+                { label: 'Instagram', href: 'https://instagram.com/passiveblessings', icon: Instagram },
+                { label: 'LinkedIn', href: 'https://linkedin.com/company/passiveblessings', icon: Linkedin },
+              ].map((social) => {
+                const Icon = social.icon
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-200"
+                    style={{ color: '#888888' }}
+                    aria-label={social.label}
+                    title={social.label}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                )
+              })}
               ))}
             </div>
           </div>

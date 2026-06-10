@@ -17,6 +17,7 @@ import {
   CreditCard,
   AlertCircle,
   Flag,
+  Mail,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -33,6 +34,7 @@ const adminMenuItems = [
   { label: 'Sponsors', href: '/admin/sponsors', icon: Store },
   { label: 'Businesses', href: '/admin/businesses', icon: Store },
   { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle },
+  { label: 'Contact Requests', href: '/admin/contact-requests', icon: Mail },
   { label: 'Membership', href: '/admin/membership', icon: CreditCard },
   { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { label: 'Reporting', href: '/admin/reporting', icon: FileText },
