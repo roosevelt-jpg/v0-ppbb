@@ -136,7 +136,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
               />
             </div>
 
@@ -151,7 +151,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Your password"
-                className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-white border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
               />
             </div>
 
@@ -190,8 +190,12 @@ export default function LoginPage() {
         {/* Right Column - Community Benefits */}
         <div className="hidden lg:flex flex-col justify-between px-8 py-12 bg-neutral-900 text-white">
           <div>
-            <div className="mb-8">
-              <Logo size="sm" href="/" variant="light" />
+            <div className="mb-8 h-12 flex items-center">
+              <img 
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
+                alt="Passive Blessings" 
+                className="h-12 w-auto"
+              />
             </div>
             <h2 className="text-4xl font-bold mb-2">
               Your community hub <span className="italic font-light">awaits</span>
