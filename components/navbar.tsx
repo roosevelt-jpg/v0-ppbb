@@ -1,8 +1,5 @@
-'use client'
-
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Logo } from './logo'
 import { Menu, X } from 'lucide-react'
 
 export function Navbar() {
@@ -22,9 +19,13 @@ export function Navbar() {
       <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 h-8">
             <Link href="/">
-              <Logo size="sm" />
+              <img 
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
+                alt="Passive Blessings" 
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 
@@ -62,7 +63,11 @@ export function Navbar() {
       {/* Mobile Navigation */}
       <div className="md:hidden px-4 py-3 flex items-center justify-between">
         <Link href="/">
-          <Logo size="sm" />
+          <img 
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
+            alt="Passive Blessings" 
+            className="h-8 w-auto"
+          />
         </Link>
         <button
           className="p-2 -mr-2 text-white"

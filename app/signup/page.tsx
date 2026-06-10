@@ -1,19 +1,15 @@
 'use client'
 
 import React from 'react'
+import { Navbar } from '@/components/navbar'
 
 export default function SignupPage() {
   const [currentStep, setCurrentStep] = React.useState(1)
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <div style={{ padding: '1.5rem', borderBottom: '1px solid #e4e1da', backgroundColor: '#ffffff' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111111' }}>Passive Blessings</h1>
-          <a href="/login" style={{ textDecoration: 'none', color: '#111111', fontWeight: '500' }}>Sign In</a>
-        </div>
-      </div>
+      {/* New Navbar */}
+      <Navbar />
 
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', backgroundColor: '#f7f6f2' }}>
