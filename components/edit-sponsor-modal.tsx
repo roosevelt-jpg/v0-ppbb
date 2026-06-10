@@ -1,0 +1,193 @@
+'use client'
+
+import React, { useState } from 'react'
+import { Dialog } from '@/components/dialog'
+import { Button } from '@/components/ui/button'
+import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { Trash2, Save } from 'lucide-react'
+
+interface EditSponsorModalProps {
+  isOpen: boolean
+  onClose: () => void
+  sponsor: any
+  onSuccess?: () => void
+}
+
+export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSponsorModalProps) {
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState(sponsor || {})
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  React.useEffect(() => {
+    if (sponsor) {
+      setFormData(sponsor)
+    }
+  }, [sponsor])
+
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      await updateDocument('sponsors', sponsor.id, formData)
+      onClose()
+      onSuccess?.()
+    } catch (error) {
+      console.error('[v0] Error saving sponsor:', error)
+      alert('Failed to save sponsor')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this sponsor?')) return
+
+    setDeleteLoading(true)
+    try {
+      await deleteDocument('sponsors', sponsor.id)
+      onClose()
+      onSuccess?.()
+    } catch (error) {
+      console.error('[v0] Error deleting sponsor:', error)
+      alert('Failed to delete sponsor')
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Edit Sponsor"
+      description={`Manage details for ${sponsor?.name || 'Sponsor'}`}
+      footer={
+        <div className="flex gap-2 justify-between">
+          <Button
+            variant="ghost"
+            onClick={handleDelete}
+            disabled={deleteLoading || loading}
+            style={{ color: '#d32f2f' }}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={loading}
+              style={{
+                backgroundColor: '#111111',
+                color: '#f7f6f2',
+              }}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      }
+    >
+      <div className="space-y-4 py-4">
+        <div>
+          <label className="text-sm font-medium">Sponsor Name</label>
+          <input
+            type="text"
+            value={formData.name || ''}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            placeholder="Enter sponsor name"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Category</label>
+          <input
+            type="text"
+            value={formData.category || ''}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            placeholder="e.g., Corporate, Individual, NGO"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Sponsorship Level</label>
+          <select
+            value={formData.sponsorshipLevel || 'standard'}
+            onChange={(e) => setFormData({ ...formData, sponsorshipLevel: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+          >
+            <option value="standard">Standard</option>
+            <option value="bronze">Bronze</option>
+            <option value="silver">Silver</option>
+            <option value="gold">Gold</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Contact Person</label>
+          <input
+            type="text"
+            value={formData.contactPerson || ''}
+            onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            placeholder="Enter contact person name"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Email</label>
+          <input
+            type="email"
+            value={formData.email || ''}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            placeholder="Enter email address"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Phone</label>
+          <input
+            type="tel"
+            value={formData.phone || ''}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            placeholder="Enter phone number"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Status</label>
+          <select
+            value={formData.status || 'active'}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Notes</label>
+          <textarea
+            value={formData.notes || ''}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            placeholder="Add any notes about this sponsor"
+            rows={3}
+          />
+        </div>
+      </div>
+    </Dialog>
+  )
+}

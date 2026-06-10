@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
+import { EditCharityModal } from '@/components/edit-charity-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -11,6 +12,8 @@ import { formatDistanceToNow } from 'date-fns'
 export default function CharityCasesPage() {
   const [cases, setCases] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [selectedCase, setSelectedCase] = React.useState<any>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -98,9 +101,10 @@ export default function CharityCasesPage() {
           data={cases}
           loading={loading}
           searchPlaceholder="Search by case title or category..."
-          onEdit={(item) => {
-            console.log('Edit charity case:', item)
-          }}
+        onEdit={(item) => {
+          setSelectedCase(item)
+          setEditModalOpen(true)
+        }}
           onDelete={async (item) => {
             if (confirm('Are you sure you want to delete this charity request?')) {
               try {
@@ -114,6 +118,17 @@ export default function CharityCasesPage() {
           }}
         />
       </div>
+
+      {selectedCase && (
+        <EditCharityModal
+          isOpen={editModalOpen}
+          onClose={() => {
+            setEditModalOpen(false)
+            setSelectedCase(null)
+          }}
+          charityCase={selectedCase}
+        />
+      )}
     </div>
   )
 }
