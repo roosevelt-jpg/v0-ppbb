@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { db } from '@/lib/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import Link from 'next/link'
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 
 interface ContactFormData {
   name: string
@@ -64,10 +63,10 @@ export default function ContactPage() {
   }
 
   const socialLinks = [
-    { icon: Facebook, href: 'https://facebook.com/passiveblessings', label: 'Facebook' },
-    { icon: Twitter, href: 'https://twitter.com/passiveblessings', label: 'Twitter' },
-    { icon: Instagram, href: 'https://instagram.com/passiveblessings', label: 'Instagram' },
-    { icon: Linkedin, href: 'https://linkedin.com/company/passiveblessings', label: 'LinkedIn' },
+    { icon: 'F', name: 'Facebook', href: 'https://facebook.com/passiveblessings' },
+    { icon: '𝕏', name: 'Twitter', href: 'https://twitter.com/passiveblessings' },
+    { icon: '📷', name: 'Instagram', href: 'https://instagram.com/passiveblessings' },
+    { icon: 'in', name: 'LinkedIn', href: 'https://linkedin.com/company/passiveblessings' },
   ]
 
   return (
@@ -89,7 +88,7 @@ export default function ContactPage() {
             {/* Address */}
             <div className="mb-8">
               <div className="flex items-start gap-4">
-                <MapPin className="w-6 h-6 text-black flex-shrink-0 mt-1" />
+                <span className="text-2xl">📍</span>
                 <div>
                   <h3 className="font-bold mb-2">Address</h3>
                   <p className="text-gray-600 text-sm">
@@ -103,7 +102,7 @@ export default function ContactPage() {
             {/* Phone */}
             <div className="mb-8">
               <div className="flex items-start gap-4">
-                <Phone className="w-6 h-6 text-black flex-shrink-0 mt-1" />
+                <span className="text-2xl">📞</span>
                 <div>
                   <h3 className="font-bold mb-2">Phone</h3>
                   <a href="tel:+971501234567" className="text-gray-600 hover:text-black transition-colors">
@@ -116,7 +115,7 @@ export default function ContactPage() {
             {/* Email */}
             <div className="mb-8">
               <div className="flex items-start gap-4">
-                <Mail className="w-6 h-6 text-black flex-shrink-0 mt-1" />
+                <span className="text-2xl">✉️</span>
                 <div>
                   <h3 className="font-bold mb-2">Email</h3>
                   <a
@@ -132,22 +131,20 @@ export default function ContactPage() {
             {/* Social Media */}
             <div className="mt-12 pt-8 border-t">
               <h3 className="font-bold mb-4">Follow Us</h3>
-          <div className="flex gap-4">
-                {socialLinks.map((social) => {
-                  const Icon = social.icon
-                  return (
-                    <a
-                      key={social.label}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                      aria-label={social.label}
-                    >
-                      <Icon className="w-5 h-5" />
-                    </a>
-                  )
-                })}
+              <div className="flex gap-4 flex-wrap">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-colors text-sm font-bold"
+                    aria-label={social.name}
+                    title={social.name}
+                  >
+                    {social.icon}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -260,7 +257,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-black hover:bg-gray-800 text-white py-3 font-medium rounded-lg disabled:bg-gray-400"
+                className="w-full bg-black hover:bg-gray-800 text-white py-3 font-medium rounded-lg disabled:bg-gray-400 transition-colors"
               >
                 {loading ? 'Sending...' : 'Send Message'}
               </button>
