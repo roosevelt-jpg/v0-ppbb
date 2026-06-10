@@ -157,52 +157,12 @@ export default function LoginPage() {
           <div className="h-8">
             <Logo size="sm" href="/" />
           </div>
-          <div className="hidden sm:flex items-center gap-6">
-            <Link 
-              href="/" 
-              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              About us
-            </Link>
-            <Link 
-              href="/" 
-              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              Events
-            </Link>
-            <Link 
-              href="/" 
-              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              Marketplace
-            </Link>
-            <Link 
-              href="/" 
-              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              Partnerships
-            </Link>
-            <Link 
-              href="/" 
-              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              Contact
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link 
-              href="/login" 
-              className="text-sm px-4 py-2 text-neutral-900 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link 
-              href="/signup" 
-              className="text-sm px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
-            >
-              Join now
-            </Link>
-          </div>
+          <Link 
+            href="/signup" 
+            className="text-sm px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+          >
+            Join now
+          </Link>
         </div>
       </div>
 
@@ -343,7 +303,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                     />
                   </div>
 
@@ -358,7 +318,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Your password"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                     />
                   </div>
 
@@ -432,7 +392,7 @@ export default function LoginPage() {
                       value={accessCode}
                       onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
                       placeholder="Enter access code"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all uppercase tracking-widest font-mono text-center"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all uppercase tracking-widest font-mono text-center"
                     />
                   </div>
 
@@ -491,7 +451,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="admin@example.com"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                     />
                   </div>
 
@@ -506,7 +466,7 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Your password"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
                     />
                   </div>
 
