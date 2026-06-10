@@ -4,19 +4,43 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser } from '@/lib/auth'
+import { verifyAccessCode } from '@/lib/access-code'
 import { Logo } from '@/components/logo'
-import { Button } from '@/components/ui/button'
 import { AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
+  
+  // Login flow state
+  const [loginType, setLoginType] = React.useState<'regular' | 'admin' | null>(null)
+  const [accessCode, setAccessCode] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
   const [rememberMe, setRememberMe] = React.useState(false)
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // Verify access code for admin login
+  const handleVerifyAccessCode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    const result = await verifyAccessCode(accessCode)
+
+    if (!result.valid) {
+      setError(result.error || 'Invalid access code')
+      setLoading(false)
+      return
+    }
+
+    // Access code is valid, move to email/password step
+    setLoading(false)
+    setLoginType('admin-verified')
+  }
+
+  // Handle regular user login
+  const handleRegularLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
@@ -31,6 +55,7 @@ export default function LoginPage() {
 
     if (user) {
       if (user.role === 'admin') {
+        // Shouldn't reach here for admins - they should use admin login
         router.push('/admin')
       } else if (user.role === 'business') {
         router.push('/business')
@@ -40,12 +65,33 @@ export default function LoginPage() {
     }
   }
 
+  // Handle admin login (with verified access code)
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    const { user, error: loginError } = await loginUser(email, password)
+
+    if (loginError) {
+      setError(loginError)
+      setLoading(false)
+      return
+    }
+
+    if (user && user.role === 'admin') {
+      router.push('/admin')
+    } else {
+      setError('This email is not associated with an admin account')
+      setLoading(false)
+    }
+  }
+
   return (
     <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
       {/* Header Navigation */}
       <div style={{ width: '100%', padding: '1rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '1rem', paddingRight: '1rem' }}>
-          {/* Logo - Light background so use black logo */}
           <div style={{ height: '32px' }}>
             <Logo size="sm" href="/" />
           </div>
@@ -55,7 +101,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Main Content - Single Column Centered */}
+      {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', width: '100%' }}>
         <div style={{ width: '100%', maxWidth: '448px' }}>
           {/* Heading */}
@@ -76,89 +122,283 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleLogin} style={{ marginBottom: '1.5rem' }}>
-            {/* Email Input */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label htmlFor="email" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
-              />
-            </div>
+          {/* Step 0: Choose Login Type */}
+          {loginType === null && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginType('regular')
+                  setError('')
+                  setEmail('')
+                  setPassword('')
+                }}
+                style={{
+                  padding: '1.25rem',
+                  backgroundColor: '#f7f6f2',
+                  border: '2px solid #e4e1da',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#111111'
+                  e.currentTarget.style.backgroundColor = '#ffffff'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#e4e1da'
+                  e.currentTarget.style.backgroundColor = '#f7f6f2'
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: '1rem', color: '#111111', marginBottom: '0.25rem' }}>
+                  Community Member
+                </div>
+                <div style={{ fontSize: '0.875rem', color: '#888888' }}>
+                  Join as a volunteer or donor
+                </div>
+              </button>
 
-            {/* Password Input */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label htmlFor="password" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
-              />
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginType('admin')
+                  setError('')
+                  setAccessCode('')
+                  setEmail('')
+                  setPassword('')
+                }}
+                style={{
+                  padding: '1.25rem',
+                  backgroundColor: '#f7f6f2',
+                  border: '2px solid #e4e1da',
+                  borderRadius: '0.5rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#111111'
+                  e.currentTarget.style.backgroundColor = '#ffffff'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#e4e1da'
+                  e.currentTarget.style.backgroundColor = '#f7f6f2'
+                }}
+              >
+                <div style={{ fontWeight: 600, fontSize: '1rem', color: '#111111', marginBottom: '0.25rem' }}>
+                  Admin Portal
+                </div>
+                <div style={{ fontSize: '0.875rem', color: '#888888' }}>
+                  Access management tools
+                </div>
+              </button>
             </div>
+          )}
 
-            {/* Remember Me & Forgot Password */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: '#111111' }}>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  style={{ width: '1rem', height: '1rem', cursor: 'pointer' }}
-                />
-                Remember me
-              </label>
-              <Link href="/forgot-password" style={{ fontSize: '0.875rem', color: '#111111', textDecoration: 'underline', fontWeight: 500 }}>
-                Forgot password?
-              </Link>
-            </div>
+          {/* Step 1: Regular User Login */}
+          {loginType === 'regular' && (
+            <>
+              <form onSubmit={handleRegularLogin} style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="email" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
+                    Email Address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
+                  />
+                </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1.5rem' }}
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="password" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: '#111111' }}>
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      style={{ width: '1rem', height: '1rem', cursor: 'pointer' }}
+                    />
+                    Remember me
+                  </label>
+                  <Link href="/forgot-password" style={{ fontSize: '0.875rem', color: '#111111', textDecoration: 'underline', fontWeight: 500 }}>
+                    Forgot password?
+                  </Link>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginType(null)
+                    setError('')
+                  }}
+                  style={{ width: '100%', padding: '0.75rem', backgroundColor: 'transparent', color: '#111111', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Back
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* Step 1: Admin Access Code */}
+          {loginType === 'admin' && (
+            <>
+              <form onSubmit={handleVerifyAccessCode} style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0f9ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem' }}>
+                  <p style={{ fontSize: '0.875rem', color: '#1e40af', margin: 0 }}>
+                    Enter your admin access code to proceed
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="accessCode" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
+                    Access Code
+                  </label>
+                  <input
+                    id="accessCode"
+                    type="text"
+                    required
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                    placeholder="Enter your access code"
+                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}
+                >
+                  {loading ? 'Verifying...' : 'Verify Access Code'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginType(null)
+                    setError('')
+                    setAccessCode('')
+                  }}
+                  style={{ width: '100%', padding: '0.75rem', backgroundColor: 'transparent', color: '#111111', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Back
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* Step 2: Admin Email & Password */}
+          {loginType === 'admin-verified' && (
+            <>
+              <form onSubmit={handleAdminLogin} style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.5rem' }}>
+                  <p style={{ fontSize: '0.875rem', color: '#166534', margin: 0 }}>
+                    Access code verified. Enter your credentials to continue.
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="admin-email" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
+                    Email Address
+                  </label>
+                  <input
+                    id="admin-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@example.com"
+                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label htmlFor="admin-password" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
+                    Password
+                  </label>
+                  <input
+                    id="admin-password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}
+                >
+                  {loading ? 'Signing in...' : 'Access Admin Portal'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginType('admin')
+                    setError('')
+                    setEmail('')
+                    setPassword('')
+                    setAccessCode('')
+                  }}
+                  style={{ width: '100%', padding: '0.75rem', backgroundColor: 'transparent', color: '#111111', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}
+                >
+                  Back
+                </button>
+              </form>
+            </>
+          )}
 
           {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ flex: 1, height: '1px', backgroundColor: '#e4e1da' }}></div>
-            <span style={{ fontSize: '0.875rem', color: '#888888' }}>or</span>
-            <div style={{ flex: 1, height: '1px', backgroundColor: '#e4e1da' }}></div>
-          </div>
+          {loginType === null && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e4e1da' }}></div>
+                <span style={{ fontSize: '0.875rem', color: '#888888' }}>or</span>
+                <div style={{ flex: 1, height: '1px', backgroundColor: '#e4e1da' }}></div>
+              </div>
 
-          {/* Sign Up CTA */}
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <p style={{ fontSize: '1rem', color: '#111111', marginBottom: '1rem' }}>
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" style={{ fontWeight: 600, color: '#111111', textDecoration: 'underline' }}>
-                Sign up now
-              </Link>
-            </p>
-
-            {/* Demo Info Box */}
-            <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', border: '1px solid #e4e1da', borderRadius: '0.5rem' }}>
-              <p style={{ fontSize: '0.875rem', color: '#666666' }}>
-                <span style={{ fontWeight: 600, color: '#111111' }}>Demo Mode:</span> Use any email and password to test
-              </p>
-            </div>
-          </div>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '1rem', color: '#111111', marginBottom: '1rem' }}>
+                  Don&apos;t have an account?{' '}
+                  <Link href="/signup" style={{ fontWeight: 600, color: '#111111', textDecoration: 'underline' }}>
+                    Sign up now
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
