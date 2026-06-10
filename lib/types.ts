@@ -382,3 +382,168 @@ export interface YouTubeConfig {
   updatedAt: Date
 }
 
+// Business Opportunities (Jobs, Internships, Gigs)
+export interface BusinessOpportunity {
+  id: string
+  businessId: string
+  businessName: string
+  title: string
+  type: 'job' | 'internship' | 'gig'
+  description: string
+  category: string
+  salary?: number
+  salaryRange?: { min: number; max: number }
+  location?: LocationData
+  remote: boolean
+  duration?: string
+  hoursPerWeek?: number
+  requirements?: string[]
+  benefits?: string[]
+  applications: number
+  applicants: string[]
+  status: 'open' | 'closed' | 'filled' | 'archived'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Offers (Products, Services, Discounts)
+export interface BusinessOffer {
+  id: string
+  businessId: string
+  businessName: string
+  title: string
+  type: 'product' | 'service' | 'discount'
+  description: string
+  category: string
+  price?: number
+  discountPercentage?: number
+  originalPrice?: number
+  image?: UploadedImage
+  imageUrl?: string
+  validUntil?: Date
+  targetAudience?: 'members' | 'volunteers' | 'public'
+  memberBenefit?: number
+  status: 'active' | 'archived'
+  views: number
+  conversions: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Leads
+export interface BusinessLead {
+  id: string
+  businessId: string
+  opportunityId?: string
+  offerId?: string
+  name: string
+  email: string
+  phone?: string
+  message?: string
+  leadSource: 'opportunity' | 'offer' | 'direct' | 'marketplace'
+  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Referrals & Commissions
+export interface BusinessReferral {
+  id: string
+  businessId: string
+  referralPercentage: number
+  totalReferrals: number
+  totalCommissions: number
+  pendingCommission: number
+  paidCommission: number
+  bankDetails?: {
+    accountHolder?: string
+    accountNumber?: string
+    bankName?: string
+  }
+  lastPayout?: Date
+  status: 'active' | 'suspended'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Partnerships & Collaborations
+export interface BusinessPartnership {
+  id: string
+  businessId: string
+  partnerBusinessId: string
+  partnerBusinessName: string
+  partnerLogo?: string
+  type: 'collaboration' | 'referral' | 'sponsor' | 'vendor'
+  description?: string
+  status: 'pending' | 'active' | 'ended'
+  startDate?: Date
+  endDate?: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Community Support Requests from Businesses
+export interface BusinessSupportRequest {
+  id: string
+  businessId: string
+  businessName: string
+  type: 'charity' | 'community' | 'event_sponsorship' | 'partnership'
+  title: string
+  description: string
+  targetAmount?: number
+  currentAmount: number
+  deadline?: Date
+  status: 'pending' | 'approved' | 'rejected' | 'completed'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Ratings & Reviews
+export interface BusinessRating {
+  id: string
+  businessId: string
+  ratedBy: string
+  rating: number // 1-5
+  review?: string
+  category?: 'communication' | 'professionalism' | 'quality' | 'value'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Payments & Subscriptions
+export interface BusinessPayment {
+  id: string
+  businessId: string
+  type: 'subscription' | 'commission_payout' | 'referral_bonus'
+  amount: number
+  status: 'pending' | 'completed' | 'failed'
+  paymentMethod?: 'card' | 'bank_transfer'
+  stripeTransactionId?: string
+  notes?: string
+  dueDate?: Date
+  paidDate?: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Analytics
+export interface BusinessAnalytics {
+  id: string
+  businessId: string
+  month: string // YYYY-MM
+  opportunitiesPosted: number
+  offersPosted: number
+  leadsGenerated: number
+  conversionRate: number
+  impressions: number
+  clicks: number
+  referralCommissions: number
+  eventAttendance: number
+  networkConnections: number
+  averageRating: number
+  totalTransactions: number
+  createdAt: Date
+  updatedAt: Date
+}
+

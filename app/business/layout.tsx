@@ -2,71 +2,140 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { auth, db } from '@/lib/firebase'
-import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore'
-import { BusinessProfile } from '@/lib/types'
+import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
-import { LogOut, Settings, BarChart3, Briefcase, TrendingUp, Users } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { Logo } from '@/components/logo'
-import { logoutUser } from '@/lib/auth'
+import { LogOut, Settings, BarChart3, Briefcase, TrendingUp, Users, ShoppingBag, Zap, DollarSign, Heart, Share2, LayoutGrid, Menu, X } from 'lucide-react'
 
 const businessMenuItems = [
-  { label: 'Overview', href: '/business', icon: BarChart3 },
+  { label: 'Dashboard', href: '/business/dashboard', icon: BarChart3 },
+  { label: 'Profile', href: '/business/profile', icon: Users },
   { label: 'Opportunities', href: '/business/opportunities', icon: Briefcase },
+  { label: 'Offers', href: '/business/offers', icon: ShoppingBag },
+  { label: 'Leads', href: '/business/leads', icon: Zap },
+  { label: 'Referrals', href: '/business/referrals', icon: Share2 },
+  { label: 'Partnerships', href: '/business/partnerships', icon: Heart },
+  { label: 'Marketplace', href: '/business/marketplace', icon: LayoutGrid },
+  { label: 'Payments', href: '/business/payments', icon: DollarSign },
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },
-  { label: 'Members', href: '/business/members', icon: Users },
-  { label: 'Settings', href: '/business/settings', icon: Settings },
 ]
 
-function BusinessSidebar() {
+function BusinessSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter()
+  const { logout } = useAuth()
 
   const handleLogout = async () => {
-    await logoutUser()
+    await logout()
     router.push('/login')
   }
 
   return (
-    <aside className="w-64 bg-card border-r border-border min-h-screen flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-border">
-        <Logo size="md" href="/business" />
-        <p className="text-xs text-muted-foreground mt-2">Business Portal</p>
-      </div>
+    <>
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 30,
+          }}
+        />
+      )}
+      
+      <aside
+        style={{
+          position: isOpen ? 'fixed' : 'sticky',
+          top: 0,
+          left: 0,
+          width: '256px',
+          backgroundColor: '#ffffff',
+          borderRight: '1px solid #e4e1da',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 40,
+          transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.3s ease',
+        }}
+      >
+        {/* Header */}
+        <div style={{ padding: '24px', borderBottom: '1px solid #e4e1da' }}>
+          <h2 style={{ color: '#111111', fontSize: '18px', fontWeight: 700 }}>
+            Business Portal
+          </h2>
+          <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>
+            Passive Blessings
+          </p>
+        </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {businessMenuItems.map((item) => {
-          const Icon = item.icon
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-foreground hover:bg-secondary"
-            >
-              <Icon className="h-4 w-4" />
-              <span className="text-sm font-medium">{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: '16px', overflowY: 'auto' }} className="space-y-2">
+          {businessMenuItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  color: '#111111',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f5f5f5'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                }}
+              >
+                <Icon className="w-4 h-4" />
+                <span style={{ fontSize: '14px', fontWeight: 500 }}>{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-border space-y-3">
-        <ThemeToggle />
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          size="sm"
-          className="w-full justify-start"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign out
-        </Button>
-      </div>
-    </aside>
+        {/* Footer */}
+        <div style={{ padding: '16px', borderTop: '1px solid #e4e1da' }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              border: '1px solid #e4e1da',
+              backgroundColor: '#ffffff',
+              color: '#111111',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500,
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#fee2e2'
+              e.currentTarget.style.borderColor = '#dc2626'
+              e.currentTarget.style.color = '#dc2626'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ffffff'
+              e.currentTarget.style.borderColor = '#e4e1da'
+              e.currentTarget.style.color = '#111111'
+            }}
+          >
+            <LogOut className="w-4 h-4" />
+            Sign out
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }
 
@@ -76,55 +145,75 @@ export default function BusinessLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const [business, setBusiness] = React.useState<BusinessProfile | null>(null)
-  const [isLoading, setIsLoading] = React.useState(true)
+  const { user, loading } = useAuth()
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
 
   React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser: any) => {
-      if (!firebaseUser) {
-        router.push('/login')
-        return
-      }
+    if (!loading && (!user || user.role !== 'business')) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
 
-      try {
-        const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
-        if (userDocSnap.exists() && userDocSnap.data().role === 'business') {
-          setBusiness(userDocSnap.data() as BusinessProfile)
-        } else {
-          router.push('/login')
-        }
-      } catch (error) {
-        console.error('[v0] Error fetching business profile:', error)
-        router.push('/login')
-      } finally {
-        setIsLoading(false)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [router])
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">Loading business portal...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#888888' }}>Loading business portal...</p>
       </div>
     )
   }
 
-  if (!business) {
+  if (!user || user.role !== 'business') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-500">Access denied. Business account required.</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#dc2626' }}>Access denied. Business account required.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <BusinessSidebar />
-      <main className="flex-1 overflow-auto">
-        {children}
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#faf9f7' }}>
+      {/* Desktop Sidebar */}
+      <div style={{ display: 'none', '@media (min-width: 768px)': { display: 'block' } }}>
+        <BusinessSidebar isOpen={true} onClose={() => {}} />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <BusinessSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+      {/* Main Content */}
+      <main style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+        {/* Mobile Header */}
+        <div
+          style={{
+            display: 'none',
+            '@media (max-width: 768px)': { display: 'flex' },
+            backgroundColor: '#ffffff',
+            borderBottom: '1px solid #e4e1da',
+            padding: '16px',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <h1 style={{ color: '#111111', fontSize: '20px', fontWeight: 700 }}>
+            Business Portal
+          </h1>
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            style={{
+              backgroundColor: '#transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+            }}
+          >
+            {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1 }}>
+          {children}
+        </div>
       </main>
     </div>
   )
