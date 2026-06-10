@@ -45,7 +45,10 @@ export default function LoginPage() {
       {/* Header Navigation */}
       <div style={{ width: '100%', padding: '1rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '1rem', paddingRight: '1rem' }}>
-          <Logo size="sm" href="/" />
+          {/* Logo - Light background so use black logo */}
+          <div style={{ height: '32px' }}>
+            <Logo size="sm" href="/" />
+          </div>
           <Link href="/signup" style={{ fontSize: '1rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>
             Create Account
           </Link>
