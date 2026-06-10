@@ -1,12 +1,13 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, FileText, Trash2 } from 'lucide-react'
+import { Plus, FileText, Trash2, Upload, File } from 'lucide-react'
 
 export default function CharityRequestsPage() {
   const [requests, setRequests] = useState<any[]>([])
@@ -17,7 +18,9 @@ export default function CharityRequestsPage() {
     description: '',
     amount: '',
     category: 'urgent',
+    documents: [] as { name: string; url: string }[],
   })
+  const [uploadingFiles, setUploadingFiles] = useState(false)
 
   useEffect(() => {
     const firebaseUser = auth.currentUser
@@ -54,16 +57,47 @@ export default function CharityRequestsPage() {
         description: formData.description,
         amount: parseInt(formData.amount),
         category: formData.category,
+        documents: formData.documents,
         submittedBy: firebaseUser.uid,
         status: 'pending',
         createdAt: new Date(),
         updatedAt: new Date(),
       })
-      setFormData({ title: '', description: '', amount: '', category: 'urgent' })
+      setFormData({ title: '', description: '', amount: '', category: 'urgent', documents: [] })
       setShowForm(false)
     } catch (error) {
       console.error('[v0] Error submitting request:', error)
     }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    setUploadingFiles(true)
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const fileData = {
+          name: file.name,
+          url: event.target?.result as string,
+        }
+        setFormData((prev) => ({
+          ...prev,
+          documents: [...prev.documents, fileData],
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+    setUploadingFiles(false)
+  }
+
+  const removeDocument = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      documents: prev.documents.filter((_, i) => i !== index),
+    }))
   }
 
   const handleDeleteRequest = async (id: string) => {
@@ -146,7 +180,42 @@ export default function CharityRequestsPage() {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div>
+                <label className="text-sm font-medium">Supporting Documents</label>
+                <div className="mt-2 border-2 border-dashed rounded p-4 text-center">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.jpg,.png,.jpeg"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    id="file-upload"
+                    disabled={uploadingFiles}
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <Upload size={24} className="mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm">Click to upload documents (PDF, images, Word)</p>
+                  </label>
+                </div>
+
+                {formData.documents.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">Uploaded documents:</p>
+                    {formData.documents.map((doc, idx) => (
+                      <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                        <File size={16} className="text-muted-foreground" />
+                        <span className="text-sm flex-1 truncate">{doc.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeDocument(idx)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <Button type="submit">Submit Request</Button>
                 <Button variant="outline" onClick={() => setShowForm(false)}>
                   Cancel
@@ -201,6 +270,25 @@ export default function CharityRequestsPage() {
                           AED {request.amount.toLocaleString()}
                         </span>
                       </div>
+
+                      {request.documents && request.documents.length > 0 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Documents:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {request.documents.map((doc: any, idx: number) => (
+                              <a
+                                key={idx}
+                                href={doc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200"
+                              >
+                                {doc.name}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   {request.status === 'pending' && (

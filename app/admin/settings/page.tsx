@@ -1,5 +1,6 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
