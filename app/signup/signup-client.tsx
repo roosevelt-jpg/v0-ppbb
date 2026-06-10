@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
@@ -8,6 +8,7 @@ import { setDoc, doc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
 import { Logo } from '@/components/logo'
 import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
+import { logActivity } from '@/lib/activity-logger'
 
 interface FormData {
   memberType: string
@@ -61,6 +62,14 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Log signup page visit on mount
+  useEffect(() => {
+    logActivity('guest', 'guest@passiveblessings.com', 'SIGNUP_PAGE_VISIT', 'Visited signup page', { 
+      timestamp: new Date().toISOString(),
+      step: 1 
+    })
+  }, [])
+
   const [formData, setFormData] = useState<FormData>({
     memberType: 'general',
     firstName: '',
@@ -99,12 +108,35 @@ export default function SignupPage() {
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement
-    if (type === 'checkbox') {
-      setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }))
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }))
-    }
+    const { name, value, type } = e.target as any
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    setFormData(prev => ({ ...prev, [name]: newValue }))
+  }
+
+  const handleSkillToggle = (skill: string) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.includes(skill) ? prev.skills.filter(s => s !== skill) : [...prev.skills, skill]
+    }))
+  }
+
+  const handleVolunteerDaysToggle = (day: string) => {
+    setFormData(prev => ({
+      ...prev,
+      volunteerDays: prev.volunteerDays.includes(day) ? prev.volunteerDays.filter(d => d !== day) : [...prev.volunteerDays, day]
+    }))
+  }
+
+  // Log step changes
+  const handleStepChange = (nextStep: number) => {
+    logActivity('guest', 'guest@passiveblessings.com', 'SIGNUP_STEP', `Moved to step ${nextStep}`, { 
+      previousStep: currentStep,
+      currentStep: nextStep,
+      formDataFields: Object.keys(formData).length,
+      timestamp: new Date().toISOString()
+    })
+    setCurrentStep(nextStep)
+  }
   }
 
   const handleSkillToggle = (skill: string) => {
@@ -126,26 +158,45 @@ export default function SignupPage() {
     setError('')
 
     if (!formData.firstName || !formData.lastName || !formData.email) {
-      setError('Please fill in all required fields')
+      const validationError = 'Please fill in all required fields'
+      setError(validationError)
+      logActivity('guest', formData.email || 'guest@passiveblessings.com', 'OTHER', 'Validation error - missing required fields', { 
+        error: validationError,
+        fields: { firstName: !!formData.firstName, lastName: !!formData.lastName, email: !!formData.email }
+      })
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      const validationError = 'Passwords do not match'
+      setError(validationError)
+      logActivity('guest', formData.email, 'OTHER', 'Validation error - passwords mismatch', { error: validationError })
       return
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters')
+      const validationError = 'Password must be at least 6 characters'
+      setError(validationError)
+      logActivity('guest', formData.email, 'OTHER', 'Validation error - weak password', { error: validationError, passwordLength: formData.password.length })
       return
     }
 
     if (!formData.consentTerms || !formData.consentPrivacy) {
-      setError('Please accept terms and privacy policy')
+      const validationError = 'Please accept terms and privacy policy'
+      setError(validationError)
+      logActivity('guest', formData.email, 'OTHER', 'Validation error - missing consent', { 
+        error: validationError,
+        consents: { terms: formData.consentTerms, privacy: formData.consentPrivacy }
+      })
       return
     }
 
     setLoading(true)
+    logActivity('guest', formData.email, 'SIGNUP_START', 'Starting signup process', { 
+      memberType: formData.memberType,
+      timestamp: new Date().toISOString()
+    })
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
       const user = userCredential.user
@@ -205,9 +256,26 @@ export default function SignupPage() {
       }
 
       await setDoc(doc(db, 'users', user.uid), userData)
+      
+      // Log successful signup
+      logActivity(user.uid, formData.email, 'SIGNUP_COMPLETE', 'Successfully created account', { 
+        userId: user.uid,
+        memberType: formData.memberType,
+        location: formData.city,
+        hasVolunteerAvailability: formData.volunteerDays.length > 0,
+        totalFormFields: Object.keys(userData).length,
+        timestamp: new Date().toISOString()
+      })
+
       router.push('/dashboard')
     } catch (err: any) {
-      setError(err.message || 'Registration failed')
+      const errorMsg = err.message || 'Registration failed'
+      setError(errorMsg)
+      logActivity('guest', formData.email, 'OTHER', 'Signup failed', { 
+        error: errorMsg,
+        errorCode: err.code,
+        timestamp: new Date().toISOString()
+      })
     } finally {
       setLoading(false)
     }
@@ -488,13 +556,13 @@ export default function SignupPage() {
               {/* Buttons */}
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 {currentStep > 1 && (
-                  <button type="button" onClick={() => setCurrentStep(prev => prev - 1)} style={{ flex: 1, padding: '1rem', border: '1px solid #e4e1da', backgroundColor: '#ffffff', color: '#111111', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <button type="button" onClick={() => handleStepChange(currentStep - 1)} style={{ flex: 1, padding: '1rem', border: '1px solid #e4e1da', backgroundColor: '#ffffff', color: '#111111', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                     <ChevronLeft size={20} /> Back
                   </button>
                 )}
 
                 {currentStep < STEPS.length ? (
-                  <button type="button" onClick={() => setCurrentStep(prev => prev + 1)} style={{ flex: 1, padding: '1rem', backgroundColor: '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <button type="button" onClick={() => handleStepChange(currentStep + 1)} style={{ flex: 1, padding: '1rem', backgroundColor: '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                     Next <ChevronRight size={20} />
                   </button>
                 ) : (

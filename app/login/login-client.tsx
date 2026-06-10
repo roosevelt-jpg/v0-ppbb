@@ -8,6 +8,7 @@ import { verifyAccessCode } from '@/lib/access-code'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
 import { AlertCircle } from 'lucide-react'
+import { logActivity } from '@/lib/activity-logger'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -34,6 +35,12 @@ export default function LoginPage() {
         setStatsLoading(false)
       }
     }
+    
+    // Log login page visit
+    logActivity('guest', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
+      timestamp: new Date().toISOString()
+    })
+    
     fetchStats()
   }, [])
 
@@ -43,15 +50,27 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
+    logActivity('guest', 'guest@passiveblessings.com', 'OTHER', 'Attempting admin access code verification', { 
+      timestamp: new Date().toISOString()
+    })
+
     const result = await verifyAccessCode(accessCode)
 
     if (!result.valid) {
-      setError(result.error || 'Invalid access code')
+      const errorMsg = result.error || 'Invalid access code'
+      setError(errorMsg)
+      logActivity('guest', 'guest@passiveblessings.com', 'OTHER', 'Admin access code verification failed', { 
+        error: errorMsg,
+        timestamp: new Date().toISOString()
+      })
       setLoading(false)
       return
     }
 
     // Access code is valid, move to email/password step
+    logActivity('guest', 'guest@passiveblessings.com', 'OTHER', 'Admin access code verified successfully', { 
+      timestamp: new Date().toISOString()
+    })
     setLoading(false)
     setLoginType('admin-verified')
   }
@@ -62,15 +81,33 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
+    logActivity('guest', email, 'OTHER', 'Attempting sign in', { 
+      loginType: 'regular',
+      timestamp: new Date().toISOString()
+    })
+
     const { user, error: loginError } = await loginUser(email, password)
 
     if (loginError) {
       setError(loginError)
+      logActivity('guest', email, 'SIGNIN_FAILED', 'Sign in failed', { 
+        error: loginError,
+        reason: 'Authentication error',
+        timestamp: new Date().toISOString()
+      })
       setLoading(false)
       return
     }
 
     if (user) {
+      // Log successful signin
+      logActivity(user.id, user.email, 'SIGNIN', 'Successfully signed in', { 
+        userId: user.id,
+        userRole: user.role,
+        rememberMe,
+        timestamp: new Date().toISOString()
+      })
+
       if (user.role === 'admin') {
         // Shouldn't reach here for admins - they should use admin login
         router.push('/admin')
@@ -88,15 +125,31 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
+    logActivity('guest', email, 'OTHER', 'Attempting admin sign in', { 
+      loginType: 'admin',
+      timestamp: new Date().toISOString()
+    })
+
     const { user, error: loginError } = await loginUser(email, password)
 
     if (loginError) {
       setError(loginError)
+      logActivity('guest', email, 'SIGNIN_FAILED', 'Admin sign in failed', { 
+        error: loginError,
+        reason: 'Authentication error',
+        loginType: 'admin',
+        timestamp: new Date().toISOString()
+      })
       setLoading(false)
       return
     }
 
     if (user && user.role === 'admin') {
+      logActivity(user.id, user.email, 'SIGNIN', 'Successfully signed in as admin', { 
+        userId: user.id,
+        userRole: 'admin',
+        timestamp: new Date().toISOString()
+      })
       router.push('/admin')
     } else {
       setError('This email is not associated with an admin account')
