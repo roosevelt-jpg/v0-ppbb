@@ -53,25 +53,29 @@ export default function AdminOverview() {
       title: 'Total Members',
       value: stats.totalMembers,
       icon: Users,
-      color: 'bg-blue-50 dark:bg-blue-950',
+      color: '#f7f6f2',
+      borderColor: '#e4e1da',
     },
     {
       title: 'Active Events',
       value: stats.totalEvents,
       icon: Calendar,
-      color: 'bg-green-50 dark:bg-green-950',
+      color: '#f7f6f2',
+      borderColor: '#e4e1da',
     },
     {
-      title: 'Donations',
-      value: `AED ${stats.totalDonations * 100}`, // Placeholder
+      title: 'Donations (AED)',
+      value: `${stats.totalDonations * 100}`,
       icon: TrendingUp,
-      color: 'bg-purple-50 dark:bg-purple-950',
+      color: '#f7f6f2',
+      borderColor: '#e4e1da',
     },
     {
       title: 'System Status',
       value: stats.systemHealth,
       icon: AlertCircle,
-      color: 'bg-yellow-50 dark:bg-yellow-950',
+      color: '#f7f6f2',
+      borderColor: '#e4e1da',
     },
   ]
 
@@ -79,18 +83,35 @@ export default function AdminOverview() {
     <>
       <AdminHeader title="Platform Overview" subtitle="Full ecosystem visibility - Role: Founder Admin" />
       
-      <div className="p-8">
+      <div className="p-8" style={{ backgroundColor: '#f7f6f2' }}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {statCards.map((stat) => {
             const Icon = stat.icon
             return (
-              <Card key={stat.title} className={`p-6 ${stat.color}`}>
+              <Card
+                key={stat.title}
+                className="p-6 border"
+                style={{
+                  backgroundColor: stat.color,
+                  borderColor: stat.borderColor,
+                }}
+              >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
-                    <p className="text-2xl font-bold mt-2">{loading ? '...' : stat.value}</p>
+                    <p className="text-xs font-medium" style={{ color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      {stat.title}
+                    </p>
+                    <p
+                      className="text-2xl font-bold mt-2"
+                      style={{
+                        color: '#111111',
+                        fontFamily: 'Playfair Display',
+                      }}
+                    >
+                      {loading ? '...' : stat.value}
+                    </p>
                   </div>
-                  <Icon className="h-6 w-6 text-muted-foreground" />
+                  <Icon className="h-6 w-6" style={{ color: '#888888' }} />
                 </div>
               </Card>
             )
@@ -99,9 +120,23 @@ export default function AdminOverview() {
 
         {/* Quick Actions */}
         <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
-          <Card className="p-6">
-            <p className="text-muted-foreground text-center py-8">
+          <h2
+            className="text-xl font-bold mb-4"
+            style={{
+              color: '#111111',
+              fontFamily: 'Playfair Display',
+            }}
+          >
+            Recent Activity
+          </h2>
+          <Card
+            className="p-6 border"
+            style={{
+              backgroundColor: '#ffffff',
+              borderColor: '#e4e1da',
+            }}
+          >
+            <p className="text-center py-8" style={{ color: '#888888', fontSize: '13px' }}>
               Activity dashboard coming soon. Configure your platform first in Settings.
             </p>
           </Card>

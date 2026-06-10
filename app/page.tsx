@@ -2,243 +2,386 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { getSiteSettings } from '@/lib/admin'
+import { Navbar } from '@/components/navbar'
 import { Logo } from '@/components/logo'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { SiteSettings } from '@/lib/types'
-import { Menu, X, ArrowRight, Users, Calendar, Heart } from 'lucide-react'
+import { ArrowRight, Users, Calendar, Heart } from 'lucide-react'
 
 export default function HomePage() {
-  const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null)
-  const [sidebarOpen, setSidebarOpen] = React.useState(false)
-  const [loading, setLoading] = React.useState(true)
-
-  React.useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const settings = await getSiteSettings()
-        setSiteSettings(settings)
-      } catch (error) {
-        console.error('[v0] Error loading site settings:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSettings()
-  }, [])
-
-  const navigationItems = [
-    { label: 'About us', href: '#' },
-    { label: 'Events', href: '#' },
-    { label: 'Volunteer', href: '#' },
-    { label: 'Marketplace', href: '#' },
-    { label: 'Contact', href: '#' },
-  ]
-
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen" style={{ backgroundColor: '#f7f6f2', color: '#111111' }}>
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Logo size="sm" href="/" />
-          
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium hover:text-primary transition"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
+      <Navbar />
 
-          {/* Actions */}
-          <div className="hidden md:flex items-center gap-4">
-            <ThemeToggle />
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm">
-                Join now
-              </Button>
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden"
-          >
-            {sidebarOpen ? <X /> : <Menu />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {sidebarOpen && (
-          <div className="md:hidden border-t border-border p-4 space-y-4">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block text-sm hover:text-primary transition"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="flex gap-2 pt-4 border-t border-border">
-              <Link href="/login" className="flex-1">
-                <Button variant="outline" size="sm" className="w-full">
-                  Sign in
-                </Button>
-              </Link>
-              <Link href="/signup" className="flex-1">
-                <Button size="sm" className="w-full">
-                  Join now
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
-      <section className="py-20 px-6">
+      {/* Hero section */}
+      <section className="py-16 px-6" style={{ backgroundColor: '#f7f6f2' }}>
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-balance">
-            Your community hub awaits
+          <h1
+            className="text-3xl md:text-4xl font-bold mb-4"
+            style={{
+              fontFamily: 'Playfair Display',
+              color: '#111111',
+              letterSpacing: '-0.3px',
+            }}
+          >
+            Community platform for events, volunteering, and giving
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 text-balance">
-            {siteSettings?.siteDescription || 'Join a thriving community for events, volunteering, and mutual support'}
+          <p className="text-base mb-8" style={{ color: '#888888' }}>
+            Passive Blessings connects members with opportunities to volunteer, contribute, and support their community.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg">
-                Join the community <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/signup"
+              className="px-6 py-2 rounded-lg text-sm font-medium transition"
+              style={{
+                backgroundColor: '#111111',
+                color: '#f7f6f2',
+              }}
+            >
+              Get started
             </Link>
-            <Link href="#features">
-              <Button variant="outline" size="lg">
-                Learn more
-              </Button>
+            <Link
+              href="#learn-more"
+              className="px-6 py-2 rounded-lg text-sm font-medium border transition"
+              style={{
+                borderColor: '#e4e1da',
+                color: '#111111',
+              }}
+            >
+              Learn more
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-6 bg-secondary/5">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">What you can do</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Stats section */}
+      <section className="py-12 px-6">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+          {[
+            { icon: Users, label: 'Members', value: '3,412' },
+            { icon: Calendar, label: 'Events', value: '87' },
+            { icon: Heart, label: 'Donations', value: 'AED 92K' },
+          ].map((stat, idx) => (
+            <Card key={idx} className="p-6 text-center" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+              <stat.icon className="w-8 h-8 mx-auto mb-3" style={{ color: '#111111' }} />
+              <p className="text-sm" style={{ color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold mt-2" style={{ color: '#111111', fontFamily: 'Playfair Display' }}>
+                {stat.value}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Features section */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2
+            className="text-2xl font-bold text-center mb-12"
+            style={{
+              fontFamily: 'Playfair Display',
+              color: '#111111',
+            }}
+          >
+            How it works
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-8">
             {[
               {
-                icon: Calendar,
-                title: 'Register & track events',
-                description: 'Discover and join community events happening near you'
+                title: 'Join the community',
+                description: 'Sign up and create your profile with your interests and availability.',
               },
               {
-                icon: Users,
-                title: 'Log volunteer hours',
-                description: 'Record your contributions and earn certificates'
+                title: 'Browse opportunities',
+                description: 'Explore events, volunteer roles, and ways to support your community.',
               },
               {
-                icon: Heart,
-                title: 'Make donations',
-                description: 'Support campaigns and causes you believe in'
+                title: 'Connect & contribute',
+                description: 'Participate in events and make meaningful connections with members.',
               },
-            ].map((feature) => {
-              const Icon = feature.icon
-              return (
-                <Card key={feature.title} className="p-8 text-center">
-                  <Icon className="h-12 w-12 mx-auto mb-4 text-primary" />
-                  <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </Card>
-              )
-            })}
+              {
+                title: 'Track your impact',
+                description: 'See your volunteer hours, donations, and community contributions.',
+              },
+            ].map((feature, idx) => (
+              <div key={idx} className="p-6 rounded-lg border" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+                <h3 className="text-lg font-bold mb-2" style={{ color: '#111111' }}>
+                  {feature.title}
+                </h3>
+                <p className="text-sm" style={{ color: '#888888' }}>
+                  {feature.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-3 gap-8 text-center">
-            <div>
-              <p className="text-4xl font-bold">3,412</p>
-              <p className="text-muted-foreground mt-2">Active members</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold">8,940</p>
-              <p className="text-muted-foreground mt-2">Volunteer hours</p>
-            </div>
-            <div>
-              <p className="text-4xl font-bold">AED 92K</p>
-              <p className="text-muted-foreground mt-2">Donations tracked</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to make a difference?</h2>
-          <p className="text-lg opacity-90 mb-8">
-            Join {siteSettings?.siteName || 'Passive Blessings'} and become part of something meaningful
+      {/* CTA section */}
+      <section className="py-12 px-6">
+        <div
+          className="rounded-lg p-12 text-center"
+          style={{
+            backgroundColor: '#111111',
+            color: '#f7f6f2',
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{
+              fontFamily: 'Playfair Display',
+              color: '#f7f6f2',
+            }}
+          >
+            Ready to make a difference?
+          </h2>
+          <p className="text-sm mb-6" style={{ color: '#e4e1da' }}>
+            Join thousands of community members creating positive impact.
           </p>
-          <Link href="/signup">
-            <Button size="lg" variant="secondary">
-              Get started today <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+          <Link
+            href="/signup"
+            className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition"
+            style={{
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+            }}
+          >
+            Join now <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <Logo size="sm" className="mb-4" />
-              <p className="text-sm text-muted-foreground">{siteSettings?.siteName}</p>
-            </div>
-            <div>
-              <p className="font-bold text-sm mb-4">Company</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">About</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Blog</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Careers</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-bold text-sm mb-4">Resources</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">FAQ</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Support</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <p className="font-bold text-sm mb-4">Legal</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">Terms</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Privacy</Link></li>
-              </ul>
-            </div>
+      <footer
+        className="py-8 px-6 border-t"
+        style={{
+          backgroundColor: '#ffffff',
+          borderColor: '#e4e1da',
+          color: '#888888',
+        }}
+      >
+        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <Logo size="sm" />
+            <p className="text-xs mt-3" style={{ color: '#888888' }}>
+              Community platform for events, volunteering, and welfare.
+            </p>
           </div>
-          <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>{siteSettings?.footerText || '© 2025 Passive Blessings. All rights reserved.'}</p>
+          {['About', 'Events', 'Volunteer', 'Contact'].map((section) => (
+            <div key={section}>
+              <p className="text-xs font-bold mb-3" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {section}
+              </p>
+              <ul className="space-y-2">
+                {['Link 1', 'Link 2', 'Link 3'].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-xs hover:text-charcoal transition" style={{ color: '#888888' }}>
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t pt-8" style={{ borderColor: '#e4e1da' }}>
+          <p className="text-xs text-center" style={{ color: '#888888' }}>
+            © {new Date().getFullYear()} Passive Blessings. All rights reserved. ESTD 2025
+          </p>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#f7f6f2', color: '#111111' }}>
+      {/* Navigation */}
+      <Navbar />
+
+      {/* Hero section */}
+      <section className="py-16 px-6" style={{ backgroundColor: '#f7f6f2' }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <h1
+            className="text-3xl md:text-4xl font-bold mb-4"
+            style={{
+              fontFamily: 'Playfair Display',
+              color: '#111111',
+              letterSpacing: '-0.3px',
+            }}
+          >
+            Community platform for events, volunteering, and giving
+          </h1>
+          <p className="text-base mb-8" style={{ color: '#888888' }}>
+            {siteSettings?.description || 'Passive Blessings connects members with opportunities to volunteer, contribute, and support their community.'}
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/signup"
+              className="px-6 py-2 rounded-lg text-sm font-medium transition"
+              style={{
+                backgroundColor: '#111111',
+                color: '#f7f6f2',
+              }}
+            >
+              Get started
+            </Link>
+            <Link
+              href="#learn-more"
+              className="px-6 py-2 rounded-lg text-sm font-medium border transition"
+              style={{
+                borderColor: '#e4e1da',
+                color: '#111111',
+              }}
+            >
+              Learn more
+            </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Stats section */}
+      <section className="py-12 px-6">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
+          {[
+            { icon: Users, label: 'Members', value: '3,412' },
+            { icon: Calendar, label: 'Events', value: '87' },
+            { icon: Heart, label: 'Donations', value: 'AED 92K' },
+          ].map((stat, idx) => (
+            <Card key={idx} className="p-6 text-center" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+              <stat.icon className="w-8 h-8 mx-auto mb-3" style={{ color: '#111111' }} />
+              <p className="text-sm" style={{ color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {stat.label}
+              </p>
+              <p className="text-2xl font-bold mt-2" style={{ color: '#111111', fontFamily: 'Playfair Display' }}>
+                {stat.value}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Features section */}
+      <section className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2
+            className="text-2xl font-bold text-center mb-12"
+            style={{
+              fontFamily: 'Playfair Display',
+              color: '#111111',
+            }}
+          >
+            How it works
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {[
+              {
+                title: 'Join the community',
+                description: 'Sign up and create your profile with your interests and availability.',
+              },
+              {
+                title: 'Browse opportunities',
+                description: 'Explore events, volunteer roles, and ways to support your community.',
+              },
+              {
+                title: 'Connect & contribute',
+                description: 'Participate in events and make meaningful connections with members.',
+              },
+              {
+                title: 'Track your impact',
+                description: 'See your volunteer hours, donations, and community contributions.',
+              },
+            ].map((feature, idx) => (
+              <div key={idx} className="p-6 rounded-lg border" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+                <h3 className="text-lg font-bold mb-2" style={{ color: '#111111' }}>
+                  {feature.title}
+                </h3>
+                <p className="text-sm" style={{ color: '#888888' }}>
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA section */}
+      <section className="py-12 px-6">
+        <div
+          className="rounded-lg p-12 text-center"
+          style={{
+            backgroundColor: '#111111',
+            color: '#f7f6f2',
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{
+              fontFamily: 'Playfair Display',
+              color: '#f7f6f2',
+            }}
+          >
+            Ready to make a difference?
+          </h2>
+          <p className="text-sm mb-6" style={{ color: '#e4e1da' }}>
+            Join thousands of community members creating positive impact.
+          </p>
+          <Link
+            href="/signup"
+            className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition"
+            style={{
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+            }}
+          >
+            Join now <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer
+        className="py-8 px-6 border-t"
+        style={{
+          backgroundColor: '#ffffff',
+          borderColor: '#e4e1da',
+          color: '#888888',
+        }}
+      >
+        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <Logo size="sm" />
+            <p className="text-xs mt-3" style={{ color: '#888888' }}>
+              Community platform for events, volunteering, and welfare.
+            </p>
+          </div>
+          {['About', 'Events', 'Volunteer', 'Contact'].map((section) => (
+            <div key={section}>
+              <p className="text-xs font-bold mb-3" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {section}
+              </p>
+              <ul className="space-y-2">
+                {['Link 1', 'Link 2', 'Link 3'].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-xs hover:text-charcoal transition" style={{ color: '#888888' }}>
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t pt-8" style={{ borderColor: '#e4e1da' }}>
+          <p className="text-xs text-center" style={{ color: '#888888' }}>
+            © {new Date().getFullYear()} Passive Blessings. All rights reserved. ESTD 2025
+          </p>
         </div>
       </footer>
     </div>

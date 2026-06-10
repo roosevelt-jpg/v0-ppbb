@@ -1,520 +1,777 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useLocale } from 'next-intl'
-import { registerUser } from '@/lib/auth'
-import { getUserLocation, searchLocation, type LocationData } from '@/lib/geolocation'
-import { uploadImageForFirestore, base64ToImage, type UploadedImage } from '@/lib/image-upload'
-import { Logo } from '@/components/logo'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { AlertCircle, ChevronRight, MapPin, Upload, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { setDoc, doc } from 'firebase/firestore'
+import { auth, db } from '@/lib/firebase'
+import { fileToBase64 } from '@/lib/image-upload'
+import { getUserLocation } from '@/lib/geolocation'
+import { Card } from '@/components/ui/card'
+import { Logo } from '@/components/logo'
+
+interface LocationData {
+  latitude: number
+  longitude: number
+  address: string
+  city: string
+  country: string
+}
+
+const STEPS = [
+  { id: 1, label: 'User type', field: 'userType' },
+  { id: 2, label: 'Personal info', field: 'personalInfo' },
+  { id: 3, label: 'Location', field: 'location' },
+  { id: 4, label: 'Agreement', field: 'agreement' },
+]
 
 export default function SignupPage() {
   const router = useRouter()
-  const locale = useLocale()
   const t = useTranslations()
-  const [step, setStep] = React.useState(1)
-  const [error, setError] = React.useState('')
-  const [loading, setLoading] = React.useState(false)
-  const [locLoading, setLocLoading] = React.useState(false)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  // Step 1: User type selection
-  const [userType, setUserType] = React.useState<'member' | 'volunteer' | 'business' | null>(null)
+  // Form state
+  const [formData, setFormData] = useState({
+    userType: 'member',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    dob: '',
+    gender: '',
+    nationality: '',
+    emiratesId: '',
+    profileImage: null as File | null,
+    profileImageBase64: '',
+    occupation: '',
+    employer: '',
+    location: null as LocationData | null,
+    locationConsent: false,
+    termsAccepted: false,
+    dataProtectionAccepted: false,
+    newsletterConsent: false,
+  })
 
-  // Step 2: Personal info
-  const [firstName, setFirstName] = React.useState('')
-  const [lastName, setLastName] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [confirmPassword, setConfirmPassword] = React.useState('')
-  const [dateOfBirth, setDateOfBirth] = React.useState('')
-  const [gender, setGender] = React.useState('')
-  const [nationality, setNationality] = React.useState('')
-  const [emiratesId, setEmiratesId] = React.useState('')
-  const [profileImage, setProfileImage] = React.useState<UploadedImage | undefined>(undefined)
-  const [profileImagePreview, setProfileImagePreview] = React.useState<string>('')
-  const [occupation, setOccupation] = React.useState('')
-  const [employer, setEmployer] = React.useState('')
-
-  // Step 3: Location
-  const [location, setLocation] = React.useState<LocationData | null>(null)
-  const [locationSearch, setLocationSearch] = React.useState('')
-  const [locationSuggestions, setLocationSuggestions] = React.useState<LocationData[]>([])
-  const [showLocationDropdown, setShowLocationDropdown] = React.useState(false)
-
-  // Step 4: Agreements
-  const [termsAgree, setTermsAgree] = React.useState(false)
-  const [dataAgree, setDataAgree] = React.useState(false)
-  const [locationAgree, setLocationAgree] = React.useState(false)
-  const [newsletterAgree, setNewsletterAgree] = React.useState(false)
-
-  const handleDetectLocation = async () => {
-    setLocLoading(true)
-    setError('')
-    try {
-      const loc = await getUserLocation()
-      if (loc) {
-        setLocation(loc)
-        setLocationSearch(`${loc.city}, ${loc.state}, ${loc.country}`)
-      } else {
-        setError('Could not detect your location. Please enable location access.')
-      }
-    } catch (err) {
-      setError('Error detecting location')
-    } finally {
-      setLocLoading(false)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement
+    if (type === 'checkbox') {
+      setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }))
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
     }
-  }
-
-  const handleLocationSearch = async (query: string) => {
-    if (query.length < 2) {
-      setLocationSuggestions([])
-      return
-    }
-    
-    try {
-      const suggestions = await searchLocation(query)
-      setLocationSuggestions(suggestions)
-    } catch (err) {
-      console.error('[v0] Location search error:', err)
-    }
-  }
-
-  const handleSelectLocation = (loc: LocationData) => {
-    setLocation(loc)
-    setLocationSearch(`${loc.city}, ${loc.state}, ${loc.country}`)
-    setLocationSuggestions([])
-    setShowLocationDropdown(false)
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB')
+      return
+    }
+
     try {
-      const uploaded = await uploadImageForFirestore(file)
-      setProfileImage(uploaded)
-      const preview = base64ToImage(uploaded.base64, uploaded.mimeType)
-      setProfileImagePreview(preview)
+      const base64 = await fileToBase64(file)
+      setFormData(prev => ({
+        ...prev,
+        profileImage: file,
+        profileImageBase64: base64,
+      }))
+      setError('')
     } catch (err) {
-      setError('Error uploading image: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      setError('Failed to process image')
     }
   }
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    // Validation
-    if (!userType) {
-      setError('Please select a user type')
-      return
+  const handleDetectLocation = async () => {
+    setLoading(true)
+    try {
+      const locationData = await getUserLocation()
+      if (locationData) {
+        setFormData(prev => ({
+          ...prev,
+          location: {
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            address: locationData.address,
+            city: locationData.city,
+            country: locationData.country,
+          },
+        }))
+      }
+      setError('')
+    } catch (err) {
+      setError('Could not detect location. Please allow location access.')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    if (password !== confirmPassword) {
-      setError(t('signup.passwordMismatch'))
-      return
-    }
-
-    if (password.length < 8) {
-      setError(t('signup.passwordMinChars'))
-      return
-    }
-
-    if (!location) {
-      setError('Please select a location')
-      return
-    }
-
-    if (!termsAgree || !dataAgree || !locationAgree) {
-      setError('Please agree to all terms and conditions')
+  const handleSignup = async () => {
+    if (!formData.termsAccepted || !formData.dataProtectionAccepted) {
+      setError('Please accept terms and conditions')
       return
     }
 
     setLoading(true)
+    setError('')
 
-    const { user, error: signupError } = await registerUser(
-      email,
-      password,
-      firstName,
-      lastName,
-      userType,
-      {
-        dateOfBirth,
-        gender,
-        nationality,
-        emiratesId,
-        location,
-        profession: occupation,
-        employer,
-        avatar: profileImage,
+    try {
+      // Create Firebase Auth user
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      const user = userCredential.user
+
+      // Prepare user document for Firestore
+      const userData = {
+        uid: user.uid,
+        userType: formData.userType,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        dob: formData.dob,
+        gender: formData.gender,
+        nationality: formData.nationality,
+        emiratesId: formData.emiratesId,
+        occupation: formData.occupation,
+        employer: formData.employer,
+        location: formData.location || {},
+        locationConsent: formData.locationConsent,
+        profileImage: formData.profileImageBase64 ? {
+          base64: formData.profileImageBase64,
+          fileName: formData.profileImage?.name,
+          mimeType: formData.profileImage?.type,
+          uploadedAt: new Date().toISOString(),
+        } : null,
+        newsletterConsent: formData.newsletterConsent,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'active',
       }
-    )
 
-    if (signupError) {
-      setError(signupError)
+      // Save to Firestore
+      await setDoc(doc(db, 'users', user.uid), userData)
+
+      // Redirect to dashboard
+      router.push('/dashboard')
+    } catch (err: any) {
+      console.error('[v0] Signup error:', err)
+      setError(err.message || 'Failed to create account')
+    } finally {
       setLoading(false)
-      return
-    }
-
-    if (user) {
-      router.push(`/${locale}/dashboard`)
     }
   }
 
-  const isStep2Valid = firstName && lastName && email && password && confirmPassword && dateOfBirth && gender && nationality
-  const isStep3Valid = location
-  const isStep4Valid = termsAgree && dataAgree && locationAgree
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return formData.userType
+      case 2:
+        return (
+          formData.firstName &&
+          formData.lastName &&
+          formData.email &&
+          formData.password &&
+          formData.confirmPassword &&
+          formData.password === formData.confirmPassword &&
+          formData.dob &&
+          formData.gender &&
+          formData.nationality
+        )
+      case 3:
+        return formData.location
+      case 4:
+        return formData.termsAccepted && formData.dataProtectionAccepted
+      default:
+        return false
+    }
+  }
+
+  const progressPercent = (currentStep / STEPS.length) * 100
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-background">
-      <div className={`w-full max-w-2xl ${locale === 'ar' ? 'rtl' : ''}`}>
-        <div className="mb-8 text-center">
-          <Logo size="lg" className="mx-auto mb-4" />
-          <h1 className="text-3xl font-bold">{t('signup.title')}</h1>
-          <p className="text-muted-foreground mt-2">{t('signup.description')}</p>
+    <div className="min-h-screen" style={{ backgroundColor: '#f7f6f2' }}>
+      {/* Navigation bar - 48px height, Ink Black background */}
+      <nav className="h-12 bg-ink-black text-warm-white px-6 flex items-center justify-between border-b" style={{ borderColor: '#e4e1da' }}>
+        <div className="w-24">
+          <Logo />
         </div>
-
-        {/* Progress Indicator */}
-        <div className="flex gap-2 mb-8">
-          {[1, 2, 3, 4].map((s) => (
-            <div
-              key={s}
-              className={`h-2 flex-1 rounded-full transition-colors ${
-                s <= step ? 'bg-primary' : 'bg-border'
-              }`}
-            />
-          ))}
+        <div className="flex items-center gap-6" style={{ fontSize: '12px', color: '#888888' }}>
+          <a href="#" className="hover:text-warm-white transition">About us</a>
+          <a href="#" className="hover:text-warm-white transition">Join</a>
+          <a href="#" className="hover:text-warm-white transition">Events</a>
+          <a href="#" className="hover:text-warm-white transition">Marketplace</a>
+          <a href="#" className="hover:text-warm-white transition">Contact</a>
+          <Link href="/login" className="ml-4 px-3 py-1 text-charcoal bg-warm-white hover:bg-warm-grey rounded-lg transition" style={{ fontSize: '12px', fontWeight: 500 }}>
+            Sign in
+          </Link>
         </div>
+      </nav>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg flex gap-3">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+      <div className="flex min-h-[calc(100vh-48px)]">
+        {/* Progress sidebar - 175px width */}
+        <div className="w-44 px-6 py-8 border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+          <h2 className="text-xs font-medium mb-8" style={{ color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            Registration progress
+          </h2>
+
+          {/* Progress bar */}
+          <div className="mb-8">
+            <div className="h-1 rounded-full overflow-hidden" style={{ backgroundColor: '#e4e1da' }}>
+              <div
+                className="h-full transition-all duration-300"
+                style={{ width: `${progressPercent}%`, backgroundColor: '#111111' }}
+              />
+            </div>
+            <p className="text-xs mt-2" style={{ color: '#888888' }}>{progressPercent.toFixed(0)}%</p>
           </div>
-        )}
 
-        {/* Step 1: User Type */}
-        {step === 1 && (
-          <Card className="p-8">
-            <h2 className="text-xl font-bold mb-6">{t('signup.selectUserType')}</h2>
-
-            <div className="space-y-3 mb-8">
-              {[
-                { value: 'member', label: t('signup.generalMember'), desc: 'Community events, charity' },
-                { value: 'volunteer', label: t('signup.volunteer'), desc: 'Contribute your time & skills' },
-                { value: 'business', label: t('signup.businessPartner'), desc: 'Full access & post back' },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => setUserType(option.value as any)}
-                  className={`w-full p-4 border-2 rounded-lg text-left transition-all ${
-                    userType === option.value
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <p className="font-medium">{option.label}</p>
-                  <p className="text-sm text-muted-foreground">{option.desc}</p>
-                </button>
-              ))}
-            </div>
-
-            <Button onClick={() => setStep(2)} disabled={!userType} className="w-full">
-              {t('common.cancel')} <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Card>
-        )}
-
-        {/* Step 2: Personal Information */}
-        {step === 2 && (
-          <Card className="p-8">
-            <div className="mb-6">
-              <button onClick={() => setStep(1)} className="text-sm text-primary hover:underline">
-                ← {t('signup.selectUserType')}
+          {/* Step indicators */}
+          <div className="space-y-3">
+            {STEPS.map((step) => (
+              <button
+                key={step.id}
+                onClick={() => {
+                  if (step.id <= currentStep) {
+                    setCurrentStep(step.id)
+                  }
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition"
+                style={{
+                  backgroundColor: step.id === currentStep ? '#111111' : step.id < currentStep ? '#e4e1da' : 'transparent',
+                  color: step.id === currentStep ? '#f7f6f2' : step.id < currentStep ? '#111111' : '#888888',
+                }}
+              >
+                <span style={{ fontFamily: 'DM Mono', fontWeight: 400 }}>{step.id}.</span> {step.label}
               </button>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); setStep(3) }} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.firstName')}</label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.lastName')}</label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-              </div>
+        {/* Main content */}
+        <div className="flex-1 p-8 flex items-center justify-center">
+          <div className="w-full max-w-2xl">
+            <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+              {/* Step 1: User Type */}
+              {currentStep === 1 && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-bold mb-2" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+                      Create your account
+                    </h1>
+                    <p className="text-sm" style={{ color: '#888888' }}>
+                      Join the Passive Blessings community — it only takes a few minutes
+                    </p>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">{t('signup.email')}</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  required
-                />
-              </div>
+                  <div className="text-xs font-medium mb-4" style={{ color: '#888888', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    I want to join as
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.dateOfBirth')}</label>
-                  <input
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.gender')}</label>
-                  <select
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  >
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.nationality')}</label>
-                  <input
-                    type="text"
-                    value={nationality}
-                    onChange={(e) => setNationality(e.target.value)}
-                    placeholder="e.g. Emirati"
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.emiratesId')}</label>
-                  <input
-                    type="text"
-                    value={emiratesId}
-                    onChange={(e) => setEmiratesId(e.target.value)}
-                    placeholder="Optional for verification"
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">{t('signup.profileImage')}</label>
-                <div className="flex items-center gap-4">
-                  {profileImagePreview && (
-                    <div className="relative">
-                      <img src={profileImagePreview} alt="Profile" className="w-20 h-20 rounded-lg object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setProfileImage(undefined)
-                          setProfileImagePreview('')
+                  <div className="space-y-3">
+                    {[
+                      { value: 'member', label: 'General member', desc: 'Community events, charity' },
+                      { value: 'volunteer', label: 'Volunteer', desc: 'Contribute your time & skills' },
+                      { value: 'both', label: 'Member + Volunteer', desc: 'Full access & give back' },
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className="flex items-center p-4 border rounded-lg cursor-pointer transition hover:bg-warm-white"
+                        style={{
+                          borderColor: formData.userType === option.value ? '#111111' : '#e4e1da',
+                          borderWidth: formData.userType === option.value ? '2px' : '1px',
                         }}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
                       >
-                        <X className="h-3 w-3" />
-                      </button>
+                        <input
+                          type="radio"
+                          name="userType"
+                          value={option.value}
+                          checked={formData.userType === option.value}
+                          onChange={handleInputChange}
+                          className="w-4 h-4"
+                        />
+                        <div className="ml-3 flex-1">
+                          <div className="font-medium" style={{ color: '#333333' }}>{option.label}</div>
+                          <div className="text-xs" style={{ color: '#888888' }}>{option.desc}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Personal Info */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-bold mb-1" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+                      Personal information
+                    </h2>
+                    <p className="text-xs" style={{ color: '#888888' }}>Tell us a bit about yourself</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        First name *
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Fatima"
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
                     </div>
-                  )}
-                  <label className="flex-1 border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary transition">
-                    <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">{t('signup.uploadImage')}</p>
-                    <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
-                  </label>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.occupation')}</label>
-                  <input
-                    type="text"
-                    value={occupation}
-                    onChange={(e) => setOccupation(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">{t('signup.employer')}</label>
-                  <input
-                    type="text"
-                    value={employer}
-                    onChange={(e) => setEmployer(e.target.value)}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Last name *
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Al Mansoori"
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <Button variant="outline" type="button" onClick={() => setStep(1)}>
-                  Back
-                </Button>
-                <Button type="submit" disabled={!isStep2Valid}>
-                  Next
-                </Button>
-              </div>
-            </form>
-          </Card>
-        )}
+                  <div>
+                    <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Email address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="you@example.com"
+                      className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                      style={{
+                        borderColor: '#e4e1da',
+                        backgroundColor: '#ffffff',
+                        color: '#333333',
+                      }}
+                    />
+                  </div>
 
-        {/* Step 3: Location */}
-        {step === 3 && (
-          <Card className="p-8">
-            <form onSubmit={(e) => { e.preventDefault(); setStep(4) }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">{t('signup.selectLocation')}</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Password *
+                      </label>
+                      <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Min 8 characters"
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Confirm password *
+                      </label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder="Re-enter password"
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Date of birth *
+                      </label>
+                      <input
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
+                        onChange={handleInputChange}
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Gender *
+                      </label>
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleInputChange}
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Nationality *
+                      </label>
+                      <select
+                        name="nationality"
+                        value={formData.nationality}
+                        onChange={handleInputChange}
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      >
+                        <option value="">Select nationality</option>
+                        <option value="UAE">UAE National</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Emirates ID (optional)
+                    </label>
                     <input
                       type="text"
-                      value={locationSearch}
-                      onChange={(e) => {
-                        setLocationSearch(e.target.value)
-                        handleLocationSearch(e.target.value)
+                      name="emiratesId"
+                      value={formData.emiratesId}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 784-XXXX-XXXXXXX-X"
+                      className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                      style={{
+                        borderColor: '#e4e1da',
+                        backgroundColor: '#ffffff',
+                        color: '#333333',
                       }}
-                      onFocus={() => setShowLocationDropdown(true)}
-                      placeholder="Search location"
-                      className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    {showLocationDropdown && locationSuggestions.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg z-10">
-                        {locationSuggestions.map((loc, idx) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => handleSelectLocation(loc)}
-                            className="w-full text-left px-4 py-2 hover:bg-secondary transition"
-                          >
-                            <p className="font-medium">{loc.city}, {loc.state}</p>
-                            <p className="text-sm text-muted-foreground">{loc.country}</p>
-                          </button>
-                        ))}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Profile photo (optional)
+                    </label>
+                    <div
+                      className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-warm-white transition cursor-pointer"
+                      style={{ borderColor: '#e4e1da' }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="profileImage"
+                      />
+                      <label htmlFor="profileImage" className="cursor-pointer">
+                        <div className="text-xs" style={{ color: '#888888' }}>Click to upload or drag and drop</div>
+                        <div className="text-xs mt-1" style={{ color: '#888888' }}>JPG, PNG up to 5MB</div>
+                      </label>
+                    </div>
+                    {formData.profileImageBase64 && (
+                      <div className="mt-3 flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: '#e4e1da' }}>
+                        <span className="text-sm" style={{ color: '#333333' }}>{formData.profileImage?.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, profileImage: null, profileImageBase64: '' }))}
+                          className="text-xs hover:underline"
+                          style={{ color: '#888888' }}
+                        >
+                          Remove
+                        </button>
                       </div>
                     )}
                   </div>
-                  <Button type="button" variant="outline" onClick={handleDetectLocation} disabled={locLoading}>
-                    {locLoading ? 'Detecting...' : t('signup.currentLocation')}
-                  </Button>
-                </div>
-              </div>
 
-              {location && (
-                <Card className="p-4 bg-secondary/5">
-                  <p className="font-medium">{location.city}, {location.state}</p>
-                  <p className="text-sm text-muted-foreground">{location.country}</p>
-                </Card>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Occupation (optional)
+                      </label>
+                      <input
+                        type="text"
+                        name="occupation"
+                        value={formData.occupation}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Software Engineer, Teacher"
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Employer / Company (optional)
+                      </label>
+                      <input
+                        type="text"
+                        name="employer"
+                        value={formData.employer}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Emirates Group, UAEU"
+                        className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                        style={{
+                          borderColor: '#e4e1da',
+                          backgroundColor: '#ffffff',
+                          color: '#333333',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
 
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <Button variant="outline" type="button" onClick={() => setStep(2)}>
+              {/* Step 3: Location */}
+              {currentStep === 3 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-bold mb-1" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+                      Your location
+                    </h2>
+                    <p className="text-xs" style={{ color: '#888888' }}>Help us connect you with local events and community members</p>
+                  </div>
+
+                  {formData.location ? (
+                    <div className="p-4 rounded-lg border" style={{ backgroundColor: '#f7f6f2', borderColor: '#e4e1da' }}>
+                      <p className="text-sm font-medium mb-2" style={{ color: '#333333' }}>
+                        Detected location:
+                      </p>
+                      <p className="text-sm" style={{ color: '#333333' }}>{formData.location.address}</p>
+                      <p className="text-xs mt-1" style={{ color: '#888888' }}>
+                        {formData.location.city}, {formData.location.country}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, location: null }))}
+                        className="mt-3 text-xs hover:underline"
+                        style={{ color: '#111111' }}
+                      >
+                        Change location
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={loading}
+                      className="w-full h-8 px-4 rounded-lg font-medium text-sm transition disabled:opacity-50"
+                      style={{
+                        backgroundColor: '#111111',
+                        color: '#f7f6f2',
+                      }}
+                    >
+                      {loading ? 'Detecting location...' : 'Detect my location'}
+                    </button>
+                  )}
+
+                  <div className="p-4 rounded-lg border" style={{ backgroundColor: '#f7f6f2', borderColor: '#e4e1da' }}>
+                    <p className="text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Why we ask for your location:
+                    </p>
+                    <ul className="text-xs space-y-1" style={{ color: '#888888' }}>
+                      <li>• To show you events happening near you</li>
+                      <li>• To connect you with members in your area</li>
+                      <li>• To match you to local opportunities & volunteer roles</li>
+                      <li>• To route charity support to the right coordinators</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Agreement */}
+              {currentStep === 4 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-bold mb-1" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+                      Consent & agreement
+                    </h2>
+                    <p className="text-xs" style={{ color: '#888888' }}>Please review and accept our policies</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-3 p-3 border rounded-lg hover:bg-warm-white transition cursor-pointer" style={{ borderColor: '#e4e1da' }}>
+                      <input
+                        type="checkbox"
+                        name="termsAccepted"
+                        checked={formData.termsAccepted}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-sm" style={{ color: '#333333' }}>
+                          I agree to the <a href="#" className="hover:underline" style={{ color: '#1565c0' }}>Terms & Conditions</a> and{' '}
+                          <a href="#" className="hover:underline" style={{ color: '#1565c0' }}>Community Code of Conduct</a> of Passive Blessings.
+                        </p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 border rounded-lg hover:bg-warm-white transition cursor-pointer" style={{ borderColor: '#e4e1da' }}>
+                      <input
+                        type="checkbox"
+                        name="dataProtectionAccepted"
+                        checked={formData.dataProtectionAccepted}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-sm" style={{ color: '#333333' }}>
+                          I consent to my personal data being stored and processed in accordance with the{' '}
+                          <a href="#" className="hover:underline" style={{ color: '#1565c0' }}>UAE Data Protection Policy</a>. My data is encrypted and will not be shared with third parties.
+                        </p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 border rounded-lg hover:bg-warm-white transition cursor-pointer" style={{ borderColor: '#e4e1da' }}>
+                      <input
+                        type="checkbox"
+                        name="locationConsent"
+                        checked={formData.locationConsent}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-sm" style={{ color: '#333333' }}>
+                          I confirm my location details are accurate and consent to being connected with local community events and members in my area.
+                        </p>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 p-3 border rounded-lg hover:bg-warm-white transition cursor-pointer" style={{ borderColor: '#e4e1da' }}>
+                      <input
+                        type="checkbox"
+                        name="newsletterConsent"
+                        checked={formData.newsletterConsent}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-sm" style={{ color: '#333333' }}>
+                          I agree to receive WhatsApp and email updates about upcoming events, opportunities, and community news.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+
+                  <p className="text-xs" style={{ color: '#888888' }}>
+                    Your data is encrypted and secure - Passive Blessings ESTD 2025
+                  </p>
+                </div>
+              )}
+
+              {/* Error message */}
+              {error && (
+                <div className="p-3 mt-6 rounded-lg border" style={{ backgroundColor: '#c62828', backgroundColor: '#fee', borderColor: '#c62828' }}>
+                  <p className="text-sm" style={{ color: '#c62828' }}>{error}</p>
+                </div>
+              )}
+
+              {/* Navigation buttons */}
+              <div className="flex justify-between gap-4 mt-8 pt-6 border-t" style={{ borderColor: '#e4e1da' }}>
+                <button
+                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                  disabled={currentStep === 1}
+                  className="px-6 h-8 rounded-lg border text-sm font-medium transition disabled:opacity-50"
+                  style={{
+                    borderColor: '#e4e1da',
+                    color: '#333333',
+                  }}
+                >
                   Back
-                </Button>
-                <div />
-                <Button type="submit" disabled={!isStep3Valid}>
-                  Next
-                </Button>
-              </div>
-            </form>
-          </Card>
-        )}
+                </button>
 
-        {/* Step 4: Agreements */}
-        {step === 4 && (
-          <Card className="p-8">
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-3">
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={termsAgree}
-                    onChange={(e) => setTermsAgree(e.target.checked)}
-                    required
-                    className="mt-1"
-                  />
-                  <span>
-                    {t('signup.termsAgreement')}
-                  </span>
-                </label>
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={dataAgree}
-                    onChange={(e) => setDataAgree(e.target.checked)}
-                    required
-                    className="mt-1"
-                  />
-                  <span>{t('signup.dataProtection')}</span>
-                </label>
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={locationAgree}
-                    onChange={(e) => setLocationAgree(e.target.checked)}
-                    required
-                    className="mt-1"
-                  />
-                  <span>{t('signup.locationConsent')}</span>
-                </label>
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={newsletterAgree}
-                    onChange={(e) => setNewsletterAgree(e.target.checked)}
-                    className="mt-1"
-                  />
-                  <span>{t('signup.newsletter')}</span>
-                </label>
+                {currentStep === STEPS.length ? (
+                  <button
+                    onClick={handleSignup}
+                    disabled={!isStepValid() || loading}
+                    className="px-6 h-8 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                    style={{
+                      backgroundColor: '#111111',
+                      color: '#f7f6f2',
+                    }}
+                  >
+                    {loading ? 'Creating account...' : 'Create account & continue'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setCurrentStep(currentStep + 1)}
+                    disabled={!isStepValid()}
+                    className="px-6 h-8 rounded-lg text-sm font-medium transition disabled:opacity-50"
+                    style={{
+                      backgroundColor: '#111111',
+                      color: '#f7f6f2',
+                    }}
+                  >
+                    Continue
+                  </button>
+                )}
               </div>
+            </Card>
 
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <Button variant="outline" type="button" onClick={() => setStep(3)}>
-                  Back
-                </Button>
-                <div />
-                <Button type="submit" disabled={!isStep4Valid || loading}>
-                  {loading ? 'Creating...' : t('signup.createAccount')}
-                </Button>
-              </div>
-            </form>
-
-            <p className="text-center text-sm text-muted-foreground mt-6">
-              {t('signup.alreadyMember')}{' '}
-              <Link href={`/${locale}/login`} className="text-primary font-medium hover:underline">
-                {t('signup.signInHere')}
+            <p className="text-center text-xs mt-6" style={{ color: '#888888' }}>
+              Already a member?{' '}
+              <Link href="/login" className="hover:underline" style={{ color: '#1565c0' }}>
+                Sign in
               </Link>
             </p>
-          </Card>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-
