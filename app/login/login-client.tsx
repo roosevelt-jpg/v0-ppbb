@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { loginUser } from '@/lib/auth'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
@@ -31,7 +30,6 @@ export default function LoginPage() {
     }
 
     if (user) {
-      // Redirect based on role
       if (user.role === 'admin') {
         router.push('/admin')
       } else if (user.role === 'business') {
@@ -43,89 +41,103 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-background">
-      {/* Left side - Form */}
-      <div className="flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <Logo size="md" className="mb-4" />
-            <h1 className="text-2xl font-bold">Welcome back</h1>
-            <p className="text-muted-foreground">Sign in to your Passive Blessings account</p>
+    <div className="w-full min-h-screen bg-background flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="mb-8">
+          <Logo size="md" href="/" className="mx-auto mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-center font-playfair mb-2">Welcome Back</h1>
+          <p className="text-sm sm:text-base text-center text-muted-foreground">Sign in to your account to continue</p>
+        </div>
+
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 p-4 sm:p-5 rounded-lg bg-red-50 border border-red-200 flex gap-3">
+            <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm sm:text-base text-red-800">{error}</p>
+          </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          {/* Email Input */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full px-4 py-3 sm:py-2.5 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent text-base sm:text-sm"
+            />
           </div>
 
-          <Card className="p-6">
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg flex gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-              </div>
-            )}
+          {/* Password Input */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-4 py-3 sm:py-2.5 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#111111] focus:border-transparent text-base sm:text-sm"
+            />
+          </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Email address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Your password"
-                  required
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="rounded"
-                  />
-                  <span className="text-sm">Remember me</span>
-                </label>
-                <Link href="#" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <Button type="submit" disabled={loading} className="w-full">
-                {loading ? 'Signing in...' : 'Sign in to dashboard'}
-              </Button>
-            </form>
-          </Card>
-
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            No account?{' '}
-            <Link href="/signup" className="text-primary font-medium hover:underline">
-              Join the community
+          {/* Remember Me & Forgot Password */}
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-border cursor-pointer"
+              />
+              <span className="text-xs sm:text-sm text-foreground">Remember me</span>
+            </label>
+            <Link href="#" className="text-xs sm:text-sm text-[#111111] hover:underline font-medium">
+              Forgot password?
             </Link>
-          </p>
-        </div>
-      </div>
+          </div>
 
-      {/* Right side - Info */}
-      <div className="hidden md:flex items-center justify-center bg-primary text-primary-foreground p-8">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold mb-4">Your community hub awaits</h2>
-          <ul className="space-y-3 text-lg opacity-90">
-            <li>✓ Register & track community events</li>
-            <li>✓ Log volunteer hours & earn certificates</li>
-            <li>✓ Request welfare support confidentially</li>
-            <li>✓ Access the business marketplace</li>
-          </ul>
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 sm:py-2.5 bg-[#111111] hover:bg-[#333333] text-white font-medium text-base sm:text-sm rounded-lg"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+
+        {/* Divider */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="flex-1 h-px bg-border"></div>
+          <span className="text-xs sm:text-sm text-muted-foreground">or</span>
+          <div className="flex-1 h-px bg-border"></div>
+        </div>
+
+        {/* Sign Up Link */}
+        <p className="text-center text-sm sm:text-base text-foreground">
+          Don&apos;t have an account?{' '}
+          <Link href="/signup" className="font-bold text-[#111111] hover:underline">
+            Sign up now
+          </Link>
+        </p>
+
+        {/* Demo Info */}
+        <div className="mt-8 p-4 sm:p-5 rounded-lg bg-[#f7f6f2] border border-[#e4e1da] text-center">
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            <span className="font-medium">Demo Mode:</span> Use any email and password
+          </p>
         </div>
       </div>
     </div>
