@@ -102,14 +102,14 @@ export default function LoginPage() {
           <div className="space-y-3 mb-6">
             <button
               type="button"
-              className="w-full px-4 py-3 text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
+              className="w-full px-4 py-3 bg-white text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
             >
               Continue with Google
             </button>
 
             <button
               type="button"
-              className="w-full px-4 py-3 text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
+              className="w-full px-4 py-3 bg-white text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
             >
               Continue with Facebook
             </button>
@@ -190,7 +190,7 @@ export default function LoginPage() {
         {/* Right Column - Community Benefits */}
         <div className="hidden lg:flex flex-col justify-between px-8 py-12 bg-neutral-900 text-white">
           <div>
-            <div className="mb-8 h-12 flex items-center">
+            <div className="mb-8 h-12 flex items-center justify-center">
               <img 
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
                 alt="Passive Blessings" 
