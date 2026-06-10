@@ -6,25 +6,54 @@ import Link from 'next/link'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { setDoc, doc } from 'firebase/firestore'
 import { auth, db } from '@/lib/firebase'
-import { fileToBase64 } from '@/lib/image-upload'
-import { getUserLocation } from '@/lib/geolocation'
 import { Logo } from '@/components/logo'
-import { ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react'
+import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 
-interface LocationData {
-  latitude: number
-  longitude: number
-  address: string
-  city: string
+interface FormData {
+  memberType: string
+  firstName: string
+  middleName: string
+  lastName: string
+  dateOfBirth: string
+  gender: string
+  nationality: string
+  emiratesId: string
   country: string
+  emirate: string
+  city: string
+  area: string
+  postalCode: string
+  address: string
+  email: string
+  whatsappNumber: string
+  password: string
+  confirmPassword: string
+  occupation: string
+  employer: string
+  skills: string[]
+  volunteerDays: string[]
+  hoursPerMonth: string
+  preferredDepartment: string
+  referralSource: string
+  referralMemberName: string
+  motivation: string
+  businessName: string
+  businessType: string
+  businessDescription: string
+  consentTerms: boolean
+  consentPrivacy: boolean
+  consentLocation: boolean
+  consentNotifications: boolean
 }
 
 const STEPS = [
-  { id: 1, label: 'User type' },
-  { id: 2, label: 'Personal info' },
-  { id: 3, label: 'Location' },
-  { id: 4, label: 'Agreement' },
+  { id: 1, label: 'Personal info & account' },
+  { id: 2, label: 'Verify & activate' },
+  { id: 3, label: 'Add business profile (optional)' },
 ]
+
+const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
+const DEPARTMENTS = ['Select dept.', 'Community Support', 'Event Management', 'Volunteer Training', 'Fundraising', 'Administration', 'Marketing', 'Operations']
 
 export default function SignupPage() {
   const router = useRouter()
@@ -32,26 +61,41 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [formData, setFormData] = useState({
-    userType: 'member',
+  const [formData, setFormData] = useState<FormData>({
+    memberType: 'general',
     firstName: '',
+    middleName: '',
     lastName: '',
+    dateOfBirth: '',
+    gender: '',
+    nationality: 'Emirati',
+    emiratesId: '',
+    country: 'United Arab Emirates',
+    emirate: 'Dubai',
+    city: 'Dubai City',
+    area: '',
+    postalCode: '',
+    address: '',
     email: '',
+    whatsappNumber: '',
     password: '',
     confirmPassword: '',
-    dob: '',
-    gender: '',
-    nationality: '',
-    emiratesId: '',
-    profileImage: null as File | null,
-    profileImageBase64: '',
     occupation: '',
     employer: '',
-    location: null as LocationData | null,
-    locationConsent: false,
-    termsAccepted: false,
-    dataProtectionAccepted: false,
-    newsletterConsent: false,
+    skills: [],
+    volunteerDays: [],
+    hoursPerMonth: '',
+    preferredDepartment: '',
+    referralSource: 'Select source',
+    referralMemberName: '',
+    motivation: '',
+    businessName: '',
+    businessType: '',
+    businessDescription: '',
+    consentTerms: false,
+    consentPrivacy: false,
+    consentLocation: false,
+    consentNotifications: false,
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -63,41 +107,41 @@ export default function SignupPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file')
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB')
-      return
-    }
-    try {
-      const base64 = await fileToBase64(file)
-      setFormData(prev => ({
-        ...prev,
-        profileImage: file,
-        profileImageBase64: base64,
-      }))
-      setError('')
-    } catch (err) {
-      setError('Failed to process image')
-    }
+  const handleSkillToggle = (skill: string) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.includes(skill) ? prev.skills.filter(s => s !== skill) : [...prev.skills, skill]
+    }))
+  }
+
+  const handleVolunteerDaysToggle = (day: string) => {
+    setFormData(prev => ({
+      ...prev,
+      volunteerDays: prev.volunteerDays.includes(day) ? prev.volunteerDays.filter(d => d !== day) : [...prev.volunteerDays, day]
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      setError('Please fill in all required fields')
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       return
     }
 
-    if (!formData.termsAccepted || !formData.dataProtectionAccepted) {
-      setError('Please accept terms and conditions')
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+
+    if (!formData.consentTerms || !formData.consentPrivacy) {
+      setError('Please accept terms and privacy policy')
       return
     }
 
@@ -106,22 +150,56 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
       const user = userCredential.user
 
-      await setDoc(doc(db, 'users', user.uid), {
+      const userData = {
+        id: user.uid,
+        email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
-        userType: formData.userType,
-        dob: formData.dob,
+        dateOfBirth: formData.dateOfBirth,
         gender: formData.gender,
         nationality: formData.nationality,
         emiratesId: formData.emiratesId,
-        profileImage: formData.profileImageBase64,
-        occupation: formData.occupation,
+        location: {
+          country: formData.country,
+          emirate: formData.emirate,
+          city: formData.city,
+          area: formData.area,
+          postalCode: formData.postalCode,
+          address: formData.address,
+        },
+        phone: formData.whatsappNumber,
+        whatsappNumber: formData.whatsappNumber,
+        profession: formData.occupation,
         employer: formData.employer,
-        location: formData.location,
+        skills: formData.skills,
+        role: formData.memberType === 'general' ? 'member' : formData.memberType === 'volunteer' ? 'volunteer' : 'member',
+        memberType: formData.memberType,
+        volunteerAvailability: {
+          days: formData.volunteerDays,
+          hoursPerMonth: parseInt(formData.hoursPerMonth) || 0,
+          preferredDepartment: formData.preferredDepartment,
+        },
+        referralSource: formData.referralSource,
+        referralMemberName: formData.referralMemberName,
+        motivation: formData.motivation,
+        businessProfile: formData.memberType === 'business' ? {
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+          businessDescription: formData.businessDescription,
+        } : undefined,
+        consentTerms: formData.consentTerms,
+        consentPrivacy: formData.consentPrivacy,
+        consentLocation: formData.consentLocation,
+        consentNotifications: formData.consentNotifications,
+        volunteeredHours: 0,
+        totalDonated: 0,
+        membershipTier: 'standard',
+        active: true,
         createdAt: new Date(),
-      })
+        updatedAt: new Date(),
+      }
 
+      await setDoc(doc(db, 'users', user.uid), userData)
       router.push('/dashboard')
     } catch (err: any) {
       setError(err.message || 'Registration failed')
@@ -134,91 +212,221 @@ export default function SignupPage() {
     switch (currentStep) {
       case 1:
         return (
-          <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: '1.5rem', color: '#111111' }}>
-              I want to join as
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {[
-                { value: 'member', label: 'General Member', desc: 'Community events, charity' },
-                { value: 'volunteer', label: 'Volunteer', desc: 'Contribute your time & skills' },
-                { value: 'member-volunteer', label: 'Member + Volunteer', desc: 'Full access & give back' },
-              ].map(option => (
-                <label key={option.value} style={{ display: 'flex', alignItems: 'flex-start', padding: '1rem', border: `2px solid ${formData.userType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.5rem', cursor: 'pointer', transition: 'all 0.2s' }}>
-                  <input type="radio" name="userType" value={option.value} checked={formData.userType === option.value} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer' }} />
-                  <div style={{ marginLeft: '0.75rem' }}>
-                    <p style={{ fontWeight: 600, color: '#111111', marginBottom: '0.25rem' }}>{option.label}</p>
-                    <p style={{ fontSize: '0.875rem', color: '#666666' }}>{option.desc}</p>
-                  </div>
-                </label>
-              ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Member Type */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>I want to join as</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {[
+                  { value: 'general', label: 'General Member', desc: 'Community events, charity' },
+                  { value: 'volunteer', label: 'Volunteer', desc: 'Contribute your time & skills' },
+                  { value: 'member-volunteer', label: 'Member + Volunteer', desc: 'Full access & give back' },
+                ].map(option => (
+                  <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '1rem', border: `2px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.5rem', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
+                    <div style={{ marginLeft: '1rem' }}>
+                      <p style={{ fontWeight: 600, color: '#111111', marginBottom: '0.25rem' }}>{option.label}</p>
+                      <p style={{ fontSize: '0.875rem', color: '#666' }}>{option.desc}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Personal Information */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Personal Information</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <input type="text" name="firstName" placeholder="First name" value={formData.firstName} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
+                <input type="text" name="middleName" placeholder="Middle name - Optional" value={formData.middleName} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+                <input type="text" name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
+                <select name="gender" value={formData.gender} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+                <select name="nationality" value={formData.nationality} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="Emirati">Emirati</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
+                <input type="text" name="emiratesId" placeholder="Emirates ID number - correct ID format, required for volunteer verification" value={formData.emiratesId} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              </div>
+            </div>
+
+            {/* Location */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Location - select your country, then in step — each selection narrows the next dropdown. This helps us connect you with local events and opportunities, and community members in your area.</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <select name="country" value={formData.country} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="United Arab Emirates">United Arab Emirates</option>
+                </select>
+                <select name="emirate" value={formData.emirate} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="Dubai">Dubai</option>
+                  <option value="Abu Dhabi">Abu Dhabi</option>
+                  <option value="Sharjah">Sharjah</option>
+                  <option value="Ajman">Ajman</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <select name="city" value={formData.city} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="Dubai City">Dubai City</option>
+                  <option value="Deira">Deira</option>
+                  <option value="Bur Dubai">Bur Dubai</option>
+                </select>
+                <select name="area" onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="">Select area</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <input type="text" name="postalCode" placeholder="P.O. Box / Postal code - optional" value={formData.postalCode} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+                <input type="text" name="address" placeholder="Full address / Building name - optional" value={formData.address} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              </div>
+            </div>
+
+            {/* Account Credentials */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Account Credentials</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <input type="email" name="email" placeholder="Email address" value={formData.email} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
+                <input type="tel" name="whatsappNumber" placeholder="WhatsApp number" value={formData.whatsappNumber} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <input type="password" name="password" placeholder="Create password - Min 6 chars, 1 number, 1 symbol" value={formData.password} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
+                <input type="password" name="confirmPassword" placeholder="Re-enter your password" value={formData.confirmPassword} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
+              </div>
+            </div>
+
+            {/* Professional Background */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Professional Background - optional, helps match you to opportunities</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <input type="text" name="occupation" placeholder="Job title / Occupation" value={formData.occupation} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+                <input type="text" name="employer" placeholder="Employer / Company / University" value={formData.employer} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: '#111' }}>Skills - select all that apply</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {SKILLS.map(skill => (
+                    <button key={skill} type="button" onClick={() => handleSkillToggle(skill)} style={{ padding: '0.5rem 1rem', backgroundColor: formData.skills.includes(skill) ? '#111111' : '#f7f6f2', color: formData.skills.includes(skill) ? '#ffffff' : '#111111', border: 'none', borderRadius: '9999px', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                      {skill}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )
 
       case 2:
         return (
-          <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: '1.5rem', color: '#111111' }}>
-              Personal Information
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
-              <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
-              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
-              <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
-              <input type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
-              <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} required />
-              <select name="gender" value={formData.gender} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
-              {formData.profileImageBase64 && <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#10b981' }}>✓ Profile image uploaded</p>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {/* Volunteer Availability */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Volunteer Availability - only if volunteering</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                {['Weekends', 'Weekdays', 'Flexible'].map(day => (
+                  <button key={day} type="button" onClick={() => handleVolunteerDaysToggle(day)} style={{ padding: '0.75rem 1rem', backgroundColor: formData.volunteerDays.includes(day) ? '#111111' : '#f7f6f2', color: formData.volunteerDays.includes(day) ? '#ffffff' : '#111111', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}>
+                    {day}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+                <input type="number" name="hoursPerMonth" placeholder="Hours per month" value={formData.hoursPerMonth} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+                <select name="preferredDepartment" value={formData.preferredDepartment} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  {DEPARTMENTS.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* How You Found Us */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>How You Found Us</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <select name="referralSource" value={formData.referralSource} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="Select source">Select source</option>
+                  <option value="Member Referral">Member Referral</option>
+                  <option value="Social Media">Social Media</option>
+                  <option value="Event">Event</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input type="text" name="referralMemberName" placeholder="Referral code or member name - Optional" value={formData.referralMemberName} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              </div>
+            </div>
+
+            {/* Motivation */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Why do you want to join Passive Blessings?</h3>
+              <textarea name="motivation" placeholder="Tell us a little about your motivation..." value={formData.motivation} onChange={handleInputChange} style={{ width: '100%', padding: '1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box', minHeight: '100px', fontFamily: 'system-ui' }} />
+            </div>
+
+            {/* Consents & Agreement */}
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Consent & Agreement</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                  <input type="checkbox" name="consentTerms" checked={formData.consentTerms} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to the <Link href="/legal/terms-conditions" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/legal/code-of-conduct" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Community Code of Conduct</Link> of Passive Blessings.</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                  <input type="checkbox" name="consentPrivacy" checked={formData.consentPrivacy} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I consent to my personal data being stored and processed in accordance with the <Link href="/legal/privacy-policy" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>UAE Data Protection Policy</Link>. My data is encrypted and will not be shared with third parties.</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                  <input type="checkbox" name="consentLocation" checked={formData.consentLocation} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I confirm my location details are accurate and consent to being connected with local community events and members in my area.</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                  <input type="checkbox" name="consentNotifications" checked={formData.consentNotifications} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} />
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to receive WhatsApp and email updates about upcoming events, opportunities, and community news.</span>
+                </label>
+              </div>
             </div>
           </div>
         )
 
       case 3:
         return (
-          <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: '1.5rem', color: '#111111' }}>
-              Location
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#666666' }}>Help us connect you with events in your area</p>
-            {formData.location && (
-              <div style={{ padding: '1rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.5rem', marginBottom: '1rem', color: '#166534' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>Location detected:</p>
-                <p style={{ fontSize: '0.875rem' }}>{formData.location.address}</p>
-              </div>
-            )}
-            <button onClick={() => {}} disabled={loading} style={{ width: '100%', padding: '0.75rem', backgroundColor: '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer' }}>
-              {loading ? 'Detecting...' : 'Continue'}
-            </button>
-          </div>
-        )
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ padding: '1rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.5rem' }}>
+              <p style={{ fontSize: '0.875rem', color: '#166534', fontWeight: 600 }}>Optional: Add your business profile</p>
+              <p style={{ fontSize: '0.875rem', color: '#166534', marginTop: '0.5rem' }}>Complete this section anytime in your dashboard</p>
+            </div>
 
-      case 4:
-        return (
-          <div>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, marginBottom: '1.5rem', color: '#111111' }}>
-              Terms & Conditions
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
-                <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer' }} required />
-                <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to the Terms & Conditions</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
-                <input type="checkbox" name="dataProtectionAccepted" checked={formData.dataProtectionAccepted} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer' }} required />
-                <span style={{ fontSize: '0.875rem', color: '#111111' }}>I accept the data protection policy</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
-                <input type="checkbox" name="newsletterConsent" checked={formData.newsletterConsent} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer' }} />
-                <span style={{ fontSize: '0.875rem', color: '#111111' }}>Subscribe to our newsletter</span>
-              </label>
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>Business Information</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <input type="text" name="businessName" placeholder="Business name" value={formData.businessName} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+                <select name="businessType" value={formData.businessType} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+                  <option value="">Select business type</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Services">Services</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
+                <textarea name="businessDescription" placeholder="Brief description of your business" value={formData.businessDescription} onChange={handleInputChange} style={{ width: '100%', padding: '1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box', minHeight: '100px', fontFamily: 'system-ui' }} />
+              </div>
+            </div>
+
+            <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem' }}>
+              <p style={{ fontSize: '0.875rem', color: '#666' }}>Your data is encrypted and securely stored • Passive Blessings • ESTD 2025 • Dubai, UAE</p>
             </div>
           </div>
         )
@@ -230,10 +438,9 @@ export default function SignupPage() {
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
-      {/* Header Navigation */}
+      {/* Header */}
       <div style={{ width: '100%', padding: '1rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '1rem', paddingRight: '1rem' }}>
-          {/* Logo - Light background so use black logo */}
           <div style={{ height: '32px' }}>
             <Logo size="sm" href="/" />
           </div>
@@ -243,75 +450,85 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Main Content - Single Column Centered */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', width: '100%' }}>
-        <div style={{ width: '100%', maxWidth: '672px' }}>
-          {/* Progress Indicator */}
-          <div style={{ marginBottom: '2rem' }}>
-            <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: '#666666' }}>
-              STEP {currentStep} OF {STEPS.length}
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              {STEPS.map(step => (
-                <div key={step.id} style={{ flex: 1, height: '0.5rem', backgroundColor: currentStep >= step.id ? '#111111' : '#e4e1da', borderRadius: '9999px', transition: 'all 0.2s' }} />
+      {/* Main Content */}
+      <div style={{ flex: 1, display: 'flex', width: '100%' }}>
+        {/* Left Form Column */}
+        <div style={{ flex: 1, padding: '2rem 1rem', overflowY: 'auto' }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+            {/* Progress */}
+            <div style={{ marginBottom: '2rem' }}>
+              <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: '#666' }}>STEP {currentStep} OF {STEPS.length}</p>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {STEPS.map(step => (
+                  <div key={step.id} style={{ flex: 1, height: '4px', backgroundColor: currentStep >= step.id ? '#111111' : '#e4e1da', borderRadius: '9999px' }} />
+                ))}
+              </div>
+              <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.5rem' }}>{STEPS[currentStep - 1].label}</p>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div style={{ padding: '1rem', marginBottom: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem' }}>
+                <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0 }} />
+                <p style={{ fontSize: '0.875rem', color: '#991b1b' }}>{error}</p>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              <div style={{ marginBottom: '2rem' }}>
+                {renderStep()}
+              </div>
+
+              {/* Buttons */}
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                {currentStep > 1 && (
+                  <button type="button" onClick={() => setCurrentStep(prev => prev - 1)} style={{ flex: 1, padding: '1rem', border: '1px solid #e4e1da', backgroundColor: '#ffffff', color: '#111111', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    <ChevronLeft size={20} /> Back
+                  </button>
+                )}
+
+                {currentStep < STEPS.length ? (
+                  <button type="button" onClick={() => setCurrentStep(prev => prev + 1)} style={{ flex: 1, padding: '1rem', backgroundColor: '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    Next <ChevronRight size={20} />
+                  </button>
+                ) : (
+                  <button type="submit" disabled={loading} style={{ flex: 1, padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
+                    {loading ? 'Creating account...' : 'Create account & continue'}
+                  </button>
+                )}
+              </div>
+
+              <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: '#666' }}>
+                Already a member? <Link href="/login" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Sign in</Link>
+              </p>
+            </form>
+          </div>
+        </div>
+
+        {/* Right Sidebar - Hidden on mobile */}
+        <div style={{ flex: 1, padding: '2rem 1rem', backgroundColor: '#111111', color: '#ffffff', display: 'none', '@media (min-width: 1024px)': { display: 'flex' }, flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <p style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Registration progress</p>
+            <div style={{ height: '4px', width: `${(currentStep / STEPS.length) * 100}%`, backgroundColor: '#ffffff', borderRadius: '9999px', marginBottom: '2rem' }} />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {STEPS.map((step, idx) => (
+                <p key={step.id} style={{ fontSize: '0.875rem', opacity: currentStep > idx ? 1 : 0.5, fontWeight: currentStep === step.id ? 700 : 400 }}>
+                  {step.id}. {step.label}
+                </p>
               ))}
             </div>
           </div>
 
-          {/* Error Alert */}
-          {error && (
-            <div style={{ padding: '1rem', marginBottom: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0, marginTop: '0.125rem' }} />
-              <p style={{ fontSize: '1rem', color: '#991b1b' }}>{error}</p>
-            </div>
-          )}
-
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} style={{ marginBottom: '2rem' }}>
-            <div style={{ marginBottom: '2rem' }}>
-              {renderStep()}
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '1rem', flexDirection: window.innerWidth < 640 ? 'column' : 'row' }}>
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(prev => prev - 1)}
-                  style={{ flex: 1, padding: '0.75rem 1rem', border: '1px solid #e4e1da', backgroundColor: '#ffffff', color: '#111111', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem' }}
-                >
-                  <ChevronLeft size={20} /> Back
-                </button>
-              )}
-
-              {currentStep < STEPS.length ? (
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(prev => prev + 1)}
-                  style={{ flex: 1, padding: '0.75rem 1rem', backgroundColor: '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1rem' }}
-                >
-                  Next <ChevronRight size={20} />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ flex: 1, padding: '0.75rem 1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', fontSize: '1rem' }}
-                >
-                  {loading ? 'Creating account...' : 'Create Account'}
-                </button>
-              )}
-            </div>
-          </form>
-
-          {/* Sign In Link */}
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '1rem', color: '#111111' }}>
-              Already have an account?{' '}
-              <Link href="/login" style={{ fontWeight: 600, color: '#111111', textDecoration: 'underline' }}>
-                Sign in here
-              </Link>
-            </p>
+          <div style={{ paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+            <p style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>What happens after you register</p>
+            <ul style={{ fontSize: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <li>Email verification - Check your inbox to confirm your account</li>
+              <li>WhatsApp welcome - Receive a personalized welcome message from the PB team</li>
+              <li>Instant dashboard access - Log in to your member dashboard immediately</li>
+              <li>Add your business (optional) - Complete your dashboard anytime</li>
+            </ul>
           </div>
         </div>
       </div>

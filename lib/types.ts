@@ -32,6 +32,7 @@ export interface User {
   avatarUrl?: string
   role: UserRole
   phone?: string
+  whatsappNumber?: string
   location?: LocationData
   profession?: string
   employer?: string
@@ -40,6 +41,24 @@ export interface User {
   volunteeredHours: number
   totalDonated: number
   membershipTier: 'standard' | 'gold' | 'platinum'
+  memberType?: 'general' | 'volunteer' | 'member-volunteer'
+  volunteerAvailability?: {
+    days: string[] // ['weekdays', 'weekends']
+    hoursPerMonth?: number
+    preferredDepartment?: string
+  }
+  referralSource?: string
+  referralMemberName?: string
+  motivation?: string
+  businessProfile?: {
+    businessName?: string
+    businessType?: string
+    businessDescription?: string
+  }
+  consentTerms: boolean
+  consentPrivacy: boolean
+  consentLocation: boolean
+  consentNotifications?: boolean
   memberSince: Date
   active: boolean
   createdAt: Date
@@ -151,6 +170,21 @@ export interface Page {
   imageUrl?: string
   status: 'draft' | 'published'
   order: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Legal Policies
+export interface Policy {
+  id: string
+  type: 'privacy' | 'terms' | 'codeofconduct' | 'other'
+  title: string
+  slug: string
+  content: string
+  version: number
+  lastUpdated: Date
+  effectiveDate: Date
+  status: 'active' | 'archived'
   createdAt: Date
   updatedAt: Date
 }
