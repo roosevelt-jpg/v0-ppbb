@@ -5,6 +5,74 @@ import { Navbar } from '@/components/navbar'
 
 export default function SignupPage() {
   const [currentStep, setCurrentStep] = React.useState(1)
+  const [formData, setFormData] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    memberType: 'General Member',
+    country: '',
+    state: '',
+    city: '',
+  })
+  const [countries, setCountries] = React.useState<any[]>([])
+  const [states, setStates] = React.useState<any[]>([])
+  const [cities, setCities] = React.useState<any[]>([])
+  const [loadingStates, setLoadingStates] = React.useState(false)
+  const [loadingCities, setLoadingCities] = React.useState(false)
+
+  React.useEffect(() => {
+    // Fetch countries on component mount
+    const fetchCountries = async () => {
+      try {
+        const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2')
+        const data = await response.json()
+        const sortedCountries = data.sort((a: any, b: any) => a.name.common.localeCompare(b.name.common))
+        setCountries(sortedCountries)
+      } catch (error) {
+        console.error('[v0] Error fetching countries:', error)
+      }
+    }
+    fetchCountries()
+  }, [])
+
+  const handleCountryChange = async (countryCode: string) => {
+    setFormData({ ...formData, country: countryCode, state: '', city: '' })
+    setLoadingStates(true)
+    try {
+      const response = await fetch(`https://api.countrystatecity.in/v1/countries/${countryCode}/states`, {
+        headers: {
+          'X-CSCAPI-KEY': 'NHhvN0NobEZneTQ0dFlXWEVpMFoydDQyUkJoRmQyVk00MjAxMjA='
+        }
+      })
+      const data = await response.json()
+      setStates(data || [])
+    } catch (error) {
+      console.error('[v0] Error fetching states:', error)
+      setStates([])
+    }
+    setLoadingStates(false)
+  }
+
+  const handleStateChange = async (stateName: string) => {
+    setFormData({ ...formData, state: stateName, city: '' })
+    setLoadingCities(true)
+    try {
+      const response = await fetch(
+        `https://api.countrystatecity.in/v1/countries/${formData.country}/states/${stateName}/cities`,
+        {
+          headers: {
+            'X-CSCAPI-KEY': 'NHhvN0NobEZneTQ0dFlXWEVpMFoydDQyUkJoRmQyVk00MjAxMjA='
+          }
+        }
+      )
+      const data = await response.json()
+      setCities(data || [])
+    } catch (error) {
+      console.error('[v0] Error fetching cities:', error)
+      setCities([])
+    }
+    setLoadingCities(false)
+  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -100,32 +168,92 @@ export default function SignupPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#111111' }}>Member Type</label>
-                    <select style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      border: '1px solid #e4e1da',
-                      borderRadius: '0.75rem',
-                      fontSize: '1rem',
-                      boxSizing: 'border-box'
-                    }}>
+                    <select 
+                      value={formData.memberType}
+                      onChange={(e) => setFormData({ ...formData, memberType: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        border: '1px solid #e4e1da',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        boxSizing: 'border-box'
+                      }}>
                       <option>General Member</option>
                       <option>Volunteer</option>
                       <option>Member + Volunteer</option>
                     </select>
                   </div>
+                  
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#111111' }}>Location</label>
-                    <select style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      border: '1px solid #e4e1da',
-                      borderRadius: '0.75rem',
-                      fontSize: '1rem',
-                      boxSizing: 'border-box'
-                    }}>
-                      <option>Dubai</option>
-                      <option>Abu Dhabi</option>
-                      <option>Sharjah</option>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#111111' }}>Country</label>
+                    <select 
+                      value={formData.country}
+                      onChange={(e) => handleCountryChange(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        border: '1px solid #e4e1da',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        boxSizing: 'border-box'
+                      }}>
+                      <option value="">Select Country</option>
+                      {countries.map((country: any) => (
+                        <option key={country.cca2} value={country.cca2}>
+                          {country.name.common}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#111111' }}>State / Province</label>
+                    <select 
+                      value={formData.state}
+                      onChange={(e) => handleStateChange(e.target.value)}
+                      disabled={!formData.country || loadingStates}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        border: '1px solid #e4e1da',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        boxSizing: 'border-box',
+                        opacity: !formData.country || loadingStates ? 0.5 : 1,
+                        cursor: !formData.country || loadingStates ? 'not-allowed' : 'pointer'
+                      }}>
+                      <option value="">{loadingStates ? 'Loading...' : 'Select State/Province'}</option>
+                      {states.map((state: any) => (
+                        <option key={state.id} value={state.name}>
+                          {state.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#111111' }}>City</label>
+                    <select 
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      disabled={!formData.state || loadingCities}
+                      style={{
+                        width: '100%',
+                        padding: '0.75rem 1rem',
+                        border: '1px solid #e4e1da',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        boxSizing: 'border-box',
+                        opacity: !formData.state || loadingCities ? 0.5 : 1,
+                        cursor: !formData.state || loadingCities ? 'not-allowed' : 'pointer'
+                      }}>
+                      <option value="">{loadingCities ? 'Loading...' : 'Select City'}</option>
+                      {cities.map((city: any) => (
+                        <option key={city.id} value={city.name}>
+                          {city.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
