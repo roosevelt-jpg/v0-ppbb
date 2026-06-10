@@ -4,6 +4,8 @@
 
 The Passive Blessings admin dashboard is fully configured and ready to use. All site settings, branding, and API integrations are managed through the admin panel.
 
+**⚠️ IMPORTANT**: Please ensure you properly set up the admin dashboard settings. This is critical for the platform to work correctly. Don't skip this step!
+
 ## Accessing the Admin Dashboard
 
 1. Navigate to `http://localhost:3000/admin`
