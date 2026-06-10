@@ -499,7 +499,190 @@ export interface BusinessSupportRequest {
   updatedAt: Date
 }
 
-// Business Ratings & Reviews
+// Business Opportunities (Jobs, Internships, Gigs)
+export interface BusinessOpportunity {
+  id: string
+  businessId: string
+  businessName: string
+  title: string
+  slug: string
+  description: string
+  type: 'job' | 'internship' | 'gig' | 'contract'
+  category: string
+  salary?: number
+  salaryRange?: { min: number; max: number }
+  location?: LocationData
+  remote: boolean
+  duration?: string
+  deadline?: Date
+  requirements: string[]
+  benefits?: string[]
+  applications: string[] // User IDs
+  accepted: string[]
+  status: 'open' | 'closed' | 'filled'
+  featured: boolean
+  views: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Offers (Products, Services, Discounts)
+export interface BusinessOffer {
+  id: string
+  businessId: string
+  businessName: string
+  title: string
+  slug: string
+  description: string
+  type: 'product' | 'service' | 'discount' | 'promotion'
+  category: string
+  price?: number
+  discountPercentage?: number
+  originalPrice?: number
+  image?: UploadedImage
+  imageUrl?: string
+  quantity?: number
+  isLimited: boolean
+  deadline?: Date
+  memberTierRequired?: 'standard' | 'gold' | 'platinum'
+  targetAudience?: string[]
+  status: 'active' | 'inactive' | 'archived'
+  views: number
+  conversions: number
+  likes: number
+  likedBy?: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Leads & Conversions
+export interface BusinessLead {
+  id: string
+  businessId: string
+  memberId: string
+  memberName: string
+  memberEmail: string
+  memberPhone?: string
+  sourceType: 'opportunity' | 'offer' | 'partnership' | 'event' | 'direct'
+  sourceId?: string
+  leadStatus: 'new' | 'contacted' | 'interested' | 'quoted' | 'converted' | 'lost'
+  notes?: string
+  conversionValue?: number
+  conversionDate?: Date
+  followUpDate?: Date
+  assignedTo?: string
+  tags: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Referrals & Commissions
+export interface BusinessReferral {
+  id: string
+  businessId: string
+  referralCode: string
+  memberId?: string // Member who referred
+  conversionType: 'signup' | 'purchase' | 'event' | 'donation'
+  referralAmount: number
+  commissionPercentage: number
+  commissionAmount: number
+  referredUserId?: string
+  status: 'pending' | 'confirmed' | 'paid' | 'cancelled'
+  payoutDate?: Date
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Partnerships & Collaborations
+export interface BusinessPartnership {
+  id: string
+  businessId: string
+  partnerId: string
+  partnerName: string
+  partnerType: 'business' | 'nonprofit' | 'individual'
+  collaborationType: 'joint_venture' | 'sponsorship' | 'co_marketing' | 'affiliate' | 'other'
+  description: string
+  status: 'requested' | 'pending' | 'active' | 'completed' | 'declined'
+  startDate?: Date
+  endDate?: Date
+  value?: number
+  notes?: string
+  attachments?: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Community Support Requests
+export interface CommunitySupport {
+  id: string
+  businessId: string
+  supportType: 'donation' | 'volunteering' | 'sponsorship' | 'partnership' | 'resources'
+  title: string
+  description: string
+  targetAudience: string
+  goal?: number
+  status: 'requested' | 'approved' | 'in_progress' | 'completed' | 'declined'
+  approvalNotes?: string
+  timeline?: string
+  approvedBy?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Connections
+export interface BusinessConnection {
+  id: string
+  businessId: string
+  connectedUserId: string
+  connectedUserName: string
+  connectedUserType: 'member' | 'business' | 'admin'
+  connectionType: 'follower' | 'partner' | 'collaborator' | 'supplier' | 'client'
+  message?: string
+  status: 'pending' | 'accepted' | 'blocked'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Marketplace Listings
+export interface MarketplaceItem {
+  id: string
+  businessId: string
+  businessName: string
+  title: string
+  description: string
+  category: string
+  subcategory?: string
+  price?: number
+  image?: UploadedImage
+  imageUrl?: string
+  images?: UploadedImage[]
+  imageUrls?: string[]
+  rating: number
+  reviewCount: number
+  status: 'listed' | 'sold' | 'unlisted'
+  featured: boolean
+  views: number
+  saves: number
+  savedBy?: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Business Event Participation
+export interface BusinessEventParticipation {
+  id: string
+  businessId: string
+  eventId: string
+  eventTitle: string
+  participationType: 'attendee' | 'sponsor' | 'vendor' | 'organizer'
+  booth?: string
+  notes?: string
+  leads?: number
+  status: 'registered' | 'attended' | 'no_show'
+  createdAt: Date
+  updatedAt: Date
+}
 export interface BusinessRating {
   id: string
   businessId: string
