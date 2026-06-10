@@ -4,6 +4,7 @@ import React from 'react'
 import { ThemeProvider } from 'next-themes'
 import { NextIntlClientProvider } from 'next-intl'
 import { PolicyInitializer } from '@/components/policy-initializer'
+import { AuthProvider } from '@/lib/auth-context'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -27,11 +28,13 @@ export function Providers({ children }: ProvidersProps) {
   }
 
   return (
-    <NextIntlClientProvider locale={locale}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <PolicyInitializer />
-        {children}
-      </ThemeProvider>
-    </NextIntlClientProvider>
+    <AuthProvider>
+      <NextIntlClientProvider locale={locale}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <PolicyInitializer />
+          {children}
+        </ThemeProvider>
+      </NextIntlClientProvider>
+    </AuthProvider>
   )
 }
