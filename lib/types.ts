@@ -730,3 +730,151 @@ export interface BusinessAnalytics {
   updatedAt: Date
 }
 
+// Beneficiary/Charity Support Request Types
+// Sensitive Document Metadata - stored separately from actual files
+export interface SensitiveDocumentMetadata {
+  id: string
+  beneficiaryRequestId: string
+  documentType: 'emirates_id' | 'passport' | 'visa' | 'salary_certificate' | 'bank_statement' | 'supporting_docs'
+  fileName: string
+  fileSize: number
+  fileHash: string // SHA-256 for integrity verification
+  uploadedAt: Date
+  encryptedStoragePath: string // Path in secure cloud storage
+  isEncrypted: boolean
+  accessLog: {
+    userId: string
+    adminRole: AdminRole
+    timestamp: Date
+    action: 'viewed' | 'downloaded'
+  }[]
+}
+
+// Beneficiary Consent & Privacy Policy
+export interface BeneficiaryConsent {
+  id: string
+  beneficiaryRequestId: string
+  userId: string
+  consentGiven: boolean
+  consentDate: Date
+  uaePrivacyPolicyVersion: string
+  privacyPolicyAccepted: boolean
+  dataProcessingAgreed: boolean
+  documentRetentionUnderstood: boolean
+  ipAddress: string
+  userAgent: string
+  timestamp: Date
+}
+
+// Main Beneficiary Support Request
+export interface BeneficiarySupportRequest {
+  id: string
+  userId: string
+  status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'completed'
+  submissionDate?: Date
+  
+  // Personal Information
+  fullName: string
+  phoneNumber: string
+  email: string
+  
+  // Identification Documents
+  emiratesId?: {
+    number: string
+    expiryDate: Date
+    documentMetadataId: string // Reference to SensitiveDocumentMetadata
+  }
+  passport?: {
+    number: string
+    expiryDate: Date
+    countryCode: string
+    documentMetadataId: string
+  }
+  visa?: {
+    number: string
+    expiryDate: Date
+    sponsorName?: string
+    documentMetadataId: string
+  }
+  
+  // Financial Documents
+  salaryDocument?: {
+    documentType: 'certificate' | 'payslip'
+    documentMetadataId: string
+    monthlySalary?: number
+    companyName?: string
+  }
+  bankStatement?: {
+    documentMetadataId: string
+    bankName?: string
+    accountType?: string
+    isOptional: boolean
+  }
+  
+  // Supporting Documents
+  supportingDocuments: {
+    id: string
+    description: string
+    documentMetadataId: string
+    uploadedAt: Date
+  }[]
+  
+  // Request Details
+  reason: string
+  reasonCategory: 'housing' | 'medical' | 'emergency' | 'education' | 'employment' | 'family' | 'other'
+  emergencyLevel: 'low' | 'medium' | 'high' | 'critical'
+  referralSource: 'self' | 'community_member' | 'business' | 'admin_referral' | 'social_media' | 'other'
+  
+  // Review & Approval
+  reviewedBy?: string // Admin ID
+  reviewDate?: Date
+  reviewNotes?: string
+  approvalNotes?: string
+  
+  // Compliance & Consent
+  consentLogId: string
+  hasSignedConsent: boolean
+  privacyPolicyAccepted: boolean
+  dataProcessingAgreed: boolean
+  
+  // Access Control
+  visibleTo: AdminRole[] // Which admin roles can view this request
+  canDownloadDocuments: AdminRole[] // Which admin roles can download sensitive docs
+  
+  // Audit Trail
+  createdAt: Date
+  updatedAt: Date
+  lastAccessedAt?: Date
+  lastAccessedBy?: string
+}
+
+// Access Log for Beneficiary Data
+export interface BeneficiaryAccessLog {
+  id: string
+  beneficiaryRequestId: string
+  userId: string // Admin or authorized user
+  userRole: AdminRole
+  userEmail: string
+  action: 'viewed_request' | 'viewed_document' | 'downloaded_document' | 'updated_status' | 'added_notes' | 'approved' | 'rejected'
+  documentType?: string
+  timestamp: Date
+  ipAddress: string
+  userAgent: string
+  details?: string
+}
+
+// Beneficiary Request Statistics (for dashboard)
+export interface BeneficiaryRequestStats {
+  id: string
+  month: string // YYYY-MM
+  totalRequests: number
+  approvedRequests: number
+  rejectedRequests: number
+  underReview: number
+  averageReviewTime: number // in hours
+  approvalRate: number // percentage
+  totalBeneficiariesServed: number
+  createdAt: Date
+  updatedAt: Date
+}
+
