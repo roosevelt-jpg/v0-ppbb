@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
+import { EditEventModal } from '@/components/edit-event-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -11,6 +12,8 @@ import { formatDistanceToNow } from 'date-fns'
 export default function EventsPage() {
   const [events, setEvents] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [selectedEvent, setSelectedEvent] = React.useState<any>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -106,14 +109,26 @@ export default function EventsPage() {
           data={events}
           loading={loading}
           searchPlaceholder="Search by event name or location..."
-          onEdit={(item) => {
-            console.log('Edit event:', item)
+          onEdit={(event) => {
+            setSelectedEvent(event)
+            setEditModalOpen(true)
           }}
           onDelete={(item) => {
             console.log('Delete event:', item)
           }}
         />
       </div>
+
+      {/* Edit Event Modal */}
+      <EditEventModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        event={selectedEvent}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          setSelectedEvent(null)
+        }}
+      />
     </div>
   )
 }

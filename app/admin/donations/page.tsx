@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
+import { EditDonationModal } from '@/components/edit-donation-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -11,6 +12,8 @@ import { formatDistanceToNow } from 'date-fns'
 export default function DonationsPage() {
   const [donations, setDonations] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [selectedDonation, setSelectedDonation] = React.useState<any>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -109,14 +112,26 @@ export default function DonationsPage() {
           data={donations}
           loading={loading}
           searchPlaceholder="Search by donor name or case..."
-          onEdit={(item) => {
-            console.log('Edit donation:', item)
+          onEdit={(donation) => {
+            setSelectedDonation(donation)
+            setEditModalOpen(true)
           }}
           onDelete={(item) => {
             console.log('Delete donation:', item)
           }}
         />
       </div>
+
+      {/* Edit Donation Modal */}
+      <EditDonationModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        donation={selectedDonation}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          setSelectedDonation(null)
+        }}
+      />
     </div>
   )
 }

@@ -1,6 +1,43 @@
 // User roles and types
 export type UserRole = 'member' | 'volunteer' | 'business' | 'admin'
 
+// Admin role permissions
+export type AdminRole = 'founder_admin' | 'manager' | 'moderator' | 'analyst'
+
+export interface AdminUser extends User {
+  adminRole: AdminRole
+  permissions: AdminPermission[]
+  departments?: string[]
+  canApprove: boolean
+  canDelete: boolean
+  canViewAnalytics: boolean
+  canManageUsers: boolean
+  canManageContent: boolean
+  canManageFinance: boolean
+  adminSince: Date
+}
+
+export type AdminPermission = 
+  | 'view_dashboard'
+  | 'manage_users'
+  | 'manage_members'
+  | 'manage_volunteers'
+  | 'manage_events'
+  | 'manage_donations'
+  | 'manage_charities'
+  | 'manage_businesses'
+  | 'approve_events'
+  | 'approve_partnerships'
+  | 'approve_charities'
+  | 'approve_donations'
+  | 'view_analytics'
+  | 'manage_content'
+  | 'moderate_community'
+  | 'manage_finance'
+  | 'view_reports'
+  | 'manage_settings'
+  | 'manage_integrations'
+
 export interface LocationData {
   latitude?: number
   longitude?: number

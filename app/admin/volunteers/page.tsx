@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
+import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -11,6 +12,8 @@ import { formatDistanceToNow } from 'date-fns'
 export default function VolunteersPage() {
   const [volunteers, setVolunteers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [selectedVolunteer, setSelectedVolunteer] = React.useState<any>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     // Subscribe to real-time volunteer updates
@@ -54,7 +57,7 @@ export default function VolunteersPage() {
       render: (value: any) => <span style={{ color: '#888888' }}>{value || '-'}</span>,
     },
     {
-      key: 'volunteerHours',
+      key: 'volunteeredHours',
       label: 'Hours',
       width: '100px',
       render: (value: any) => <span style={{ fontWeight: 600, color: '#111111' }}>{value || 0}</span>,
@@ -90,6 +93,11 @@ export default function VolunteersPage() {
     },
   ]
 
+  const handleEditVolunteer = (volunteer: any) => {
+    setSelectedVolunteer(volunteer)
+    setEditModalOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <AdminHeader title="Volunteers" subtitle="Manage volunteer profiles and track volunteer hours" />
@@ -100,16 +108,25 @@ export default function VolunteersPage() {
           data={volunteers}
           loading={loading}
           searchPlaceholder="Search by name, email, or location..."
-          onEdit={(item) => {
-            // TODO: Open volunteer detail modal
-            console.log('Edit volunteer:', item)
-          }}
-          onDelete={(item) => {
-            // TODO: Open delete confirmation
-            console.log('Delete volunteer:', item)
+          onEdit={handleEditVolunteer}
+          onDelete={(volunteer) => {
+            if (confirm(`Are you sure you want to delete ${volunteer.firstName}?`)) {
+              console.log('Delete volunteer:', volunteer)
+            }
           }}
         />
       </div>
+
+      {/* Edit Volunteer Modal */}
+      <EditVolunteerModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        volunteer={selectedVolunteer}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          setSelectedVolunteer(null)
+        }}
+      />
     </div>
   )
 }
