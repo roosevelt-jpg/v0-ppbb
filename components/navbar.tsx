@@ -1,35 +1,11 @@
-'use client'
-
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X, Sun, Moon, Globe } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { Menu, X } from 'lucide-react'
+import { ThemeToggle } from './theme-toggle'
+import { LanguageSelector } from './language-selector'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [languageOpen, setLanguageOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const { theme, setTheme } = useTheme()
-  const [currentLanguage, setCurrentLanguage] = useState('en')
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'ar', label: 'العربية' },
-    { code: 'es', label: 'Español' },
-    { code: 'fr', label: 'Français' },
-    { code: 'de', label: 'Deutsch' },
-    { code: 'pt', label: 'Português' },
-    { code: 'ja', label: '日本語' },
-    { code: 'zh', label: '中文' },
-    { code: 'ko', label: '한국어' },
-    { code: 'it', label: 'Italiano' },
-    { code: 'nl', label: 'Nederlands' },
-    { code: 'ru', label: 'Русский' },
-  ]
 
   const navItems = [
     { label: 'About us', href: '#about' },
@@ -70,47 +46,8 @@ export function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            {/* Language Selector */}
-            <div className="relative">
-              <button
-                onClick={() => setLanguageOpen(!languageOpen)}
-                className="p-2 text-neutral-300 hover:text-white transition-colors"
-                aria-label="Select language"
-              >
-                <Globe size={20} />
-              </button>
-              {languageOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-lg z-50 border border-neutral-700">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => {
-                        setCurrentLanguage(lang.code)
-                        setLanguageOpen(false)
-                      }}
-                      className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                        currentLanguage === lang.code
-                          ? 'bg-neutral-700 text-white'
-                          : 'text-neutral-300 hover:text-white hover:bg-neutral-700'
-                      }`}
-                    >
-                      {lang.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Theme Toggle */}
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 text-neutral-300 hover:text-white transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
-            )}
+            <LanguageSelector />
+            <ThemeToggle />
 
             <Link
               href="/login"
@@ -138,15 +75,7 @@ export function Navbar() {
           />
         </Link>
         <div className="flex items-center gap-2">
-          {mounted && (
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 text-neutral-300 hover:text-white transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-          )}
+          <ThemeToggle />
           <button
             className="p-2 -mr-2 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -172,35 +101,8 @@ export function Navbar() {
           ))}
 
           {/* Language Selector Mobile */}
-          <div className="border-t border-neutral-700">
-            <button
-              onClick={() => setLanguageOpen(!languageOpen)}
-              className="w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors flex items-center gap-2"
-            >
-              <Globe size={18} />
-              Language
-            </button>
-            {languageOpen && (
-              <div className="bg-neutral-700">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      setCurrentLanguage(lang.code)
-                      setLanguageOpen(false)
-                      setMobileMenuOpen(false)
-                    }}
-                    className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                      currentLanguage === lang.code
-                        ? 'bg-neutral-600 text-white'
-                        : 'text-neutral-300 hover:text-white hover:bg-neutral-600'
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            )}
+          <div className="border-t border-neutral-700 px-4 py-3">
+            <LanguageSelector mobile />
           </div>
 
           {/* Mobile Login Section */}
