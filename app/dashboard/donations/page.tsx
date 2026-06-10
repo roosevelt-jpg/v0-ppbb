@@ -10,7 +10,7 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 
 export default function DonationsPage() {
-  const [donations, setDonations] = React.useState([])
+  const [donations, setDonations] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
 

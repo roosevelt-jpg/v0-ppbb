@@ -10,40 +10,44 @@ import {
   query,
   where,
   QueryConstraint,
-  DocumentReference,
-  CollectionReference,
 } from 'firebase/firestore'
 
 // Generic Firestore operations
-export async function getDocument<T>(collectionName: string, docId: string): Promise<T | null> {
+export async function getDocument<T extends Record<string, any>>(
+  collectionName: string,
+  docId: string
+): Promise<(T & { id: string }) | null> {
   try {
     const docRef = doc(db, collectionName, docId)
     const docSnap = await getDoc(docRef)
-    return docSnap.exists() ? (docSnap.data() as T) : null
+    return docSnap.exists() ? ({ id: docSnap.id, ...docSnap.data() } as T & { id: string }) : null
   } catch (error) {
     console.error(`[v0] Error fetching ${collectionName}/${docId}:`, error)
     return null
   }
 }
 
-export async function getCollection<T>(
+export async function getCollection<T extends Record<string, any>>(
   collectionName: string,
   constraints: QueryConstraint[] = []
-): Promise<T[]> {
+): Promise<(T & { id: string })[]> {
   try {
     const q = query(collection(db, collectionName), ...constraints)
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as T))
+    return querySnapshot.docs.map((docSnapshot) => ({
+      id: docSnapshot.id,
+      ...docSnapshot.data(),
+    } as T & { id: string }))
   } catch (error) {
     console.error(`[v0] Error fetching ${collectionName}:`, error)
     return []
   }
 }
 
-export async function setDocument<T>(
+export async function setDocument(
   collectionName: string,
   docId: string,
-  data: T
+  data: Record<string, any>
 ): Promise<boolean> {
   try {
     const docRef = doc(db, collectionName, docId)
@@ -55,10 +59,10 @@ export async function setDocument<T>(
   }
 }
 
-export async function updateDocument<T extends Record<string, any>>(
+export async function updateDocument(
   collectionName: string,
   docId: string,
-  updates: Partial<T>
+  updates: Record<string, any>
 ): Promise<boolean> {
   try {
     const docRef = doc(db, collectionName, docId)

@@ -35,7 +35,7 @@ export default function SignupPage() {
   const [gender, setGender] = React.useState('')
   const [nationality, setNationality] = React.useState('')
   const [emiratesId, setEmiratesId] = React.useState('')
-  const [profileImage, setProfileImage] = React.useState<UploadedImage | null>(null)
+  const [profileImage, setProfileImage] = React.useState<UploadedImage | undefined>(undefined)
   const [profileImagePreview, setProfileImagePreview] = React.useState<string>('')
   const [occupation, setOccupation] = React.useState('')
   const [employer, setEmployer] = React.useState('')
@@ -334,7 +334,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          setProfileImage(null)
+                          setProfileImage(undefined)
                           setProfileImagePreview('')
                         }}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"

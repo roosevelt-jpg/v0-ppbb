@@ -1,8 +1,5 @@
 'use client'
 
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { app } from './firebase'
-
 export interface UploadedImage {
   base64: string
   fileName: string
@@ -51,22 +48,9 @@ export async function uploadImageForFirestore(file: File): Promise<UploadedImage
 }
 
 /**
- * Optional: Upload to Firebase Storage if you need CDN URLs later
- * Keep Base64 in Firestore for quick access
- */
-export async function uploadImageToStorage(file: File, path: string): Promise<string> {
-  const storage = getStorage(app)
-  const storageRef = ref(storage, `${path}/${Date.now()}_${file.name}`)
-  
-  await uploadBytes(storageRef, file)
-  const downloadURL = await getDownloadURL(storageRef)
-  
-  return downloadURL
-}
-
-/**
  * Convert Base64 back to blob/image for display
  */
 export function base64ToImage(base64: string, mimeType: string = 'image/jpeg'): string {
   return `data:${mimeType};base64,${base64}`
 }
+

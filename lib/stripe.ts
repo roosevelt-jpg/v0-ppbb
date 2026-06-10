@@ -4,7 +4,7 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase
 import { Donation } from '@/lib/types'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-10-28.acpi',
+  apiVersion: '2026-05-27.dahlia',
 })
 
 export async function createPaymentIntent(

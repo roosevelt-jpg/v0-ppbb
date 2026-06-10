@@ -5,7 +5,7 @@ import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { checkServiceHealth } from '@/lib/api-config'
-import { SystemHealth } from '@/lib/api-config'
+import { SystemHealth } from '@/lib/types'
 import { RefreshCw, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
 
 const SERVICES_TO_CHECK = ['firebase', 'stripe', 'sendgrid']

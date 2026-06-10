@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 
 export default function MemberEventsPage() {
-  const [events, setEvents] = React.useState([])
+  const [events, setEvents] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
 

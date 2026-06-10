@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase'
-import { ApiConfig } from '@/lib/types'
+import { ApiConfig, SystemHealth } from '@/lib/types'
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, query, where } from 'firebase/firestore'
 
 const API_CONFIG_COLLECTION = 'apiConfigs'
@@ -88,7 +88,7 @@ export async function setApiConfig(
 export async function checkServiceHealth(serviceName: string): Promise<SystemHealth> {
   const config = await getApiConfig(serviceName)
 
-  if (!config || !config.isActive) {
+  if (!config || config.status !== 'active') {
     return {
       id: serviceName,
       serviceName,
@@ -183,15 +183,4 @@ export async function checkServiceHealth(serviceName: string): Promise<SystemHea
       errorMessage: error instanceof Error ? error.message : 'Unknown error',
     }
   }
-}
-
-// Types for system health
-export interface SystemHealth {
-  id: string
-  serviceName: string
-  status: 'healthy' | 'degraded' | 'down'
-  lastChecked: Date
-  responseTime?: number
-  errorMessage?: string
-  metadata?: Record<string, any>
 }
