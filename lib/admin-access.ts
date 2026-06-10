@@ -1,5 +1,3 @@
-'use server'
-
 import { db, auth } from '@/lib/firebase'
 import { AdminUser, AdminRole, AdminPermission } from '@/lib/types'
 import { doc, getDoc, setDoc, query, collection, where, getDocs, updateDoc, Timestamp } from 'firebase/firestore'

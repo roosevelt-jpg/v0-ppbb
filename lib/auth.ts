@@ -9,7 +9,6 @@ import {
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
-import { setAdminUser } from '@/lib/admin-access'
 
 interface RegisterUserOptions {
   dateOfBirth?: string
