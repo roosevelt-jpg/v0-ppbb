@@ -37,7 +37,7 @@ export default function OrdersPage() {
             .map((doc) => ({
               id: doc.id,
               ...doc.data(),
-            }))
+            })) as any[]
             .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0))
         )
         setLoading(false)

@@ -19,7 +19,7 @@ export default function CharityCasesPage() {
         const caseData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }))
+        })) as any[]
         setCases(caseData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
         setLoading(false)
       },

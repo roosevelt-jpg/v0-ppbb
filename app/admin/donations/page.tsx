@@ -19,7 +19,7 @@ export default function DonationsPage() {
         const donationData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }))
+        })) as any[]
         setDonations(donationData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
         setLoading(false)
       },

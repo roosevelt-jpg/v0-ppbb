@@ -19,7 +19,7 @@ export default function EventsPage() {
         const eventData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }))
+        })) as any[]
         setEvents(eventData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
         setLoading(false)
       },

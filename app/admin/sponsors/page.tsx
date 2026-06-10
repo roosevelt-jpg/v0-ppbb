@@ -19,7 +19,7 @@ export default function SponsorsPage() {
         const sponsorData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }))
+        })) as any[]
         setSponsors(sponsorData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
         setLoading(false)
       },
