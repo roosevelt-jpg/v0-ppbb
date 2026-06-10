@@ -13,6 +13,7 @@ export default function CommunityPage() {
   const [opportunities, setOpportunities] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -60,6 +61,8 @@ export default function CommunityPage() {
       <MemberHeader
         title="Community & Opportunities"
         subtitle="Discover jobs, internships, and networking opportunities"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8 space-y-6">

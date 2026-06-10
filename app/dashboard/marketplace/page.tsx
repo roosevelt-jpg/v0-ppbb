@@ -14,6 +14,7 @@ export default function MarketplacePage() {
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState<any[]>([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -56,6 +57,8 @@ export default function MarketplacePage() {
       <MemberHeader
         title="Marketplace"
         subtitle="Shop member-exclusive products and access discounts"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8 space-y-6">
