@@ -6,11 +6,15 @@ import { Logo } from './logo'
 
 export function Navbar() {
   const navLinks = [
-    { href: '#about', label: 'About us' },
-    { href: '#join', label: 'Join' },
-    { href: '#events', label: 'Events' },
-    { href: '#marketplace', label: 'Marketplace' },
-    { href: '#contact', label: 'Contact' },
+    { href: '/', label: 'Home' },
+    { href: '#impact', label: 'Impact' },
+    { href: '/dashboard/events', label: 'Events' },
+    { href: '/dashboard/volunteering', label: 'Volunteer' },
+    { href: '/dashboard/donations', label: 'Donate' },
+    { href: '/dashboard/marketplace', label: 'Marketplace' },
+    { href: '/dashboard/learning', label: 'Resources' },
+    { href: '/dashboard/sponsor-profile', label: 'Partners' },
+    { href: '/dashboard/community', label: 'Opportunities' },
   ]
 
   return (

@@ -32,9 +32,10 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { label: 'About Us', href: '#' },
-                { label: 'Events', href: '#' },
-                { label: 'Volunteer', href: '#' },
-                { label: 'Donate', href: '#' },
+                { label: 'Events', href: '/dashboard/events' },
+                { label: 'Volunteer', href: '/dashboard/volunteering' },
+                { label: 'Donate', href: '/dashboard/donations' },
+                { label: 'Partnership Inquiry', href: '/dashboard/sponsor-profile' },
               ].map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
@@ -52,10 +53,11 @@ export function Footer() {
             </h3>
             <ul className="space-y-2">
               {[
-                { label: 'Members', href: '#' },
-                { label: 'Business Partners', href: '#' },
-                { label: 'Sponsors', href: '#' },
-                { label: 'Contact Us', href: '#' },
+                { label: 'Join Community', href: '/signup' },
+                { label: 'Member Portal', href: '/dashboard' },
+                { label: 'Sponsor Portal', href: '/dashboard/sponsor-dashboard' },
+                { label: 'Admin Portal', href: '/admin' },
+                { label: 'Marketplace', href: '/dashboard/marketplace' },
               ].map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
@@ -101,14 +103,16 @@ export function Footer() {
             </p>
             <div className="flex gap-4 mt-4 sm:mt-0">
               {[
-                { label: 'Facebook', href: '#' },
-                { label: 'Twitter', href: '#' },
-                { label: 'Instagram', href: '#' },
-                { label: 'LinkedIn', href: '#' },
+                { label: 'Facebook', href: 'https://facebook.com/passiveblessings' },
+                { label: 'Twitter', href: 'https://twitter.com/passiveblessings' },
+                { label: 'Instagram', href: 'https://instagram.com/passiveblessings' },
+                { label: 'LinkedIn', href: 'https://linkedin.com/company/passiveblessings' },
               ].map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-xs hover:underline"
                   style={{ color: '#888888' }}
                 >

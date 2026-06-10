@@ -151,6 +151,54 @@ Service health status monitoring
 - `errorMessage`: Error details if applicable
 - `metadata`: Additional service-specific data
 
+### 12. **testimonials**
+Public testimonials from members, beneficiaries, and sponsors
+- `id`: Unique testimonial ID
+- `type`: 'member' | 'beneficiary' | 'sponsor'
+- `name`: Person's name
+- `title`: Title/role
+- `content`: Testimonial text (max 300 chars)
+- `image`: Avatar URL
+- `isApproved`: Boolean approval status
+- `isPublished`: Boolean publish status
+- `createdAt`, `updatedAt`: Timestamps
+
+### 13. **news**
+News articles, press coverage, and community updates
+- `id`: Unique news ID
+- `title`: Article title
+- `content`: Full article content
+- `summary`: Short summary for preview
+- `category`: 'news' | 'press' | 'update' | 'media'
+- `image`: Featured image URL
+- `author`: Author name
+- `isPublished`: Boolean publish status
+- `views`: View count
+- `createdAt`, `updatedAt`: Timestamps
+
+### 14. **causes**
+Active causes and fundraising campaigns
+- `id`: Unique cause ID
+- `title`: Cause name
+- `description`: Full description
+- `image`: Cause image URL
+- `goalAmount`: Target fundraising amount (AED)
+- `currentAmount`: Amount raised so far
+- `category`: 'welfare' | 'education' | 'health' | 'environment' | 'community'
+- `status`: 'active' | 'completed' | 'paused'
+- `impactDescription`: How funds are used
+- `endDate`: Campaign end date
+- `createdAt`, `updatedAt`: Timestamps
+
+### 15. **pillars**
+6 Pillars content for homepage display
+- `id`: Pillar ID ('community', 'welfare', 'volunteering', 'business', 'partnerships', 'development')
+- `title`: Pillar name
+- `description`: Pillar description
+- `icon`: Icon name/URL
+- `color`: Brand color for pillar
+- `contentHighlight`: Key text for pillar
+
 ## Security Model
 
 ### Role-Based Access Control (RBAC)
