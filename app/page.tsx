@@ -114,7 +114,7 @@ export default function HomePage() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-playfair leading-tight sm:leading-snug md:leading-tight mb-6 sm:mb-8 md:mb-10 max-w-4xl">
               Community. Support. Growth.
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed text-balance">
               Connect with members, volunteer your time, donate to causes, and grow your business within our thriving community platform.
             </p>
             
