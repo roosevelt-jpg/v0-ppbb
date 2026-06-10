@@ -69,121 +69,202 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Vol. hours',
+      title: 'Volunteered Hours',
       value: stats.volunteeredHours,
-      suffix: 'hrs this year',
+      suffix: 'hours this year',
       icon: Clock,
-      color: 'bg-blue-50 dark:bg-blue-950',
+      color: '#e3f2fd',
+      iconColor: '#1976d2',
     },
     {
-      title: 'Events attended',
+      title: 'Events Attended',
       value: stats.registeredEvents,
-      suffix: 'this year',
+      suffix: 'events this year',
       icon: Calendar,
-      color: 'bg-green-50 dark:bg-green-950',
+      color: '#e8f5e9',
+      iconColor: '#388e3c',
     },
     {
-      title: 'Donated',
-      value: `AED ${stats.donationAmount}`,
-      suffix: 'total',
+      title: 'Total Donations',
+      value: `AED ${stats.donationAmount.toLocaleString()}`,
+      suffix: 'total contributed',
       icon: Heart,
-      color: 'bg-red-50 dark:bg-red-950',
+      color: '#ffebee',
+      iconColor: '#d32f2f',
     },
     {
       title: 'Membership',
-      value: user?.membershipTier || 'standard',
-      suffix: `since ${new Date(user?.memberSince || '').toLocaleDateString()}`,
+      value: (user?.membershipTier || 'standard').toUpperCase(),
+      suffix: `since ${new Date(user?.memberSince || '').toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`,
       icon: Users,
-      color: 'bg-purple-50 dark:bg-purple-950',
+      color: '#f3e5f5',
+      iconColor: '#7b1fa2',
     },
   ]
 
   return (
-    <div className="p-8">
+    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {statCards.map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.title} className={`p-6 ${stat.color}`}>
-              <div className="flex items-start justify-between">
+            <div key={stat.title} style={{
+              backgroundColor: stat.color,
+              borderRadius: '16px',
+              padding: '1.5rem',
+              border: '1px solid rgba(17, 17, 17, 0.08)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+              transition: 'all 0.3s ease',
+              cursor: 'default',
+              ':hover': {
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+                transform: 'translateY(-2px)',
+              }
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06)'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
-                  <p className="text-2xl font-bold mt-2">{loading ? '...' : stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.suffix}</p>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: '#888888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>{stat.title}</p>
+                  <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>{loading ? '...' : stat.value}</p>
+                  <p style={{ fontSize: '12px', color: '#888888' }}>{stat.suffix}</p>
                 </div>
-                <Icon className="h-6 w-6 text-muted-foreground" />
+                <Icon size={24} style={{ color: stat.iconColor }} />
               </div>
-            </Card>
+            </div>
           )
         })}
       </div>
 
-      {/* Quick Actions & Upcoming Events */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Quick Actions & Membership */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         {/* Quick Actions */}
-        <Card className="p-6 lg:col-span-2">
-          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/dashboard/events">
-              <Button variant="outline" className="w-full justify-between">
-                Browse Events
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/dashboard/community">
-              <Button variant="outline" className="w-full justify-between">
-                Find Opportunities
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/dashboard/donations">
-              <Button variant="outline" className="w-full justify-between">
-                Make a Donation
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/dashboard/settings">
-              <Button variant="outline" className="w-full justify-between">
-                Update Profile
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </Card>
-
-        {/* Membership Status */}
-        <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <h3 className="font-bold mb-3">Membership Status</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            {user?.membershipTier === 'standard'
-              ? 'Upgrade to Gold tier for exclusive benefits'
-              : 'You have premium membership benefits'}
-          </p>
-          <Button className="w-full">
-            View Benefits
-          </Button>
-        </Card>
-      </div>
-
-      {/* Community Stats */}
-      <Card className="p-6 mt-6">
-        <h2 className="text-xl font-bold mb-4">Community Impact</h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold">3,412</p>
-            <p className="text-sm text-muted-foreground">Active members</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold">8,940</p>
-            <p className="text-sm text-muted-foreground">Volunteer hours</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold">AED 92K</p>
-            <p className="text-sm text-muted-foreground">Donations tracked</p>
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          padding: '2rem',
+          border: '1px solid #e4e1da',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+        }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Quick Actions</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+            {[
+              { label: 'Browse Events', href: '/dashboard/events' },
+              { label: 'Find Opportunities', href: '/dashboard/community' },
+              { label: 'Make Donation', href: '/dashboard/donations' },
+              { label: 'Edit Profile', href: '/dashboard/profile' },
+            ].map(({ label, href }) => (
+              <Link key={label} href={href}>
+                <button style={{
+                  width: '100%',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  border: '1px solid #e4e1da',
+                  backgroundColor: '#f7f6f2',
+                  color: '#111111',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e4e1da'
+                  e.currentTarget.style.borderColor = '#888888'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f7f6f2'
+                  e.currentTarget.style.borderColor = '#e4e1da'
+                }}>
+                  {label}
+                  <ArrowRight size={16} />
+                </button>
+              </Link>
+            ))}
           </div>
         </div>
-      </Card>
+
+        {/* Membership Status */}
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          padding: '2rem',
+          border: '1px solid #e4e1da',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+          background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.05) 0%, rgba(17, 17, 17, 0.02) 100%)',
+        }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: '#111111' }}>Membership Status</h3>
+          <div style={{
+            backgroundColor: '#111111',
+            color: '#f7f6f2',
+            padding: '1rem',
+            borderRadius: '12px',
+            marginBottom: '1rem',
+            textAlign: 'center',
+          }}>
+            <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{user?.membershipTier?.toUpperCase() || 'STANDARD'}</p>
+            <p style={{ fontSize: '12px', opacity: 0.9, marginTop: '0.5rem' }}>Active Member</p>
+          </div>
+          <button style={{
+            width: '100%',
+            padding: '0.75rem',
+            borderRadius: '12px',
+            backgroundColor: '#111111',
+            color: '#f7f6f2',
+            fontWeight: '600',
+            fontSize: '13px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#333333'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#111111'
+          }}>
+            View Benefits
+          </button>
+        </div>
+      </div>
+
+      {/* Community Impact */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        padding: '2rem',
+        border: '1px solid #e4e1da',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Community Impact</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
+          {[
+            { value: '3,412', label: 'Active Members' },
+            { value: '8,940', label: 'Volunteer Hours' },
+            { value: 'AED 92K', label: 'Donations Tracked' },
+          ].map(({ value, label }) => (
+            <div key={label} style={{
+              textAlign: 'center',
+              padding: '1.5rem',
+              backgroundColor: '#f7f6f2',
+              borderRadius: '12px',
+              border: '1px solid #e4e1da',
+            }}>
+              <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>{value}</p>
+              <p style={{ fontSize: '13px', color: '#888888', fontWeight: '500' }}>{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

@@ -171,38 +171,65 @@
     @apply font-sans;
   }
 
-  /* Typography system */
+  /* Typography system - Enhanced */
   h1 {
-    @apply font-playfair font-bold text-2xl tracking-tight;
+    @apply font-playfair font-bold text-3xl tracking-tight leading-tight;
   }
   h2 {
-    @apply font-playfair font-bold text-xl tracking-tight;
+    @apply font-playfair font-bold text-2xl tracking-tight leading-snug;
   }
   h3 {
-    @apply font-sans font-medium text-lg;
+    @apply font-sans font-semibold text-lg leading-snug;
   }
   h4 {
-    @apply font-sans font-medium text-base;
+    @apply font-sans font-semibold text-base leading-snug;
+  }
+  p {
+    @apply leading-relaxed;
   }
 
-  /* Form inputs - 36px height, 13px font */
+  /* Form inputs - Enhanced styling */
   input,
   textarea,
   select {
-    @apply h-9 px-3 py-2 text-sm rounded-lg border border-sand-border bg-white text-charcoal placeholder:text-warm-grey focus:outline-none focus:ring-2 focus:ring-ink-black focus:border-transparent;
+    @apply h-10 px-4 py-2 text-sm rounded-xl border border-sand-border bg-white text-charcoal placeholder:text-warm-grey focus:outline-none focus:ring-2 focus:ring-ink-black focus:border-transparent transition-all;
+    font-size: 13px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply ring-2 ring-ink-black ring-offset-0 border-ink-black;
+    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.1);
+  }
+
+  /* Buttons - Enhanced with better states */
+  button {
+    @apply h-10 px-5 rounded-xl font-semibold text-sm bg-ink-black text-warm-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md;
     font-size: 13px;
   }
 
-  /* Buttons - 34px height */
-  button {
-    @apply h-8 px-4 rounded-lg font-medium text-sm bg-ink-black text-warm-white hover:bg-charcoal transition-colors;
-    font-size: 12px;
+  button:disabled {
+    @apply opacity-50 cursor-not-allowed;
   }
 
-  /* Labels - 12px uppercase */
+  /* Secondary buttons */
+  button.secondary {
+    @apply bg-warm-white border-2 border-sand-border text-charcoal hover:bg-sand-border active:bg-sand-border;
+  }
+
+  /* Labels - Enhanced */
   label {
-    @apply text-xs uppercase font-medium text-charcoal;
-    font-size: 12px;
+    @apply text-xs uppercase font-semibold text-charcoal tracking-wider;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Cards - Elegant styling */
+  .card {
+    @apply bg-white rounded-2xl border border-sand-border shadow-sm hover:shadow-md transition-shadow;
+    padding: 1.5rem;
   }
 
   /* Semantic status colors */
@@ -217,6 +244,28 @@
   }
   .text-info {
     @apply text-info;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium;
+  }
+  .badge-success {
+    @apply bg-success/10 text-success;
+  }
+  .badge-warning {
+    @apply bg-warning/10 text-warning;
+  }
+  .badge-danger {
+    @apply bg-danger/10 text-danger;
+  }
+  .badge-info {
+    @apply bg-info/10 text-info;
+  }
+
+  /* Smooth transitions */
+  * {
+    @apply transition-colors duration-200;
   }
 }
 
