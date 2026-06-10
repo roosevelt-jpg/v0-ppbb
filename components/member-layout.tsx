@@ -3,7 +3,7 @@
 import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, LayoutDashboard, Calendar, Heart, Users, Settings, Menu, X } from 'lucide-react'
+import { LogOut, LayoutDashboard, Calendar, Heart, Users, Settings, Menu, X, Briefcase, ShoppingBag, BookOpen, Award, MessageSquare, HelpCircle } from 'lucide-react'
 import { auth } from '@/lib/firebase'
 import { logoutUser } from '@/lib/auth'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -14,7 +14,11 @@ const memberMenuItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Events', href: '/dashboard/events', icon: Calendar },
   { label: 'My Donations', href: '/dashboard/donations', icon: Heart },
-  { label: 'Community', href: '/dashboard/community', icon: Users },
+  { label: 'Volunteering', href: '/dashboard/volunteering', icon: Briefcase },
+  { label: 'Charity Requests', href: '/dashboard/charity-requests', icon: HelpCircle },
+  { label: 'Opportunities', href: '/dashboard/community', icon: Users },
+  { label: 'Marketplace', href: '/dashboard/marketplace', icon: ShoppingBag },
+  { label: 'Certificates', href: '/dashboard/certificates', icon: Award },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 

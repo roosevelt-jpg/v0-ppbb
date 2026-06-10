@@ -12,12 +12,15 @@ export default function SettingsPage() {
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [editing, setEditing] = React.useState(false)
+  const [saving, setSaving] = React.useState(false)
   const [formData, setFormData] = React.useState({
     firstName: '',
     lastName: '',
     phone: '',
     location: '',
+    bio: '',
     skills: [] as string[],
+    departments: [] as string[],
   })
 
   React.useEffect(() => {
@@ -35,7 +38,9 @@ export default function SettingsPage() {
             lastName: userData.lastName || '',
             phone: userData.phone || '',
             location: userData.location || '',
+            bio: userData.bio || '',
             skills: userData.skills || [],
+            departments: userData.departments || [],
           })
         }
       } catch (error) {
@@ -52,18 +57,24 @@ export default function SettingsPage() {
     const firebaseUser = auth.currentUser
     if (!firebaseUser) return
 
+    setSaving(true)
     try {
       await updateDoc(doc(db, 'users', firebaseUser.uid), {
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: formData.phone,
         location: formData.location,
+        bio: formData.bio,
         skills: formData.skills,
+        departments: formData.departments,
         updatedAt: new Date(),
       })
+      setUser({...user, ...formData} as User)
       setEditing(false)
     } catch (error) {
       console.error('[v0] Error updating profile:', error)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -122,8 +133,41 @@ export default function SettingsPage() {
                   />
                 </div>
 
+                <div>
+                  <label className="text-sm font-medium">Bio</label>
+                  <textarea
+                    value={formData.bio}
+                    onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                    placeholder="Tell us about yourself"
+                    rows={3}
+                    className="w-full mt-1 px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Skills (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={formData.skills.join(', ')}
+                    onChange={(e) => setFormData({...formData, skills: e.target.value.split(',').map(s => s.trim())})}
+                    placeholder="e.g., Teaching, Cooking, Programming"
+                    className="w-full mt-1 px-3 py-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">Interested Departments (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={formData.departments.join(', ')}
+                    onChange={(e) => setFormData({...formData, departments: e.target.value.split(',').map(d => d.trim())})}
+                    placeholder="e.g., Education, Healthcare, Community Service"
+                    className="w-full mt-1 px-3 py-2 border rounded"
+                  />
+                </div>
+
                 <div className="flex gap-2 pt-4">
-                  <Button onClick={handleSaveProfile}>Save Changes</Button>
+                  <Button onClick={handleSaveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
                   <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
                 </div>
               </div>
@@ -153,6 +197,41 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Location</p>
                   <p className="font-medium">{user?.location || '-'}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground">Bio</p>
+                  <p className="font-medium">{user?.bio || '-'}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground">Skills</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {user?.skills && user.skills.length > 0 ? (
+                      user.skills.map((skill: string) => (
+                        <span key={skill} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No skills added</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground">Interested Departments</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {user?.departments && user.departments.length > 0 ? (
+                      user.departments.map((dept: string) => (
+                        <span key={dept} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                          {dept}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No departments selected</p>
+                    )}
+                  </div>
                 </div>
 
                 <Button onClick={() => setEditing(true)} className="mt-4">Edit Profile</Button>
