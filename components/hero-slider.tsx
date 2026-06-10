@@ -71,12 +71,16 @@ export function HeroSlider({ settings }: HeroSliderProps) {
               key={image.id}
               className="flex-[0_0_100%] min-w-0 relative h-96 md:h-[500px] lg:h-[600px]"
             >
-              {/* Image */}
-              <img
-                src={image.imageUrl}
-                alt={image.title}
-                className="w-full h-full object-cover"
-              />
+              {/* Image Container with proper aspect ratio handling */}
+              <div className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
+                <img
+                  src={image.imageUrl}
+                  alt={image.title}
+                  className="w-full h-full object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
 
               {/* Overlay Gradient */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

@@ -9,7 +9,8 @@ import {
   deleteSliderImage,
   publishHeroSlider 
 } from '@/lib/hero-slider'
-import { Upload, Trash2, Eye, EyeOff, Save } from 'lucide-react'
+import { getImageDimensions, validateImage } from '@/lib/image-service'
+import { Upload, Trash2, Eye, EyeOff, Save, AlertCircle, CheckCircle, Info } from 'lucide-react'
 
 export default function AssetsPage() {
   const [settings, setSettings] = useState<HeroSliderSettings | null>(null)
@@ -17,6 +18,8 @@ export default function AssetsPage() {
   const [isAddingImage, setIsAddingImage] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [previewImage, setPreviewImage] = useState<string>('')
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
+  const [imageValidation, setImageValidation] = useState<{ errors: string[]; warnings: string[] } | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -36,10 +39,33 @@ export default function AssetsPage() {
     setLoading(false)
   }
 
-  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value
     setFormData(prev => ({ ...prev, imageUrl: url }))
     setPreviewImage(url)
+    setImageValidation(null)
+    
+    if (url) {
+      try {
+        // Get image dimensions
+        const dimensions = await getImageDimensions(url)
+        setImageDimensions(dimensions)
+        
+        // Validate image
+        const validation = validateImage(dimensions.width, dimensions.height)
+        setImageValidation({
+          errors: validation.errors,
+          warnings: validation.warnings,
+        })
+      } catch (error) {
+        console.error('[v0] Error loading image:', error)
+        setImageDimensions(null)
+        setImageValidation({
+          errors: ['Failed to load image. Please check the URL.'],
+          warnings: [],
+        })
+      }
+    }
   }
 
   const handleAddImage = async () => {
@@ -160,10 +186,65 @@ export default function AssetsPage() {
 
         {isAddingImage ? (
           <div className="space-y-4">
-            {/* Image Preview */}
+            {/* Image Preview with info */}
             {previewImage && (
-              <div className="rounded-lg overflow-hidden bg-neutral-100">
-                <img src={previewImage} alt="Preview" className="w-full h-64 object-cover" />
+              <div className="rounded-lg overflow-hidden bg-neutral-100 border border-neutral-200">
+                <img src={previewImage} alt="Preview" className="w-full h-64 object-contain bg-neutral-50" />
+                
+                {/* Image Info */}
+                {imageDimensions && (
+                  <div className="p-4 bg-neutral-50 border-t border-neutral-200">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-neutral-600">Dimensions</p>
+                        <p className="font-semibold text-neutral-900">{imageDimensions.width} × {imageDimensions.height}px</p>
+                      </div>
+                      <div>
+                        <p className="text-neutral-600">Aspect Ratio</p>
+                        <p className="font-semibold text-neutral-900">{(imageDimensions.width / imageDimensions.height).toFixed(2)}:1</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Validation Messages */}
+            {imageValidation && imageValidation.errors.length > 0 && (
+              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-red-900">Image Errors</p>
+                  <ul className="text-sm text-red-800 mt-1 space-y-1">
+                    {imageValidation.errors.map((error, i) => (
+                      <li key={i}>• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {imageValidation && imageValidation.warnings.length > 0 && (
+              <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-yellow-900">Image Tips</p>
+                  <ul className="text-sm text-yellow-800 mt-1 space-y-1">
+                    {imageValidation.warnings.map((warning, i) => (
+                      <li key={i}>• {warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {imageDimensions && imageValidation && imageValidation.errors.length === 0 && (
+              <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-green-900">Image looks good!</p>
+                  <p className="text-sm text-green-800">Your image will automatically adjust to fit the hero slider without stretching.</p>
+                </div>
               </div>
             )}
 
@@ -274,17 +355,28 @@ export default function AssetsPage() {
       <div className="space-y-4 mb-8">
         <h2 className="text-xl font-semibold">Images ({settings?.images.length || 0})</h2>
         
+        {/* Info Box */}
+        <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-blue-900">Automatic Image Resizing</p>
+            <p className="text-sm text-blue-800 mt-1">All images automatically adjust to fit the hero slider without stretching or distortion. Larger images are optimized for quality, and smaller images are enhanced for clarity.</p>
+          </div>
+        </div>
+        
         {settings?.images && settings.images.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settings.images
               .sort((a, b) => a.displayOrder - b.displayOrder)
               .map(image => (
                 <div key={image.id} className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
-                  <img
-                    src={image.imageUrl}
-                    alt={image.title}
-                    className="w-full h-40 object-cover"
-                  />
+                  <div className="w-full h-40 bg-neutral-100 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={image.imageUrl}
+                      alt={image.title}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
                   
                   <div className="p-4">
                     <h3 className="font-semibold text-neutral-900 mb-1">{image.title}</h3>
