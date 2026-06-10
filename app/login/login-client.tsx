@@ -7,13 +7,12 @@ import { loginUser } from '@/lib/auth'
 import { verifyAccessCode } from '@/lib/access-code'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Lock, Mail, Check } from 'lucide-react'
 import { logActivity } from '@/lib/activity-logger'
 
 export default function LoginPage() {
   const router = useRouter()
   
-  // Login flow state
   const [loginType, setLoginType] = React.useState<'regular' | 'admin' | null>(null)
   const [accessCode, setAccessCode] = React.useState('')
   const [email, setEmail] = React.useState('')
@@ -36,7 +35,6 @@ export default function LoginPage() {
       }
     }
     
-    // Log login page visit
     logActivity('guest', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
       timestamp: new Date().toISOString()
     })
@@ -44,7 +42,6 @@ export default function LoginPage() {
     fetchStats()
   }, [])
 
-  // Verify access code for admin login
   const handleVerifyAccessCode = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -67,7 +64,6 @@ export default function LoginPage() {
       return
     }
 
-    // Access code is valid, move to email/password step
     logActivity('guest', 'guest@passiveblessings.com', 'OTHER', 'Admin access code verified successfully', { 
       timestamp: new Date().toISOString()
     })
@@ -75,7 +71,6 @@ export default function LoginPage() {
     setLoginType('admin-verified')
   }
 
-  // Handle regular user login
   const handleRegularLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -100,7 +95,6 @@ export default function LoginPage() {
     }
 
     if (user) {
-      // Log successful signin
       logActivity(user.id, user.email, 'SIGNIN', 'Successfully signed in', { 
         userId: user.id,
         userRole: user.role,
@@ -109,7 +103,6 @@ export default function LoginPage() {
       })
 
       if (user.role === 'admin') {
-        // Shouldn't reach here for admins - they should use admin login
         router.push('/admin')
       } else if (user.role === 'business') {
         router.push('/business')
@@ -119,7 +112,6 @@ export default function LoginPage() {
     }
   }
 
-  // Handle admin login (with verified access code)
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -158,280 +150,372 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+    <div className="min-h-screen w-full flex flex-col bg-neutral-100">
       {/* Header Navigation */}
-      <div style={{ width: '100%', padding: '1rem', borderBottom: '1px solid #e4e1da' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '1rem', paddingRight: '1rem' }}>
-          <div style={{ height: '32px' }}>
+      <div className="w-full border-b border-neutral-200 bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div className="h-8">
             <Logo size="sm" href="/" />
           </div>
-          <Link href="/signup" style={{ fontSize: '1rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>
-            Create Account
-          </Link>
+          <div className="hidden sm:flex items-center gap-4">
+            <Link 
+              href="/" 
+              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              About us
+            </Link>
+            <Link 
+              href="/" 
+              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              Events
+            </Link>
+            <Link 
+              href="/" 
+              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              Marketplace
+            </Link>
+            <Link 
+              href="/" 
+              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              Partnerships
+            </Link>
+            <Link 
+              href="/" 
+              className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              Contact
+            </Link>
+            <Link 
+              href="/login" 
+              className="text-sm px-4 py-2 text-neutral-900 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link 
+              href="/signup" 
+              className="text-sm px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
+            >
+              Join now
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem', width: '100%' }}>
-        <div style={{ width: '100%', maxWidth: '448px' }}>
-          {/* Heading */}
-          <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-            <h1 style={{ fontSize: 'clamp(1.875rem, 5vw, 3rem)', fontWeight: 700, marginBottom: '0.75rem', fontFamily: 'Playfair Display', lineHeight: 1.2, color: '#111111' }}>
-              Welcome Back
-            </h1>
-            <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.125rem)', color: '#888888', lineHeight: 1.6 }}>
-              Sign in to continue
-            </p>
-          </div>
-
-          {/* Error Alert */}
-          {error && (
-            <div style={{ padding: '1rem', marginBottom: '1.5rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-              <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0, marginTop: '0.125rem' }} />
-              <p style={{ fontSize: '1rem', color: '#991b1b' }}>{error}</p>
-            </div>
-          )}
-
-          {/* Step 0: Choose Login Type */}
-          {loginType === null && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginType('regular')
-                  setError('')
-                  setEmail('')
-                  setPassword('')
-                }}
-                style={{
-                  padding: '1.25rem',
-                  backgroundColor: '#f7f6f2',
-                  border: '2px solid #e4e1da',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#111111'
-                  e.currentTarget.style.backgroundColor = '#ffffff'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#e4e1da'
-                  e.currentTarget.style.backgroundColor = '#f7f6f2'
-                }}
-              >
-                <div style={{ fontWeight: 600, fontSize: '1rem', color: '#111111', marginBottom: '0.25rem' }}>
-                  Community Member
-                </div>
-                <div style={{ fontSize: '0.875rem', color: '#888888' }}>
-                  Join as a volunteer or donor
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setLoginType('admin')
-                  setError('')
-                  setAccessCode('')
-                  setEmail('')
-                  setPassword('')
-                }}
-                style={{
-                  padding: '1.25rem',
-                  backgroundColor: '#f7f6f2',
-                  border: '2px solid #e4e1da',
-                  borderRadius: '0.5rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  textAlign: 'left',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#111111'
-                  e.currentTarget.style.backgroundColor = '#ffffff'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#e4e1da'
-                  e.currentTarget.style.backgroundColor = '#f7f6f2'
-                }}
-              >
-                <div style={{ fontWeight: 600, fontSize: '1rem', color: '#111111', marginBottom: '0.25rem' }}>
-                  Admin Portal
-                </div>
-                <div style={{ fontSize: '0.875rem', color: '#888888' }}>
-                  Access management tools
-                </div>
-              </button>
-            </div>
-          )}
-
-          {/* Step 1: Regular User Login */}
-          {loginType === 'regular' && (
-            <>
-              <form onSubmit={handleRegularLogin} style={{ marginBottom: '1.5rem' }}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label htmlFor="email" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                    Email Address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label htmlFor="password" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                    Password
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '1rem', flexWrap: 'wrap' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: '#111111' }}>
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      style={{ width: '1rem', height: '1rem', cursor: 'pointer' }}
-                    />
-                    Remember me
-                  </label>
-                  <Link href="/forgot-password" style={{ fontSize: '0.875rem', color: '#111111', textDecoration: 'underline', fontWeight: 500 }}>
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}
-                >
-                  {loading ? 'Signing in...' : 'Sign In'}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginType(null)
-                    setError('')
-                  }}
-                  style={{ width: '100%', padding: '0.75rem', backgroundColor: 'transparent', color: '#111111', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}
-                >
-                  Back
-                </button>
-              </form>
-            </>
-          )}
-
-          {/* Step 1: Admin Access Code */}
-          {loginType === 'admin' && (
-            <>
-              <form onSubmit={handleVerifyAccessCode} style={{ marginBottom: '1.5rem' }}>
-                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0f9ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem' }}>
-                  <p style={{ fontSize: '0.875rem', color: '#1e40af', margin: 0 }}>
-                    Enter your admin access code to proceed
+      {/* Main Content - Two Column Layout */}
+      <div className="flex-1 flex items-center justify-center px-4 py-8 lg:py-12">
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-0">
+          {/* Left Column - Form */}
+          <div className="flex flex-col justify-center px-6 sm:px-8 py-8 bg-white rounded-l-2xl lg:rounded-r-none">
+            {/* Choose Login Type */}
+            {loginType === null && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-2">
+                    Welcome back
+                  </h1>
+                  <p className="text-base text-neutral-600">
+                    Sign in to your Passive Blessings account to access your dashboard, events, and community.
                   </p>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label htmlFor="accessCode" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                    Access Code
-                  </label>
-                  <input
-                    id="accessCode"
-                    type="text"
-                    required
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
-                    placeholder="Enter your access code"
-                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box', textTransform: 'uppercase', letterSpacing: '0.1em' }}
-                  />
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-900">{error}</p>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginType('regular')
+                      setError('')
+                      setEmail('')
+                      setPassword('')
+                    }}
+                    className="w-full px-4 py-3 text-left border-2 border-neutral-200 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
+                  >
+                    Continue with Google
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginType('regular')
+                      setError('')
+                      setEmail('')
+                      setPassword('')
+                    }}
+                    className="w-full px-4 py-3 text-left border-2 border-neutral-200 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
+                  >
+                    Continue with Apple
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginType('regular')
+                      setError('')
+                      setEmail('')
+                      setPassword('')
+                    }}
+                    className="w-full px-4 py-3 text-left border-2 border-neutral-200 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
+                  >
+                    Continue with Facebook
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-neutral-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-neutral-500">or sign in with email</span>
+                  </div>
                 </div>
 
                 <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}
+                  type="button"
+                  onClick={() => {
+                    setLoginType('regular')
+                    setError('')
+                    setEmail('')
+                    setPassword('')
+                  }}
+                  className="w-full px-4 py-3 text-left border-2 border-neutral-900 rounded-xl bg-neutral-50 hover:bg-white transition-all font-medium text-neutral-900"
                 >
-                  {loading ? 'Verifying...' : 'Verify Access Code'}
+                  Email address
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
-                    setLoginType(null)
+                    setLoginType('admin')
                     setError('')
                     setAccessCode('')
+                    setEmail('')
+                    setPassword('')
                   }}
-                  style={{ width: '100%', padding: '0.75rem', backgroundColor: 'transparent', color: '#111111', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}
+                  className="w-full px-4 py-3 text-left border-2 border-neutral-200 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
+                >
+                  Admin Portal
+                </button>
+
+                <div className="text-center text-sm">
+                  <span className="text-neutral-600">No account yet? </span>
+                  <Link href="/signup" className="font-semibold text-neutral-900 hover:underline">
+                    Join the community
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Regular Email Login */}
+            {loginType === 'regular' && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">Welcome back</h1>
+                  <p className="text-neutral-600">Sign in to your account to continue</p>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-900">{error}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handleRegularLogin} className="space-y-5">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-neutral-900 mb-2">
+                      Email address
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-semibold text-neutral-900 mb-2">
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Your password"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 cursor-pointer accent-neutral-900 rounded"
+                      />
+                      <span className="text-sm text-neutral-900">Remember me</span>
+                    </label>
+                    <Link href="/forgot-password" className="text-sm text-neutral-900 underline hover:no-underline">
+                      Forgot password?
+                    </Link>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-neutral-900 text-white font-semibold rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {loading ? 'Signing in...' : 'Sign in to dashboard'}
+                  </button>
+                </form>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginType(null)
+                    setError('')
+                  }}
+                  className="w-full py-2 text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
                   Back
                 </button>
-              </form>
-            </>
-          )}
+              </div>
+            )}
 
-          {/* Step 2: Admin Email & Password */}
-          {loginType === 'admin-verified' && (
-            <>
-              <form onSubmit={handleAdminLogin} style={{ marginBottom: '1.5rem' }}>
-                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.5rem' }}>
-                  <p style={{ fontSize: '0.875rem', color: '#166534', margin: 0 }}>
-                    Access code verified. Enter your credentials to continue.
-                  </p>
+            {/* Admin Access Code */}
+            {loginType === 'admin' && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">Admin Portal</h1>
+                  <p className="text-neutral-600">Enter your admin access code</p>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label htmlFor="admin-email" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                    Email Address
-                  </label>
-                  <input
-                    id="admin-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@example.com"
-                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
-                  />
-                </div>
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-900">{error}</p>
+                  </div>
+                )}
 
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label htmlFor="admin-password" style={{ display: 'block', fontSize: '1rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111111' }}>
-                    Password
-                  </label>
-                  <input
-                    id="admin-password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    style={{ width: '100%', padding: '0.875rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', backgroundColor: '#ffffff', color: '#111111', boxSizing: 'border-box' }}
-                  />
-                </div>
+                <form onSubmit={handleVerifyAccessCode} className="space-y-5">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-900">
+                      Enter your admin access code to proceed.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="accessCode" className="block text-sm font-semibold text-neutral-900 mb-2">
+                      Access Code
+                    </label>
+                    <input
+                      id="accessCode"
+                      type="text"
+                      required
+                      value={accessCode}
+                      onChange={(e) => setAccessCode(e.target.value.toUpperCase())}
+                      placeholder="Enter access code"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all uppercase tracking-widest font-mono text-center"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-neutral-900 text-white font-semibold rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {loading ? 'Verifying...' : 'Verify Access Code'}
+                  </button>
+                </form>
 
                 <button
-                  type="submit"
-                  disabled={loading}
-                  style={{ width: '100%', padding: '1rem', backgroundColor: loading ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1rem' }}
+                  type="button"
+                  onClick={() => {
+                    setLoginType(null)
+                    setError('')
+                  }}
+                  className="w-full py-2 text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
-                  {loading ? 'Signing in...' : 'Access Admin Portal'}
+                  Back
                 </button>
+              </div>
+            )}
+
+            {/* Admin Email & Password */}
+            {loginType === 'admin-verified' && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">Admin Portal</h1>
+                  <p className="text-neutral-600">Enter your admin credentials</p>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-900">{error}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handleAdminLogin} className="space-y-5">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-900">
+                      Access code verified. Enter your credentials to continue.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="admin-email" className="block text-sm font-semibold text-neutral-900 mb-2">
+                      Email address
+                    </label>
+                    <input
+                      id="admin-email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="admin@example.com"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="admin-password" className="block text-sm font-semibold text-neutral-900 mb-2">
+                      Password
+                    </label>
+                    <input
+                      id="admin-password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Your password"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-lg text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-neutral-900 text-white font-semibold rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {loading ? 'Signing in...' : 'Access Admin Portal'}
+                  </button>
+                </form>
 
                 <button
                   type="button"
@@ -442,33 +526,79 @@ export default function LoginPage() {
                     setPassword('')
                     setAccessCode('')
                   }}
-                  style={{ width: '100%', padding: '0.75rem', backgroundColor: 'transparent', color: '#111111', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontWeight: 500, fontSize: '0.875rem', cursor: 'pointer' }}
+                  className="w-full py-2 text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
                   Back
                 </button>
-              </form>
-            </>
-          )}
-
-          {/* Divider */}
-          {loginType === null && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#e4e1da' }}></div>
-                <span style={{ fontSize: '0.875rem', color: '#888888' }}>or</span>
-                <div style={{ flex: 1, height: '1px', backgroundColor: '#e4e1da' }}></div>
               </div>
+            )}
+          </div>
 
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '1rem', color: '#111111', marginBottom: '1rem' }}>
-                  Don&apos;t have an account?{' '}
-                  <Link href="/signup" style={{ fontWeight: 600, color: '#111111', textDecoration: 'underline' }}>
-                    Sign up now
-                  </Link>
-                </p>
+          {/* Right Column - Community Benefits (Dark Background) */}
+          <div className="hidden lg:flex flex-col justify-between px-8 py-12 bg-neutral-900 rounded-r-2xl text-white">
+            <div>
+              <div className="h-8 mb-8">
+                <Logo size="sm" href="/" variant="light" />
               </div>
-            </>
-          )}
+              <h2 className="text-4xl font-bold mb-3">
+                Your community hub <span className="italic font-light">awaits</span>
+              </h2>
+              <p className="text-neutral-300 mb-8 leading-relaxed">
+                Access your dashboard, track volunteer hours, register for events, manage donations, and connect with 3,400+ community members across the UAE.
+              </p>
+
+              <div className="space-y-4">
+                <div className="flex gap-3 items-start">
+                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" />
+                  <span className="text-neutral-200">Register and track community events</span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" />
+                  <span className="text-neutral-200">Log volunteer hours and earn certificates</span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" />
+                  <span className="text-neutral-200">Request welfare support confidentially</span>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" />
+                  <span className="text-neutral-200">Access the business marketplace</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  {statsLoading ? '-' : stats.totalMembers.toLocaleString()}
+                </div>
+                <div className="text-sm text-neutral-400">Community members</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  {statsLoading ? '-' : stats.volunteerHours.toLocaleString()}
+                </div>
+                <div className="text-sm text-neutral-400">Volunteer hours</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  {statsLoading ? '-' : stats.businessPartners}
+                </div>
+                <div className="text-sm text-neutral-400">Business partners</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  {statsLoading ? '-' : formatDonations(stats.totalDonations)}
+                </div>
+                <div className="text-sm text-neutral-400">Donations tracked</div>
+              </div>
+            </div>
+
+            <div className="text-xs text-neutral-500 pt-6 border-t border-neutral-800">
+              TRUSTED BY 3,400+ MEMBERS • ESTD 2025 • DUBAI, UAE
+            </div>
+          </div>
         </div>
       </div>
     </div>
