@@ -24,10 +24,12 @@ export interface User {
   email: string
   firstName: string
   lastName: string
+  middleName?: string
   dateOfBirth?: string
   gender?: string
   nationality?: string
   emiratesId?: string
+  emiratesIdNumber?: string
   avatar?: UploadedImage
   avatarUrl?: string
   role: UserRole
@@ -35,32 +37,48 @@ export interface User {
   whatsappNumber?: string
   location?: LocationData
   profession?: string
+  jobTitle?: string
   employer?: string
-  skills?: string[]
+  company?: string
+  university?: string
+  skills?: string[] // ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching', 'Medical', 'Legal', 'Other']
   hourlyRate?: number
   volunteeredHours: number
   totalDonated: number
   membershipTier: 'standard' | 'gold' | 'platinum'
   memberType?: 'general' | 'volunteer' | 'member-volunteer'
   volunteerAvailability?: {
-    days: string[] // ['weekdays', 'weekends']
+    days: string[] // ['weekdays', 'weekends', 'flexible']
     hoursPerMonth?: number
     preferredDepartment?: string
   }
   referralSource?: string
+  referralSourceOther?: string
+  referralCode?: string
   referralMemberName?: string
   motivation?: string
   businessProfile?: {
     businessName?: string
     businessType?: string
     businessDescription?: string
+    businessRegistration?: string
+    businessWebsite?: string
+  }
+  emergencyContact?: {
+    name?: string
+    phone?: string
+    relationship?: string
   }
   consentTerms: boolean
   consentPrivacy: boolean
   consentLocation: boolean
   consentNotifications?: boolean
+  consentWhatsapp?: boolean
   memberSince: Date
   active: boolean
+  emailVerified: boolean
+  lastLogin?: Date
+  profileComplete: boolean
   createdAt: Date
   updatedAt: Date
 }

@@ -155,6 +155,7 @@ export default function SignupPage() {
         email: formData.email,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        middleName: formData.middleName,
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender,
         nationality: formData.nationality,
@@ -191,10 +192,14 @@ export default function SignupPage() {
         consentPrivacy: formData.consentPrivacy,
         consentLocation: formData.consentLocation,
         consentNotifications: formData.consentNotifications,
+        consentWhatsapp: formData.consentNotifications,
         volunteeredHours: 0,
         totalDonated: 0,
         membershipTier: 'standard',
         active: true,
+        emailVerified: false,
+        profileComplete: true,
+        lastLogin: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -380,11 +385,11 @@ export default function SignupPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="consentTerms" checked={formData.consentTerms} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
-                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to the <Link href="/legal/terms-conditions" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/legal/code-of-conduct" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Community Code of Conduct</Link> of Passive Blessings.</span>
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to the <Link href="/policies/terms-of-service" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/policies/code-of-conduct" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Community Code of Conduct</Link> of Passive Blessings.</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="consentPrivacy" checked={formData.consentPrivacy} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
-                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I consent to my personal data being stored and processed in accordance with the <Link href="/legal/privacy-policy" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>UAE Data Protection Policy</Link>. My data is encrypted and will not be shared with third parties.</span>
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I consent to my personal data being stored and processed in accordance with the <Link href="/policies/privacy-policy" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Privacy Policy</Link>. My data is encrypted and will not be shared with third parties.</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="consentLocation" checked={formData.consentLocation} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
