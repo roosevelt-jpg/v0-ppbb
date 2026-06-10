@@ -1,0 +1,35 @@
+{
+  "common": {
+    "appName": "Passive Blessings",
+    "estd": "ESTD 2025",
+    "signIn": "Sign in",
+    "signUp": "Join now",
+    "signOut": "Sign out",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "business": "Business",
+    "about": "About us",
+    "contact": "Contact",
+    "events": "Events",
+    "volunteer": "Volunteer",
+    "marketplace": "Marketplace",
+    "partnerships": "Partnerships",
+    "donations": "Donations",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
+  "navigation": {
+    "home": "Home",
+    "aboutUs": "About us",
+    "events": "Events",
+    "volunteer": "Volunteer",
+    "marketplace": "Marketplace",
+    "partnerships": "Partnerships",
+    "contact": "Contact"
+  }
+}

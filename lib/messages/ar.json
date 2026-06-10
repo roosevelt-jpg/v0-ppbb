@@ -1,0 +1,35 @@
+{
+  "common": {
+    "appName": "المباركات السلبية",
+    "estd": "تأسس 2025",
+    "signIn": "تسجيل الدخول",
+    "signUp": "انضم الآن",
+    "signOut": "تسجيل خروج",
+    "dashboard": "لوحة التحكم",
+    "admin": "المسؤول",
+    "business": "عمل",
+    "about": "عن الجهة",
+    "contact": "اتصل",
+    "events": "الأحداث",
+    "volunteer": "متطوع",
+    "marketplace": "السوق",
+    "partnerships": "الشراكات",
+    "donations": "التبرعات",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تحرير"
+  },
+  "navigation": {
+    "home": "الرئيسية",
+    "aboutUs": "عن الجهة",
+    "events": "الأحداث",
+    "volunteer": "متطوع",
+    "marketplace": "السوق",
+    "partnerships": "الشراكات",
+    "contact": "اتصل"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "locales": ["en", "ar"],
+  "defaultLocale": "en",
+  "pathnames": {
+    "/": "/",
+    "/dashboard": "/dashboard",
+    "/admin": "/admin",
+    "/business": "/business",
+    "/events": "/events",
+    "/marketplace": "/marketplace",
+    "/volunteer": "/volunteer",
+    "/donations": "/donations"
+  }
+}

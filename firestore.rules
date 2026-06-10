@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isOwnUser(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isBusiness(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'business';
+    }
+    
+    function isOwnBusiness(businessId) {
+      return isAuth() && isBusiness(request.auth.uid) && request.auth.uid == businessId;
+    }
+    
+    // Users collection - Public read, restricted write
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && isOwnUser(userId) && request.resource.data.role in ['member', 'volunteer'];
+      allow update: if isAdmin() || isOwnUser(userId);
+      allow delete: if isAdmin() || isOwnUser(userId);
+      
+      // User's private data
+      match /private/{document=**} {
+        allow read, write: if isOwnUser(userId) || isAdmin();
+      }
+    }
+    
+    // Admin API Configs - Admin only
+    match /apiConfigs/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Site Settings - Public read, admin write
+    match /siteSettings/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Pages (CMS) - Public read, admin write
+    match /pages/{document=**} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Events - Authenticated read, specific write
+    match /events/{eventId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && (isAdmin() || isBusiness(request.auth.uid));
+      allow update: if isAdmin() || request.resource.data.organizerId == request.auth.uid;
+      allow delete: if isAdmin() || resource.data.organizerId == request.auth.uid;
+    }
+    
+    // Opportunities - Authenticated read, business write
+    match /opportunities/{opportunityId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && isBusiness(request.auth.uid);
+      allow update: if isAdmin() || resource.data.businessId == request.auth.uid;
+      allow delete: if isAdmin() || resource.data.businessId == request.auth.uid;
+      
+      // Applications subcollection
+      match /applications/{applicationId} {
+        allow read: if isAuth() && (resource.data.applicantId == request.auth.uid || isBusiness(resource.data.businessId));
+        allow create: if isAuth() && isOwnUser(request.resource.data.applicantId);
+        allow update: if isAdmin() || (isBusiness(get(/databases/$(database)/documents/opportunities/$(opportunityId)).data.businessId) && request.auth.uid == get(/databases/$(database)/documents/opportunities/$(opportunityId)).data.businessId);
+      }
+    }
+    
+    // Donations - Authenticated read, own write
+    match /donations/{donationId} {
+      allow read: if isAuth() && (resource.data.donorId == request.auth.uid || isAdmin());
+      allow create: if isAuth() && request.resource.data.donorId == request.auth.uid;
+      allow update, delete: if isAdmin() || resource.data.donorId == request.auth.uid;
+    }
+    
+    // Campaigns - Public read, admin write
+    match /campaigns/{campaignId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Newsletter subscriptions - Mostly open, email verification required
+    match /newsletters/{document=**} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.email is string && request.resource.data.email.size() > 0;
+      allow update, delete: if isAdmin();
+    }
+    
+    // Audit logs - Admin only
+    match /auditLogs/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // System health checks - Public read, service account write
+    match /systemHealth/{document=**} {
+      allow read: if true;
+      allow write: if request.auth.uid != null; // Protected by backend
+    }
+    
+    // Default deny all other requests
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

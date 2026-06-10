@@ -1,0 +1,98 @@
+import Stripe from 'stripe'
+import { db } from '@/lib/firebase'
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import { Donation } from '@/lib/types'
+
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-10-28.acpi',
+})
+
+export async function createPaymentIntent(
+  amount: number,
+  currency: string = 'aed',
+  metadata?: Record<string, string>
+) {
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Stripe expects amount in cents
+      currency,
+      metadata,
+    })
+    return paymentIntent
+  } catch (error) {
+    console.error('[v0] Error creating payment intent:', error)
+    throw error
+  }
+}
+
+export async function recordDonation(
+  donorId: string,
+  campaignId: string,
+  amount: number,
+  stripeTransactionId: string,
+  isAnonymous: boolean = false
+) {
+  try {
+    const donation: Donation = {
+      id: `${Date.now()}-${Math.random()}`,
+      donorId,
+      campaignId,
+      amount,
+      currency: 'AED',
+      paymentMethod: 'card',
+      status: 'completed',
+      stripeTransactionId,
+      isAnonymous,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    await setDoc(doc(db, 'donations', donation.id), donation)
+    return donation
+  } catch (error) {
+    console.error('[v0] Error recording donation:', error)
+    throw error
+  }
+}
+
+export async function getDonations(donorId?: string, campaignId?: string) {
+  try {
+    let constraints = []
+
+    if (donorId) {
+      constraints.push(where('donorId', '==', donorId))
+    }
+
+    if (campaignId) {
+      constraints.push(where('campaignId', '==', campaignId))
+    }
+
+    const q = query(collection(db, 'donations'), ...constraints)
+    const snapshot = await getDocs(q)
+
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Donation[]
+  } catch (error) {
+    console.error('[v0] Error fetching donations:', error)
+    return []
+  }
+}
+
+export async function verifyStripeWebhook(
+  body: string,
+  signature: string
+): Promise<Stripe.Event | null> {
+  try {
+    const event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET || ''
+    )
+    return event
+  } catch (error) {
+    console.error('[v0] Webhook verification error:', error)
+    return null
+  }
+}
