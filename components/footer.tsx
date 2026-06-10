@@ -107,12 +107,12 @@ export function Footer() {
             </h3>
             <ul className="space-y-2">
               {[
-                { label: 'About Us', href: '#' },
+                { label: 'About Us', href: '#about' },
                 { label: 'Impact & Transparency', href: '/transparency' },
-                { label: 'Events', href: '/dashboard/events' },
-                { label: 'Volunteer', href: '/dashboard/volunteering' },
+                { label: 'Events', href: '/events' },
+                { label: 'Marketplace', href: '/marketplace' },
+                { label: 'Contact Us', href: '/contact' },
                 { label: 'Donate', href: '/dashboard/donations' },
-                { label: 'Partnership Inquiry', href: '/dashboard/sponsor-profile' },
               ].map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
@@ -126,15 +126,15 @@ export function Footer() {
           {/* Community */}
           <div>
             <h3 className="text-sm font-semibold mb-4" style={{ color: '#111111' }}>
-              Community
+              Get Involved
             </h3>
             <ul className="space-y-2">
               {[
                 { label: 'Join Community', href: '/signup' },
-                { label: 'Member Portal', href: '/dashboard' },
-                { label: 'Sponsor Portal', href: '/dashboard/sponsor-dashboard' },
-                { label: 'Admin Portal', href: '/admin' },
-                { label: 'Marketplace', href: '/dashboard/marketplace' },
+                { label: 'Volunteer', href: '/signup' },
+                { label: 'Donate', href: '/dashboard/donations' },
+                { label: 'Start Business', href: '/signup' },
+                { label: 'Host Event', href: '/signup' },
               ].map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
@@ -178,7 +178,7 @@ export function Footer() {
             <p className="text-xs" style={{ color: '#888888' }}>
               Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025
             </p>
-            <div className="flex gap-4 mt-4 sm:mt-0">
+          <div className="flex gap-4 mt-4 sm:mt-0">
               {[
                 { label: 'Facebook', href: 'https://facebook.com/passiveblessings' },
                 { label: 'Twitter', href: 'https://twitter.com/passiveblessings' },
@@ -190,10 +190,12 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs hover:underline"
+                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-200"
                   style={{ color: '#888888' }}
+                  aria-label={social.label}
+                  title={social.label}
                 >
-                  {social.label}
+                  <span className="text-xs font-bold">{social.label.charAt(0)}</span>
                 </a>
               ))}
             </div>
