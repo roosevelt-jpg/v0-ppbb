@@ -13,6 +13,7 @@ export default function CharityRequestsPage() {
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -111,7 +112,7 @@ export default function CharityRequestsPage() {
 
   return (
     <>
-      <MemberHeader title="Charity Requests" subtitle="Submit and track support requests" />
+      <MemberHeader title="Charity Requests" subtitle="Submit and track support requests" open={sidebarOpen} setOpen={setSidebarOpen} />
 
       <div className="p-8 space-y-6">
         {/* Submit Button */}

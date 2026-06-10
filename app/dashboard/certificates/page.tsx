@@ -14,6 +14,7 @@ export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<any[]>([])
   const [badges, setBadges] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const firebaseUser = auth.currentUser
@@ -57,6 +58,8 @@ export default function CertificatesPage() {
       <MemberHeader
         title="Certificates & Badges"
         subtitle="View your achievements and credentials"
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
       />
 
       <div className="p-8 space-y-8">
