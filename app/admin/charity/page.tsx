@@ -1,0 +1,110 @@
+'use client'
+
+import React from 'react'
+import { AdminHeader } from '@/components/admin-layout'
+import { AdminTable } from '@/components/admin-table'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { formatDistanceToNow } from 'date-fns'
+
+export default function CharityCasesPage() {
+  const [cases, setCases] = React.useState<any[]>([])
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'charityCases'),
+      (snapshot) => {
+        const caseData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        setCases(caseData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
+        setLoading(false)
+      },
+      (error) => {
+        console.error('[v0] Error fetching charity cases:', error)
+        setLoading(false)
+      }
+    )
+
+    return () => unsubscribe()
+  }, [])
+
+  const columns = [
+    {
+      key: 'title',
+      label: 'Case Title',
+      width: '300px',
+      render: (value: any) => <span style={{ fontWeight: 500, color: '#111111' }}>{value}</span>,
+    },
+    {
+      key: 'category',
+      label: 'Category',
+      width: '150px',
+      render: (value: any) => <span style={{ color: '#888888' }}>{value || '-'}</span>,
+    },
+    {
+      key: 'targetAmount',
+      label: 'Target (AED)',
+      width: '150px',
+      render: (value: any) => <span style={{ fontWeight: 600, color: '#111111' }}>{value || 0}</span>,
+    },
+    {
+      key: 'collectedAmount',
+      label: 'Collected (AED)',
+      width: '150px',
+      render: (value: any) => <span style={{ fontWeight: 600, color: '#2e7d32' }}>{value || 0}</span>,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      width: '120px',
+      render: (value: any) => (
+        <span
+          style={{
+            backgroundColor: value === 'active' ? '#e8f5e9' : value === 'completed' ? '#f3e5f5' : '#fff3e0',
+            color: value === 'active' ? '#2e7d32' : value === 'completed' ? '#6a1b9a' : '#e65100',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+          }}
+        >
+          {value || 'active'}
+        </span>
+      ),
+    },
+    {
+      key: 'createdAt',
+      label: 'Created',
+      width: '150px',
+      render: (value: any) => {
+        if (!value) return '-'
+        const date = value.toDate ? value.toDate() : new Date(value)
+        return <span style={{ color: '#888888' }}>{formatDistanceToNow(date, { addSuffix: true })}</span>
+      },
+    },
+  ]
+
+  return (
+    <div className="space-y-6">
+      <AdminHeader title="Charity Cases" subtitle="Manage community charity cases and fundraising campaigns" />
+      <div className="px-8">
+        <AdminTable
+          title="All Charity Cases"
+          columns={columns}
+          data={cases}
+          loading={loading}
+          searchPlaceholder="Search by case title or category..."
+          onEdit={(item) => {
+            console.log('Edit case:', item)
+          }}
+          onDelete={(item) => {
+            console.log('Delete case:', item)
+          }}
+        />
+      </div>
+    </div>
+  )
+}
