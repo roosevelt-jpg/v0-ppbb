@@ -9,6 +9,7 @@ export function Navbar() {
 
   const navItems = [
     { label: 'About us', href: '#about' },
+    { label: 'Impact', href: '/transparency' },
     { label: 'Join', href: '/signup' },
     { label: 'Events', href: '/dashboard/events' },
     { label: 'Marketplace', href: '/dashboard/marketplace' },

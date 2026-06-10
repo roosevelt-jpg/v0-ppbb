@@ -108,6 +108,7 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { label: 'About Us', href: '#' },
+                { label: 'Impact & Transparency', href: '/transparency' },
                 { label: 'Events', href: '/dashboard/events' },
                 { label: 'Volunteer', href: '/dashboard/volunteering' },
                 { label: 'Donate', href: '/dashboard/donations' },
