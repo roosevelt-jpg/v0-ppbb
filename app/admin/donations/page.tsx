@@ -116,8 +116,16 @@ export default function DonationsPage() {
             setSelectedDonation(donation)
             setEditModalOpen(true)
           }}
-          onDelete={(item) => {
-            console.log('Delete donation:', item)
+          onDelete={async (item) => {
+            if (confirm('Are you sure you want to delete this donation record?')) {
+              try {
+                const { updateDocument } = await import('@/lib/admin-queries')
+                await updateDocument('donations', item.id, { status: 'cancelled', updatedAt: new Date() })
+              } catch (error) {
+                console.error('[v0] Error deleting donation:', error)
+                alert('Failed to delete donation')
+              }
+            }
           }}
         />
       </div>
