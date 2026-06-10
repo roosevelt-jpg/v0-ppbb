@@ -19,6 +19,7 @@ export default function AdminOverview() {
     eventAttendance: 0,
     activeBusinesses: 0,
     charityRequests: 0,
+    beneficiaryRequests: 0,
     pendingApprovals: 0,
     membershipTiers: { standard: 0, gold: 0, platinum: 0 },
     outreachPipeline: 0,
@@ -77,6 +78,9 @@ export default function AdminOverview() {
         // Fetch charity requests
         const charitySnap = await getDocs(collection(db, 'charityRequests'))
 
+        // Fetch beneficiary requests
+        const beneficiarySnap = await getDocs(collection(db, 'beneficiaryRequests'))
+
         // Fetch approvals
         const eventsApprovalsSnap = await getDocs(
           query(collection(db, 'events'), where('status', '==', 'pending'))
@@ -126,6 +130,7 @@ export default function AdminOverview() {
           eventAttendance,
           activeBusinesses: businessesSnap.size,
           charityRequests: charitySnap.size,
+          beneficiaryRequests: beneficiarySnap.size,
           pendingApprovals,
           membershipTiers: tiers,
           outreachPipeline,
@@ -231,6 +236,14 @@ export default function AdminOverview() {
       color: 'bg-pink-50',
       link: '/admin/charity',
       trend: 'Active requests',
+    },
+    {
+      title: 'Beneficiary Support Requests',
+      value: stats.beneficiaryRequests,
+      icon: Heart,
+      color: 'bg-rose-50',
+      link: '/admin/beneficiary-requests',
+      trend: 'Awaiting review',
     },
     {
       title: 'Pending Approvals',
