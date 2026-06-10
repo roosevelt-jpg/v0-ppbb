@@ -111,13 +111,6 @@ export default function LoginPage() {
               type="button"
               className="w-full px-4 py-3 text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
             >
-              Continue with Apple
-            </button>
-
-            <button
-              type="button"
-              className="w-full px-4 py-3 text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-neutral-900"
-            >
               Continue with Facebook
             </button>
           </div>
