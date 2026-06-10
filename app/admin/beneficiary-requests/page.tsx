@@ -8,8 +8,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   getAllBeneficiaryRequests,
-  approveBeneficiarySupportRequest,
-  rejectBeneficiarySupportRequest,
+  approveBeneficiaryRequest,
+  rejectBeneficiaryRequest,
   getBeneficiaryAccessLogs,
   canViewBeneficiaryRequest,
   canDownloadSensitiveDocument,
