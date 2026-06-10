@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
+import { EditCharityModal } from '@/components/edit-charity-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -11,6 +12,8 @@ import { formatDistanceToNow } from 'date-fns'
 export default function CharityCasesPage() {
   const [cases, setCases] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [selectedCase, setSelectedCase] = React.useState<any>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -98,14 +101,34 @@ export default function CharityCasesPage() {
           data={cases}
           loading={loading}
           searchPlaceholder="Search by case title or category..."
-          onEdit={(item) => {
-            console.log('Edit case:', item)
+          onEdit={(charityCase) => {
+            setSelectedCase(charityCase)
+            setEditModalOpen(true)
           }}
-          onDelete={(item) => {
-            console.log('Delete case:', item)
+          onDelete={async (item) => {
+            if (confirm('Are you sure you want to delete this charity request?')) {
+              try {
+                const { updateDocument } = await import('@/lib/admin-queries')
+                await updateDocument('charityRequests', item.id, { status: 'archived', updatedAt: new Date() })
+              } catch (error) {
+                console.error('[v0] Error deleting charity:', error)
+                alert('Failed to delete charity request')
+              }
+            }
           }}
         />
       </div>
+
+      {/* Edit Charity Modal */}
+      <EditCharityModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        charity={selectedCase}
+        onSuccess={() => {
+          setEditModalOpen(false)
+          setSelectedCase(null)
+        }}
+      />
     </div>
   )
 }

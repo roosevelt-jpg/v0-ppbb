@@ -8,7 +8,8 @@ import {
   browserLocalPersistence,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
-import { User, UserRole, LocationData, UploadedImage } from '@/lib/types'
+import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
+import { setAdminUser } from '@/lib/admin-access'
 
 interface RegisterUserOptions {
   dateOfBirth?: string
@@ -146,4 +147,22 @@ export function onAuthStateChange(callback: (user: User | null) => void) {
       callback(null)
     }
   })
+}
+
+// Promote user to admin role
+export async function promoteUserToAdmin(
+  userId: string,
+  adminRole: AdminRole
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Update user role in Firestore
+    const userRef = doc(db, 'users', userId)
+    await setDoc(userRef, { role: 'admin' }, { merge: true })
+
+    // Set admin role and permissions
+    const result = await setAdminUser(userId, adminRole)
+    return result
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
 }

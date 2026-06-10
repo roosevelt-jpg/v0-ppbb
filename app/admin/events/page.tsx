@@ -113,8 +113,16 @@ export default function EventsPage() {
             setSelectedEvent(event)
             setEditModalOpen(true)
           }}
-          onDelete={(item) => {
-            console.log('Delete event:', item)
+          onDelete={async (item) => {
+            if (confirm('Are you sure you want to delete this event?')) {
+              try {
+                const { updateDocument } = await import('@/lib/admin-queries')
+                await updateDocument('events', item.id, { status: 'cancelled', updatedAt: new Date() })
+              } catch (error) {
+                console.error('[v0] Error deleting event:', error)
+                alert('Failed to delete event')
+              }
+            }
           }}
         />
       </div>
