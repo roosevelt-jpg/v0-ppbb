@@ -1,7 +1,20 @@
 import React from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { LogOut, Settings, BarChart3, Users, Calendar, Store, FileText, Zap } from 'lucide-react'
+import {
+  LogOut,
+  Settings,
+  BarChart3,
+  Users,
+  Calendar,
+  Store,
+  FileText,
+  Zap,
+  Heart,
+  DollarSign,
+  CheckCircle,
+  ShieldAlert,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Logo } from '@/components/logo'
@@ -10,8 +23,14 @@ import { logoutUser } from '@/lib/auth'
 const adminMenuItems = [
   { label: 'Overview', href: '/admin', icon: BarChart3 },
   { label: 'Members', href: '/admin/members', icon: Users },
+  { label: 'Volunteers', href: '/admin/volunteers', icon: Heart },
   { label: 'Events', href: '/admin/events', icon: Calendar },
+  { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert },
+  { label: 'Donations', href: '/admin/donations', icon: DollarSign },
+  { label: 'Sponsors', href: '/admin/sponsors', icon: Store },
   { label: 'Businesses', href: '/admin/businesses', icon: Store },
+  { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle },
+  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Zap },
