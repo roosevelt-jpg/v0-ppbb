@@ -109,16 +109,16 @@ export default function HomePage() {
 
       {/* HERO SECTION - Mobile First */}
       <section className="relative w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-28 overflow-hidden">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col items-center text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-playfair leading-tight sm:leading-snug md:leading-tight mb-4 sm:mb-6">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="flex flex-col items-center justify-center text-center w-full">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-playfair leading-tight sm:leading-snug md:leading-tight mb-6 sm:mb-8 md:mb-10 max-w-4xl">
               Community. Support. Growth.
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed">
               Connect with members, volunteer your time, donate to causes, and grow your business within our thriving community platform.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full sm:w-auto">
               <Link href="/signup" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto bg-[#111111] hover:bg-[#333333] text-white">
                   Join Community
