@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
-import { EditSponsorModal } from '@/components/edit-sponsor-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -12,8 +11,6 @@ import { formatDistanceToNow } from 'date-fns'
 export default function SponsorsPage() {
   const [sponsors, setSponsors] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [selectedSponsor, setSelectedSponsor] = React.useState<any>(null)
-  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -110,9 +107,8 @@ export default function SponsorsPage() {
           data={sponsors}
           loading={loading}
           searchPlaceholder="Search by sponsor name, category, or contact..."
-          onEdit={(sponsor) => {
-            setSelectedSponsor(sponsor)
-            setEditModalOpen(true)
+          onEdit={(item) => {
+            console.log('Edit sponsor:', item)
           }}
           onDelete={async (item) => {
             if (confirm('Are you sure you want to delete this sponsor?')) {
@@ -127,17 +123,6 @@ export default function SponsorsPage() {
           }}
         />
       </div>
-
-      {/* Edit Sponsor Modal */}
-      <EditSponsorModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        sponsor={selectedSponsor}
-        onSuccess={() => {
-          setEditModalOpen(false)
-          setSelectedSponsor(null)
-        }}
-      />
     </div>
   )
 }

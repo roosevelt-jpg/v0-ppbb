@@ -4,16 +4,13 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
-import { EditBusinessModal } from '@/components/edit-business-modal'
 import { db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function BusinessesPage() {
   const [businesses, setBusinesses] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [selectedBusiness, setSelectedBusiness] = React.useState<any>(null)
-  const [editModalOpen, setEditModalOpen] = React.useState(false)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -102,9 +99,8 @@ export default function BusinessesPage() {
           data={businesses}
           loading={loading}
           searchPlaceholder="Search by business name, category, or location..."
-          onEdit={(business) => {
-            setSelectedBusiness(business)
-            setEditModalOpen(true)
+          onEdit={(item) => {
+            console.log('Edit business:', item)
           }}
           onDelete={async (item) => {
             if (confirm('Are you sure you want to delete this business?')) {
@@ -119,17 +115,6 @@ export default function BusinessesPage() {
           }}
         />
       </div>
-
-      {/* Edit Business Modal */}
-      <EditBusinessModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        business={selectedBusiness}
-        onSuccess={() => {
-          setEditModalOpen(false)
-          setSelectedBusiness(null)
-        }}
-      />
     </div>
   )
 }

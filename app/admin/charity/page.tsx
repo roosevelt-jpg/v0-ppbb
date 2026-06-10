@@ -98,9 +98,8 @@ export default function CharityCasesPage() {
           data={cases}
           loading={loading}
           searchPlaceholder="Search by case title or category..."
-          onEdit={(charityCase) => {
-            setSelectedCase(charityCase)
-            setEditModalOpen(true)
+          onEdit={(item) => {
+            console.log('Edit charity case:', item)
           }}
           onDelete={async (item) => {
             if (confirm('Are you sure you want to delete this charity request?')) {
@@ -115,17 +114,6 @@ export default function CharityCasesPage() {
           }}
         />
       </div>
-
-      {/* Edit Charity Modal */}
-      <EditCharityModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        charity={selectedCase}
-        onSuccess={() => {
-          setEditModalOpen(false)
-          setSelectedCase(null)
-        }}
-      />
     </div>
   )
 }
