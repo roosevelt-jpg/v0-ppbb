@@ -81,8 +81,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 lg:py-12 bg-neutral-100">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-lg">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 md:py-12 bg-neutral-100">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-lg">
         {/* Left Column - Form */}
         <div className="flex flex-col justify-center px-8 py-12 bg-white">
           <div className="mb-8">
@@ -190,7 +190,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right Column - Community Benefits */}
-        <div className="hidden lg:flex flex-col justify-between px-8 py-12 bg-neutral-900 text-white">
+        <div className="hidden md:flex flex-col justify-between px-8 py-12 bg-neutral-900 text-white">
           <div>
             <div className="mb-8 h-12 flex items-center justify-center">
               <img 
