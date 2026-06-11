@@ -30,6 +30,7 @@ import { logoutUser } from '@/lib/auth'
 const adminMenuItems = [
   { label: 'Overview', href: '/admin', icon: BarChart3 },
   { label: 'Members', href: '/admin/members', icon: Users },
+  { label: 'Team (About)', href: '/admin/team', icon: Users },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart },
   { label: 'Events', href: '/admin/events', icon: Calendar },
   { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert },

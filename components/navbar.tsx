@@ -8,7 +8,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navItems = [
-    { label: 'About us', href: '#about' },
+    { label: 'About us', href: '/about' },
     { label: 'Impact', href: '/transparency' },
     { label: 'Events', href: '/events' },
     { label: 'Marketplace', href: '/marketplace' },

@@ -67,27 +67,27 @@ export function Footer() {
     <footer
       className="border-t py-12 px-4 sm:px-6 lg:px-8"
       style={{
-        backgroundColor: '#ffffff',
-        borderColor: '#e4e1da',
+        backgroundColor: '#111111',
+        borderColor: '#333333',
       }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Community Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 pb-8" style={{ borderBottom: '1px solid #e4e1da' }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 pb-8" style={{ borderBottom: '1px solid #333333' }}>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#111111' }}>{stats.members.toLocaleString()}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.members.toLocaleString()}</p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Community Members</p>
           </div>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#111111' }}>{stats.volunteerHours.toLocaleString()}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.volunteerHours.toLocaleString()}</p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Volunteer Hours</p>
           </div>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#111111' }}>{stats.businessPartners}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.businessPartners}</p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Business Partners</p>
           </div>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#111111' }}>{stats.donationsTracked}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.donationsTracked}</p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Donations Tracked</p>
           </div>
         </div>
@@ -103,22 +103,22 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-sm font-semibold mb-4" style={{ color: '#111111' }}>
+            <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
               Quick Links
             </h3>
             <ul className="space-y-2">
               {[
-                { label: 'About Us', href: '#about' },
+                { label: 'About Us', href: '/about' },
                 { label: 'Impact & Transparency', href: '/transparency' },
                 { label: 'Events', href: '/events' },
                 { label: 'Marketplace', href: '/marketplace' },
                 { label: 'Contact Us', href: '/contact' },
-                { label: 'Donate', href: '/dashboard/donations' },
+                { label: 'Donate', href: '/donate' },
               ].map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
+                  <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -126,21 +126,21 @@ export function Footer() {
 
           {/* Community */}
           <div>
-            <h3 className="text-sm font-semibold mb-4" style={{ color: '#111111' }}>
+            <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
               Get Involved
             </h3>
             <ul className="space-y-2">
               {[
                 { label: 'Join Community', href: '/signup' },
                 { label: 'Volunteer', href: '/signup' },
-                { label: 'Donate', href: '/dashboard/donations' },
+                { label: 'Donate', href: '/donate' },
                 { label: 'Start Business', href: '/signup' },
                 { label: 'Host Event', href: '/signup' },
               ].map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
+                  <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -148,7 +148,7 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold mb-4" style={{ color: '#111111' }}>
+            <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
               Legal
             </h3>
             <ul className="space-y-2">
@@ -159,7 +159,7 @@ export function Footer() {
                 { label: 'Accessibility', href: '#' },
               ].map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="text-sm hover:underline" style={{ color: '#333333' }}>
+                  <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>
                 </li>
@@ -172,14 +172,14 @@ export function Footer() {
         <div
           className="border-t pt-8"
           style={{
-            borderColor: '#e4e1da',
+            borderColor: '#333333',
           }}
         >
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <p className="text-xs" style={{ color: '#888888' }}>
               Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025
             </p>
-          <div className="flex gap-4 mt-4 sm:mt-0">
+            <div className="flex gap-4 mt-4 sm:mt-0">
               {[
                 { label: 'Facebook', href: 'https://facebook.com/passiveblessings' },
                 { label: 'Twitter', href: 'https://twitter.com/passiveblessings' },
@@ -191,7 +191,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-200"
+                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-700"
                   style={{ color: '#888888' }}
                   aria-label={social.label}
                   title={social.label}

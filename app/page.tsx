@@ -126,7 +126,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/donate" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-[#111111] hover:bg-[#333333] text-white">
                   Donate Now
                 </Button>
               </Link>
@@ -172,8 +172,8 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10 sm:mb-12 md:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair">Upcoming Events</h2>
-            <Link href="/dashboard/events">
-              <Button variant="outline" size="sm" className="w-full sm:w-auto">
+            <Link href="/events">
+              <Button size="sm" className="w-full sm:w-auto bg-[#111111] hover:bg-[#333333] text-white">
                 View All Events
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
