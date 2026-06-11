@@ -26,12 +26,13 @@ export default function AdminLayout({
 
     const unsubscribe = auth.onAuthStateChanged(async (user: any) => {
       if (!user) {
-        router.push('/login')
+        // Not authenticated - redirect to setup page for admin
+        router.push('/admin/setup')
         return
       }
 
-      // Check if user is admin (in production, verify role from Firestore)
-      // For now, we'll allow logged-in users
+      // For admin pages, redirect first-time users or non-admins to setup
+      // In production, verify admin role from Firestore
       setIsAdmin(true)
     })
 

@@ -65,9 +65,9 @@ export function AdminSidebar() {
   return (
     <aside className="w-44 min-h-screen flex flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       {/* Logo */}
-      <div className="p-4 border-b" style={{ borderColor: '#e4e1da' }}>
-        <Logo size="sm" href="/admin" />
-        <p className="text-xs mt-2" style={{ color: '#888888' }}>ESTD 2025</p>
+      <div className="p-4 border-b flex flex-col items-center" style={{ borderColor: '#e4e1da' }}>
+        <Logo size="md" href="/admin" />
+        <p className="text-xs mt-3 font-semibold" style={{ color: '#111111' }}>Admin Panel</p>
       </div>
 
       {/* Navigation */}
