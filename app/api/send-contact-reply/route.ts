@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getApiConfig } from '@/lib/api-config'
+import { getApiConfigServer } from '@/lib/api-config-server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get SendGrid configuration from admin settings
-    const sendgridConfig = await getApiConfig('sendgrid')
+    const sendgridConfig = await getApiConfigServer('sendgrid')
     const apiKey = sendgridConfig?.apiKey
 
     if (!apiKey) {

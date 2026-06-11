@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAllServicesHealth } from '@/lib/api-config'
+import { checkAllServicesHealth } from '@/lib/api-config-server'
 import { hasPermission } from '@/lib/admin-access'
 import { getAuth } from 'firebase-admin/auth'
 

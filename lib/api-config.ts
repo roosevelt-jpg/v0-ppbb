@@ -1,12 +1,11 @@
 import { db } from '@/lib/firebase'
 import { ApiConfig, SystemHealth } from '@/lib/types'
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, query, where } from 'firebase/firestore'
+import { collection, doc, getDocs, setDoc, query, where } from 'firebase/firestore'
 
 const API_CONFIG_COLLECTION = 'apiConfigs'
 
 // Encrypt sensitive data (in production, use a proper encryption library)
 function encryptData(data: string): string {
-  // For MVP, using base64. In production, use proper encryption
   return Buffer.from(data).toString('base64')
 }
 
@@ -23,10 +22,9 @@ export async function getApiConfig(serviceName: string): Promise<ApiConfig | nul
     const snapshot = await getDocs(q)
     if (snapshot.empty) return null
 
-    const doc = snapshot.docs[0]
-    const data = doc.data()
+    const docSnap = snapshot.docs[0]
+    const data = docSnap.data()
 
-    // Decrypt sensitive fields
     return {
       ...data,
       apiKey: decryptData(data.apiKey),
@@ -41,8 +39,8 @@ export async function getApiConfig(serviceName: string): Promise<ApiConfig | nul
 export async function getAllApiConfigs(): Promise<ApiConfig[]> {
   try {
     const snapshot = await getDocs(collection(db, API_CONFIG_COLLECTION))
-    return snapshot.docs.map((doc) => {
-      const data = doc.data()
+    return snapshot.docs.map((docSnap) => {
+      const data = docSnap.data()
       return {
         ...data,
         apiKey: '***REDACTED***',
@@ -85,6 +83,7 @@ export async function setApiConfig(
   }
 }
 
+// Client-side health check functions (deprecated - use api-config-server.ts on server)
 export async function checkServiceHealth(serviceName: string): Promise<SystemHealth> {
   const config = await getApiConfig(serviceName)
 
@@ -98,198 +97,31 @@ export async function checkServiceHealth(serviceName: string): Promise<SystemHea
     }
   }
 
-  // Service-specific health checks
   try {
     const startTime = Date.now()
 
     switch (serviceName) {
       case 'stripe':
-        // Basic Stripe health check
-        const response = await fetch('https://api.stripe.com/v1/account', {
-          headers: {
-            Authorization: `Bearer ${config.apiKey}`,
-          },
+        const stripeResponse = await fetch('https://api.stripe.com/v1/account', {
+          headers: { Authorization: `Bearer ${config.apiKey}` },
         })
-        const responseTime = Date.now() - startTime
-
-        if (response.ok) {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'healthy',
-            lastChecked: new Date(),
-            responseTime,
-          }
-        } else {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'down',
-            lastChecked: new Date(),
-            errorMessage: response.statusText,
-          }
-        }
-
-      case 'sendgrid':
-        // Basic SendGrid health check
-        const sgResponse = await fetch('https://api.sendgrid.com/v3/mail/validate', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${config.apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            personalizations: [{ to: [{ email: 'test@example.com' }] }],
-            from: { email: 'test@example.com' },
-            subject: 'test',
-            content: [{ type: 'text/plain', value: 'test' }],
-          }),
-        })
-
-        const sgResponseTime = Date.now() - startTime
-        if (sgResponse.ok || sgResponse.status === 400) {
-          // 400 is ok for validation
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'healthy',
-            lastChecked: new Date(),
-            responseTime: sgResponseTime,
-          }
-        } else {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'down',
-            lastChecked: new Date(),
-            errorMessage: sgResponse.statusText,
-          }
-        }
+        return stripeResponse.ok
+          ? { id: serviceName, serviceName, status: 'healthy', lastChecked: new Date(), responseTime: Date.now() - startTime }
+          : { id: serviceName, serviceName, status: 'down', lastChecked: new Date(), errorMessage: stripeResponse.statusText }
 
       case 'openai':
-        // Check OpenAI models endpoint
         const oaiResponse = await fetch('https://api.openai.com/v1/models', {
-          headers: {
-            'Authorization': `Bearer ${config.apiKey}`,
-          },
+          headers: { 'Authorization': `Bearer ${config.apiKey}` },
         })
-        const oaiResponseTime = Date.now() - startTime
-        if (oaiResponse.ok) {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'healthy',
-            lastChecked: new Date(),
-            responseTime: oaiResponseTime,
-          }
-        } else {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'down',
-            lastChecked: new Date(),
-            errorMessage: oaiResponse.statusText,
-          }
-        }
-
-      case 'anthropic':
-        // Check Anthropic API
-        const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': config.apiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'claude-3-haiku-20240307',
-            max_tokens: 10,
-            messages: [{ role: 'user', content: 'ping' }],
-          }),
-        })
-        const anthropicResponseTime = Date.now() - startTime
-        if (anthropicResponse.ok || anthropicResponse.status === 400) {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'healthy',
-            lastChecked: new Date(),
-            responseTime: anthropicResponseTime,
-          }
-        } else {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'down',
-            lastChecked: new Date(),
-            errorMessage: anthropicResponse.statusText,
-          }
-        }
-
-      case 'youtube':
-        // Check YouTube API
-        const youtubeResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${config.apiKey}`
-        )
-        const youtubeResponseTime = Date.now() - startTime
-        if (youtubeResponse.ok) {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'healthy',
-            lastChecked: new Date(),
-            responseTime: youtubeResponseTime,
-          }
-        } else {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'down',
-            lastChecked: new Date(),
-            errorMessage: youtubeResponse.statusText,
-          }
-        }
-
-      case 'googlemaps':
-        // Check Google Maps API
-        const mapsResponse = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=test&key=${config.apiKey}`
-        )
-        const mapsResponseTime = Date.now() - startTime
-        if (mapsResponse.ok) {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'healthy',
-            lastChecked: new Date(),
-            responseTime: mapsResponseTime,
-          }
-        } else {
-          return {
-            id: serviceName,
-            serviceName,
-            status: 'down',
-            lastChecked: new Date(),
-            errorMessage: mapsResponse.statusText,
-          }
-        }
+        return oaiResponse.ok
+          ? { id: serviceName, serviceName, status: 'healthy', lastChecked: new Date(), responseTime: Date.now() - startTime }
+          : { id: serviceName, serviceName, status: 'down', lastChecked: new Date(), errorMessage: oaiResponse.statusText }
 
       default:
-        return {
-          id: serviceName,
-          serviceName,
-          status: 'healthy',
-          lastChecked: new Date(),
-        }
+        return { id: serviceName, serviceName, status: 'healthy', lastChecked: new Date() }
     }
   } catch (error) {
-    return {
-      id: serviceName,
-      serviceName,
-      status: 'degraded',
-      lastChecked: new Date(),
-      errorMessage: error instanceof Error ? error.message : 'Unknown error',
-    }
+    return { id: serviceName, serviceName, status: 'degraded', lastChecked: new Date(), errorMessage: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 

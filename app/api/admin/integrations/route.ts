@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllApiConfigs, checkAllServicesHealth } from '@/lib/api-config'
+import { getAllApiConfigsServer, checkAllServicesHealth } from '@/lib/api-config-server'
 import { hasPermission } from '@/lib/admin-access'
 import { getAuth } from 'firebase-admin/auth'
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [configs, health] = await Promise.all([
-      getAllApiConfigs(),
+      getAllApiConfigsServer(),
       checkAllServicesHealth(),
     ])
     return NextResponse.json({
