@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
-import { collection, getDocs, getCountFromServer, query, where } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { Mail, Heart, Share2, Link as LinkIcon, MessageSquare } from 'lucide-react'
 
 interface Stats {
@@ -29,39 +29,11 @@ export function Footer() {
     donationsTracked: 'AED 92K',
   })
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({})
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchSettings = async () => {
       try {
-        const membersSnapshot = await getCountFromServer(collection(db, 'users'))
-        const memberCount = membersSnapshot.data().count
-
-        const usersSnapshot = await getDocs(collection(db, 'users'))
-        let totalVolunteerHours = 0
-        usersSnapshot.forEach(doc => {
-          totalVolunteerHours += doc.data().volunteeredHours || 0
-        })
-
-        const businessSnapshot = await getCountFromServer(
-          query(collection(db, 'users'), where('role', '==', 'business'))
-        )
-        const businessCount = businessSnapshot.data().count
-
-        const donationsSnapshot = await getDocs(collection(db, 'donations'))
-        let totalDonations = 0
-        donationsSnapshot.forEach(doc => {
-          if (doc.data().amount) totalDonations += doc.data().amount
-        })
-
-        setStats({
-          members: memberCount || 3412,
-          volunteerHours: totalVolunteerHours || 8940,
-          businessPartners: businessCount || 87,
-          donationsTracked: totalDonations > 0 ? `AED ${totalDonations.toLocaleString()}` : 'AED 92K',
-        })
-
-        // Fetch social links from settings
+        // Only fetch social links from settings collection
         const settingsSnapshot = await getDocs(collection(db, 'settings'))
         settingsSnapshot.forEach(doc => {
           if (doc.data().socialLinks) {
@@ -69,13 +41,12 @@ export function Footer() {
           }
         })
       } catch (error) {
-        console.error('[v0] Error fetching footer stats:', error)
-      } finally {
-        setLoading(false)
+        console.error('[v0] Error fetching footer settings:', error)
+        // Silently fail - don't crash the page
       }
     }
 
-    fetchStats()
+    fetchSettings()
   }, [])
 
   return (
