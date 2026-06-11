@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -146,13 +145,6 @@ export default function BeneficiaryRequestsAdmin() {
 
   return (
     <>
-      <AdminHeader
-        title="Beneficiary Requests"
-        subtitle="Review and process charity support requests"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
       <div style={{ padding: '32px', maxWidth: '1400px', margin: '0 auto' }}>
         {/* Stats Grid */}
         <div

@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getSiteSettings, updateSiteSettings } from '@/lib/admin'
@@ -139,7 +138,6 @@ export default function AdminSettings() {
   if (loading) {
     return (
       <>
-        <AdminHeader title="Settings" subtitle="Configure your platform" />
         <div className="p-8" style={{ backgroundColor: '#f7f6f2' }}>
           <p style={{ color: '#888888' }}>Loading settings...</p>
         </div>
@@ -149,7 +147,6 @@ export default function AdminSettings() {
 
   return (
     <>
-      <AdminHeader title="Settings" subtitle="Configure your platform, branding, and API integrations" />
 
       <div className="p-8 space-y-8" style={{ backgroundColor: '#f7f6f2' }}>
         {message && (

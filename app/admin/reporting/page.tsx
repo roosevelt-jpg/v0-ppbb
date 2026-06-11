@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore'
@@ -45,7 +44,6 @@ export default function ReportingPage() {
 
   return (
     <>
-      <AdminHeader title="Community Reports" subtitle="Analytics and insights across all platforms" />
       
       <div className="p-8 bg-neutral-50 space-y-8">
         {/* Date Range Selector */}

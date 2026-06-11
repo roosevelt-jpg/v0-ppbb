@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { db } from '@/lib/firebase'
@@ -120,7 +119,6 @@ export default function AdminPolicies() {
   if (loading) {
     return (
       <>
-        <AdminHeader title="Policies" subtitle="Manage Privacy Policy, Terms & Conditions, and Code of Conduct" />
         <div className="p-8">
           <p style={{ color: '#888888' }}>Loading policies...</p>
         </div>
@@ -130,7 +128,6 @@ export default function AdminPolicies() {
 
   return (
     <>
-      <AdminHeader title="Policies" subtitle="Manage Privacy Policy, Terms & Conditions, and Code of Conduct" />
       
       <div className="p-8">
         <div className="space-y-6">

@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditSponsorModal } from '@/components/edit-sponsor-modal'
 import { db } from '@/lib/firebase'
@@ -102,7 +101,6 @@ export default function SponsorsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Sponsors" subtitle="Manage corporate sponsors and sponsorship partnerships" />
       <div className="px-8">
         <AdminTable
           title="All Sponsors"

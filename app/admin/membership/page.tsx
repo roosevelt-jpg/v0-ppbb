@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, updateDoc, doc, writeBatch, onSnapshot } from 'firebase/firestore'
@@ -172,7 +171,6 @@ export default function MembershipPage() {
 
   return (
     <>
-      <AdminHeader title="Membership Management" subtitle="Track and manage member tiers, benefits, and bulk operations" />
 
       <div className="p-8 bg-neutral-50 space-y-8">
         {/* Tier Overview - Enhanced Analytics */}

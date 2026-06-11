@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
 import { db } from '@/lib/firebase'
@@ -122,7 +121,6 @@ export default function VolunteersPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Volunteers" subtitle="Manage volunteer profiles and track volunteer hours" />
       <div className="px-8">
         <AdminTable
           title="All Volunteers"

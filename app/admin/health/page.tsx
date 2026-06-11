@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { checkServiceHealth } from '@/lib/api-config'
@@ -74,7 +73,6 @@ export default function SystemHealthPage() {
 
   return (
     <>
-      <AdminHeader title="System Health" subtitle="Monitor all integrations and services" />
       
       <div className="p-8">
         {/* Overall Status */}

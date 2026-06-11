@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditEventModal } from '@/components/edit-event-modal'
 import { db } from '@/lib/firebase'
@@ -123,7 +122,6 @@ export default function EventsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Events" subtitle="Manage community events and track attendance" />
       <div className="px-8">
         <AdminTable
           title="All Events"

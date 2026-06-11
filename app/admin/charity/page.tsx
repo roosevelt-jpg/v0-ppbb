@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditCharityModal } from '@/components/edit-charity-modal'
 import { db } from '@/lib/firebase'
@@ -93,7 +92,6 @@ export default function CharityCasesPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Charity Cases" subtitle="Manage community charity cases and fundraising campaigns" />
       <div className="px-8">
         <AdminTable
           title="All Charity Cases"

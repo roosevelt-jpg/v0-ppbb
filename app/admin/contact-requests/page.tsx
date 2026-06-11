@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore'
@@ -153,17 +152,7 @@ export default function ContactRequestsPage() {
   ]
 
   return (
-    <div>
-      <AdminHeader
-        title="Contact Requests"
-        description="Manage and respond to contact form submissions from visitors"
-        stats={[
-          { label: 'Total Requests', value: requests.length },
-          { label: 'Unread', value: requests.filter((r) => !r.read).length },
-        ]}
-      />
-
-      <div className="p-6">
+    <div className="p-6">
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />

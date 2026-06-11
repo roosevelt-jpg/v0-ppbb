@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React, { useState, useEffect } from 'react'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
@@ -121,7 +120,6 @@ export default function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Approvals" subtitle="Review and manage pending submissions" />
       <div className="px-8">
         <AdminTable
           title="Pending Approvals"

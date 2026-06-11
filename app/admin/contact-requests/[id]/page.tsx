@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic'
 import React, { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { db } from '@/lib/firebase'
@@ -210,15 +209,6 @@ export default function ContactRequestDetailPage() {
           <p className="text-gray-600">From {request.name}</p>
         </div>
       </div>
-
-      <AdminHeader
-        title={`Contact Request - ${request.subject}`}
-        description={`Received ${request.createdAt ? formatDistanceToNow(request.createdAt.toDate(), { addSuffix: true }) : 'recently'}`}
-        stats={[
-          { label: 'Status', value: request.status.charAt(0).toUpperCase() + request.status.slice(1) },
-          { label: 'Replies', value: replies.length },
-        ]}
-      />
 
       <div className="px-6 pb-6 grid lg:grid-cols-3 gap-6">
         {/* Main content */}

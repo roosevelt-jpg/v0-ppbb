@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getAllPages, createPage, updatePage, deletePage } from '@/lib/admin'
@@ -92,7 +91,6 @@ export default function AdminPages() {
 
   return (
     <>
-      <AdminHeader title="Pages (CMS)" subtitle="Manage your website content" />
       
       <div className="p-8">
         <div className="mb-6 flex justify-between items-center">

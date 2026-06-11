@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -86,7 +85,6 @@ export default function DonationVerificationPage() {
 
   return (
     <div>
-      <AdminHeader title="Donation Verification" subtitle="Verify donation submissions and process approvals" />
 
       <div className="space-y-8">
         {/* Pending Submissions */}

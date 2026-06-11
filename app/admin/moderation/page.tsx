@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy, writeBatch } from 'firebase/firestore'
@@ -175,7 +174,6 @@ export default function ModerationPage() {
 
   return (
     <>
-      <AdminHeader title="Community Moderation" subtitle="Manage community reports, flagged content, and user violations" />
       
       <div className="p-8 bg-neutral-50 space-y-8">
         {/* Stats Grid */}

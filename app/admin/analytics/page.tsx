@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query } from 'firebase/firestore'
@@ -149,7 +148,6 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Analytics" subtitle="Platform performance and key metrics" />
       <div className="px-8 space-y-6">
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

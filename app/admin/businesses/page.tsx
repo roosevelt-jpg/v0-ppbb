@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditBusinessModal } from '@/components/edit-business-modal'
 import { db } from '@/lib/firebase'
@@ -94,7 +93,6 @@ export default function BusinessesPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Businesses" subtitle="Manage registered businesses and merchant partners" />
       <div className="px-8">
         <AdminTable
           title="All Businesses"

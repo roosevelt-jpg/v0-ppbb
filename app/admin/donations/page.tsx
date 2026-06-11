@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditDonationModal } from '@/components/edit-donation-modal'
 import { db } from '@/lib/firebase'
@@ -121,7 +120,6 @@ export default function DonationsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminHeader title="Donations" subtitle="Track all donations and monetary contributions" />
       <div className="px-8">
         <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2', borderLeft: '4px solid #2e7d32' }}>
           <p style={{ color: '#888888', fontSize: '14px' }}>Total Donations</p>

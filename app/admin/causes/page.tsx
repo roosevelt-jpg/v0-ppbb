@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
@@ -100,7 +99,6 @@ export default function DonationCausesPage() {
 
   return (
     <div>
-      <AdminHeader title="Donation Causes" subtitle="Manage charitable causes and campaigns" />
 
       <div className="space-y-6">
         {/* Add New Cause Form */}
