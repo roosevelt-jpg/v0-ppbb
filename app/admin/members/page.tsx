@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditMemberModal } from '@/components/edit-member-modal'
 import { db } from '@/lib/firebase'
@@ -99,10 +98,8 @@ export default function MembersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <AdminHeader title="Members" subtitle="Manage member accounts and profile information" />
-      <div className="px-8">
-        <AdminTable
+    <div className="space-y-6 px-8">
+      <AdminTable
           title="All Members"
           columns={columns}
           data={members}
