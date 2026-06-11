@@ -4,12 +4,14 @@ import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
-import { getGroup, getGroupPosts, joinGroup, createPost, addComment, getPostComments } from '@/lib/community-service'
+import { getGroup, getGroupPosts, joinGroup, createPost, addComment, getPostComments, uploadPostMedia } from '@/lib/community-service'
 import { MemberHeader } from '@/components/member-layout'
+import { MediaUpload } from '@/components/media-upload'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MessageSquare, Users, Heart, Share2, Flag, Send, Upload, X } from 'lucide-react'
+import { MessageSquare, Users, Heart, Share2, Flag, Send, Upload, X, FileText, ImageIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 interface Group {
   id: string
@@ -144,6 +146,20 @@ export default function GroupPage() {
     if (!firebaseUser || !postTitle.trim() || !postContent.trim()) return
 
     try {
+      const mediaUrls: Array<{ type: string; url: string; name: string }> = []
+
+      // Upload media files if any
+      if (postMedia.length > 0) {
+        for (const file of postMedia) {
+          try {
+            const mediaData = await uploadPostMedia(groupId, 'temp_post_id', file)
+            mediaUrls.push(mediaData as any)
+          } catch (error) {
+            console.error('[v0] Error uploading media:', error)
+          }
+        }
+      }
+
       await createPost(
         groupId,
         {
@@ -152,8 +168,8 @@ export default function GroupPage() {
           title: postTitle,
           content: postContent,
           type: postType as any,
-          media: [],
-          isApproved: true, // In production, set based on group settings
+          media: mediaUrls,
+          isApproved: true,
           isPinned: false,
           isArchived: false,
           tags: [],
@@ -322,6 +338,17 @@ export default function GroupPage() {
                   className="mb-4"
                 />
 
+                {/* Media Upload */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Attach Images or Documents</label>
+                  <MediaUpload
+                    onFilesAdded={(files) => {
+                      setPostMedia(files.map((f) => f.file))
+                    }}
+                    maxFiles={5}
+                  />
+                </div>
+
                 <div className="flex gap-2">
                   <Button onClick={handleCreatePost} className="bg-blue-600 hover:bg-blue-700">
                     Post
@@ -358,12 +385,24 @@ export default function GroupPage() {
 
                   {/* Media */}
                   {post.media && post.media.length > 0 && (
-                    <div className="mb-4 grid grid-cols-2 gap-2">
-                      {post.media.map((m, i) => (
-                        <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm hover:underline">
-                          📎 {m.name}
-                        </a>
-                      ))}
+                    <div className="mb-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {post.media.map((m, i) => (
+                          m.type === 'image' ? (
+                            <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="relative group overflow-hidden rounded-lg bg-gray-200 h-24">
+                              <img src={m.url} alt={m.name} className="w-full h-full object-cover group-hover:opacity-80 transition" />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition flex items-center justify-center">
+                                <ImageIcon className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition" />
+                              </div>
+                            </a>
+                          ) : (
+                            <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg border border-gray-200 hover:border-blue-500 transition group">
+                              <FileText className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition" />
+                              <span className="text-xs text-gray-600 group-hover:text-blue-600 truncate">{m.name}</span>
+                            </a>
+                          )
+                        ))}
+                      </div>
                     </div>
                   )}
 
