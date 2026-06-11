@@ -7,7 +7,8 @@ import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
-import { Mail, MessageSquare, Trash2 } from 'lucide-react'
+import { Mail, MessageSquare, Trash2, Eye } from 'lucide-react'
+import Link from 'next/link'
 
 interface ContactRequest {
   id: string
@@ -127,6 +128,16 @@ export default function ContactRequestsPage() {
 
   const actions = [
     {
+      label: 'View',
+      icon: Eye,
+      onClick: (item: ContactRequest) => {
+        // This will be handled by Link in the table
+      },
+      color: 'text-blue-600',
+      isLink: true,
+      href: (item: ContactRequest) => `/admin/contact-requests/${item.id}`,
+    },
+    {
       label: 'Mark as',
       icon: Mail,
       onClick: (item: ContactRequest) => handleMarkAsRead(item.id, item.read),
@@ -162,10 +173,8 @@ export default function ContactRequestsPage() {
             title="Contact Form Submissions"
             columns={columns}
             data={requests}
-            onViewDetails={(request) => {
-              alert(
-                `Contact Request\n\nName: ${request.name}\nEmail: ${request.email}\nPhone: ${request.phone}\nSubject: ${request.subject}\nMessage: ${request.message}`
-              )
+            onRowClick={(request) => {
+              window.location.href = `/admin/contact-requests/${request.id}`
             }}
             actions={actions}
           />
