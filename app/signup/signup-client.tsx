@@ -64,10 +64,15 @@ export default function SignupPage() {
 
   // Log signup page visit on mount
   useEffect(() => {
-    logActivity('guest', 'guest@passiveblessings.com', 'SIGNUP_PAGE_VISIT', 'Visited signup page', { 
-      timestamp: new Date().toISOString(),
-      step: 1 
-    })
+    console.log("[v0] Signup page mounted, current step:", currentStep)
+    try {
+      logActivity('guest', 'guest@passiveblessings.com', 'SIGNUP_PAGE_VISIT', 'Visited signup page', { 
+        timestamp: new Date().toISOString(),
+        step: 1 
+      })
+    } catch (err) {
+      console.error("[v0] Error logging activity:", err)
+    }
   }, [])
 
   const [formData, setFormData] = useState<FormData>({
@@ -510,6 +515,7 @@ export default function SignupPage() {
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+      {console.log("[v0] Rendering signup page, currentStep:", currentStep)}
       {/* Header */}
       <div style={{ width: '100%', padding: '1rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '1rem', paddingRight: '1rem' }}>
