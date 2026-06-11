@@ -1,63 +1,152 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { constructWebhookEvent } from '@/lib/stripe-utils'
+import { db } from '@/lib/firebase'
+import { doc, setDoc, updateDoc, Timestamp, query, collection, where, getDocs } from 'firebase/firestore'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// Lazy load stripe to avoid build issues
-async function getStripeModule() {
-  try {
-    return await import('@/lib/stripe')
-  } catch (error) {
-    console.error('[v0] Stripe module load error:', error)
-    return null
-  }
-}
-
 export async function POST(req: NextRequest) {
-  const stripe = await getStripeModule()
-  if (!stripe) {
-    return NextResponse.json({ error: 'Stripe not available' }, { status: 503 })
-  }
-
-  const body = await req.text()
-  const signature = req.headers.get('stripe-signature') || ''
-
-  const event = await stripe.verifyStripeWebhook(body, signature)
-
-  if (!event) {
-    return NextResponse.json(
-      { error: 'Webhook signature verification failed' },
-      { status: 400 }
-    )
-  }
-
   try {
-    switch (event.type) {
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as any
-        const { donorId, campaignId, amount, isAnonymous } = paymentIntent.metadata
+    const body = await req.arrayBuffer()
+    const signature = req.headers.get('stripe-signature') || ''
 
-        if (donorId && campaignId) {
-          await stripe.recordDonation(donorId, campaignId, parseInt(amount), paymentIntent.id, isAnonymous === 'true')
+    let event
+    try {
+      event = constructWebhookEvent(Buffer.from(body), signature)
+    } catch (err: any) {
+      console.error('[v0] Webhook signature verification failed:', err.message)
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+    }
+
+    console.log('[v0] Processing webhook event:', event.type)
+
+    switch (event.type) {
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as any
+        const customerId = subscription.customer
+        const subscriptionId = subscription.id
+
+        // Get customer email
+        const { stripe } = await import('@/lib/stripe-utils')
+        const customer = await stripe.customers.retrieve(customerId)
+        const email = (customer as any).email
+
+        // Get user ID from Firestore by email
+        const usersQuery = query(collection(db, 'users'), where('email', '==', email))
+        const usersSnapshot = await getDocs(usersQuery)
+        const userId = usersSnapshot.docs[0]?.id
+
+        if (!userId) {
+          console.error('[v0] User not found for email:', email)
+          return NextResponse.json({ error: 'User not found' }, { status: 404 })
+        }
+
+        // Save subscription to Firestore
+        const subscriptionData = {
+          userId,
+          stripeSubscriptionId: subscriptionId,
+          stripeCustomerId: customerId,
+          amount: subscription.items.data[0]?.price.unit_amount / 100,
+          currency: subscription.items.data[0]?.price.currency,
+          interval: subscription.items.data[0]?.price.recurring?.interval,
+          status: subscription.status,
+          currentPeriodStart: Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
+          currentPeriodEnd: Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
+          nextBillingDate: Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
+          metadata: subscription.metadata,
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        }
+
+        await setDoc(doc(db, 'subscriptions', subscriptionId), subscriptionData)
+        console.log('[v0] Subscription saved:', subscriptionId)
+        break
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as any
+        const subscriptionId = subscription.id
+
+        // Mark subscription as cancelled
+        await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+          status: 'cancelled',
+          cancelledAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        })
+
+        console.log('[v0] Subscription cancelled:', subscriptionId)
+        break
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as any
+        const subscriptionId = invoice.subscription
+
+        if (subscriptionId) {
+          // Log charge
+          const chargeData = {
+            stripeInvoiceId: invoice.id,
+            stripeSubscriptionId: subscriptionId,
+            amount: invoice.amount_paid / 100,
+            currency: invoice.currency,
+            status: 'succeeded',
+            paidAt: Timestamp.fromDate(new Date(invoice.paid_date * 1000)),
+            nextBillingDate: Timestamp.fromDate(new Date(invoice.lines.data[0]?.period.end * 1000)),
+            createdAt: Timestamp.now(),
+          }
+
+          await setDoc(doc(db, 'subscriptions', subscriptionId, 'charges', invoice.id), chargeData)
+
+          // Update subscription next billing date
+          await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+            nextBillingDate: Timestamp.fromDate(new Date(invoice.lines.data[0]?.period.end * 1000)),
+            updatedAt: Timestamp.now(),
+          })
+
+          console.log('[v0] Charge logged for subscription:', subscriptionId)
         }
         break
       }
 
-      case 'payment_intent.payment_failed': {
-        console.log('[v0] Payment failed:', event.data.object)
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as any
+        const subscriptionId = invoice.subscription
+
+        if (subscriptionId) {
+          // Log failed charge
+          const chargeData = {
+            stripeInvoiceId: invoice.id,
+            stripeSubscriptionId: subscriptionId,
+            amount: invoice.amount_due / 100,
+            currency: invoice.currency,
+            status: 'failed',
+            failureReason: invoice.last_finalization_error?.message,
+            createdAt: Timestamp.now(),
+          }
+
+          await setDoc(doc(db, 'subscriptions', subscriptionId, 'charges', invoice.id), chargeData)
+
+          // Update subscription status
+          await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+            paymentStatus: 'failed',
+            lastPaymentError: invoice.last_finalization_error?.message,
+            updatedAt: Timestamp.now(),
+          })
+
+          console.log('[v0] Payment failed for subscription:', subscriptionId)
+        }
         break
       }
 
       default:
-        console.log('[v0] Unhandled event type:', event.type)
+        console.log('[v0] Unhandled webhook event type:', event.type)
     }
 
-    return NextResponse.json({ received: true })
-  } catch (error) {
-    console.error('[v0] Webhook processing error:', error)
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ received: true }, { status: 200 })
+  } catch (error: any) {
+    console.error('[v0] Webhook error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

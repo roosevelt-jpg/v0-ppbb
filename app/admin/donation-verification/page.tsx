@@ -31,26 +31,44 @@ export default function DonationVerificationPage() {
     const submission = submissions.find((s) => s.id === submissionId)
     if (!submission) return
 
-    // Update submission status
-    await updateDoc(doc(db, 'donationSubmissions', submissionId), {
-      status: 'verified',
-      verifiedAt: serverTimestamp(),
-      verifiedBy: 'admin',
-    })
+    try {
+      // Generate PDF receipt
+      const receiptResponse = await fetch('/api/donations/generate-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ donationId: submissionId }),
+      })
 
-    // Update donor profile with donation
-    await updateDoc(doc(db, 'users', submission.userId), {
-      totalDonations: (submission.userTotalDonations || 0) + submission.amount,
-      lastDonationDate: serverTimestamp(),
-    })
+      let receiptUrl = null
+      if (receiptResponse.ok) {
+        const receiptData = await receiptResponse.json()
+        receiptUrl = receiptData.receiptUrl
+      }
 
-    // Update cause progress
-    const causeRef = doc(db, 'causes', submission.causeId)
-    await updateDoc(causeRef, {
-      currentAmount: (submission.currentCauseAmount || 0) + submission.amount,
-    })
+      // Update submission status with receipt URL
+      await updateDoc(doc(db, 'donationSubmissions', submissionId), {
+        status: 'verified',
+        verifiedAt: serverTimestamp(),
+        verifiedBy: 'admin',
+        receiptUrl,
+      })
 
-    setSelectedSubmission(null)
+      // Update donor profile with donation
+      await updateDoc(doc(db, 'users', submission.userId), {
+        totalDonations: (submission.userTotalDonations || 0) + submission.amount,
+        lastDonationDate: serverTimestamp(),
+      })
+
+      // Update cause progress
+      const causeRef = doc(db, 'causes', submission.causeId)
+      await updateDoc(causeRef, {
+        currentAmount: (submission.currentCauseAmount || 0) + submission.amount,
+      })
+
+      setSelectedSubmission(null)
+    } catch (error) {
+      console.error('[v0] Error verifying donation:', error)
+    }
   }
 
   const handleReject = async (submissionId: string, reason: string) => {
