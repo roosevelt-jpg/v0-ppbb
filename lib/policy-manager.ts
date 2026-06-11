@@ -4,12 +4,12 @@ import { Policy } from './types'
 
 const POLICIES_COLLECTION = 'policies'
 
-// Default policy content
-export const DEFAULT_POLICIES = {
+// Default policy templates (content templates, not full policies)
+export const POLICY_TEMPLATES = {
   privacy: {
     title: 'Privacy Policy',
     slug: 'privacy-policy',
-    content: `Privacy Policy
+    getContent: () => `Privacy Policy
 
 Last Updated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
@@ -52,7 +52,7 @@ For privacy-related inquiries, please contact us at privacy@passiveblessings.com
   terms: {
     title: 'Terms and Conditions',
     slug: 'terms-conditions',
-    content: `Terms and Conditions
+    getContent: () => `Terms and Conditions
 
 Last Updated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
@@ -87,7 +87,7 @@ These terms are governed by and construed in accordance with the laws of the Uni
   codeofconduct: {
     title: 'Community Code of Conduct',
     slug: 'code-of-conduct',
-    content: `Community Code of Conduct
+    getContent: () => `Community Code of Conduct
 
 Last Updated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
 
@@ -130,6 +130,25 @@ We reserve the right to modify this Code of Conduct at any time to maintain a sa
   }
 }
 
+// Export for backward compatibility and fallback display
+export const DEFAULT_POLICIES = {
+  privacy: {
+    title: POLICY_TEMPLATES.privacy.title,
+    slug: POLICY_TEMPLATES.privacy.slug,
+    content: POLICY_TEMPLATES.privacy.getContent()
+  },
+  terms: {
+    title: POLICY_TEMPLATES.terms.title,
+    slug: POLICY_TEMPLATES.terms.slug,
+    content: POLICY_TEMPLATES.terms.getContent()
+  },
+  codeofconduct: {
+    title: POLICY_TEMPLATES.codeofconduct.title,
+    slug: POLICY_TEMPLATES.codeofconduct.slug,
+    content: POLICY_TEMPLATES.codeofconduct.getContent()
+  }
+}
+
 export async function initializePolicies() {
   try {
     // Check if policies exist
@@ -137,15 +156,15 @@ export async function initializePolicies() {
     const snapshot = await getDocs(policiesRef)
     
     if (snapshot.empty) {
-      // Create default policies
+      // Create default policies with current timestamp
       const now = new Date()
-      for (const [type, policy] of Object.entries(DEFAULT_POLICIES)) {
+      for (const [type, template] of Object.entries(POLICY_TEMPLATES)) {
         const policyData: Policy = {
           id: type,
           type: type as 'privacy' | 'terms' | 'codeofconduct',
-          title: policy.title,
-          slug: policy.slug,
-          content: policy.content,
+          title: template.title,
+          slug: template.slug,
+          content: template.getContent(), // Get fresh content with current date
           version: 1,
           lastUpdated: now,
           effectiveDate: now,

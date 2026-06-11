@@ -46,6 +46,7 @@ const adminMenuItems = [
   { label: 'Reporting', href: '/admin/reporting', icon: FileText },
   { label: 'Moderation', href: '/admin/moderation', icon: Flag },
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
+  { label: 'Policies', href: '/admin/policies', icon: FileText },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Zap },
