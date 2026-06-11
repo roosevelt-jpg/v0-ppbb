@@ -290,6 +290,12 @@ export interface SiteSettings {
   }
   footerText: string
   maintenanceMode: boolean
+  // SEO Fields
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string
+  // Analytics
+  googleAnalyticsId?: string
   createdAt: Date
   updatedAt: Date
 }

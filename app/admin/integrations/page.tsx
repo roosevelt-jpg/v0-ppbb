@@ -44,14 +44,59 @@ export default function AdminIntegrationsPage() {
     setShowModal(true)
   }
 
-  function handleDelete(serviceId: string) {
-    if (confirm(`Delete ${serviceId} configuration?`)) {
-      console.log('Delete', serviceId)
+  async function handleSaveConfig(serviceId: string, credentials: Record<string, any>) {
+    try {
+      const response = await fetch(`/api/admin/integrations/${serviceId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      })
+
+      if (response.ok) {
+        await loadData()
+        setShowModal(false)
+        setSelectedService(null)
+      } else {
+        const error = await response.json()
+        console.error('[v0] Error saving config:', error)
+      }
+    } catch (error) {
+      console.error('[v0] Error saving config:', error)
     }
   }
 
-  function handleTest(serviceId: string) {
-    console.log('Test', serviceId)
+  async function handleTestService(serviceId: string) {
+    try {
+      const response = await fetch(`/api/admin/integrations/${serviceId}/test`, {
+        method: 'POST',
+      })
+
+      if (response.ok) {
+        await loadData()
+      } else {
+        console.error('[v0] Test failed')
+      }
+    } catch (error) {
+      console.error('[v0] Error testing service:', error)
+    }
+  }
+
+  async function handleDeleteConfig(serviceId: string) {
+    if (!confirm(`Delete ${serviceId} configuration?`)) return
+
+    try {
+      const response = await fetch(`/api/admin/integrations/${serviceId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        await loadData()
+      } else {
+        console.error('[v0] Delete failed')
+      }
+    } catch (error) {
+      console.error('[v0] Error deleting config:', error)
+    }
   }
 
   function isConfigured(serviceId: string): boolean {
@@ -110,9 +155,8 @@ export default function AdminIntegrationsPage() {
 
         <Button
           onClick={loadData}
-          variant="outline"
-          size="sm"
           className="gap-2"
+          style={{ backgroundColor: '#111111', color: '#ffffff' }}
         >
           <RefreshCw className="h-4 w-4" />
           Refresh
@@ -135,9 +179,9 @@ export default function AdminIntegrationsPage() {
               service={service}
               isConfigured={isConfigured(service.id)}
               health={getHealth(service.id)}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onTest={handleTest}
+              onEdit={() => handleEdit(service.id)}
+              onDelete={() => handleDeleteConfig(service.id)}
+              onTest={() => handleTestService(service.id)}
             />
           ))}
         </div>
@@ -148,9 +192,7 @@ export default function AdminIntegrationsPage() {
         <ApiFormModal
           serviceId={selectedService}
           onSave={async (credentials) => {
-            console.log('Save credentials for', selectedService, credentials)
-            setShowModal(false)
-            await loadData()
+            await handleSaveConfig(selectedService, credentials)
           }}
           onClose={() => {
             setShowModal(false)

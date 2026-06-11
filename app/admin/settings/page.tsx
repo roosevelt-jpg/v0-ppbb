@@ -559,6 +559,98 @@ export default function AdminSettings() {
           </div>
         </Card>
 
+        {/* SEO & Analytics Settings */}
+        <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+          <h2
+            className="text-2xl font-bold mb-6"
+            style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}
+          >
+            SEO & Analytics
+          </h2>
+
+          <div className="space-y-6">
+            {/* SEO Title */}
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                SEO Title
+              </label>
+              <input
+                type="text"
+                placeholder="Passive Blessings - Community Platform for Events & Volunteering"
+                value={siteSettings?.seoTitle || ''}
+                onChange={(e) => handleSiteSettingsChange('seoTitle', e.target.value)}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+                maxLength={60}
+              />
+              <p className="text-xs mt-1" style={{ color: '#888888' }}>
+                {(siteSettings?.seoTitle || '').length}/60 characters
+              </p>
+            </div>
+
+            {/* SEO Description */}
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                SEO Description
+              </label>
+              <textarea
+                placeholder="Discover Passive Blessings - a vibrant community platform connecting volunteers, members, businesses, and sponsors for meaningful events and charitable causes in the UAE."
+                value={siteSettings?.seoDescription || ''}
+                onChange={(e) => handleSiteSettingsChange('seoDescription', e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333', minHeight: '80px' }}
+                maxLength={160}
+              />
+              <p className="text-xs mt-1" style={{ color: '#888888' }}>
+                {(siteSettings?.seoDescription || '').length}/160 characters
+              </p>
+            </div>
+
+            {/* SEO Keywords */}
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                SEO Keywords (comma-separated)
+              </label>
+              <input
+                type="text"
+                placeholder="volunteering, events, community, charitable, UAE, Dubai, sponsorship, membership"
+                value={siteSettings?.seoKeywords || ''}
+                onChange={(e) => handleSiteSettingsChange('seoKeywords', e.target.value)}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            {/* Google Analytics ID */}
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Google Analytics ID
+              </label>
+              <input
+                type="text"
+                placeholder="G-XXXXXXXXXX"
+                value={siteSettings?.googleAnalyticsId || ''}
+                onChange={(e) => handleSiteSettingsChange('googleAnalyticsId', e.target.value)}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+              <p className="text-xs mt-1" style={{ color: '#888888' }}>
+                Get your tracking ID from Google Analytics 4 (GA4)
+              </p>
+            </div>
+
+            <button
+              onClick={handleSaveSiteSettings}
+              disabled={saving}
+              className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
+              style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
+            >
+              <Save className="w-4 h-4 inline mr-2" />
+              {saving ? 'Saving...' : 'Save SEO & Analytics'}
+            </button>
+          </div>
+        </Card>
+
         {/* System Alert */}
         <Card
           className="p-8 border flex gap-4"

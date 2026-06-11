@@ -1,43 +1,25 @@
-'use client'
+import React from 'react'
+import { getAllServiceDefinitions } from '@/lib/integrations/services'
+import { checkAllServicesHealth, getAllApiConfigs } from '@/lib/api-config'
+import { CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
-import React from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { checkServiceHealth } from '@/lib/api-config'
-import { SystemHealth } from '@/lib/types'
-import { RefreshCw, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
 
-const SERVICES_TO_CHECK = ['firebase', 'stripe', 'sendgrid']
+export default async function SystemHealthPage() {
+  const allServices = getAllServiceDefinitions()
+  const [configuredServices, healthStatus] = await Promise.all([
+    getAllApiConfigs(),
+    checkAllServicesHealth(),
+  ])
 
-export default function SystemHealthPage() {
-  const [healthStatus, setHealthStatus] = React.useState<SystemHealth[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [lastChecked, setLastChecked] = React.useState<Date | null>(null)
-
-  const checkServices = async () => {
-    setLoading(true)
-    try {
-      const results: SystemHealth[] = []
-      for (const service of SERVICES_TO_CHECK) {
-        const health = await checkServiceHealth(service)
-        results.push(health)
-      }
-      setHealthStatus(results)
-      setLastChecked(new Date())
-    } catch (error) {
-      console.error('[v0] Error checking service health:', error)
-    } finally {
-      setLoading(false)
+  const getServiceStatus = (serviceId: string) => {
+    const health = healthStatus.find((h) => h.serviceName === serviceId)
+    const isConfigured = configuredServices.some((c) => c.serviceName === serviceId)
+    return {
+      health,
+      isConfigured,
     }
   }
-
-  React.useEffect(() => {
-    checkServices()
-    // Auto-check every 5 minutes
-    const interval = setInterval(checkServices, 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -48,137 +30,226 @@ export default function SystemHealthPage() {
       case 'down':
         return <XCircle className="h-6 w-6 text-red-600" />
       default:
-        return null
+        return <AlertTriangle className="h-6 w-6 text-gray-600" />
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (isConfigured: boolean, status?: string) => {
+    if (!isConfigured) return 'bg-gray-50 border-gray-200'
     switch (status) {
       case 'healthy':
-        return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
+        return 'bg-green-50 border-green-200'
       case 'degraded':
-        return 'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800'
+        return 'bg-yellow-50 border-yellow-200'
       case 'down':
-        return 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+        return 'bg-red-50 border-red-200'
       default:
-        return ''
+        return 'bg-gray-50 border-gray-200'
     }
   }
 
-  const overallStatus = healthStatus.every((s) => s.status === 'healthy')
-    ? 'all-healthy'
-    : healthStatus.some((s) => s.status === 'down')
-      ? 'some-down'
-      : 'degraded'
+  const configuredCount = configuredServices.length
+  const healthyCount = healthStatus.filter((h) => h.status === 'healthy').length
+  const degradedCount = healthStatus.filter((h) => h.status === 'degraded').length
+  const downCount = healthStatus.filter((h) => h.status === 'down').length
+
+  const overallStatus =
+    downCount > 0
+      ? 'down'
+      : degradedCount > 0
+        ? 'degraded'
+        : configuredCount > 0
+          ? 'healthy'
+          : 'unconfigured'
 
   return (
-    <>
-      
-      <div className="p-8">
-        {/* Overall Status */}
-        <Card className={`p-6 mb-8 ${getStatusColor(overallStatus === 'all-healthy' ? 'healthy' : overallStatus === 'some-down' ? 'down' : 'degraded')}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {getStatusIcon(overallStatus === 'all-healthy' ? 'healthy' : overallStatus === 'some-down' ? 'down' : 'degraded')}
-              <div>
-                <h2 className="text-2xl font-bold">
-                  {overallStatus === 'all-healthy'
-                    ? 'All Systems Operational'
-                    : overallStatus === 'some-down'
-                      ? 'Critical Service Down'
-                      : 'Service Degradation'}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Last checked: {lastChecked?.toLocaleTimeString() || 'Never'}
-                </p>
-              </div>
+    <div className="p-8 space-y-8">
+      {/* Overall Status Alert */}
+      {overallStatus === 'down' && (
+        <div
+          className="p-6 rounded-lg border"
+          style={{
+            backgroundColor: '#fef2f2',
+            borderColor: '#fecaca',
+          }}
+        >
+          <div className="flex items-start gap-4">
+            <XCircle style={{ color: '#dc2626', minWidth: '24px' }} />
+            <div>
+              <h3
+                className="font-bold text-lg"
+                style={{ color: '#dc2626' }}
+              >
+                Critical Service Down
+              </h3>
+              <p
+                className="text-sm mt-1"
+                style={{ color: '#991b1b' }}
+              >
+                Last checked: {new Date().toLocaleTimeString()}
+              </p>
             </div>
-            <Button onClick={checkServices} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Checking...' : 'Check Now'}
-            </Button>
           </div>
-        </Card>
+        </div>
+      )}
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {healthStatus.map((service) => (
-            <Card key={service.id} className={`p-6 ${getStatusColor(service.status)}`}>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
+          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
+            Configured
+          </div>
+          <div className="text-3xl font-bold mt-2" style={{ color: '#111111' }}>
+            {configuredCount}
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
+          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
+            Healthy
+          </div>
+          <div className="text-3xl font-bold mt-2" style={{ color: '#10b981' }}>
+            {healthyCount}
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
+          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
+            Degraded
+          </div>
+          <div className="text-3xl font-bold mt-2" style={{ color: '#f59e0b' }}>
+            {degradedCount}
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
+          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
+            Down
+          </div>
+          <div className="text-3xl font-bold mt-2" style={{ color: '#ef4444' }}>
+            {downCount}
+          </div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold" style={{ color: '#111111' }}>
+          Service Health Status
+        </h2>
+        <p className="text-sm mt-1" style={{ color: '#888888' }}>
+          Real-time monitoring of all configured integrations
+        </p>
+      </div>
+
+      {/* Services Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {allServices.map((service) => {
+          const { health, isConfigured } = getServiceStatus(service.id)
+          const statusText = !isConfigured
+            ? 'Not Configured'
+            : health?.status === 'healthy'
+              ? 'Connected'
+              : health?.status === 'degraded'
+                ? 'Degraded'
+                : 'Disconnected'
+
+          return (
+            <div
+              key={service.id}
+              className="p-4 rounded-lg border"
+              style={{
+                backgroundColor: getStatusColor(isConfigured, health?.status).includes('green')
+                  ? '#ecfdf5'
+                  : getStatusColor(isConfigured, health?.status).includes('yellow')
+                    ? '#fefce8'
+                    : getStatusColor(isConfigured, health?.status).includes('red')
+                      ? '#fef2f2'
+                      : '#f9fafb',
+                borderColor: getStatusColor(isConfigured, health?.status).includes('green')
+                  ? '#a7f3d0'
+                  : getStatusColor(isConfigured, health?.status).includes('yellow')
+                    ? '#fef08a'
+                    : getStatusColor(isConfigured, health?.status).includes('red')
+                      ? '#fecaca'
+                      : '#e5e7eb',
+              }}
+            >
               <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4 flex-1">
-                  {getStatusIcon(service.status)}
+                <div className="flex items-start gap-3 flex-1">
+                  {getStatusIcon(health?.status || 'down')}
                   <div>
-                    <h3 className="font-bold capitalize">{service.serviceName}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 capitalize">
-                      Status: {service.status}
+                    <h3 className="font-bold" style={{ color: '#111111' }}>
+                      {service.name}
+                    </h3>
+                    <p className="text-sm mt-1" style={{ color: '#888888' }}>
+                      {service.category}
                     </p>
-                    {service.responseTime && (
-                      <p className="text-sm text-muted-foreground">
-                        Response time: {service.responseTime}ms
+                    {isConfigured && (
+                      <p
+                        className="text-xs font-semibold mt-2"
+                        style={{
+                          color:
+                            health?.status === 'healthy'
+                              ? '#059669'
+                              : health?.status === 'degraded'
+                                ? '#d97706'
+                                : '#dc2626',
+                        }}
+                      >
+                        {statusText}
                       </p>
                     )}
-                    {service.errorMessage && (
-                      <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-                        Error: {service.errorMessage}
+                    {!isConfigured && (
+                      <p className="text-xs font-semibold mt-2" style={{ color: '#6b7280' }}>
+                        {statusText}
+                      </p>
+                    )}
+                    {health?.responseTime && (
+                      <p className="text-xs mt-2" style={{ color: '#888888' }}>
+                        Response: {health.responseTime}ms
                       </p>
                     )}
                   </div>
                 </div>
               </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Firebase Note */}
-        <Card className="p-6 mt-8 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Database Status</h3>
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            Firebase Firestore health is checked automatically. If your Firestore quota is exceeded, 
-            you may experience service degradation. Monitor your usage in Firebase Console.
-          </p>
-        </Card>
-
-        {/* Service Details */}
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Service Details</h2>
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="pb-4 border-b border-border">
-                <p className="font-medium">What is System Health?</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  This page monitors the status of all critical services integrated with Passive Blessings. 
-                  Each service is checked periodically to ensure everything is running smoothly.
-                </p>
-              </div>
-
-              <div className="pb-4 border-b border-border">
-                <p className="font-medium">Service Status Indicators</p>
-                <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" /> Healthy - Service is operational
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600" /> Degraded - Service is slow or partially unavailable
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <XCircle className="h-4 w-4 text-red-600" /> Down - Service is unavailable
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <p className="font-medium">What to do if a service is down?</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  1. Check your API keys in Settings<br />
-                  2. Verify the service status on their official status page<br />
-                  3. Ensure your account has sufficient quota/credits<br />
-                  4. Contact support if the issue persists
-                </p>
-              </div>
             </div>
-          </Card>
-        </div>
+          )
+        })}
       </div>
-    </>
+
+      {/* Information Box */}
+      <div className="p-6 rounded-lg" style={{ backgroundColor: '#eff6ff', borderLeft: '4px solid #3b82f6' }}>
+        <h3 className="font-bold" style={{ color: '#1e40af' }}>
+          Service Health Information
+        </h3>
+        <ul className="text-sm mt-3 space-y-2" style={{ color: '#1e40af' }}>
+          <li className="flex gap-2">
+            <CheckCircle className="h-4 w-4" />
+            <span>
+              <strong>Connected</strong> - Service is properly configured and responding
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            <span>
+              <strong>Degraded</strong> - Service is slow or partially unavailable
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <XCircle className="h-4 w-4" />
+            <span>
+              <strong>Disconnected</strong> - Service is down or not responding
+            </span>
+          </li>
+          <li className="flex gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            <span>
+              <strong>Not Configured</strong> - Service API keys are not configured
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
   )
 }
