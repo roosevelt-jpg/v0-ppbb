@@ -166,6 +166,114 @@ export async function checkServiceHealth(serviceName: string): Promise<SystemHea
           }
         }
 
+      case 'openai':
+        // Check OpenAI models endpoint
+        const oaiResponse = await fetch('https://api.openai.com/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${config.apiKey}`,
+          },
+        })
+        const oaiResponseTime = Date.now() - startTime
+        if (oaiResponse.ok) {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'healthy',
+            lastChecked: new Date(),
+            responseTime: oaiResponseTime,
+          }
+        } else {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'down',
+            lastChecked: new Date(),
+            errorMessage: oaiResponse.statusText,
+          }
+        }
+
+      case 'anthropic':
+        // Check Anthropic API
+        const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': config.apiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'claude-3-haiku-20240307',
+            max_tokens: 10,
+            messages: [{ role: 'user', content: 'ping' }],
+          }),
+        })
+        const anthropicResponseTime = Date.now() - startTime
+        if (anthropicResponse.ok || anthropicResponse.status === 400) {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'healthy',
+            lastChecked: new Date(),
+            responseTime: anthropicResponseTime,
+          }
+        } else {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'down',
+            lastChecked: new Date(),
+            errorMessage: anthropicResponse.statusText,
+          }
+        }
+
+      case 'youtube':
+        // Check YouTube API
+        const youtubeResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${config.apiKey}`
+        )
+        const youtubeResponseTime = Date.now() - startTime
+        if (youtubeResponse.ok) {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'healthy',
+            lastChecked: new Date(),
+            responseTime: youtubeResponseTime,
+          }
+        } else {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'down',
+            lastChecked: new Date(),
+            errorMessage: youtubeResponse.statusText,
+          }
+        }
+
+      case 'googlemaps':
+        // Check Google Maps API
+        const mapsResponse = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=test&key=${config.apiKey}`
+        )
+        const mapsResponseTime = Date.now() - startTime
+        if (mapsResponse.ok) {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'healthy',
+            lastChecked: new Date(),
+            responseTime: mapsResponseTime,
+          }
+        } else {
+          return {
+            id: serviceName,
+            serviceName,
+            status: 'down',
+            lastChecked: new Date(),
+            errorMessage: mapsResponse.statusText,
+          }
+        }
+
       default:
         return {
           id: serviceName,
@@ -183,4 +291,10 @@ export async function checkServiceHealth(serviceName: string): Promise<SystemHea
       errorMessage: error instanceof Error ? error.message : 'Unknown error',
     }
   }
+}
+
+export async function checkAllServicesHealth(): Promise<SystemHealth[]> {
+  const configs = await getAllApiConfigs()
+  const healthChecks = configs.map((config) => checkServiceHealth(config.serviceName))
+  return Promise.all(healthChecks)
 }
