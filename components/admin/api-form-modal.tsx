@@ -80,12 +80,12 @@ export function ApiFormModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col"
         style={{ borderColor: '#e4e1da' }}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between p-6 border-b"
+          className="flex items-center justify-between p-6 border-b flex-shrink-0"
           style={{ borderColor: '#e4e1da' }}
         >
           <div>
@@ -104,8 +104,8 @@ export function ApiFormModal({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Form - Scrollable Content */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           {service.fields.map((field) => (
             <div key={field.name}>
               <label
@@ -159,8 +159,8 @@ export function ApiFormModal({
             </div>
           )}
 
-          {/* Buttons */}
-          <div className="flex gap-2 pt-4">
+          {/* Buttons - Fixed at bottom */}
+          <div className="flex gap-2 pt-4 border-t" style={{ borderColor: '#e4e1da' }}>
             <Button
               type="button"
               variant="outline"
