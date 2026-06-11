@@ -15,7 +15,7 @@ export function YouTubeWidget({ videos, isLoading = false }: YouTubeWidgetProps)
     return (
       <div className="w-full">
         <h2 className="text-3xl font-bold text-neutral-900 mb-8">Latest from Our YouTube Channel</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="rounded-lg overflow-hidden bg-neutral-200 animate-pulse">
               <div className="w-full aspect-video bg-neutral-300" />
@@ -41,8 +41,8 @@ export function YouTubeWidget({ videos, isLoading = false }: YouTubeWidgetProps)
     )
   }
 
-  // Display maximum of 4 videos
-  const displayVideos = videos.slice(0, 4)
+  // Display maximum of 6 videos for better display flexibility
+  const displayVideos = videos.slice(0, 6)
 
   return (
     <div className="w-full">
@@ -62,7 +62,7 @@ export function YouTubeWidget({ videos, isLoading = false }: YouTubeWidgetProps)
         </a>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6">
         {displayVideos.map(video => (
           <a
             key={video.id}
