@@ -118,9 +118,9 @@ export default function ContactPage() {
       <div className="flex-1">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header */}
-          <div className="mb-12 text-center">
+          <div className="mb-12 text-center w-full">
             <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-black">Get In Touch</h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto w-full">
               Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
             </p>
           </div>
