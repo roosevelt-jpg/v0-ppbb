@@ -7,7 +7,6 @@ import { LogOut, LayoutDashboard, Calendar, Heart, Users, Settings, Menu, X, Bri
 import { auth } from '@/lib/firebase'
 import { logoutUser } from '@/lib/auth'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 
 const memberMenuItems = [
@@ -53,7 +52,13 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
       >
         {/* Logo and Close Button */}
         <div className="p-6 border-b border-border flex flex-col items-center justify-center" style={{ minHeight: '100px', position: 'relative' }}>
-          <Logo size="lg" href="/dashboard" />
+          <Link href="/dashboard">
+            <img 
+              src="/pb-logo-black.png" 
+              alt="Passive Blessings"
+              style={{ maxWidth: '140px', height: 'auto' }}
+            />
+          </Link>
           <button onClick={() => setOpen(false)} className="md:hidden absolute top-4 right-4">
             <X className="h-6 w-6" />
           </button>

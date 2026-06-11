@@ -24,7 +24,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Logo } from '@/components/logo'
 import { logoutUser } from '@/lib/auth'
 
 const adminMenuItems = [
@@ -66,7 +65,13 @@ export function AdminSidebar() {
     <aside className="w-44 min-h-screen flex flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       {/* Logo */}
       <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
-        <Logo size="lg" href="/admin" />
+        <Link href="/admin">
+          <img 
+            src="/pb-logo-black.png" 
+            alt="Passive Blessings"
+            style={{ maxWidth: '140px', height: 'auto' }}
+          />
+        </Link>
       </div>
 
       {/* Navigation */}
