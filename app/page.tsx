@@ -17,7 +17,6 @@ import { HeroSliderSettings, YouTubeConfig } from '@/lib/types'
 export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
-  console.log('[v0] HomePage rendering')
   const [stats, setStats] = useState({ members: 0, events: 0, donations: 0 })
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
   const [testimonials, setTestimonials] = useState<any[]>([])
@@ -28,96 +27,68 @@ export default function HomePage() {
   const [heroSliderSettings, setHeroSliderSettings] = useState<HeroSliderSettings | null>(null)
   const [youtubeConfig, setYoutubeConfig] = useState<YouTubeConfig | null>(null)
 
-  console.log('[v0] HomePage state initialized')
-
   useEffect(() => {
-    console.log('[v0] HomePage useEffect starting')
     const statsListeners: any[] = []
     
     try {
-      console.log('[v0] Loading hero slider settings')
       // Load hero slider settings
-      getHeroSliderSettings().then(result => {
-        console.log('[v0] Hero slider settings loaded:', result)
-        setHeroSliderSettings(result)
-      }).catch(err => console.error('[v0] Hero slider settings error:', err))
+      getHeroSliderSettings().then(setHeroSliderSettings).catch(err => console.error('Hero slider error:', err))
       
-      console.log('[v0] Loading YouTube config')
       // Load YouTube config
-      getYouTubeConfig().then(result => {
-        console.log('[v0] YouTube config loaded:', result)
-        setYoutubeConfig(result)
-      }).catch(err => console.error('[v0] YouTube config error:', err))
+      getYouTubeConfig().then(setYoutubeConfig).catch(err => console.error('YouTube config error:', err))
 
       // Members count
-      console.log('[v0] Setting up members listener')
       const usersQuery = query(collection(db, 'users'), where('role', '==', 'member'))
       statsListeners.push(onSnapshot(usersQuery, (snapshot) => {
-        console.log('[v0] Members updated:', snapshot.docs.length)
         setStats((prev) => ({ ...prev, members: snapshot.docs.length }))
-      }, (error) => console.error('[v0] Members listener error:', error)))
+      }, (error) => console.error('Members listener error:', error)))
 
       // Events count
-      console.log('[v0] Setting up events listener')
       const eventsQuery = query(collection(db, 'events'), where('status', '==', 'published'))
       statsListeners.push(onSnapshot(eventsQuery, (snapshot) => {
-        console.log('[v0] Events updated:', snapshot.docs.length)
         setStats((prev) => ({ ...prev, events: snapshot.docs.length }))
-      }, (error) => console.error('[v0] Events listener error:', error)))
+      }, (error) => console.error('Events listener error:', error)))
 
       // Donations sum
-      console.log('[v0] Setting up donations listener')
       const donationsQuery = query(collection(db, 'donations'), where('status', '==', 'completed'))
       statsListeners.push(onSnapshot(donationsQuery, (snapshot) => {
         const total = snapshot.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0)
-        console.log('[v0] Donations updated:', total)
         setStats((prev) => ({ ...prev, donations: total }))
-      }, (error) => console.error('[v0] Donations listener error:', error)))
+      }, (error) => console.error('Donations listener error:', error)))
 
       // Upcoming events
-      console.log('[v0] Setting up upcoming events listener')
       const upcomingQuery = query(collection(db, 'events'), where('status', 'in', ['published', 'active']), limit(3))
       statsListeners.push(onSnapshot(upcomingQuery, (snapshot) => {
-        console.log('[v0] Upcoming events updated:', snapshot.docs.length)
         setUpcomingEvents(snapshot.docs.map(doc => doc.data()))
-      }, (error) => console.error('[v0] Upcoming events listener error:', error)))
+      }, (error) => console.error('Upcoming events listener error:', error)))
 
       // Testimonials
-      console.log('[v0] Setting up testimonials listener')
       const testimonialsQuery = query(collection(db, 'testimonials'), where('isPublished', '==', true), limit(3))
       statsListeners.push(onSnapshot(testimonialsQuery, (snapshot) => {
-        console.log('[v0] Testimonials updated:', snapshot.docs.length)
         setTestimonials(snapshot.docs.map(doc => doc.data()))
-      }, (error) => console.error('[v0] Testimonials listener error:', error)))
+      }, (error) => console.error('Testimonials listener error:', error)))
 
       // Causes
-      console.log('[v0] Setting up causes listener')
       const causesQuery = query(collection(db, 'causes'), where('status', '==', 'active'), limit(3))
       statsListeners.push(onSnapshot(causesQuery, (snapshot) => {
-        console.log('[v0] Causes updated:', snapshot.docs.length)
         setCauses(snapshot.docs.map(doc => doc.data()))
-      }, (error) => console.error('[v0] Causes listener error:', error)))
+      }, (error) => console.error('Causes listener error:', error)))
 
       // Sponsors
-      console.log('[v0] Setting up sponsors listener')
       const sponsorsQuery = query(collection(db, 'sponsors'), where('partnershipStatus', '==', 'active'), limit(6))
       statsListeners.push(onSnapshot(sponsorsQuery, (snapshot) => {
-        console.log('[v0] Sponsors updated:', snapshot.docs.length)
         setSponsors(snapshot.docs.map(doc => doc.data()))
-      }, (error) => console.error('[v0] Sponsors listener error:', error)))
+      }, (error) => console.error('Sponsors listener error:', error)))
 
       // News
-      console.log('[v0] Setting up news listener')
       const newsQuery = query(collection(db, 'news'), where('isPublished', '==', true), limit(3))
       statsListeners.push(onSnapshot(newsQuery, (snapshot) => {
-        console.log('[v0] News updated:', snapshot.docs.length)
         setNews(snapshot.docs.map(doc => doc.data()))
-      }, (error) => console.error('[v0] News listener error:', error)))
+      }, (error) => console.error('News listener error:', error)))
 
-      console.log('[v0] All listeners set up successfully')
       setLoading(false)
     } catch (error) {
-      console.error('[v0] Error setting up listeners:', error)
+      console.error('Error setting up listeners:', error)
       setLoading(false)
     }
 
@@ -138,14 +109,11 @@ export default function HomePage() {
   return (
     <div className="w-full bg-background text-foreground">
       <Navbar />
-      {console.log('[v0] Navbar rendered successfully')}
 
       {/* HERO SLIDER - Full Width Image Carousel */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="max-w-7xl mx-auto">
-          {console.log('[v0] About to render HeroSlider', { heroSliderSettings })}
           <HeroSlider settings={heroSliderSettings} />
-          {console.log('[v0] HeroSlider rendered')}
         </div>
       </section>
 
