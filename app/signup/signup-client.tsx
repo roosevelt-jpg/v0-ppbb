@@ -56,13 +56,44 @@ const STEPS = [
 const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
 const DEPARTMENTS = ['Select dept.', 'Community Support', 'Event Management', 'Volunteer Training', 'Fundraising', 'Administration', 'Marketing', 'Operations']
 
-export default function SignupPage() {
+// Wrap in error boundary
+class ErrorBoundary extends React.Component<any, { hasError: boolean; error: any }> {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error: any) {
+    console.error("[v0] Error boundary caught error:", error)
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("[v0] Error details:", error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ width: '100%', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f7f6f2', flexDirection: 'column', padding: '2rem', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#dc2626', marginBottom: '1rem' }}>Error Loading Signup</h1>
+          <p style={{ color: '#991b1b', marginBottom: '1rem', maxWidth: '500px' }}>{this.state.error?.message || 'An error occurred while loading the signup form'}</p>
+          <a href="/" style={{ padding: '0.75rem 1.5rem', backgroundColor: '#111111', color: '#ffffff', borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 600 }}>Go Home</a>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+function SignupPageContent() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Log signup page visit on mount
+  // Log signup page visit on mount - wrap in try catch
   useEffect(() => {
     console.log("[v0] Signup page mounted, current step:", currentStep)
     try {
@@ -72,6 +103,7 @@ export default function SignupPage() {
       })
     } catch (err) {
       console.error("[v0] Error logging activity:", err)
+      // Don't block signup if logging fails
     }
   }, [])
 
@@ -611,5 +643,14 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Export wrapped with error boundary
+export default function SignupPage() {
+  return (
+    <ErrorBoundary>
+      <SignupPageContent />
+    </ErrorBoundary>
   )
 }
