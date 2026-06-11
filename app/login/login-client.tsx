@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { loginUser } from '@/lib/auth'
+import { loginUser, loginWithGoogle, loginWithFacebook } from '@/lib/auth'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
 import { AlertCircle, Check } from 'lucide-react'
@@ -32,12 +32,28 @@ export default function LoginPage() {
       }
     }
     
+    // Load saved email if remember me was checked
+    const savedEmail = localStorage.getItem('pb_remember_email')
+    if (savedEmail) {
+      setEmail(savedEmail)
+      setRememberMe(true)
+    }
+    
     logActivity('guest', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
       timestamp: new Date().toISOString()
     })
     
     fetchStats()
   }, [])
+
+  // Save email to localStorage when rememberMe changes
+  React.useEffect(() => {
+    if (rememberMe && email) {
+      localStorage.setItem('pb_remember_email', email)
+    } else {
+      localStorage.removeItem('pb_remember_email')
+    }
+  }, [rememberMe, email])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,44 +96,108 @@ export default function LoginPage() {
     }
   }
 
+  const handleGoogleLogin = async () => {
+    setError('')
+    setLoading(true)
+
+    const { user, error: loginError } = await loginWithGoogle()
+
+    if (loginError) {
+      setError(loginError)
+      setLoading(false)
+      return
+    }
+
+    if (user) {
+      logActivity(user.id, user.email, 'SIGNIN_GOOGLE', 'Signed in with Google', { 
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      })
+
+      if (user.role === 'admin') {
+        router.push('/admin')
+      } else if (user.role === 'business') {
+        router.push('/business')
+      } else if (user.role === 'sponsor') {
+        router.push('/sponsor')
+      } else {
+        router.push('/dashboard')
+      }
+    }
+  }
+
+  const handleFacebookLogin = async () => {
+    setError('')
+    setLoading(true)
+
+    const { user, error: loginError } = await loginWithFacebook()
+
+    if (loginError) {
+      setError(loginError)
+      setLoading(false)
+      return
+    }
+
+    if (user) {
+      logActivity(user.id, user.email, 'SIGNIN_FACEBOOK', 'Signed in with Facebook', { 
+        userId: user.id,
+        timestamp: new Date().toISOString()
+      })
+
+      if (user.role === 'admin') {
+        router.push('/admin')
+      } else if (user.role === 'business') {
+        router.push('/business')
+      } else if (user.role === 'sponsor') {
+        router.push('/sponsor')
+      } else {
+        router.push('/dashboard')
+      }
+    }
+  }
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center px-4 py-6 md:py-8 bg-neutral-100">
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-2xl overflow-hidden shadow-lg">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 py-4 md:py-6 bg-neutral-100">
+      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-0 rounded-lg overflow-hidden shadow-md">
         {/* Left Column - Form */}
-        <div className="flex flex-col justify-center px-6 py-8 md:px-8 md:py-10 bg-white">
-          <div className="mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2">
+        <div className="flex flex-col justify-center px-5 py-6 md:px-6 bg-white">
+          <div className="mb-4">
+            <h1 className="text-2.5xl md:text-3xl font-bold text-neutral-900 mb-1">
               Welcome back
             </h1>
-            <p className="text-sm md:text-base text-neutral-600">
-              Sign in to your Passive Blessings account to access your dashboard, events, and community.
+            <p className="text-xs md:text-sm text-neutral-600">
+              Sign in to access your dashboard, events, and community.
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-900">{error}</p>
+            <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-lg flex gap-2 items-start">
+              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-red-900">{error}</p>
             </div>
           )}
 
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2 mb-3">
             <button
               type="button"
-              className="w-full px-4 py-2.5 bg-white text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-sm text-neutral-900"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
             >
-              Continue with Google
+              {loading ? 'Signing in...' : 'Continue with Google'}
             </button>
 
             <button
               type="button"
-              className="w-full px-4 py-2.5 bg-white text-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 transition-all font-medium text-sm text-neutral-900"
+              onClick={handleFacebookLogin}
+              disabled={loading}
+              className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
             >
-              Continue with Facebook
+              {loading ? 'Signing in...' : 'Continue with Facebook'}
             </button>
           </div>
 
-          <div className="relative mb-4">
+          <div className="relative mb-3">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-neutral-200"></div>
             </div>
@@ -126,10 +206,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-3">
+          <form onSubmit={handleLogin} className="space-y-2">
             <div>
-              <label htmlFor="email" className="block text-xs font-medium text-neutral-900 mb-1.5">
-                Email address
+              <label htmlFor="email" className="block text-xs font-medium text-neutral-900 mb-1">
+                Email
               </label>
               <input
                 id="email"
@@ -138,12 +218,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-medium text-neutral-900 mb-1.5">
+              <label htmlFor="password" className="block text-xs font-medium text-neutral-900 mb-1">
                 Password
               </label>
               <input
@@ -153,12 +233,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Your password"
-                className="w-full px-3 py-2.5 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 bg-white border border-neutral-200 rounded-lg text-sm text-neutral-900 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
               />
             </div>
 
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -175,59 +255,59 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-neutral-900 text-white font-semibold text-sm rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors mt-4"
+              className="w-full py-2 bg-neutral-900 text-white font-semibold text-xs rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors mt-3"
             >
-              {loading ? 'Signing in...' : 'Sign in to dashboard'}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
-          <div className="text-center mt-4">
-            <span className="text-xs text-neutral-600">No account yet? </span>
+          <div className="text-center mt-3">
+            <span className="text-xs text-neutral-600">New here? </span>
             <Link href="/signup" className="text-xs font-semibold text-neutral-900 hover:underline">
-              Join the community
+              Create account
             </Link>
           </div>
         </div>
 
         {/* Right Column - Community Benefits */}
-        <div className="hidden md:flex flex-col justify-between px-6 py-8 md:px-8 md:py-10 bg-neutral-900 text-white">
+        <div className="hidden md:flex flex-col justify-between px-6 py-6 bg-neutral-900 text-white">
           <div>
-            <div className="mb-6 h-10 flex items-center justify-center">
+            <div className="mb-4 h-8 flex items-center justify-center">
               <img 
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
                 alt="Passive Blessings" 
-                className="h-10 w-auto"
+                className="h-8 w-auto"
               />
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">
+            <h2 className="text-2xl font-bold mb-2">
               Your community hub <span className="italic font-light">awaits</span>
             </h2>
-            <p className="text-sm text-neutral-300 mb-6 leading-relaxed">
-              Access your dashboard, track volunteer hours, register for events, manage donations, and connect with 3,400+ community members across the UAE.
+            <p className="text-sm text-neutral-300 mb-4 leading-relaxed">
+              Access dashboard, track hours, register events, manage donations, and connect with 3,400+ members.
             </p>
 
-            <div className="space-y-3">
-              <div className="flex gap-3 items-start">
-                <div className="w-4 h-4 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3 h-3 text-neutral-300" />
+            <div className="space-y-2">
+              <div className="flex gap-2 items-start">
+                <div className="w-3.5 h-3.5 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-2.5 h-2.5 text-neutral-300" />
                 </div>
                 <span className="text-xs text-neutral-300">Register and track community events</span>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="w-4 h-4 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3 h-3 text-neutral-300" />
+              <div className="flex gap-2 items-start">
+                <div className="w-3.5 h-3.5 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-2.5 h-2.5 text-neutral-300" />
                 </div>
                 <span className="text-xs text-neutral-300">Log volunteer hours and earn certificates</span>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="w-4 h-4 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3 h-3 text-neutral-300" />
+              <div className="flex gap-2 items-start">
+                <div className="w-3.5 h-3.5 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-2.5 h-2.5 text-neutral-300" />
                 </div>
                 <span className="text-xs text-neutral-300">Request welfare support confidentially</span>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="w-4 h-4 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3 h-3 text-neutral-300" />
+              <div className="flex gap-2 items-start">
+                <div className="w-3.5 h-3.5 rounded border border-neutral-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-2.5 h-2.5 text-neutral-300" />
                 </div>
                 <span className="text-xs text-neutral-300">Access the business marketplace</span>
               </div>
@@ -235,35 +315,35 @@ export default function LoginPage() {
           </div>
 
           {/* Stats Grid */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="border border-neutral-700 rounded-lg p-3">
-                <div className="text-2xl font-bold text-white mb-1">
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="border border-neutral-700 rounded-lg p-2.5">
+                <div className="text-xl font-bold text-white mb-0.5">
                   {statsLoading ? '-' : stats.totalMembers.toLocaleString()}
                 </div>
                 <div className="text-xs text-neutral-400">Community members</div>
               </div>
-              <div className="border border-neutral-700 rounded-lg p-3">
-                <div className="text-2xl font-bold text-white mb-1">
+              <div className="border border-neutral-700 rounded-lg p-2.5">
+                <div className="text-xl font-bold text-white mb-0.5">
                   {statsLoading ? '-' : stats.volunteerHours.toLocaleString()}
                 </div>
                 <div className="text-xs text-neutral-400">Volunteer hours</div>
               </div>
-              <div className="border border-neutral-700 rounded-lg p-3">
-                <div className="text-2xl font-bold text-white mb-1">
+              <div className="border border-neutral-700 rounded-lg p-2.5">
+                <div className="text-xl font-bold text-white mb-0.5">
                   {statsLoading ? '-' : stats.businessPartners}
                 </div>
                 <div className="text-xs text-neutral-400">Business partners</div>
               </div>
-              <div className="border border-neutral-700 rounded-lg p-3">
-                <div className="text-2xl font-bold text-white mb-1">
+              <div className="border border-neutral-700 rounded-lg p-2.5">
+                <div className="text-xl font-bold text-white mb-0.5">
                   {statsLoading ? '-' : formatDonations(stats.totalDonations)}
                 </div>
-                <div className="text-xs text-neutral-400">Donations tracked</div>
+                <div className="text-xs text-neutral-400">Donations</div>
               </div>
             </div>
 
-            <div className="text-xs text-neutral-500 pt-3 border-t border-neutral-800">
+            <div className="text-xs text-neutral-500 pt-2 border-t border-neutral-800">
               TRUSTED BY 3,400+ MEMBERS • ESTD 2025 • DUBAI, UAE
             </div>
           </div>

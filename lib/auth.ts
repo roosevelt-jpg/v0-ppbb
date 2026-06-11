@@ -6,6 +6,10 @@ import {
   User as FirebaseUser,
   setPersistence,
   browserLocalPersistence,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
@@ -90,6 +94,101 @@ export async function loginUser(
     return { user: userDocSnap.data() as User, error: null }
   } catch (error: any) {
     return { user: null, error: error.message }
+  }
+}
+
+export async function loginWithGoogle(): Promise<{ user: User | null; error: string | null }> {
+  try {
+    await setPersistence(auth, browserLocalPersistence)
+    
+    const provider = new GoogleAuthProvider()
+    const result = await signInWithPopup(auth, provider)
+    const firebaseUser = result.user
+
+    // Check if user exists in Firestore
+    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+
+    if (userDocSnap.exists()) {
+      return { user: userDocSnap.data() as User, error: null }
+    }
+
+    // Create new user profile for first-time Google sign-in
+    const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
+    const lastName = lastNameParts.join(' ')
+
+    const userProfile: User = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      firstName,
+      lastName,
+      avatar: firebaseUser.photoURL ? { url: firebaseUser.photoURL, name: 'google-avatar' } : undefined,
+      role: 'member',
+      volunteeredHours: 0,
+      totalDonated: 0,
+      membershipTier: 'standard',
+      memberSince: new Date(),
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+
+    return { user: userProfile, error: null }
+  } catch (error: any) {
+    return { user: null, error: error.message }
+  }
+}
+
+export async function loginWithFacebook(): Promise<{ user: User | null; error: string | null }> {
+  try {
+    await setPersistence(auth, browserLocalPersistence)
+    
+    const provider = new FacebookAuthProvider()
+    const result = await signInWithPopup(auth, provider)
+    const firebaseUser = result.user
+
+    // Check if user exists in Firestore
+    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+
+    if (userDocSnap.exists()) {
+      return { user: userDocSnap.data() as User, error: null }
+    }
+
+    // Create new user profile for first-time Facebook sign-in
+    const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
+    const lastName = lastNameParts.join(' ')
+
+    const userProfile: User = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      firstName,
+      lastName,
+      avatar: firebaseUser.photoURL ? { url: firebaseUser.photoURL, name: 'facebook-avatar' } : undefined,
+      role: 'member',
+      volunteeredHours: 0,
+      totalDonated: 0,
+      membershipTier: 'standard',
+      memberSince: new Date(),
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+
+    return { user: userProfile, error: null }
+  } catch (error: any) {
+    return { user: null, error: error.message }
+  }
+}
+
+export async function sendPasswordReset(email: string): Promise<{ success: boolean; error: string | null }> {
+  try {
+    await sendPasswordResetEmail(auth, email)
+    return { success: true, error: null }
+  } catch (error: any) {
+    return { success: false, error: error.message }
   }
 }
 
