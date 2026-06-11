@@ -9,10 +9,12 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@base-ui/react": "^1.5.0",
     "@sendgrid/mail": "^8.1.6",
     "@stripe/react-stripe-js": "^6.6.0",
     "@vercel/analytics": "1.6.1",
+    "ai": "^6.0.201",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
