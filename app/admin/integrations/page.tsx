@@ -27,12 +27,12 @@ export default function AdminIntegrationsPage() {
 
   async function loadData() {
     try {
-      const [configsData, healthData] = await Promise.all([
-        getAllApiConfigs(),
-        checkAllServicesHealth(),
-      ])
-      setConfigs(configsData)
-      setHealthStatus(healthData)
+      const response = await fetch('/api/admin/integrations')
+      const data = await response.json()
+      if (data.success) {
+        setConfigs(data.configs)
+        setHealthStatus(data.health)
+      }
       setLoading(false)
     } catch (error) {
       console.error('[v0] Error loading integrations:', error)
