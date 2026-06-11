@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { auth } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
 
 export default function AdminSetup() {
@@ -21,19 +22,32 @@ export default function AdminSetup() {
     setLoading(true)
 
     try {
-      // Valid access codes - should be set in environment variable in production
-      // For now, using specific codes for security
-      const ADMIN_ACCESS_CODE = process.env.NEXT_PUBLIC_ADMIN_ACCESS_CODE || 'PB-ADMIN-2025'
-      const validCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025']
+      const code = accessCode.trim().toUpperCase()
       
-      if (!validCodes.includes(accessCode.trim())) {
+      // Check against hardcoded codes first (for emergency access)
+      const ADMIN_ACCESS_CODE = process.env.NEXT_PUBLIC_ADMIN_ACCESS_CODE || 'PB-ADMIN-2025'
+      const hardcodedCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025']
+      
+      if (hardcodedCodes.includes(code)) {
+        setStep(2)
+        setLoading(false)
+        return
+      }
+
+      // Check Firestore for dynamically generated access codes
+      const usersRef = collection(db, 'users')
+      const q = query(usersRef, where('accessCode', '==', code))
+      const querySnapshot = await getDocs(q)
+
+      if (querySnapshot.empty) {
         setError('Invalid access code. Please try again.')
         setLoading(false)
         return
       }
-      
+
       setStep(2)
     } catch (err) {
+      console.error('[v0] Access code validation error:', err)
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
