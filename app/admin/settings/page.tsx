@@ -393,6 +393,86 @@ export default function AdminSettings() {
           </div>
         </Card>
 
+        {/* Social Media Links */}
+        <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+          <h2
+            className="text-2xl font-bold mb-2"
+            style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}
+          >
+            Social Media Links
+          </h2>
+          <p className="text-sm mb-6" style={{ color: '#888888' }}>
+            Add your social media URLs. They will appear in the footer.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Facebook URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://facebook.com/passiveblessings"
+                value={siteSettings?.socialLinks?.facebook || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, facebook: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Twitter URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://twitter.com/passiveblessings"
+                value={siteSettings?.socialLinks?.twitter || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, twitter: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Instagram URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://instagram.com/passiveblessings"
+                value={siteSettings?.socialLinks?.instagram || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, instagram: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                LinkedIn URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://linkedin.com/company/passiveblessings"
+                value={siteSettings?.socialLinks?.linkedin || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, linkedin: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <button
+              onClick={handleSaveSiteSettings}
+              disabled={saving}
+              className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
+              style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
+            >
+              <Save className="w-4 h-4 inline mr-2" />
+              {saving ? 'Saving...' : 'Save Social Media Links'}
+            </button>
+          </div>
+        </Card>
+
         {/* API Configurations */}
         <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
           <h2

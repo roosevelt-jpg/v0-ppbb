@@ -2,16 +2,23 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Logo } from '@/components/logo'
+import Image from 'next/image'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, getCountFromServer, query, where } from 'firebase/firestore'
-import { Mail } from 'lucide-react'
+import { Mail, Heart, Share2, Link as LinkIcon, MessageSquare } from 'lucide-react'
 
 interface Stats {
   members: number
   volunteerHours: number
   businessPartners: number
   donationsTracked: string
+}
+
+interface SocialLinks {
+  facebook?: string
+  twitter?: string
+  instagram?: string
+  linkedin?: string
 }
 
 export function Footer() {
@@ -22,6 +29,7 @@ export function Footer() {
     businessPartners: 87,
     donationsTracked: 'AED 92K',
   })
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -52,6 +60,14 @@ export function Footer() {
           volunteerHours: totalVolunteerHours || 8940,
           businessPartners: businessCount || 87,
           donationsTracked: totalDonations > 0 ? `AED ${totalDonations.toLocaleString()}` : 'AED 92K',
+        })
+
+        // Fetch social links from settings
+        const settingsSnapshot = await getDocs(collection(db, 'settings'))
+        settingsSnapshot.forEach(doc => {
+          if (doc.data().socialLinks) {
+            setSocialLinks(doc.data().socialLinks)
+          }
         })
       } catch (error) {
         console.error('[v0] Error fetching footer stats:', error)
@@ -95,7 +111,15 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <Logo size="md" />
+            <div className="w-32 h-auto">
+              <Image 
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-1IbVvpWYxxNsdvH8MfdFG37gnBEPOv.png" 
+                alt="Passive Blessings" 
+                width={200} 
+                height={60}
+                priority
+              />
+            </div>
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
               Building community through compassion and collective action.
             </p>
@@ -181,24 +205,28 @@ export function Footer() {
             </p>
             <div className="flex gap-4 mt-4 sm:mt-0">
               {[
-                { label: 'Facebook', href: 'https://facebook.com/passiveblessings' },
-                { label: 'Twitter', href: 'https://twitter.com/passiveblessings' },
-                { label: 'Instagram', href: 'https://instagram.com/passiveblessings' },
-                { label: 'LinkedIn', href: 'https://linkedin.com/company/passiveblessings' },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-700"
-                  style={{ color: '#888888' }}
-                  aria-label={social.label}
-                  title={social.label}
-                >
-                  <span className="text-xs font-bold">{social.label.charAt(0)}</span>
-                </a>
-              ))}
+                { label: 'Facebook', key: 'facebook', icon: Heart },
+                { label: 'Twitter', key: 'twitter', icon: MessageSquare },
+                { label: 'Instagram', key: 'instagram', icon: Share2 },
+                { label: 'LinkedIn', key: 'linkedin', icon: LinkIcon },
+              ].map((social) => {
+                const href = socialLinks[social.key as keyof SocialLinks]
+                const Icon = social.icon
+                return (
+                  <a
+                    key={social.label}
+                    href={href || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-700"
+                    style={{ color: '#ffffff' }}
+                    aria-label={social.label}
+                    title={social.label}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                )
+              })}
             </div>
           </div>
         </div>

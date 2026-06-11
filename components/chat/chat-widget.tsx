@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageCircle, X, Send } from 'lucide-react'
+import { X, Send } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 interface Message {
@@ -61,7 +61,21 @@ export function ChatWidget() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || loading || !conversationId) return
+    console.log('[v0] Chat: handleSendMessage called', { input, loading, conversationId })
+    
+    if (!input.trim() || loading) {
+      console.log('[v0] Chat: Early return - input empty or loading')
+      return
+    }
+
+    if (!conversationId) {
+      console.log('[v0] Chat: No conversation ID, initializing...')
+      // Try to initialize if not already done
+      if (user?.id) {
+        await initializeConversation()
+      }
+      return
+    }
 
     const userMessage: Message = {
       role: 'user',
@@ -74,6 +88,7 @@ export function ChatWidget() {
     setLoading(true)
 
     try {
+      console.log('[v0] Chat: Sending message to API', { conversationId, userId: user?.id })
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,7 +99,13 @@ export function ChatWidget() {
         }),
       })
 
+      console.log('[v0] Chat: API response status', response.status)
       const data = await response.json()
+      console.log('[v0] Chat: API response data', data)
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message')
+      }
 
       if (data.message) {
         const assistantMessage: Message = {
@@ -95,7 +116,7 @@ export function ChatWidget() {
         setMessages(prev => [...prev, assistantMessage])
       }
     } catch (error) {
-      console.error('[v0] Error sending message:', error)
+      console.error('[v0] Chat: Error sending message:', error)
       setMessages(prev => [
         ...prev,
         {
@@ -115,13 +136,13 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 text-2xl"
           style={{ backgroundColor: '#111111' }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
           aria-label="Open chat"
         >
-          <MessageCircle className="w-6 h-6" />
+          👳‍♀️
         </button>
       )}
 
@@ -131,7 +152,7 @@ export function ChatWidget() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div>
-              <h3 className="font-semibold">Support Assistant</h3>
+              <h3 className="font-semibold">PB Assistant</h3>
               <p className="text-xs opacity-90">Powered by AI</p>
             </div>
             <button
