@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
-import { Award, Target, Users, TrendingUp, Gift, Calendar } from 'lucide-react'
+import { Award, Target, Users, TrendingUp, Gift, Calendar, BarChart3, Zap, ShoppingBag } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import Link from 'next/link'
 
 interface SponsorStats {
   activeCampaigns: number
@@ -207,33 +208,46 @@ export default function SponsorDashboard() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-          <button
-            onClick={() => router.push('/marketplace')}
-            className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left"
-          >
-            <Gift className="w-8 h-8 text-blue-600 mb-3" />
-            <h3 className="font-semibold text-neutral-900">Browse Opportunities</h3>
-            <p className="text-sm text-neutral-600 mt-1">Find campaigns and events to sponsor</p>
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          <Link href="/sponsor/marketplace">
+            <button className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left w-full">
+              <ShoppingBag className="w-8 h-8 text-blue-600 mb-3" />
+              <h3 className="font-semibold text-neutral-900">Browse Opportunities</h3>
+              <p className="text-sm text-neutral-600 mt-1">Explore sponsorship options</p>
+            </button>
+          </Link>
 
-          <button
-            onClick={() => router.push('/marketplace')}
-            className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left"
-          >
-            <Users className="w-8 h-8 text-purple-600 mb-3" />
-            <h3 className="font-semibold text-neutral-900">Partner With Us</h3>
-            <p className="text-sm text-neutral-600 mt-1">Explore partnership opportunities</p>
-          </button>
+          <Link href="/sponsor/profile">
+            <button className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left w-full">
+              <Award className="w-8 h-8 text-amber-600 mb-3" />
+              <h3 className="font-semibold text-neutral-900">My Profile</h3>
+              <p className="text-sm text-neutral-600 mt-1">View and edit your information</p>
+            </button>
+          </Link>
 
-          <button
-            onClick={() => router.push('/contact')}
-            className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left"
-          >
-            <Award className="w-8 h-8 text-orange-600 mb-3" />
-            <h3 className="font-semibold text-neutral-900">Contact Support</h3>
-            <p className="text-sm text-neutral-600 mt-1">Get help with sponsorships</p>
-          </button>
+          <Link href="/sponsor/analytics">
+            <button className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left w-full">
+              <BarChart3 className="w-8 h-8 text-purple-600 mb-3" />
+              <h3 className="font-semibold text-neutral-900">Analytics</h3>
+              <p className="text-sm text-neutral-600 mt-1">Track your impact and ROI</p>
+            </button>
+          </Link>
+
+          <Link href="/sponsor/certificates">
+            <button className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left w-full">
+              <Zap className="w-8 h-8 text-orange-600 mb-3" />
+              <h3 className="font-semibold text-neutral-900">Recognition</h3>
+              <p className="text-sm text-neutral-600 mt-1">View certificates and awards</p>
+            </button>
+          </Link>
+
+          <Link href="/sponsor/partnerships">
+            <button className="p-6 border border-neutral-200 rounded-lg hover:border-neutral-300 hover:bg-neutral-50 transition-all text-left w-full">
+              <Users className="w-8 h-8 text-green-600 mb-3" />
+              <h3 className="font-semibold text-neutral-900">Partnerships</h3>
+              <p className="text-sm text-neutral-600 mt-1">Manage your relationships</p>
+            </button>
+          </Link>
         </div>
       </div>
     </div>
