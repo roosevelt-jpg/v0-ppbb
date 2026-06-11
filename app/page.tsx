@@ -35,7 +35,7 @@ export default function HomePage() {
       getHeroSliderSettings().then(setHeroSliderSettings)
       
       // Load YouTube config
-      getYoutubeConfig().then(setYoutubeConfig)
+      getYouTubeConfig().then(setYoutubeConfig)
 
       // Members count
       const usersQuery = query(collection(db, 'users'), where('role', '==', 'member'))
