@@ -115,7 +115,10 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-6 right-6 z-40 w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          style={{ backgroundColor: '#111111' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
           aria-label="Open chat"
         >
           <MessageCircle className="w-6 h-6" />
@@ -126,14 +129,16 @@ export function ChatWidget() {
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50 w-96 h-96 bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-blue-600 text-white rounded-t-lg">
+          <div className="flex items-center justify-between p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div>
               <h3 className="font-semibold">Support Assistant</h3>
               <p className="text-xs opacity-90">Powered by AI</p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-blue-700 rounded transition"
+              className="p-1 rounded transition"
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -149,9 +154,10 @@ export function ChatWidget() {
                 <div
                   className={`max-w-xs px-4 py-2 rounded-lg ${
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-none'
+                      ? 'text-white rounded-br-none'
                       : 'bg-neutral-100 text-neutral-900 rounded-bl-none'
                   }`}
+                  style={message.role === 'user' ? { backgroundColor: '#111111' } : {}}
                 >
                   <p className="text-sm">{message.content}</p>
                 </div>
@@ -180,12 +186,18 @@ export function ChatWidget() {
                 onChange={e => setInput(e.target.value)}
                 placeholder="Type a message..."
                 disabled={loading}
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-neutral-50"
+                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 text-sm disabled:bg-neutral-50"
+                style={{ '--tw-ring-color': '#111111' } as any}
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+                className="p-2 text-white rounded-lg transition"
+                style={{ 
+                  backgroundColor: loading || !input.trim() ? '#cccccc' : '#111111'
+                }}
+                onMouseEnter={(e) => !loading && !input.trim() && (e.currentTarget.style.backgroundColor = '#333333')}
+                onMouseLeave={(e) => !loading && !input.trim() && (e.currentTarget.style.backgroundColor = '#111111')}
               >
                 <Send className="w-4 h-4" />
               </button>
