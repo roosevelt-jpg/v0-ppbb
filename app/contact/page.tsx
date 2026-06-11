@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { db } from '@/lib/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import Link from 'next/link'
@@ -70,8 +72,10 @@ export default function ContactPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-white flex flex-col">
+      <Navbar />
+      <div className="flex-1">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-16 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">Get In Touch</h1>
@@ -282,6 +286,8 @@ export default function ContactPage() {
           </Link>
         </div>
       </div>
+      </div>
+      <Footer />
     </div>
   )
 }
