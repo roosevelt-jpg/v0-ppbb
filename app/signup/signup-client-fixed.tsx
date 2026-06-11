@@ -14,7 +14,7 @@ const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training'
 export default function SignupClient() {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
-    memberType: 'general',
+    memberType: 'member',
     firstName: '',
     lastName: '',
     email: '',
@@ -91,9 +91,8 @@ export default function SignupClient() {
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>I want to join as</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                         {[
-                          { value: 'general', label: 'General Member', desc: 'Community events, charity' },
-                          { value: 'volunteer', label: 'Volunteer', desc: 'Contribute your time & skills' },
-                          { value: 'member-volunteer', label: 'Member + Volunteer', desc: 'Full access & give back' },
+                          { value: 'member', label: 'Member', desc: 'Community events & charity' },
+                          { value: 'volunteer', label: 'Volunteer', desc: 'Member + contribute time & skills' },
                           { value: 'business', label: 'Business Owner', desc: 'Marketplace access' },
                           { value: 'sponsor', label: 'Sponsor', desc: 'Support & partner opportunities' },
                         ].map(option => (

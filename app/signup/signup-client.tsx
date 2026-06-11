@@ -108,7 +108,7 @@ function SignupPageContent() {
   }, [])
 
   const [formData, setFormData] = useState<FormData>({
-    memberType: 'general',
+    memberType: 'member',
     firstName: '',
     middleName: '',
     lastName: '',
@@ -261,11 +261,7 @@ function SignupPageContent() {
         profession: formData.occupation,
         employer: formData.employer,
         skills: formData.skills,
-        role: formData.memberType === 'general' ? 'member' : 
-             formData.memberType === 'volunteer' ? 'volunteer' : 
-             formData.memberType === 'member-volunteer' ? 'member' :
-             formData.memberType === 'business' ? 'business' :
-             formData.memberType === 'sponsor' ? 'sponsor' : 'member',
+        role: formData.memberType as 'member' | 'volunteer' | 'business' | 'sponsor',
         memberType: formData.memberType,
         volunteerAvailability: {
           days: formData.volunteerDays,
@@ -332,9 +328,10 @@ function SignupPageContent() {
               <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '1rem', textTransform: 'uppercase', color: '#666', letterSpacing: '0.05em' }}>I want to join as</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {[
-                  { value: 'general', label: 'General Member', desc: 'Community events, charity' },
-                  { value: 'volunteer', label: 'Volunteer', desc: 'Contribute your time & skills' },
-                  { value: 'member-volunteer', label: 'Member + Volunteer', desc: 'Full access & give back' },
+                  { value: 'member', label: 'Member', desc: 'Community events & charity' },
+                  { value: 'volunteer', label: 'Volunteer', desc: 'Member + contribute time & skills' },
+                  { value: 'business', label: 'Business Owner', desc: 'Marketplace access' },
+                  { value: 'sponsor', label: 'Sponsor', desc: 'Support & partner opportunities' },
                 ].map(option => (
                   <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '1rem', border: `2px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.5rem', cursor: 'pointer', transition: 'all 0.2s' }}>
                     <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
