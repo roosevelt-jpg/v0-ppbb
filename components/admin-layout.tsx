@@ -65,9 +65,8 @@ export function AdminSidebar() {
   return (
     <aside className="w-44 min-h-screen flex flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       {/* Logo */}
-      <div className="p-4 border-b flex flex-col items-center" style={{ borderColor: '#e4e1da' }}>
-        <Logo size="md" href="/admin" />
-        <p className="text-xs mt-3 font-semibold" style={{ color: '#111111' }}>Admin Panel</p>
+      <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
+        <Logo size="lg" href="/admin" />
       </div>
 
       {/* Navigation */}
@@ -113,12 +112,36 @@ export function AdminSidebar() {
 }
 
 export function AdminHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logoutUser()
+    router.push('/login')
+  }
+
   return (
-    <div className="border-b px-8 py-6" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-      <h1 className="text-2xl font-bold" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
-        {title}
-      </h1>
-      {subtitle && <p className="text-xs mt-1" style={{ color: '#888888' }}>{subtitle}</p>}
+    <div className="border-b px-8 py-4 flex items-center justify-between" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+      <div>
+        <h1 className="text-2xl font-bold" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+          {title}
+        </h1>
+        {subtitle && <p className="text-xs mt-1" style={{ color: '#888888' }}>{subtitle}</p>}
+      </div>
+      <div className="flex items-center gap-4">
+        <ThemeToggle />
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+          style={{
+            backgroundColor: '#f7f6f2',
+            color: '#111111',
+            border: '1px solid #e4e1da',
+          }}
+        >
+          <LogOut className="h-4 w-4" />
+          Sign out
+        </button>
+      </div>
     </div>
   )
 }

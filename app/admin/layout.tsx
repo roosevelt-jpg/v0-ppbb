@@ -68,13 +68,16 @@ export default function AdminLayout({
     )
   }
 
-  // For other admin pages, render with sidebar
+  // For other admin pages, render with sidebar and header
   return (
     <div className="flex h-screen bg-background">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <AdminHeader title="Platform Overview" subtitle="Complete ecosystem visibility and management" />
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }
