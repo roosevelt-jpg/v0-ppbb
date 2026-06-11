@@ -18,6 +18,8 @@ import {
   AlertCircle,
   Flag,
   Mail,
+  HandHeart,
+  Target,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -31,6 +33,9 @@ const adminMenuItems = [
   { label: 'Events', href: '/admin/events', icon: Calendar },
   { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert },
   { label: 'Donations', href: '/admin/donations', icon: DollarSign },
+  { label: 'Donation Causes', href: '/admin/causes', icon: Target },
+  { label: 'Charity Partners', href: '/admin/partners', icon: HandHeart },
+  { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle },
   { label: 'Sponsors', href: '/admin/sponsors', icon: Store },
   { label: 'Businesses', href: '/admin/businesses', icon: Store },
   { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle },
