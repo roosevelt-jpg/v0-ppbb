@@ -6,7 +6,7 @@ import { IntegrationCard } from '@/components/admin/integration-card'
 import { IntegrationForm } from '@/components/admin/integration-form'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, AlertCircle, CheckCircle } from 'lucide-react'
+import { Plus, AlertCircle, CheckCircle, Zap, Database, TrendingUp, Clock } from 'lucide-react'
 
 // Define available integrations
 const AVAILABLE_INTEGRATIONS: Record<string, { name: string; description: string; icon: string }> = {
