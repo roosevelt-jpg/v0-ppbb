@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { AdminSidebar, AdminHeader } from '@/components/admin-layout'
 
@@ -11,9 +11,19 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null)
 
+  // Check if this is the setup page
+  const isSetupPage = pathname === '/admin/setup'
+
   React.useEffect(() => {
+    // Skip auth check for setup page
+    if (isSetupPage) {
+      setIsAdmin(true)
+      return
+    }
+
     const unsubscribe = auth.onAuthStateChanged(async (user: any) => {
       if (!user) {
         router.push('/login')
@@ -26,9 +36,9 @@ export default function AdminLayout({
     })
 
     return () => unsubscribe()
-  }, [router])
+  }, [router, isSetupPage])
 
-  if (isAdmin === null) {
+  if (isAdmin === null && !isSetupPage) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -38,7 +48,7 @@ export default function AdminLayout({
     )
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !isSetupPage) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -48,6 +58,16 @@ export default function AdminLayout({
     )
   }
 
+  // For setup page, render without sidebar
+  if (isSetupPage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+        {children}
+      </div>
+    )
+  }
+
+  // For other admin pages, render with sidebar
   return (
     <div className="flex h-screen bg-background">
       <AdminSidebar />
@@ -57,3 +77,4 @@ export default function AdminLayout({
     </div>
   )
 }
+
