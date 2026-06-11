@@ -124,6 +124,19 @@ export default function DonationPage() {
                       <h3 className="text-lg font-bold mb-2">{cause.name}</h3>
                       <p className="text-gray-600 text-sm mb-4">{cause.description}</p>
 
+                      {/* Show assigned partner badge */}
+                      {cause.partnerId && (
+                        <div className="mb-3">
+                          {partners
+                            .filter((p) => p.id === cause.partnerId)
+                            .map((partner) => (
+                              <p key={partner.id} className="text-xs text-gray-700 mb-3">
+                                <span className="font-semibold">Partner:</span> {partner.name}
+                              </p>
+                            ))}
+                        </div>
+                      )}
+
                       {/* Progress Bar */}
                       <div className="mb-3">
                         <div className="flex justify-between text-sm mb-1">
@@ -174,23 +187,77 @@ export default function DonationPage() {
                     donation, you&apos;ll be able to track it in your dashboard and receive a tax receipt.
                   </p>
 
-                  <div className="space-y-3">
-                    {partners.map((partner) => (
-                      <a
-                        key={partner.id}
-                        href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                        className="block border rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 transition-all"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-bold">{partner.name}</h4>
-                            <p className="text-sm text-gray-600">{partner.description}</p>
+                  {/* Show assigned partner if exists */}
+                  {selectedCause.partnerId ? (
+                    <>
+                      <p className="text-sm font-semibold mb-3">Recommended Partner for this Cause:</p>
+                      {partners
+                        .filter((p) => p.id === selectedCause.partnerId)
+                        .map((partner) => (
+                          <a
+                            key={partner.id}
+                            href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
+                            className="block border-2 border-blue-500 rounded-lg p-4 hover:bg-blue-50 transition-all bg-blue-50"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h4 className="font-bold">{partner.name}</h4>
+                                <p className="text-sm text-gray-600">{partner.description}</p>
+                                <span className="inline-block mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                                  Primary Partner for this Cause
+                                </span>
+                              </div>
+                              <ArrowRight className="w-5 h-5 text-blue-600" />
+                            </div>
+                          </a>
+                        ))}
+
+                      {/* Show other partners as alternatives */}
+                      {partners.filter((p) => p.id !== selectedCause.partnerId).length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold mb-2 text-gray-600">Alternative Partners:</p>
+                          <div className="space-y-2">
+                            {partners
+                              .filter((p) => p.id !== selectedCause.partnerId)
+                              .map((partner) => (
+                                <a
+                                  key={partner.id}
+                                  href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
+                                  className="block border rounded-lg p-3 hover:bg-gray-50 hover:border-gray-400 transition-all"
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div>
+                                      <h4 className="font-semibold">{partner.name}</h4>
+                                      <p className="text-xs text-gray-600">{partner.description}</p>
+                                    </div>
+                                    <ArrowRight className="w-4 h-4 text-gray-600" />
+                                  </div>
+                                </a>
+                              ))}
                           </div>
-                          <ArrowRight className="w-5 h-5 text-blue-600" />
                         </div>
-                      </a>
-                    ))}
-                  </div>
+                      )}
+                    </>
+                  ) : (
+                    // If no partner assigned, show all partners
+                    <div className="space-y-3">
+                      {partners.map((partner) => (
+                        <a
+                          key={partner.id}
+                          href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
+                          className="block border rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 transition-all"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-bold">{partner.name}</h4>
+                              <p className="text-sm text-gray-600">{partner.description}</p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-blue-600" />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Info about process */}
