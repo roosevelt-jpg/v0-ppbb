@@ -153,22 +153,22 @@ export default function ContactRequestsPage() {
 
   return (
     <div className="p-6">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-          </div>
-        ) : (
-          <AdminTable<ContactRequest>
-            title="Contact Form Submissions"
-            columns={columns}
-            data={requests}
-            onRowClick={(request) => {
-              window.location.href = `/admin/contact-requests/${request.id}`
-            }}
-            actions={actions}
-          />
-        )}
-      </div>
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+        </div>
+      ) : (
+        <AdminTable<ContactRequest>
+          title="Contact Form Submissions"
+          columns={columns}
+          data={requests}
+          onRowClick={(request) => {
+            window.location.href = `/admin/contact-requests/${request.id}`
+          }}
+          actions={actions}
+        />
+      )}
     </div>
   )
+}
 }
