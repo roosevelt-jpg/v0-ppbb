@@ -1,92 +1,190 @@
-# Admin Login Guide - Passive Blessings
+# Admin Login & Integration Testing Guide - Passive Blessings
 
-## Current Status
-✅ Firebase authentication is now working
-✅ Login page is deployed with two modes: Community Member & Admin Portal
-✅ Access code system is implemented
-✅ Logo is displaying correctly on login page
+## ✅ Current Working Credentials
 
-## Admin Login Credentials
+```
+Email:       admin@passiveblessings.ae
+Password:    Admin@123456
+Access Code: PB-ADMIN-2025
+Admin URL:   https://test.myflynai.com/admin
+Setup URL:   https://test.myflynai.com/admin/setup
+```
 
-**Email:** `admin@passiveblessings.com`
-**Password:** `Admin@PassiveBlessing2025`
-**Access Code:** You need to set this in your Firestore
+## Step-by-Step Login Instructions
 
-## How to Set Your Admin Access Code
+### Step 1: Go to Setup Page
+- Navigate to: **https://test.myflynai.com/admin/setup**
+- You'll see the Admin Dashboard Setup (Step 1 of 3)
 
-### Option 1: Firebase Console (Recommended)
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your Passive Blessings project
-3. Go to Firestore Database
-4. Find the "users" collection
-5. Find the document with email: `admin@passiveblessings.com`
-6. Add a field called `accessCode` with a value like: `ADMIN2025` or any code you want
-7. Save
+### Step 2: Enter Access Code
+- Enter: **PB-ADMIN-2025**
+- Click "Continue"
 
-### Option 2: Use Your Own Access Code
-If you want a specific access code, just add it to the Firestore document:
-- Field name: `accessCode`
-- Field value: Any text you want (e.g., `SECRET123`, `PBADMIN`, etc.)
+### Step 3: Email Verification (Step 2 of 3)
+- Click "Next" (automatically proceeds)
 
-## Login Flow (After Setting Access Code)
+### Step 4: Sign In with Admin Credentials
+- Email: **admin@passiveblessings.ae**
+- Password: **Admin@123456**
+- Click "Sign In"
 
-1. Go to: https://v0-ppbb.vercel.app/login
-2. Click on **"Admin Portal"** button
-3. Enter your **Access Code** (the one you set in Firestore)
-4. Click **"Next"**
-5. Enter **Email:** `admin@passiveblessings.com`
-6. Enter **Password:** `Admin@PassiveBlessing2025`
-7. Click **"Sign In"**
-8. You will be redirected to: https://v0-ppbb.vercel.app/admin
+### Result
+- You'll be redirected to: **https://test.myflynai.com/admin**
+- First time loads: **https://test.myflynai.com/admin/integrations**
 
-## Admin Dashboard Features Available
+## Testing "Add Configuration" Modal
 
-After login, you can access:
-- **Analytics** - Community metrics and statistics
-- **Approvals** - Approve member/business registrations
-- **Businesses** - Manage business partners
-- **Charity** - Manage charity initiatives
-- **Donations** - Track all donations
-- **Events** - Create and manage events
-- **Health** - System health monitoring
-- **Members** - Manage community members
-- **Pages** - Manage website pages
-- **Settings** - Configure site branding, logos, and settings
-- **Sponsors** - Manage sponsors
-- **Volunteers** - Track volunteer hours
+### Step-by-Step
+1. Login using credentials above
+2. Navigate to Integrations page
+3. See 8 service cards:
+   - Anthropic (Claude)
+   - OpenAI
+   - Stripe
+   - SendGrid
+   - YouTube API
+   - Google Maps API
+   - Firebase Admin SDK
+   - Custom Webhook
 
-## Community Member Login
+4. Click **"Add Configuration"** button on any service card
+5. Modal should appear with:
+   - Service name as title
+   - "Configure your API credentials" description
+   - X button (top-right) to close
+   - Form with dynamic fields based on service
+   - "Cancel" and "Save Configuration" buttons
 
-If you want to create a regular community member account:
-1. Click **"Community Member"** on the login page
-2. Go to **"Sign up now"** link
-3. Follow the signup form
-4. You'll have full access to the member dashboard
+### Modal Technical Details
+- **Position**: Fixed overlay (z-index: 50)
+- **Backdrop**: Semi-transparent black (bg-black/50)
+- **Width**: Max 448px (max-w-md)
+- **Max Height**: 90% viewport with scroll if needed
+- **Animation**: Smooth fade-in
+- **Close Options**: X button or Cancel button
+- **Form Validation**: Real-time field validation
+- **Status Messages**: Success (green) / Error (red) notifications
+
+## All Admin Dashboard Pages
+
+Once logged in, you can access:
+- ✅ **Overview** - Platform overview and stats
+- ✅ **Members** - Manage community members
+- ✅ **Team (About)** - Team management
+- ✅ **Volunteers** - Track volunteer hours
+- ✅ **Events** - Create and manage events
+- ✅ **Charity Cases** - Manage charity initiatives
+- ✅ **Donations** - Track donation transactions
+- ✅ **Donation Causes** - Manage donation campaigns
+- ✅ **Charity Partners** - Partner management
+- ✅ **Sponsors** - Sponsor management
+- ✅ **Businesses** - Business partners
+- ✅ **Approvals** - Approve new registrations
+- ✅ **Contact Requests** - Handle contact form submissions
+- ✅ **Membership** - Membership management
+- ✅ **Analytics** - Community analytics dashboard
+- ✅ **Reporting** - Generate reports
+- ✅ **Moderation** - Content moderation
+- ✅ **Pages (CMS)** - Website page management
+- ✅ **Policies** - Legal policies management
+- ✅ **Integrations** - API configuration dashboard
+- ✅ **Settings** - Site branding, SEO, analytics
+- ✅ **System Health** - Real-time service health monitoring
+
+## API Integrations Available for Configuration
+
+| Service | Category | Description |
+|---------|----------|-------------|
+| Anthropic (Claude) | AI | AI-powered language model for text generation |
+| OpenAI | AI | GPT models and other OpenAI services |
+| Stripe | Payment | Payment processing and billing |
+| SendGrid | Email | Email delivery and management service |
+| YouTube API | Media | Video content management and search |
+| Google Maps API | Maps | Maps, geocoding, and location services |
+| Firebase Admin SDK | Database | Backend administration and database access |
+| Custom Webhook | Other | Generic webhook endpoint configuration |
+
+## What Happens After Configuring an API
+
+1. **After clicking "Save Configuration"**
+   - Credentials are validated
+   - Success message appears (green)
+   - Modal auto-closes after 1.5 seconds
+   - Page refreshes to show updated status
+
+2. **Service Status Shows**
+   - Green checkmark: Healthy
+   - Yellow warning: Degraded
+   - Red X: Down/Error
+   - Gray clock: Not configured
+
+3. **Service Card Updates**
+   - Buttons change from "Add Configuration" → "Edit", "Test", "Delete"
+   - Status box shows current health
+   - Last checked timestamp displayed
+   - Response time shown in milliseconds
+
+## Integration System Flow
+
+```
+User clicks "Add Configuration"
+        ↓
+Modal renders with service fields
+        ↓
+User fills API credentials
+        ↓
+Form validates on submit
+        ↓
+Success → Credentials saved to Firestore
+        ↓
+Health check runs automatically
+        ↓
+Status updates on card (green/yellow/red)
+```
+
+## Key Features
+
+✅ **Secure Storage** - Credentials encrypted in Firestore
+✅ **Real-time Health Monitoring** - Auto-checks service status
+✅ **Form Validation** - Validates credentials before saving
+✅ **Error Handling** - Clear error messages for failed configs
+✅ **Dynamic Forms** - Fields adapt based on service type
+✅ **Test Button** - Verify configuration works
+✅ **Edit/Delete** - Update or remove configs
+✅ **Stats Dashboard** - See configured vs healthy services
 
 ## Troubleshooting
 
-### "Access code not valid" error
-- Make sure the `accessCode` field exists in your Firestore admin user document
-- Check the spelling and capitalization
+### Modal Not Appearing?
+- Check if you're properly authenticated (not redirected to setup)
+- Open DevTools (F12) → Console for JavaScript errors
+- Clear browser cache and refresh
+- Try a different service card
 
-### "Email or password incorrect"
-- Make sure you're using: `admin@passiveblessings.com` (exactly)
-- Make sure you're using: `Admin@PassiveBlessing2025` (exactly)
-- Check that CAPS LOCK is off
+### Form Not Submitting?
+- Check all required fields are filled
+- Look for red error messages below fields
+- Verify API key format matches requirements
+- Check browser console for validation errors
 
-### Logo not showing
-- Logo is now pulling from Firestore via the Logo component
-- If logo doesn't appear, check that you've configured logos in admin settings
+### Status Shows "Not Configured"?
+- Service configuration may not be saved
+- Try clicking "Add Configuration" again
+- Verify credentials in form fields
+- Click "Save Configuration"
 
 ## Next Steps
 
-1. Set your desired access code in Firestore
-2. Log in using the Admin Portal
-3. Go to Settings to upload your brand logos (if needed)
-4. Configure your dashboard as needed
+1. ✅ Log in with provided credentials
+2. ✅ Navigate to Integrations page
+3. ✅ Click "Add Configuration" on a service
+4. ✅ Test the modal rendering
+5. ✅ Try filling in sample API credentials
+6. ✅ Click "Save Configuration" to persist
+7. ✅ Verify service status updates
 
 ---
 
-**Live Site:** https://v0-ppbb.vercel.app
-**Login Page:** https://v0-ppbb.vercel.app/login
-**Admin Panel:** https://v0-ppbb.vercel.app/admin (after login)
+**Production Environment**: https://test.myflynai.com
+**Admin Setup**: https://test.myflynai.com/admin/setup
+**Direct Admin Access** (after login): https://test.myflynai.com/admin
