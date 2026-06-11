@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { db } from '@/lib/firebase'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
+import { Heart, MessageSquare, Share2, Link as LinkIcon } from 'lucide-react'
 
 interface ContactFormData {
   name: string
@@ -13,6 +14,18 @@ interface ContactFormData {
   phone: string
   subject: string
   message: string
+}
+
+interface ContactInfo {
+  email: string
+  phone: string
+  address: string
+  socialLinks: {
+    facebook?: string
+    twitter?: string
+    instagram?: string
+    linkedin?: string
+  }
 }
 
 export default function ContactPage() {
@@ -26,6 +39,34 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    email: 'support@passiveblessings.ae',
+    phone: '+971 50 000 0000',
+    address: 'Dubai, UAE',
+    socialLinks: {},
+  })
+
+  // Fetch contact info from Firestore settings
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const settingsSnapshot = await getDocs(collection(db, 'settings'))
+        settingsSnapshot.forEach(doc => {
+          const data = doc.data()
+          setContactInfo({
+            email: data.email || 'support@passiveblessings.ae',
+            phone: data.phone || '+971 50 000 0000',
+            address: data.address || 'Dubai, UAE',
+            socialLinks: data.socialLinks || {},
+          })
+        })
+      } catch (error) {
+        console.error('[v0] Error fetching contact info:', error)
+      }
+    }
+
+    fetchContactInfo()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -64,228 +105,213 @@ export default function ContactPage() {
     }
   }
 
-  const socialLinks = [
-    { icon: 'F', name: 'Facebook', href: 'https://facebook.com/passiveblessings' },
-    { icon: '𝕏', name: 'Twitter', href: 'https://twitter.com/passiveblessings' },
-    { icon: '📷', name: 'Instagram', href: 'https://instagram.com/passiveblessings' },
-    { icon: 'in', name: 'LinkedIn', href: 'https://linkedin.com/company/passiveblessings' },
+  const socialIcons = [
+    { key: 'facebook', name: 'Facebook', icon: Heart, url: contactInfo.socialLinks.facebook },
+    { key: 'twitter', name: 'Twitter', icon: MessageSquare, url: contactInfo.socialLinks.twitter },
+    { key: 'instagram', name: 'Instagram', icon: Share2, url: contactInfo.socialLinks.instagram },
+    { key: 'linkedin', name: 'LinkedIn', icon: LinkIcon, url: contactInfo.socialLinks.linkedin },
   ]
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
       <div className="flex-1">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-16 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-black">Get In Touch</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
-          </p>
-        </div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header */}
+          <div className="mb-12 text-center">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-black">Get In Touch</h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
+            </p>
+          </div>
 
-        <div className="grid lg:grid-cols-3 gap-12 mb-16">
-          {/* Contact Information */}
-          <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold mb-8 text-black">Contact Information</h2>
+          <div className="grid lg:grid-cols-5 gap-8 mb-12">
+            {/* Contact Information - Compact */}
+            <div className="lg:col-span-1 space-y-6">
+              <div>
+                <h2 className="text-lg font-bold mb-4 text-black">Contact Info</h2>
+              </div>
 
-            {/* Address */}
-            <div className="mb-8">
-              <div className="flex items-start gap-4">
-                <span className="text-2xl">📍</span>
-                <div>
-                  <h3 className="font-bold mb-2">Address</h3>
-                  <p className="text-gray-600 text-sm">
-                    Dubai, United Arab Emirates<br />
-                    P.O. Box XXXX
+              {/* Address */}
+              <div>
+                <p className="text-xs uppercase font-medium text-gray-500 mb-1">Address</p>
+                <p className="text-sm text-gray-700">{contactInfo.address}</p>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <p className="text-xs uppercase font-medium text-gray-500 mb-1">Phone</p>
+                <a href={`tel:${contactInfo.phone}`} className="text-sm text-gray-700 hover:text-black transition-colors">
+                  {contactInfo.phone}
+                </a>
+              </div>
+
+              {/* Email */}
+              <div>
+                <p className="text-xs uppercase font-medium text-gray-500 mb-1">Email</p>
+                <a href={`mailto:${contactInfo.email}`} className="text-sm text-gray-700 hover:text-black transition-colors break-all">
+                  {contactInfo.email}
+                </a>
+              </div>
+
+              {/* Social Media */}
+              <div className="pt-4 border-t">
+                <p className="text-xs uppercase font-medium text-gray-500 mb-3">Follow Us</p>
+                <div className="flex gap-2 flex-wrap">
+                  {socialIcons.map((social) => {
+                    const Icon = social.icon
+                    return (
+                      <a
+                        key={social.key}
+                        href={social.url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-9 h-9 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-colors"
+                        aria-label={social.name}
+                        title={social.name}
+                      >
+                        <Icon className="w-4 h-4 text-white" />
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Form - Compact */}
+            <div className="lg:col-span-4">
+              {success && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-medium">
+                    Thank you! We&apos;ve received your message and will get back to you soon.
                   </p>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Phone */}
-            <div className="mb-8">
-              <div className="flex items-start gap-4">
-                <span className="text-2xl">📞</span>
-                <div>
-                  <h3 className="font-bold mb-2">Phone</h3>
-                  <a href="tel:+971501234567" className="text-gray-600 hover:text-black transition-colors">
-                    +971 50 123 4567
-                  </a>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-red-800 font-medium">{error}</p>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Email */}
-            <div className="mb-8">
-              <div className="flex items-start gap-4">
-                <span className="text-2xl">✉️</span>
-                <div>
-                  <h3 className="font-bold mb-2">Email</h3>
-                  <a
-                    href="mailto:hello@passiveblessings.com"
-                    className="text-gray-600 hover:text-black transition-colors break-all"
-                  >
-                    hello@passiveblessings.com
-                  </a>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium mb-1 text-gray-700">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium mb-1 text-gray-700">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                      placeholder="john@example.com"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Social Media */}
-            <div className="mt-12 pt-8 border-t">
-              <h3 className="font-bold mb-4">Follow Us</h3>
-              <div className="flex gap-4 flex-wrap">
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-colors text-sm font-bold"
-                    aria-label={social.name}
-                    title={social.name}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium mb-1 text-gray-700">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                      placeholder="+971 50 123 4567"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="subject" className="block text-sm font-medium mb-1 text-gray-700">
+                      Subject *
+                    </label>
+                    <select
+                      id="subject"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                      required
+                    >
+                      <option value="">Select a subject</option>
+                      <option value="general">General Inquiry</option>
+                      <option value="donation">Donation Support</option>
+                      <option value="volunteer">Volunteer Opportunity</option>
+                      <option value="partnership">Partnership Inquiry</option>
+                      <option value="event">Event Booking</option>
+                      <option value="support">Customer Support</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium mb-1 text-gray-700">
+                    Message *
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none text-sm"
+                    placeholder="Tell us how we can help..."
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-xs text-gray-500">* Required fields. We&apos;ll respond within 24 hours.</p>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-black hover:bg-gray-800 text-white px-6 py-2 font-medium rounded-lg disabled:bg-gray-400 transition-colors text-sm"
                   >
-                    {social.icon}
-                  </a>
-                ))}
-              </div>
+                    {loading ? 'Sending...' : 'Send Message'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
-          {/* Contact Form */}
-          <div className="lg:col-span-2">
-            {success && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-800 font-medium">
-                  Thank you! We&apos;ve received your message and will get back to you soon.
-                </p>
-              </div>
-            )}
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-800 font-medium">{error}</p>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="John Doe"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="john@example.com"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="+971 50 123 4567"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                  Subject *
-                </label>
-                <select
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  required
-                >
-                  <option value="">Select a subject</option>
-                  <option value="general">General Inquiry</option>
-                  <option value="donation">Donation Support</option>
-                  <option value="volunteer">Volunteer Opportunity</option>
-                  <option value="partnership">Partnership Inquiry</option>
-                  <option value="event">Event Booking</option>
-                  <option value="support">Customer Support</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
-                  placeholder="Tell us how we can help..."
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-black hover:bg-gray-800 text-white py-3 font-medium rounded-lg disabled:bg-gray-400 transition-colors"
-              >
-                {loading ? 'Sending...' : 'Send Message'}
+          {/* CTA Section */}
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4 text-black">Want to Join Our Community?</h2>
+            <p className="text-gray-700 mb-6">
+              Become a member and start making a difference today.
+            </p>
+            <Link href="/signup">
+              <button className="bg-black hover:bg-gray-800 text-white px-6 py-3 font-medium rounded-lg transition-colors">
+                Join Now
               </button>
-
-              <p className="text-sm text-gray-600">
-                * Required fields. We&apos;ll respond to your inquiry within 24 hours.
-              </p>
-            </form>
+            </Link>
           </div>
         </div>
-
-        {/* CTA Section */}
-        <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-black">Want to Join Our Community?</h2>
-          <p className="text-gray-700 mb-6">
-            Become a member and start making a difference today.
-          </p>
-          <Link href="/signup">
-            <button className="bg-black hover:bg-gray-800 text-white px-6 py-3 font-medium rounded-lg transition-colors">
-              Join Now
-            </button>
-          </Link>
-        </div>
-      </div>
       </div>
       <Footer />
     </div>
