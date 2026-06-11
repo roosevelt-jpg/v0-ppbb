@@ -67,7 +67,7 @@ export default function AdminSetup() {
           <img 
             src="/pb-logo-black.png" 
             alt="Passive Blessings" 
-            style={{ height: '80px', marginBottom: '15px' }}
+            style={{ height: '80px', marginBottom: '15px', display: 'block', margin: '0 auto 15px' }}
           />
           <p style={{ fontSize: '16px', color: '#666' }}>Admin Dashboard Setup</p>
         </div>
