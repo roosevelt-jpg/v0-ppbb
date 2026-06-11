@@ -87,7 +87,7 @@ export default function AdminSetup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-3">Passive Blessings</h1>
@@ -106,7 +106,7 @@ export default function AdminSetup() {
           {/* Step 1: Access Code */}
           {step === 1 && (
             <div>
-              <h2 className="text-2xl font-bold mb-3">Step 1 of 3</h2>
+              <h2 className="text-2xl font-bold mb-3 whitespace-nowrap">Step 1 of 3</h2>
               <p className="text-base text-muted-foreground mb-8 leading-relaxed">Enter your admin access code to continue</p>
 
               <form onSubmit={handleAccessCodeSubmit} className="space-y-6">
@@ -142,7 +142,7 @@ export default function AdminSetup() {
           {/* Step 2: Verification */}
           {step === 2 && (
             <div>
-              <h2 className="text-2xl font-bold mb-3">Step 2 of 3</h2>
+              <h2 className="text-2xl font-bold mb-3 whitespace-nowrap">Step 2 of 3</h2>
               <p className="text-base text-muted-foreground mb-8 leading-relaxed">Verification confirmed</p>
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-5 mb-8">
@@ -170,7 +170,7 @@ export default function AdminSetup() {
           {/* Step 3: Login */}
           {step === 3 && (
             <div>
-              <h2 className="text-2xl font-bold mb-3">Step 3 of 3</h2>
+              <h2 className="text-2xl font-bold mb-3 whitespace-nowrap">Step 3 of 3</h2>
               <p className="text-base text-muted-foreground mb-8 leading-relaxed">Sign in with your admin credentials</p>
 
               <form onSubmit={handleAdminLogin} className="space-y-6">
