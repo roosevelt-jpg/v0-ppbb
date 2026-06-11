@@ -114,6 +114,28 @@ export function AdminSidebar() {
 export function AdminHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   const router = useRouter()
 
+  const [dateTime, setDateTime] = React.useState<string>('')
+
+  React.useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date()
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }
+      setDateTime(now.toLocaleDateString('en-US', options))
+    }
+
+    updateDateTime()
+    const interval = setInterval(updateDateTime, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   const handleLogout = async () => {
     await logoutUser()
     router.push('/login')
@@ -121,11 +143,19 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
 
   return (
     <div className="border-b px-8 py-4 flex items-center justify-between" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-      <div>
+      <div className="flex-1">
         <h1 className="text-2xl font-bold" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
           {title}
         </h1>
-        {subtitle && <p className="text-xs mt-1" style={{ color: '#888888' }}>{subtitle}</p>}
+        <div className="flex items-center gap-4 mt-2">
+          {subtitle && <p className="text-xs" style={{ color: '#888888' }}>{subtitle}</p>}
+          <div className="flex items-center gap-1 text-xs" style={{ color: '#888888' }}>
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{dateTime}</span>
+          </div>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <ThemeToggle />

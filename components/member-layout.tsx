@@ -51,10 +51,10 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Logo */}
-        <div className="p-6 border-b border-border flex items-center justify-between">
-          <Logo size="md" href="/dashboard" />
-          <button onClick={() => setOpen(false)} className="md:hidden">
+        {/* Logo and Close Button */}
+        <div className="p-6 border-b border-border flex flex-col items-center justify-center" style={{ minHeight: '100px', position: 'relative' }}>
+          <Logo size="lg" href="/dashboard" />
+          <button onClick={() => setOpen(false)} className="md:hidden absolute top-4 right-4">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -101,15 +101,63 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
 }
 
 export function MemberHeader({ title, subtitle, open, setOpen }: { title: string; subtitle?: string; open: boolean; setOpen: (open: boolean) => void }) {
+  const router = useRouter()
+  const [dateTime, setDateTime] = React.useState<string>('')
+
+  React.useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date()
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }
+      setDateTime(now.toLocaleDateString('en-US', options))
+    }
+
+    updateDateTime()
+    const interval = setInterval(updateDateTime, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleLogout = async () => {
+    await logoutUser()
+    router.push('/login')
+  }
+
   return (
-    <div className="bg-background border-b border-border px-6 py-6 flex items-center justify-between">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">{title}</h1>
-        {subtitle && <p className="text-muted-foreground mt-1">{subtitle}</p>}
+    <div className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
+      <div className="flex-1">
+        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+        <div className="flex items-center gap-4 mt-2">
+          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{dateTime}</span>
+          </div>
+        </div>
       </div>
-      <button onClick={() => setOpen(!open)} className="md:hidden">
-        <Menu className="h-6 w-6" />
-      </button>
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          size="sm"
+          className="hidden md:flex"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Sign out
+        </Button>
+        <button onClick={() => setOpen(!open)} className="md:hidden">
+          <Menu className="h-6 w-6" />
+        </button>
+      </div>
     </div>
   )
 }
