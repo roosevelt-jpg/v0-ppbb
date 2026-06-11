@@ -91,6 +91,28 @@ export default function VolunteersPage() {
         return <span style={{ color: '#888888' }}>{formatDistanceToNow(date, { addSuffix: true })}</span>
       },
     },
+    {
+      key: 'actions',
+      label: 'Actions',
+      width: '120px',
+      render: (_: any, row: any) => (
+        <a
+          href={`/admin/volunteers/${row.id}`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            color: '#0066cc',
+            textDecoration: 'none',
+            fontSize: '14px',
+            fontWeight: 500,
+          }}
+          className="hover:underline"
+        >
+          View Details →
+        </a>
+      ),
+    },
   ]
 
   const handleEditVolunteer = (volunteer: any) => {
