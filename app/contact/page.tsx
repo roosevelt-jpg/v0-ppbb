@@ -78,7 +78,7 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="mb-16 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4">Get In Touch</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-black">Get In Touch</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
           </p>
@@ -87,7 +87,7 @@ export default function ContactPage() {
         <div className="grid lg:grid-cols-3 gap-12 mb-16">
           {/* Contact Information */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold mb-8">Contact Information</h2>
+            <h2 className="text-2xl font-bold mb-8 text-black">Contact Information</h2>
 
             {/* Address */}
             <div className="mb-8">
@@ -275,8 +275,8 @@ export default function ContactPage() {
 
         {/* CTA Section */}
         <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Want to Join Our Community?</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold mb-4 text-black">Want to Join Our Community?</h2>
+          <p className="text-gray-700 mb-6">
             Become a member and start making a difference today.
           </p>
           <Link href="/signup">
