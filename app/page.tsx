@@ -125,7 +125,7 @@ export default function HomePage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/dashboard/donations" className="w-full sm:w-auto">
+              <Link href="/donate" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   Donate Now
                 </Button>
@@ -277,7 +277,7 @@ export default function HomePage() {
                         </div>
                       </div>
                       
-                      <Link href="/dashboard/donations">
+                      <Link href="/donate">
                         <Button size="sm" className="w-full bg-[#111111] hover:bg-[#333333] text-white">
                           Support
                         </Button>
