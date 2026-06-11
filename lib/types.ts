@@ -1,5 +1,5 @@
 // User roles and types
-export type UserRole = 'member' | 'volunteer' | 'business' | 'admin'
+export type UserRole = 'member' | 'volunteer' | 'business' | 'admin' | 'sponsor'
 
 // Admin role permissions
 export type AdminRole = 'founder_admin' | 'manager' | 'moderator' | 'analyst'
@@ -139,6 +139,24 @@ export interface BusinessProfile extends User {
   referralEarnings: number
   conversionRate: number
   membership: 'partner' | 'gold' | 'platinum'
+}
+
+export interface SponsorProfile extends User {
+  sponsorName: string
+  sponsorType: string // 'individual' | 'company' | 'foundation' | 'ngo'
+  registrationNumber?: string
+  website?: string
+  logo?: UploadedImage
+  logoUrl?: string
+  sponsorDescription: string
+  sponsorEmail?: string
+  sponsorPhone?: string
+  sponsorLocation?: LocationData
+  sponsorshipFocus?: string[] // Categories they sponsor
+  totalSponsored: number
+  activeSponsorships: number
+  yearlySponsorshipBudget?: number
+  membership: 'standard' | 'gold' | 'platinum'
 }
 
 // Events
@@ -626,6 +644,30 @@ export interface CommunitySupport {
   approvalNotes?: string
   timeline?: string
   approvedBy?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Sponsorships
+export interface Sponsorship {
+  id: string
+  sponsorId: string
+  sponsorName: string
+  type: 'campaign' | 'event' | 'charity' | 'project'
+  title: string
+  description: string
+  amount: number
+  currency: string
+  status: 'pending' | 'active' | 'completed' | 'cancelled'
+  targetId: string // Campaign/Event/Charity ID
+  targetName: string
+  impactArea?: string // What the sponsorship supports
+  visibilityLevel: 'public' | 'partners_only' | 'private'
+  startDate: Date
+  endDate?: Date
+  benefits?: string[] // Benefits to sponsor
+  recognition?: boolean // Featured as sponsor?
+  certificateIssued?: boolean
   createdAt: Date
   updatedAt: Date
 }

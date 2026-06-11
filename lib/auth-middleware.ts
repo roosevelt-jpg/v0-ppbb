@@ -20,6 +20,10 @@ export async function requireAdmin(): Promise<User | null> {
   return requireRole('admin')
 }
 
+export async function requireSponsor(): Promise<User | null> {
+  return requireRole('sponsor')
+}
+
 // Require specific admin role
 export async function requireAdminRole(role: AdminRole): Promise<AdminUser | null> {
   const user = await requireAuth()

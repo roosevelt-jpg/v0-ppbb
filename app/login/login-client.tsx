@@ -72,6 +72,8 @@ export default function LoginPage() {
         router.push('/admin')
       } else if (user.role === 'business') {
         router.push('/business')
+      } else if (user.role === 'sponsor') {
+        router.push('/sponsor')
       } else {
         router.push('/dashboard')
       }
