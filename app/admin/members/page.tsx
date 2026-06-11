@@ -100,15 +100,14 @@ export default function MembersPage() {
   return (
     <div className="space-y-6 px-8">
       <AdminTable
-          title="All Members"
-          columns={columns}
-          data={members}
-          loading={loading}
-          searchPlaceholder="Search by name, email, or location..."
-          onEdit={handleEditMember}
-          onDelete={handleDeleteMember}
-        />
-      </div>
+        title="All Members"
+        columns={columns}
+        data={members}
+        loading={loading}
+        searchPlaceholder="Search by name, email, or location..."
+        onEdit={handleEditMember}
+        onDelete={handleDeleteMember}
+      />
 
       {/* Edit Member Modal */}
       <EditMemberModal
