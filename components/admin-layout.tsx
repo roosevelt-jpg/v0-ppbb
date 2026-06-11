@@ -20,6 +20,7 @@ import {
   Mail,
   HandHeart,
   Target,
+  Plug,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -45,6 +46,7 @@ const adminMenuItems = [
   { label: 'Reporting', href: '/admin/reporting', icon: FileText },
   { label: 'Moderation', href: '/admin/moderation', icon: Flag },
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
+  { label: 'Integrations', href: '/admin/integrations', icon: Plug },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Zap },
 ]
