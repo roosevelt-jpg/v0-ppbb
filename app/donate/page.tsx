@@ -63,8 +63,8 @@ export default function DonationPage() {
       <Navbar />
       <div className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
+          {/* Header */}
+          <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Make a Difference</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Passive Blessings acts as a community mobilizer and awareness partner. Funds are collected through official
@@ -337,6 +337,7 @@ export default function DonationPage() {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
       <Footer />
