@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { AdminHeader } from '@/components/admin-layout'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
@@ -265,8 +264,6 @@ export default function AdminOverview() {
 
   return (
     <>
-      <AdminHeader title="Platform Overview" subtitle="Complete ecosystem visibility and management" />
-      
       <div className="p-8 bg-neutral-50 dark:bg-neutral-900">
         {/* Last Updated */}
         <div className="mb-6 flex items-center justify-between">
