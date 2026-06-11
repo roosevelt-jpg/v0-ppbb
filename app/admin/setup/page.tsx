@@ -21,11 +21,17 @@ export default function AdminSetup() {
     setLoading(true)
 
     try {
-      if (!accessCode || accessCode.length < 3) {
-        setError('Access code must be at least 3 characters.')
+      // Valid access codes - should be set in environment variable in production
+      // For now, using specific codes for security
+      const ADMIN_ACCESS_CODE = process.env.NEXT_PUBLIC_ADMIN_ACCESS_CODE || 'PB-ADMIN-2025'
+      const validCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025']
+      
+      if (!validCodes.includes(accessCode.trim())) {
+        setError('Invalid access code. Please try again.')
         setLoading(false)
         return
       }
+      
       setStep(2)
     } catch (err) {
       setError('An error occurred. Please try again.')
@@ -58,7 +64,11 @@ export default function AdminSetup() {
       <div style={{ width: '100%', maxWidth: '600px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '10px', color: '#000' }}>Passive Blessings</h1>
+          <img 
+            src="/pb-logo-black.png" 
+            alt="Passive Blessings" 
+            style={{ height: '80px', marginBottom: '15px' }}
+          />
           <p style={{ fontSize: '16px', color: '#666' }}>Admin Dashboard Setup</p>
         </div>
 
