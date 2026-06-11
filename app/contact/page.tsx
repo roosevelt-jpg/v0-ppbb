@@ -120,7 +120,7 @@ export default function ContactPage() {
           {/* Header */}
           <div className="mb-12 text-center w-full">
             <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-black">Get In Touch</h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto w-full">
+            <p className="text-gray-600 mx-auto" style={{ maxWidth: '600px', fontSize: '18px', lineHeight: '1.6' }}>
               Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
             </p>
           </div>
