@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, getCountFromServer, query, where } from 'firebase/firestore'
 import { Mail, Heart, Share2, Link as LinkIcon, MessageSquare } from 'lucide-react'
@@ -111,15 +110,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <div className="w-32 h-auto">
-              <Image 
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-1IbVvpWYxxNsdvH8MfdFG37gnBEPOv.png" 
-                alt="Passive Blessings" 
-                width={200} 
-                height={60}
-                priority
-              />
-            </div>
+            <img 
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-1IbVvpWYxxNsdvH8MfdFG37gnBEPOv.png" 
+              alt="Passive Blessings" 
+              style={{ width: '140px', height: 'auto' }}
+            />
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
               Building community through compassion and collective action.
             </p>
