@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAllApiConfigs, checkAllServicesHealth } from '@/lib/api-config'
+import { checkServiceHealth } from '@/lib/api-config'
 import { hasPermission } from '@/lib/admin-access'
 import { getAuth } from 'firebase-admin/auth'
 
@@ -22,7 +22,10 @@ async function checkIntegrationPermission(request: NextRequest): Promise<string 
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { name: string } }
+) {
   try {
     const userId = await checkIntegrationPermission(request)
     if (!userId) {
@@ -32,20 +35,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const [configs, health] = await Promise.all([
-      getAllApiConfigs(),
-      checkAllServicesHealth(),
-    ])
+    const serviceName = params.name
+    const health = await checkServiceHealth(serviceName)
+
     return NextResponse.json({
       success: true,
-      configs,
       health,
-      total: configs.length,
     })
   } catch (error) {
-    console.error('[v0] Error fetching API configs:', error)
+    console.error('[v0] Error testing service:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch API configurations' },
+      { success: false, error: 'Failed to test service' },
       { status: 500 }
     )
   }
