@@ -235,11 +235,16 @@ export function ApiFormModal({
           <div style={{ padding: '1.5rem 2rem', borderTop: '1.5px solid #e4e1da', display: 'flex', gap: '1rem', flexShrink: 0, backgroundColor: '#fafaf8' }}>
             <Button
               type="button"
-              variant="outline"
               onClick={onClose}
               disabled={loading}
               className="flex-1"
-              style={{ padding: '0.75rem 1.5rem', fontSize: '0.95rem' }}
+              style={{ 
+                padding: '0.75rem 1.5rem', 
+                fontSize: '0.95rem',
+                backgroundColor: '#111111',
+                color: '#ffffff',
+                border: 'none',
+              }}
             >
               Cancel
             </Button>
