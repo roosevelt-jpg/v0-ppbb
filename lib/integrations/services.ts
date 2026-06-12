@@ -425,3 +425,6 @@ export function getAllServiceDefinitions(): ServiceDefinition[] {
 export function getServicesByCategory(category: ServiceDefinition['category']): ServiceDefinition[] {
   return Object.values(API_SERVICES).filter((service) => service.category === category)
 }
+
+// Export services array for API endpoints
+export const services = Object.values(API_SERVICES)

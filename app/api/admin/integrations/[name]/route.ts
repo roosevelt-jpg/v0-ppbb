@@ -80,15 +80,22 @@ export async function POST(
     const serviceDefinition = services.find((s: any) => s.id === serviceName)
 
     if (!serviceDefinition) {
+      console.log('[v0] Service not found:', serviceName, 'Available services:', services.map((s: any) => s.id))
       return NextResponse.json(
         { error: 'Service not found' },
         { status: 404 }
       )
     }
 
+    console.log('[v0] Service definition found for', serviceName, 'with fields:', serviceDefinition.fields.map((f: any) => f.name))
+
     // Validate that at least one credential field is provided
     const requiredFields = serviceDefinition.fields || []
     const hasAtLeastOneField = requiredFields.some((field: any) => body[field.name])
+
+    console.log('[v0] Required fields:', requiredFields.map((f: any) => f.name))
+    console.log('[v0] Body keys:', Object.keys(body))
+    console.log('[v0] Has at least one field:', hasAtLeastOneField)
 
     if (requiredFields.length > 0 && !hasAtLeastOneField) {
       console.log('[v0] Validation failed: no required fields provided')

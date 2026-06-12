@@ -66,13 +66,25 @@ export async function getAllApiConfigsServer(): Promise<ApiConfig[]> {
   try {
     const db = getDb()
     const snapshot = await getDocs(collection(db, API_CONFIG_COLLECTION))
+    
+    const systemFields = ['serviceName', 'status', 'lastChecked', 'updatedBy', 'updatedAt', 'createdAt', 'deletedAt', 'deletedBy']
+    
     return snapshot.docs.map((docSnap) => {
       const data = docSnap.data()
-      return {
+      const redactedData: any = {
         ...data,
-        apiKey: '***REDACTED***',
-        apiSecret: data.apiSecret ? '***REDACTED***' : undefined,
-      } as ApiConfig
+      }
+
+      // Redact all credential fields (non-system fields)
+      Object.keys(redactedData).forEach((key: string) => {
+        if (!systemFields.includes(key) && redactedData[key]) {
+          redactedData[key] = '***REDACTED***'
+        }
+      })
+
+      console.log('[v0] Config found:', data.serviceName, 'with fields:', Object.keys(data).filter(k => !systemFields.includes(k)))
+
+      return redactedData as ApiConfig
     })
   } catch (error) {
     console.error('[v0] Error fetching API configs:', error)
