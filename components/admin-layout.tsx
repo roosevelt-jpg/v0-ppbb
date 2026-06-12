@@ -44,6 +44,7 @@ const adminMenuItems = [
   { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle },
   { label: 'Contact Requests', href: '/admin/contact-requests', icon: Mail },
   { label: 'Membership', href: '/admin/membership', icon: CreditCard },
+  { label: 'Pricing Plans', href: '/admin/pricing', icon: DollarSign },
   { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { label: 'Reporting', href: '/admin/reporting', icon: FileText },
   { label: 'Moderation', href: '/admin/moderation', icon: Flag },
