@@ -24,6 +24,7 @@ import {
   Image,
   Play,
   Shield,
+  Lock,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -34,6 +35,8 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore'
 const adminMenuItems = [
   { label: 'Overview', href: '/admin', icon: BarChart3 },
   { label: 'Access Control', href: '/admin/access-control', icon: Shield },
+  { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
+  { label: 'Security Center', href: '/admin/security-center', icon: Lock },
   { label: 'Members', href: '/admin/members', icon: Users },
   { label: 'Team (About)', href: '/admin/team', icon: Users },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart },
@@ -57,6 +60,7 @@ const adminMenuItems = [
   { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play },
   { label: 'Policies', href: '/admin/policies', icon: FileText },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug },
+  { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: BarChart3 },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Zap },
 ]
