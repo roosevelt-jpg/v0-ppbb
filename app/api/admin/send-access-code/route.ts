@@ -1,22 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuth } from 'firebase-admin/auth'
-import { getFirestore } from 'firebase-admin/firestore'
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
 import nodemailer from 'nodemailer'
-
-// Initialize Firebase Admin SDK
-if (!getApps().length) {
-  const serviceAccount = process.env.GCP_SERVICE_ACCOUNT
-    ? JSON.parse(Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString())
-    : undefined
-
-  if (serviceAccount) {
-    initializeApp({
-      credential: cert(serviceAccount),
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    })
-  }
-}
 
 // Email transporter (using SendGrid or Gmail)
 const getEmailTransporter = () => {
