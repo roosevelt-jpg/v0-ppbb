@@ -78,10 +78,11 @@ export function ApiFormModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div
         className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col"
         style={{ borderColor: '#e4e1da' }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -98,69 +99,71 @@ export function ApiFormModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-lg transition"
+            className="p-1 hover:bg-gray-100 rounded-lg transition flex-shrink-0"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form - Scrollable Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
-          {service.fields.map((field) => (
-            <div key={field.name}>
-              <label
-                htmlFor={field.name}
-                className="block text-sm font-medium mb-2"
-                style={{ color: '#111111' }}
-              >
-                {field.label}
-                {field.required && <span style={{ color: '#ef4444' }}>*</span>}
-              </label>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="p-6 space-y-4 overflow-y-auto flex-1">
+            {service.fields.map((field) => (
+              <div key={field.name}>
+                <label
+                  htmlFor={field.name}
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: '#111111' }}
+                >
+                  {field.label}
+                  {field.required && <span style={{ color: '#ef4444' }}>*</span>}
+                </label>
 
-              <input
-                id={field.name}
-                type={field.type}
-                placeholder={field.placeholder}
-                value={credentials[field.name] || ''}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-offset-0"
+                <input
+                  id={field.name}
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  value={credentials[field.name] || ''}
+                  onChange={(e) => handleChange(field.name, e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-offset-0"
+                  style={{
+                    borderColor: errors[field.name] ? '#ef4444' : '#e4e1da',
+                    backgroundColor: '#ffffff',
+                    color: '#111111',
+                  }}
+                  aria-invalid={!!errors[field.name]}
+                />
+
+                {errors[field.name] && (
+                  <p className="text-xs mt-1" style={{ color: '#ef4444' }}>
+                    {errors[field.name]}
+                  </p>
+                )}
+
+                {field.help && !errors[field.name] && (
+                  <p className="text-xs mt-1" style={{ color: '#888888' }}>
+                    {field.help}
+                  </p>
+                )}
+              </div>
+            ))}
+
+            {/* Messages */}
+            {message && (
+              <div
+                className="p-3 rounded-lg text-sm"
                 style={{
-                  borderColor: errors[field.name] ? '#ef4444' : '#e4e1da',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
+                  backgroundColor: message.type === 'success' ? '#d1fae5' : '#fee2e2',
+                  color: message.type === 'success' ? '#065f46' : '#991b1b',
                 }}
-                aria-invalid={!!errors[field.name]}
-              />
-
-              {errors[field.name] && (
-                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>
-                  {errors[field.name]}
-                </p>
-              )}
-
-              {field.help && !errors[field.name] && (
-                <p className="text-xs mt-1" style={{ color: '#888888' }}>
-                  {field.help}
-                </p>
-              )}
-            </div>
-          ))}
-
-          {/* Messages */}
-          {message && (
-            <div
-              className="p-3 rounded-lg text-sm"
-              style={{
-                backgroundColor: message.type === 'success' ? '#d1fae5' : '#fee2e2',
-                color: message.type === 'success' ? '#065f46' : '#991b1b',
-              }}
-            >
-              {message.text}
-            </div>
-          )}
+              >
+                {message.text}
+              </div>
+            )}
+          </div>
 
           {/* Buttons - Fixed at bottom */}
-          <div className="flex gap-2 pt-4 border-t" style={{ borderColor: '#e4e1da' }}>
+          <div className="flex gap-2 p-6 border-t flex-shrink-0" style={{ borderColor: '#e4e1da' }}>
             <Button
               type="button"
               variant="outline"

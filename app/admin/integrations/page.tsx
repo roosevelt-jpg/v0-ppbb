@@ -28,15 +28,35 @@ export default function AdminIntegrationsPage() {
 
   async function loadData() {
     try {
-      const response = await fetch('/api/admin/integrations')
-      const data = await response.json()
-      if (data.success) {
-        setConfigs(data.configs)
-        setHealthStatus(data.health)
+      setLoading(true)
+      const response = await fetch('/api/admin/integrations', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setConfigs(data.configs || [])
+          setHealthStatus(data.health || [])
+        } else {
+          console.error('[v0] API returned error:', data.error)
+          setConfigs([])
+          setHealthStatus([])
+        }
+      } else {
+        console.error('[v0] API error:', response.status, response.statusText)
+        setConfigs([])
+        setHealthStatus([])
       }
       setLoading(false)
     } catch (error) {
       console.error('[v0] Error loading integrations:', error)
+      setConfigs([])
+      setHealthStatus([])
       setLoading(false)
     }
   }
