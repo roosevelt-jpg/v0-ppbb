@@ -134,7 +134,7 @@ export default function AdminIntegrationsPage() {
 
   return (
     <AdminPageLayout title="Integrations" subtitle="Manage and configure all integrated services">
-      <div className="space-y-8 max-w-7xl">
+      <div className="space-y-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border border-neutral-200 rounded-lg p-4">

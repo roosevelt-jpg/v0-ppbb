@@ -70,11 +70,11 @@ export default function AdminLayout({
 
   // For other admin pages, render with sidebar and header
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background overflow-hidden">
       <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ position: 'relative' }}>
+      <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader title="Platform Overview" subtitle="Complete ecosystem visibility and management" />
-        <main className="flex-1 overflow-auto" style={{ position: 'relative', zIndex: 1, backgroundColor: '#f7f6f2' }}>
+        <main className="flex-1 overflow-auto bg-[#f7f6f2]">
           <div className="p-8">
             {children}
           </div>

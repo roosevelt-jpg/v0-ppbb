@@ -78,36 +78,43 @@ export function ApiFormModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+    <div 
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-hidden"
+      onClick={onClose}
+    >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] flex flex-col"
         style={{ borderColor: '#e4e1da' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between p-6 border-b flex-shrink-0"
+          className="p-6 border-b flex-shrink-0"
           style={{ borderColor: '#e4e1da' }}
         >
-          <div>
-            <h2 className="text-lg font-semibold" style={{ color: '#111111' }}>
-              {service.name}
-            </h2>
-            <p className="text-xs mt-1" style={{ color: '#888888' }}>
-              Configure your API credentials
-            </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold" style={{ color: '#111111' }}>
+                {service.name}
+              </h2>
+              <p className="text-xs mt-1" style={{ color: '#888888' }}>
+                Configure your API credentials
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded transition flex-shrink-0"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded-lg transition flex-shrink-0"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
 
-        {/* Form - Scrollable Content */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="p-6 space-y-4 overflow-y-auto flex-1">
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto flex-1 p-6 space-y-4">
             {service.fields.map((field) => (
               <div key={field.name}>
                 <label
@@ -116,7 +123,7 @@ export function ApiFormModal({
                   style={{ color: '#111111' }}
                 >
                   {field.label}
-                  {field.required && <span style={{ color: '#ef4444' }}>*</span>}
+                  {field.required && <span className="text-red-600"> *</span>}
                 </label>
 
                 <input
@@ -125,7 +132,7 @@ export function ApiFormModal({
                   placeholder={field.placeholder}
                   value={credentials[field.name] || ''}
                   onChange={(e) => handleChange(field.name, e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm transition focus:outline-none focus:ring-2 focus:ring-offset-0"
+                  className="w-full px-3 py-2 border rounded text-sm transition focus:outline-none focus:ring-2"
                   style={{
                     borderColor: errors[field.name] ? '#ef4444' : '#e4e1da',
                     backgroundColor: '#ffffff',
@@ -135,7 +142,7 @@ export function ApiFormModal({
                 />
 
                 {errors[field.name] && (
-                  <p className="text-xs mt-1" style={{ color: '#ef4444' }}>
+                  <p className="text-xs mt-1 text-red-600">
                     {errors[field.name]}
                   </p>
                 )}
@@ -148,10 +155,9 @@ export function ApiFormModal({
               </div>
             ))}
 
-            {/* Messages */}
             {message && (
               <div
-                className="p-3 rounded-lg text-sm"
+                className="p-3 rounded text-sm"
                 style={{
                   backgroundColor: message.type === 'success' ? '#d1fae5' : '#fee2e2',
                   color: message.type === 'success' ? '#065f46' : '#991b1b',
@@ -162,8 +168,8 @@ export function ApiFormModal({
             )}
           </div>
 
-          {/* Buttons - Fixed at bottom */}
-          <div className="flex gap-2 p-6 border-t flex-shrink-0" style={{ borderColor: '#e4e1da' }}>
+          {/* Footer */}
+          <div className="p-6 border-t flex gap-2 flex-shrink-0" style={{ borderColor: '#e4e1da' }}>
             <Button
               type="button"
               variant="outline"
@@ -180,7 +186,7 @@ export function ApiFormModal({
               style={{ backgroundColor: '#111111', color: '#ffffff' }}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {loading ? 'Saving...' : 'Save Configuration'}
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </form>
