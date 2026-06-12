@@ -1,6 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
@@ -8,6 +7,8 @@ import { collection, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/fire
 import { formatDistanceToNow } from 'date-fns'
 import { Mail, MessageSquare, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
+
+export const dynamic = 'force-dynamic'
 
 interface ContactRequest {
   id: string

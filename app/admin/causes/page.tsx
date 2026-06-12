@@ -1,11 +1,14 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
-import { db } from '@/lib/firebase'
+import { db, storage } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { formatDistanceToNow } from 'date-fns'
+import { Upload } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export default function DonationCausesPage() {
   const [causes, setCauses] = React.useState<any[]>([])
@@ -18,6 +21,7 @@ export default function DonationCausesPage() {
     category: 'education',
     targetAmount: 0,
     image: '',
+    imageFile: null as File | null,
     status: 'active',
     partnerId: '',
   })
@@ -50,8 +54,26 @@ export default function DonationCausesPage() {
     e.preventDefault()
     if (!newCause.name.trim()) return
 
+    let imageUrl = newCause.image
+
+    // Upload image to Firebase Storage if a file is selected
+    if (newCause.imageFile) {
+      try {
+        const fileName = `${Date.now()}-${newCause.imageFile.name}`
+        const fileRef = ref(storage, `causes/${fileName}`)
+        await uploadBytes(fileRef, newCause.imageFile)
+        imageUrl = await getDownloadURL(fileRef)
+      } catch (error) {
+        console.error('[v0] Error uploading image:', error)
+        alert('Failed to upload image. Please try again.')
+        return
+      }
+    }
+
     await addDoc(collection(db, 'causes'), {
       ...newCause,
+      image: imageUrl,
+      imageFile: undefined, // Don't store the File object in Firestore
       currentAmount: 0,
       createdAt: serverTimestamp(),
       active: true,
@@ -63,6 +85,7 @@ export default function DonationCausesPage() {
       category: 'education',
       targetAmount: 0,
       image: '',
+      imageFile: null,
       status: 'active',
       partnerId: '',
     })
@@ -82,9 +105,26 @@ export default function DonationCausesPage() {
     if (!editingCause.id) return
 
     try {
-      const { id, ...updateData } = editingCause
+      let imageUrl = editingCause.image
+
+      // Upload new image to Firebase Storage if a file is selected
+      if (editingCause.imageFile) {
+        try {
+          const fileName = `${Date.now()}-${editingCause.imageFile.name}`
+          const fileRef = ref(storage, `causes/${fileName}`)
+          await uploadBytes(fileRef, editingCause.imageFile)
+          imageUrl = await getDownloadURL(fileRef)
+        } catch (error) {
+          console.error('[v0] Error uploading image:', error)
+          alert('Failed to upload image. Please try again.')
+          return
+        }
+      }
+
+      const { id, imageFile, ...updateData } = editingCause
       await updateDoc(doc(db, 'causes', editingCause.id), {
         ...updateData,
+        image: imageUrl,
         updatedAt: serverTimestamp(),
       })
       setEditingCause(null)
@@ -132,13 +172,26 @@ export default function DonationCausesPage() {
               onChange={(e) => setNewCause({ ...newCause, targetAmount: parseInt(e.target.value) })}
               className="border rounded px-3 py-2"
             />
-            <input
-              type="url"
-              placeholder="Image URL"
-              value={newCause.image}
-              onChange={(e) => setNewCause({ ...newCause, image: e.target.value })}
-              className="border rounded px-3 py-2"
-            />
+            <div className="relative">
+              <label className="block text-sm font-medium mb-2">Cause Image</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  id="image-upload"
+                  accept="image/*"
+                  onChange={(e) => setNewCause({ ...newCause, imageFile: e.target.files?.[0] || null })}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  className="flex items-center gap-2 px-3 py-2 border border-neutral-300 rounded-lg text-sm hover:bg-neutral-50 transition"
+                >
+                  <Upload className="w-4 h-4" />
+                  {newCause.imageFile ? newCause.imageFile.name : 'Choose Image'}
+                </button>
+              </div>
+            </div>
             <select
               value={newCause.partnerId}
               onChange={(e) => setNewCause({ ...newCause, partnerId: e.target.value })}
@@ -232,13 +285,26 @@ export default function DonationCausesPage() {
                   onChange={(e) => setEditingCause({ ...editingCause, targetAmount: parseInt(e.target.value) })}
                   className="border rounded px-3 py-2"
                 />
-                <input
-                  type="url"
-                  placeholder="Image URL"
-                  value={editingCause.image}
-                  onChange={(e) => setEditingCause({ ...editingCause, image: e.target.value })}
-                  className="border rounded px-3 py-2"
-                />
+                <div className="relative">
+                  <label className="block text-sm font-medium mb-2">Cause Image</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id="edit-image-upload"
+                      accept="image/*"
+                      onChange={(e) => setEditingCause({ ...editingCause, imageFile: e.target.files?.[0] || null })}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('edit-image-upload')?.click()}
+                      className="flex items-center gap-2 px-3 py-2 border border-neutral-300 rounded-lg text-sm hover:bg-neutral-50 transition"
+                    >
+                      <Upload className="w-4 h-4" />
+                      {editingCause.imageFile ? editingCause.imageFile.name : editingCause.image ? 'Change Image' : 'Choose Image'}
+                    </button>
+                  </div>
+                </div>
                 <select
                   value={editingCause.partnerId}
                   onChange={(e) => setEditingCause({ ...editingCause, partnerId: e.target.value })}

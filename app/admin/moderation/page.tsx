@@ -212,7 +212,7 @@ export default function ModerationPage() {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 font-medium border-b-2 transition ${
                 activeTab === tab
-                  ? 'border-neutral-900 text-neutral-900'
+                  ? 'border-neutral-900 bg-neutral-900 text-white'
                   : 'border-transparent text-neutral-600 hover:text-neutral-900'
               }`}
             >
