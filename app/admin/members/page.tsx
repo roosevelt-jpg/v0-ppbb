@@ -228,8 +228,8 @@ export default function MembersPage() {
 
       {/* Add Member Modal */}
       {addModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 space-y-4">
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content bg-white rounded-lg w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Add New Member</h2>
               <button
@@ -329,8 +329,8 @@ export default function MembersPage() {
 
       {/* CSV Import Modal */}
       {csvImportOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6 space-y-4">
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content bg-white rounded-lg w-full max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Import Members from CSV</h2>
               <button

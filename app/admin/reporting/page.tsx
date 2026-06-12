@@ -221,8 +221,8 @@ export default function ReportingPage() {
 
         {/* Report Detail Modal */}
         {reportData && selectedReport && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="admin-modal-overlay">
+            <div className="admin-modal-content bg-white rounded-lg w-full max-w-4xl flex flex-col">
               {/* Modal Header */}
               <div className="p-6 border-b border-neutral-200 flex-shrink-0 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">{reportData.type}</h2>
@@ -304,7 +304,7 @@ export default function ReportingPage() {
                   Close
                 </button>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </div>

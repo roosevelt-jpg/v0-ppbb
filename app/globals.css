@@ -284,3 +284,31 @@ body {
   }
 }
 
+/* Modal Portal Styles - Fix z-index stacking */
+[role="dialog"],
+.modal-overlay,
+.modal-backdrop {
+  position: fixed;
+  z-index: 9999;
+}
+
+/* Admin Modal Fixes */
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.admin-modal-content {
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+

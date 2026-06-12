@@ -13,7 +13,7 @@ import { formatDistanceToNow } from 'date-fns'
 
 export default function ApprovalsPage() {
   const [pendingItems, setPendingItems] = React.useState<any[]>([])
-  const [loading, setLoading] = React.useState(true)
+  const [loading, setLoading] = React.useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
@@ -30,7 +30,9 @@ export default function ApprovalsPage() {
           ...doc.data(),
         }))
         setPendingItems((prev) => [...prev.filter((i) => i.type !== 'charity'), ...items])
-        setLoading(false)
+      },
+      (error) => {
+        console.error('[v0] Error fetching approvals:', error)
       }
     )
 

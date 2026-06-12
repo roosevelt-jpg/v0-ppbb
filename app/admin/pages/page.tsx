@@ -145,10 +145,10 @@ export default function AdminPages() {
 
         {/* Page Editor Modal */}
         {editingPage && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="admin-modal-overlay p-4">
+            <div className="admin-modal-content bg-white rounded-lg w-full max-w-2xl flex flex-col">
               {/* Modal Header */}
-              <div className="p-6 border-b border-border flex-shrink-0">
+              <div className="p-6 border-b border-neutral-200 flex-shrink-0">
                 <h2 className="text-2xl font-bold">
                   {isCreating ? 'Create New Page' : 'Edit Page'}
                 </h2>
@@ -162,7 +162,7 @@ export default function AdminPages() {
                     type="text"
                     value={editingPage.title}
                     onChange={(e) => setEditingPage({ ...editingPage, title: e.target.value })}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
                   />
                 </div>
 
@@ -172,7 +172,7 @@ export default function AdminPages() {
                     type="text"
                     value={editingPage.slug}
                     onChange={(e) => setEditingPage({ ...editingPage, slug: e.target.value })}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
                   />
                 </div>
 
@@ -202,7 +202,7 @@ export default function AdminPages() {
                       type="text"
                       value={editingPage.seoTitle}
                       onChange={(e) => setEditingPage({ ...editingPage, seoTitle: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
                     />
                   </div>
 
@@ -211,7 +211,7 @@ export default function AdminPages() {
                     <select
                       value={editingPage.status}
                       onChange={(e) => setEditingPage({ ...editingPage, status: e.target.value as any })}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
                     >
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
@@ -221,7 +221,7 @@ export default function AdminPages() {
               </div>
 
               {/* Modal Footer - Buttons */}
-              <div className="p-6 border-t border-border flex gap-3 flex-shrink-0">
+              <div className="p-6 border-t border-neutral-200 flex gap-3 flex-shrink-0">
                 <Button
                   onClick={handleSavePage}
                   className="flex-1"
@@ -239,7 +239,7 @@ export default function AdminPages() {
                   Cancel
                 </Button>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </div>
