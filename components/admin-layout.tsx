@@ -21,6 +21,7 @@ import {
   HandHeart,
   Target,
   Plug,
+  Image,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -49,6 +50,7 @@ const adminMenuItems = [
   { label: 'Reporting', href: '/admin/reporting', icon: FileText },
   { label: 'Moderation', href: '/admin/moderation', icon: Flag },
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
+  { label: 'Hero Slider', href: '/admin/assets', icon: Image },
   { label: 'Policies', href: '/admin/policies', icon: FileText },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug },
   { label: 'Settings', href: '/admin/settings', icon: Settings },

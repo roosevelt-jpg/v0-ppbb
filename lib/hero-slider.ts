@@ -47,6 +47,42 @@ export async function saveHeroSliderSettings(settings: HeroSliderSettings): Prom
   }
 }
 
+export async function updateHeroSliderSettings(settings: Partial<HeroSliderSettings>): Promise<boolean> {
+  try {
+    const docRef = doc(db, SLIDER_COLLECTION, 'default')
+    const current = await getHeroSliderSettings()
+    
+    if (!current) {
+      // Create new settings if doesn't exist
+      const newSettings: HeroSliderSettings = {
+        id: 'default',
+        transitionEffect: settings.transitionEffect || 'fade',
+        transitionDuration: settings.transitionDuration || 500,
+        autoplay: settings.autoplay !== undefined ? settings.autoplay : true,
+        autoplayDuration: settings.autoplayDuration || 5,
+        displayMode: settings.displayMode || 'auto',
+        images: settings.images || [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      await setDoc(docRef, newSettings)
+    } else {
+      await updateDoc(docRef, {
+        transitionEffect: settings.transitionEffect || current.transitionEffect,
+        transitionDuration: settings.transitionDuration || current.transitionDuration,
+        autoplay: settings.autoplay !== undefined ? settings.autoplay : current.autoplay,
+        autoplayDuration: settings.autoplayDuration || current.autoplayDuration,
+        displayMode: settings.displayMode || current.displayMode,
+        updatedAt: serverTimestamp(),
+      })
+    }
+    return true
+  } catch (error) {
+    console.error('[v0] Error updating hero slider settings:', error)
+    return false
+  }
+}
+
 export async function updateSliderImage(image: SliderImage): Promise<boolean> {
   try {
     const docRef = doc(db, SLIDER_COLLECTION, 'default')

@@ -3,16 +3,15 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot, limit } from 'firebase/firestore'
+import { collection, query, where, onSnapshot, limit, doc } from 'firebase/firestore'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { HeroSlider } from '@/components/hero-slider'
 import { YouTubeWidget } from '@/components/youtube-widget'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Users2, Heart, Zap, Building2, BookOpen, Briefcase, TrendingUp } from 'lucide-react'
-import { getHeroSliderSettings } from '@/lib/hero-slider'
-import { getYouTubeConfig } from '@/lib/youtube-service'
 import { HeroSliderSettings, YouTubeConfig } from '@/lib/types'
+import { getYouTubeConfig } from '@/lib/youtube-service'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,8 +30,17 @@ export default function HomePage() {
     const statsListeners: any[] = []
     
     try {
-      // Load hero slider settings
-      getHeroSliderSettings().then(setHeroSliderSettings).catch(err => console.error('Hero slider error:', err))
+      // Real-time hero slider settings listener
+      const heroSliderUnsubscribe = onSnapshot(
+        doc(db, 'heroSlider', 'default'),
+        (snapshot) => {
+          if (snapshot.exists()) {
+            setHeroSliderSettings(snapshot.data() as HeroSliderSettings)
+          }
+        },
+        (error) => console.error('Hero slider listener error:', error)
+      )
+      statsListeners.push(heroSliderUnsubscribe)
       
       // Load YouTube config
       getYouTubeConfig().then(setYoutubeConfig).catch(err => console.error('YouTube config error:', err))

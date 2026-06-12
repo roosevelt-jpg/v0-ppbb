@@ -7,10 +7,14 @@ import {
   addSliderImage, 
   updateSliderImage, 
   deleteSliderImage,
+  updateHeroSliderSettings,
   publishHeroSlider 
 } from '@/lib/hero-slider'
 import { getImageDimensions, validateImage } from '@/lib/image-service'
-import { Upload, Trash2, Eye, EyeOff, Save, AlertCircle, CheckCircle, Info } from 'lucide-react'
+import { db } from '@/lib/firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '@/lib/firebase'
+import { Upload, Trash2, Eye, EyeOff, Save, AlertCircle, CheckCircle, Info, Settings as SettingsIcon, Cloud } from 'lucide-react'
 
 export default function AssetsPage() {
   const [settings, setSettings] = useState<HeroSliderSettings | null>(null)
@@ -20,6 +24,9 @@ export default function AssetsPage() {
   const [previewImage, setPreviewImage] = useState<string>('')
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [imageValidation, setImageValidation] = useState<{ errors: string[]; warnings: string[] } | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false)
+  const [editableSettings, setEditableSettings] = useState<Partial<HeroSliderSettings>>({})
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -36,7 +43,68 @@ export default function AssetsPage() {
     setLoading(true)
     const data = await getHeroSliderSettings()
     setSettings(data)
+    if (data) {
+      setEditableSettings(data)
+    }
     setLoading(false)
+  }
+
+  const handleFirebaseImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
+    setIsUploadingImage(true)
+    try {
+      const timestamp = Date.now()
+      const fileName = `hero-slider/${timestamp}-${file.name}`
+      const storageRef = ref(storage, fileName)
+      
+      await uploadBytes(storageRef, file)
+      const downloadURL = await getDownloadURL(storageRef)
+      
+      setFormData(prev => ({ ...prev, imageUrl: downloadURL }))
+      setPreviewImage(downloadURL)
+      
+      // Get image dimensions
+      const dimensions = await getImageDimensions(downloadURL)
+      setImageDimensions(dimensions)
+      
+      // Validate image
+      const validation = validateImage(dimensions.width, dimensions.height)
+      setImageValidation({
+        errors: validation.errors,
+        warnings: validation.warnings,
+      })
+    } catch (error) {
+      console.error('[v0] Error uploading image:', error)
+      alert('Failed to upload image')
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    if (!editableSettings) return
+    
+    setIsSaving(true)
+    try {
+      const success = await updateHeroSliderSettings(editableSettings as HeroSliderSettings)
+      if (success) {
+        await loadSettings()
+        setShowSettingsPanel(false)
+        alert('Settings saved successfully!')
+      }
+    } catch (error) {
+      console.error('[v0] Error saving settings:', error)
+      alert('Failed to save settings')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleImageUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,6 +254,44 @@ export default function AssetsPage() {
 
         {isAddingImage ? (
           <div className="space-y-4">
+            {/* Image Upload Methods */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              {/* Firebase Upload */}
+              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6">
+                <label className="flex flex-col items-center gap-2 cursor-pointer">
+                  <Cloud className="w-8 h-8 text-neutral-400" />
+                  <span className="font-semibold text-neutral-700">Upload to Cloud</span>
+                  <span className="text-sm text-neutral-500">or drag and drop</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFirebaseImageUpload}
+                    disabled={isUploadingImage}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* URL Input */}
+              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 flex flex-col items-center justify-center">
+                <span className="font-semibold text-neutral-700 mb-2">Or paste URL</span>
+                <input
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  onPaste={(e) => {
+                    const url = e.clipboardData?.getData('text') || ''
+                    if (url) {
+                      setFormData(prev => ({ ...prev, imageUrl: url }))
+                      // Trigger the image URL change handler
+                      handleImageUrlChange({ target: { value: url } } as any)
+                    }
+                  }}
+                  className="hidden"
+                />
+                <span className="text-xs text-neutral-400 mt-2">Paste image URL here</span>
+              </div>
+            </div>
+
             {/* Image Preview with info */}
             {previewImage && (
               <div className="rounded-lg overflow-hidden bg-neutral-100 border border-neutral-200">
@@ -350,6 +456,115 @@ export default function AssetsPage() {
           </button>
         )}
       </div>
+
+      {/* Settings Panel Button */}
+      <div className="mb-8 flex justify-end">
+        <button
+          onClick={() => setShowSettingsPanel(!showSettingsPanel)}
+          className="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg font-semibold transition"
+        >
+          <SettingsIcon className="w-4 h-4" />
+          {showSettingsPanel ? 'Hide Settings' : 'Show Settings'}
+        </button>
+      </div>
+
+      {/* Settings Panel */}
+      {showSettingsPanel && editableSettings && (
+        <div className="bg-white rounded-lg border border-neutral-200 p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <SettingsIcon className="w-5 h-5" />
+            Slider Settings
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Transition Effect */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Transition Effect
+              </label>
+              <select
+                value={editableSettings.transitionEffect || 'fade'}
+                onChange={e => setEditableSettings(prev => ({ ...prev, transitionEffect: e.target.value as any }))}
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              >
+                <option value="fade">Fade</option>
+                <option value="slide">Slide</option>
+                <option value="zoom">Zoom</option>
+              </select>
+            </div>
+
+            {/* Autoplay Duration */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Autoplay Duration (seconds)
+              </label>
+              <input
+                type="number"
+                value={editableSettings.autoplayDuration || 5}
+                onChange={e => setEditableSettings(prev => ({ ...prev, autoplayDuration: parseInt(e.target.value) }))}
+                min="2"
+                max="30"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+
+            {/* Autoplay Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Autoplay
+              </label>
+              <button
+                onClick={() => setEditableSettings(prev => ({ ...prev, autoplay: !prev.autoplay }))}
+                className={`w-full px-4 py-2 rounded-lg font-semibold transition ${
+                  editableSettings.autoplay
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                }`}
+              >
+                {editableSettings.autoplay ? 'Enabled' : 'Disabled'}
+              </button>
+            </div>
+
+            {/* Transition Duration */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Transition Duration (ms)
+              </label>
+              <input
+                type="number"
+                value={editableSettings.transitionDuration || 500}
+                onChange={e => setEditableSettings(prev => ({ ...prev, transitionDuration: parseInt(e.target.value) }))}
+                min="300"
+                max="2000"
+                step="100"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={handleSaveSettings}
+              disabled={isSaving}
+              className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-2 rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 font-semibold"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Saving...' : 'Save Settings'}
+            </button>
+            <button
+              onClick={() => {
+                setShowSettingsPanel(false)
+                if (settings) {
+                  setEditableSettings(settings)
+                }
+              }}
+              className="flex-1 bg-neutral-200 text-neutral-900 py-2 rounded-lg hover:bg-neutral-300 font-semibold"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Images List */}
       <div className="space-y-4 mb-8">
