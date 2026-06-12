@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { db } from '@/lib/firebase'
-import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
 import { Heart, MessageSquare, Share2, Link as LinkIcon } from 'lucide-react'
 
@@ -85,13 +85,23 @@ export default function ContactPage() {
         throw new Error('Please fill in all required fields')
       }
 
-      // Add to Firestore
-      await addDoc(collection(db, 'contactRequests'), {
-        ...formData,
-        status: 'new',
-        createdAt: serverTimestamp(),
-        read: false,
+      // Call API endpoint instead of direct Firestore write
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          status: 'new',
+          read: false,
+        }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send message')
+      }
 
       setSuccess(true)
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
