@@ -36,12 +36,33 @@ export async function getApiConfigServer(serviceName: string): Promise<ApiConfig
     const docSnap = snapshot.docs[0]
     const data = docSnap.data()
 
-    // Decrypt sensitive fields
-    return {
+    const decryptedConfig: any = {
       ...data,
-      apiKey: decryptData(data.apiKey),
-      apiSecret: data.apiSecret ? decryptData(data.apiSecret) : undefined,
-    } as ApiConfig
+    }
+
+    // Decrypt standard fields
+    if (data.apiKey) {
+      decryptedConfig.apiKey = decryptData(data.apiKey)
+    }
+    if (data.apiSecret) {
+      decryptedConfig.apiSecret = decryptData(data.apiSecret)
+    }
+
+    // Decrypt Firebase Admin SDK fields
+    if (data.privateKey) {
+      decryptedConfig.privateKey = decryptData(data.privateKey)
+    }
+    if (data.clientEmail) {
+      decryptedConfig.clientEmail = decryptData(data.clientEmail)
+    }
+    if (data.projectId) {
+      decryptedConfig.projectId = decryptData(data.projectId)
+    }
+    if (data.privateKeyId) {
+      decryptedConfig.privateKeyId = decryptData(data.privateKeyId)
+    }
+
+    return decryptedConfig as ApiConfig
   } catch (error) {
     console.error(`[v0] Error fetching API config for ${serviceName}:`, error)
     return null
@@ -81,12 +102,32 @@ export async function setApiConfigServer(
     const docId = snapshot.empty ? serviceName : snapshot.docs[0].id
     const docRef = doc(db, API_CONFIG_COLLECTION, docId)
 
-    const dataToSave = {
+    const dataToSave: any = {
       serviceName,
       ...config,
-      apiKey: config.apiKey ? encryptData(config.apiKey) : undefined,
-      apiSecret: config.apiSecret ? encryptData(config.apiSecret) : undefined,
       updatedAt: new Date(),
+    }
+
+    // Encrypt standard fields
+    if (config.apiKey) {
+      dataToSave.apiKey = encryptData(config.apiKey)
+    }
+    if (config.apiSecret) {
+      dataToSave.apiSecret = encryptData(config.apiSecret)
+    }
+
+    // Encrypt Firebase Admin SDK fields
+    if (config.privateKey) {
+      dataToSave.privateKey = encryptData(config.privateKey)
+    }
+    if (config.clientEmail) {
+      dataToSave.clientEmail = encryptData(config.clientEmail)
+    }
+    if (config.projectId) {
+      dataToSave.projectId = encryptData(config.projectId)
+    }
+    if (config.privateKeyId) {
+      dataToSave.privateKeyId = encryptData(config.privateKeyId)
     }
 
     await setDoc(docRef, dataToSave, { merge: true })
