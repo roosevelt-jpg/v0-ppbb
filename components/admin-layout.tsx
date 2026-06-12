@@ -22,6 +22,7 @@ import {
   Target,
   Plug,
   Image,
+  Play,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -51,6 +52,7 @@ const adminMenuItems = [
   { label: 'Moderation', href: '/admin/moderation', icon: Flag },
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
   { label: 'Hero Slider', href: '/admin/assets', icon: Image },
+  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play },
   { label: 'Policies', href: '/admin/policies', icon: FileText },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug },
   { label: 'Settings', href: '/admin/settings', icon: Settings },

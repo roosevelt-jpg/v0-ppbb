@@ -41,8 +41,8 @@ export function YouTubeWidget({ videos, isLoading = false }: YouTubeWidgetProps)
     )
   }
 
-  // Display maximum of 6 videos for better display flexibility
-  const displayVideos = videos.slice(0, 6)
+  // Display maximum of 3 videos for homepage (user preference)
+  const displayVideos = videos.slice(0, 3)
 
   return (
     <div className="w-full">

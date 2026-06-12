@@ -42,8 +42,17 @@ export default function HomePage() {
       )
       statsListeners.push(heroSliderUnsubscribe)
       
-      // Load YouTube config
-      getYouTubeConfig().then(setYoutubeConfig).catch(err => console.error('YouTube config error:', err))
+      // Real-time YouTube config listener
+      const youtubeUnsubscribe = onSnapshot(
+        doc(db, 'youtubeConfig', 'default'),
+        (snapshot) => {
+          if (snapshot.exists()) {
+            setYoutubeConfig(snapshot.data() as YouTubeConfig)
+          }
+        },
+        (error) => console.error('YouTube config listener error:', error)
+      )
+      statsListeners.push(youtubeUnsubscribe)
 
       // Members count
       const usersQuery = query(collection(db, 'users'), where('role', '==', 'member'))
