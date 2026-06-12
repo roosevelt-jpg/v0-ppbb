@@ -134,7 +134,7 @@ export default function AdminIntegrationsPage() {
 
   return (
     <AdminPageLayout title="Integrations" subtitle="Manage and configure all integrated services">
-      <div className="space-y-8">
+      <div className="space-y-12">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border border-neutral-200 rounded-lg p-4">
@@ -150,6 +150,120 @@ export default function AdminIntegrationsPage() {
             <div className="text-3xl font-bold mt-2 text-neutral-900">{services.length}</div>
           </div>
         </div>
+
+        {/* Current Configurations Section */}
+        {!loading && configuredCount > 0 && (
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#111111' }}>
+              Current Configurations
+            </h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '16px',
+            }}>
+              {configs.map((config) => {
+                const service = services.find(s => s.id === config.serviceName)
+                const health = getHealth(config.serviceName)
+                
+                return (
+                  <div
+                    key={config.serviceName}
+                    style={{
+                      border: '1px solid #e4e1da',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '12px',
+                    }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111111', margin: '0' }}>
+                        {service?.name || config.serviceName}
+                      </h3>
+                      <span style={{
+                        backgroundColor: health?.status === 'healthy' ? '#d1fae5' : '#fee2e2',
+                        color: health?.status === 'healthy' ? '#065f46' : '#991b1b',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                      }}>
+                        {health?.status === 'healthy' ? 'Active' : 'Error'}
+                      </span>
+                    </div>
+
+                    {service?.description && (
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#888888',
+                        margin: '0 0 12px 0',
+                      }}>
+                        {service.description}
+                      </p>
+                    )}
+
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px',
+                      flexWrap: 'wrap',
+                    }}>
+                      <button
+                        onClick={() => handleEdit(config.serviceName)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#111111',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleTestService(config.serviceName)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#e4e1da',
+                          color: '#111111',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Test
+                      </button>
+                      <button
+                        onClick={() => handleDeleteConfig(config.serviceName)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: '#fee2e2',
+                          color: '#991b1b',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Refresh Button */}
         <div className="flex justify-end">
@@ -169,20 +283,81 @@ export default function AdminIntegrationsPage() {
           </div>
         )}
 
-        {/* Services Grid */}
+        {/* Add New Configuration Section */}
         {!loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {services.map((service) => (
-              <ApiCard
-                key={service.id}
-                service={service}
-                isConfigured={isConfigured(service.id)}
-                health={getHealth(service.id)}
-                onEdit={() => handleEdit(service.id)}
-                onDelete={() => handleDeleteConfig(service.id)}
-                onTest={() => handleTestService(service.id)}
-              />
-            ))}
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#111111' }}>
+              Add New Configuration
+            </h2>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '16px',
+            }}>
+              {services.map((service) => {
+                const isConfigured = isConfigured(service.id)
+                
+                return (
+                  <div
+                    key={service.id}
+                    style={{
+                      border: '1px solid #e4e1da',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      backgroundColor: isConfigured ? '#f5f5f5' : '#ffffff',
+                      opacity: isConfigured ? 0.7 : 1,
+                    }}
+                  >
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111111', margin: '0 0 8px 0' }}>
+                      {service.name}
+                    </h3>
+                    <p style={{
+                      fontSize: '13px',
+                      color: '#888888',
+                      margin: '0 0 16px 0',
+                    }}>
+                      {service.description}
+                    </p>
+
+                    {isConfigured ? (
+                      <button
+                        disabled
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: '#333333',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          cursor: 'not-allowed',
+                        }}
+                      >
+                        ✓ Already Configured
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEdit(service.id)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: '#111111',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        + Configure
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
 
