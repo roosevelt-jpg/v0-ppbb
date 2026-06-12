@@ -6,14 +6,12 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { getSiteSettings, updateSiteSettings } from '@/lib/admin'
-import { setApiConfig, getApiConfig } from '@/lib/api-config'
 import { fileToBase64 } from '@/lib/image-upload'
-import { SiteSettings, ApiConfig } from '@/lib/types'
+import { SiteSettings } from '@/lib/types'
 import { Save, AlertCircle, Upload, X } from 'lucide-react'
 
 export default function AdminSettings() {
   const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null)
-  const [apiConfigs, setApiConfigs] = React.useState<{ stripe?: Partial<ApiConfig>; sendgrid?: Partial<ApiConfig> }>({})
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
   const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -51,15 +49,6 @@ export default function AdminSettings() {
           }
           setSiteSettings(defaultSettings)
         }
-
-        // Load API configs
-        const stripeConfig = await getApiConfig('stripe')
-        const sendgridConfig = await getApiConfig('sendgrid')
-
-        setApiConfigs({
-          stripe: stripeConfig || { status: 'inactive' },
-          sendgrid: sendgridConfig || { status: 'inactive' },
-        })
       } catch (error) {
         console.error('[v0] Error loading settings:', error)
       } finally {
@@ -97,13 +86,7 @@ export default function AdminSettings() {
   }
 
   const handleApiConfigChange = (service: 'stripe' | 'sendgrid', field: string, value: string) => {
-    setApiConfigs((prev) => ({
-      ...prev,
-      [service]: {
-        ...prev[service],
-        [field]: value,
-      },
-    }))
+    // Removed - API configs are now managed in /admin/integrations
   }
 
   const handleSaveSiteSettings = async () => {
@@ -121,19 +104,7 @@ export default function AdminSettings() {
   }
 
   const handleSaveApiConfig = async (service: 'stripe' | 'sendgrid') => {
-    setSaving(true)
-    try {
-      const config = apiConfigs[service]
-      if (!config) return
-
-      await setApiConfig(service, config as any)
-      setMessage({ type: 'success', text: `${service} configuration saved` })
-      setTimeout(() => setMessage(null), 3000)
-    } catch (error) {
-      setMessage({ type: 'error', text: `Failed to save ${service} configuration` })
-    } finally {
-      setSaving(false)
-    }
+    // Removed - API configs are now managed in /admin/integrations
   }
 
   if (loading) {
@@ -467,95 +438,6 @@ export default function AdminSettings() {
               <Save className="w-4 h-4 inline mr-2" />
               {saving ? 'Saving...' : 'Save Social Media Links'}
             </button>
-          </div>
-        </Card>
-
-        {/* API Configurations */}
-        <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-          <h2
-            className="text-2xl font-bold mb-2"
-            style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}
-          >
-            API Integrations
-          </h2>
-          <p className="text-sm mb-6" style={{ color: '#888888' }}>
-            Add your API keys to enable payment processing and email features
-          </p>
-
-          {/* Stripe */}
-          <div className="mb-8 pb-8 border-b" style={{ borderColor: '#e4e1da' }}>
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#333333' }}>
-              Stripe Integration
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Stripe API Key (Secret)
-                </label>
-                <input
-                  type="password"
-                  placeholder="sk_live_..."
-                  value={apiConfigs.stripe?.apiKey || ''}
-                  onChange={(e) => handleApiConfigChange('stripe', 'apiKey', e.target.value)}
-                  className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                  style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-                />
-              </div>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={apiConfigs.stripe?.status === 'active'}
-                  onChange={(e) => handleApiConfigChange('stripe', 'status', e.target.checked ? 'active' : 'inactive')}
-                />
-                <span className="text-sm" style={{ color: '#333333' }}>Active</span>
-              </label>
-              <button
-                onClick={() => handleSaveApiConfig('stripe')}
-                disabled={saving}
-                className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
-                style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-              >
-                Save Stripe Config
-              </button>
-            </div>
-          </div>
-
-          {/* SendGrid */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#333333' }}>
-              SendGrid Integration
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  SendGrid API Key
-                </label>
-                <input
-                  type="password"
-                  placeholder="SG...."
-                  value={apiConfigs.sendgrid?.apiKey || ''}
-                  onChange={(e) => handleApiConfigChange('sendgrid', 'apiKey', e.target.value)}
-                  className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                  style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-                />
-              </div>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={apiConfigs.sendgrid?.status === 'active'}
-                  onChange={(e) => handleApiConfigChange('sendgrid', 'status', e.target.checked ? 'active' : 'inactive')}
-                />
-                <span className="text-sm" style={{ color: '#333333' }}>Active</span>
-              </label>
-              <button
-                onClick={() => handleSaveApiConfig('sendgrid')}
-                disabled={saving}
-                className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
-                style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-              >
-                Save SendGrid Config
-              </button>
-            </div>
           </div>
         </Card>
 
