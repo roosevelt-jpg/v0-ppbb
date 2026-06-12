@@ -186,11 +186,11 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
             style={{
               width: '100%',
               padding: '8px 12px',
-              marginTop: '4px',
               border: '1px solid #e4e1da',
               borderRadius: '6px',
               backgroundColor: '#f7f6f2',
               color: '#111111',
+              boxSizing: 'border-box',
             }}
           />
         </div>

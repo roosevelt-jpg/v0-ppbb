@@ -20,45 +20,90 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/5"
+        className="fixed inset-0 z-40"
         onClick={() => onOpenChange(false)}
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
       />
 
-      {/* Dialog */}
-      <div className="fixed left-[50%] top-[50%] z-50 w-screen max-w-4xl translate-x-[-50%] translate-y-[-50%] max-h-[90vh] overflow-y-auto p-4">
+      {/* Dialog - Properly Centered and Sized */}
+      <div style={{
+        position: 'fixed',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 50,
+        width: '90vw',
+        maxWidth: '900px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        padding: '0',
+      }}>
         <div
-          className="border shadow-lg rounded-lg"
           style={{
+            border: '1px solid #e4e1da',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            borderRadius: '8px',
             backgroundColor: '#ffffff',
-            borderColor: '#e4e1da',
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b p-6" style={{ borderColor: '#e4e1da' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid #e4e1da',
+            padding: '24px',
+            gap: '12px',
+          }}>
             <div>
-              <h2 className="text-lg font-semibold" style={{ color: '#111111' }}>
+              <h2 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111111',
+                margin: '0',
+              }}>
                 {title}
               </h2>
               {description && (
-                <p className="text-sm mt-1" style={{ color: '#888888' }}>
+                <p style={{
+                  fontSize: '14px',
+                  marginTop: '4px',
+                  color: '#888888',
+                  margin: '0',
+                }}>
                   {description}
                 </p>
               )}
             </div>
             <button
               onClick={() => onOpenChange(false)}
-              className="text-gray-400 hover:text-gray-600 transition"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#aaa',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Content */}
-          <div className="p-6">{children}</div>
+          <div style={{ padding: '24px' }}>{children}</div>
 
           {/* Footer */}
-          {footer && <div className="border-t px-6 py-4" style={{ borderColor: '#e4e1da' }}>{footer}</div>}
+          {footer && <div style={{
+            borderTop: '1px solid #e4e1da',
+            paddingLeft: '24px',
+            paddingRight: '24px',
+            paddingTop: '16px',
+            paddingBottom: '16px',
+          }}>{footer}</div>}
         </div>
       </div>
     </>

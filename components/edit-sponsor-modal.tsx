@@ -238,7 +238,19 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
           <textarea
             value={formData.notes || ''}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+              fontFamily: 'inherit',
+              fontSize: '14px',
+              minHeight: '80px',
+              resize: 'vertical',
+            }}
             placeholder="Add any notes about this sponsor"
             rows={3}
           />
