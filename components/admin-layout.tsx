@@ -25,6 +25,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { logoutUser } from '@/lib/auth'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 
 const adminMenuItems = [
   { label: 'Overview', href: '/admin', icon: BarChart3 },
@@ -119,6 +121,7 @@ export function AdminSidebar() {
 export function AdminHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   const router = useRouter()
   const [dateTime, setDateTime] = React.useState<string>('')
+  const [unreadMessages, setUnreadMessages] = React.useState<number>(0)
 
   React.useEffect(() => {
     const updateDateTime = () => {
@@ -138,6 +141,22 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
     updateDateTime()
     const interval = setInterval(updateDateTime, 1000)
     return () => clearInterval(interval)
+  }, [])
+
+  React.useEffect(() => {
+    // Subscribe to unread messages
+    const q = query(collection(db, 'contactRequests'), where('read', '==', false))
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setUnreadMessages(snapshot.size)
+      },
+      (error) => {
+        console.error('[v0] Error fetching unread messages:', error)
+      }
+    )
+
+    return () => unsubscribe()
   }, [])
 
   const handleLogout = async () => {
@@ -163,6 +182,19 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
       </div>
       <div className="flex items-center gap-4">
         <ThemeToggle />
+        
+        {/* Message Notification Badge */}
+        {unreadMessages > 0 && (
+          <Link href="/admin/contact-requests">
+            <button className="relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors" style={{ backgroundColor: '#fff3e0', border: '2px solid #ff6b6b' }}>
+              <Mail className="h-5 w-5" style={{ color: '#ff6b6b' }} />
+              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: '#ff6b6b' }}>
+                {unreadMessages}
+              </span>
+            </button>
+          </Link>
+        )}
+        
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
