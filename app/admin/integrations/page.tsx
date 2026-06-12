@@ -295,7 +295,7 @@ export default function AdminIntegrationsPage() {
               gap: '16px',
             }}>
               {services.map((service) => {
-                const isConfigured = isConfigured(service.id)
+                const serviceIsConfigured = isConfigured(service.id)
                 
                 return (
                   <div
@@ -304,8 +304,8 @@ export default function AdminIntegrationsPage() {
                       border: '1px solid #e4e1da',
                       borderRadius: '8px',
                       padding: '16px',
-                      backgroundColor: isConfigured ? '#f5f5f5' : '#ffffff',
-                      opacity: isConfigured ? 0.7 : 1,
+                      backgroundColor: serviceIsConfigured ? '#f5f5f5' : '#ffffff',
+                      opacity: serviceIsConfigured ? 0.7 : 1,
                     }}
                   >
                     <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#111111', margin: '0 0 8px 0' }}>
@@ -319,7 +319,7 @@ export default function AdminIntegrationsPage() {
                       {service.description}
                     </p>
 
-                    {isConfigured ? (
+                    {serviceIsConfigured ? (
                       <button
                         disabled
                         style={{
