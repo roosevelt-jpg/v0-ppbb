@@ -23,6 +23,7 @@ import {
   Plug,
   Image,
   Play,
+  Shield,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -32,6 +33,7 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore'
 
 const adminMenuItems = [
   { label: 'Overview', href: '/admin', icon: BarChart3 },
+  { label: 'Access Control', href: '/admin/access-control', icon: Shield },
   { label: 'Members', href: '/admin/members', icon: Users },
   { label: 'Team (About)', href: '/admin/team', icon: Users },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart },

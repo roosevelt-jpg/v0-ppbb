@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { verifyAdminAccessCode } from '@/lib/admin-access-codes'
 import Link from 'next/link'
 
 export default function AdminSetup() {
@@ -35,12 +35,10 @@ export default function AdminSetup() {
       }
 
       // Check Firestore for dynamically generated access codes
-      const usersRef = collection(db, 'users')
-      const q = query(usersRef, where('accessCode', '==', code))
-      const querySnapshot = await getDocs(q)
-
-      if (querySnapshot.empty) {
-        setError('Invalid access code. Please try again.')
+      const result = await verifyAdminAccessCode(code)
+      
+      if (!result.valid) {
+        setError(result.error || 'Invalid access code. Please try again.')
         setLoading(false)
         return
       }
