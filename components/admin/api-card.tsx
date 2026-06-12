@@ -12,7 +12,28 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  Brain,
+  Zap,
+  CreditCard,
+  Mail,
+  PlayCircle,
+  MapPin,
+  Database,
+  Calendar,
+  Plug,
 } from 'lucide-react'
+
+const ICON_MAP: Record<string, React.ComponentType<any>> = {
+  Brain,
+  Zap,
+  CreditCard,
+  Mail,
+  PlayCircle,
+  MapPin,
+  Database,
+  Calendar,
+  Plug,
+}
 
 interface ApiCardProps {
   service: ServiceDefinition
@@ -31,7 +52,7 @@ export function ApiCard({
   onDelete,
   onTest,
 }: ApiCardProps) {
-  const Icon = require('lucide-react')[service.icon] || Power
+  const Icon = ICON_MAP[service.icon] || Power
 
   return (
     <Card className="p-6 flex flex-col h-full" style={{ borderColor: '#e4e1da' }}>
