@@ -52,9 +52,24 @@ export default function AdminTeamPage() {
       })) as TeamMember[]
       setMembers(membersList)
       setLoading(false)
+    }, (error) => {
+      console.error('[v0] Error fetching team members:', error)
+      // Set loading to false on error so page doesn't hang
+      setLoading(false)
     })
 
-    return () => unsubscribe()
+    // Add timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('[v0] Team members loading timeout')
+        setLoading(false)
+      }
+    }, 5000)
+
+    return () => {
+      unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
