@@ -145,46 +145,52 @@ export function ApiFormModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           {/* Scrollable Content */}
-          <div className="overflow-y-auto flex-1 p-6 space-y-4">
-            {service.fields.map((field) => (
-              <div key={field.name}>
-                <label
-                  htmlFor={field.name}
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: '#111111' }}
-                >
-                  {field.label}
-                  {field.required && <span className="text-red-600"> *</span>}
-                </label>
+          <div className="overflow-y-auto flex-1 p-6 space-y-4 block" style={{ minHeight: '100px', visibility: 'visible' }}>
+            {service.fields && service.fields.length > 0 ? (
+              service.fields.map((field) => (
+                <div key={field.name} style={{ display: 'block' }}>
+                  <label
+                    htmlFor={field.name}
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: '#111111', display: 'block' }}
+                  >
+                    {field.label}
+                    {field.required && <span className="text-red-600"> *</span>}
+                  </label>
 
-                <input
-                  id={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  value={credentials[field.name] || ''}
-                  onChange={(e) => handleChange(field.name, e.target.value)}
-                  className="w-full px-3 py-2 border rounded text-sm transition focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: errors[field.name] ? '#ef4444' : '#e4e1da',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                  }}
-                  aria-invalid={!!errors[field.name]}
-                />
+                  <input
+                    id={field.name}
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={credentials[field.name] || ''}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    className="w-full px-3 py-2 border rounded text-sm transition focus:outline-none focus:ring-2"
+                    style={{
+                      borderColor: errors[field.name] ? '#ef4444' : '#e4e1da',
+                      backgroundColor: '#ffffff',
+                      color: '#111111',
+                      display: 'block',
+                      visibility: 'visible',
+                    }}
+                    aria-invalid={!!errors[field.name]}
+                  />
 
-                {errors[field.name] && (
-                  <p className="text-xs mt-1 text-red-600">
-                    {errors[field.name]}
-                  </p>
-                )}
+                  {errors[field.name] && (
+                    <p className="text-xs mt-1 text-red-600" style={{ display: 'block' }}>
+                      {errors[field.name]}
+                    </p>
+                  )}
 
-                {field.help && !errors[field.name] && (
-                  <p className="text-xs mt-1" style={{ color: '#888888' }}>
-                    {field.help}
-                  </p>
-                )}
-              </div>
-            ))}
+                  {field.help && !errors[field.name] && (
+                    <p className="text-xs mt-1" style={{ color: '#888888', display: 'block' }}>
+                      {field.help}
+                    </p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p style={{ color: '#888888' }}>No fields configured for this service</p>
+            )}
 
             {message && (
               <div
@@ -192,6 +198,7 @@ export function ApiFormModal({
                 style={{
                   backgroundColor: message.type === 'success' ? '#d1fae5' : '#fee2e2',
                   color: message.type === 'success' ? '#065f46' : '#991b1b',
+                  display: 'block',
                 }}
               >
                 {message.text}
