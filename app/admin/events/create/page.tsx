@@ -160,19 +160,20 @@ export default function CreateEventPage({ params }: PageProps) {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-2 mb-6 text-neutral-600 hover:text-neutral-900"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </button>
+    <div className="w-full px-8 py-8">
+      <div className="max-w-4xl mx-auto">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 mb-6 text-neutral-600 hover:text-neutral-900"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
 
-      <Card className="p-8 border-neutral-200">
-        <h1 className="text-3xl font-bold mb-8">{isEditing ? 'Edit Event' : 'Create New Event'}</h1>
+        <Card className="p-8 border-neutral-200">
+          <h1 className="text-3xl font-bold mb-8">{isEditing ? 'Edit Event' : 'Create New Event'}</h1>
 
-        <form onSubmit={handleSave} className="space-y-8">
+          <form onSubmit={handleSave} className="space-y-8">
           {/* Basic Information */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold">Basic Information</h2>
@@ -442,6 +443,7 @@ export default function CreateEventPage({ params }: PageProps) {
           </div>
         </form>
       </Card>
+    </div>
     </div>
   )
 }

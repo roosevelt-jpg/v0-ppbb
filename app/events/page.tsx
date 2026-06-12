@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where, addDoc, deleteDoc, doc, Timestamp } from 'firebase/firestore'
 import Link from 'next/link'
-import { Calendar, MapPin, Users, Heart, Share2 } from 'lucide-react'
+import { Calendar, MapPin, Users, Heart, Share2, Plus } from 'lucide-react'
 import { Event } from '@/lib/event-types'
 import { format } from 'date-fns'
 
@@ -106,11 +106,19 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4">Upcoming Events</h1>
-          <p className="text-lg text-gray-600">
-            Join us for events, workshops, and community gatherings. Connect with fellow members and make a difference together.
-          </p>
+        <div className="mb-12 flex justify-between items-start">
+          <div className="flex-1">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-4">Upcoming Events</h1>
+            <p className="text-lg text-gray-600">
+              Join us for events, workshops, and community gatherings. Connect with fellow members and make a difference together.
+            </p>
+          </div>
+          <Link href="/admin/events/create">
+            <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium whitespace-nowrap ml-4">
+              <Plus className="w-4 h-4" />
+              Create Event
+            </button>
+          </Link>
         </div>
 
         {/* Upcoming Events */}
