@@ -44,7 +44,7 @@ export function ApiFormModal({
         onClick={onClose}
       >
         <div
-          className="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+          className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6"
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="text-lg font-semibold mb-2" style={{ color: '#111111' }}>
@@ -114,7 +114,7 @@ export function ApiFormModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[85vh] flex flex-col"
+        className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col"
         style={{ borderColor: '#e4e1da' }}
         onClick={(e) => e.stopPropagation()}
       >
