@@ -1,13 +1,13 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getAllPages, createPage, updatePage, deletePage } from '@/lib/admin'
 import { Page } from '@/lib/types'
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export default function AdminPages() {
   const [pages, setPages] = React.useState<Page[]>([])
