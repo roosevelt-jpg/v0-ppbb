@@ -2,163 +2,263 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
-import { doc, getDoc, collection, getDocs, query, where, updateDoc, arrayUnion } from 'firebase/firestore'
-import { User } from '@/lib/types'
-import Link from 'next/link'
+import { collection, onSnapshot, query, where, deleteDoc, doc, Timestamp } from 'firebase/firestore'
 import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, QrCode, Clock, MapPin, Users } from 'lucide-react'
+import { Clock, MapPin, Users, Calendar, LogOut, Plus } from 'lucide-react'
+import Link from 'next/link'
+import { Event } from '@/lib/event-types'
+import { format } from 'date-fns'
 
 export default function MemberEventsPage() {
-  const [events, setEvents] = React.useState<any[]>([])
+  const [attendingEvents, setAttendingEvents] = React.useState<Event[]>([])
+  const [declinedEvents, setDeclinedEvents] = React.useState<Event[]>([])
   const [loading, setLoading] = React.useState(true)
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
-  const [showQRScanner, setShowQRScanner] = React.useState<string | null>(null)
-  const [userEmail, setUserEmail] = React.useState('')
 
   React.useEffect(() => {
-    const fetchEvents = async () => {
-      const firebaseUser = auth.currentUser
-      if (!firebaseUser) return
+    if (!auth.currentUser) {
+      setLoading(false)
+      return
+    }
 
-      setUserEmail(firebaseUser.email || '')
-
-      try {
-        // Fetch events user is registered for
-        const eventsSnap = await getDocs(
-          query(
-            collection(db, 'events'),
-            where('attendees', 'array-contains', firebaseUser.uid)
-          )
-        )
-
-        setEvents(eventsSnap.docs.map((doc) => ({
-          id: doc.id,
+    // Fetch user's event attendance records
+    const unsubscribe = onSnapshot(
+      query(
+        collection(db, 'eventAttendance'),
+        where('userId', '==', auth.currentUser.uid)
+      ),
+      async (snapshot) => {
+        const attendanceRecords = snapshot.docs.map((doc) => ({
           ...doc.data(),
-        })))
-      } catch (error) {
-        console.error('[v0] Error fetching events:', error)
-      } finally {
+          docId: doc.id,
+        }))
+
+        // Fetch full event details for each attendance record
+        const eventPromises = attendanceRecords.map(async (record) => {
+          try {
+            const eventDoc = await fetch(`/api/events/${record.eventId}`)
+            if (eventDoc.ok) {
+              const event = await eventDoc.json()
+              return { ...event, attendanceDocId: record.docId, status: record.status }
+            }
+          } catch (err) {
+            console.error('[v0] Error fetching event:', err)
+          }
+          return null
+        })
+
+        const events = await Promise.all(eventPromises)
+        const validEvents = events.filter((e): e is any => e !== null)
+
+        setAttendingEvents(validEvents.filter((e) => e.status === 'attending'))
+        setDeclinedEvents(validEvents.filter((e) => e.status === 'declined'))
         setLoading(false)
       }
-    }
+    )
 
-    fetchEvents()
+    return () => unsubscribe()
   }, [])
 
-  const handleQRCheckIn = async (eventId: string) => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) return
-
+  const handleDeclineEvent = async (attendanceDocId: string) => {
     try {
-      await updateDoc(doc(db, 'events', eventId), {
-        checkedIn: arrayUnion(firebaseUser.uid),
-      })
-      // Update local state
-      setEvents(events.map(e => e.id === eventId ? {...e, checkedIn: [...(e.checkedIn || []), firebaseUser.uid]} : e))
-      setShowQRScanner(null)
+      await deleteDoc(doc(db, 'eventAttendance', attendanceDocId))
     } catch (error) {
-      console.error('[v0] Error checking in:', error)
+      console.error('[v0] Error declining event:', error)
+      alert('Failed to decline event')
     }
+  }
+
+  const handleAddToCalendar = (event: Event) => {
+    const eventDate = event.date instanceof Date ? event.date : (event.date as any).toDate?.() || new Date()
+    const startDateTime = new Date(eventDate)
+    const [startHour] = event.startTime.split(':')
+    startDateTime.setHours(parseInt(startHour), 0, 0)
+
+    const endDateTime = new Date(startDateTime)
+    const [endHour] = event.endTime.split(':')
+    endDateTime.setHours(parseInt(endHour), 0, 0)
+
+    // Generate iCal format
+    const icalContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Passive Blessings//Events//EN
+BEGIN:VEVENT
+UID:${event.id}@passiveblessings.com
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTART:${startDateTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${endDateTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}
+LOCATION:${event.location.address}, ${event.location.city}
+END:VEVENT
+END:VCALENDAR`
+
+    // Download iCal file
+    const blob = new Blob([icalContent], { type: 'text/calendar' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${event.title}.ics`
+    a.click()
+    window.URL.revokeObjectURL(url)
   }
 
   return (
     <>
       <MemberHeader
         title="My Events"
-        subtitle="Events you&apos;re registered for"
+        subtitle="Events you&apos;re attending and registered for"
         open={sidebarOpen}
         setOpen={setSidebarOpen}
       />
       
       <div className="p-8">
         {loading ? (
-          <p className="text-muted-foreground">Loading events...</p>
-        ) : events.length === 0 ? (
+          <p className="text-neutral-600">Loading events...</p>
+        ) : attendingEvents.length === 0 && declinedEvents.length === 0 ? (
           <Card className="p-8 text-center">
-            <p className="text-muted-foreground mb-4">You haven&apos;t registered for any events yet</p>
+            <p className="text-neutral-600 mb-4">You haven&apos;t registered for any events yet</p>
             <Link href="/events">
-              <Button>Browse Events</Button>
+              <Button className="bg-neutral-900 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Browse Events
+              </Button>
             </Link>
           </Card>
         ) : (
-          <div className="grid gap-6">
-            {events.map((event: any) => {
-              const isCheckedIn = event.checkedIn?.includes(auth.currentUser?.uid)
-              const attendeeCount = event.attendees?.length || 0
-              
-              return (
-                <Card key={event.id} className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-bold">{event.title}</h3>
-                        {isCheckedIn && (
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">
-                            Checked In
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-2">{event.description}</p>
-                      
-                      <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-muted-foreground" />
-                          <span><strong>{event.date}</strong> at {event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin size={16} className="text-muted-foreground" />
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Users size={16} className="text-muted-foreground" />
-                          <span>{attendeeCount} attendees</span>
-                        </div>
-                      </div>
+          <div className="space-y-8">
+            {/* Attending Events */}
+            {attendingEvents.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Attending Events</h2>
+                <div className="grid gap-4">
+                  {attendingEvents.map((event: any) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onDecline={() => handleDeclineEvent(event.attendanceDocId)}
+                      onAddToCalendar={() => handleAddToCalendar(event)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Declined Events */}
+            {declinedEvents.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Declined Events</h2>
+                <div className="grid gap-4">
+                  {declinedEvents.map((event: any) => (
+                    <div
+                      key={event.id}
+                      className="p-4 border border-gray-200 rounded-lg opacity-60"
+                    >
+                      <p className="text-neutral-600">
+                        You declined: <strong>{event.title}</strong>
+                      </p>
                     </div>
-                    
-                    <div className="flex gap-2 flex-col">
-                      <Button variant="outline">View Details</Button>
-                      {!isCheckedIn && (
-                        <Button 
-                          onClick={() => setShowQRScanner(event.id)}
-                          className="flex items-center gap-2"
-                        >
-                          <QrCode size={16} />
-                          Check In
-                        </Button>
-                      )}
-                      {showQRScanner === event.id && (
-                        <div className="mt-2 p-3 bg-blue-50 rounded">
-                          <p className="text-xs text-muted-foreground mb-2">Tap to check in with QR code</p>
-                          <Button 
-                            size="sm"
-                            onClick={() => handleQRCheckIn(event.id)}
-                            className="w-full"
-                          >
-                            Confirm Check-In
-                          </Button>
-                          <Button 
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setShowQRScanner(null)}
-                            className="w-full mt-2"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              )
-            })}
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
     </>
+  )
+}
+
+function EventCard({
+  event,
+  onDecline,
+  onAddToCalendar,
+}: {
+  event: Event & { attendanceDocId: string }
+  onDecline: () => void
+  onAddToCalendar: () => void
+}) {
+  const eventDate = event.date instanceof Date ? event.date : (event.date as any).toDate?.() || new Date()
+  const formattedDate = format(eventDate, 'MMM dd, yyyy')
+  const genderLabel = {
+    'mixed': 'All Genders',
+    'men-only': 'Men Only',
+    'ladies-only': 'Ladies Only',
+  }
+
+  return (
+    <Card className="p-6">
+      {event.bannerImageUrl && (
+        <img
+          src={event.bannerImageUrl}
+          alt={event.title}
+          className="w-full h-40 object-cover rounded-lg mb-4"
+        />
+      )}
+
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h3 className="text-lg font-bold">{event.title}</h3>
+          <div className="flex gap-2 mt-2">
+            <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+              {genderLabel[event.genderRestriction]}
+            </span>
+            {event.isPaid && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                {event.currency} {event.price}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <p className="text-sm text-neutral-600 mb-4">{event.description}</p>
+
+      <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-neutral-500" />
+          <span>{formattedDate}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-neutral-500" />
+          <span>{event.startTime} - {event.endTime}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-neutral-500" />
+          <span>{event.location.address}, {event.location.city}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-neutral-500" />
+          <span>{event.attendees.length} attending</span>
+        </div>
+      </div>
+
+      {event.dressCode && (
+        <div className="mb-4 p-3 bg-gray-50 rounded">
+          <p className="text-xs font-medium text-neutral-600">Dress Code: {event.dressCode}</p>
+        </div>
+      )}
+
+      {event.logistics && (
+        <div className="mb-4 p-3 bg-gray-50 rounded">
+          <p className="text-xs font-medium text-neutral-600 mb-1">Logistics & Info:</p>
+          <p className="text-xs text-neutral-600">{event.logistics}</p>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <Button onClick={onAddToCalendar} variant="outline" className="flex-1">
+          <Calendar className="w-4 h-4 mr-2" />
+          Add to Calendar
+        </Button>
+        <Button onClick={onDecline} variant="outline" className="flex-1 text-red-600 border-red-300">
+          <LogOut className="w-4 h-4 mr-2" />
+          Decline
+        </Button>
+      </div>
+    </Card>
   )
 }

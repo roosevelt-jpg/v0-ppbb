@@ -4,7 +4,7 @@ export interface ServiceDefinition {
   name: string
   description: string
   icon: string
-  category: 'AI' | 'Payment' | 'Email' | 'Maps' | 'Media' | 'Database' | 'Other'
+  category: 'AI' | 'Payment' | 'Email' | 'Maps' | 'Media' | 'Database' | 'Calendar' | 'Other'
   fields: FormField[]
   testEndpoint?: string
   healthCheck: boolean
@@ -285,6 +285,105 @@ export const API_SERVICES: Record<string, ServiceDefinition> = {
       },
     ],
     testEndpoint: 'https://api.ziina.me/v1/account',
+  },
+
+  googleCalendar: {
+    id: 'googleCalendar',
+    name: 'Google Calendar',
+    description: 'Integrate events with Google Calendar for users',
+    icon: 'Calendar',
+    category: 'Other',
+    healthCheck: true,
+    fields: [
+      {
+        name: 'clientId',
+        label: 'Client ID',
+        type: 'text',
+        required: true,
+        placeholder: 'xxx.apps.googleusercontent.com',
+        help: 'Google OAuth 2.0 Client ID from Google Cloud Console',
+      },
+      {
+        name: 'clientSecret',
+        label: 'Client Secret',
+        type: 'password',
+        required: true,
+        placeholder: 'GOCSPX-...',
+        help: 'Google OAuth 2.0 Client Secret',
+      },
+      {
+        name: 'redirectUri',
+        label: 'Redirect URI',
+        type: 'url',
+        required: true,
+        placeholder: 'https://your-domain.com/api/calendar/google/callback',
+        help: 'Callback URL for OAuth flow',
+      },
+    ],
+    testEndpoint: 'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+  },
+
+  microsoftCalendar: {
+    id: 'microsoftCalendar',
+    name: 'Microsoft Calendar (Outlook)',
+    description: 'Integrate events with Microsoft Outlook Calendar',
+    icon: 'Calendar',
+    category: 'Other',
+    healthCheck: true,
+    fields: [
+      {
+        name: 'clientId',
+        label: 'Client ID',
+        type: 'text',
+        required: true,
+        placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        help: 'Azure AD Application (client) ID',
+      },
+      {
+        name: 'clientSecret',
+        label: 'Client Secret',
+        type: 'password',
+        required: true,
+        placeholder: '...',
+        help: 'Azure AD Client Secret',
+      },
+      {
+        name: 'redirectUri',
+        label: 'Redirect URI',
+        type: 'url',
+        required: true,
+        placeholder: 'https://your-domain.com/api/calendar/microsoft/callback',
+        help: 'Callback URL for OAuth flow',
+      },
+      {
+        name: 'tenantId',
+        label: 'Tenant ID',
+        type: 'text',
+        required: false,
+        placeholder: 'common or your-tenant-id',
+        help: 'Azure AD Tenant ID (default: common)',
+      },
+    ],
+    testEndpoint: 'https://graph.microsoft.com/v1.0/me/calendars',
+  },
+
+  appleCalendar: {
+    id: 'appleCalendar',
+    name: 'Apple Calendar',
+    description: 'Support for Apple Calendar integration via iCalendar',
+    icon: 'Calendar',
+    category: 'Other',
+    healthCheck: false,
+    fields: [
+      {
+        name: 'iCloudEmail',
+        label: 'iCloud Email (Optional)',
+        type: 'email',
+        required: false,
+        placeholder: 'user@icloud.com',
+        help: 'User iCloud email for calendar sharing',
+      },
+    ],
   },
 
   webhook: {
