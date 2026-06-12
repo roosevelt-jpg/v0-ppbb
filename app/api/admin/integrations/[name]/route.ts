@@ -73,10 +73,18 @@ export async function POST(
     const serviceName = params.name
     const body = await request.json()
 
-    // Validate required fields
-    if (!body.apiKey) {
+    // Validate that at least some credentials are provided
+    const hasCredentials = 
+      body.apiKey || 
+      body.projectId || 
+      body.privateKey || 
+      body.clientEmail ||
+      body.apiSecret ||
+      body.privateKeyId
+
+    if (!hasCredentials) {
       return NextResponse.json(
-        { error: 'API key is required' },
+        { error: 'At least one credential field is required' },
         { status: 400 }
       )
     }

@@ -29,10 +29,24 @@ export default function AdminIntegrationsPage() {
   async function loadData() {
     try {
       setLoading(true)
+      
+      // Get auth token
+      const auth = (await import('firebase/auth')).getAuth()
+      const user = auth.currentUser
+      
+      if (!user) {
+        console.error('[v0] User not authenticated')
+        setLoading(false)
+        return
+      }
+
+      const token = await user.getIdToken()
+
       const response = await fetch('/api/admin/integrations', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         cache: 'no-store',
       })
@@ -68,13 +82,28 @@ export default function AdminIntegrationsPage() {
 
   async function handleSaveConfig(serviceId: string, credentials: Record<string, any>) {
     try {
+      // Get auth token from Firebase
+      const auth = (await import('firebase/auth')).getAuth()
+      const user = auth.currentUser
+      
+      if (!user) {
+        console.error('[v0] User not authenticated')
+        return
+      }
+
+      const token = await user.getIdToken()
+
       const response = await fetch(`/api/admin/integrations/${serviceId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(credentials),
       })
 
       if (response.ok) {
+        console.log('[v0] Config saved successfully')
         await loadData()
         setShowModal(false)
         setSelectedService(null)
@@ -89,8 +118,21 @@ export default function AdminIntegrationsPage() {
 
   async function handleTestService(serviceId: string) {
     try {
+      const auth = (await import('firebase/auth')).getAuth()
+      const user = auth.currentUser
+      
+      if (!user) {
+        console.error('[v0] User not authenticated')
+        return
+      }
+
+      const token = await user.getIdToken()
+
       const response = await fetch(`/api/admin/integrations/${serviceId}/test`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       })
 
       if (response.ok) {
@@ -107,8 +149,21 @@ export default function AdminIntegrationsPage() {
     if (!confirm(`Delete ${serviceId} configuration?`)) return
 
     try {
+      const auth = (await import('firebase/auth')).getAuth()
+      const user = auth.currentUser
+      
+      if (!user) {
+        console.error('[v0] User not authenticated')
+        return
+      }
+
+      const token = await user.getIdToken()
+
       const response = await fetch(`/api/admin/integrations/${serviceId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       })
 
       if (response.ok) {
