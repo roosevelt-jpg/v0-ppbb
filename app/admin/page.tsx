@@ -3,9 +3,10 @@
 import React from 'react'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore'
-import { Card } from '@/components/ui/card'
-import { Users, Calendar, TrendingUp, AlertCircle, Heart, Clock, Building2, Target, User2, DollarSign, CheckCircle, AlertTriangle, Zap, BarChart3 } from 'lucide-react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
+import { Users, Calendar, TrendingUp, Heart, Clock, Building2, Target, User2, DollarSign, CheckCircle, AlertTriangle, Zap, BarChart3 } from 'lucide-react'
 import Link from 'next/link'
+import { BUTTON_PRIMARY, GRID_2COL, GRID_3COL, FLEX_BETWEEN, TEXT_SECTION, TEXT_SMALL } from '@/lib/admin-design-system'
 
 export default function AdminOverview() {
   const [stats, setStats] = React.useState({
@@ -263,46 +264,45 @@ export default function AdminOverview() {
   ]
 
   return (
-    <>
-      <div className="p-8 bg-neutral-50 dark:bg-neutral-900">
-        {/* Last Updated */}
-        <div className="mb-6 flex items-center justify-between">
+    <AdminPageLayout title="Dashboard" subtitle="Platform overview and real-time metrics">
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className={FLEX_BETWEEN}>
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-50">Dashboard Metrics</h1>
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-              Real-time platform statistics and analytics
-            </p>
+            <h2 className={TEXT_SECTION}>Platform Metrics</h2>
+            <p className={TEXT_SMALL + ' mt-1'}>Real-time statistics and key performance indicators</p>
           </div>
           {lastUpdated && (
-            <div className="text-xs text-neutral-500 dark:text-neutral-500">
-              Last updated: {lastUpdated.toLocaleTimeString()}
+            <div className="text-xs text-neutral-500">
+              Updated: {lastUpdated.toLocaleTimeString()}
             </div>
           )}
         </div>
 
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {statCards.map((stat) => {
             const Icon = stat.icon
             return (
               <Link 
                 key={stat.title}
                 href={stat.link}
-                className={`block p-6 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-600 transition-all cursor-pointer ${stat.color} dark:${stat.color.replace('50', '900')}`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400 uppercase tracking-wide">
-                      {stat.title}
-                    </p>
-                    <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mt-2">
-                      {loading ? '...' : stat.value}
-                    </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
-                      {stat.trend}
-                    </p>
+                <div className="h-full bg-white border border-neutral-200 rounded-lg p-4 hover:shadow-md hover:border-neutral-300 transition-all cursor-pointer">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-neutral-600 uppercase tracking-wide truncate">
+                        {stat.title}
+                      </p>
+                      <p className="text-2xl md:text-3xl font-bold text-neutral-900 mt-2">
+                        {loading ? '...' : stat.value}
+                      </p>
+                      <p className="text-xs text-neutral-500 mt-1 line-clamp-2">
+                        {stat.trend}
+                      </p>
+                    </div>
+                    <Icon className="h-5 w-5 text-neutral-300 flex-shrink-0 ml-2" />
                   </div>
-                  <Icon className="h-6 w-6 text-neutral-400 dark:text-neutral-600 flex-shrink-0" />
                 </div>
               </Link>
             )
@@ -310,37 +310,29 @@ export default function AdminOverview() {
         </div>
 
         {/* Membership Breakdown */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-50 mb-4">Membership Breakdown</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <Card className="p-6 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 uppercase tracking-wide">Standard</p>
-              <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mt-2">{stats.membershipTiers.standard}</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-2">
-                {stats.totalMembers > 0 ? Math.round((stats.membershipTiers.standard / stats.totalMembers) * 100) : 0}% of total
-              </p>
-            </Card>
-            <Card className="p-6 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 uppercase tracking-wide">Gold</p>
-              <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mt-2">{stats.membershipTiers.gold}</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-2">
-                {stats.totalMembers > 0 ? Math.round((stats.membershipTiers.gold / stats.totalMembers) * 100) : 0}% of total
-              </p>
-            </Card>
-            <Card className="p-6 border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 uppercase tracking-wide">Platinum</p>
-              <p className="text-3xl font-bold text-neutral-900 dark:text-neutral-50 mt-2">{stats.membershipTiers.platinum}</p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-500 mt-2">
-                {stats.totalMembers > 0 ? Math.round((stats.membershipTiers.platinum / stats.totalMembers) * 100) : 0}% of total
-              </p>
-            </Card>
+        <div>
+          <h3 className={TEXT_SECTION + ' mb-4'}>Membership Tiers</h3>
+          <div className={GRID_3COL}>
+            {[
+              { tier: 'Standard', count: stats.membershipTiers.standard },
+              { tier: 'Gold', count: stats.membershipTiers.gold },
+              { tier: 'Platinum', count: stats.membershipTiers.platinum },
+            ].map((item) => (
+              <div key={item.tier} className="bg-white border border-neutral-200 rounded-lg p-4">
+                <p className="text-xs font-medium text-neutral-600 uppercase tracking-wide">{item.tier}</p>
+                <p className="text-3xl font-bold text-neutral-900 mt-2">{item.count}</p>
+                <p className="text-xs text-neutral-500 mt-2">
+                  {stats.totalMembers > 0 ? Math.round((item.count / stats.totalMembers) * 100) : 0}% of total
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Quick Navigation */}
         <div>
-          <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-50 mb-4">Quick Navigation</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <h3 className={TEXT_SECTION + ' mb-4'}>Quick Navigation</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {[
               { label: 'Members', href: '/admin/members' },
               { label: 'Volunteers', href: '/admin/volunteers' },
@@ -358,14 +350,15 @@ export default function AdminOverview() {
               <Link 
                 key={item.href}
                 href={item.href}
-                className="px-4 py-3 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:border-neutral-300 dark:hover:border-neutral-600 hover:shadow-sm transition-all text-center"
               >
-                {item.label}
+                <button className={BUTTON_PRIMARY + ' w-full text-sm'}>
+                  {item.label}
+                </button>
               </Link>
             ))}
           </div>
         </div>
       </div>
-    </>
+    </AdminPageLayout>
   )
 }
