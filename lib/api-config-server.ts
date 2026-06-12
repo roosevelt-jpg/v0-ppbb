@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, setDoc, doc, query, where } from 'firebase-admin/firestore'
+import { getFirestore, collection, getDocs, setDoc, doc, query, where, deleteDoc } from 'firebase-admin/firestore'
 import { getApps } from 'firebase-admin/app'
 import { ApiConfig, SystemHealth } from '@/lib/types'
 
@@ -40,27 +40,20 @@ export async function getApiConfigServer(serviceName: string): Promise<ApiConfig
       ...data,
     }
 
-    // Decrypt standard fields
-    if (data.apiKey) {
-      decryptedConfig.apiKey = decryptData(data.apiKey)
-    }
-    if (data.apiSecret) {
-      decryptedConfig.apiSecret = decryptData(data.apiSecret)
-    }
+    // System fields that shouldn't be decrypted
+    const systemFields = ['serviceName', 'status', 'lastChecked', 'updatedBy', 'updatedAt', 'createdAt', 'deletedAt', 'deletedBy']
 
-    // Decrypt Firebase Admin SDK fields
-    if (data.privateKey) {
-      decryptedConfig.privateKey = decryptData(data.privateKey)
-    }
-    if (data.clientEmail) {
-      decryptedConfig.clientEmail = decryptData(data.clientEmail)
-    }
-    if (data.projectId) {
-      decryptedConfig.projectId = decryptData(data.projectId)
-    }
-    if (data.privateKeyId) {
-      decryptedConfig.privateKeyId = decryptData(data.privateKeyId)
-    }
+    // Decrypt all credential fields generically
+    Object.keys(decryptedConfig).forEach((key: string) => {
+      if (!systemFields.includes(key) && typeof decryptedConfig[key] === 'string') {
+        try {
+          // Try to decrypt - if it fails, leave it as-is
+          decryptedConfig[key] = decryptData(decryptedConfig[key])
+        } catch {
+          // Data might not be encrypted, keep original
+        }
+      }
+    })
 
     return decryptedConfig as ApiConfig
   } catch (error) {
@@ -104,36 +97,59 @@ export async function setApiConfigServer(
 
     const dataToSave: any = {
       serviceName,
-      ...config,
-      updatedAt: new Date(),
     }
 
-    // Encrypt standard fields
-    if (config.apiKey) {
-      dataToSave.apiKey = encryptData(config.apiKey)
-    }
-    if (config.apiSecret) {
-      dataToSave.apiSecret = encryptData(config.apiSecret)
-    }
+    // System fields that shouldn't be encrypted
+    const systemFields = ['serviceName', 'status', 'lastChecked', 'updatedBy', 'updatedAt', 'createdAt', 'deletedAt', 'deletedBy']
 
-    // Encrypt Firebase Admin SDK fields
-    if (config.privateKey) {
-      dataToSave.privateKey = encryptData(config.privateKey)
-    }
-    if (config.clientEmail) {
-      dataToSave.clientEmail = encryptData(config.clientEmail)
-    }
-    if (config.projectId) {
-      dataToSave.projectId = encryptData(config.projectId)
-    }
-    if (config.privateKeyId) {
-      dataToSave.privateKeyId = encryptData(config.privateKeyId)
-    }
+    // Encrypt all credential fields generically
+    Object.keys(config).forEach((key: string) => {
+      if (systemFields.includes(key)) {
+        // System fields pass through unencrypted
+        dataToSave[key] = config[key as keyof typeof config]
+      } else if (config[key as keyof typeof config]) {
+        // All other fields are credentials and should be encrypted
+        const value = config[key as keyof typeof config]
+        if (typeof value === 'string') {
+          dataToSave[key] = encryptData(value)
+        } else {
+          // For non-string values (dates, objects), store as-is or convert to JSON
+          dataToSave[key] = value
+        }
+      }
+    })
+
+    console.log('[v0] Saving config for', serviceName, 'with fields:', Object.keys(dataToSave))
 
     await setDoc(docRef, dataToSave, { merge: true })
     return true
   } catch (error) {
     console.error(`[v0] Error setting API config for ${serviceName}:`, error)
+    return false
+  }
+}
+
+export async function deleteApiConfigServer(serviceName: string): Promise<boolean> {
+  try {
+    const db = getDb()
+    const q = query(
+      collection(db, API_CONFIG_COLLECTION),
+      where('serviceName', '==', serviceName)
+    )
+    const snapshot = await getDocs(q)
+
+    if (snapshot.empty) {
+      console.log('[v0] Config not found for deletion:', serviceName)
+      return false
+    }
+
+    const docRef = doc(db, API_CONFIG_COLLECTION, snapshot.docs[0].id)
+    await deleteDoc(docRef)
+
+    console.log('[v0] Config deleted for', serviceName)
+    return true
+  } catch (error) {
+    console.error(`[v0] Error deleting API config for ${serviceName}:`, error)
     return false
   }
 }

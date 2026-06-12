@@ -29,27 +29,20 @@ export async function getApiConfig(serviceName: string): Promise<ApiConfig | nul
       ...data,
     }
 
-    // Decrypt standard fields
-    if (data.apiKey) {
-      decryptedConfig.apiKey = decryptData(data.apiKey)
-    }
-    if (data.apiSecret) {
-      decryptedConfig.apiSecret = decryptData(data.apiSecret)
-    }
+    // System fields that shouldn't be decrypted
+    const systemFields = ['serviceName', 'status', 'lastChecked', 'updatedBy', 'updatedAt', 'createdAt', 'deletedAt', 'deletedBy']
 
-    // Decrypt Firebase Admin SDK fields
-    if (data.privateKey) {
-      decryptedConfig.privateKey = decryptData(data.privateKey)
-    }
-    if (data.clientEmail) {
-      decryptedConfig.clientEmail = decryptData(data.clientEmail)
-    }
-    if (data.projectId) {
-      decryptedConfig.projectId = decryptData(data.projectId)
-    }
-    if (data.privateKeyId) {
-      decryptedConfig.privateKeyId = decryptData(data.privateKeyId)
-    }
+    // Decrypt all credential fields generically
+    Object.keys(decryptedConfig).forEach((key: string) => {
+      if (!systemFields.includes(key) && typeof decryptedConfig[key] === 'string') {
+        try {
+          // Try to decrypt - if it fails, leave it as-is
+          decryptedConfig[key] = decryptData(decryptedConfig[key])
+        } catch {
+          // Data might not be encrypted, keep original
+        }
+      }
+    })
 
     return decryptedConfig as ApiConfig
   } catch (error) {
@@ -91,31 +84,28 @@ export async function setApiConfig(
 
     const dataToSave: any = {
       serviceName,
-      ...config,
-      updatedAt: new Date(),
     }
 
-    // Encrypt apiKey and apiSecret if they exist
-    if (config.apiKey) {
-      dataToSave.apiKey = encryptData(config.apiKey)
-    }
-    if (config.apiSecret) {
-      dataToSave.apiSecret = encryptData(config.apiSecret)
-    }
+    // System fields that shouldn't be encrypted
+    const systemFields = ['serviceName', 'status', 'lastChecked', 'updatedBy', 'updatedAt', 'createdAt', 'deletedAt', 'deletedBy']
 
-    // For Firebase Admin SDK and other complex credentials, encrypt the entire JSON object
-    if (config.privateKey) {
-      dataToSave.privateKey = encryptData(config.privateKey)
-    }
-    if (config.clientEmail) {
-      dataToSave.clientEmail = encryptData(config.clientEmail)
-    }
-    if (config.projectId) {
-      dataToSave.projectId = encryptData(config.projectId)
-    }
-    if (config.privateKeyId) {
-      dataToSave.privateKeyId = encryptData(config.privateKeyId)
-    }
+    // Encrypt all credential fields generically
+    Object.keys(config).forEach((key: string) => {
+      if (systemFields.includes(key)) {
+        // System fields pass through unencrypted
+        dataToSave[key] = config[key as keyof typeof config]
+      } else if (config[key as keyof typeof config]) {
+        // All other fields are credentials and should be encrypted
+        const value = config[key as keyof typeof config]
+        if (typeof value === 'string') {
+          dataToSave[key] = encryptData(value)
+        } else {
+          dataToSave[key] = value
+        }
+      }
+    })
+
+    console.log('[v0] Saving config for', serviceName, 'with fields:', Object.keys(dataToSave))
 
     await setDoc(docRef, dataToSave, { merge: true })
     return true

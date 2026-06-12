@@ -73,23 +73,34 @@ export async function POST(
     const serviceName = params.name
     const body = await request.json()
 
-    // Validate that at least some credentials are provided
-    const hasCredentials = 
-      body.apiKey || 
-      body.projectId || 
-      body.privateKey || 
-      body.clientEmail ||
-      body.apiSecret ||
-      body.privateKeyId
+    console.log('[v0] POST /api/admin/integrations/', serviceName, 'Body:', body)
 
-    if (!hasCredentials) {
+    // Get service definition to know what fields to expect
+    const { services } = await import('@/lib/integrations/services')
+    const serviceDefinition = services.find((s: any) => s.id === serviceName)
+
+    if (!serviceDefinition) {
       return NextResponse.json(
-        { error: 'At least one credential field is required' },
+        { error: 'Service not found' },
+        { status: 404 }
+      )
+    }
+
+    // Validate that at least one credential field is provided
+    const requiredFields = serviceDefinition.fields || []
+    const hasAtLeastOneField = requiredFields.some((field: any) => body[field.name])
+
+    if (requiredFields.length > 0 && !hasAtLeastOneField) {
+      console.log('[v0] Validation failed: no required fields provided')
+      return NextResponse.json(
+        { error: `At least one of these fields is required: ${requiredFields.map((f: any) => f.name).join(', ')}` },
         { status: 400 }
       )
     }
 
-    const success = await setApiConfig(serviceName, {
+    // Save the configuration
+    const { setApiConfigServer } = await import('@/lib/api-config-server')
+    const success = await setApiConfigServer(serviceName, {
       ...body,
       status: body.status || 'active',
       lastChecked: new Date(),
@@ -98,12 +109,14 @@ export async function POST(
     })
 
     if (!success) {
+      console.log('[v0] Failed to save configuration')
       return NextResponse.json(
         { error: 'Failed to save configuration' },
         { status: 400 }
       )
     }
 
+    console.log('[v0] Configuration saved successfully for', serviceName)
     return NextResponse.json({
       message: 'Configuration saved successfully',
       serviceName,
@@ -132,15 +145,29 @@ export async function DELETE(
 
     const serviceName = params.name
 
-    const docRef = doc(db, 'apiConfigs', serviceName)
-    await updateDoc(docRef, {
-      status: 'inactive',
-      apiKey: deleteField(),
-      apiSecret: deleteField(),
-      updatedAt: new Date(),
-      deletedBy: userId,
-    })
+    // Get service definition to know what fields to delete
+    const { services } = await import('@/lib/integrations/services')
+    const serviceDefinition = services.find((s: any) => s.id === serviceName)
 
+    if (!serviceDefinition) {
+      return NextResponse.json(
+        { error: 'Service not found' },
+        { status: 404 }
+      )
+    }
+
+    // Delete all credential fields for this service
+    const { deleteApiConfigServer } = await import('@/lib/api-config-server')
+    const success = await deleteApiConfigServer(serviceName)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to delete configuration' },
+        { status: 400 }
+      )
+    }
+
+    console.log('[v0] Configuration deleted for', serviceName)
     return NextResponse.json({
       message: 'Integration configuration deleted',
     })
