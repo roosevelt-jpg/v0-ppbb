@@ -1,0 +1,124 @@
+import { db } from '@/lib/firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+
+export async function seedDonationData() {
+  try {
+    // Seed Charity Partners
+    const charityPartnerRef = collection(db, 'charityPartners')
+    
+    const charityPartners = [
+      {
+        name: 'Beit Al Khair Society',
+        description: 'Official charitable partner for community support',
+        status: 'active',
+        paymentLink: 'https://beitalkhairdubai.ae/donate',
+        email: 'info@beitalkhairdubai.ae',
+        phone: '+971-4-XXX-XXXX',
+        createdAt: serverTimestamp(),
+      },
+      {
+        name: 'Al Noor Community Services',
+        description: 'Committed to social welfare and community development',
+        status: 'active',
+        paymentLink: 'https://alnoor.ae/donate',
+        email: 'support@alnoor.ae',
+        phone: '+971-4-XXX-XXXX',
+        createdAt: serverTimestamp(),
+      },
+    ]
+
+    const charityIds: string[] = []
+    for (const partner of charityPartners) {
+      const docRef = await addDoc(charityPartnerRef, partner)
+      charityIds.push(docRef.id)
+    }
+
+    // Seed Causes
+    const causesRef = collection(db, 'causes')
+    
+    const causes = [
+      {
+        name: 'Emergency Relief Fund',
+        description: 'Support families facing urgent hardships and emergency situations',
+        category: 'Emergency Relief',
+        status: 'active',
+        currentAmount: 45000,
+        targetAmount: 100000,
+        partnerId: charityIds[0],
+        image: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=400&h=300&fit=crop',
+        details: 'Help families dealing with unexpected emergencies including medical crises, housing issues, and loss of income.',
+        createdAt: serverTimestamp(),
+      },
+      {
+        name: 'Education Scholarship Program',
+        description: 'Provide quality education for underprivileged children',
+        category: 'Education',
+        status: 'active',
+        currentAmount: 75000,
+        targetAmount: 150000,
+        partnerId: charityIds[1],
+        image: 'https://images.unsplash.com/photo-1427504494934-ed8b0c4cfe15?w=400&h=300&fit=crop',
+        details: 'Enable talented students from low-income families to pursue their educational dreams.',
+        createdAt: serverTimestamp(),
+      },
+      {
+        name: 'Food Security Initiative',
+        description: 'Combat hunger and provide nutritious meals to vulnerable communities',
+        category: 'Food Security',
+        status: 'active',
+        currentAmount: 32000,
+        targetAmount: 80000,
+        partnerId: charityIds[0],
+        image: 'https://images.unsplash.com/photo-1532996122724-8f3c2cd83c5d?w=400&h=300&fit=crop',
+        details: 'Provide regular food packages to families in need and support community feeding programs.',
+        createdAt: serverTimestamp(),
+      },
+      {
+        name: 'Health & Wellness Campaign',
+        description: 'Ensure access to healthcare and wellness programs for all',
+        category: 'Healthcare',
+        status: 'active',
+        currentAmount: 55000,
+        targetAmount: 120000,
+        partnerId: charityIds[1],
+        image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=300&fit=crop',
+        details: 'Support medical camps, health screenings, and wellness initiatives for underserved communities.',
+        createdAt: serverTimestamp(),
+      },
+      {
+        name: 'Skills Training Program',
+        description: 'Empower individuals with job-ready skills and vocational training',
+        category: 'Skills Development',
+        status: 'active',
+        currentAmount: 28000,
+        targetAmount: 90000,
+        partnerId: charityIds[0],
+        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
+        details: 'Provide training in IT, business, and vocational skills to enable economic independence.',
+        createdAt: serverTimestamp(),
+      },
+      {
+        name: 'Environmental Conservation',
+        description: 'Protect and restore our natural environment and green spaces',
+        category: 'Environment',
+        status: 'active',
+        currentAmount: 18000,
+        targetAmount: 70000,
+        partnerId: charityIds[1],
+        image: 'https://images.unsplash.com/photo-1559027615-cd00b42f0c69?w=400&h=300&fit=crop',
+        details: 'Support environmental projects including tree planting, beach cleanups, and sustainability initiatives.',
+        createdAt: serverTimestamp(),
+      },
+    ]
+
+    for (const cause of causes) {
+      await addDoc(causesRef, cause)
+    }
+
+    console.log('Donation data seeded successfully!')
+    return { success: true, charityPartnersCount: charityPartners.length, causesCount: causes.length }
+  } catch (error) {
+    console.error('Error seeding data:', error)
+    throw error
+  }
+}
