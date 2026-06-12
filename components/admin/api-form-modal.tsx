@@ -143,19 +143,31 @@ export function ApiFormModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           {/* Scrollable Content */}
-          <div className="overflow-y-auto flex-1 p-6 space-y-4 block" style={{ minHeight: '100px', visibility: 'visible' }}>
+          <div style={{ 
+            overflowY: 'auto',
+            flex: 1,
+            padding: '1.5rem',
+            backgroundColor: '#ffffff',
+            color: '#111111',
+            minHeight: '150px',
+          }}>
             {service.fields && service.fields.length > 0 ? (
               service.fields.map((field) => (
-                <div key={field.name} style={{ display: 'block' }}>
+                <div key={field.name} style={{ marginBottom: '1.5rem', display: 'block', color: '#111111' }}>
                   <label
                     htmlFor={field.name}
-                    className="block text-sm font-medium mb-2"
-                    style={{ color: '#111111', display: 'block' }}
+                    style={{ 
+                      display: 'block',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      marginBottom: '0.5rem',
+                      color: '#111111',
+                    }}
                   >
                     {field.label}
-                    {field.required && <span className="text-red-600"> *</span>}
+                    {field.required && <span style={{ color: '#ef4444' }}> *</span>}
                   </label>
 
                   <input
@@ -164,41 +176,48 @@ export function ApiFormModal({
                     placeholder={field.placeholder}
                     value={credentials[field.name] || ''}
                     onChange={(e) => handleChange(field.name, e.target.value)}
-                    className="w-full px-3 py-2 border rounded text-sm transition focus:outline-none focus:ring-2"
                     style={{
-                      borderColor: errors[field.name] ? '#ef4444' : '#e4e1da',
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      border: `1px solid ${errors[field.name] ? '#ef4444' : '#e4e1da'}`,
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
                       backgroundColor: '#ffffff',
                       color: '#111111',
                       display: 'block',
-                      visibility: 'visible',
+                      boxSizing: 'border-box',
+                      fontFamily: 'inherit',
                     }}
                     aria-invalid={!!errors[field.name]}
                   />
 
                   {errors[field.name] && (
-                    <p className="text-xs mt-1 text-red-600" style={{ display: 'block' }}>
+                    <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: '#ef4444', display: 'block' }}>
                       {errors[field.name]}
                     </p>
                   )}
 
                   {field.help && !errors[field.name] && (
-                    <p className="text-xs mt-1" style={{ color: '#888888', display: 'block' }}>
+                    <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: '#888888', display: 'block' }}>
                       {field.help}
                     </p>
                   )}
                 </div>
               ))
             ) : (
-              <p style={{ color: '#888888' }}>No fields configured for this service</p>
+              <p style={{ color: '#888888', marginBottom: '1rem' }}>No fields configured for this service. Please check the service configuration.</p>
             )}
 
             {message && (
               <div
-                className="p-3 rounded text-sm"
                 style={{
+                  padding: '0.75rem',
+                  borderRadius: '0.375rem',
+                  fontSize: '0.875rem',
                   backgroundColor: message.type === 'success' ? '#d1fae5' : '#fee2e2',
                   color: message.type === 'success' ? '#065f46' : '#991b1b',
                   display: 'block',
+                  marginTop: '1rem',
                 }}
               >
                 {message.text}
@@ -207,7 +226,7 @@ export function ApiFormModal({
           </div>
 
           {/* Footer */}
-          <div className="p-6 border-t flex gap-2 flex-shrink-0" style={{ borderColor: '#e4e1da' }}>
+          <div style={{ padding: '1.5rem', borderTop: '1px solid #e4e1da', display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
             <Button
               type="button"
               variant="outline"
