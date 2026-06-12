@@ -134,7 +134,7 @@ export default function AdminIntegrationsPage() {
 
   return (
     <AdminPageLayout title="Integrations" subtitle="Manage and configure all integrated services">
-      <div className="space-y-8">
+      <div className="space-y-8 max-w-7xl">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border border-neutral-200 rounded-lg p-4">
@@ -162,43 +162,43 @@ export default function AdminIntegrationsPage() {
           </button>
         </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-        </div>
-      )}
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+          </div>
+        )}
 
-      {/* Services Grid */}
-      {!loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {services.map((service) => (
-            <ApiCard
-              key={service.id}
-              service={service}
-              isConfigured={isConfigured(service.id)}
-              health={getHealth(service.id)}
-              onEdit={() => handleEdit(service.id)}
-              onDelete={() => handleDeleteConfig(service.id)}
-              onTest={() => handleTestService(service.id)}
-            />
-          ))}
-        </div>
-      )}
+        {/* Services Grid */}
+        {!loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {services.map((service) => (
+              <ApiCard
+                key={service.id}
+                service={service}
+                isConfigured={isConfigured(service.id)}
+                health={getHealth(service.id)}
+                onEdit={() => handleEdit(service.id)}
+                onDelete={() => handleDeleteConfig(service.id)}
+                onTest={() => handleTestService(service.id)}
+              />
+            ))}
+          </div>
+        )}
 
-      {/* Modal */}
-      {showModal && selectedService && (
-        <ApiFormModal
-          serviceId={selectedService}
-          onSave={async (credentials) => {
-            await handleSaveConfig(selectedService, credentials)
-          }}
-          onClose={() => {
-            setShowModal(false)
-            setSelectedService(null)
-          }}
-        />
-      )}
+        {/* Modal */}
+        {showModal && selectedService && (
+          <ApiFormModal
+            serviceId={selectedService}
+            onSave={async (credentials) => {
+              await handleSaveConfig(selectedService, credentials)
+            }}
+            onClose={() => {
+              setShowModal(false)
+              setSelectedService(null)
+            }}
+          />
+        )}
       </div>
     </AdminPageLayout>
   )
