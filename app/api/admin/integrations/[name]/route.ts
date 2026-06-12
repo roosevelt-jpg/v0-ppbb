@@ -18,18 +18,30 @@ async function checkIntegrationPermission(request: NextRequest): Promise<string 
     const userId = decodedToken.uid
     console.log('[v0] Token verified for userId:', userId)
 
-    const hasAccess = await hasPermission(userId, 'manage_integrations')
-    console.log('[v0] Permission check for manage_integrations:', hasAccess, 'userId:', userId)
+    let hasAccess = await hasPermission(userId, 'manage_integrations')
+    console.log('[v0] Initial permission check for manage_integrations:', hasAccess)
     
     if (!hasAccess) {
-      console.log('[v0] User lacks manage_integrations permission. Checking admin status...')
-      // Log what permissions the user has
+      // User doesn't have permission - try to grant it if they're an admin
       const adminRef = doc(db, 'adminUsers', userId)
       const adminSnap = await getDoc(adminRef)
+      
       if (adminSnap.exists()) {
-        console.log('[v0] Admin user data:', adminSnap.data())
+        const adminData = adminSnap.data()
+        console.log('[v0] Admin user found. Current role:', adminData.adminRole, 'Current permissions:', adminData.permissions)
+        
+        // If they're founder_admin, grant manage_integrations permission
+        if (adminData.adminRole === 'founder_admin' && !adminData.permissions?.includes('manage_integrations')) {
+          console.log('[v0] Granting manage_integrations permission to founder_admin')
+          const newPermissions = [...(adminData.permissions || []), 'manage_integrations']
+          await updateDoc(adminRef, { permissions: newPermissions })
+          hasAccess = true
+        } else if (adminData.adminRole === 'founder_admin') {
+          // They're founder_admin with the permission already
+          hasAccess = true
+        }
       } else {
-        console.log('[v0] User is not in adminUsers collection')
+        console.log('[v0] User is not in adminUsers collection - cannot grant permissions')
       }
     }
     
