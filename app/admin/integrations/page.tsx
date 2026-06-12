@@ -19,9 +19,15 @@ export default function IntegrationsPage() {
   }, [auth.user])
 
   async function loadData() {
-    if (!auth.user) return
+    if (!auth.user) {
+      console.log('[v0] No auth user yet, skipping load')
+      return
+    }
+    
+    setLoading(true)
     try {
       const token = await auth.user.getIdToken()
+      console.log('[v0] Got token, fetching integrations...')
       
       const [integrationsRes, healthRes] = await Promise.all([
         fetch('/api/admin/integrations', {
@@ -32,14 +38,27 @@ export default function IntegrationsPage() {
         }),
       ])
 
+      console.log('[v0] Integrations response:', integrationsRes.status, integrationsRes.ok)
+      console.log('[v0] Health response:', healthRes.status, healthRes.ok)
+
       if (integrationsRes.ok) {
         const data = await integrationsRes.json()
+        console.log('[v0] Integrations data:', data)
         setIntegrations(data.data || [])
+      } else {
+        console.error('[v0] Integrations request failed:', integrationsRes.status)
+        const errText = await integrationsRes.text()
+        console.error('[v0] Error response:', errText)
       }
 
       if (healthRes.ok) {
         const data = await healthRes.json()
+        console.log('[v0] Health data:', data)
         setHealth(data.health || [])
+      } else {
+        console.error('[v0] Health request failed:', healthRes.status)
+        const errText = await healthRes.text()
+        console.error('[v0] Error response:', errText)
       }
     } catch (error) {
       console.error('[v0] Error loading data:', error)

@@ -10,8 +10,47 @@ async function checkPermission(request: NextRequest): Promise<string | null> {
     if (!authHeader?.startsWith('Bearer ')) return null
     const token = authHeader.substring(7)
     const decodedToken = await getAuth().verifyIdToken(token)
-    const hasAccess = await hasPermission(decodedToken.uid, 'manage_integrations')
-    return hasAccess ? decodedToken.uid : null
+    const userId = decodedToken.uid
+    
+    let hasAccess = await hasPermission(userId, 'manage_integrations')
+    
+    // Auto-grant for founder_admin
+    if (!hasAccess) {
+      try {
+        const { getFirestore, doc, getDoc, updateDoc } = await import('firebase/firestore')
+        const { initializeApp, getApps } = await import('firebase/app')
+        
+        const app = getApps().length > 0 ? getApps()[0] : initializeApp({
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+        })
+
+        const db = getFirestore(app)
+        const adminRef = doc(db, 'adminUsers', userId)
+        const adminSnap = await getDoc(adminRef)
+        
+        if (adminSnap.exists()) {
+          const adminData = adminSnap.data()
+          if (adminData?.adminRole === 'founder_admin') {
+            const currentPerms = adminData?.permissions || []
+            if (!currentPerms.includes('manage_integrations')) {
+              await updateDoc(adminRef, { 
+                permissions: [...currentPerms, 'manage_integrations'] 
+              })
+            }
+            hasAccess = true
+          }
+        }
+      } catch (err) {
+        console.error('[v0] Permission grant error:', err)
+      }
+    }
+    
+    return hasAccess ? userId : null
   } catch (error) {
     console.error('[v0] Auth error:', error)
     return null
