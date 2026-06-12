@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getApiConfigServer } from '@/lib/api-config-server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,14 +13,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get SendGrid configuration from admin settings
-    const sendgridConfig = await getApiConfigServer('sendgrid')
-    const apiKey = sendgridConfig?.apiKey
+    // Get SendGrid API key from environment variables
+    const apiKey = process.env.SENDGRID_API_KEY
 
     if (!apiKey) {
-      console.error('[v0] SendGrid API key not configured in admin settings')
+      console.error('[v0] SendGrid API key not configured in environment variables')
       return NextResponse.json(
-        { error: 'SendGrid not configured. Please add API key in admin settings.' },
+        { error: 'SendGrid not configured. Please add SENDGRID_API_KEY to environment variables.' },
         { status: 500 }
       )
     }

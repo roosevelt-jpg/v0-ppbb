@@ -20,7 +20,6 @@ import {
   Mail,
   HandHeart,
   Target,
-  Plug,
   Image,
   Play,
 } from 'lucide-react'
@@ -54,7 +53,6 @@ const adminMenuItems = [
   { label: 'Hero Slider', href: '/admin/assets', icon: Image },
   { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play },
   { label: 'Policies', href: '/admin/policies', icon: FileText },
-  { label: 'Integrations', href: '/admin/integrations', icon: Plug },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
   { label: 'System Health', href: '/admin/health', icon: Zap },
 ]
