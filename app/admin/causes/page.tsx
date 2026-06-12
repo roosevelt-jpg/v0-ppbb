@@ -1,12 +1,14 @@
 'use client'
 
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminTable } from '@/components/admin-table'
 import { db, storage } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { formatDistanceToNow } from 'date-fns'
 import { Upload } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export const dynamic = 'force-dynamic'
 

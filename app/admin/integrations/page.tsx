@@ -1,12 +1,14 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { getAllServiceDefinitions } from '@/lib/integrations/services'
 import { ApiCard } from '@/components/admin/api-card'
 import { ApiFormModal } from '@/components/admin/api-form-modal'
 import { ApiConfig, SystemHealth } from '@/lib/types'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 export const dynamic = 'force-dynamic'
 
@@ -111,57 +113,34 @@ export default function AdminIntegrationsPage() {
   const healthyCount = healthStatus.filter((h) => h.status === 'healthy').length
 
   return (
-    <div className="p-8 space-y-8">
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
-          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
-            Configured Services
+    <AdminPageLayout title="Integrations" subtitle="Manage and configure all integrated services">
+      <div className="space-y-8">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Configured Services</div>
+            <div className="text-3xl font-bold mt-2 text-neutral-900">{configuredCount}</div>
           </div>
-          <div className="text-3xl font-bold mt-2" style={{ color: '#111111' }}>
-            {configuredCount}
+          <div className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Healthy Services</div>
+            <div className="text-3xl font-bold mt-2 text-green-600">{healthyCount}</div>
           </div>
-        </div>
-
-        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
-          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
-            Healthy Services
-          </div>
-          <div className="text-3xl font-bold mt-2" style={{ color: '#10b981' }}>
-            {healthyCount}
+          <div className="bg-white border border-neutral-200 rounded-lg p-4">
+            <div className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">Available Services</div>
+            <div className="text-3xl font-bold mt-2 text-neutral-900">{services.length}</div>
           </div>
         </div>
 
-        <div className="p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2' }}>
-          <div className="text-xs font-semibold" style={{ color: '#888888' }}>
-            Available Services
-          </div>
-          <div className="text-3xl font-bold mt-2" style={{ color: '#111111' }}>
-            {services.length}
-          </div>
+        {/* Refresh Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={loadData}
+            className={`${BUTTON_PRIMARY} flex items-center gap-2`}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh Status
+          </button>
         </div>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold" style={{ color: '#111111' }}>
-            API Integrations
-          </h2>
-          <p className="text-sm mt-1" style={{ color: '#888888' }}>
-            Manage and configure all integrated services
-          </p>
-        </div>
-
-        <Button
-          onClick={loadData}
-          className="gap-2"
-          style={{ backgroundColor: '#111111', color: '#ffffff' }}
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
-      </div>
 
       {/* Loading State */}
       {loading && (
@@ -200,6 +179,7 @@ export default function AdminIntegrationsPage() {
           }}
         />
       )}
-    </div>
+      </div>
+    </AdminPageLayout>
   )
 }

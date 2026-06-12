@@ -147,9 +147,8 @@ export default function AdminSettings() {
   }
 
   return (
-    <>
-
-      <div className="p-8 space-y-8" style={{ backgroundColor: '#f7f6f2' }}>
+    <AdminPageLayout title="Settings" subtitle="Configure platform settings and integrations">
+      <div className="space-y-8">
         {message && (
           <div
             className="p-4 rounded-lg border"
@@ -671,6 +670,6 @@ export default function AdminSettings() {
           </div>
         </Card>
       </div>
-    </>
+    </AdminPageLayout>
   )
 }

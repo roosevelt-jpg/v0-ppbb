@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { HeroSliderSettings, SliderImage } from '@/lib/types'
 import { 
   getHeroSliderSettings, 
@@ -15,6 +16,7 @@ import { db } from '@/lib/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { Upload, Trash2, Eye, EyeOff, Save, AlertCircle, CheckCircle, Info, Settings as SettingsIcon, Cloud } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export default function AssetsPage() {
   const [settings, setSettings] = useState<HeroSliderSettings | null>(null)
@@ -210,11 +212,8 @@ export default function AssetsPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Hero Slider Assets</h1>
-        <p className="text-neutral-600">Manage images that appear in the homepage hero slider</p>
-      </div>
+    <AdminPageLayout title="Hero Slider Assets" subtitle="Manage images that appear in the homepage hero slider">
+      <div className="max-w-7xl mx-auto space-y-6">
 
       {/* Current Settings */}
       {settings && (
@@ -659,6 +658,7 @@ export default function AssetsPage() {
           {isSaving ? 'Publishing...' : 'Publish Changes'}
         </button>
       )}
-    </div>
+      </div>
+    </AdminPageLayout>
   )
 }

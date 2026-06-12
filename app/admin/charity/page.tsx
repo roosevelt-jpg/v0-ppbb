@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminTable } from '@/components/admin-table'
 import { EditCharityModal } from '@/components/edit-charity-modal'
 import { db } from '@/lib/firebase'
@@ -91,8 +92,8 @@ export default function CharityCasesPage() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div className="px-8">
+    <AdminPageLayout title="Charity Cases" subtitle="Manage charity cases and distributions">
+      <div className="space-y-6">
         <AdminTable
           title="All Charity Cases"
           columns={columns}
@@ -127,6 +128,6 @@ export default function CharityCasesPage() {
           charityCase={selectedCase}
         />
       )}
-    </div>
+    </AdminPageLayout>
   )
 }

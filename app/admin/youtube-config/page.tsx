@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { YouTubeConfig, YouTubeVideo } from '@/lib/types'
 import { 
   getYouTubeConfig, 
@@ -10,6 +11,7 @@ import {
   formatDuration
 } from '@/lib/youtube-service'
 import { Save, RefreshCw, AlertCircle } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export default function YouTubeConfigPage() {
   const [config, setConfig] = useState<YouTubeConfig | null>(null)
@@ -119,11 +121,8 @@ export default function YouTubeConfigPage() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">YouTube Integration</h1>
-        <p className="text-neutral-600">Configure and manage YouTube videos displayed on your homepage</p>
-      </div>
+    <AdminPageLayout title="YouTube Videos" subtitle="Configure and manage YouTube integration">
+      <div className="max-w-4xl mx-auto space-y-6">
 
       {/* Error Alert */}
       {error && (
@@ -306,6 +305,7 @@ export default function YouTubeConfigPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </AdminPageLayout>
   )
 }
