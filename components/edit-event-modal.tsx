@@ -93,74 +93,121 @@ export function EditEventModal({ open, onOpenChange, event, onSuccess }: EditEve
         </div>
       }
     >
-      <div className="space-y-4">
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Event Name</label>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Event Name</label>
           <input
             type="text"
             value={formData.name || ''}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
           />
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-neutral-700">Description</label>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Description</label>
           <textarea
             value={formData.description || ''}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+              minHeight: '80px',
+              fontFamily: 'inherit',
+              resize: 'vertical',
+            }}
             rows={3}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium text-neutral-700 flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              Date
-            </label>
-            <input
-              type="date"
-              value={formData.date || ''}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-neutral-700">Location</label>
-            <input
-              type="text"
-              value={formData.location || ''}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50"
-            />
-          </div>
+        <div>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
+            <Calendar className="w-4 h-4 inline mr-1" />
+            Date
+          </label>
+          <input
+            type="date"
+            value={formData.date || ''}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Location</label>
+          <input
+            type="text"
+            value={formData.location || ''}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
+          />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium text-neutral-700">Capacity</label>
-            <input
-              type="number"
-              value={formData.capacity || 0}
-              onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-neutral-700">Status</label>
-            <select
-              value={formData.status || 'active'}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50"
-            >
-              <option value="active">Active</option>
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
+        <div>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Capacity</label>
+          <input
+            type="number"
+            value={formData.capacity || 0}
+            onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) })}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Status</label>
+          <select
+            value={formData.status || 'active'}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
+          >
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
         </div>
       </div>
     </Dialog>

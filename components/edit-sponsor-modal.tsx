@@ -94,35 +94,59 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
         </div>
       }
     >
-      <div className="space-y-4 py-4">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
         <div>
-          <label className="text-sm font-medium">Sponsor Name</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Sponsor Name</label>
           <input
             type="text"
             value={formData.name || ''}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
             placeholder="Enter sponsor name"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Category</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Category</label>
           <input
             type="text"
             value={formData.category || ''}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
             placeholder="e.g., Corporate, Individual, NGO"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Sponsorship Level</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Sponsorship Level</label>
           <select
             value={formData.sponsorshipLevel || 'standard'}
             onChange={(e) => setFormData({ ...formData, sponsorshipLevel: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
           >
             <option value="standard">Standard</option>
             <option value="bronze">Bronze</option>
@@ -132,44 +156,76 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
         </div>
 
         <div>
-          <label className="text-sm font-medium">Contact Person</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Contact Person</label>
           <input
             type="text"
             value={formData.contactPerson || ''}
             onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
             placeholder="Enter contact person name"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Email</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Email</label>
           <input
             type="email"
             value={formData.email || ''}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
             placeholder="Enter email address"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Phone</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Phone</label>
           <input
             type="tel"
             value={formData.phone || ''}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
             placeholder="Enter phone number"
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium">Status</label>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Status</label>
           <select
             value={formData.status || 'active'}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-lg"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #e4e1da',
+              borderRadius: '6px',
+              backgroundColor: '#f7f6f2',
+              color: '#111111',
+              boxSizing: 'border-box',
+            }}
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -177,8 +233,8 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
           </select>
         </div>
 
-        <div>
-          <label className="text-sm font-medium">Notes</label>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Notes</label>
           <textarea
             value={formData.notes || ''}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}

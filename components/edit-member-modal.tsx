@@ -86,9 +86,9 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
         </div>
       }
     >
-      <div className="space-y-4">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
         <div>
-          <label className="text-sm font-medium" style={{ color: '#111111' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
             Name
           </label>
           <input
@@ -98,17 +98,17 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
             style={{
               width: '100%',
               padding: '8px 12px',
-              marginTop: '4px',
               border: '1px solid #e4e1da',
               borderRadius: '6px',
               backgroundColor: '#f7f6f2',
               color: '#111111',
+              boxSizing: 'border-box',
             }}
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium" style={{ color: '#111111' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
             Email
           </label>
           <input
@@ -119,17 +119,17 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
             style={{
               width: '100%',
               padding: '8px 12px',
-              marginTop: '4px',
               border: '1px solid #e4e1da',
               borderRadius: '6px',
               backgroundColor: '#f7f6f2',
               color: '#888888',
+              boxSizing: 'border-box',
             }}
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium" style={{ color: '#111111' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
             Role
           </label>
           <select
@@ -138,11 +138,11 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
             style={{
               width: '100%',
               padding: '8px 12px',
-              marginTop: '4px',
               border: '1px solid #e4e1da',
               borderRadius: '6px',
               backgroundColor: '#f7f6f2',
               color: '#111111',
+              boxSizing: 'border-box',
             }}
           >
             <option value="member">Member</option>
@@ -153,7 +153,7 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
         </div>
 
         <div>
-          <label className="text-sm font-medium" style={{ color: '#111111' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
             Status
           </label>
           <select
@@ -162,11 +162,11 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
             style={{
               width: '100%',
               padding: '8px 12px',
-              marginTop: '4px',
               border: '1px solid #e4e1da',
               borderRadius: '6px',
               backgroundColor: '#f7f6f2',
               color: '#111111',
+              boxSizing: 'border-box',
             }}
           >
             <option value="active">Active</option>
@@ -175,8 +175,8 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
           </select>
         </div>
 
-        <div>
-          <label className="text-sm font-medium" style={{ color: '#111111' }}>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
             Location
           </label>
           <input

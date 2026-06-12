@@ -20,12 +20,13 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/50"
+        className="fixed inset-0 z-40 bg-black/5"
         onClick={() => onOpenChange(false)}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
       />
 
       {/* Dialog */}
-      <div className="fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%]">
+      <div className="fixed left-[50%] top-[50%] z-50 w-screen max-w-4xl translate-x-[-50%] translate-y-[-50%] max-h-[90vh] overflow-y-auto p-4">
         <div
           className="border shadow-lg rounded-lg"
           style={{
