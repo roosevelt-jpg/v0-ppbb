@@ -147,17 +147,25 @@ export default function TransparencyPage() {
 
       {/* Hero Section */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col items-center text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-playfair leading-tight mb-4 sm:mb-6">
-              Transparency & Impact Report
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
-              Know exactly how your donations and support are making a real difference in our community.
-            </p>
-            <p className="text-sm text-[#888888] max-w-2xl mx-auto">
-              Real-time data • No sensitive donor information shared • Verified impact metrics
-            </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            <div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-playfair leading-tight mb-6">
+                Transparency & Impact Report
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground mb-4 leading-relaxed">
+                Know exactly how your donations and support are making a real difference in our community.
+              </p>
+              <p className="text-sm text-[#888888] leading-relaxed">
+                Real-time data • No sensitive donor information shared • Verified impact metrics
+              </p>
+            </div>
+            <div className="bg-white p-8 rounded-lg border border-[#e4e1da]">
+              <h3 className="text-xl font-bold mb-4 text-[#111111]">Our Commitment</h3>
+              <p className="text-[#333333] leading-relaxed text-sm sm:text-base">
+                We are dedicated to complete transparency about how donations are used. This dashboard displays real-time impact metrics without exposing sensitive donor information. Every number here represents genuine change in our community.
+              </p>
+            </div>
           </div>
         </div>
       </section>

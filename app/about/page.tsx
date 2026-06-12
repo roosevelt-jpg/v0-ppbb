@@ -60,13 +60,22 @@ export default function AboutPage() {
 
       {/* Hero Section */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-playfair mb-6">
-            About Us
-          </h1>
-          <p className="text-lg sm:text-xl text-[#333333] max-w-3xl mx-auto">
-            Passive Blessings is a community platform dedicated to fostering meaningful connections, enabling charitable impact, and supporting business growth within the UAE.
-          </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-playfair mb-6 leading-tight">
+                About Us
+              </h1>
+              <p className="text-base sm:text-lg text-[#333333] leading-relaxed">
+                Passive Blessings is a community platform dedicated to fostering meaningful connections, enabling charitable impact, and supporting business growth within the UAE.
+              </p>
+            </div>
+            <div className="bg-white p-8 rounded-lg border border-[#e4e1da]">
+              <p className="text-[#333333] leading-relaxed">
+                Our platform brings together individuals, businesses, and organizations to create lasting positive change. We believe in the power of community, collaboration, and compassion to solve challenges and drive sustainable development across the Emirates.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
