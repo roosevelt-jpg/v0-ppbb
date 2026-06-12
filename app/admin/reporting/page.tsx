@@ -43,6 +43,7 @@ export default function ReportingPage() {
   }, [dateRange])
 
   const handleViewReport = async (reportType: ReportType) => {
+    console.log('[v0] View report clicked for:', reportType)
     try {
       setSelectedReport(reportType)
       let data: any = null
@@ -111,6 +112,7 @@ export default function ReportingPage() {
         }
       }
 
+      console.log('[v0] Report data loaded:', data)
       setReportData(data)
     } catch (error) {
       console.error('[v0] Error fetching report:', error)
@@ -206,6 +208,7 @@ export default function ReportingPage() {
                 <h3 className="font-semibold text-neutral-900">{report.title}</h3>
                 <p className="text-sm text-neutral-600 mt-2">{report.description}</p>
                 <button 
+                  type="button"
                   onClick={() => handleViewReport(report.type)}
                   className="mt-4 px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition flex items-center gap-2">
                   <BarChart3 className="w-4 h-4" />
@@ -224,7 +227,9 @@ export default function ReportingPage() {
               <div className="p-6 border-b border-neutral-200 flex-shrink-0 flex items-center justify-between">
                 <h2 className="text-2xl font-bold">{reportData.type}</h2>
                 <button
+                  type="button"
                   onClick={() => {
+                    console.log('[v0] Closing report modal')
                     setReportData(null)
                     setSelectedReport(null)
                   }}
@@ -280,6 +285,7 @@ export default function ReportingPage() {
               {/* Modal Footer */}
               <div className="p-6 border-t border-neutral-200 flex-shrink-0 flex gap-3">
                 <button
+                  type="button"
                   onClick={handleExport}
                   className="flex-1 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition flex items-center justify-center gap-2 font-medium"
                 >
@@ -287,7 +293,9 @@ export default function ReportingPage() {
                   Export as CSV
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
+                    console.log('[v0] Closing report modal')
                     setReportData(null)
                     setSelectedReport(null)
                   }}
