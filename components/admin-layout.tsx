@@ -102,23 +102,6 @@ export function AdminSidebar() {
           )
         })}
       </nav>
-
-      {/* Footer */}
-      <div className="p-3 border-t space-y-2" style={{ borderColor: '#e4e1da' }}>
-        <ThemeToggle />
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition"
-          style={{
-            backgroundColor: '#f7f6f2',
-            color: '#111111',
-            border: '1px solid #e4e1da',
-          }}
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </button>
-      </div>
     </aside>
   )
 }
