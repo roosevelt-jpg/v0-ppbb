@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { EditBusinessModal } from '@/components/edit-business-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
@@ -92,8 +93,8 @@ export default function BusinessesPage() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div className="px-8">
+    <AdminPageLayout title="Businesses" subtitle="Manage and track businesses">
+      <div className="space-y-6">
         <AdminTable
           title="All Businesses"
           columns={columns}
@@ -116,18 +117,18 @@ export default function BusinessesPage() {
             }
           }}
         />
-      </div>
 
-      {selectedBusiness && (
-        <EditBusinessModal
-          isOpen={editModalOpen}
-          onClose={() => {
-            setEditModalOpen(false)
-            setSelectedBusiness(null)
-          }}
-          business={selectedBusiness}
-        />
-      )}
-    </div>
+        {selectedBusiness && (
+          <EditBusinessModal
+            isOpen={editModalOpen}
+            onClose={() => {
+              setEditModalOpen(false)
+              setSelectedBusiness(null)
+            }}
+            business={selectedBusiness}
+          />
+        )}
+      </div>
+    </AdminPageLayout>
   )
 }

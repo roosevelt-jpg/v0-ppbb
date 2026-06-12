@@ -4,10 +4,12 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import Link from 'next/link'
 import { AdminTable } from '@/components/admin-table'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
 import { formatDistanceToNow, format } from 'date-fns'
 import { Plus } from 'lucide-react'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 export default function EventsPage() {
   const [events, setEvents] = React.useState<any[]>([])
@@ -111,11 +113,11 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="px-8">
-        <div className="flex justify-end mb-4">
+    <AdminPageLayout title="Events" subtitle="Create and manage events">
+      <div className="space-y-6">
+        <div className="flex justify-end">
           <Link href="/admin/events/create">
-            <button className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition font-medium">
+            <button className={`${BUTTON_PRIMARY} flex items-center gap-2`}>
               <Plus className="w-4 h-4" />
               Create Event
             </button>
@@ -134,6 +136,6 @@ export default function EventsPage() {
           onDelete={handleDelete}
         />
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }

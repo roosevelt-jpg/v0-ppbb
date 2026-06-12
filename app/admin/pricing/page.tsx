@@ -2,10 +2,12 @@
 
 import React from 'react'
 import { Card } from '@/components/ui/card'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { PricingPlan } from '@/lib/pricing-types'
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export const dynamic = 'force-dynamic'
 
@@ -184,23 +186,22 @@ export default function PricingManagementPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Pricing Plans Management</h1>
-          <p className="text-neutral-600 mt-1">Create and manage subscription plans that users can purchase</p>
+    <AdminPageLayout title="Pricing Plans" subtitle="Create and manage subscription plans">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            {!showAddForm && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className={`${BUTTON_PRIMARY} flex items-center gap-2`}
+              >
+                <Plus className="w-4 h-4" />
+                Add Plan
+              </button>
+            )}
+          </div>
         </div>
-        {!showAddForm && (
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Add Plan
-          </button>
-        )}
-      </div>
 
       {/* Add/Edit Form */}
       {showAddForm && (
@@ -487,13 +488,14 @@ export default function PricingManagementPage() {
           <p className="text-neutral-600 mb-4">No pricing plans yet. Create your first plan to get started.</p>
           <button
             onClick={() => setShowAddForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition font-medium"
+            className={`${BUTTON_PRIMARY} inline-flex items-center gap-2`}
           >
             <Plus className="w-4 h-4" />
             Create Plan
           </button>
         </Card>
       )}
-    </div>
+      </div>
+    </AdminPageLayout>
   )
 }

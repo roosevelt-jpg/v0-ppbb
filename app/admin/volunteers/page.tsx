@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
@@ -120,8 +121,8 @@ export default function VolunteersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="px-8">
+    <AdminPageLayout title="Volunteers" subtitle="Manage and track volunteers">
+      <div className="space-y-6">
         <AdminTable
           title="All Volunteers"
           columns={columns}
@@ -135,18 +136,18 @@ export default function VolunteersPage() {
             }
           }}
         />
-      </div>
 
-      {/* Edit Volunteer Modal */}
-      <EditVolunteerModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        volunteer={selectedVolunteer}
-        onSuccess={() => {
-          setEditModalOpen(false)
-          setSelectedVolunteer(null)
-        }}
-      />
-    </div>
+        {/* Edit Volunteer Modal */}
+        <EditVolunteerModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          volunteer={selectedVolunteer}
+          onSuccess={() => {
+            setEditModalOpen(false)
+            setSelectedVolunteer(null)
+          }}
+        />
+      </div>
+    </AdminPageLayout>
   )
 }

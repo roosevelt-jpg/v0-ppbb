@@ -4,9 +4,12 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
 import { EditDonationModal } from '@/components/edit-donation-modal'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
+import { Plus } from 'lucide-react'
 
 export default function DonationsPage() {
   const [donations, setDonations] = React.useState<any[]>([])
@@ -119,11 +122,12 @@ export default function DonationsPage() {
   const totalDonations = donations.reduce((sum, d) => sum + (d.amount || 0), 0)
 
   return (
-    <div className="space-y-6">
-      <div className="px-8">
-        <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#f7f6f2', borderLeft: '4px solid #2e7d32' }}>
-          <p style={{ color: '#888888', fontSize: '14px' }}>Total Donations</p>
-          <p style={{ fontSize: '28px', fontWeight: 700, color: '#111111' }}>AED {totalDonations.toLocaleString()}</p>
+    <AdminPageLayout title="Donations" subtitle="Manage and track all donations">
+      <div className="space-y-6">
+        <div className="bg-white border border-neutral-200 rounded-lg p-6">
+          <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Total Donations</p>
+          <p className="text-4xl font-bold text-neutral-900 mt-2">AED {totalDonations.toLocaleString()}</p>
+          <p className="text-xs text-neutral-500 mt-2">{donations.length} total donations</p>
         </div>
 
         <AdminTable
@@ -148,18 +152,18 @@ export default function DonationsPage() {
             }
           }}
         />
-      </div>
 
-      {/* Edit Donation Modal */}
-      <EditDonationModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        donation={selectedDonation}
-        onSuccess={() => {
-          setEditModalOpen(false)
-          setSelectedDonation(null)
-        }}
-      />
-    </div>
+        {/* Edit Donation Modal */}
+        <EditDonationModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          donation={selectedDonation}
+          onSuccess={() => {
+            setEditModalOpen(false)
+            setSelectedDonation(null)
+          }}
+        />
+      </div>
+    </AdminPageLayout>
   )
 }
