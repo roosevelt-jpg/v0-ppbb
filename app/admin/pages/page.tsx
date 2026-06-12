@@ -146,95 +146,98 @@ export default function AdminPages() {
         {/* Page Editor Modal */}
         {editingPage && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-6">
+            <Card className="w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-6 border-b border-border flex-shrink-0">
+                <h2 className="text-2xl font-bold">
                   {isCreating ? 'Create New Page' : 'Edit Page'}
                 </h2>
+              </div>
 
-                <div className="space-y-4">
+              {/* Modal Content - Scrollable */}
+              <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Page Title</label>
+                  <input
+                    type="text"
+                    value={editingPage.title}
+                    onChange={(e) => setEditingPage({ ...editingPage, title: e.target.value })}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Slug (URL)</label>
+                  <input
+                    type="text"
+                    value={editingPage.slug}
+                    onChange={(e) => setEditingPage({ ...editingPage, slug: e.target.value })}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <textarea
+                    value={editingPage.description}
+                    onChange={(e) => setEditingPage({ ...editingPage, description: e.target.value })}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground h-20"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Content</label>
+                  <textarea
+                    value={editingPage.content}
+                    onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground h-40 font-mono text-sm"
+                    placeholder="Enter HTML or markdown content"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Page Title</label>
+                    <label className="block text-sm font-medium mb-2">SEO Title</label>
                     <input
                       type="text"
-                      value={editingPage.title}
-                      onChange={(e) => setEditingPage({ ...editingPage, title: e.target.value })}
+                      value={editingPage.seoTitle}
+                      onChange={(e) => setEditingPage({ ...editingPage, seoTitle: e.target.value })}
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Slug (URL)</label>
-                    <input
-                      type="text"
-                      value={editingPage.slug}
-                      onChange={(e) => setEditingPage({ ...editingPage, slug: e.target.value })}
+                    <label className="block text-sm font-medium mb-2">Status</label>
+                    <select
+                      value={editingPage.status}
+                      onChange={(e) => setEditingPage({ ...editingPage, status: e.target.value as any })}
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Description</label>
-                    <textarea
-                      value={editingPage.description}
-                      onChange={(e) => setEditingPage({ ...editingPage, description: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground h-20"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Content</label>
-                    <textarea
-                      value={editingPage.content}
-                      onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground h-40 font-mono text-sm"
-                      placeholder="Enter HTML or markdown content"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">SEO Title</label>
-                      <input
-                        type="text"
-                        value={editingPage.seoTitle}
-                        onChange={(e) => setEditingPage({ ...editingPage, seoTitle: e.target.value })}
-                        className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Status</label>
-                      <select
-                        value={editingPage.status}
-                        onChange={(e) => setEditingPage({ ...editingPage, status: e.target.value as any })}
-                        className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground"
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="published">Published</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-4 border-t border-border">
-                    <Button
-                      onClick={handleSavePage}
-                      className="flex-1"
                     >
-                      Save Page
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setEditingPage(null)
-                        setIsCreating(false)
-                      }}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
                   </div>
                 </div>
+              </div>
+
+              {/* Modal Footer - Buttons */}
+              <div className="p-6 border-t border-border flex gap-3 flex-shrink-0">
+                <Button
+                  onClick={handleSavePage}
+                  className="flex-1"
+                >
+                  Save Page
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditingPage(null)
+                    setIsCreating(false)
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
               </div>
             </Card>
           </div>

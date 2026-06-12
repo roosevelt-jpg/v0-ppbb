@@ -109,7 +109,7 @@ export default function ReportingPage() {
               <Card key={report.title} className="p-6 border border-neutral-200 cursor-pointer hover:shadow-md transition">
                 <h3 className="font-semibold text-neutral-900">{report.title}</h3>
                 <p className="text-sm text-neutral-600 mt-2">{report.description}</p>
-                <button className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-700">View Report →</button>
+                <button className="mt-4 px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition">View Report →</button>
               </Card>
             ))}
           </div>
