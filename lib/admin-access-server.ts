@@ -28,7 +28,13 @@ function getAdminApp() {
         console.log('[v0] Base64 parsing failed, trying direct JSON...')
         try {
           // If base64 fails, try parsing as direct JSON
-          serviceAccount = JSON.parse(process.env.GCP_SERVICE_ACCOUNT)
+          let jsonStr = process.env.GCP_SERVICE_ACCOUNT
+          
+          // Handle escaped newlines in the private key - replace \\n with actual newlines
+          // This is needed because environment variables with literal \n get stored as \\n
+          jsonStr = jsonStr.replace(/\\n/g, '\n')
+          
+          serviceAccount = JSON.parse(jsonStr)
           console.log('[v0] Successfully parsed GCP_SERVICE_ACCOUNT as direct JSON')
         } catch (jsonError) {
           console.error('[v0] Failed to parse GCP_SERVICE_ACCOUNT as JSON:', jsonError instanceof Error ? jsonError.message : String(jsonError))
