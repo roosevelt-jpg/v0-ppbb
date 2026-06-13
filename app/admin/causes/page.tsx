@@ -140,8 +140,7 @@ export default function DonationCausesPage() {
   }
 
   return (
-    <div>
-
+    <AdminPageLayout title="Donation Causes" subtitle="Manage fundraising causes and campaigns">
       <div className="space-y-6">
         {/* Add New Cause Form */}
         <div className="bg-white rounded-lg p-6 shadow">
@@ -355,6 +354,6 @@ export default function DonationCausesPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }

@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
@@ -88,8 +89,7 @@ export default function CharityPartnersPage() {
   }
 
   return (
-    <div>
-
+    <AdminPageLayout title="Charity Partners" subtitle="Manage and coordinate with nonprofit partners">
       <div className="space-y-6">
         {/* Add New Partner Form */}
         <div className="bg-white rounded-lg p-6 shadow">
@@ -250,6 +250,6 @@ export default function CharityPartnersPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }

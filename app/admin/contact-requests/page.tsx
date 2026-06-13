@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc, deleteDoc, query, orderBy } from 'firebase/firestore'
@@ -72,7 +73,8 @@ export default function ContactRequestsPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <AdminPageLayout title="Contact Requests" subtitle="Manage and respond to user inquiries">
+      <div className="space-y-6">
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-6 border border-neutral-200">
@@ -186,5 +188,6 @@ export default function ContactRequestsPage() {
         </div>
       )}
     </div>
+    </AdminPageLayout>
   )
 }

@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -84,9 +85,8 @@ export default function DonationVerificationPage() {
   const rejectedSubmissions = submissions.filter((s) => s.status === 'rejected')
 
   return (
-    <div>
-
-      <div className="space-y-8">
+    <AdminPageLayout title="Donation Verification" subtitle="Review and verify donation submissions">
+            <div className="space-y-8">
         {/* Pending Submissions */}
         <div className="bg-white rounded-lg p-6 shadow">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -202,6 +202,6 @@ export default function DonationVerificationPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }
