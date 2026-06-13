@@ -29,7 +29,6 @@ export default function MembersPage() {
   })
 
   React.useEffect(() => {
-    // Subscribe to real-time member updates
     const q = query(collection(db, 'users'), where('role', 'in', ['member', 'member+volunteer']))
 
     const unsubscribe = onSnapshot(
@@ -163,7 +162,6 @@ export default function MembersPage() {
         return
       }
 
-      // Batch add members
       const batch = result.valid
       let successCount = 0
       let failCount = 0
@@ -228,8 +226,8 @@ export default function MembersPage() {
 
       {/* Add Member Modal */}
       {addModalOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-content bg-white rounded-lg w-full max-w-md p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Add New Member</h2>
               <button
@@ -329,8 +327,8 @@ export default function MembersPage() {
 
       {/* CSV Import Modal */}
       {csvImportOpen && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-content bg-white rounded-lg w-full max-w-md p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Import Members from CSV</h2>
               <button
