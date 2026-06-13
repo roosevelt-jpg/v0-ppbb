@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { getAllServices, CATEGORIES } from '@/lib/integrations/services'
 import { IntegrationCard } from '@/components/admin/integration-card'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
 export default function IntegrationsPage() {
   const auth = useAuth()
@@ -144,17 +144,23 @@ export default function IntegrationsPage() {
 
       {/* Search & Filter */}
       <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div style={{ flex: 1, minWidth: '250px', position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <Search className="absolute left-3 h-4 w-4 text-gray-400" style={{ pointerEvents: 'none' }} />
           <input
             type="text"
             placeholder="Search integrations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onBlur={() => {
+              // Clear search if it doesn't match any service
+              if (searchTerm && filteredServices.length === 0) {
+                setSearchTerm('')
+              }
+            }}
             style={{
               width: '100%',
               paddingLeft: '2.5rem',
-              paddingRight: '1rem',
+              paddingRight: searchTerm ? '2.5rem' : '1rem',
               paddingTop: '0.5rem',
               paddingBottom: '0.5rem',
               border: '1px solid #e4e1da',
@@ -163,6 +169,22 @@ export default function IntegrationsPage() {
               backgroundColor: '#ffffff',
             }}
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              style={{
+                position: 'absolute',
+                right: '0.5rem',
+                padding: '0.25rem',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#888888',
+              }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <a href="/admin/integrations/health" style={{
@@ -221,6 +243,10 @@ export default function IntegrationsPage() {
       {/* Services Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#888888' }}>Loading...</div>
+      ) : filteredServices.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#888888' }}>
+          {searchTerm ? 'No integrations match your search' : 'No integrations found'}
+        </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
           {filteredServices.map((service) => {
@@ -232,7 +258,11 @@ export default function IntegrationsPage() {
                 service={service}
                 integration={integration}
                 health={serviceHealth}
-                onRefresh={loadData}
+                onRefresh={() => {
+                  setSearchTerm('')
+                  setSelectedCategory(null)
+                  loadData()
+                }}
               />
             )
           })}
