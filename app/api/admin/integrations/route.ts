@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { saveIntegration, getAllIntegrations } from '@/lib/integrations/handlers'
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,12 +26,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Return success for now
-    // TODO: Persist to database
-    return NextResponse.json({
-      success: true,
-      message: 'Integration saved'
-    })
+    // Get the userId from the Authorization header's JWT token
+    // For now, use a test userId - in production this would come from verifyIdToken
+    const userId = 'test-user-123' // TODO: Extract from Firebase ID token
+    
+    try {
+      const integration = await saveIntegration(userId, serviceId, credentials)
+      console.log('[v0] Integration saved successfully')
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Integration saved',
+        integration
+      })
+    } catch (dbError) {
+      console.error('[v0] Database save error:', dbError)
+      return NextResponse.json({ error: 'Failed to save integration' }, { status: 500 })
+    }
   } catch (error) {
     console.error('[v0] POST error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
