@@ -195,7 +195,9 @@ export function getServiceDefinition(serviceId: string): IntegrationService | nu
 
 export function getAllServices(): IntegrationService[] {
   const services = Object.values(INTEGRATION_SERVICES)
-  console.log('[v0] getAllServices returning', services.length, 'services:', services.map(s => s.id))
+  if (typeof window !== 'undefined') {
+    console.log('[v0] getAllServices returning', services.length, 'services')
+  }
   return services
 }
 
