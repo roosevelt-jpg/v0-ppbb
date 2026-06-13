@@ -1,13 +1,13 @@
 # Integration Configuration Guide - Passive Blessings Admin
 
 ## Overview
-This guide covers configuring all 14 pre-configured integrations for the Passive Blessings platform. Each integration handles specific functionality from payments to messaging and analytics.
+This guide covers configuring all 15 pre-configured integrations for the Passive Blessings platform. Each integration handles specific functionality from payments to messaging and analytics.
 
-**Total Integrations: 14** (organized into 6 categories)
+**Total Integrations: 15** (organized into 6 categories)
 
 ---
 
-## 1. PAYMENTS (2 Integrations)
+## 1. PAYMENTS (3 Integrations)
 
 ### 1.1 PayPal
 **Category:** Payments  
@@ -35,7 +35,42 @@ This guide covers configuring all 14 pre-configured integrations for the Passive
 
 ---
 
-### 1.2 Ziina
+### 1.2 Stripe
+**Category:** Payments  
+**Purpose:** Payment processing & subscriptions  
+**Status:** Ready for configuration
+
+**Required Fields:**
+- **Publishable Key** - Your Stripe publishable key (pk_test_... or pk_live_...)
+- **Secret Key** - Your Stripe secret key (encrypted, sk_test_... or sk_live_...)
+- **Mode** - Select "Test" for testing or "Live" for production
+- **Webhook Secret** - Optional webhook signing secret (whsec_...)
+
+**Configuration Steps:**
+1. Go to https://dashboard.stripe.com/
+2. Navigate to Developers → API Keys
+3. Copy your publishable and secret keys (use test keys for development)
+4. In Admin Dashboard → Integrations → Find "Stripe"
+5. Click "Configure"
+6. Enter credentials and select mode
+7. Optionally add webhook secret from Webhooks section
+8. Click "Save Configuration"
+
+**Fields:**
+- publishableKey (text, required, placeholder: pk_test_...)
+- secretKey (password, required, encrypted, placeholder: sk_test_...)
+- mode (select: test/live, required)
+- webhookSecret (password, optional, encrypted, placeholder: whsec_...)
+
+**Best Practices:**
+- Always use test keys for development/staging
+- Switch to live keys only in production
+- Store webhook secret securely for event verification
+- Enable webhook signing for payment event validation
+
+---
+
+### 1.3 Ziina
 **Category:** Payments  
 **Purpose:** Middle East & Africa payment gateway  
 **Status:** Ready for configuration
