@@ -12,9 +12,23 @@ function getAdminApp() {
   if (apps.length > 0) return apps[0]
 
   try {
-    const serviceAccount = process.env.GCP_SERVICE_ACCOUNT
-      ? JSON.parse(Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString())
-      : undefined
+    let serviceAccount: any = undefined
+    
+    if (process.env.GCP_SERVICE_ACCOUNT) {
+      try {
+        // Try base64 decoding first
+        const decoded = Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
+        serviceAccount = JSON.parse(decoded)
+      } catch {
+        try {
+          // If base64 fails, try parsing as direct JSON
+          serviceAccount = JSON.parse(process.env.GCP_SERVICE_ACCOUNT)
+        } catch (jsonError) {
+          console.error('[v0] Failed to parse GCP_SERVICE_ACCOUNT:', jsonError)
+          throw new Error('Invalid GCP_SERVICE_ACCOUNT format - must be valid JSON or base64-encoded JSON')
+        }
+      }
+    }
 
     if (!serviceAccount) {
       throw new Error('GCP_SERVICE_ACCOUNT not configured')
