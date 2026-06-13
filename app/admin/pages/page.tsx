@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getAllPages, createPage, updatePage, deletePage } from '@/lib/admin'
