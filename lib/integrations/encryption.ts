@@ -32,15 +32,31 @@ export function decryptField(encrypted: string): string {
   }
 }
 
-export function encryptCredentials(credentials: Record<string, string>, serviceId: string): Record<string, string> {
-  const { getServiceDefinition } = require('./services')
-  const service = getServiceDefinition(serviceId)
-  if (!service) return credentials
+// Field-level encryption map (hardcoded to avoid circular imports)
+const ENCRYPTED_FIELDS: Record<string, Set<string>> = {
+  paypal: new Set(['clientSecret']),
+  stripe: new Set(['secretKey', 'webhookSecret']),
+  ziina: new Set(['apiSecret', 'webhookSecret']),
+  firebase: new Set(['privateKey']),
+  googleCalendar: new Set(['refreshToken', 'accessToken']),
+  microsoftCalendar: new Set(['refreshToken', 'accessToken']),
+  appleCalendar: new Set(['refreshToken']),
+  whatsapp: new Set(['accessToken', 'webhookSecret']),
+  sendgrid: new Set(['apiKey']),
+  twilio: new Set(['authToken']),
+  googleMaps: new Set(['apiKey']),
+  cloudStorage: new Set(['secretAccessKey']),
+  youtubeApi: new Set(['apiKey']),
+  googleAnalytics: new Set(['serviceAccountKey']),
+  customWebhook: new Set(['secret']),
+}
 
+export function encryptCredentials(credentials: Record<string, string>, serviceId: string): Record<string, string> {
+  const encryptedFields = ENCRYPTED_FIELDS[serviceId] || new Set()
   const encrypted: Record<string, string> = {}
+
   for (const [key, value] of Object.entries(credentials)) {
-    const field = service.fields.find((f: any) => f.name === key)
-    if (field?.encrypt) {
+    if (encryptedFields.has(key) && value) {
       encrypted[key] = encryptField(value)
     } else {
       encrypted[key] = value
@@ -50,14 +66,11 @@ export function encryptCredentials(credentials: Record<string, string>, serviceI
 }
 
 export function decryptCredentials(credentials: Record<string, string>, serviceId: string): Record<string, string> {
-  const { getServiceDefinition } = require('./services')
-  const service = getServiceDefinition(serviceId)
-  if (!service) return credentials
-
+  const encryptedFields = ENCRYPTED_FIELDS[serviceId] || new Set()
   const decrypted: Record<string, string> = {}
+
   for (const [key, value] of Object.entries(credentials)) {
-    const field = service.fields.find((f: any) => f.name === key)
-    if (field?.encrypt) {
+    if (encryptedFields.has(key) && value) {
       decrypted[key] = decryptField(value)
     } else {
       decrypted[key] = value
@@ -67,14 +80,11 @@ export function decryptCredentials(credentials: Record<string, string>, serviceI
 }
 
 export function redactCredentials(credentials: Record<string, string>, serviceId: string): Record<string, string> {
-  const { getServiceDefinition } = require('./services')
-  const service = getServiceDefinition(serviceId)
-  if (!service) return credentials
-
+  const encryptedFields = ENCRYPTED_FIELDS[serviceId] || new Set()
   const redacted: Record<string, string> = {}
+
   for (const [key, value] of Object.entries(credentials)) {
-    const field = service.fields.find((f: any) => f.name === key)
-    if (field?.encrypt) {
+    if (encryptedFields.has(key)) {
       redacted[key] = value ? '***' + value.slice(-4) : '***'
     } else {
       redacted[key] = value

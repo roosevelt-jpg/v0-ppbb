@@ -13,15 +13,34 @@ function getAdminApp() {
     return getApps()[0]
   }
   
-  const serviceAccount = {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  try {
+    // Try GCP_SERVICE_ACCOUNT first (base64 encoded JSON)
+    let serviceAccount: any = null
+    
+    if (process.env.GCP_SERVICE_ACCOUNT) {
+      serviceAccount = JSON.parse(
+        Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
+      )
+    } else {
+      // Fallback to individual env vars
+      serviceAccount = {
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }
+    }
+
+    if (!serviceAccount?.projectId) {
+      throw new Error('Firebase credentials not configured')
+    }
+
+    return initializeApp({
+      credential: credential.cert(serviceAccount as any),
+    })
+  } catch (error) {
+    console.error('[v0] Firebase init error:', error)
+    throw error
   }
-  
-  return initializeApp({
-    credential: credential.cert(serviceAccount as any),
-  })
 }
 
 function getAdminDb() {
