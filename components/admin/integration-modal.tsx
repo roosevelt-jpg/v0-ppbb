@@ -63,11 +63,13 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 50,
+        zIndex: 1000,
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
       }}
     >
       <div
@@ -75,12 +77,13 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '0.5rem',
-          width: '90%',
+          width: '100%',
           maxWidth: '600px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          animation: 'fadeIn 0.2s ease-out',
         }}
       >
         {/* Header */}
