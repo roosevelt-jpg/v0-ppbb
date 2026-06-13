@@ -14,6 +14,19 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'mode', label: 'Mode', type: 'select', required: true, options: [{ label: 'Sandbox', value: 'sandbox' }, { label: 'Live', value: 'live' }] },
     ],
   },
+  stripe: {
+    id: 'stripe',
+    name: 'Stripe',
+    category: 'payments',
+    description: 'Payment processing & subscriptions',
+    icon: '🎯',
+    fields: [
+      { name: 'publishableKey', label: 'Publishable Key', type: 'text', required: true, placeholder: 'pk_test_...' },
+      { name: 'secretKey', label: 'Secret Key', type: 'password', required: true, encrypt: true, placeholder: 'sk_test_...' },
+      { name: 'mode', label: 'Mode', type: 'select', required: true, options: [{ label: 'Test', value: 'test' }, { label: 'Live', value: 'live' }] },
+      { name: 'webhookSecret', label: 'Webhook Secret', type: 'password', required: false, encrypt: true, placeholder: 'whsec_...' },
+    ],
+  },
   ziina: {
     id: 'ziina',
     name: 'Ziina',
