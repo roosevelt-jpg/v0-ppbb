@@ -46,7 +46,7 @@ export function AdminModal({
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -58,7 +58,7 @@ export function AdminModal({
           backgroundColor: '#ffffff',
           borderColor: '#e4e1da',
           width: '90%',
-          maxWidth: '500px',
+          maxWidth: '800px',
           maxHeight: '90vh',
           overflowY: 'auto',
         }}

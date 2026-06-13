@@ -21,6 +21,7 @@ export default function IntegrationsPage() {
   async function loadData() {
     if (!auth.user) {
       console.log('[v0] No auth user yet, skipping load')
+      setLoading(false)
       return
     }
     
@@ -32,36 +33,53 @@ export default function IntegrationsPage() {
       const [integrationsRes, healthRes] = await Promise.all([
         fetch('/api/admin/integrations', {
           headers: { Authorization: `Bearer ${token}` },
+        }).catch(e => {
+          console.error('[v0] Integrations fetch error:', e)
+          return null
         }),
         fetch('/api/admin/integrations/health', {
           headers: { Authorization: `Bearer ${token}` },
+        }).catch(e => {
+          console.error('[v0] Health fetch error:', e)
+          return null
         }),
       ])
 
-      console.log('[v0] Integrations response:', integrationsRes.status, integrationsRes.ok)
-      console.log('[v0] Health response:', healthRes.status, healthRes.ok)
-
-      if (integrationsRes.ok) {
-        const data = await integrationsRes.json()
-        console.log('[v0] Integrations data:', data)
-        setIntegrations(data.data || [])
+      if (integrationsRes) {
+        console.log('[v0] Integrations response:', integrationsRes.status, integrationsRes.ok)
+        if (integrationsRes.ok) {
+          const data = await integrationsRes.json()
+          console.log('[v0] Integrations data:', data)
+          setIntegrations(data.data || [])
+        } else {
+          console.error('[v0] Integrations request failed:', integrationsRes.status)
+          const errText = await integrationsRes.text()
+          console.error('[v0] Error response:', errText)
+          setIntegrations([])
+        }
       } else {
-        console.error('[v0] Integrations request failed:', integrationsRes.status)
-        const errText = await integrationsRes.text()
-        console.error('[v0] Error response:', errText)
+        setIntegrations([])
       }
 
-      if (healthRes.ok) {
-        const data = await healthRes.json()
-        console.log('[v0] Health data:', data)
-        setHealth(data.health || [])
+      if (healthRes) {
+        console.log('[v0] Health response:', healthRes.status, healthRes.ok)
+        if (healthRes.ok) {
+          const data = await healthRes.json()
+          console.log('[v0] Health data:', data)
+          setHealth(data.health || [])
+        } else {
+          console.error('[v0] Health request failed:', healthRes.status)
+          const errText = await healthRes.text()
+          console.error('[v0] Error response:', errText)
+          setHealth([])
+        }
       } else {
-        console.error('[v0] Health request failed:', healthRes.status)
-        const errText = await healthRes.text()
-        console.error('[v0] Error response:', errText)
+        setHealth([])
       }
     } catch (error) {
       console.error('[v0] Error loading data:', error)
+      setIntegrations([])
+      setHealth([])
     } finally {
       setLoading(false)
     }

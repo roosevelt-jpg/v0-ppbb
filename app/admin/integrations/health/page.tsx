@@ -17,7 +17,10 @@ export default function IntegrationHealthPage() {
   }, [auth.user])
 
   async function loadHealth() {
-    if (!auth.user) return
+    if (!auth.user) {
+      setLoading(false)
+      return
+    }
     try {
       const token = await auth.user.getIdToken()
       const response = await fetch('/api/admin/integrations/health', {
@@ -26,11 +29,20 @@ export default function IntegrationHealthPage() {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('[v0] Health data loaded:', data)
         setHealth(data.health || [])
-        setSummary(data.summary)
+        setSummary(data.summary || {})
+      } else {
+        console.error('[v0] Health response failed:', response.status)
+        const errText = await response.text()
+        console.error('[v0] Error:', errText)
+        setHealth([])
+        setSummary({})
       }
     } catch (error) {
       console.error('[v0] Error loading health:', error)
+      setHealth([])
+      setSummary({})
     } finally {
       setLoading(false)
     }
