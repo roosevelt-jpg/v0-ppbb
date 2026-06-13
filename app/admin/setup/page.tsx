@@ -19,6 +19,13 @@ export default function AdminSetup() {
   const handleAccessCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    
+    // Manual validation
+    if (!accessCode.trim()) {
+      setError('Access code is required')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -59,12 +66,24 @@ export default function AdminSetup() {
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    
+    // Manual validation
+    if (!email.trim()) {
+      setError('Email is required')
+      return
+    }
+    if (!password.trim()) {
+      setError('Password is required')
+      return
+    }
+
     setLoading(true)
 
     try {
       await signInWithEmailAndPassword(auth, email, password)
       router.push('/admin')
     } catch (err: any) {
+      console.error('[v0] Login error:', err)
       setError('Login failed. Please check your credentials.')
     } finally {
       setLoading(false)
@@ -126,7 +145,6 @@ export default function AdminSetup() {
                       boxSizing: 'border-box',
                       fontFamily: 'inherit'
                     }}
-                    required
                   />
                 </div>
 
@@ -256,7 +274,6 @@ export default function AdminSetup() {
                       boxSizing: 'border-box',
                       fontFamily: 'inherit'
                     }}
-                    required
                   />
                 </div>
 
@@ -278,7 +295,6 @@ export default function AdminSetup() {
                       boxSizing: 'border-box',
                       fontFamily: 'inherit'
                     }}
-                    required
                   />
                 </div>
 
