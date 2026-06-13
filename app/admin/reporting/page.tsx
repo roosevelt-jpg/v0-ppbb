@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore'
@@ -142,8 +143,8 @@ export default function ReportingPage() {
   }
 
   return (
-    <>
-      <div className="p-8 bg-neutral-50 space-y-8">
+    <AdminPageLayout title="Reporting" subtitle="Generate and export comprehensive reports">
+      <div className="space-y-8">
         {/* Date Range Selector */}
         <div className="flex gap-4 items-center flex-wrap">
           <Calendar className="w-5 h-5 text-neutral-600" />
@@ -308,6 +309,6 @@ export default function ReportingPage() {
           </div>
         )}
       </div>
-    </>
+    </AdminPageLayout>
   )
 }

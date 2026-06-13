@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy, writeBatch } from 'firebase/firestore'
@@ -173,9 +174,8 @@ export default function ModerationPage() {
   }
 
   return (
-    <>
-      
-      <div className="p-8 bg-neutral-50 space-y-8">
+    <AdminPageLayout title="Moderation" subtitle="Review and manage community reports">
+      <div className="space-y-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           <Card className="p-4 border border-neutral-200">
