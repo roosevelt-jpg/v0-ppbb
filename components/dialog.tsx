@@ -33,7 +33,7 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         transform: 'translate(-50%, -50%)',
         zIndex: 50,
         width: '90vw',
-        maxWidth: '900px',
+        maxWidth: '600px',
         maxHeight: '90vh',
         overflowY: 'auto',
         padding: '0',

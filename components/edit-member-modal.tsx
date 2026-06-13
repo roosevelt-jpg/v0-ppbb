@@ -86,7 +86,7 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
         </div>
       }
     >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
           <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>
             Name
