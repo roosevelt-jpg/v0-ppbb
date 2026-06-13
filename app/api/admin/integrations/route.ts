@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuth } from 'firebase-admin/auth'
-import { hasPermission } from '@/lib/admin-access'
+import { verifyIdToken, hasPermissionServer, grantIntegrationPermission } from '@/lib/admin-access-server'
 import { saveIntegration, getIntegration, getAllIntegrations, deleteIntegration, updateIntegrationStatus } from '@/lib/integrations/handlers'
 import { redactCredentials } from '@/lib/integrations/encryption'
 
@@ -13,49 +12,23 @@ async function checkPermission(request: NextRequest): Promise<string | null> {
     }
 
     const token = authHeader.substring(7)
-    const decodedToken = await getAuth().verifyIdToken(token)
-    const userId = decodedToken.uid
+    const userId = await verifyIdToken(token)
+    
+    if (!userId) {
+      console.log('[v0] Token verification failed')
+      return null
+    }
 
-    let hasAccess = await hasPermission(userId, 'manage_integrations')
-    console.log('[v0] Initial permission check:', hasAccess, 'for', userId)
+    console.log('[v0] Verified user:', userId)
+    
+    let hasAccess = await hasPermissionServer(userId, 'manage_integrations')
+    console.log('[v0] Initial permission check:', hasAccess)
     
     // If no access, try to grant it for founder_admin
     if (!hasAccess) {
-      try {
-        const { getFirestore, doc, getDoc, updateDoc } = await import('firebase/firestore')
-        const { initializeApp, getApps } = await import('firebase/app')
-        
-        const app = getApps().length > 0 ? getApps()[0] : initializeApp({
-          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-        })
-
-        const db = getFirestore(app)
-        const adminRef = doc(db, 'adminUsers', userId)
-        const adminSnap = await getDoc(adminRef)
-        
-        if (adminSnap.exists()) {
-          const adminData = adminSnap.data()
-          console.log('[v0] Admin user role:', adminData?.adminRole)
-          
-          if (adminData?.adminRole === 'founder_admin') {
-            const currentPerms = adminData?.permissions || []
-            if (!currentPerms.includes('manage_integrations')) {
-              console.log('[v0] Granting manage_integrations to founder_admin')
-              await updateDoc(adminRef, { 
-                permissions: [...currentPerms, 'manage_integrations'] 
-              })
-            }
-            hasAccess = true
-          }
-        }
-      } catch (permError) {
-        console.error('[v0] Permission grant error:', permError)
-      }
+      const granted = await grantIntegrationPermission(userId)
+      console.log('[v0] Permission grant attempt:', granted)
+      hasAccess = granted
     }
     
     return hasAccess ? userId : null
