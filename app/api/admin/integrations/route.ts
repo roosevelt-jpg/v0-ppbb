@@ -1,41 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyIdToken } from '@/lib/admin-access-server'
+import { saveIntegrationServer, getAllIntegrationsServer } from '@/lib/integrations/handlers-server'
 
 export async function GET(request: NextRequest) {
   try {
-    // For now, return empty integrations list
-    // Auth is handled on client side
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing authorization header' }, { status: 401 })
+    }
+
+    const token = authHeader.substring(7)
+    const userId = await verifyIdToken(token)
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
+    }
+
+    console.log('[v0] GET integrations for user:', userId)
+    const integrations = await getAllIntegrationsServer(userId)
+    
     return NextResponse.json({
-      data: [],
-      message: 'Integrations API'
+      data: integrations,
+      message: 'Integrations retrieved successfully',
+      count: integrations.length
     })
   } catch (error) {
     console.error('[v0] GET error:', error)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Server error' },
+      { status: 500 }
+    )
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Missing authorization header' }, { status: 401 })
+    }
+
+    const token = authHeader.substring(7)
+    const userId = await verifyIdToken(token)
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { serviceId, credentials } = body
 
-    console.log('[v0] POST: Saving integration', serviceId)
-
     if (!serviceId || !credentials) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing required fields (serviceId, credentials)' }, { status: 400 })
     }
 
-    // TODO: Implement Firestore persistence with server-side Firebase Admin SDK
-    // For now, return success to allow UI to work
-    console.log('[v0] Integration accepted (not persisted yet):', serviceId)
-    
+    console.log('[v0] POST: Saving integration', serviceId, 'for user', userId)
+    const integration = await saveIntegrationServer(userId, serviceId, credentials)
+
     return NextResponse.json({
       success: true,
-      message: 'Integration configuration saved',
-      data: { serviceId, credentials }
+      message: 'Integration saved successfully',
+      integration: {
+        id: integration.id,
+        serviceId: integration.serviceId,
+        status: integration.status,
+        createdAt: integration.createdAt,
+        updatedAt: integration.updatedAt
+      }
     })
   } catch (error) {
     console.error('[v0] POST error:', error)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to save integration' },
+      { status: 500 }
+    )
   }
 }
