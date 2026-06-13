@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken, hasPermissionServer, grantIntegrationPermission } from '@/lib/admin-access-server'
-import { getAllIntegrationHealth, getIntegrationHealth } from '@/lib/integrations/handlers'
+import { getAllIntegrationHealthServer, getIntegrationHealthServer } from '@/lib/integrations/handlers-server'
 import { getAllServices } from '@/lib/integrations/services'
 
 async function checkPermission(request: NextRequest): Promise<string | null> {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const userId = await checkPermission(request)
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const healthData = await getAllIntegrationHealth()
+    const healthData = await getAllIntegrationHealthServer()
     const allServices = getAllServices()
 
     // Ensure all services have health records

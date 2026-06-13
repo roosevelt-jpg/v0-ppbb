@@ -18,12 +18,19 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   async function handleSave() {
-    if (!auth.user) return
+    if (!auth.user) {
+      console.log('[v0] No auth user')
+      return
+    }
     setLoading(true)
     try {
       const token = await auth.user.getIdToken()
+      console.log('[v0] Got token, saving integration:', service.id)
+      
       const endpoint = integration ? `/api/admin/integrations/${service.id}` : '/api/admin/integrations'
       const method = integration ? 'PATCH' : 'POST'
+      
+      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(credentials).length })
 
       const response = await fetch(endpoint, {
         method,
@@ -31,16 +38,20 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
         body: JSON.stringify({ serviceId: service.id, credentials, serviceName: service.name }),
       })
 
+      console.log('[v0] Response status:', response.status, response.ok)
+      
       if (response.ok) {
+        console.log('[v0] Save successful')
         setMessage({ type: 'success', text: 'Configuration saved successfully' })
         setTimeout(() => onClose(), 1500)
       } else {
         const error = await response.json()
-        setMessage({ type: 'error', text: error.error || 'Failed to save' })
+        console.error('[v0] API Error:', error)
+        setMessage({ type: 'error', text: error.error || `Failed to save (${response.status})` })
       }
     } catch (error) {
       console.error('[v0] Error:', error)
-      setMessage({ type: 'error', text: 'Error saving configuration' })
+      setMessage({ type: 'error', text: `Error saving configuration: ${error instanceof Error ? error.message : 'Unknown error'}` })
     } finally {
       setLoading(false)
     }

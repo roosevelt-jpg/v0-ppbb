@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken, hasPermissionServer, grantIntegrationPermission } from '@/lib/admin-access-server'
-import { saveIntegration, getIntegration, getAllIntegrations, deleteIntegration, updateIntegrationStatus } from '@/lib/integrations/handlers'
+import { saveIntegrationServer, getAllIntegrationsServer, deleteIntegrationServer, updateIntegrationStatusServer } from '@/lib/integrations/handlers-server'
 import { redactCredentials } from '@/lib/integrations/encryption'
 
 async function checkPermission(request: NextRequest): Promise<string | null> {
@@ -39,48 +39,39 @@ async function checkPermission(request: NextRequest): Promise<string | null> {
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const userId = await checkPermission(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  const userId = await checkPermission(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-    const integrations = await getAllIntegrations(userId)
-    
-    // Redact sensitive fields
-    const redacted = integrations.map((int) => ({
-      ...int,
-      credentials: redactCredentials(int.credentials, int.serviceId),
-    }))
+  try {
+    console.log('[v0] Fetching integrations for', userId)
+    const integrations = await getAllIntegrationsServer(userId)
+    console.log('[v0] Found integrations:', integrations.length)
 
     return NextResponse.json({
-      success: true,
-      count: redacted.length,
-      data: redacted,
+      data: integrations.map((int) => ({
+        ...int,
+        credentials: redactCredentials(int.credentials, int.serviceId),
+      })),
     })
   } catch (error) {
     console.error('[v0] GET error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: `Failed to fetch integrations: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
+  const userId = await checkPermission(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const userId = await checkPermission(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await request.json()
-    const { serviceId, credentials } = body
-
-    if (!serviceId || !credentials) {
-      return NextResponse.json({ error: 'Missing serviceId or credentials' }, { status: 400 })
-    }
-
+    const { serviceId, credentials, serviceName } = await request.json()
     console.log('[v0] Saving integration:', serviceId, 'for', userId)
 
-    const integration = await saveIntegration(userId, serviceId, credentials)
+    const integration = await saveIntegrationServer(userId, serviceId, { ...credentials, serviceName })
     
     return NextResponse.json({
       success: true,
@@ -91,6 +82,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[v0] POST error:', error)
-    return NextResponse.json({ error: 'Failed to save integration' }, { status: 500 })
+    return NextResponse.json({ error: `Failed to save integration: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 })
   }
 }
