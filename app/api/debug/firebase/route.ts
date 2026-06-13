@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminApp } from '@/lib/admin-access-server'
+import { verifyIdToken } from '@/lib/admin-access-server'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('[v0] DEBUG: Checking Firebase Admin SDK initialization...')
+    console.log('[v0] DEBUG: Testing Firebase Admin SDK initialization via verifyIdToken...')
     
-    console.log('[v0] DEBUG: Attempting to get admin app...')
-    const adminApp = getAdminApp()
+    // Use an invalid token just to trigger the initialization
+    const result = await verifyIdToken('invalid_token_for_testing')
     
-    console.log('[v0] DEBUG: Admin app initialized successfully:', !!adminApp)
-    console.log('[v0] DEBUG: Admin app name:', adminApp.name)
+    console.log('[v0] DEBUG: verifyIdToken completed (result should be null for invalid token):', result)
     
     return NextResponse.json({
       status: 'success',
-      message: 'Firebase Admin SDK initialized successfully',
-      appName: adminApp.name,
+      message: 'Firebase Admin SDK initialized successfully and token verification attempted',
+      tokenVerificationResult: result,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     const errorStack = error instanceof Error ? error.stack : undefined
-    console.error('[v0] DEBUG: Error initializing Firebase Admin SDK:', errorMessage)
+    console.error('[v0] DEBUG: Error during Firebase initialization/verification:', errorMessage)
     console.error('[v0] Stack:', errorStack)
     return NextResponse.json({
       status: 'error',
