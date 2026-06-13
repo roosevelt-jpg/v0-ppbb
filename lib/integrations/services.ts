@@ -194,7 +194,9 @@ export function getServiceDefinition(serviceId: string): IntegrationService | nu
 }
 
 export function getAllServices(): IntegrationService[] {
-  return Object.values(INTEGRATION_SERVICES)
+  const services = Object.values(INTEGRATION_SERVICES)
+  console.log('[v0] getAllServices returning', services.length, 'services:', services.map(s => s.id))
+  return services
 }
 
 export function getServicesByCategory(category: IntegrationService['category']): IntegrationService[] {
