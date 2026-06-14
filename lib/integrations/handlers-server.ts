@@ -7,20 +7,18 @@ import { credential } from 'firebase-admin'
 const INTEGRATIONS_COLLECTION = 'integrations'
 const HEALTH_COLLECTION = 'integrationHealth'
 
-// Initialize Firebase Admin
 function getAdminApp() {
   if (getApps().length > 0) {
     return getApps()[0]
   }
-  
+
   try {
-    // Try GCP_SERVICE_ACCOUNT first (base64 encoded JSON)
     let serviceAccount: any = null
-    
+
     if (process.env.GCP_SERVICE_ACCOUNT) {
-      serviceAccount = JSON.parse(
-        Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
-      )
+      // GCP_SERVICE_ACCOUNT is stored as plain JSON in Vercel (not base64)
+      const raw = process.env.GCP_SERVICE_ACCOUNT.replace(/\\n/g, '\n')
+      serviceAccount = JSON.parse(raw)
     } else {
       // Fallback to individual env vars
       serviceAccount = {
@@ -30,7 +28,7 @@ function getAdminApp() {
       }
     }
 
-    if (!serviceAccount?.projectId) {
+    if (!serviceAccount?.project_id && !serviceAccount?.projectId) {
       throw new Error('Firebase credentials not configured')
     }
 
@@ -58,14 +56,14 @@ export async function saveIntegrationServer(
     const encrypted = encryptCredentials(credentials, serviceId)
     const integrationId = `${userId}_${serviceId}`
     const db = getAdminDb()
-    
+
     const integration: Integration = {
       id: integrationId,
       userId,
       serviceId,
       serviceName: credentials.serviceName || serviceId,
       credentials: encrypted,
-      status: 'inactive',
+      status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -89,9 +87,9 @@ export async function getIntegrationServer(userId: string, serviceId: string): P
     const integrationId = `${userId}_${serviceId}`
     const db = getAdminDb()
     const snap = await db.collection(INTEGRATIONS_COLLECTION).doc(integrationId).get()
-    
-    if (!snap.exists()) return null
-    
+
+    if (!snap.exists) return null
+
     const data = snap.data() as Integration
     return {
       ...data,
@@ -107,7 +105,7 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
   try {
     const db = getAdminDb()
     const snap = await db.collection(INTEGRATIONS_COLLECTION).where('userId', '==', userId).get()
-    
+
     return snap.docs.map((doc) => {
       const data = doc.data() as Integration
       return {
@@ -178,10 +176,7 @@ export async function saveIntegrationHealthServer(health: IntegrationHealth): Pr
   try {
     const db = getAdminDb()
     await db.collection(HEALTH_COLLECTION).doc(health.serviceId).set(
-      {
-        ...health,
-        updatedAt: new Date(),
-      },
+      { ...health, updatedAt: new Date() },
       { merge: true }
     )
   } catch (error) {
