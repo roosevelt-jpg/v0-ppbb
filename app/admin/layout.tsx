@@ -1,10 +1,8 @@
 'use client'
-
 import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { AdminSidebar, AdminHeader } from '@/components/admin-layout'
-
 export default function AdminLayout({
   children,
 }: {
@@ -13,32 +11,21 @@ export default function AdminLayout({
   const router = useRouter()
   const pathname = usePathname()
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null)
-
-  // Check if this is the setup page
   const isSetupPage = pathname === '/admin/setup'
-
   React.useEffect(() => {
-    // Skip auth check for setup page
     if (isSetupPage) {
       setIsAdmin(true)
       return
     }
-
     const unsubscribe = auth.onAuthStateChanged(async (user: any) => {
       if (!user) {
-        // Not authenticated - redirect to setup page for admin
         router.push('/admin/setup')
         return
       }
-
-      // For admin pages, redirect first-time users or non-admins to setup
-      // In production, verify admin role from Firestore
       setIsAdmin(true)
     })
-
     return () => unsubscribe()
   }, [router, isSetupPage])
-
   if (isAdmin === null && !isSetupPage) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -48,7 +35,6 @@ export default function AdminLayout({
       </div>
     )
   }
-
   if (!isAdmin && !isSetupPage) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -58,8 +44,6 @@ export default function AdminLayout({
       </div>
     )
   }
-
-  // For setup page, render without sidebar
   if (isSetupPage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted">
@@ -67,15 +51,13 @@ export default function AdminLayout({
       </div>
     )
   }
-
-  // For other admin pages, render with sidebar and header
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <AdminSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <AdminHeader title="Platform Overview" subtitle="Complete ecosystem visibility and management" />
         <main className="flex-1 overflow-auto bg-[#f7f6f2]">
-          <div className="p-8">
+          <div className="w-full p-8">
             {children}
           </div>
         </main>
@@ -83,4 +65,3 @@ export default function AdminLayout({
     </div>
   )
 }
-
