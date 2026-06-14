@@ -30,12 +30,23 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
       const endpoint = integration ? `/api/admin/integrations/${service.id}` : '/api/admin/integrations'
       const method = integration ? 'PATCH' : 'POST'
       
-      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(credentials).length })
+      // Properly escape credentials for JSON transmission
+      const escapedCredentials: Record<string, string> = {}
+      for (const [key, value] of Object.entries(credentials)) {
+        if (typeof value === 'string') {
+          // Replace literal newlines with escaped newlines for JSON serialization
+          escapedCredentials[key] = value.replace(/\n/g, '\\n')
+        } else {
+          escapedCredentials[key] = value
+        }
+      }
+      
+      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(escapedCredentials).length })
 
       const response = await fetch(endpoint, {
         method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId: service.id, credentials, serviceName: service.name }),
+        body: JSON.stringify({ serviceId: service.id, credentials: escapedCredentials, serviceName: service.name }),
       })
 
       console.log('[v0] Response status:', response.status, response.ok)
