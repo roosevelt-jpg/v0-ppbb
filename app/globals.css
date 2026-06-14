@@ -308,8 +308,31 @@ body {
   position: relative;
   z-index: 10000;
   pointer-events: auto;
+  width: 100%;
+  max-width: 28rem;
   max-height: 90vh;
   overflow-y: auto;
+}
+
+/* Fix global button and input styles inside modals */
+.fixed button,
+[class*="z-50"] button {
+  height: auto !important;
+  width: auto !important;
+  background-color: inherit;
+  color: inherit;
+  box-shadow: none;
+  padding: inherit;
+}
+
+.fixed input,
+.fixed select,
+.fixed textarea,
+[class*="z-50"] input,
+[class*="z-50"] select,
+[class*="z-50"] textarea {
+  height: auto !important;
+  width: 100% !important;
 }
 
 /* Modal animations */
@@ -342,4 +365,3 @@ body {
 .modal-slide {
   animation: slideIn 0.3s ease-out;
 }
-
