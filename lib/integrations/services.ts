@@ -47,10 +47,15 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     description: 'Backend admin & database',
     icon: '🔥',
     fields: [
-      { name: 'projectId', label: 'Project ID', type: 'text', required: true, placeholder: 'passive-blessings-prod' },
-      { name: 'privateKeyId', label: 'Private Key ID', type: 'text', required: true, encrypt: true },
-      { name: 'privateKey', label: 'Private Key', type: 'textarea', required: true, encrypt: true, help: 'Paste the entire private key JSON' },
-      { name: 'clientEmail', label: 'Client Email', type: 'text', required: true, placeholder: 'firebase-adminsdk@...iam.gserviceaccount.com' },
+      {
+        name: 'serviceAccountJson',
+        label: 'Service Account JSON',
+        type: 'textarea',
+        required: true,
+        encrypt: true,
+        placeholder: '{"type":"service_account","project_id":"your-project","private_key_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n","client_email":"...@....iam.gserviceaccount.com"}',
+        help: 'Paste your entire Firebase service account JSON file contents here',
+      },
     ],
   },
   // Calendars
