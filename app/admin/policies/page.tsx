@@ -4,16 +4,19 @@ import React, { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { db } from '@/lib/firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, collection, getDocs, query, orderBy } from 'firebase/firestore'
 import { Policy } from '@/lib/types'
 import { POLICY_TEMPLATES } from '@/lib/policy-manager'
-import { Save, RefreshCw } from 'lucide-react'
+import { Save, RefreshCw, Plus } from 'lucide-react'
 
 export default function AdminPolicies() {
   const [policies, setPolicies] = useState<Record<string, Policy>>({})
+  const [customPolicies, setCustomPolicies] = useState<Policy[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editingPolicy, setEditingPolicy] = useState<string | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newPolicy, setNewPolicy] = useState({ title: '', slug: '', content: '' })
 
   useEffect(() => {
     const loadPolicies = async () => {
@@ -49,7 +52,16 @@ export default function AdminPolicies() {
           }
         }
         
+        // Load custom policies
+        const customRef = collection(db, 'policies')
+        const customQuery = query(customRef, orderBy('createdAt', 'desc'))
+        const customSnap = await getDocs(customQuery)
+        const custom = customSnap.docs
+          .map(doc => ({ ...doc.data(), id: doc.id } as Policy))
+          .filter(p => !['privacy', 'terms', 'codeofconduct'].includes(p.id || ''))
+        
         setPolicies(policiesData)
+        setCustomPolicies(custom)
       } catch (error) {
         console.error('[v0] Error loading policies:', error)
       } finally {
@@ -116,6 +128,53 @@ export default function AdminPolicies() {
     setEditingPolicy(policyType)
   }
 
+  const handleCreatePolicy = async () => {
+    if (!newPolicy.title || !newPolicy.slug || !newPolicy.content) {
+      alert('Please fill in all required fields')
+      return
+    }
+    setSaving(true)
+    try {
+      const now = new Date()
+      const policyId = `custom_${Date.now()}`
+      const policy: Policy = {
+        id: policyId,
+        type: 'privacy' as const,
+        title: newPolicy.title,
+        slug: newPolicy.slug,
+        content: newPolicy.content,
+        version: 1,
+        lastUpdated: now,
+        effectiveDate: now,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      }
+      await setDoc(doc(db, 'policies', policyId), policy)
+      setCustomPolicies([policy, ...customPolicies])
+      setShowCreateModal(false)
+      setNewPolicy({ title: '', slug: '', content: '' })
+      alert('Policy created successfully!')
+    } catch (error) {
+      console.error('[v0] Error creating policy:', error)
+      alert('Error creating policy')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDeletePolicy = async (policyId: string) => {
+    if (!confirm('Delete this policy?')) return
+    try {
+      await setDoc(doc(db, 'policies', policyId), { status: 'deleted' }, { merge: true })
+      setCustomPolicies(customPolicies.filter(p => p.id !== policyId))
+      alert('Policy deleted successfully')
+    } catch (error) {
+      console.error('[v0] Error deleting policy:', error)
+      alert('Error deleting policy')
+    }
+  }
+
   if (loading) {
     return (
       <>
@@ -128,8 +187,42 @@ export default function AdminPolicies() {
 
   return (
     <>
-      
       <div className="p-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 style={{ color: '#111111' }} className="text-3xl font-bold">Policies</h1>
+          <Button onClick={() => setShowCreateModal(true)} style={{ backgroundColor: '#111111', color: '#f7f6f2' }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Policy
+          </Button>
+        </div>
+        
+        {/* Custom Policies */}
+        {customPolicies.length > 0 && (
+          <div className="mb-12">
+            <h2 style={{ color: '#111111' }} className="text-2xl font-bold mb-6">Custom Policies</h2>
+            <div className="space-y-4">
+              {customPolicies.map((policy) => (
+                <Card key={policy.id} style={{ borderColor: '#e4e1da' }} className="p-6 flex justify-between items-center">
+                  <div>
+                    <h3 style={{ color: '#111111' }} className="font-semibold">{policy.title}</h3>
+                    <p style={{ color: '#888888' }} className="text-sm">/{policy.slug}</p>
+                  </div>
+                  <Button 
+                    onClick={() => handleDeletePolicy(policy.id!)} 
+                    variant="ghost"
+                    style={{ color: '#d32f2f' }}
+                    size="sm"
+                  >
+                    Delete
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Template Policies */}
+        <h2 style={{ color: '#111111' }} className="text-2xl font-bold mb-6">Template Policies</h2>
         <div className="space-y-6">
           {Object.entries(policies).map(([policyType, policy]) => (
             <Card 
@@ -310,6 +403,42 @@ export default function AdminPolicies() {
           </div>
         </Card>
       </div>
+
+      {/* Create Policy Modal */}
+      {showCreateModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Card style={{ borderColor: '#e4e1da', width: '90%', maxWidth: '500px' }} className="p-8 space-y-4">
+            <h2 style={{ color: '#111111' }} className="text-2xl font-bold">Create New Policy</h2>
+            <input
+              type="text"
+              placeholder="Policy Title"
+              value={newPolicy.title}
+              onChange={(e) => setNewPolicy({ ...newPolicy, title: e.target.value })}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e4e1da', borderRadius: '6px', backgroundColor: '#f7f6f2', color: '#111111', boxSizing: 'border-box' }}
+            />
+            <input
+              type="text"
+              placeholder="URL Slug"
+              value={newPolicy.slug}
+              onChange={(e) => setNewPolicy({ ...newPolicy, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e4e1da', borderRadius: '6px', backgroundColor: '#f7f6f2', color: '#111111', boxSizing: 'border-box' }}
+            />
+            <textarea
+              placeholder="Policy Content"
+              value={newPolicy.content}
+              onChange={(e) => setNewPolicy({ ...newPolicy, content: e.target.value })}
+              rows={6}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e4e1da', borderRadius: '6px', backgroundColor: '#f7f6f2', color: '#111111', boxSizing: 'border-box' }}
+            />
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button onClick={handleCreatePolicy} style={{ backgroundColor: '#111111', color: '#f7f6f2' }} disabled={saving}>
+                {saving ? 'Creating...' : 'Create'}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </>
   )
 }
