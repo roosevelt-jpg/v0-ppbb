@@ -41,10 +41,21 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
         }
       }
 
+      // Deep sanitize: remove all control characters that break JSON
+      const deepSanitized: Record<string, string> = {}
+      for (const [key, value] of Object.entries(sanitizedCredentials)) {
+        deepSanitized[key] = String(value)
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+          .replace(/\r\n/g, '\\n')
+          .replace(/\n/g, '\\n')
+          .replace(/\r/g, '\\n')
+          .replace(/\t/g, '\\t')
+      }
+
       const response = await fetch(endpoint, {
         method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId: service.id, credentials: sanitizedCredentials, serviceName: service.name }),
+        body: JSON.stringify({ serviceId: service.id, credentials: deepSanitized, serviceName: service.name }),
       })
 
       if (response.ok) {
