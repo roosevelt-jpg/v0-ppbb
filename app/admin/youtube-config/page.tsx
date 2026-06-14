@@ -124,7 +124,7 @@ export default function YouTubeConfigPage() {
 
   return (
     <AdminPageLayout title="YouTube Videos" subtitle="Configure and manage YouTube integration">
-      <div className="w-full max-w-4xl space-y-6 p-6">
+      <div className="w-full space-y-6">
 
         {/* Error Alert */}
         {error && (
