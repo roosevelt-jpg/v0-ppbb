@@ -29,42 +29,49 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
       const endpoint = integration ? `/api/admin/integrations/${service.id}` : '/api/admin/integrations'
       const method = integration ? 'PATCH' : 'POST'
 
-      // Sanitize credentials — escape literal newlines in all string values
-      // This prevents JSON parse errors when private keys contain real newline chars
-      const sanitizedCredentials: Record<string, string> = {}
-      for (const [key, value] of Object.entries(credentials)) {
-        if (typeof value === 'string') {
-          // Replace literal newlines with \n escape sequence for safe JSON transport
-          sanitizedCredentials[key] = value.replace(/\r\n/g, '\\n').replace(/\n/g, '\\n').replace(/\r/g, '\\n')
-        } else {
-          sanitizedCredentials[key] = value
-        }
-      }
+      let finalCredentials: Record<string, string> = { ...credentials }
 
-      // Deep sanitize: remove all control characters that break JSON
-      const deepSanitized: Record<string, string> = {}
-      for (const [key, value] of Object.entries(sanitizedCredentials)) {
-        deepSanitized[key] = String(value)
-          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-          .replace(/\r\n/g, '\\n')
-          .replace(/\n/g, '\\n')
-          .replace(/\r/g, '\\n')
-          .replace(/\t/g, '\\t')
+      // For Firebase, parse the JSON blob client-side so we control newline handling
+      if (service.id === 'firebase' && credentials.serviceAccountJson) {
+        try {
+          // Use a regex-based extraction to avoid JSON.parse issues with newlines
+          const raw = credentials.serviceAccountJson
+          const parsed = JSON.parse(raw) // browser can parse it fine from textarea
+          finalCredentials = {
+            serviceAccountJson: JSON.stringify(parsed), // re-serialize cleanly
+            serviceName: service.name,
+          }
+        } catch (e) {
+          setMessage({ type: 'error', text: 'Invalid JSON. Please paste the complete service account JSON file.' })
+          setLoading(false)
+          return
+        }
       }
 
       const response = await fetch(endpoint, {
         method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId: service.id, credentials: deepSanitized, serviceName: service.name }),
+        body: JSON.stringify({ serviceId: service.id, credentials: finalCredentials, serviceName: service.name }),
       })
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Configuration saved successfully' })
         setTimeout(() => onClose(), 1500)
       } else {
-        const error = await response.json()
-        console.error('[v0] API Error:', error)
-        setMessage({ type: 'error', text: error.error || `Failed to save (${response.status})` })
+        // Safely parse error — server may return non-JSON on crash
+        let errorText = `Failed to save (${response.status})`
+        try {
+          const errBody = await response.text()
+          try {
+            const errJson = JSON.parse(errBody)
+            errorText = errJson.error || errJson.message || errorText
+          } catch {
+            // Server returned non-JSON error (HTML crash page etc)
+            errorText = errBody.slice(0, 200) || errorText
+          }
+        } catch {}
+        console.error('[v0] API Error:', errorText)
+        setMessage({ type: 'error', text: errorText })
       }
     } catch (error) {
       console.error('[v0] Error:', error)
