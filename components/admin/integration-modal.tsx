@@ -117,7 +117,13 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
               ) : field.type === 'textarea' ? (
                 <textarea
                   value={credentials[field.name] || ''}
-                  onChange={(e) => setCredentials({ ...credentials, [field.name]: e.target.value })}
+                  onChange={(e) => {
+                    let val = e.target.value
+                    if (field.name === 'privateKey' || field.name === 'private_key') {
+                      val = val.replace(/\r\n/g, '\\n').replace(/\n/g, '\\n').replace(/\r/g, '\\n')
+                    }
+                    setCredentials({ ...credentials, [field.name]: val })
+                  }}
                   placeholder={field.placeholder}
                   rows={4}
                   style={{ width: '100%', padding: '0.5rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', backgroundColor: '#ffffff', color: '#111111', fontFamily: 'monospace', resize: 'vertical', boxSizing: 'border-box', display: 'block' }}
