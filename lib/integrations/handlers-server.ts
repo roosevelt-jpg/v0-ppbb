@@ -16,11 +16,9 @@ function getAdminApp() {
     let serviceAccount: any = null
 
     if (process.env.GCP_SERVICE_ACCOUNT) {
-      // GCP_SERVICE_ACCOUNT is stored as plain JSON in Vercel (not base64)
       const raw = process.env.GCP_SERVICE_ACCOUNT.replace(/\\n/g, '\n')
       serviceAccount = JSON.parse(raw)
     } else {
-      // Fallback to individual env vars
       serviceAccount = {
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
@@ -53,6 +51,23 @@ export async function saveIntegrationServer(
 ): Promise<Integration> {
   try {
     console.log('[v0] Saving integration (server):', serviceId, 'for', userId)
+
+    // If Firebase integration, parse the serviceAccountJson blob into individual fields
+    if (serviceId === 'firebase' && credentials.serviceAccountJson) {
+      try {
+        const sa = JSON.parse(credentials.serviceAccountJson)
+        credentials = {
+          ...credentials,
+          projectId: sa.project_id || sa.projectId,
+          privateKeyId: sa.private_key_id || sa.privateKeyId,
+          privateKey: sa.private_key || sa.privateKey,
+          clientEmail: sa.client_email || sa.clientEmail,
+        }
+      } catch (parseErr) {
+        throw new Error('Invalid service account JSON. Please paste the complete JSON file.')
+      }
+    }
+
     const encrypted = encryptCredentials(credentials, serviceId)
     const integrationId = `${userId}_${serviceId}`
     const db = getAdminDb()
