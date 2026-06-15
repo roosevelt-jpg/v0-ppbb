@@ -1,33 +1,91 @@
-const admin = require('firebase-admin');
+// Use native Node.js fetch (available in Node 18+)
 
-// Use environment variables directly
-const serviceAccount = {
-  type: "service_account",
-  project_id: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  private_key_id: process.env.private_key_id,
-  private_key: process.env.PRIVATE_KEY?.replace(/\\n/g, '\n') || process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  client_email: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-  client_id: "1",
-  auth_uri: "https://accounts.google.com/o/oauth2/auth",
-  token_uri: "https://oauth2.googleapis.com/token",
-  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs"
-};
+const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 
-try {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-  });
-  console.log('[v0] Firebase Admin initialized successfully');
-} catch (error) {
-  console.error('[v0] Firebase Admin initialization error:', error.message);
+if (!projectId || !apiKey) {
+  console.error('[v0] ERROR: Missing Firebase projectId or apiKey');
   process.exit(1);
 }
 
-const auth = admin.auth();
-const db = admin.firestore();
+console.log('[v0] Using Firebase REST API to create test members...\n');
 
-async function createTestMembers() {
+async function createTestMember(email, password, firstName, lastName) {
+  try {
+    console.log(`[v0] Creating member: ${email}`);
+
+    // Sign up new user
+    const signUpResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        displayName: `${firstName} ${lastName}`,
+        returnSecureToken: true,
+      }),
+    });
+
+    const signUpData = await signUpResponse.json();
+
+    if (!signUpResponse.ok) {
+      if (signUpData.error?.message === 'EMAIL_EXISTS') {
+        console.log(`⊘ Already exists: ${email}`);
+        return true;
+      }
+      throw new Error(signUpData.error?.message || 'Sign up failed');
+    }
+
+    const uid = signUpData.localId;
+    const idToken = signUpData.idToken;
+
+    console.log(`✓ Created Firebase auth user: ${uid}`);
+
+    // Create Firestore document
+    const firestoreResponse = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/users/${uid}?key=${apiKey}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            uid: { stringValue: uid },
+            email: { stringValue: email },
+            firstName: { stringValue: firstName },
+            lastName: { stringValue: lastName },
+            displayName: { stringValue: `${firstName} ${lastName}` },
+            membershipTier: { stringValue: 'standard' },
+            role: { stringValue: 'member' },
+            bio: { stringValue: '' },
+            profilePicture: { stringValue: '' },
+            phoneNumber: { stringValue: '' },
+            location: { stringValue: '' },
+            volunteerHours: { integerValue: 0 },
+            eventsAttended: { integerValue: 0 },
+            donations: { integerValue: 0 },
+            certificateCount: { integerValue: 0 },
+            createdAt: { timestampValue: new Date().toISOString() },
+            updatedAt: { timestampValue: new Date().toISOString() },
+          },
+        }),
+      }
+    );
+
+    if (!firestoreResponse.ok) {
+      const error = await firestoreResponse.json();
+      console.log(`⚠ Firestore doc create failed (may already exist): ${error.error?.message || 'unknown error'}`);
+      return true;
+    }
+
+    console.log(`✓ Created Firestore document\n`);
+    return true;
+  } catch (error) {
+    console.error(`✗ Error with ${email}: ${error.message}\n`);
+    return false;
+  }
+}
+
+async function main() {
   const members = [
     { email: 'member1@passiveblessings.ae', password: 'Member@123456', firstName: 'Ahmed', lastName: 'Al-Mansouri' },
     { email: 'member2@passiveblessings.ae', password: 'Member@123456', firstName: 'Fatima', lastName: 'Al-Zahra' },
@@ -36,61 +94,25 @@ async function createTestMembers() {
     { email: 'member5@passiveblessings.ae', password: 'Member@123456', firstName: 'Hassan', lastName: 'Al-Tamimi' },
   ];
 
-  console.log('\n[v0] Creating test member accounts...\n');
+  console.log('[v0] ========================================\n');
+  console.log('[v0] Creating test member accounts...\n');
 
   for (const member of members) {
-    try {
-      // Try to get existing user
-      let userRecord;
-      try {
-        userRecord = await auth.getUserByEmail(member.email);
-        console.log(`⊘ Already exists: ${member.email}`);
-      } catch (err) {
-        // User doesn't exist, create it
-        userRecord = await auth.createUser({
-          email: member.email,
-          password: member.password,
-          displayName: `${member.firstName} ${member.lastName}`,
-          emailVerified: true,
-        });
-        console.log(`✓ Created: ${member.email}`);
-      }
-
-      // Create/update Firestore user document
-      await db.collection('users').doc(userRecord.uid).set({
-        uid: userRecord.uid,
-        email: member.email,
-        firstName: member.firstName,
-        lastName: member.lastName,
-        displayName: `${member.firstName} ${member.lastName}`,
-        membershipTier: 'standard',
-        role: 'member',
-        bio: '',
-        profilePicture: '',
-        phoneNumber: '',
-        location: '',
-        volunteerHours: 0,
-        eventsAttended: 0,
-        donations: 0,
-        certificateCount: 0,
-        createdAt: admin.firestore.Timestamp.now(),
-        updatedAt: admin.firestore.Timestamp.now(),
-      }, { merge: true });
-      console.log(`✓ Firestore doc created/updated: ${member.email}\n`);
-    } catch (error) {
-      console.error(`✗ Error with ${member.email}:`, error.message, '\n');
-    }
+    await createTestMember(member.email, member.password, member.firstName, member.lastName);
   }
 
-  console.log('[v0] Test member creation complete!');
-  console.log('\n[v0] You can now login with:');
+  console.log('[v0] ========================================');
+  console.log('[v0] Test member creation complete!\n');
+  console.log('[v0] You can now login with any of these credentials:\n');
   console.log('  Email: member1@passiveblessings.ae');
   console.log('  Password: Member@123456\n');
+  console.log('  (or member2, member3, member4, member5 with same password)\n');
+  console.log('[v0] Login URL: https://test.myflynai.com/login\n');
 
   process.exit(0);
 }
 
-createTestMembers().catch(error => {
-  console.error('[v0] Fatal error:', error);
+main().catch(error => {
+  console.error('[v0] Fatal error:', error.message);
   process.exit(1);
 });
