@@ -980,3 +980,31 @@ export interface Recording {
   publishedAt?: Date
 }
 
+// EU Data Protection Policy - GDPR Compliance
+export interface EUDataProtectionPolicy {
+  id: string
+  title: string
+  content: string
+  htmlContent?: string
+  version: number
+  status: 'draft' | 'active' | 'archived'
+  effectiveDate: Date
+  lastUpdated: Date
+  createdBy: string
+  updatedBy: string
+  requiresAcceptance: boolean
+  acceptanceRequired: boolean
+}
+
+// User Policy Acceptance Tracking
+export interface UserPolicyAcceptance {
+  id: string
+  userId: string
+  userEmail: string
+  policyId: string
+  policyVersion: number
+  acceptedAt: Date
+  ipAddress?: string
+  userAgent?: string
+}
+

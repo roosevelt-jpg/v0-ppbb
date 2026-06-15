@@ -4,6 +4,7 @@ import { DM_Sans, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import { ChatWidget } from '@/components/chat/chat-widget'
+import { EUDataProtectionPopup } from '@/components/eu-data-protection-popup'
 
 const dmSans = DM_Sans({ variable: '--font-dm-sans', subsets: ['latin'] })
 const playfairDisplay = Playfair_Display({
@@ -55,6 +56,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased bg-background text-foreground">
         <Providers>{children}</Providers>
+        <EUDataProtectionPopup />
         <ChatWidget />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
