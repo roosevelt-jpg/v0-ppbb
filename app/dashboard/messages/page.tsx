@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, addDoc, orderBy } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -89,15 +88,8 @@ export default function MessagesPage() {
   }
 
   return (
-    <>
-      <MemberHeader
-        title="Messages"
-        subtitle="Connect with other members and community leaders"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div className="p-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8">
         <div className="grid md:grid-cols-3 gap-6 h-96">
           {/* Conversations List */}
           <Card className="p-4 overflow-y-auto">
@@ -174,7 +166,6 @@ export default function MessagesPage() {
             )}
           </Card>
         </div>
-      </div>
-    </>
+      </div>    </div>
   )
 }

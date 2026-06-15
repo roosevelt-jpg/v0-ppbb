@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Clock, Award, Target } from 'lucide-react'
@@ -54,13 +53,8 @@ export default function VolunteeringPage() {
     : 'Not enrolled'
 
   return (
-    <>
-      <MemberHeader
-        title="Volunteering"
-        subtitle="Track your volunteer experience and contributions"
-      />
-
-      <div className="p-8 space-y-6">
+    <div style={{ padding: "0" }}>
+            <div className="p-8 space-y-6">
         {/* Stats Cards */}
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="p-6">
@@ -178,7 +172,6 @@ export default function VolunteeringPage() {
             </div>
           </Card>
         )}
-      </div>
-    </>
+      </div>    </div>
   )
 }

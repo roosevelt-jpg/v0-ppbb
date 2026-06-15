@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where, deleteDoc, doc, Timestamp } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Clock, MapPin, Users, Calendar, LogOut, Plus } from 'lucide-react'
@@ -107,15 +106,8 @@ END:VCALENDAR`
   }
 
   return (
-    <>
-      <MemberHeader
-        title="My Events"
-        subtitle="Events you&apos;re attending and registered for"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-      
-      <div className="p-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8">
         {loading ? (
           <p className="text-neutral-600">Loading events...</p>
         ) : attendingEvents.length === 0 && declinedEvents.length === 0 ? (
@@ -167,8 +159,7 @@ END:VCALENDAR`
             )}
           </div>
         )}
-      </div>
-    </>
+      </div>    </div>
   )
 }
 

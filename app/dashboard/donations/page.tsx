@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, CheckCircle, Clock, XCircle, Download } from 'lucide-react'
@@ -90,15 +89,8 @@ export default function DonationsPage() {
   }
 
   return (
-    <>
-      <MemberHeader
-        title="My Donations"
-        subtitle="Track your charitable contributions"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-      
-      <div className="p-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100">
@@ -186,7 +178,6 @@ export default function DonationsPage() {
             ))}
           </div>
         )}
-      </div>
-    </>
+      </div>    </div>
   )
 }

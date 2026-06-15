@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BookOpen, Video, FileText, Users } from 'lucide-react'
@@ -67,15 +66,8 @@ export default function LearningPage() {
   }
 
   return (
-    <>
-      <MemberHeader
-        title="Learning Center"
-        subtitle="Access resources, workshops, and recordings"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div className="p-8 space-y-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8 space-y-8">
         {/* Filter */}
         <div className="flex gap-2">
           {['all', 'video', 'document', 'workshop'].map((f) => (
@@ -150,7 +142,6 @@ export default function LearningPage() {
             ))}
           </div>
         </Card>
-      </div>
-    </>
+      </div>    </div>
   )
 }

@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where, updateDoc, doc } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, Pause, Play, Trash2, Calendar, DollarSign, CheckCircle, AlertCircle } from 'lucide-react'
@@ -128,9 +127,7 @@ export default function RecurringDonationsPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <MemberHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-      <div className="flex-1 p-8">
+            <div className="flex-1 p-8">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100">

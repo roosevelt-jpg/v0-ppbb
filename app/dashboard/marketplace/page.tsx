@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, Star } from 'lucide-react'
@@ -53,15 +52,8 @@ export default function MarketplacePage() {
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0)
 
   return (
-    <>
-      <MemberHeader
-        title="Marketplace"
-        subtitle="Shop member-exclusive products and access discounts"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div className="p-8 space-y-6">
+    <div style={{ padding: "0" }}>
+            <div className="p-8 space-y-6">
         <div className="grid md:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="md:col-span-1">
@@ -176,7 +168,6 @@ export default function MarketplacePage() {
             </div>
           </Card>
         )}
-      </div>
-    </>
+      </div>    </div>
   )
 }

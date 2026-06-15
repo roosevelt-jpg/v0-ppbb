@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { getAllGroups, getGroupsByType } from '@/lib/community-service'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -93,9 +92,7 @@ export default function CommunityPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <MemberHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-      <div className="flex-1 p-6 lg:p-8">
+            <div className="flex-1 p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Community Forum</h1>

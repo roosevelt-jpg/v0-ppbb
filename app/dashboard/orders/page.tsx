@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { ShoppingBag, Truck, CheckCircle, Clock } from 'lucide-react'
 
@@ -53,15 +52,8 @@ export default function OrdersPage() {
   }
 
   return (
-    <>
-      <MemberHeader
-        title="My Orders"
-        subtitle="Track your merchandise and purchases"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div className="p-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8">
         {loading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading orders...</p>
@@ -127,7 +119,6 @@ export default function OrdersPage() {
             })}
           </div>
         )}
-      </div>
-    </>
+      </div>    </div>
   )
 }

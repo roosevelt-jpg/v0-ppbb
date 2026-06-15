@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Award, Download, Share2 } from 'lucide-react'
@@ -54,15 +53,8 @@ export default function CertificatesPage() {
   }, [])
 
   return (
-    <>
-      <MemberHeader
-        title="Certificates & Badges"
-        subtitle="View your achievements and credentials"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div className="p-8 space-y-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8 space-y-8">
         {/* Badges Section */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Your Badges</h2>
@@ -174,7 +166,6 @@ export default function CertificatesPage() {
             </div>
           )}
         </div>
-      </div>
-    </>
+      </div>    </div>
   )
 }

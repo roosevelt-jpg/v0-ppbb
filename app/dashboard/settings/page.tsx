@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { User } from '@/lib/types'
@@ -80,13 +79,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <>
-      <MemberHeader
-        title="Profile Settings"
-        subtitle="Manage your account and preferences"
-      />
-      
-      <div className="p-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8">
         <div className="max-w-2xl">
           <Card className="p-6">
             <h2 className="text-xl font-bold mb-6">Personal Information</h2>
@@ -256,7 +250,6 @@ export default function SettingsPage() {
             </div>
           </Card>
         </div>
-      </div>
-    </>
+      </div>    </div>
   )
 }

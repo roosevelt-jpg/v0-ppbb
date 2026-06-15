@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Check, Crown, Loader2 } from 'lucide-react'
@@ -104,33 +103,19 @@ export default function MembershipPage() {
 
   if (loading || plans.length === 0) {
     return (
-      <>
-        <MemberHeader
-          title="Membership Plans"
-          subtitle="Loading available plans..."
-          open={sidebarOpen}
-          setOpen={setSidebarOpen}
-        />
-        <div className="flex items-center justify-center h-96">
+    <div style={{ padding: "0" }}>
+                <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin mx-auto" />
             <p className="mt-4 text-neutral-600">Loading membership plans...</p>
           </div>
-        </div>
-      </>
-    )
-  }
+        </div>    </div>
+  )
+}
 
   return (
-    <>
-      <MemberHeader
-        title="Membership Plans"
-        subtitle="Choose your membership tier to unlock exclusive benefits"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div className="p-8 space-y-8">
+    <div style={{ padding: "0" }}>
+            <div className="p-8 space-y-8">
         {currentTier && (
           <Card className="p-6 bg-blue-50 border-blue-200 border-2">
             <div className="flex items-center gap-4">
@@ -257,7 +242,6 @@ export default function MembershipPage() {
             <p>✓ Ziina (Payment gateway for Middle East & Africa)</p>
           </div>
         </Card>
-      </div>
-    </>
+      </div>    </div>
   )
 }

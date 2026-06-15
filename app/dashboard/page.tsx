@@ -3,7 +3,6 @@
 import React from 'react'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
-import { MemberHeader } from '@/components/member-layout'
 import { User } from '@/lib/types'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,7 +17,6 @@ export default function DashboardPage() {
     volunteeredHours: 0,
   })
   const [loading, setLoading] = React.useState(true)
-  const [sidebarOpen, setSidebarOpen] = React.useState(false)
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -105,14 +103,7 @@ export default function DashboardPage() {
   ]
 
   return (
-    <>
-      <MemberHeader
-        title="Welcome back,"
-        subtitle={`${user?.firstName} • Active member`}
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         {statCards.map((stat) => {
@@ -274,6 +265,6 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
-    </>
+    </div>
   )
 }

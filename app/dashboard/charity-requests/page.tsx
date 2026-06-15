@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -381,15 +380,8 @@ export default function CharityRequestsPage() {
   }
 
   return (
-    <>
-      <MemberHeader
-        title="Charity Support Requests"
-        subtitle="Submit requests for community support and assistance"
-        open={sidebarOpen}
-        setOpen={setSidebarOpen}
-      />
-
-      <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto', space: '24px' }}>
+    <div style={{ padding: "0" }}>
+            <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto', space: '24px' }}>
         {/* Action Buttons */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
           <Button
@@ -1515,7 +1507,6 @@ export default function CharityRequestsPage() {
             </div>
           )}
         </div>
-      </div>
-    </>
+      </div>    </div>
   )
 }
