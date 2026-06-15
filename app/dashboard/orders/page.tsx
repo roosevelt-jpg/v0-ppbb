@@ -6,7 +6,6 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { ShoppingBag, Truck, CheckCircle, Clock } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
 
 const STATUS_CONFIG = {
   pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pending' },

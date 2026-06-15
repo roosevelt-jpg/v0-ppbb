@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Award, Download, Share2 } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<any[]>([])

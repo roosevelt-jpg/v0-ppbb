@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { createGroup } from '@/lib/community-service'
-import { MemberHeader } from '@/components/member-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +11,6 @@ import { ArrowLeft } from 'lucide-react'
 
 export default function CreateGroupPage() {
   const router = useRouter()
-  const [sidebarOpen, setSidebarOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
 
   const [formData, setFormData] = React.useState({
@@ -54,11 +52,8 @@ export default function CreateGroupPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <MemberHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-      <div className="flex-1 p-6 lg:p-8">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-black mb-6">
+    <div className="p-6 lg:p-8">
+      <button onClick={() => router.back()} className="flex items-center gap-2 text-black mb-6">
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
@@ -122,7 +117,6 @@ export default function CreateGroupPage() {
             </div>
           </Card>
         </div>
-      </div>
     </div>
   )
 }

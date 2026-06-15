@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Check, Crown, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
 
-export const dynamic = 'force-dynamic'
 
 export default function MembershipPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)

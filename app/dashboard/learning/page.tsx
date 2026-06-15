@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BookOpen, Video, FileText, Users } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
 
 export default function LearningPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
