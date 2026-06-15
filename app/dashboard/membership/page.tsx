@@ -134,7 +134,7 @@ export default function MembershipPage() {
         {currentTier && (
           <Card className="p-6 bg-blue-50 border-blue-200 border-2">
             <div className="flex items-center gap-4">
-              <Crown className="w-8 h-8 text-blue-600" />
+              <Crown className="w-8 h-8 text-black" />
               <div>
                 <h3 className="font-semibold capitalize">{currentTier} Plan Active</h3>
                 <p className="text-sm text-neutral-600">Renews on {renewDate}</p>
@@ -192,7 +192,7 @@ export default function MembershipPage() {
                     <div className="space-y-2">
                       {plan.benefits.map((benefit, idx) => (
                         <div key={idx} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <Check className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
                           <span className="text-sm">{benefit}</span>
                         </div>
                       ))}

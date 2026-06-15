@@ -175,7 +175,7 @@ export default function DonationsPage() {
                   <div className="text-right">
                     <p className="text-2xl font-bold">AED {donation.amount}</p>
                     {donation.status === 'verified' && (
-                      <button className="mt-3 flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-semibold">
+                      <button className="mt-3 flex items-center gap-1 text-black hover:text-black text-sm font-semibold">
                         <Download className="w-4 h-4" />
                         Receipt
                       </button>

@@ -88,17 +88,8 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border space-y-3">
-          <ThemeToggle />
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            size="sm"
-            className="w-full justify-start"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign out
-          </Button>
+        <div className="p-4 border-t border-border">
+          {/* Footer is now empty - controls moved to header */}
         </div>
       </aside>
     </>
@@ -129,6 +120,11 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
     return () => clearInterval(interval)
   }, [])
 
+  const handleLogout = async () => {
+    await logoutUser()
+    router.push('/login')
+  }
+
   return (
     <div className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
       <div className="flex-1">
@@ -144,7 +140,15 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
         </div>
       </div>
 
-      <div className="flex items-center gap-3 md:hidden">
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Sign out
+        </button>
         <button onClick={() => setOpen(!open)} className="md:hidden">
           <Menu className="h-6 w-6" />
         </button>

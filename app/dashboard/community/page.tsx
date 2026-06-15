@@ -104,7 +104,7 @@ export default function CommunityPage() {
 
         {/* Create Group Button */}
         <div className="mb-6">
-          <Button onClick={() => router.push('/dashboard/community/create')} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => router.push('/dashboard/community/create')} className="bg-black hover:bg-gray-800">
             <Plus className="w-4 h-4 mr-2" />
             Create New Group
           </Button>
@@ -127,7 +127,7 @@ export default function CommunityPage() {
             <button
               onClick={() => setSelectedType(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                selectedType === null ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
+                selectedType === null ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
               }`}
             >
               All Types
@@ -137,7 +137,7 @@ export default function CommunityPage() {
                 key={type.id}
                 onClick={() => setSelectedType(type.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                  selectedType === type.id ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
+                  selectedType === type.id ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
                 }`}
               >
                 {type.label}
@@ -184,7 +184,7 @@ export default function CommunityPage() {
 
                   {/* Type Badge */}
                   <div className="mb-4">
-                    <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-gray-100 text-black">
                       {groupTypes.find((t) => t.id === group.type)?.label}
                     </span>
                   </div>
@@ -195,7 +195,7 @@ export default function CommunityPage() {
                       e.stopPropagation()
                       router.push(`/dashboard/community/${group.id}`)
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-black hover:bg-gray-800 text-white"
                   >
                     {userGroups.has(group.id) ? 'View Group' : 'Join Group'}
                   </Button>
@@ -213,7 +213,7 @@ export default function CommunityPage() {
         {!loading && filteredGroups.length === 0 && (
           <Card className="p-8 text-center">
             <p className="text-gray-600 mb-4">No groups found matching your criteria.</p>
-            <Button onClick={() => router.push('/dashboard/community/create')} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => router.push('/dashboard/community/create')} className="bg-black hover:bg-gray-800">
               <Plus className="w-4 h-4 mr-2" />
               Create First Group
             </Button>

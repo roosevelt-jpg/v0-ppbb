@@ -58,7 +58,7 @@ export default function CreateGroupPage() {
       <MemberHeader sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <div className="flex-1 p-6 lg:p-8">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-blue-600 mb-6">
+        <button onClick={() => router.back()} className="flex items-center gap-2 text-black mb-6">
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
@@ -112,7 +112,7 @@ export default function CreateGroupPage() {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <Button onClick={handleCreateGroup} disabled={loading} className="bg-blue-600 hover:bg-blue-700 flex-1">
+                <Button onClick={handleCreateGroup} disabled={loading} className="bg-black hover:bg-gray-800 flex-1">
                   {loading ? 'Creating...' : 'Create Group'}
                 </Button>
                 <Button onClick={() => router.back()} variant="outline" className="flex-1">

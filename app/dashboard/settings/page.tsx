@@ -210,7 +210,7 @@ export default function SettingsPage() {
                   <div className="flex flex-wrap gap-2 mt-1">
                     {user?.skills && user.skills.length > 0 ? (
                       user.skills.map((skill: string) => (
-                        <span key={skill} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                        <span key={skill} className="px-3 py-1 bg-gray-100 text-black rounded-full text-sm">
                           {skill}
                         </span>
                       ))

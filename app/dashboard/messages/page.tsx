@@ -109,7 +109,7 @@ export default function MessagesPage() {
                   onClick={() => setSelectedConversation(conv)}
                   className={`w-full text-left p-3 rounded-lg transition ${
                     selectedConversation?.id === conv.id
-                      ? 'bg-blue-100'
+                      ? 'bg-gray-100'
                       : 'hover:bg-gray-100'
                   }`}
                 >

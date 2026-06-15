@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic'
 
 const STATUS_CONFIG = {
   pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pending' },
-  processing: { color: 'bg-blue-100 text-blue-800', icon: Clock, label: 'Processing' },
-  shipped: { color: 'bg-blue-100 text-blue-800', icon: Truck, label: 'Shipped' },
+  processing: { color: 'bg-gray-100 text-black', icon: Clock, label: 'Processing' },
+  shipped: { color: 'bg-gray-100 text-black', icon: Truck, label: 'Shipped' },
   delivered: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Delivered' },
   cancelled: { color: 'bg-red-100 text-red-800', icon: Clock, label: 'Cancelled' },
 }

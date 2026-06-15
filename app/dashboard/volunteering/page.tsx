@@ -131,7 +131,7 @@ export default function VolunteeringPage() {
                         {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                       </span>
                       {app.hoursLogged && (
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                        <span className="text-xs px-2 py-1 bg-gray-100 text-black rounded">
                           {app.hoursLogged} hours logged
                         </span>
                       )}

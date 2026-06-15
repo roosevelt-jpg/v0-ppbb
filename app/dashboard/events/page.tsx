@@ -207,7 +207,7 @@ function EventCard({
               {genderLabel[event.genderRestriction]}
             </span>
             {event.isPaid && (
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+              <span className="text-xs bg-gray-100 text-blue-700 px-2 py-1 rounded">
                 {event.currency} {event.price}
               </span>
             )}

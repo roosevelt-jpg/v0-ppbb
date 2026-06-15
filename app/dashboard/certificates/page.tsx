@@ -134,7 +134,7 @@ export default function CertificatesPage() {
                         </p>
                       )}
                       {cert.credentialId && (
-                        <p className="text-xs text-blue-600 mt-2 font-medium">
+                        <p className="text-xs text-black mt-2 font-medium">
                           ID: {cert.credentialId}
                         </p>
                       )}

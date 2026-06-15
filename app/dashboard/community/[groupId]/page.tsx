@@ -350,7 +350,7 @@ export default function GroupPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button onClick={handleCreatePost} className="bg-blue-600 hover:bg-blue-700">
+                  <Button onClick={handleCreatePost} className="bg-black hover:bg-gray-800">
                     Post
                   </Button>
                   <Button onClick={() => setShowCreatePost(false)} variant="outline">
@@ -359,7 +359,7 @@ export default function GroupPage() {
                 </div>
               </Card>
             ) : (
-              <Button onClick={() => setShowCreatePost(true)} className="mb-8 bg-blue-600 hover:bg-blue-700 w-full">
+              <Button onClick={() => setShowCreatePost(true)} className="mb-8 bg-black hover:bg-gray-800 w-full">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Start a Discussion
               </Button>
@@ -397,8 +397,8 @@ export default function GroupPage() {
                             </a>
                           ) : (
                             <a key={i} href={m.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-2 rounded-lg border border-gray-200 hover:border-blue-500 transition group">
-                              <FileText className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition" />
-                              <span className="text-xs text-gray-600 group-hover:text-blue-600 truncate">{m.name}</span>
+                              <FileText className="w-5 h-5 text-gray-500 group-hover:text-black transition" />
+                              <span className="text-xs text-gray-600 group-hover:text-black truncate">{m.name}</span>
                             </a>
                           )
                         ))}
@@ -434,7 +434,7 @@ export default function GroupPage() {
                           }))
                         }
                       }}
-                      className="text-blue-600 text-sm font-medium mb-4"
+                      className="text-black text-sm font-medium mb-4"
                     >
                       {commentStates[post.id]?.showComments ? 'Hide' : 'Show'} {post.commentCount} comments
                     </button>
@@ -472,7 +472,7 @@ export default function GroupPage() {
                       <Button
                         onClick={() => handleAddComment(post.id)}
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-black hover:bg-gray-800"
                       >
                         <Send className="w-4 h-4" />
                       </Button>
@@ -486,7 +486,7 @@ export default function GroupPage() {
             {posts.length === 0 && (
               <Card className="p-8 text-center">
                 <p className="text-gray-600 mb-4">No discussions yet in this group.</p>
-                <Button onClick={() => setShowCreatePost(true)} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => setShowCreatePost(true)} className="bg-black hover:bg-gray-800">
                   Start First Discussion
                 </Button>
               </Card>
@@ -497,7 +497,7 @@ export default function GroupPage() {
         {!isMember && (
           <Card className="p-8 text-center">
             <p className="text-gray-600 mb-4">Join this group to view and participate in discussions</p>
-            <Button onClick={handleJoinGroup} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleJoinGroup} className="bg-black hover:bg-gray-800">
               Join Group
             </Button>
           </Card>

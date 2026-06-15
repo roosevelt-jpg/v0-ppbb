@@ -97,7 +97,7 @@ export default function LearningPage() {
             {filteredResources.map((resource) => (
               <Card key={resource.id} className="p-6 hover:shadow-lg transition cursor-pointer">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+                  <div className="p-2 bg-gray-100 rounded-lg">
                     {getIcon(resource.type)}
                   </div>
                   <div>
