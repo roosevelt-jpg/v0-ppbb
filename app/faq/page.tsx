@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { FAQ } from '@/lib/types'
 import { getAllFAQs, searchFAQs, incrementFAQViews, markFAQHelpful } from '@/lib/faq-queries'
 
@@ -47,7 +49,9 @@ export default function FAQPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#f9f7f4', paddingTop: '40px', paddingBottom: '60px' }}>
+    <>
+      <Navbar />
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9f7f4', paddingTop: '40px', paddingBottom: '60px' }}>
       {/* Header */}
       <section style={{ textAlign: 'center', marginBottom: '48px', paddingX: '20px' }}>
         <h1 style={{ fontSize: '48px', fontWeight: 700, color: '#111111', marginBottom: '16px', textAlign: 'center' }}>
@@ -272,6 +276,8 @@ export default function FAQPage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+      <Footer />
+    </>
   )
 }

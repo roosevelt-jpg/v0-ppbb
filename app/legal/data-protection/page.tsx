@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { db } from '@/lib/firebase'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
@@ -146,7 +148,9 @@ export default function UAEDataProtectionPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
+    <>
+      <Navbar />
+      <main style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
       {/* Header */}
       <div style={{ backgroundColor: '#111111', color: '#ffffff', padding: '32px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
@@ -197,6 +201,8 @@ export default function UAEDataProtectionPage() {
           </Link>
         </div>
       </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   )
 }

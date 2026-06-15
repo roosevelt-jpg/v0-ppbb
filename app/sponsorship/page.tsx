@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { SponsorshipTier } from '@/lib/types'
 import { db } from '@/lib/firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
@@ -91,7 +93,9 @@ export default function SponsorshipPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
+    <>
+      <Navbar />
+      <div style={{ minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
       {/* Header */}
       <div style={{ backgroundColor: '#111111', color: '#fff', padding: '60px 20px', textAlign: 'center' }}>
         <h1 style={{ fontSize: '48px', fontWeight: 700, margin: '0 0 16px 0' }}>Become a Sponsor</h1>
@@ -396,6 +400,8 @@ export default function SponsorshipPage() {
           Questions? Contact our sponsorship team at sponsorships@passiveblessings.com
         </p>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </>
   )
 }

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { FAQ } from '@/lib/types'
 import { getAllFAQs, searchFAQs } from '@/lib/faq-queries'
 import { Send } from 'lucide-react'
@@ -119,7 +121,9 @@ export default function ChatBotPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: '#f9f7f4', display: 'flex', flexDirection: 'column' }}>
+    <>
+      <Navbar />
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9f7f4', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <section style={{ backgroundColor: '#111111', color: '#fff', padding: '24px', textAlign: 'center', borderBottom: '1px solid #333' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
@@ -247,6 +251,8 @@ export default function ChatBotPage() {
           50% { opacity: 1; }
         }
       `}</style>
-    </main>
+      </main>
+      <Footer />
+    </>
   )
 }
