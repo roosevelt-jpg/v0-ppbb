@@ -4,7 +4,7 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
-import { MemberSidebar, MemberHeader } from '@/components/member-layout'
+import { MemberSidebar } from '@/components/member-layout'
 import { User } from '@/lib/types'
 
 export default function DashboardLayout({
@@ -66,15 +66,7 @@ export default function DashboardLayout({
     <div className="flex h-screen bg-background">
       <MemberSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <main className="flex-1 overflow-auto flex flex-col">
-        <MemberHeader
-          title="Welcome back, " 
-          subtitle={`${user.firstName} • Active member`}
-          open={sidebarOpen}
-          setOpen={setSidebarOpen}
-        />
-        <div className="flex-1 overflow-auto">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   )
