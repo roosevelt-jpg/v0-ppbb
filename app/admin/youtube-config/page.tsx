@@ -241,7 +241,7 @@ export default function YouTubeConfigPage() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || !formData.channelId || !formData.apiKey}
-            className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold disabled:bg-neutral-400"
+            className="flex-1 flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold disabled:bg-neutral-400"
           >
             <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing ? 'Fetching...' : 'Fetch Videos Now'}

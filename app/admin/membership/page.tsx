@@ -301,7 +301,7 @@ export default function MembershipPage() {
             </select>
             <button
               onClick={exportMembershipData}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center gap-2"
+              className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Export

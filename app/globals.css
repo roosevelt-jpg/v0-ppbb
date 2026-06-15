@@ -19,6 +19,17 @@ body {
   -ms-overflow-style: none;
 }
 
+/* Custom checkbox styling for black theme */
+input[type='checkbox']:checked {
+  background-color: #111111;
+  border-color: #111111;
+  accent-color: #111111;
+}
+
+input[type='checkbox'] {
+  accent-color: #111111;
+}
+
 @theme inline {
   /* Brand typography */
   --font-playfair: var(--font-playfair-display);

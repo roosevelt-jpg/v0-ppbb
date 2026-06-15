@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { AdminSidebar } from '@/components/admin-layout'
@@ -16,9 +16,32 @@ export default function AdminLayout({
   const router = useRouter()
   const pathname = usePathname()
   const { user, loading } = useAuth()
+  const [currentDateTime, setCurrentDateTime] = useState<string>('')
 
   // Check if this is the setup page
   const isSetupPage = pathname === '/admin/setup'
+
+  // Update date and time
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date()
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      }
+      setCurrentDateTime(now.toLocaleDateString('en-US', options))
+    }
+
+    updateDateTime()
+    const interval = setInterval(updateDateTime, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     // Skip auth check for setup page
@@ -51,6 +74,9 @@ export default function AdminLayout({
     await logoutUser()
     router.push('/login')
   }
+
+  // Get user's first name or display email as fallback
+  const displayName = user && 'firstName' in user ? user.firstName || (user as any).email : (user as any)?.email || 'Admin'
 
   // Show loading state ONLY on setup page during initial auth check
   // On other pages, allow rendering with sidebar visible while auth validates
@@ -97,9 +123,12 @@ export default function AdminLayout({
         {/* Top Header */}
         <header className="h-16 border-b flex items-center justify-between px-6" style={{ borderColor: '#e4e1da' }}>
           <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              {user?.email}
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-lg font-semibold text-foreground">
+                {displayName}
+              </h2>
+              <p className="text-xs text-muted-foreground">{currentDateTime}</p>
+            </div>
             <span className="px-3 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#f0ede8', color: '#666' }}>
               {user?.role === 'super_admin' ? 'Super Admin' : 'Admin'}
             </span>
@@ -109,7 +138,7 @@ export default function AdminLayout({
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-black text-white hover:bg-gray-800 transition"
             >
               <LogOut className="w-4 h-4" />
               Logout
