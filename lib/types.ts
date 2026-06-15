@@ -825,6 +825,8 @@ export interface BeneficiarySupportRequest {
   fullName: string
   phoneNumber: string
   email: string
+  dateOfBirth?: Date
+  currentEmirateArea?: string
   
   // Identification Documents
   emiratesId?: {
@@ -868,10 +870,15 @@ export interface BeneficiarySupportRequest {
   }[]
   
   // Request Details
+  amountNeeded?: number // AED amount requested
+  employmentStatus?: 'employed' | 'self_employed' | 'unemployed' | 'retired' | 'student'
+  monthlyIncome?: number // AED
+  numberOfDependents?: number
   reason: string
   reasonCategory: 'housing' | 'medical' | 'emergency' | 'education' | 'employment' | 'family' | 'other'
   emergencyLevel: 'low' | 'medium' | 'high' | 'critical'
   referralSource: 'self' | 'community_member' | 'business' | 'admin_referral' | 'social_media' | 'other'
+  referralPersonName?: string
   
   // Review & Approval
   reviewedBy?: string // Admin ID

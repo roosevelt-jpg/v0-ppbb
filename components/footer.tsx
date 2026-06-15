@@ -103,6 +103,7 @@ export function Footer() {
                 { label: 'Events', href: '/events' },
                 { label: 'Marketplace', href: '/marketplace' },
                 { label: 'Contact Us', href: '/contact' },
+                { label: 'Charity Support Request', href: '/dashboard/charity-requests' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
@@ -147,6 +148,7 @@ export function Footer() {
                 { label: 'Privacy Policy', href: '/policies/privacy-policy' },
                 { label: 'Terms & Conditions', href: '/policies/terms-of-service' },
                 { label: 'Code of Conduct', href: '/policies/code-of-conduct' },
+                { label: 'UAE Data Protection Policy', href: '/legal/data-protection' },
                 { label: 'Accessibility', href: '#' },
               ].map((link) => (
                 <li key={link.label}>

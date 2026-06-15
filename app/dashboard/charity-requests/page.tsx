@@ -39,21 +39,28 @@ export default function CharityRequestsPage() {
   const [submitLoading, setSubmitLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string>('')
 
-  // Form state - All 11 required fields
+  // Form state - All fields from comprehensive form
   const [formData, setFormData] = useState({
     fullName: '',
     phoneNumber: '',
     email: '',
+    dateOfBirth: '', // DD/MM/YYYY format
+    currentEmirateArea: '', // Dropdown selection
     emiratesId: { number: '', expiryDate: '', file: null as File | null },
     passport: { number: '', expiryDate: '', countryCode: '', file: null as File | null },
     visa: { number: '', expiryDate: '', sponsorName: '', file: null as File | null },
     salaryDoc: { type: '', file: null as File | null },
     bankStatement: { file: null as File | null },
     supportingDocs: [] as { file: File; description: string }[],
+    amountNeeded: 0, // AED amount
+    employmentStatus: '', // Dropdown
+    monthlyIncome: 0, // AED
+    numberOfDependents: 0,
     reason: '',
     reasonCategory: 'emergency',
-    emergencyLevel: 'medium',
+    emergencyLevel: 'medium', // Will map to critical/urgent/standard
     referralSource: 'self',
+    referralPersonName: '', // Name of person who referred
   })
 
   // Consent state
@@ -322,16 +329,23 @@ export default function CharityRequestsPage() {
         fullName: '',
         phoneNumber: '',
         email: user.email,
+        dateOfBirth: '',
+        currentEmirateArea: '',
         emiratesId: { number: '', expiryDate: '', file: null },
         passport: { number: '', expiryDate: '', countryCode: '', file: null },
         visa: { number: '', expiryDate: '', sponsorName: '', file: null },
         salaryDoc: { type: '', file: null },
         bankStatement: { file: null },
         supportingDocs: [],
+        amountNeeded: 0,
+        employmentStatus: '',
+        monthlyIncome: 0,
+        numberOfDependents: 0,
         reason: '',
         reasonCategory: 'emergency',
         emergencyLevel: 'medium',
         referralSource: 'self',
+        referralPersonName: '',
       })
       setConsent({
         privacyPolicyAccepted: false,
@@ -485,6 +499,55 @@ export default function CharityRequestsPage() {
                           }}
                           placeholder="your.email@example.com"
                         />
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Date of Birth
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.dateOfBirth}
+                            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                            placeholder="DD / MM / YYYY"
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Current Emirate / Area
+                          </label>
+                          <select
+                            value={formData.currentEmirateArea}
+                            onChange={(e) => setFormData({ ...formData, currentEmirateArea: e.target.value })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            <option value="">Select emirate...</option>
+                            <option value="Dubai">Dubai</option>
+                            <option value="Abu Dhabi">Abu Dhabi</option>
+                            <option value="Sharjah">Sharjah</option>
+                            <option value="Ajman">Ajman</option>
+                            <option value="Umm Al Quwain">Umm Al Quwain</option>
+                            <option value="Ras Al Khaimah">Ras Al Khaimah</option>
+                            <option value="Fujairah">Fujairah</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </fieldset>
@@ -848,6 +911,100 @@ export default function CharityRequestsPage() {
                     </legend>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {/* Financial Information */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Amount Needed (AED) *
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            min="0"
+                            value={formData.amountNeeded}
+                            onChange={(e) => setFormData({ ...formData, amountNeeded: parseFloat(e.target.value) || 0 })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                            placeholder="e.g. AED 3,500"
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Employment Status
+                          </label>
+                          <select
+                            value={formData.employmentStatus}
+                            onChange={(e) => setFormData({ ...formData, employmentStatus: e.target.value })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            <option value="">Select status...</option>
+                            <option value="employed">Employed</option>
+                            <option value="self_employed">Self Employed</option>
+                            <option value="unemployed">Unemployed</option>
+                            <option value="retired">Retired</option>
+                            <option value="student">Student</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Monthly Income (AED)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={formData.monthlyIncome}
+                            onChange={(e) => setFormData({ ...formData, monthlyIncome: parseFloat(e.target.value) || 0 })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                            placeholder="e.g. AED 2,500 or 0"
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Number of Dependents
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={formData.numberOfDependents}
+                            onChange={(e) => setFormData({ ...formData, numberOfDependents: parseInt(e.target.value) || 0 })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                            placeholder="e.g. 2 children, 1 spouse"
+                          />
+                        </div>
+                      </div>
+
                       <div>
                         <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
                           Reason for Request *
@@ -898,12 +1055,47 @@ export default function CharityRequestsPage() {
                         </div>
 
                         <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '12px' }}>
                             Emergency Level *
                           </label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                            {[
+                              { value: 'critical', label: 'Critical', color: '#dc2626', bgColor: '#fee2e2' },
+                              { value: 'high', label: 'Urgent', color: '#ea580c', bgColor: '#ffedd5' },
+                              { value: 'medium', label: 'Standard', color: '#059669', bgColor: '#ecfdf5' },
+                            ].map((level) => (
+                              <button
+                                key={level.value}
+                                type="button"
+                                onClick={() => setFormData({ ...formData, emergencyLevel: level.value as any })}
+                                style={{
+                                  padding: '12px',
+                                  borderRadius: '6px',
+                                  border: formData.emergencyLevel === level.value ? `2px solid ${level.color}` : '1px solid #e4e1da',
+                                  backgroundColor: formData.emergencyLevel === level.value ? level.bgColor : '#ffffff',
+                                  cursor: 'pointer',
+                                  fontSize: '13px',
+                                  fontWeight: 600,
+                                  color: level.color,
+                                  transition: 'all 0.2s',
+                                }}
+                              >
+                                {level.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            How did you hear about us? *
+                          </label>
                           <select
-                            value={formData.emergencyLevel}
-                            onChange={(e) => setFormData({ ...formData, emergencyLevel: e.target.value })}
+                            required
+                            value={formData.referralSource}
+                            onChange={(e) => setFormData({ ...formData, referralSource: e.target.value })}
                             style={{
                               width: '100%',
                               padding: '10px 12px',
@@ -913,37 +1105,35 @@ export default function CharityRequestsPage() {
                               fontFamily: 'inherit',
                             }}
                           >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="critical">Critical</option>
+                            <option value="">Select source...</option>
+                            <option value="self">Myself</option>
+                            <option value="community_member">Community Member</option>
+                            <option value="business">Business Partner</option>
+                            <option value="admin_referral">Admin Referral</option>
+                            <option value="social_media">Social Media</option>
+                            <option value="other">Other</option>
                           </select>
                         </div>
-                      </div>
 
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                          How did you hear about us?
-                        </label>
-                        <select
-                          value={formData.referralSource}
-                          onChange={(e) => setFormData({ ...formData, referralSource: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: '1px solid #e4e1da',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                          }}
-                        >
-                          <option value="self">Myself</option>
-                          <option value="community_member">Community Member</option>
-                          <option value="business">Business Partner</option>
-                          <option value="admin_referral">Admin Referral</option>
-                          <option value="social_media">Social Media</option>
-                          <option value="other">Other</option>
-                        </select>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
+                            Referral Person Name (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.referralPersonName}
+                            onChange={(e) => setFormData({ ...formData, referralPersonName: e.target.value })}
+                            style={{
+                              width: '100%',
+                              padding: '10px 12px',
+                              border: '1px solid #e4e1da',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontFamily: 'inherit',
+                            }}
+                            placeholder="Name of person who referred you, if any"
+                          />
+                        </div>
                       </div>
                     </div>
                   </fieldset>
