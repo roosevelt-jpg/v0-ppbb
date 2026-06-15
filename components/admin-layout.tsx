@@ -26,6 +26,7 @@ import {
   Shield,
   Lock,
   HelpCircle,
+  Menu,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
