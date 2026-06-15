@@ -40,14 +40,14 @@ export default function BusinessDashboard() {
 
   // Redirect if not authenticated or not a business user
   React.useEffect(() => {
-    if (!loading && (!user || user.role !== 'business')) {
+    if (!loading && (!user || ((user.role !== 'business' && user.role !== 'super_admin') && user.role !== 'super_admin'))) {
       router.push('/login')
     }
   }, [user, loading, router])
 
   // Fetch dashboard stats
   React.useEffect(() => {
-    if (user?.id && user.role === 'business') {
+    if (user?.id && (user.role === 'business' || user.role === 'super_admin')) {
       const fetchStats = async () => {
         try {
           const dashboardStats = await getBusinessDashboardStats(user.id)
@@ -66,7 +66,7 @@ export default function BusinessDashboard() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
   }
 
-  if (user.role !== 'business') {
+  if ((user.role !== 'business' && user.role !== 'super_admin')) {
     return <div className="flex items-center justify-center h-screen">Access Denied</div>
   }
 

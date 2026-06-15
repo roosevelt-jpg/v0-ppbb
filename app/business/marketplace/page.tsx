@@ -16,7 +16,7 @@ export default function Marketplace() {
   const [message, setMessage] = React.useState('')
 
   React.useEffect(() => {
-    if (!user || user.role !== 'business') {
+    if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
       router.push('/login')
       return
     }
@@ -56,7 +56,7 @@ export default function Marketplace() {
     }
   }
 
-  if (!user || user.role !== 'business') {
+  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
     return <div className="text-center py-8">Access Denied</div>
   }
 

@@ -56,7 +56,7 @@ export default function NewOffer() {
     }
   }
 
-  if (!user || user.role !== 'business') {
+  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
     return <div className="text-center py-8">Access Denied</div>
   }
 

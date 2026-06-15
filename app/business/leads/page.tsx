@@ -17,7 +17,7 @@ export default function LeadsTracker() {
   const [filter, setFilter] = React.useState('all')
 
   React.useEffect(() => {
-    if (!user || user.role !== 'business') {
+    if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
       router.push('/login')
       return
     }
@@ -45,7 +45,7 @@ export default function LeadsTracker() {
     }
   }
 
-  if (!user || user.role !== 'business') {
+  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
