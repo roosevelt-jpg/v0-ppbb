@@ -26,25 +26,25 @@ export default function AdminLayout({
       return
     }
 
-    // Wait for auth context to load
-    if (loading) {
-      return
-    }
+    // Only redirect if NOT loading and user doesn't have proper access
+    // Don't redirect WHILE loading - allow the loading state to show
+    if (!loading) {
+      // Auth check is complete
+      if (!user) {
+        // Not authenticated - redirect to admin setup for 3-step login
+        router.push('/admin/setup')
+        return
+      }
 
-    // Check authentication and authorization
-    if (!user) {
-      // Not authenticated - redirect to admin setup for 3-step login
-      router.push('/admin/setup')
-      return
-    }
-
-    if (user.role !== 'admin' && user.role !== 'super_admin') {
-      // User is authenticated but not an admin or super admin
-      router.push('/dashboard')
-      return
+      if (user.role !== 'admin' && user.role !== 'super_admin') {
+        // User is authenticated but not an admin or super admin
+        router.push('/dashboard')
+        return
+      }
     }
     
     // User is authenticated and is an admin or super admin - allow access
+    // Or we're still loading and waiting for auth check
   }, [user, loading, router, isSetupPage])
 
   const handleLogout = async () => {
@@ -52,8 +52,9 @@ export default function AdminLayout({
     router.push('/login')
   }
 
-  // Show loading state while checking auth
-  if (loading && !isSetupPage) {
+  // Show loading state ONLY on setup page during initial auth check
+  // On other pages, allow rendering with sidebar visible while auth validates
+  if (loading && isSetupPage) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -64,7 +65,7 @@ export default function AdminLayout({
     )
   }
 
-  // Show access denied if not admin or super admin
+  // Show access denied if not admin or super admin (only after loading complete)
   if (!loading && !isSetupPage && (!user || (user.role !== 'admin' && user.role !== 'super_admin'))) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
