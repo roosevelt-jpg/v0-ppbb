@@ -87,11 +87,33 @@ export async function loginUser(
     // Fetch user profile from Firestore
     const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
 
-    if (!userDocSnap.exists()) {
-      return { user: null, error: 'User profile not found' }
+    if (userDocSnap.exists()) {
+      return { user: userDocSnap.data() as User, error: null }
     }
 
-    return { user: userDocSnap.data() as User, error: null }
+    // Auto-create user profile on first login if it doesn't exist
+    // This handles test members or users created via Firebase console
+    const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
+    const lastName = lastNameParts.join(' ')
+
+    const userProfile: User = {
+      id: firebaseUser.uid,
+      email: firebaseUser.email || email,
+      firstName: firstName || email.split('@')[0],
+      lastName: lastName || '',
+      role: 'member',
+      volunteeredHours: 0,
+      totalDonated: 0,
+      membershipTier: 'standard',
+      memberSince: new Date(),
+      active: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+
+    return { user: userProfile, error: null }
   } catch (error: any) {
     return { user: null, error: error.message }
   }
