@@ -87,9 +87,9 @@ export default function LoginPage() {
       if (user.role === 'admin') {
         router.push('/admin')
       } else if (user.role === 'super_admin') {
-        router.push('/business/dashboard')
+        router.push('/business-admin/dashboard')
       } else if (user.role === 'business') {
-        router.push('/business/dashboard')
+        router.push('/business-admin/dashboard')
       } else if (user.role === 'sponsor') {
         router.push('/sponsor')
       } else {
@@ -119,9 +119,9 @@ export default function LoginPage() {
       if (user.role === 'admin') {
         router.push('/admin')
       } else if (user.role === 'super_admin') {
-        router.push('/business/dashboard')
+        router.push('/business-admin/dashboard')
       } else if (user.role === 'business') {
-        router.push('/business/dashboard')
+        router.push('/business-admin/dashboard')
       } else if (user.role === 'sponsor') {
         router.push('/sponsor')
       } else {
@@ -151,9 +151,9 @@ export default function LoginPage() {
       if (user.role === 'admin') {
         router.push('/admin')
       } else if (user.role === 'super_admin') {
-        router.push('/business/dashboard')
+        router.push('/business-admin/dashboard')
       } else if (user.role === 'business') {
-        router.push('/business/dashboard')
+        router.push('/business-admin/dashboard')
       } else if (user.role === 'sponsor') {
         router.push('/sponsor')
       } else {
