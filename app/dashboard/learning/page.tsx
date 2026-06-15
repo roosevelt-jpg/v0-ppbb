@@ -1,4 +1,5 @@
 'use client'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
 import { db } from '@/lib/firebase'
@@ -65,8 +66,7 @@ export default function LearningPage() {
   }
 
   return (
-    <div style={{ padding: "0" }}>
-            <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8">
         {/* Filter */}
         <div className="flex gap-2">
           {['all', 'video', 'document', 'workshop'].map((f) => (
@@ -141,6 +141,6 @@ export default function LearningPage() {
             ))}
           </div>
         </Card>
-      </div>    </div>
+      </div>
   )
 }

@@ -1,4 +1,5 @@
 'use client'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
@@ -52,8 +53,7 @@ export default function CertificatesPage() {
   }, [])
 
   return (
-    <div style={{ padding: "0" }}>
-            <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8">
         {/* Badges Section */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Your Badges</h2>
@@ -165,6 +165,6 @@ export default function CertificatesPage() {
             </div>
           )}
         </div>
-      </div>    </div>
+      </div>
   )
 }

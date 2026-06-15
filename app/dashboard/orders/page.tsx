@@ -1,4 +1,5 @@
 'use client'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
@@ -51,8 +52,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div style={{ padding: "0" }}>
-            <div className="p-8">
+    <div className="p-8">
         {loading ? (
           <div className="flex justify-center py-8">
             <p className="text-muted-foreground">Loading orders...</p>
@@ -118,6 +118,6 @@ export default function OrdersPage() {
             })}
           </div>
         )}
-      </div>    </div>
+      </div>
   )
 }

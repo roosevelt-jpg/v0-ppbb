@@ -1,4 +1,5 @@
 'use client'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'

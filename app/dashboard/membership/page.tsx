@@ -1,4 +1,5 @@
 'use client'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '@/lib/firebase'
@@ -102,19 +103,19 @@ export default function MembershipPage() {
 
   if (loading || plans.length === 0) {
     return (
-    <div style={{ padding: "0" }}>
-                <div className="flex items-center justify-center h-96">
+      <div className="p-8">
+        <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin mx-auto" />
             <p className="mt-4 text-neutral-600">Loading membership plans...</p>
           </div>
-        </div>    </div>
-  )
-}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div style={{ padding: "0" }}>
-            <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8">
         {currentTier && (
           <Card className="p-6 bg-blue-50 border-blue-200 border-2">
             <div className="flex items-center gap-4">
@@ -241,6 +242,6 @@ export default function MembershipPage() {
             <p>✓ Ziina (Payment gateway for Middle East & Africa)</p>
           </div>
         </Card>
-      </div>    </div>
+      </div>
   )
 }
