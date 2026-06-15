@@ -104,6 +104,7 @@ export function Footer() {
                 { label: 'Marketplace', href: '/marketplace' },
                 { label: 'Contact Us', href: '/contact' },
                 { label: 'Charity Support Request', href: '/dashboard/charity-requests' },
+                { label: 'FAQ', href: '/faq' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>

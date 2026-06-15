@@ -25,6 +25,7 @@ import {
   Play,
   Shield,
   Lock,
+  HelpCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -59,6 +60,7 @@ const adminMenuItems = [
   { label: 'Moderation', href: '/admin/moderation', icon: Flag },
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
   { label: 'Policies', href: '/admin/policies', icon: FileText },
+  { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle },
   { label: 'Hero Slider', href: '/admin/assets', icon: Image },
   { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap },

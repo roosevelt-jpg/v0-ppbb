@@ -1161,3 +1161,18 @@ export interface UserPolicyAcceptance {
   userAgent?: string
 }
 
+// FAQ System - Brain of Passive Blessings
+export interface FAQ {
+  id: string
+  question: string
+  answer: string
+  category: 'general' | 'community' | 'sponsorship' | 'volunteering' | 'support' | 'technical'
+  keywords: string[]
+  order: number
+  isActive: boolean
+  views: number
+  helpful: number
+  notHelpful: number
+  createdAt: Date
+  updatedAt: Date
+}
