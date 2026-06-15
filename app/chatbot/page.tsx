@@ -85,32 +85,43 @@ export default function ChatBotPage() {
     }
 
     setMessages(prev => [...prev, userMessage])
+    const messageCopy = inputValue
     setInputValue('')
     setIsLoading(true)
 
-    // Find best matching FAQ
-    await new Promise(resolve => setTimeout(resolve, 500)) // Simulate thinking
+    try {
+      // Simulate thinking with timeout
+      await new Promise(resolve => setTimeout(resolve, 800))
 
-    const matchedFAQ = findBestMatch(inputValue)
+      const matchedFAQ = findBestMatch(messageCopy)
 
-    if (matchedFAQ) {
-      const botResponse: Message = {
-        type: 'bot',
-        content: matchedFAQ.answer,
-        timestamp: new Date(),
-        relatedFAQ: matchedFAQ,
+      if (matchedFAQ) {
+        const botResponse: Message = {
+          type: 'bot',
+          content: matchedFAQ.answer,
+          timestamp: new Date(),
+          relatedFAQ: matchedFAQ,
+        }
+        setMessages(prev => [...prev, botResponse])
+      } else {
+        const botResponse: Message = {
+          type: 'bot',
+          content: `I'm not sure about that specific question. For the most accurate assistance, please:\n\n1. Browse our FAQ page for more answers\n2. Visit our Charity Support Request page if you need assistance\n3. Contact our support team at support@passiveblessings.com\n\nIs there anything else I can help you with?`,
+          timestamp: new Date(),
+        }
+        setMessages(prev => [...prev, botResponse])
       }
-      setMessages(prev => [...prev, botResponse])
-    } else {
-      const botResponse: Message = {
+    } catch (error) {
+      console.error('[v0] Error in handleSendMessage:', error)
+      const errorResponse: Message = {
         type: 'bot',
-        content: `I'm not sure about that specific question. For the most accurate assistance, please:\n\n1. Browse our FAQ page for more answers\n2. Visit our Charity Support Request page if you need assistance\n3. Contact our support team at support@passiveblessings.com\n\nIs there anything else I can help you with?`,
+        content: 'Sorry, I encountered an error. Please try again or contact support@passiveblessings.com',
         timestamp: new Date(),
       }
-      setMessages(prev => [...prev, botResponse])
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
