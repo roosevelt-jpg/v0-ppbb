@@ -9,7 +9,6 @@ export const getAllFAQs = (callback: (faqs: FAQ[]) => void) => {
   const q = query(
     collection(db, FAQ_COLLECTION),
     where('isActive', '==', true),
-    orderBy('category', 'asc'),
     orderBy('order', 'asc')
   )
   return onSnapshot(q, (snapshot) => {
@@ -19,7 +18,13 @@ export const getAllFAQs = (callback: (faqs: FAQ[]) => void) => {
       createdAt: doc.data().createdAt?.toDate?.() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
     })) as FAQ[]
-    callback(faqs)
+    // Sort by category first, then by order
+    callback(faqs.sort((a, b) => {
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category)
+      }
+      return a.order - b.order
+    }))
   })
 }
 
@@ -71,7 +76,7 @@ export const searchFAQs = (searchTerm: string, callback: (faqs: FAQ[]) => void) 
 
 // Get all FAQs (admin view - including inactive)
 export const getAllFAQsAdmin = (callback: (faqs: FAQ[]) => void) => {
-  const q = query(collection(db, FAQ_COLLECTION), orderBy('category', 'asc'), orderBy('order', 'asc'))
+  const q = query(collection(db, FAQ_COLLECTION), orderBy('order', 'asc'))
   return onSnapshot(q, (snapshot) => {
     const faqs = snapshot.docs.map(doc => ({
       id: doc.id,
@@ -79,7 +84,13 @@ export const getAllFAQsAdmin = (callback: (faqs: FAQ[]) => void) => {
       createdAt: doc.data().createdAt?.toDate?.() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
     })) as FAQ[]
-    callback(faqs)
+    // Sort by category first, then by order
+    callback(faqs.sort((a, b) => {
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category)
+      }
+      return a.order - b.order
+    }))
   })
 }
 
@@ -138,13 +149,16 @@ export const toggleFAQStatus = async (id: string, isActive: boolean) => {
 export const incrementFAQViews = async (id: string) => {
   try {
     const faqRef = doc(db, FAQ_COLLECTION, id)
-    const snapshot = await getDocs(query(collection(db, FAQ_COLLECTION), where('__name__', '==', id)))
-    const currentViews = snapshot.docs[0]?.data()?.views || 0
-    await updateDoc(faqRef, {
-      views: currentViews + 1,
-    })
+    const faqSnap = await getDocs(query(collection(db, FAQ_COLLECTION)))
+    const faq = faqSnap.docs.find(d => d.id === id)
+    if (faq) {
+      const currentViews = faq.data().views || 0
+      await updateDoc(faqRef, {
+        views: currentViews + 1,
+      })
+    }
   } catch (error) {
-    console.error('Error incrementing FAQ views:', error)
+    console.error('[v0] Error incrementing FAQ views:', error)
   }
 }
 
@@ -152,15 +166,18 @@ export const incrementFAQViews = async (id: string) => {
 export const markFAQHelpful = async (id: string, helpful: boolean) => {
   try {
     const faqRef = doc(db, FAQ_COLLECTION, id)
-    const snapshot = await getDocs(query(collection(db, FAQ_COLLECTION), where('__name__', '==', id)))
-    const currentFAQ = snapshot.docs[0]?.data()
+    const faqSnap = await getDocs(query(collection(db, FAQ_COLLECTION)))
+    const faq = faqSnap.docs.find(d => d.id === id)
     
-    const updates = helpful
-      ? { helpful: (currentFAQ?.helpful || 0) + 1 }
-      : { notHelpful: (currentFAQ?.notHelpful || 0) + 1 }
-    
-    await updateDoc(faqRef, updates)
+    if (faq) {
+      const faqData = faq.data()
+      const updates = helpful
+        ? { helpful: (faqData?.helpful || 0) + 1 }
+        : { notHelpful: (faqData?.notHelpful || 0) + 1 }
+      
+      await updateDoc(faqRef, updates)
+    }
   } catch (error) {
-    console.error('Error marking FAQ:', error)
+    console.error('[v0] Error marking FAQ:', error)
   }
 }
