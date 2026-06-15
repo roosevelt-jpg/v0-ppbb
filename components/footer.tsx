@@ -103,7 +103,6 @@ export function Footer() {
                 { label: 'Events', href: '/events' },
                 { label: 'Marketplace', href: '/marketplace' },
                 { label: 'Contact Us', href: '/contact' },
-                { label: 'Donate', href: '/donate' },
               ].map((link) => (
                 <li key={link.label}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
