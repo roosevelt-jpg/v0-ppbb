@@ -168,8 +168,13 @@ export default function AdminFAQPage() {
   const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
-    if (user?.role !== 'admin') {
-      router.push('/dashboard')
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    if (user.role !== 'admin') {
+      router.push('/admin')
       return
     }
 

@@ -17,7 +17,7 @@ import { BeneficiarySupportRequest, BeneficiaryAccessLog } from '@/lib/types'
 import { AlertCircle, CheckCircle2, Clock, XCircle, Eye, Download, Filter } from 'lucide-react'
 
 export default function BeneficiaryRequestsAdmin() {
-  const { user, adminUser } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
   const [requests, setRequests] = useState<BeneficiarySupportRequest[]>([])
   const [filteredRequests, setFilteredRequests] = useState<BeneficiarySupportRequest[]>([])
@@ -33,25 +33,24 @@ export default function BeneficiaryRequestsAdmin() {
 
   // Access control check
   useEffect(() => {
-    if (!user || !adminUser) {
+    if (!user) {
       router.push('/login')
       return
     }
 
-    // Only founder_admin and manager can view beneficiary requests
-    if (!['founder_admin', 'manager'].includes(adminUser.adminRole)) {
+    if (user.role !== 'admin') {
       router.push('/admin')
       return
     }
-  }, [user, adminUser, router])
+  }, [user, router])
 
   // Load beneficiary requests
   useEffect(() => {
-    if (!adminUser) return
+    if (!user) return
 
     const loadRequests = async () => {
       try {
-        const reqs = await getAllBeneficiaryRequests(adminUser.adminRole, {
+        const reqs = await getAllBeneficiaryRequests(user.adminRole || 'moderator', {
           status: filters.status || undefined,
           emergencyLevel: filters.emergencyLevel || undefined,
         })
@@ -60,7 +59,7 @@ export default function BeneficiaryRequestsAdmin() {
         const accessibleRequests = await Promise.all(
           reqs.map(async (req) => ({
             req,
-            canView: await canViewBeneficiaryRequest(adminUser, req),
+            canView: await canViewBeneficiaryRequest(user as any, req),
           }))
         )
 
@@ -73,7 +72,7 @@ export default function BeneficiaryRequestsAdmin() {
     }
 
     loadRequests()
-  }, [adminUser, filters])
+  }, [user, filters])
 
   // Load access logs when request selected
   useEffect(() => {
@@ -88,11 +87,11 @@ export default function BeneficiaryRequestsAdmin() {
   }, [selectedRequest])
 
   const handleApprove = async (requestId: string, notes: string) => {
-    if (!adminUser) return
+    if (!user) return
 
     setActionLoading(true)
     try {
-      await approveBeneficiarySupportRequest(requestId, adminUser.id, notes)
+      await approveBeneficiarySupportRequest(requestId, user.id, notes)
       setRequests(requests.map((r) => (r.id === requestId ? { ...r, status: 'approved' } : r)))
       setSelectedRequest(null)
       alert('Request approved successfully')
@@ -105,11 +104,11 @@ export default function BeneficiaryRequestsAdmin() {
   }
 
   const handleReject = async (requestId: string, reason: string) => {
-    if (!adminUser) return
+    if (!user) return
 
     setActionLoading(true)
     try {
-      await rejectBeneficiarySupportRequest(requestId, adminUser.id, reason)
+      await rejectBeneficiarySupportRequest(requestId, user.id, reason)
       setRequests(requests.map((r) => (r.id === requestId ? { ...r, status: 'rejected' } : r)))
       setSelectedRequest(null)
       alert('Request rejected')
