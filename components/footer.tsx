@@ -170,9 +170,22 @@ export function Footer() {
           }}
         >
           <div className="flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-xs" style={{ color: '#888888' }}>
-              Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025
-            </p>
+            <div className="text-xs flex flex-col sm:flex-row items-center gap-2" style={{ color: '#888888' }}>
+              <p>Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025</p>
+              <span className="hidden sm:inline">·</span>
+              <p>
+                Made with Love by{' '}
+                <Link 
+                  href="https://myflynai.com" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors font-semibold"
+                  style={{ color: '#ffffff' }}
+                >
+                  MYFLYN
+                </Link>
+              </p>
+            </div>
             <div className="flex gap-4 mt-4 sm:mt-0">
               {[
                 { label: 'Facebook', key: 'facebook', icon: Heart },
