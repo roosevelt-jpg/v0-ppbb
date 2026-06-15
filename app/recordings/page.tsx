@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Recording } from '@/lib/types'
 import { Play, Eye, Heart, Search } from 'lucide-react'
+import { Footer } from '@/components/footer'
 
 export default function RecordingsPage() {
   const [recordings, setRecordings] = useState<Recording[]>([])
@@ -169,6 +170,7 @@ export default function RecordingsPage() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

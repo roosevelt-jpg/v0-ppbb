@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Workshop } from '@/lib/types'
 import { Calendar, Clock, MapPin, Users, ArrowRight } from 'lucide-react'
+import { Footer } from '@/components/footer'
 
 export default function WorkshopsPage() {
   const [workshops, setWorkshops] = useState<Workshop[]>([])
@@ -129,6 +130,7 @@ export default function WorkshopsPage() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
