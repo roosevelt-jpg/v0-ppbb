@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, updateDoc, doc, getDocs } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
@@ -137,7 +138,7 @@ export default function AdminChatbotPage() {
   }
 
   return (
-    <div className="p-8 bg-neutral-50 min-h-screen">
+    <AdminPageLayout title="Chatbot Management" subtitle="Manage and reply to customer support conversations">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -330,6 +331,6 @@ export default function AdminChatbotPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }

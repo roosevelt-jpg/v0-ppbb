@@ -27,6 +27,8 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [businesses, setBusinesses] = useState<any[]>([])
+  const [loadingBusinesses, setLoadingBusinesses] = useState(true)
 
   useEffect(() => {
     const itemsRef = collection(db, 'marketplaceItems')
@@ -50,6 +52,18 @@ export default function MarketplacePage() {
     return () => unsubscribe()
   }, [filter, searchTerm])
 
+  // Load businesses for directory
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'businesses'), (snapshot) => {
+      setBusinesses(snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })))
+      setLoadingBusinesses(false)
+    })
+    return unsubscribe
+  }, [])
+
   const categories = [
     'all',
     'services',
@@ -57,6 +71,8 @@ export default function MarketplacePage() {
     'coaching',
     'consulting',
     'education',
+    'merchandise',
+    'donations-purchases',
   ]
 
   return (
@@ -98,6 +114,37 @@ export default function MarketplacePage() {
                 {cat}
               </button>
             ))}
+          </div>
+
+          {/* Shop Dropdown */}
+          <div className="mb-8">
+            <details className="group">
+              <summary className="cursor-pointer px-4 py-2 rounded-lg font-medium bg-black text-white hover:bg-gray-900 transition-colors list-none">
+                SHOP ▼
+              </summary>
+              <div className="mt-2 pl-4 space-y-2">
+                <button
+                  onClick={() => setFilter('merchandise')}
+                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors capitalize ${
+                    filter === 'merchandise'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  • Merchandise
+                </button>
+                <button
+                  onClick={() => setFilter('donations-purchases')}
+                  className={`block w-full text-left px-4 py-2 rounded-lg transition-colors capitalize ${
+                    filter === 'donations-purchases'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  }`}
+                >
+                  • Donations Through Purchases
+                </button>
+              </div>
+            </details>
           </div>
 
           {/* Items Grid */}
@@ -161,6 +208,62 @@ export default function MarketplacePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Business Directory Section */}
+          {businesses.length > 0 && (
+            <div className="mt-16 pt-12 border-t border-gray-200">
+              <h2 className="text-3xl font-bold mb-8">Business Directory</h2>
+              <p className="text-gray-600 mb-8">Discover what our business partners are selling and offering</p>
+              
+              {loadingBusinesses ? (
+                <p className="text-gray-500">Loading businesses...</p>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {businesses.map((business) => (
+                    <div
+                      key={business.id}
+                      className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                    >
+                      {business.logo && (
+                        <img
+                          src={business.logo}
+                          alt={business.name}
+                          className="w-full h-40 object-cover rounded-lg mb-4"
+                        />
+                      )}
+                      <h3 className="font-bold text-lg mb-2">{business.name}</h3>
+                      <p className="text-gray-600 text-sm mb-3">{business.description}</p>
+                      
+                      <div className="space-y-2 mb-4 text-sm">
+                        {business.category && (
+                          <p><span className="font-semibold">Category:</span> {business.category}</p>
+                        )}
+                        {business.contact && (
+                          <p><span className="font-semibold">Contact:</span> {business.contact}</p>
+                        )}
+                        {business.website && (
+                          <p>
+                            <span className="font-semibold">Website:</span>{' '}
+                            <a href={business.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              Visit
+                            </a>
+                          </p>
+                        )}
+                      </div>
+
+                      {business.storefront && (
+                        <Link href={`/business/storefront/${business.id}`}>
+                          <button className="w-full bg-black hover:bg-gray-800 text-white py-2 font-medium rounded-lg transition-colors">
+                            View Storefront
+                          </button>
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
