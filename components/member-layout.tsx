@@ -23,6 +23,7 @@ const memberMenuItems = [
   { label: 'Certificates', href: '/dashboard/certificates', icon: Award },
   { label: 'Membership', href: '/dashboard/membership', icon: Crown },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { label: 'Business Portal', href: '/business/dashboard', icon: Briefcase, divider: true },
 ]
 
 export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
@@ -66,23 +67,25 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2">
-          {memberMenuItems.map((item) => {
+          {memberMenuItems.map((item: any) => {
             const Icon = item.icon
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-secondary'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </Link>
+              <div key={item.href}>
+                {item.divider && <div className="h-px bg-border my-2" />}
+                <Link
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-secondary'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </Link>
+              </div>
             )
           })}
         </nav>
