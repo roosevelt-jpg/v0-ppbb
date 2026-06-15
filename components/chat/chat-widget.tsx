@@ -138,7 +138,7 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 text-2xl"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 text-xl sm:text-2xl"
           style={{ backgroundColor: '#111111' }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
@@ -150,12 +150,22 @@ export function ChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-96 h-96 bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-80 h-96 sm:w-96 sm:h-96 bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div>
-              <h3 className="font-semibold">PB Assistant</h3>
-              <p className="text-xs opacity-90">Powered by MYFLYN</p>
+              <h3 className="font-semibold text-sm sm:text-base">PB Assistant</h3>
+              <p className="text-xs opacity-90">
+                Powered by{' '}
+                <a 
+                  href="https://myflynai.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80 transition-opacity"
+                >
+                  MYFLYN
+                </a>
+              </p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
@@ -163,32 +173,32 @@ export function ChatWidget() {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
             {messages.map((message, idx) => (
               <div
                 key={idx}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-lg ${
+                  className={`max-w-xs px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm ${
                     message.role === 'user'
                       ? 'text-white rounded-br-none'
                       : 'bg-neutral-100 text-neutral-900 rounded-bl-none'
                   }`}
                   style={message.role === 'user' ? { backgroundColor: '#111111' } : {}}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p>{message.content}</p>
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-neutral-100 text-neutral-900 px-4 py-2 rounded-lg rounded-bl-none">
+                <div className="bg-neutral-100 text-neutral-900 px-3 sm:px-4 py-2 rounded-lg rounded-bl-none">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" />
                     <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
@@ -201,7 +211,7 @@ export function ChatWidget() {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-neutral-200">
+          <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t border-neutral-200">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -215,7 +225,7 @@ export function ChatWidget() {
                 }}
                 placeholder="Type a message..."
                 disabled={loading}
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 text-sm disabled:bg-neutral-50"
+                className="flex-1 px-2 sm:px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 text-xs sm:text-sm disabled:bg-neutral-50"
                 style={{ '--tw-ring-color': '#111111' } as any}
               />
               <button
