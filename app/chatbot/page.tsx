@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { FAQ } from '@/lib/types'
 import { getAllFAQs, searchFAQs } from '@/lib/faq-queries'
-import { Send, MessageCircle } from 'lucide-react'
+import { Send } from 'lucide-react'
 
 interface Message {
   type: 'user' | 'bot'
@@ -122,7 +123,13 @@ export default function ChatBotPage() {
       {/* Header */}
       <section style={{ backgroundColor: '#111111', color: '#fff', padding: '24px', textAlign: 'center', borderBottom: '1px solid #333' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-          <MessageCircle size={32} style={{ marginRight: '12px' }} />
+          <Image
+            src="/icons/emirati-dress-icon.png"
+            alt="Emirati Assistant"
+            width={40}
+            height={40}
+            style={{ marginRight: '12px', filter: 'brightness(0) invert(1)' }}
+          />
           <h1 style={{ fontSize: '28px', fontWeight: 700, margin: 0 }}>Passive Blessings Assistant</h1>
         </div>
         <p style={{ fontSize: '14px', color: '#aaa', margin: 0 }}>

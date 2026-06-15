@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, updateDoc, doc, getDocs } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MessageSquare, Send, Check, X, Search, Filter, Archive, AlertCircle } from 'lucide-react'
+import { Send, Check, X, Search, Filter, Archive, AlertCircle } from 'lucide-react'
 
 interface Conversation {
   id: string
@@ -324,7 +325,13 @@ export default function AdminChatbotPage() {
               </Card>
             ) : (
               <Card className="p-12 border border-neutral-200 text-center">
-                <MessageSquare className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                <Image
+                  src="/icons/emirati-dress-icon.png"
+                  alt="Chatbot Assistant"
+                  width={48}
+                  height={48}
+                  style={{ margin: '0 auto 16px', opacity: 0.3 }}
+                />
                 <p className="text-neutral-500">Select a conversation to view details</p>
               </Card>
             )}
