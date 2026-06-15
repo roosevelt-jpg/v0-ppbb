@@ -157,6 +157,152 @@ export interface SponsorProfile extends User {
   activeSponsorships: number
   yearlySponsorshipBudget?: number
   membership: 'standard' | 'gold' | 'platinum'
+  // Priority 1 - Sponsor Tags
+  tags: SponsorTag[]
+  // Priority 2 - Sponsor Management
+  campaignIds: string[]
+  isRecurring: boolean
+  recurringStartDate?: Date
+  recurringEndDate?: Date
+  externalSponsor: boolean
+  mediaKitUrl?: string
+}
+
+export interface VolunteerProfile extends User {
+  volunteerDepartmentId?: string
+  volunteerDepartmentName?: string
+  volunteeredTotalHours: number
+  certifications?: string[]
+  languagesSpoken?: string[]
+  preferredSkills?: VolunteerSkill[]
+  hasBackgroundCheck: boolean
+  backgroundCheckDate?: Date
+  leaderboardRank?: number
+  leaderboardPoints: number
+  // Priority 4 - Leaderboard
+  monthlyHours: number
+  yearlyHours: number
+  contributionStreak: number // Days in a row volunteered
+  badgesEarned: VolunteerBadge[]
+}
+
+export interface VolunteerBadge {
+  id: string
+  name: string
+  icon: string
+  earnedDate: Date
+  description: string
+}
+
+// Priority 4 - Admin Analytics
+export interface AdminAnalytics {
+  id: string
+  period: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  date: Date
+  totalReferrals: number
+  totalVolunteerHours: number
+  totalDonations: number
+  topBusinesses: Array<{ id: string; name: string; referrals: number }>
+  topVolunteers: Array<{ id: string; name: string; hours: number }>
+  topSponsors: Array<{ id: string; name: string; contribution: number }>
+  conversionRate: number
+  revenueContribution: number
+  businessLeaderboard: BusinessLeaderboardEntry[]
+  referralAnalytics: ReferralAnalytics
+}
+
+export interface BusinessLeaderboardEntry {
+  businessId: string
+  businessName: string
+  rank: number
+  referrals: number
+  earnings: number
+  activeOffers: number
+  satisfaction: number // 0-100
+}
+
+export interface ReferralAnalytics {
+  totalReferrals: number
+  activeReferrals: number
+  conversionCount: number
+  totalCommission: number
+  topReferrers: Array<{ id: string; count: number; commission: number }>
+}
+
+// Priority 5 - Sponsorship Page
+export interface SponsorshipTier {
+  id: string
+  name: string
+  monthlyAmount: number
+  yearlyAmount: number
+  benefits: string[]
+  icon: string
+  color: string
+  order: number
+  isPopular: boolean
+}
+
+export interface SponsorshipInquiry {
+  id: string
+  name: string
+  email: string
+  phone: string
+  companyName: string
+  message: string
+  preferredTier?: string
+  submittedAt: Date
+  status: 'new' | 'contacted' | 'interested' | 'declined'
+  adminNotes?: string
+}
+
+// Priority 6 - AI Matching & Advanced Features
+export interface AIMatchingResult {
+  id: string
+  volunteerId: string
+  opportunityId: string
+  matchScore: number // 0-100
+  reasons: string[]
+  createdAt: Date
+  viewed: boolean
+}
+
+export interface CommunityReputation {
+  userId: string
+  score: number
+  level: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
+  contributions: {
+    volunteering: number
+    donations: number
+    referrals: number
+    community: number
+  }
+  badges: VolunteerBadge[]
+}
+
+export interface DigitalWallet {
+  userId: string
+  balance: number
+  currency: string
+  transactions: WalletTransaction[]
+  lastUpdated: Date
+}
+
+export interface WalletTransaction {
+  id: string
+  type: 'earn' | 'spend'
+  amount: number
+  description: string
+  source: string // 'referral', 'reward', 'purchase', etc.
+  date: Date
+}
+
+export interface VolunteerDepartment {
+  id: string
+  name: string
+  description?: string
+  icon?: string
+  color?: string
+  requiresTraining: boolean
 }
 
 // Events
