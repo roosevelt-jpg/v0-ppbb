@@ -5,6 +5,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { FAQ } from '@/lib/types'
 import { getAllFAQs, searchFAQs, incrementFAQViews, markFAQHelpful } from '@/lib/faq-queries'
+import { initializeFAQs } from '@/lib/initialize-faqs'
 
 export default function FAQPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([])
@@ -12,24 +13,60 @@ export default function FAQPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
+  const [initialized, setInitialized] = useState(false)
 
   const categories = ['general', 'community', 'sponsorship', 'volunteering', 'support', 'technical']
 
+  // Initialize FAQs on mount
   useEffect(() => {
+    console.log('[v0] Starting FAQ initialization...')
+    initializeFAQs()
+      .then(() => {
+        console.log('[v0] FAQ initialization complete')
+        setInitialized(true)
+      })
+      .catch(err => {
+        console.error('[v0] FAQ init error:', err)
+        setInitialized(true) // Set to true anyway to proceed
+      })
+  }, [])
+
+  // Fetch FAQs after initialization
+  useEffect(() => {
+    if (!initialized) return
+
+    console.log('[v0] Fetching FAQs with search term:', searchTerm)
+    setLoading(true)
+    
+    // Set a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.log('[v0] FAQ loading timeout, setting default state')
+      setFaqs([])
+      setLoading(false)
+    }, 5000)
+
     if (searchTerm.trim()) {
       const unsubscribe = searchFAQs(searchTerm, (foundFaqs) => {
+        console.log('[v0] Search found', foundFaqs.length, 'FAQs')
         setFaqs(foundFaqs)
         setLoading(false)
       })
-      return unsubscribe
+      return () => {
+        clearTimeout(timeout)
+        unsubscribe()
+      }
     } else {
       const unsubscribe = getAllFAQs((foundFaqs) => {
+        console.log('[v0] Got', foundFaqs.length, 'FAQs')
         setFaqs(foundFaqs)
         setLoading(false)
       })
-      return unsubscribe
+      return () => {
+        clearTimeout(timeout)
+        unsubscribe()
+      }
     }
-  }, [searchTerm])
+  }, [searchTerm, initialized])
 
   const filteredFaqs = selectedCategory === 'all' ? faqs : faqs.filter(faq => faq.category === selectedCategory)
 

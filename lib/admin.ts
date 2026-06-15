@@ -138,6 +138,28 @@ export async function deletePage(pageId: string): Promise<boolean> {
   }
 }
 
+export async function getPagesByMenuLocation(menuLocation: string): Promise<Page[]> {
+  try {
+    const q = query(
+      collection(db, 'pages'),
+      where('status', '==', 'published'),
+      where('menuLocation', '==', menuLocation),
+      where('showInMenu', '==', true)
+    )
+    const snapshot = await getDocs(q)
+    const pages = snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      } as Page))
+      .sort((a, b) => (a.menuOrder || 0) - (b.menuOrder || 0))
+    return pages
+  } catch (error) {
+    console.error('[v0] Error fetching pages by menu location:', error)
+    return []
+  }
+}
+
 // Audit Logging
 export async function logAdminAction(
   adminId: string,

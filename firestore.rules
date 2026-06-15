@@ -8,7 +8,15 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return isAuth() && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin');
+    }
+    
+    function isSuperAdmin() {
+      return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
+    }
+    
+    function hasPermission(permission) {
+      return isSuperAdmin() || (isAdmin() && permission in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('permissions', []));
     }
     
     function isOwnUser(userId) {
@@ -50,6 +58,12 @@ service cloud.firestore {
     // Pages (CMS) - Public read, admin write
     match /pages/{document=**} {
       allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // FAQs - Public read, admin write
+    match /faqs/{document=**} {
+      allow read: if true; // Public read for active FAQs
       allow create, update, delete: if isAdmin();
     }
     
@@ -157,6 +171,18 @@ service cloud.firestore {
     // User notifications - Own read/write, admin can read all
     match /users/{userId}/notifications/{document=**} {
       allow read, write: if isOwnUser(userId) || isAdmin();
+    }
+    
+    // Admin Access Codes - Super admin only
+    match /adminAccessCodes/{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+    
+    // Admin Audit Logs - Admin only
+    match /adminAuditLogs/{document=**} {
+      allow read: if isAdmin();
+      allow create: if isAuth(); // Anyone can create audit log entries (service logs)
+      allow update, delete: if isAdmin();
     }
     
     // Default deny all other requests

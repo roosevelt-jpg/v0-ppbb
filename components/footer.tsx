@@ -4,7 +4,9 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
 import { collection, getDocs } from 'firebase/firestore'
+import { getPagesByMenuLocation } from '@/lib/admin'
 import { Mail, Heart, Share2, Link as LinkIcon, MessageSquare } from 'lucide-react'
+import { Page } from '@/lib/types'
 
 interface Stats {
   members: number
@@ -29,25 +31,82 @@ export function Footer() {
     donationsTracked: 'AED 92K',
   })
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({})
+  
+  const [quickLinks, setQuickLinks] = useState<Page[]>([])
+  const [getInvolvedLinks, setGetInvolvedLinks] = useState<Page[]>([])
+  const [legalLinks, setLegalLinks] = useState<Page[]>([])
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchData = async () => {
       try {
-        // Only fetch social links from settings collection
+        // Fetch social links from settings
         const settingsSnapshot = await getDocs(collection(db, 'settings'))
         settingsSnapshot.forEach(doc => {
           if (doc.data().socialLinks) {
             setSocialLinks(doc.data().socialLinks)
           }
         })
+
+        // Fetch menu pages by location
+        const [quickLinksPages, getInvolvedPages, legalPages] = await Promise.all([
+          getPagesByMenuLocation('footer-quicklinks'),
+          getPagesByMenuLocation('footer-getinvolved'),
+          getPagesByMenuLocation('footer-legal'),
+        ])
+
+        setQuickLinks(quickLinksPages)
+        setGetInvolvedLinks(getInvolvedPages)
+        setLegalLinks(legalPages)
       } catch (error) {
-        console.error('[v0] Error fetching footer settings:', error)
-        // Silently fail - don't crash the page
+        // Silently fail - use default links
+        // Permission errors are expected for unauthenticated users
       }
     }
 
-    fetchSettings()
+    fetchData()
   }, [])
+
+  // Default links if no pages configured
+  const defaultQuickLinks = [
+    { label: 'About Us', href: '/about' },
+    { label: 'Impact & Transparency', href: '/transparency' },
+    { label: 'Events', href: '/events' },
+    { label: 'Marketplace', href: '/marketplace' },
+    { label: 'Contact Us', href: '/contact' },
+    { label: 'Charity Support Request', href: '/dashboard/charity-requests' },
+    { label: 'FAQ', href: '/faq' },
+  ]
+
+  const defaultGetInvolved = [
+    { label: 'Join Community', href: '/signup' },
+    { label: 'Volunteer', href: '/signup' },
+    { label: 'Workshops', href: '/workshops' },
+    { label: 'Recordings', href: '/recordings' },
+    { label: 'Donate', href: '/donate' },
+    { label: 'Start Business', href: '/signup' },
+    { label: 'Host Event', href: '/signup' },
+  ]
+
+  const defaultLegal = [
+    { label: 'Privacy Policy', href: '/policies/privacy-policy' },
+    { label: 'Terms & Conditions', href: '/policies/terms-of-service' },
+    { label: 'Code of Conduct', href: '/policies/code-of-conduct' },
+    { label: 'UAE Data Protection Policy', href: '/legal/data-protection' },
+    { label: 'Accessibility', href: '#' },
+  ]
+
+  // Use Firestore pages if available, otherwise use defaults
+  const quickLinksToDisplay = quickLinks.length > 0 
+    ? quickLinks.map(p => ({ label: p.menuLabel || p.title, href: `/${p.slug}` }))
+    : defaultQuickLinks
+
+  const getInvolvedToDisplay = getInvolvedLinks.length > 0
+    ? getInvolvedLinks.map(p => ({ label: p.menuLabel || p.title, href: `/${p.slug}` }))
+    : defaultGetInvolved
+
+  const legalToDisplay = legalLinks.length > 0
+    ? legalLinks.map(p => ({ label: p.menuLabel || p.title, href: `/${p.slug}` }))
+    : defaultLegal
 
   return (
     <footer
@@ -97,16 +156,8 @@ export function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-2">
-              {[
-                { label: 'About Us', href: '/about' },
-                { label: 'Impact & Transparency', href: '/transparency' },
-                { label: 'Events', href: '/events' },
-                { label: 'Marketplace', href: '/marketplace' },
-                { label: 'Contact Us', href: '/contact' },
-                { label: 'Charity Support Request', href: '/dashboard/charity-requests' },
-                { label: 'FAQ', href: '/faq' },
-              ].map((link) => (
-                <li key={link.label}>
+              {quickLinksToDisplay.map((link) => (
+                <li key={link.href}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>
@@ -115,22 +166,14 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Community */}
+          {/* Get Involved */}
           <div>
             <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
               Get Involved
             </h3>
             <ul className="space-y-2">
-              {[
-                { label: 'Join Community', href: '/signup' },
-                { label: 'Volunteer', href: '/signup' },
-                { label: 'Workshops', href: '/workshops' },
-                { label: 'Recordings', href: '/recordings' },
-                { label: 'Donate', href: '/donate' },
-                { label: 'Start Business', href: '/signup' },
-                { label: 'Host Event', href: '/signup' },
-              ].map((link) => (
-                <li key={link.label}>
+              {getInvolvedToDisplay.map((link) => (
+                <li key={link.href}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>
@@ -145,14 +188,8 @@ export function Footer() {
               Legal
             </h3>
             <ul className="space-y-2">
-              {[
-                { label: 'Privacy Policy', href: '/policies/privacy-policy' },
-                { label: 'Terms & Conditions', href: '/policies/terms-of-service' },
-                { label: 'Code of Conduct', href: '/policies/code-of-conduct' },
-                { label: 'UAE Data Protection Policy', href: '/legal/data-protection' },
-                { label: 'Accessibility', href: '#' },
-              ].map((link) => (
-                <li key={link.label}>
+              {legalToDisplay.map((link) => (
+                <li key={link.href}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>

@@ -18,35 +18,40 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   async function handleSave() {
-    if (!auth.firebaseUser) {
-      console.log('[v0] No Firebase user')
+    if (!auth.user) {
+      console.log('[v0] No authenticated user')
+      setMessage({ type: 'error', text: 'Not authenticated' })
       return
     }
     setLoading(true)
     try {
-      const token = await auth.firebaseUser.getIdToken()
+      const token = await auth.user.getIdToken()
       console.log('[v0] Got token, saving integration:', service.id)
       
       const endpoint = integration ? `/api/admin/integrations/${service.id}` : '/api/admin/integrations'
       const method = integration ? 'PATCH' : 'POST'
       
-      // Properly escape credentials for JSON transmission
-      const escapedCredentials: Record<string, string> = {}
+      // Sanitize credentials for JSON transmission
+      const sanitizedCredentials: Record<string, string> = {}
       for (const [key, value] of Object.entries(credentials)) {
         if (typeof value === 'string') {
-          // Replace literal newlines with escaped newlines for JSON serialization
-          escapedCredentials[key] = value.replace(/\n/g, '\\n')
+          // Remove control characters and properly escape special characters
+          sanitizedCredentials[key] = value
+            .replace(/[\x00-\x1F\x7F]/g, ' ') // Replace control characters with space
+            .replace(/\n/g, '\\n')            // Escape newlines
+            .replace(/\r/g, '\\r')            // Escape carriage returns
+            .replace(/\t/g, '\\t')            // Escape tabs
         } else {
-          escapedCredentials[key] = value
+          sanitizedCredentials[key] = value
         }
       }
       
-      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(escapedCredentials).length })
+      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(sanitizedCredentials).length })
 
       const response = await fetch(endpoint, {
         method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId: service.id, credentials: escapedCredentials, serviceName: service.name }),
+        body: JSON.stringify({ serviceId: service.id, credentials: sanitizedCredentials, serviceName: service.name }),
       })
 
       console.log('[v0] Response status:', response.status, response.ok)

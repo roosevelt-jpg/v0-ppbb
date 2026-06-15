@@ -1,8 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '@/lib/auth-context'
-import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,15 +8,12 @@ import {
   approveBeneficiaryRequest,
   rejectBeneficiaryRequest,
   getBeneficiaryAccessLogs,
-  canViewBeneficiaryRequest,
   canDownloadSensitiveDocument,
 } from '@/lib/beneficiary-queries'
 import { BeneficiarySupportRequest, BeneficiaryAccessLog } from '@/lib/types'
 import { AlertCircle, CheckCircle2, Clock, XCircle, Eye, Download, Filter } from 'lucide-react'
 
 export default function BeneficiaryRequestsAdmin() {
-  const { user } = useAuth()
-  const router = useRouter()
   const [requests, setRequests] = useState<BeneficiarySupportRequest[]>([])
   const [filteredRequests, setFilteredRequests] = useState<BeneficiarySupportRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,39 +26,16 @@ export default function BeneficiaryRequestsAdmin() {
     emergencyLevel: '',
   })
 
-  // Access control check
-  useEffect(() => {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-
-    if (user.role !== 'admin') {
-      router.push('/admin')
-      return
-    }
-  }, [user, router])
-
   // Load beneficiary requests
   useEffect(() => {
-    if (!user) return
-
     const loadRequests = async () => {
       try {
-        const reqs = await getAllBeneficiaryRequests(user.adminRole || 'moderator', {
+        const reqs = await getAllBeneficiaryRequests('admin', {
           status: filters.status || undefined,
           emergencyLevel: filters.emergencyLevel || undefined,
         })
 
-        // Filter by access control
-        const accessibleRequests = await Promise.all(
-          reqs.map(async (req) => ({
-            req,
-            canView: await canViewBeneficiaryRequest(user as any, req),
-          }))
-        )
-
-        setRequests(accessibleRequests.filter((r) => r.canView).map((r) => r.req))
+        setRequests(reqs)
       } catch (error) {
         console.error('[v0] Error loading beneficiary requests:', error)
       } finally {
@@ -72,7 +44,7 @@ export default function BeneficiaryRequestsAdmin() {
     }
 
     loadRequests()
-  }, [user, filters])
+  }, [filters])
 
   // Load access logs when request selected
   useEffect(() => {
@@ -87,11 +59,9 @@ export default function BeneficiaryRequestsAdmin() {
   }, [selectedRequest])
 
   const handleApprove = async (requestId: string, notes: string) => {
-    if (!user) return
-
     setActionLoading(true)
     try {
-      await approveBeneficiarySupportRequest(requestId, user.id, notes)
+      await approveBeneficiaryRequest(requestId, 'admin-system', notes)
       setRequests(requests.map((r) => (r.id === requestId ? { ...r, status: 'approved' } : r)))
       setSelectedRequest(null)
       alert('Request approved successfully')
@@ -104,11 +74,9 @@ export default function BeneficiaryRequestsAdmin() {
   }
 
   const handleReject = async (requestId: string, reason: string) => {
-    if (!user) return
-
     setActionLoading(true)
     try {
-      await rejectBeneficiarySupportRequest(requestId, user.id, reason)
+      await rejectBeneficiaryRequest(requestId, 'admin-system', reason)
       setRequests(requests.map((r) => (r.id === requestId ? { ...r, status: 'rejected' } : r)))
       setSelectedRequest(null)
       alert('Request rejected')

@@ -1,5 +1,5 @@
 // User roles and types
-export type UserRole = 'member' | 'volunteer' | 'business' | 'admin' | 'sponsor'
+export type UserRole = 'member' | 'volunteer' | 'business' | 'admin' | 'sponsor' | 'super_admin'
 
 // Admin role permissions
 export type AdminRole = 'founder_admin' | 'manager' | 'moderator' | 'analyst'
@@ -392,6 +392,11 @@ export interface Page {
   imageUrl?: string
   status: 'draft' | 'published'
   order: number
+  // Menu configuration
+  menuLocation?: 'navbar' | 'footer-quicklinks' | 'footer-getinvolved' | 'footer-legal' | 'none'
+  showInMenu: boolean
+  menuLabel?: string
+  menuOrder: number
   createdAt: Date
   updatedAt: Date
 }

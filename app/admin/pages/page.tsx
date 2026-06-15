@@ -43,6 +43,10 @@ export default function AdminPages() {
       keywords: [],
       status: 'draft',
       order: pages.length,
+      menuLocation: 'none',
+      showInMenu: false,
+      menuLabel: '',
+      menuOrder: pages.length,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -218,6 +222,63 @@ export default function AdminPages() {
                       <option value="published">Published</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Menu Configuration */}
+                <div className="border-t border-neutral-200 pt-4 mt-4">
+                  <h3 className="text-sm font-semibold mb-4">Menu Configuration</h3>
+                  
+                  <div>
+                    <label className="flex items-center gap-2 mb-4">
+                      <input
+                        type="checkbox"
+                        checked={editingPage.showInMenu}
+                        onChange={(e) => setEditingPage({ ...editingPage, showInMenu: e.target.checked })}
+                        className="w-4 h-4 border border-neutral-300 rounded"
+                      />
+                      <span className="text-sm font-medium">Show in Menu</span>
+                    </label>
+                  </div>
+
+                  {editingPage.showInMenu && (
+                    <>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">Menu Location</label>
+                        <select
+                          value={editingPage.menuLocation || 'none'}
+                          onChange={(e) => setEditingPage({ ...editingPage, menuLocation: e.target.value as any })}
+                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                        >
+                          <option value="none">Hidden from Menu</option>
+                          <option value="navbar">Main Menu (Header)</option>
+                          <option value="footer-quicklinks">Footer - Quick Links</option>
+                          <option value="footer-getinvolved">Footer - Get Involved</option>
+                          <option value="footer-legal">Footer - Legal</option>
+                        </select>
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">Menu Label (optional)</label>
+                        <input
+                          type="text"
+                          value={editingPage.menuLabel || ''}
+                          onChange={(e) => setEditingPage({ ...editingPage, menuLabel: e.target.value })}
+                          placeholder="Leave blank to use page title"
+                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Menu Order</label>
+                        <input
+                          type="number"
+                          value={editingPage.menuOrder}
+                          onChange={(e) => setEditingPage({ ...editingPage, menuOrder: parseInt(e.target.value) || 0 })}
+                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

@@ -34,90 +34,220 @@ import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 
 const adminMenuItems = [
-  { label: 'Overview', href: '/admin', icon: BarChart3 },
-  { label: 'Access Control', href: '/admin/access-control', icon: Shield },
-  { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText },
-  { label: 'Security Center', href: '/admin/security-center', icon: Lock },
-  { label: 'Members', href: '/admin/members', icon: Users },
-  { label: 'Team (About)', href: '/admin/team', icon: Users },
-  { label: 'Volunteers', href: '/admin/volunteers', icon: Heart },
-  { label: 'Events', href: '/admin/events', icon: Calendar },
-  { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert },
-  { label: 'Donations', href: '/admin/donations', icon: DollarSign },
-  { label: 'Donation Causes', href: '/admin/causes', icon: Target },
-  { label: 'Charity Partners', href: '/admin/partners', icon: HandHeart },
-  { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle },
-  { label: 'Sponsors', href: '/admin/sponsors', icon: Store },
-  { label: 'Businesses', href: '/admin/businesses', icon: Store },
-  { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle },
-  { label: 'Contact Requests', href: '/admin/contact-requests', icon: Mail },
-  { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: HandHeart },
-  { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield },
-  { label: 'Membership', href: '/admin/membership', icon: CreditCard },
-  { label: 'Pricing Plans', href: '/admin/pricing', icon: DollarSign },
-  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-  { label: 'Reporting', href: '/admin/reporting', icon: FileText },
-  { label: 'Moderation', href: '/admin/moderation', icon: Flag },
-  { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText },
-  { label: 'Policies', href: '/admin/policies', icon: FileText },
-  { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle },
-  { label: 'Hero Slider', href: '/admin/assets', icon: Image },
-  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play },
-  { label: 'Chatbot', href: '/admin/chatbot', icon: Zap },
-  { label: 'Community', href: '/admin/community', icon: Users },
-  { label: 'Workshops', href: '/admin/workshops', icon: Calendar },
-  { label: 'Recordings', href: '/admin/recordings', icon: Play },
-  { label: 'Location Config', href: '/admin/location-config', icon: Shield },
-  { label: 'Integrations', href: '/admin/integrations', icon: Plug },
-  { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: BarChart3 },
-  { label: 'Settings', href: '/admin/settings', icon: Settings },
-  { label: 'System Health', href: '/admin/health', icon: Zap },
+  // Dashboard & System
+  { label: 'Overview', href: '/admin', icon: BarChart3, group: 'Dashboard' },
+  { label: 'System Health', href: '/admin/health', icon: Zap, group: 'Dashboard' },
+  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, group: 'Dashboard' },
+  { label: 'Reporting', href: '/admin/reporting', icon: FileText, group: 'Dashboard' },
+
+  // Security & Access
+  { label: 'Security Center', href: '/admin/security-center', icon: Lock, group: 'Security' },
+  { label: 'Access Control', href: '/admin/access-control', icon: Shield, group: 'Security' },
+  { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText, group: 'Security' },
+  { label: 'Admin Management', href: '/admin/management', icon: Users, group: 'Security' },
+
+  // User Management
+  { label: 'Members', href: '/admin/members', icon: Users, group: 'Users' },
+  { label: 'Team (About)', href: '/admin/team', icon: Users, group: 'Users' },
+  { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
+  { label: 'Sponsors', href: '/admin/sponsors', icon: Store, group: 'Users' },
+  { label: 'Businesses', href: '/admin/businesses', icon: Store, group: 'Users' },
+
+  // Community & Events
+  { label: 'Community', href: '/admin/community', icon: Users, group: 'Community' },
+  { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
+  { label: 'Workshops', href: '/admin/workshops', icon: Calendar, group: 'Community' },
+  { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
+
+  // Charity & Support
+  { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert, group: 'Charity' },
+  { label: 'Donations', href: '/admin/donations', icon: DollarSign, group: 'Charity' },
+  { label: 'Donation Causes', href: '/admin/causes', icon: Target, group: 'Charity' },
+  { label: 'Charity Partners', href: '/admin/partners', icon: HandHeart, group: 'Charity' },
+  { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },
+  { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: HandHeart, group: 'Charity' },
+
+  // Memberships & Commerce
+  { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },
+  { label: 'Pricing Plans', href: '/admin/pricing', icon: DollarSign, group: 'Memberships' },
+  { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle, group: 'Memberships' },
+
+  // Communication & Support
+  { label: 'Contact Requests', href: '/admin/contact-requests', icon: Mail, group: 'Communication' },
+  { label: 'Moderation', href: '/admin/moderation', icon: Flag, group: 'Communication' },
+  { label: 'Chatbot', href: '/admin/chatbot', icon: Zap, group: 'Communication' },
+
+  // Content Management
+  { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText, group: 'Content' },
+  { label: 'Custom Forms', href: '/admin/forms', icon: FileText, group: 'Content' },
+  { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },
+  { label: 'Policies', href: '/admin/policies', icon: FileText, group: 'Content' },
+  { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield, group: 'Content' },
+
+  // Assets & Media
+  { label: 'Hero Slider', href: '/admin/assets', icon: Image, group: 'Assets' },
+  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play, group: 'Assets' },
+
+  // Configuration
+  { label: 'Location Config', href: '/admin/location-config', icon: Shield, group: 'Configuration' },
+  { label: 'Integrations', href: '/admin/integrations', icon: Plug, group: 'Configuration' },
+  { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: BarChart3, group: 'Configuration' },
+  { label: 'Settings', href: '/admin/settings', icon: Settings, group: 'Configuration' },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
 
   const handleLogout = async () => {
     await logoutUser()
     router.push('/login')
   }
 
-  return (
-    <aside className="w-44 min-h-screen flex flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-      {/* Logo */}
-      <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
-        <Link href="/admin">
-          <img 
-            src="/pb-logo-black.png" 
-            alt="Passive Blessings"
-            style={{ maxWidth: '140px', height: 'auto' }}
-          />
-        </Link>
-      </div>
+  // Group items by category
+  const groupedItems = adminMenuItems.reduce((acc, item) => {
+    const group = item.group || 'Other'
+    if (!acc[group]) {
+      acc[group] = []
+    }
+    acc[group].push(item)
+    return acc
+  }, {} as Record<string, typeof adminMenuItems>)
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {adminMenuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
-              style={{
-                backgroundColor: isActive ? '#111111' : 'transparent',
-                color: isActive ? '#f7f6f2' : '#333333',
-              }}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
-    </aside>
+  // Sort groups in order of appearance
+  const groupOrder = ['Dashboard', 'Security', 'Users', 'Community', 'Charity', 'Memberships', 'Communication', 'Content', 'Assets', 'Configuration']
+  const sortedGroups = groupOrder.filter(g => groupedItems[g])
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-52 min-h-screen flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+        {/* Logo */}
+        <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
+          <Link href="/admin">
+            <img 
+              src="/pb-logo-black.png" 
+              alt="Passive Blessings"
+              style={{ maxWidth: '140px', height: 'auto' }}
+            />
+          </Link>
+        </div>
+
+        {/* Navigation with Groups */}
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+          {sortedGroups.map((group) => (
+            <div key={group}>
+              {/* Group Header */}
+              <div className="px-3 py-2 mb-2">
+                <h3 
+                  className="text-xs font-semibold tracking-wider"
+                  style={{ color: '#888888', textTransform: 'uppercase' }}
+                >
+                  {group}
+                </h3>
+              </div>
+
+              {/* Group Items */}
+              <div className="space-y-1">
+                {groupedItems[group].map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+                      style={{
+                        backgroundColor: isActive ? '#111111' : 'transparent',
+                        color: isActive ? '#f7f6f2' : '#333333',
+                      }}
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="font-medium truncate">{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 p-3 rounded-lg transition-colors"
+        style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
+        aria-label="Toggle menu"
+      >
+        <Menu size={24} />
+      </button>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Drawer */}
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-64 flex flex-col border-r overflow-y-auto z-30" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+            {/* Logo */}
+            <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
+              <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                <img 
+                  src="/pb-logo-black.png" 
+                  alt="Passive Blessings"
+                  style={{ maxWidth: '140px', height: 'auto' }}
+                />
+              </Link>
+            </div>
+
+            {/* Navigation with Groups */}
+            <nav className="flex-1 p-3 space-y-4">
+              {sortedGroups.map((group) => (
+                <div key={group}>
+                  {/* Group Header */}
+                  <div className="px-3 py-2 mb-2">
+                    <h3 
+                      className="text-xs font-semibold tracking-wider"
+                      style={{ color: '#888888', textTransform: 'uppercase' }}
+                    >
+                      {group}
+                    </h3>
+                  </div>
+
+                  {/* Group Items */}
+                  <div className="space-y-1">
+                    {groupedItems[group].map((item) => {
+                      const Icon = item.icon
+                      const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+                          style={{
+                            backgroundColor: isActive ? '#111111' : 'transparent',
+                            color: isActive ? '#f7f6f2' : '#333333',
+                          }}
+                        >
+                          <Icon className="h-4 w-4 flex-shrink-0" />
+                          <span className="font-medium">{item.label}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </nav>
+          </aside>
+        </>
+      )}
+    </>
   )
 }
 
@@ -168,28 +298,28 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
   }
 
   return (
-    <div className="border-b px-8 py-4 flex items-center justify-between" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-      <div className="flex-1">
-        <h1 className="text-2xl font-bold" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+    <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+      <div className="flex-1 min-w-0">
+        <h1 className="text-xl sm:text-2xl font-bold truncate" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
           {title}
         </h1>
-        <div className="flex items-center gap-4 mt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
           {subtitle && <p className="text-xs" style={{ color: '#888888' }}>{subtitle}</p>}
           <div className="flex items-center gap-1 text-xs" style={{ color: '#888888' }}>
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{dateTime}</span>
+            <span className="truncate">{dateTime}</span>
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap justify-end">
         <ThemeToggle />
         
         {/* Message Notification Badge */}
         {unreadMessages > 0 && (
           <Link href="/admin/contact-requests">
-            <button className="relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors" style={{ backgroundColor: '#fff3e0', border: '2px solid #ff6b6b' }}>
+            <button className="relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors flex-shrink-0" style={{ backgroundColor: '#fff3e0', border: '2px solid #ff6b6b' }}>
               <Mail className="h-5 w-5" style={{ color: '#ff6b6b' }} />
               <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: '#ff6b6b' }}>
                 {unreadMessages}
@@ -200,7 +330,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
         
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-100 transition-colors whitespace-nowrap flex-shrink-0"
           style={{
             backgroundColor: '#f7f6f2',
             color: '#111111',
@@ -208,7 +338,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
           }}
         >
           <LogOut className="h-4 w-4" />
-          Sign out
+          <span className="hidden sm:inline">Sign out</span>
         </button>
       </div>
     </div>

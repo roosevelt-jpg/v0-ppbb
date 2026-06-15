@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react'
 import { FAQ } from '@/lib/types'
 import { getAllFAQsAdmin, addFAQ, updateFAQ, deleteFAQ, toggleFAQStatus } from '@/lib/faq-queries'
-import { useAuth } from '@/lib/auth-context'
-import { useRouter } from 'next/navigation'
 
 const DEFAULT_FAQS: Omit<FAQ, 'id'>[] = [
   {
@@ -153,8 +151,6 @@ const DEFAULT_FAQS: Omit<FAQ, 'id'>[] = [
 ]
 
 export default function AdminFAQPage() {
-  const { user } = useAuth()
-  const router = useRouter()
   const [faqs, setFaqs] = useState<FAQ[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -168,16 +164,6 @@ export default function AdminFAQPage() {
   const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-
-    if (user.role !== 'admin') {
-      router.push('/admin')
-      return
-    }
-
     const unsubscribe = getAllFAQsAdmin((foundFaqs) => {
       if (foundFaqs.length === 0) {
         initializeDefaultFAQs()
@@ -188,7 +174,7 @@ export default function AdminFAQPage() {
     })
 
     return unsubscribe
-  }, [user, router])
+  }, [])
 
   const initializeDefaultFAQs = async () => {
     try {

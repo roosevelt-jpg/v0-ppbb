@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { verifyAdminAccessCode } from '@/lib/admin-access-codes'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { verifyAdminAccessCode } from '@/lib/admin-access-code-generator'
 import Link from 'next/link'
 
 export default function AdminSetup() {
@@ -80,10 +81,66 @@ export default function AdminSetup() {
     setLoading(true)
 
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const firebaseUser = userCredential.user
+      console.log('[v0] Firebase login successful:', firebaseUser.uid)
+
+      // Check if user has admin role
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+      console.log('[v0] User doc exists:', userDoc.exists())
+      
+      if (!userDoc.exists()) {
+        // Create user profile if it doesn't exist
+        // Determine role - super admin for roosevelt@myflynai.com, admin for others
+        const role = email === 'roosevelt@myflynai.com' ? 'super_admin' : 'admin'
+        
+        const adminProfile = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+          firstName: email === 'roosevelt@myflynai.com' ? 'Roosevelt' : 'Admin',
+          lastName: 'User',
+          role: role,
+          permissions: role === 'super_admin' ? [
+            'admin.create_admin',
+            'admin.manage_users',
+            'admin.manage_permissions',
+            'admin.view_all',
+            'admin.create_access_codes',
+            'admin.manage_access_codes',
+            'admin.manage_roles',
+            'admin.delete_admin'
+          ] : [],
+          active: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+        console.log('[v0] Creating admin profile with role:', role)
+        await setDoc(doc(db, 'users', firebaseUser.uid), adminProfile)
+        console.log('[v0] Admin profile created')
+        router.push('/admin')
+        return
+      }
+
+      const userData = userDoc.data()
+      console.log('[v0] User data:', userData)
+
+      // If user doesn't have admin role, set it
+      if (userData.role !== 'admin' && userData.role !== 'super_admin') {
+        const role = email === 'roosevelt@myflynai.com' ? 'super_admin' : 'admin'
+        console.log('[v0] Setting admin role:', role)
+        await setDoc(
+          doc(db, 'users', firebaseUser.uid),
+          { role: role, updatedAt: new Date() },
+          { merge: true }
+        )
+      }
+
+      console.log('[v0] Login successful, redirecting to /admin')
       router.push('/admin')
     } catch (err: any) {
       console.error('[v0] Login error:', err)
+      console.error('[v0] Error code:', err.code)
+      console.error('[v0] Error message:', err.message)
       setError('Login failed. Please check your credentials.')
     } finally {
       setLoading(false)
