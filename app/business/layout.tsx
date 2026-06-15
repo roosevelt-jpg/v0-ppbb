@@ -149,7 +149,7 @@ export default function BusinessLayout({
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
 
   React.useEffect(() => {
-    if (!loading && (!user || (user.role !== 'business' && user.role !== 'super_admin'))) {
+    if (!loading && !user) {
       router.push('/login')
     }
   }, [user, loading, router])
@@ -162,10 +162,10 @@ export default function BusinessLayout({
     )
   }
 
-  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
+  if (!user) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#dc2626' }}>Access denied. Business account required.</p>
+        <p style={{ color: '#dc2626' }}>Access denied. Please login to access the business portal.</p>
       </div>
     )
   }
