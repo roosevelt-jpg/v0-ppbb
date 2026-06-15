@@ -61,15 +61,12 @@ export function ChatWidget() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('[v0] Chat: handleSendMessage called', { input, loading, conversationId })
     
     if (!input.trim() || loading) {
-      console.log('[v0] Chat: Early return - input empty or loading')
       return
     }
 
     if (!conversationId) {
-      console.log('[v0] Chat: No conversation ID, initializing...')
       // Try to initialize if not already done
       if (user?.id) {
         await initializeConversation()
@@ -83,29 +80,34 @@ export function ChatWidget() {
       timestamp: new Date(),
     }
 
+    // Update local state with user message
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
 
     try {
-      console.log('[v0] Chat: Sending message to API', { conversationId, userId: user?.id })
+      // Send ALL messages including the new user message to the API
+      const allMessages = [...messages, userMessage].map(m => ({
+        role: m.role,
+        content: m.content,
+      }))
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: messages.map(m => ({ role: m.role, content: m.content })).concat([{ role: 'user', content: input }]),
+          messages: allMessages,
           conversationId,
           userId: user?.id,
         }),
       })
 
-      console.log('[v0] Chat: API response status', response.status)
-      const data = await response.json()
-      console.log('[v0] Chat: API response data', data)
-
       if (!response.ok) {
+        const data = await response.json()
         throw new Error(data.error || 'Failed to send message')
       }
+
+      const data = await response.json()
 
       if (data.message) {
         const assistantMessage: Message = {
@@ -205,6 +207,12 @@ export function ChatWidget() {
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey && !loading) {
+                    e.preventDefault()
+                    handleSendMessage(e as any)
+                  }
+                }}
                 placeholder="Type a message..."
                 disabled={loading}
                 className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 text-sm disabled:bg-neutral-50"
