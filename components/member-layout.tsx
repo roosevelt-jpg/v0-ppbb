@@ -129,11 +129,6 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
     return () => clearInterval(interval)
   }, [])
 
-  const handleLogout = async () => {
-    await logoutUser()
-    router.push('/login')
-  }
-
   return (
     <div className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
       <div className="flex-1">
@@ -148,17 +143,8 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
-        <Button
-          onClick={handleLogout}
-          variant="outline"
-          size="sm"
-          className="hidden md:flex"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign out
-        </Button>
+
+      <div className="flex items-center gap-3 md:hidden">
         <button onClick={() => setOpen(!open)} className="md:hidden">
           <Menu className="h-6 w-6" />
         </button>
