@@ -15,6 +15,17 @@ export default function DonationPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let dataLoaded = false
+    let causesLoaded = false
+    let partnersLoaded = false
+
+    const checkAndSetLoading = () => {
+      if (causesLoaded && partnersLoaded) {
+        setLoading(false)
+        dataLoaded = true
+      }
+    }
+
     // Fetch active causes
     const unsubscribeCauses = onSnapshot(
       query(collection(db, 'causes'), where('status', '==', 'active')),
@@ -24,6 +35,13 @@ export default function DonationPage() {
           ...doc.data(),
         }))
         setCauses(data)
+        causesLoaded = true
+        checkAndSetLoading()
+      },
+      (error) => {
+        console.error('[v0] Error loading causes:', error)
+        causesLoaded = true
+        checkAndSetLoading()
       }
     )
 
@@ -36,13 +54,28 @@ export default function DonationPage() {
           ...doc.data(),
         }))
         setPartners(data)
-        setLoading(false)
+        partnersLoaded = true
+        checkAndSetLoading()
+      },
+      (error) => {
+        console.error('[v0] Error loading partners:', error)
+        partnersLoaded = true
+        checkAndSetLoading()
       }
     )
+
+    // Fallback timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      if (!dataLoaded) {
+        console.warn('[v0] Loading timeout - forcing page to show')
+        setLoading(false)
+      }
+    }, 5000)
 
     return () => {
       unsubscribeCauses()
       unsubscribePartners()
+      clearTimeout(timeout)
     }
   }, [])
 
@@ -175,7 +208,7 @@ export default function DonationPage() {
         </div>
 
         {/* Donation Modal / Details */}
-        {selectedCause && partners.length > 0 && (
+        {selectedCause && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
               <div className="p-6 border-b">
@@ -195,76 +228,88 @@ export default function DonationPage() {
                     donation, you&apos;ll be able to track it in your dashboard and receive a tax receipt.
                   </p>
 
-                  {/* Show assigned partner if exists */}
-                  {selectedCause.partnerId ? (
+                  {partners.length === 0 ? (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+                      <p className="text-yellow-900 font-semibold mb-2">Payment Partners Coming Soon</p>
+                      <p className="text-yellow-800 text-sm">
+                        We&apos;re setting up payment partners for this cause. Please check back soon or contact us for
+                        alternative donation methods.
+                      </p>
+                    </div>
+                  ) : (
                     <>
-                      <p className="text-sm font-semibold mb-3">Recommended Partner for this Cause:</p>
-                      {partners
-                        .filter((p) => p.id === selectedCause.partnerId)
-                        .map((partner) => (
-                          <a
-                            key={partner.id}
-                            href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                            className="block border-2 border-blue-500 rounded-lg p-4 hover:bg-blue-50 transition-all bg-blue-50"
-                          >
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h4 className="font-bold">{partner.name}</h4>
-                                <p className="text-sm text-gray-600">{partner.description}</p>
-                                <span className="inline-block mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
-                                  Primary Partner for this Cause
-                                </span>
-                              </div>
-                              <ArrowRight className="w-5 h-5 text-blue-600" />
-                            </div>
-                          </a>
-                        ))}
-
-                      {/* Show other partners as alternatives */}
-                      {partners.filter((p) => p.id !== selectedCause.partnerId).length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-sm font-semibold mb-2 text-gray-600">Alternative Partners:</p>
-                          <div className="space-y-2">
-                            {partners
-                              .filter((p) => p.id !== selectedCause.partnerId)
-                              .map((partner) => (
-                                <a
-                                  key={partner.id}
-                                  href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                                  className="block border rounded-lg p-3 hover:bg-gray-50 hover:border-gray-400 transition-all"
-                                >
-                                  <div className="flex items-start justify-between">
-                                    <div>
-                                      <h4 className="font-semibold">{partner.name}</h4>
-                                      <p className="text-xs text-gray-600">{partner.description}</p>
-                                    </div>
-                                    <ArrowRight className="w-4 h-4 text-gray-600" />
+                      {/* Show assigned partner if exists */}
+                      {selectedCause.partnerId ? (
+                        <>
+                          <p className="text-sm font-semibold mb-3">Recommended Partner for this Cause:</p>
+                          {partners
+                            .filter((p) => p.id === selectedCause.partnerId)
+                            .map((partner) => (
+                              <a
+                                key={partner.id}
+                                href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
+                                className="block border-2 border-blue-500 rounded-lg p-4 hover:bg-blue-50 transition-all bg-blue-50"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <h4 className="font-bold">{partner.name}</h4>
+                                    <p className="text-sm text-gray-600">{partner.description}</p>
+                                    <span className="inline-block mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                                      Primary Partner for this Cause
+                                    </span>
                                   </div>
-                                </a>
-                              ))}
-                          </div>
+                                  <ArrowRight className="w-5 h-5 text-blue-600" />
+                                </div>
+                              </a>
+                            ))}
+
+                          {/* Show other partners as alternatives */}
+                          {partners.filter((p) => p.id !== selectedCause.partnerId).length > 0 && (
+                            <div className="mt-4">
+                              <p className="text-sm font-semibold mb-2 text-gray-600">Alternative Partners:</p>
+                              <div className="space-y-2">
+                                {partners
+                                  .filter((p) => p.id !== selectedCause.partnerId)
+                                  .map((partner) => (
+                                    <a
+                                      key={partner.id}
+                                      href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
+                                      className="block border rounded-lg p-3 hover:bg-gray-50 hover:border-gray-400 transition-all"
+                                    >
+                                      <div className="flex items-start justify-between">
+                                        <div>
+                                          <h4 className="font-semibold">{partner.name}</h4>
+                                          <p className="text-xs text-gray-600">{partner.description}</p>
+                                        </div>
+                                        <ArrowRight className="w-4 h-4 text-gray-600" />
+                                      </div>
+                                    </a>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        // If no partner assigned, show all partners
+                        <div className="space-y-3">
+                          {partners.map((partner) => (
+                            <a
+                              key={partner.id}
+                              href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
+                              className="block border rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 transition-all"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h4 className="font-bold">{partner.name}</h4>
+                                  <p className="text-sm text-gray-600">{partner.description}</p>
+                                </div>
+                                <ArrowRight className="w-5 h-5 text-blue-600" />
+                              </div>
+                            </a>
+                          ))}
                         </div>
                       )}
                     </>
-                  ) : (
-                    // If no partner assigned, show all partners
-                    <div className="space-y-3">
-                      {partners.map((partner) => (
-                        <a
-                          key={partner.id}
-                          href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                          className="block border rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 transition-all"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h4 className="font-bold">{partner.name}</h4>
-                              <p className="text-sm text-gray-600">{partner.description}</p>
-                            </div>
-                            <ArrowRight className="w-5 h-5 text-blue-600" />
-                          </div>
-                        </a>
-                      ))}
-                    </div>
                   )}
                 </div>
 
