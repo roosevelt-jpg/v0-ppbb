@@ -123,6 +123,8 @@ export function Footer() {
               {[
                 { label: 'Join Community', href: '/signup' },
                 { label: 'Volunteer', href: '/signup' },
+                { label: 'Workshops', href: '/workshops' },
+                { label: 'Recordings', href: '/recordings' },
                 { label: 'Donate', href: '/donate' },
                 { label: 'Start Business', href: '/signup' },
                 { label: 'Host Event', href: '/signup' },

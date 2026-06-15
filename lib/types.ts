@@ -926,3 +926,57 @@ export interface BeneficiaryRequestStats {
   updatedAt: Date
 }
 
+
+// Workshops - Educational events with registrations
+export interface Workshop {
+  id: string
+  title: string
+  description: string
+  category: string
+  instructorName: string
+  instructorEmail: string
+  date: Date
+  time: string // HH:MM format
+  duration: number // minutes
+  location: string
+  capacity: number
+  registered: number
+  image?: string
+  status: 'draft' | 'published' | 'archived'
+  registrations: WorkshopRegistration[]
+  createdAt: Date
+  updatedAt: Date
+  publishedAt?: Date
+}
+
+export interface WorkshopRegistration {
+  id: string
+  workshopId: string
+  userId: string
+  userName: string
+  userEmail: string
+  registeredAt: Date
+  attended: boolean
+  attendanceTime?: Date
+}
+
+// Recordings - Educational video content
+export interface Recording {
+  id: string
+  title: string
+  description: string
+  category: string
+  videoUrl: string // URL to hosted video
+  thumbnail?: string
+  duration: number // seconds
+  instructor: string
+  views: number
+  likes: number
+  status: 'draft' | 'published' | 'archived'
+  tags: string[]
+  transcript?: string
+  createdAt: Date
+  updatedAt: Date
+  publishedAt?: Date
+}
+

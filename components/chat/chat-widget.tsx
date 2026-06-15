@@ -153,7 +153,7 @@ export function ChatWidget() {
           <div className="flex items-center justify-between p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div>
               <h3 className="font-semibold">PB Assistant</h3>
-              <p className="text-xs opacity-90">Powered by AI</p>
+              <p className="text-xs opacity-90">Powered by MYFLYN</p>
             </div>
             <button
               onClick={() => setIsOpen(false)}

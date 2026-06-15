@@ -62,6 +62,8 @@ const adminMenuItems = [
   { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap },
   { label: 'Community', href: '/admin/community', icon: Users },
+  { label: 'Workshops', href: '/admin/workshops', icon: Calendar },
+  { label: 'Recordings', href: '/admin/recordings', icon: Play },
   { label: 'Location Config', href: '/admin/location-config', icon: Shield },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug },
   { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: BarChart3 },
