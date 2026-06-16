@@ -213,7 +213,7 @@ export function Footer() {
               <p>
                 Made with ❤️ by{' '}
                 <Link 
-                  href="https://flyn.ai" 
+                  href="https://myflynai.com" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors font-semibold"
