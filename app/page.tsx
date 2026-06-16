@@ -142,34 +142,34 @@ export default function HomePage() {
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-            <div className="flex flex-col items-center p-6 sm:p-8 bg-white rounded-lg border border-[#e4e1da]">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-2">
+            <div className="flex flex-col items-center p-4 sm:p-5 bg-white rounded-lg border border-[#e4e1da]">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-1">
                 {loading ? '-' : stats.members.toLocaleString()}
               </div>
-              <p className="text-sm sm:text-base text-[#888888] text-center">Active Members</p>
+              <p className="text-xs sm:text-sm text-[#888888] text-center">Active Members</p>
             </div>
             
-            <div className="flex flex-col items-center p-6 sm:p-8 bg-white rounded-lg border border-[#e4e1da]">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-2">
+            <div className="flex flex-col items-center p-4 sm:p-5 bg-white rounded-lg border border-[#e4e1da]">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-1">
                 {loading ? '-' : stats.events.toLocaleString()}
               </div>
-              <p className="text-sm sm:text-base text-[#888888] text-center">Events Hosted</p>
+              <p className="text-xs sm:text-sm text-[#888888] text-center">Events Hosted</p>
             </div>
             
-            <div className="flex flex-col items-center p-6 sm:p-8 bg-white rounded-lg border border-[#e4e1da]">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-2">
+            <div className="flex flex-col items-center p-4 sm:p-5 bg-white rounded-lg border border-[#e4e1da]">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-1">
                 {loading ? '-' : `AED ${(stats.donations / 1000).toFixed(1)}K`}
               </div>
-              <p className="text-sm sm:text-base text-[#888888] text-center">Donations Raised</p>
+              <p className="text-xs sm:text-sm text-[#888888] text-center">Donations Raised</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* UPCOMING EVENTS - Mobile First */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10 sm:mb-12 md:mb-16">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10 md:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair">Upcoming Events</h2>
             <Link href="/events">
               <Button size="sm" className="w-full sm:w-auto bg-[#111111] hover:bg-[#333333] text-white">
@@ -179,17 +179,17 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {upcomingEvents.map((event) => (
               <div key={event.id} className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                 {event.image && (
-                  <img src={event.image} alt={event.title} className="w-full h-40 sm:h-48 object-cover" />
+                  <img src={event.image} alt={event.title} className="w-full h-32 sm:h-40 object-cover" />
                 )}
-                <div className="p-4 sm:p-6">
-                  <h3 className="font-bold text-lg sm:text-xl mb-2 line-clamp-2">{event.title}</h3>
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-bold text-base sm:text-lg mb-1 line-clamp-2">{event.title}</h3>
                   <p className="text-xs sm:text-sm text-[#888888] mb-3">{event.location}</p>
                   <Link href={`/dashboard/events/${event.id}`}>
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm py-1">
                       Learn More
                     </Button>
                   </Link>
@@ -201,20 +201,20 @@ export default function HomePage() {
       </section>
 
       {/* 6 PILLARS - Mobile First */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-playfair">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-playfair">
             Our 6 Pillars
           </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {pillars.map((pillar, idx) => {
               const Icon = pillar.icon
               return (
-                <div key={idx} className="bg-white p-6 sm:p-8 rounded-lg border border-[#e4e1da] hover:shadow-md transition-shadow">
-                  <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-[#111111] mb-4" />
-                  <h3 className="font-bold text-lg sm:text-xl mb-2">{pillar.title}</h3>
-                  <p className="text-sm sm:text-base text-[#888888]">{pillar.desc}</p>
+                <div key={idx} className="bg-white p-4 sm:p-5 rounded-lg border border-[#e4e1da] hover:shadow-md transition-shadow">
+                  <Icon className="h-7 w-7 sm:h-8 sm:w-8 text-[#111111] mb-2" />
+                  <h3 className="font-bold text-base sm:text-lg mb-1">{pillar.title}</h3>
+                  <p className="text-xs sm:text-sm text-[#888888] leading-tight">{pillar.desc}</p>
                 </div>
               )
             })}
@@ -224,21 +224,21 @@ export default function HomePage() {
 
       {/* TESTIMONIALS - Mobile First */}
       {testimonials.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-playfair">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-playfair">
               Success Stories
             </h2>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {testimonials.map((test) => (
-                <div key={test.id} className="bg-white p-6 sm:p-8 rounded-lg border border-[#e4e1da]">
+                <div key={test.id} className="bg-white p-4 sm:p-5 rounded-lg border border-[#e4e1da]">
                   {test.image && (
-                    <img src={test.image} alt={test.name} className="w-12 h-12 rounded-full mb-4 object-cover" />
+                    <img src={test.image} alt={test.name} className="w-10 h-10 rounded-full mb-3 object-cover" />
                   )}
-                  <p className="text-sm sm:text-base text-[#333333] mb-4 italic line-clamp-3">{test.content}</p>
-                  <p className="font-bold text-sm sm:text-base">{test.name}</p>
-                  <p className="text-xs sm:text-sm text-[#888888]">{test.title}</p>
+                  <p className="text-xs sm:text-sm text-[#333333] mb-2 italic line-clamp-3">{test.content}</p>
+                  <p className="font-bold text-xs sm:text-sm">{test.name}</p>
+                  <p className="text-xs text-[#888888]">{test.title}</p>
                 </div>
               ))}
             </div>
@@ -248,36 +248,36 @@ export default function HomePage() {
 
       {/* ACTIVE CAUSES - Mobile First */}
       {causes.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-playfair">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-playfair">
               Active Causes
             </h2>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {causes.map((cause) => {
                 const percentage = (cause.currentAmount / cause.goalAmount) * 100
                 return (
                   <div key={cause.id} className="bg-white rounded-lg overflow-hidden border border-[#e4e1da]">
                     {cause.image && (
-                      <img src={cause.image} alt={cause.title} className="w-full h-40 sm:h-48 object-cover" />
+                      <img src={cause.image} alt={cause.title} className="w-full h-32 sm:h-40 object-cover" />
                     )}
-                    <div className="p-4 sm:p-6">
-                      <h3 className="font-bold text-lg sm:text-xl mb-2">{cause.title}</h3>
-                      <p className="text-xs sm:text-sm text-[#888888] mb-4">{cause.description}</p>
+                    <div className="p-3 sm:p-4">
+                      <h3 className="font-bold text-base sm:text-lg mb-1">{cause.title}</h3>
+                      <p className="text-xs sm:text-sm text-[#888888] mb-2 line-clamp-2">{cause.description}</p>
                       
-                      <div className="mb-3">
-                        <div className="flex justify-between text-xs sm:text-sm mb-2">
+                      <div className="mb-2">
+                        <div className="flex justify-between text-xs mb-1">
                           <span>AED {(cause.currentAmount || 0).toLocaleString()}</span>
                           <span className="text-[#888888]">of AED {(cause.goalAmount || 0).toLocaleString()}</span>
                         </div>
-                        <div className="w-full bg-[#e4e1da] rounded-full h-2">
-                          <div className="bg-[#111111] h-2 rounded-full" style={{ width: `${Math.min(percentage, 100)}%` }}></div>
+                        <div className="w-full bg-[#e4e1da] rounded-full h-1.5">
+                          <div className="bg-[#111111] h-1.5 rounded-full" style={{ width: `${Math.min(percentage, 100)}%` }}></div>
                         </div>
                       </div>
                       
                       <Link href="/donate">
-                        <Button size="sm" className="w-full bg-[#111111] hover:bg-[#333333] text-white">
+                        <Button size="sm" className="w-full bg-[#111111] hover:bg-[#333333] text-white text-xs py-1">
                           Support
                         </Button>
                       </Link>
