@@ -217,8 +217,8 @@ export function Footer() {
                     href="https://myflynai.com" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-white transition-colors font-semibold"
-                    style={{ color: '#ffffff' }}
+                    className="hover:text-white transition-colors font-light text-[10px] sm:text-xs opacity-60"
+                    style={{ color: '#999999' }}
                   >
                     FLYN.AI
                   </Link>
