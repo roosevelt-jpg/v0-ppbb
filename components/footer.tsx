@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { db } from '@/lib/firebase'
 import { collection, getDocs } from 'firebase/firestore'
 import { getPagesByMenuLocation } from '@/lib/admin'
-import { Mail, Heart, Share2, Link as LinkIcon, MessageSquare } from 'lucide-react'
+import { Mail, Heart, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 import { Page } from '@/lib/types'
 
 interface Stats {
@@ -211,7 +211,7 @@ export function Footer() {
               <p>Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025</p>
               <span className="hidden sm:inline">·</span>
               <p>
-                Made with Love by{' '}
+                Made with ❤️ by{' '}
                 <Link 
                   href="https://myflynai.com" 
                   target="_blank"
@@ -225,10 +225,10 @@ export function Footer() {
             </div>
             <div className="flex gap-4 mt-4 sm:mt-0">
               {[
-                { label: 'Facebook', key: 'facebook', icon: Heart },
-                { label: 'Twitter', key: 'twitter', icon: MessageSquare },
-                { label: 'Instagram', key: 'instagram', icon: Share2 },
-                { label: 'LinkedIn', key: 'linkedin', icon: LinkIcon },
+                { label: 'Facebook', key: 'facebook', icon: Facebook },
+                { label: 'Twitter', key: 'twitter', icon: Twitter },
+                { label: 'Instagram', key: 'instagram', icon: Instagram },
+                { label: 'LinkedIn', key: 'linkedin', icon: Linkedin },
               ].map((social) => {
                 const href = socialLinks[social.key as keyof SocialLinks]
                 const Icon = social.icon
@@ -243,7 +243,7 @@ export function Footer() {
                     aria-label={social.label}
                     title={social.label}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-5 h-5" />
                   </a>
                 )
               })}
