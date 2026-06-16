@@ -213,13 +213,13 @@ export function Footer() {
               <p>
                 Made with ❤️ by{' '}
                 <Link 
-                  href="https://myflynai.com" 
+                  href="https://flyn.ai" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-white transition-colors font-semibold"
                   style={{ color: '#ffffff' }}
                 >
-                  MYFLYN
+                  FLYN.AI
                 </Link>
               </p>
             </div>
