@@ -1,11 +1,95 @@
 {
   "header": {
     "about": "About us",
-    "join": "Join",
+    "impact": "Impact",
     "events": "Events",
     "marketplace": "Marketplace",
     "contact": "Contact",
     "signIn": "Sign in"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About Us",
+    "impact": "Impact",
+    "transparency": "Transparency",
+    "events": "Events",
+    "marketplace": "Marketplace",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "admin": "Admin"
+  },
+  "common": {
+    "optional": "(optional)",
+    "required": "*",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  },
+  "homepage": {
+    "hero": {
+      "title": "Community. Impact. Growth.",
+      "subtitle": "Join the Passive Blessings community — together, we create lasting positive change in the UAE"
+    },
+    "featuredVideos": "Featured Videos",
+    "checkBackSoon": "Check back soon for our latest videos and tutorials.",
+    "successStories": "Success Stories",
+    "activeCauses": "Active Causes",
+    "impactCards": {
+      "communityConnection": "Community Connection",
+      "events": "250+ Events",
+      "volunteers": "1000+ Volunteers",
+      "lives": "Lives Impacted"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Passive Blessings is a community platform dedicated to fostering meaningful connections, enabling charitable impact, and supporting business growth within the UAE.",
+    "mission": "Our Mission",
+    "vision": "Our Vision",
+    "values": "Our Values",
+    "meetOurTeam": "Meet Our Team"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with the Passive Blessings team",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "message": "Message",
+    "sendMessage": "Send Message",
+    "followUs": "Follow Us"
+  },
+  "footer": {
+    "copyright": "Copyright © {year} Passive Blessings. All rights reserved. ESTD 2025",
+    "madeWith": "Made with ❤️ by",
+    "socialLinks": "Social links not configured"
+  },
+  "chat": {
+    "title": "PB Assistant",
+    "byFlynAI": "By FLYN.AI",
+    "welcome": "Hello! I'm here to help. Ask me anything about Passive Blessings!",
+    "connectionError": "Sorry, I'm having trouble connecting. Please try again in a moment.",
+    "placeholder": "Ask me anything..."
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "events": "Events",
+    "users": "Users",
+    "analytics": "Analytics",
+    "superAdmin": "Super Admin",
+    "adminRole": "Admin"
   },
   "signup": {
     "title": "Create your account",
@@ -72,7 +156,6 @@
     "locationConsent": "I confirm my location details are accurate and consent to being connected with local community events and members in my area.",
     "newsletterConsent": "I agree to receive WhatsApp and email updates about upcoming events, opportunities, and community news.",
     "dataSecure": "Your data is encrypted and secure - Passive Blessings ESTD 2025",
-    "back": "Back",
     "continue": "Continue",
     "createAccount": "Create account & continue",
     "creating": "Creating account...",
@@ -84,12 +167,5 @@
     "locationError": "Could not detect location. Please allow location access.",
     "acceptTerms": "Please accept terms and conditions",
     "passwordMismatch": "Passwords do not match"
-  },
-  "common": {
-    "optional": "(optional)",
-    "required": "*",
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success"
   }
 }

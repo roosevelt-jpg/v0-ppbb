@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { AdminSidebar } from '@/components/admin-layout'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageSelector } from '@/components/language-selector'
 import { LogOut } from 'lucide-react'
 import { logoutUser } from '@/lib/auth'
 
@@ -135,6 +136,7 @@ export default function AdminLayout({
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageSelector />
             <ThemeToggle />
             <button
               onClick={handleLogout}
