@@ -7,6 +7,7 @@ import { collection, getDocs } from 'firebase/firestore'
 import { getPagesByMenuLocation } from '@/lib/admin'
 import { Mail, Heart, Users, Share2, MessageSquare, Briefcase } from 'lucide-react'
 import { Page } from '@/lib/types'
+import { SocialMediaLinks } from '@/components/social-media-links'
 
 interface Stats {
   members: number
@@ -224,29 +225,7 @@ export function Footer() {
               </p>
             </div>
             <div className="flex gap-4 mt-4 sm:mt-0">
-              {[
-                { label: 'Facebook', key: 'facebook', icon: Users },
-                { label: 'Twitter', key: 'twitter', icon: Share2 },
-                { label: 'Instagram', key: 'instagram', icon: MessageSquare },
-                { label: 'LinkedIn', key: 'linkedin', icon: Briefcase },
-              ].map((social) => {
-                const href = socialLinks[social.key as keyof SocialLinks]
-                const Icon = social.icon
-                return (
-                  <a
-                    key={social.label}
-                    href={href || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:bg-gray-700"
-                    style={{ color: '#ffffff' }}
-                    aria-label={social.label}
-                    title={social.label}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </a>
-                )
-              })}
+              <SocialMediaLinks links={socialLinks} size="md" />
             </div>
           </div>
         </div>

@@ -489,6 +489,10 @@ export interface SiteSettings {
     twitter?: string
     instagram?: string
     linkedin?: string
+    youtube?: string
+    discord?: string
+    tiktok?: string
+    snapchat?: string
   }
   footerText: string
   maintenanceMode: boolean

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { SocialMediaLinks } from '@/components/social-media-links'
 import { db } from '@/lib/firebase'
 import { collection, getDocs } from 'firebase/firestore'
 import Link from 'next/link'
@@ -167,24 +168,7 @@ export default function ContactPage() {
               {/* Social Media */}
               <div className="pt-4 border-t">
                 <p className="text-xs uppercase font-medium text-gray-500 mb-3">Follow Us</p>
-                <div className="flex gap-2 flex-wrap">
-                  {socialIcons.map((social) => {
-                    const Icon = social.icon
-                    return (
-                      <a
-                        key={social.key}
-                        href={social.url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-9 h-9 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-colors"
-                        aria-label={social.name}
-                        title={social.name}
-                      >
-                        <Icon className="w-4 h-4 text-white" />
-                      </a>
-                    )
-                  })}
-                </div>
+                <SocialMediaLinks links={contactInfo.socialLinks} size="md" />
               </div>
             </div>
 

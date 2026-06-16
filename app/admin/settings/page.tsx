@@ -429,6 +429,62 @@ export default function AdminSettings() {
               />
             </div>
 
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                YouTube URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://youtube.com/passiveblessings"
+                value={siteSettings?.socialLinks?.youtube || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, youtube: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Discord URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://discord.gg/passiveblessings"
+                value={siteSettings?.socialLinks?.discord || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, discord: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                TikTok URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://tiktok.com/@passiveblessings"
+                value={siteSettings?.socialLinks?.tiktok || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, tiktok: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Snapchat URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://snapchat.com/add/passiveblessings"
+                value={siteSettings?.socialLinks?.snapchat || ''}
+                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, snapchat: e.target.value })}
+                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
+                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+              />
+            </div>
+
             <button
               onClick={handleSaveSiteSettings}
               disabled={saving}
