@@ -15,6 +15,57 @@ export interface AdminUser extends User {
   canManageContent: boolean
   canManageFinance: boolean
   adminSince: Date
+  lastLoginAt?: Date
+  lastLoginIP?: string
+  lastLoginLocation?: string
+  loginAttempts: number
+  isLocked?: boolean
+}
+
+export interface AdminAccessCode {
+  id: string
+  code: string
+  adminEmail: string
+  adminName: string
+  adminRole: 'super_admin' | 'admin' | 'moderator'
+  permissions: string[]
+  createdAt: Date
+  expiresAt: Date
+  isUsed: boolean
+  usedAt?: Date
+  usedIP?: string
+  usedLocation?: string
+  createdBy: string
+  status: 'active' | 'used' | 'expired'
+}
+
+export interface AdminLoginLog {
+  id: string
+  adminId: string
+  adminEmail: string
+  adminName: string
+  timestamp: Date
+  ipAddress: string
+  userAgent: string
+  deviceInfo: {
+    browser?: string
+    os?: string
+    osVersion?: string
+    deviceType?: 'desktop' | 'mobile' | 'tablet'
+  }
+  location?: {
+    city?: string
+    state?: string
+    country?: string
+    countryCode?: string
+    latitude?: number
+    longitude?: number
+    timezone?: string
+  }
+  status: 'success' | 'failed' | 'locked'
+  failureReason?: string
+  accessCodeId?: string
+  sessionId: string
 }
 
 export type AdminPermission = 

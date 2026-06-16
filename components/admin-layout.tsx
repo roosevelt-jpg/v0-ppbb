@@ -43,7 +43,6 @@ const adminMenuItems = [
 
   // Security & Access
   { label: 'Security Center', href: '/admin/security-center', icon: Lock, group: 'Security' },
-  { label: 'Access Control', href: '/admin/access-control', icon: Shield, group: 'Security' },
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText, group: 'Security' },
   { label: 'Admin Management', href: '/admin/management', icon: Users, group: 'Security' },
 
