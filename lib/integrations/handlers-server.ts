@@ -7,22 +7,18 @@ import { credential } from 'firebase-admin'
 const INTEGRATIONS_COLLECTION = 'integrations'
 const HEALTH_COLLECTION = 'integrationHealth'
 
-// Initialize Firebase Admin
 function getAdminApp() {
   if (getApps().length > 0) {
     return getApps()[0]
   }
-  
+
   try {
-    // Try GCP_SERVICE_ACCOUNT first (base64 encoded JSON)
     let serviceAccount: any = null
-    
+
     if (process.env.GCP_SERVICE_ACCOUNT) {
-      serviceAccount = JSON.parse(
-        Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
-      )
+      const raw = process.env.GCP_SERVICE_ACCOUNT.replace(/\\n/g, '\n')
+      serviceAccount = JSON.parse(raw)
     } else {
-      // Fallback to individual env vars
       serviceAccount = {
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
@@ -30,7 +26,7 @@ function getAdminApp() {
       }
     }
 
-    if (!serviceAccount?.projectId) {
+    if (!serviceAccount?.project_id && !serviceAccount?.projectId) {
       throw new Error('Firebase credentials not configured')
     }
 
@@ -55,17 +51,34 @@ export async function saveIntegrationServer(
 ): Promise<Integration> {
   try {
     console.log('[v0] Saving integration (server):', serviceId, 'for', userId)
+
+    // If Firebase integration, parse the serviceAccountJson blob into individual fields
+    if (serviceId === 'firebase' && credentials.serviceAccountJson) {
+      try {
+        const sa = JSON.parse(credentials.serviceAccountJson)
+        credentials = {
+          ...credentials,
+          projectId: sa.project_id || sa.projectId,
+          privateKeyId: sa.private_key_id || sa.privateKeyId,
+          privateKey: sa.private_key || sa.privateKey,
+          clientEmail: sa.client_email || sa.clientEmail,
+        }
+      } catch (parseErr) {
+        throw new Error('Invalid service account JSON. Please paste the complete JSON file.')
+      }
+    }
+
     const encrypted = encryptCredentials(credentials, serviceId)
     const integrationId = `${userId}_${serviceId}`
     const db = getAdminDb()
-    
+
     const integration: Integration = {
       id: integrationId,
       userId,
       serviceId,
       serviceName: credentials.serviceName || serviceId,
       credentials: encrypted,
-      status: 'inactive',
+      status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -89,9 +102,9 @@ export async function getIntegrationServer(userId: string, serviceId: string): P
     const integrationId = `${userId}_${serviceId}`
     const db = getAdminDb()
     const snap = await db.collection(INTEGRATIONS_COLLECTION).doc(integrationId).get()
-    
-    if (!snap.exists()) return null
-    
+
+    if (!snap.exists) return null
+
     const data = snap.data() as Integration
     return {
       ...data,
@@ -107,7 +120,7 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
   try {
     const db = getAdminDb()
     const snap = await db.collection(INTEGRATIONS_COLLECTION).where('userId', '==', userId).get()
-    
+
     return snap.docs.map((doc) => {
       const data = doc.data() as Integration
       return {
@@ -178,10 +191,7 @@ export async function saveIntegrationHealthServer(health: IntegrationHealth): Pr
   try {
     const db = getAdminDb()
     await db.collection(HEALTH_COLLECTION).doc(health.serviceId).set(
-      {
-        ...health,
-        updatedAt: new Date(),
-      },
+      { ...health, updatedAt: new Date() },
       { merge: true }
     )
   } catch (error) {
