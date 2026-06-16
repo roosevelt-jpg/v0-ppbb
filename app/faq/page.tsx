@@ -88,13 +88,13 @@ export default function FAQPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-neutral-50 py-10 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen bg-neutral-50 py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <section className="max-w-6xl mx-auto mb-12 sm:mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
+        <section className="max-w-6xl mx-auto mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
             {/* Left: Title and Description */}
             <div className="lg:col-span-2">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 mb-4 leading-tight">
                 Frequently Asked Questions
               </h1>
               <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
@@ -110,17 +110,17 @@ export default function FAQPage() {
                   placeholder="Search FAQs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
+                  className="w-full px-4 sm:px-5 py-2 sm:py-3 border-2 border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
                 />
               </div>
             </div>
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 justify-start">
+          <div className="flex flex-wrap gap-2 mt-6 sm:mt-8 justify-start">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 sm:px-6 py-2 rounded-full font-semibold text-sm sm:text-base transition-all ${
+              className={`px-3 sm:px-5 py-1.5 rounded-full font-semibold text-xs sm:text-sm transition-all ${
                 selectedCategory === 'all'
                   ? 'bg-neutral-900 text-white'
                   : 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
@@ -132,7 +132,7 @@ export default function FAQPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 sm:px-6 py-2 rounded-full font-semibold text-sm sm:text-base transition-all capitalize ${
+                className={`px-3 sm:px-5 py-1.5 rounded-full font-semibold text-xs sm:text-sm transition-all capitalize ${
                   selectedCategory === category
                     ? 'bg-neutral-900 text-white'
                     : 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
@@ -147,29 +147,29 @@ export default function FAQPage() {
         {/* FAQs List */}
         <section className="max-w-6xl mx-auto">
           {loading ? (
-            <div className="text-center py-12 sm:py-16">
+            <div className="text-center py-8 sm:py-12">
               <p className="text-neutral-600 text-base sm:text-lg">Loading FAQs...</p>
             </div>
           ) : filteredFaqs.length === 0 ? (
-            <div className="text-center py-12 sm:py-16">
+            <div className="text-center py-8 sm:py-12">
               <p className="text-neutral-600 text-base sm:text-lg">
                 {searchTerm ? 'No FAQs found matching your search.' : 'No FAQs available in this category.'}
               </p>
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {filteredFaqs.map((faq) => (
                 <div key={faq.id} className="border-2 border-neutral-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
                   <button
                     onClick={() => toggleExpand(faq.id)}
-                    className="w-full px-4 sm:px-6 py-4 sm:py-5 bg-white hover:bg-neutral-50 transition-colors flex justify-between items-start sm:items-center gap-4 text-left"
+                    className="w-full px-3 sm:px-5 py-3 sm:py-4 bg-white hover:bg-neutral-50 transition-colors flex justify-between items-start sm:items-center gap-4 text-left"
                     aria-expanded={expandedItems.has(faq.id)}
                   >
-                    <span className="text-base sm:text-lg font-semibold text-neutral-900 flex-1 break-words">
+                    <span className="text-sm sm:text-base font-semibold text-neutral-900 flex-1 break-words">
                       {faq.question}
                     </span>
                     <span
-                      className="text-xl sm:text-2xl text-neutral-600 flex-shrink-0 transition-transform"
+                      className="text-lg sm:text-xl text-neutral-600 flex-shrink-0 transition-transform"
                       style={{ transform: expandedItems.has(faq.id) ? 'rotate(180deg)' : 'rotate(0deg)' }}
                     >
                       ▼
