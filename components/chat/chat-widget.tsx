@@ -85,36 +85,88 @@ export function ChatWidget() {
       return
     }
 
-    if (!conversationId) {
-      // Initialize conversation and wait for it to complete
-      await initializeConversation()
-      // Don't return - we'll send the message after initialization
-      // However, we need to wait a bit for state to update
-      setError('')
-      const userMessage: Message = {
-        role: 'user',
-        content: input,
-        timestamp: new Date(),
-      }
-      setMessages(prev => [...prev, userMessage])
-      setInput('')
-      setLoading(true)
-      // Give a tiny delay for conversationId to be set
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return
-    }
-
-    setError('')
+    // Add user message immediately
     const userMessage: Message = {
       role: 'user',
       content: input,
       timestamp: new Date(),
     }
-
-    // Update local state with user message
+    
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
+    setError('')
+
+    // If no conversation, initialize it first
+    if (!conversationId) {
+      try {
+        const response = await fetch('/api/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user?.id || 'anonymous',
+            title: `Chat - ${new Date().toLocaleString()}`,
+            role: user?.role || 'member',
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to initialize conversation')
+        }
+
+        const data = await response.json()
+        if (!data.id) {
+          throw new Error('No conversation ID returned')
+        }
+
+        // Now send the message with the new conversation ID
+        const allMessages = [userMessage].map(m => ({
+          role: m.role,
+          content: m.content,
+        }))
+
+        const chatResponse = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: allMessages,
+            conversationId: data.id,
+            userId: user?.id || 'anonymous',
+          }),
+        })
+
+        if (!chatResponse.ok) {
+          let errorMsg = 'Failed to send message'
+          try {
+            const errorData = await chatResponse.json()
+            errorMsg = errorData.error || errorMsg
+          } catch (e) {
+            // Response body not JSON
+          }
+          throw new Error(errorMsg)
+        }
+
+        const chatData = await chatResponse.json()
+        
+        if (chatData.message) {
+          const assistantMessage: Message = {
+            role: 'assistant',
+            content: chatData.message,
+            timestamp: new Date(),
+            faqSource: chatData.faqSource,
+          }
+          setMessages(prev => [...prev, assistantMessage])
+        }
+
+        setConversationId(data.id)
+        setLoading(false)
+      } catch (error) {
+        console.error('[v0] Error in first message:', error)
+        setError(error instanceof Error ? error.message : 'Failed to send message')
+        setLoading(false)
+      }
+      return
+    }
 
     try {
       // Send message to chat API with all previous messages
@@ -195,7 +247,7 @@ export function ChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-72 h-96 sm:w-96 sm:h-[500px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200 max-w-[calc(100vw-32px)]">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-64 h-80 sm:w-80 sm:h-[430px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200 max-w-[calc(100vw-32px)]">
           {/* Header */}
           <div className="flex items-center justify-between p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div>
