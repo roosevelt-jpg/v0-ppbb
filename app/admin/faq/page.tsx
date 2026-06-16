@@ -169,15 +169,49 @@ export default function AdminFAQPage() {
 
     const loadFAQs = async () => {
       try {
-        unsubscribe = getAllFAQsAdmin((foundFaqs) => {
-          if (!isMounted) return
-          if (foundFaqs.length === 0) {
-            initializeDefaultFAQs()
-          } else {
-            setFaqs(foundFaqs)
-          }
-          setLoading(false)
+        // Try to get FAQs first
+        const faqSnapshot = await new Promise((resolve) => {
+          const timeoutId = setTimeout(() => {
+            console.warn('[v0] FAQ fetch timeout after 3 seconds')
+            resolve([])
+          }, 3000)
+          
+          unsubscribe = getAllFAQsAdmin((foundFaqs) => {
+            clearTimeout(timeoutId)
+            resolve(foundFaqs)
+          })
         })
+
+        if (!isMounted) return
+
+        if (Array.isArray(faqSnapshot) && faqSnapshot.length === 0) {
+          console.log('[v0] No FAQs found, initializing default FAQs...')
+          // Initialize default FAQs
+          for (const faq of DEFAULT_FAQS) {
+            await addFAQ(faq)
+          }
+          // After initialization, reload FAQs
+          await new Promise((resolve) => {
+            const timeoutId = setTimeout(() => {
+              console.warn('[v0] FAQ reload timeout')
+              resolve([])
+            }, 3000)
+            
+            unsubscribe = getAllFAQsAdmin((foundFaqs) => {
+              clearTimeout(timeoutId)
+              if (isMounted) {
+                setFaqs(foundFaqs)
+              }
+              resolve(foundFaqs)
+            })
+          })
+        } else if (isMounted) {
+          setFaqs(faqSnapshot as FAQ[])
+        }
+        
+        if (isMounted) {
+          setLoading(false)
+        }
       } catch (error) {
         console.error('[v0] Error loading FAQs:', error)
         if (isMounted) {
@@ -187,34 +221,22 @@ export default function AdminFAQPage() {
       }
     }
 
-    // Set a timeout to ensure loading state doesn't hang forever
-    const timeout = setTimeout(() => {
+    // Set a maximum timeout to ensure loading state doesn't hang forever
+    const maxTimeout = setTimeout(() => {
       if (isMounted && loading) {
-        console.warn('[v0] FAQ loading timeout - displaying empty state')
+        console.warn('[v0] FAQ page loading timeout - displaying empty state')
         setLoading(false)
       }
-    }, 5000)
+    }, 8000)
 
     loadFAQs()
 
     return () => {
       isMounted = false
-      clearTimeout(timeout)
+      clearTimeout(maxTimeout)
       if (unsubscribe) unsubscribe()
     }
   }, [])
-
-  const initializeDefaultFAQs = async () => {
-    try {
-      for (const faq of DEFAULT_FAQS) {
-        await addFAQ(faq)
-      }
-      const unsubscribe = getAllFAQsAdmin(setFaqs)
-      return () => unsubscribe()
-    } catch (error) {
-      console.error('Error initializing FAQs:', error)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
