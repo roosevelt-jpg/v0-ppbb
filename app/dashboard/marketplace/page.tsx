@@ -60,10 +60,10 @@ export default function MarketplacePage() {
                 <button
                   key={cat}
                   onClick={() => setFilter(cat)}
-                  className={`w-full text-left px-3 py-2 rounded text-sm ${
+                  className={`w-full text-left px-3 py-2 rounded text-sm font-medium transition-colors ${
                     filter === cat
-                      ? 'bg-blue-500 text-white'
-                      : 'hover:bg-gray-100'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
                 >
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}

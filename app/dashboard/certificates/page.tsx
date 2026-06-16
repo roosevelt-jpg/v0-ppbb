@@ -17,7 +17,13 @@ export default function CertificatesPage() {
 
   useEffect(() => {
     const firebaseUser = auth.currentUser
-    if (!firebaseUser) return
+    if (!firebaseUser) {
+      setLoading(false)
+      return
+    }
+
+    let certLoaded = false
+    let badgesLoaded = false
 
     // Fetch certificates
     const certUnsubscribe = onSnapshot(
@@ -29,6 +35,17 @@ export default function CertificatesPage() {
             ...doc.data(),
           }))
         )
+        certLoaded = true
+        if (certLoaded && badgesLoaded) {
+          setLoading(false)
+        }
+      },
+      (error) => {
+        console.error('[v0] Error fetching certificates:', error)
+        certLoaded = true
+        if (certLoaded && badgesLoaded) {
+          setLoading(false)
+        }
       }
     )
 
@@ -42,7 +59,17 @@ export default function CertificatesPage() {
             ...doc.data(),
           }))
         )
-        setLoading(false)
+        badgesLoaded = true
+        if (certLoaded && badgesLoaded) {
+          setLoading(false)
+        }
+      },
+      (error) => {
+        console.error('[v0] Error fetching badges:', error)
+        badgesLoaded = true
+        if (certLoaded && badgesLoaded) {
+          setLoading(false)
+        }
       }
     )
 

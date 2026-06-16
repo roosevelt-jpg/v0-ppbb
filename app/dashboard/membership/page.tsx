@@ -53,9 +53,11 @@ export default function MembershipPage() {
           ...doc.data(),
         })) as PricingPlan[]
         setPlans(plansData)
+        setLoading(false)
       },
       (error) => {
         console.error('[v0] Error fetching plans:', error)
+        setLoading(false)
       }
     )
 
@@ -101,7 +103,7 @@ export default function MembershipPage() {
   const currentTier = user?.membershipTier
   const renewDate = user?.membershipRenewDate ? new Date(user.membershipRenewDate).toLocaleDateString() : '-'
 
-  if (loading || plans.length === 0) {
+  if (loading) {
     return (
       <div className="p-8">
         <div className="flex items-center justify-center h-96">

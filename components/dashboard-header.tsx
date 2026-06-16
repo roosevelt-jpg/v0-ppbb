@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { LogOut, Clock } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
+import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
 import { logoutUser } from '@/lib/auth'
 
 interface DashboardHeaderProps {
@@ -58,7 +59,8 @@ export function DashboardHeader({ title, subtitle, showDateTime = true }: Dashbo
           )}
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <BusinessPortalSwitcher />
         <LanguageSwitcherWithFlags />
         <ThemeToggle />
         <button
