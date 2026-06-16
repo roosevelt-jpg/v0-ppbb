@@ -16,10 +16,10 @@ export default function IntegrationsPage() {
 
   useEffect(() => {
     loadData()
-  }, [auth.user])
+  }, [auth.firebaseUser])
 
   async function loadData() {
-    if (!auth.user) {
+    if (!auth.firebaseUser) {
       console.log('[v0] No auth user yet, skipping load')
       setLoading(false)
       return
@@ -27,7 +27,7 @@ export default function IntegrationsPage() {
     
     setLoading(true)
     try {
-      const token = await auth.user.getIdToken()
+      const token = await auth.firebaseUser.getIdToken()
       console.log('[v0] Got token, fetching integrations...')
       
       const [integrationsRes, healthRes] = await Promise.all([

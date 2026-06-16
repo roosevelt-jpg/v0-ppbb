@@ -14,15 +14,15 @@ export default function IntegrationHealthPage() {
 
   useEffect(() => {
     loadHealth()
-  }, [auth.user])
+  }, [auth.firebaseUser])
 
   async function loadHealth() {
-    if (!auth.user) {
+    if (!auth.firebaseUser) {
       setLoading(false)
       return
     }
     try {
-      const token = await auth.user.getIdToken()
+      const token = await auth.firebaseUser.getIdToken()
       const response = await fetch('/api/admin/integrations/health', {
         headers: { Authorization: `Bearer ${token}` },
       })

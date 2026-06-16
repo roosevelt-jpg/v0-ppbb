@@ -18,14 +18,14 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   async function handleSave() {
-    if (!auth.user) {
+    if (!auth.firebaseUser) {
       console.log('[v0] No authenticated user')
       setMessage({ type: 'error', text: 'Not authenticated' })
       return
     }
     setLoading(true)
     try {
-      const token = await auth.user.getIdToken()
+      const token = await auth.firebaseUser.getIdToken()
       console.log('[v0] Got token, saving integration:', service.id)
       
       const endpoint = integration ? `/api/admin/integrations/${service.id}` : '/api/admin/integrations'
