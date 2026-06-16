@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { db } from '@/lib/firebase'
 import { collection, getDocs } from 'firebase/firestore'
 import { getPagesByMenuLocation } from '@/lib/admin'
-import { Mail, Heart, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
+import { Mail, Heart, Users, Share2, MessageSquare, Briefcase } from 'lucide-react'
 import { Page } from '@/lib/types'
 
 interface Stats {
@@ -225,10 +225,10 @@ export function Footer() {
             </div>
             <div className="flex gap-4 mt-4 sm:mt-0">
               {[
-                { label: 'Facebook', key: 'facebook', icon: Facebook },
-                { label: 'Twitter', key: 'twitter', icon: Twitter },
-                { label: 'Instagram', key: 'instagram', icon: Instagram },
-                { label: 'LinkedIn', key: 'linkedin', icon: Linkedin },
+                { label: 'Facebook', key: 'facebook', icon: Users },
+                { label: 'Twitter', key: 'twitter', icon: Share2 },
+                { label: 'Instagram', key: 'instagram', icon: MessageSquare },
+                { label: 'LinkedIn', key: 'linkedin', icon: Briefcase },
               ].map((social) => {
                 const href = socialLinks[social.key as keyof SocialLinks]
                 const Icon = social.icon

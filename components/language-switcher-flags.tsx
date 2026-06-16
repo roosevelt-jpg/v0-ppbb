@@ -108,11 +108,6 @@ export function LanguageSwitcherWithFlags() {
           </div>
         </div>
       )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
