@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
-import { LanguageSelector } from './language-selector'
+import { LanguageSwitcherWithFlags } from './language-switcher-flags'
 import { getPagesByMenuLocation } from '@/lib/admin'
 import { Page } from '@/lib/types'
 
@@ -68,7 +68,7 @@ export function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <LanguageSelector />
+            <LanguageSwitcherWithFlags />
             <ThemeToggle />
 
             <Link
@@ -97,6 +97,7 @@ export function Navbar() {
           />
         </Link>
         <div className="flex items-center gap-2">
+          <LanguageSwitcherWithFlags />
           <ThemeToggle />
           <button
             className="p-2 -mr-2 text-white"
@@ -122,9 +123,9 @@ export function Navbar() {
             </Link>
           ))}
 
-          {/* Language Selector Mobile */}
+          {/* Language Switcher Mobile */}
           <div className="border-t border-neutral-700 px-4 py-3">
-            <LanguageSelector mobile />
+            <LanguageSwitcherWithFlags />
           </div>
 
           {/* Mobile Login Section */}

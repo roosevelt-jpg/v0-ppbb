@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
 import { LogOut, Settings, BarChart3, Briefcase, TrendingUp, Users, ShoppingBag, Zap, DollarSign, Heart, Share2, LayoutGrid, Menu, X } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
 
 const businessMenuItems = [
   { label: 'Dashboard', href: '/admin/business/dashboard', icon: BarChart3 },
@@ -197,17 +199,21 @@ export default function BusinessLayout({
           <h1 style={{ color: '#111111', fontSize: '20px', fontWeight: 700 }}>
             Business Portal
           </h1>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            style={{
-              backgroundColor: '#transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-            }}
-          >
-            {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <LanguageSwitcherWithFlags />
+            <ThemeToggle />
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              style={{
+                backgroundColor: '#transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px',
+              }}
+            >
+              {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Content */}

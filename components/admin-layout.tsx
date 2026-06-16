@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
 import { logoutUser } from '@/lib/auth'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
@@ -315,6 +316,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
         </div>
       </div>
       <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap justify-end">
+        <LanguageSwitcherWithFlags />
         <ThemeToggle />
         
         {/* Message Notification Badge */}
