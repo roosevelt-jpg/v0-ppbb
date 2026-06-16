@@ -90,28 +90,34 @@ export default function FAQPage() {
       <Navbar />
       <main className="min-h-screen bg-neutral-50 py-10 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <section className="max-w-3xl mx-auto mb-12 sm:mb-16 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4 sm:mb-6 text-balance">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-base sm:text-lg text-neutral-600 mb-8 sm:mb-10">
-            Find answers to common questions about Passive Blessings, our community, sponsorships, and more.
-          </p>
-
-          {/* Search Box */}
-          <div className="max-w-xl mx-auto mb-10 sm:mb-12">
-            <input
-              type="text"
-              placeholder="Search FAQs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
-              aria-label="Search FAQs"
-            />
+        <section className="max-w-6xl mx-auto mb-12 sm:mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-start">
+            {/* Left: Title and Description */}
+            <div className="lg:col-span-2">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 mb-6 leading-tight">
+                Frequently Asked Questions
+              </h1>
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
+                Find answers to common questions about Passive Blessings, our community, sponsorships, and more.
+              </p>
+            </div>
+            
+            {/* Right: Search Bar */}
+            <div className="lg:col-span-1">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search FAQs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-start">
             <button
               onClick={() => setSelectedCategory('all')}
               className={`px-4 sm:px-6 py-2 rounded-full font-semibold text-sm sm:text-base transition-all ${
@@ -139,7 +145,7 @@ export default function FAQPage() {
         </section>
 
         {/* FAQs List */}
-        <section className="max-w-3xl mx-auto">
+        <section className="max-w-6xl mx-auto">
           {loading ? (
             <div className="text-center py-12 sm:py-16">
               <p className="text-neutral-600 text-base sm:text-lg">Loading FAQs...</p>
@@ -203,7 +209,7 @@ export default function FAQPage() {
         </section>
 
         {/* Contact Section */}
-        <section className="max-w-3xl mx-auto mt-16 sm:mt-20 px-4">
+        <section className="max-w-6xl mx-auto mt-16 sm:mt-20">
           <div className="bg-neutral-100 p-8 sm:p-10 rounded-lg text-center">
             <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3 sm:mb-4">
               Didn&apos;t find your answer?
