@@ -143,12 +143,19 @@ export const deleteFAQ = async (id: string) => {
 }
 
 // Toggle FAQ active status
-export const toggleFAQStatus = async (id: string, isActive: boolean) => {
+export const toggleFAQStatus = async (id: string) => {
   try {
-    await updateDoc(doc(db, FAQ_COLLECTION, id), {
-      isActive,
-      updatedAt: new Date(),
-    })
+    const faqRef = doc(db, FAQ_COLLECTION, id)
+    const faqSnap = await getDocs(query(collection(db, FAQ_COLLECTION)))
+    const faq = faqSnap.docs.find(d => d.id === id)
+    
+    if (faq) {
+      const currentStatus = faq.data().isActive || false
+      await updateDoc(faqRef, {
+        isActive: !currentStatus,
+        updatedAt: new Date(),
+      })
+    }
   } catch (error) {
     console.error('Error toggling FAQ status:', error)
     throw error

@@ -264,14 +264,14 @@ export default function FAQManagementPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-neutral-400"
+                className="flex-1 px-6 py-2 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-600"
               >
                 {loading ? 'Saving...' : editingId ? 'Update FAQ' : 'Create FAQ'}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex-1 px-6 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-semibold hover:bg-neutral-400 transition-colors"
+                className="flex-1 px-6 py-2 bg-gray-200 text-gray-900 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
               >
                 Cancel
               </button>
