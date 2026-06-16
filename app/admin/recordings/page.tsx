@@ -27,19 +27,49 @@ export default function AdminRecordingsPage() {
   })
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'recordings'), orderBy('createdAt', 'desc')),
-      (snapshot) => {
-        setRecordings(snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-        } as Recording)))
+    let isMounted = true
+    let unsubscribe: any
+
+    try {
+      unsubscribe = onSnapshot(
+        query(collection(db, 'recordings'), orderBy('createdAt', 'desc')),
+        (snapshot) => {
+          if (!isMounted) return
+          setRecordings(snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+            updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+          } as Recording)))
+          setLoading(false)
+        },
+        (error) => {
+          console.error('[v0] Error loading recordings:', error)
+          if (isMounted) {
+            setLoading(false)
+            setRecordings([])
+          }
+        }
+      )
+    } catch (error) {
+      console.error('[v0] Error setting up recordings listener:', error)
+      setLoading(false)
+      setRecordings([])
+    }
+
+    // Set a timeout to ensure loading state doesn't hang forever
+    const timeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('[v0] Recordings loading timeout - displaying empty state')
         setLoading(false)
       }
-    )
-    return unsubscribe
+    }, 5000)
+
+    return () => {
+      isMounted = false
+      clearTimeout(timeout)
+      if (unsubscribe) unsubscribe()
+    }
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {

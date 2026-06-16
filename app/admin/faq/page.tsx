@@ -164,16 +164,44 @@ export default function AdminFAQPage() {
   const [showForm, setShowForm] = useState(false)
 
   useEffect(() => {
-    const unsubscribe = getAllFAQsAdmin((foundFaqs) => {
-      if (foundFaqs.length === 0) {
-        initializeDefaultFAQs()
-      } else {
-        setFaqs(foundFaqs)
-      }
-      setLoading(false)
-    })
+    let isMounted = true
+    let unsubscribe: any
 
-    return unsubscribe
+    const loadFAQs = async () => {
+      try {
+        unsubscribe = getAllFAQsAdmin((foundFaqs) => {
+          if (!isMounted) return
+          if (foundFaqs.length === 0) {
+            initializeDefaultFAQs()
+          } else {
+            setFaqs(foundFaqs)
+          }
+          setLoading(false)
+        })
+      } catch (error) {
+        console.error('[v0] Error loading FAQs:', error)
+        if (isMounted) {
+          setLoading(false)
+          setFaqs([])
+        }
+      }
+    }
+
+    // Set a timeout to ensure loading state doesn't hang forever
+    const timeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('[v0] FAQ loading timeout - displaying empty state')
+        setLoading(false)
+      }
+    }, 5000)
+
+    loadFAQs()
+
+    return () => {
+      isMounted = false
+      clearTimeout(timeout)
+      if (unsubscribe) unsubscribe()
+    }
   }, [])
 
   const initializeDefaultFAQs = async () => {

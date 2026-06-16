@@ -76,22 +76,32 @@ export const searchFAQs = (searchTerm: string, callback: (faqs: FAQ[]) => void) 
 
 // Get all FAQs (admin view - including inactive)
 export const getAllFAQsAdmin = (callback: (faqs: FAQ[]) => void) => {
-  const q = query(collection(db, FAQ_COLLECTION), orderBy('order', 'asc'))
-  return onSnapshot(q, (snapshot) => {
-    const faqs = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-    })) as FAQ[]
-    // Sort by category first, then by order
-    callback(faqs.sort((a, b) => {
-      if (a.category !== b.category) {
-        return a.category.localeCompare(b.category)
-      }
-      return a.order - b.order
-    }))
-  })
+  try {
+    const q = query(collection(db, FAQ_COLLECTION), orderBy('order', 'asc'))
+    return onSnapshot(q, (snapshot) => {
+      const faqs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+        updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+      })) as FAQ[]
+      // Sort by category first, then by order
+      callback(faqs.sort((a, b) => {
+        if (a.category !== b.category) {
+          return a.category.localeCompare(b.category)
+        }
+        return a.order - b.order
+      }))
+    }, (error) => {
+      console.error('[v0] Error in getAllFAQsAdmin:', error)
+      // Return empty array instead of hanging
+      callback([])
+    })
+  } catch (error) {
+    console.error('[v0] Error setting up FAQ listener:', error)
+    callback([])
+    return () => {} // Return noop unsubscribe
+  }
 }
 
 // Add FAQ
