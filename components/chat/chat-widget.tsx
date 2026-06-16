@@ -214,16 +214,24 @@ export function ChatWidget() {
           <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-neutral-50">
             {messages.map((message, idx) => (
               <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
-                <div className="max-w-sm sm:max-w-md">
+                <div className={`${message.role === 'user' ? 'max-w-[calc(100%-24px)]' : 'max-w-[calc(100%-24px)]'}`}>
                   <div
-                    className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm break-words whitespace-normal overflow-hidden ${
+                    className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm ${
                       message.role === 'user'
                         ? 'text-white rounded-br-none'
                         : 'bg-white text-neutral-900 rounded-bl-none border border-neutral-200'
                     }`}
-                    style={message.role === 'user' ? { backgroundColor: '#111111', maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word' } : { maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                    style={{
+                      ...(message.role === 'user' ? { backgroundColor: '#111111' } : {}),
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      wordBreak: 'break-word',
+                      display: 'block',
+                    }}
                   >
-                    <p className="leading-relaxed" style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{message.content}</p>
+                    <p className="leading-relaxed" style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      {message.content}
+                    </p>
                   </div>
                   {/* FAQ Source Badge */}
                   {message.faqSource && (
