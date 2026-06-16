@@ -468,10 +468,19 @@ export interface ApiConfig {
 // Newsletter
 export interface Newsletter {
   id: string
-  email: string
-  subscribedAt: Date
-  unsubscribedAt?: Date
-  isActive: boolean
+  title: string
+  subject: string
+  content: string
+  template: 'classic' | 'modern' | 'minimal' | 'highlight' | 'newsletter'
+  status: 'draft' | 'scheduled' | 'sent'
+  scheduledFor?: Date
+  sentAt?: Date
+  recipientCount: number
+  openedCount: number
+  clickedCount: number
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface NewsletterTemplate {
@@ -479,7 +488,43 @@ export interface NewsletterTemplate {
   title: string
   subject: string
   content: string
+  css?: string
+  html: string
+  category: string
+  thumbnail?: string
   createdAt: Date
+}
+
+export interface NewsletterSubscriber {
+  id: string
+  email: string
+  subscribedAt: Date
+  unsubscribedAt?: Date
+  isActive: boolean
+}
+
+export interface Conversation {
+  id: string
+  userId: string
+  userEmail?: string
+  userRole: string
+  title: string
+  messages: Array<{
+    role: 'user' | 'assistant'
+    content: string
+    timestamp: Date
+    faqSourceId?: string
+  }>
+  status: 'active' | 'archived' | 'resolved'
+  category?: string
+  sentiment?: string
+  faqSourceId?: string
+  createdAt: Date
+  lastMessageAt: Date
+  adminReply?: string
+  adminResolved?: boolean
+  adminReplyAt?: Date
+  updatedAt: Date
 }
 
 // System Health

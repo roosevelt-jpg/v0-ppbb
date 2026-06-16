@@ -88,233 +88,154 @@ export default function FAQPage() {
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: '100vh', backgroundColor: '#f9f7f4', paddingTop: '40px', paddingBottom: '60px' }}>
-      {/* Header */}
-      <section style={{ textAlign: 'center', marginBottom: '48px', paddingX: '20px' }}>
-        <h1 style={{ fontSize: '48px', fontWeight: 700, color: '#111111', marginBottom: '16px', textAlign: 'center' }}>
-          Frequently Asked Questions
-        </h1>
-        <p style={{ fontSize: '18px', color: '#666', marginBottom: '32px', maxWidth: '600px', margin: '0 auto' }}>
-          Find answers to common questions about Passive Blessings, our community, sponsorships, and more.
-        </p>
+      <main className="min-h-screen bg-neutral-50 py-10 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <section className="max-w-3xl mx-auto mb-12 sm:mb-16 text-center">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 mb-4 sm:mb-6 text-balance">
+            Frequently Asked Questions
+          </h1>
+          <p className="text-base sm:text-lg text-neutral-600 mb-8 sm:mb-10">
+            Find answers to common questions about Passive Blessings, our community, sponsorships, and more.
+          </p>
 
-        {/* Search Box */}
-        <div style={{ maxWidth: '500px', margin: '0 auto', marginBottom: '32px' }}>
-          <input
-            type="text"
-            placeholder="Search FAQs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              border: '2px solid #e4e1da',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontFamily: 'inherit',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
+          {/* Search Box */}
+          <div className="max-w-xl mx-auto mb-10 sm:mb-12">
+            <input
+              type="text"
+              placeholder="Search FAQs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
+              aria-label="Search FAQs"
+            />
+          </div>
 
-        {/* Category Filter */}
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', maxWidth: '800px', margin: '0 auto' }}>
-          <button
-            onClick={() => setSelectedCategory('all')}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '20px',
-              border: 'none',
-              backgroundColor: selectedCategory === 'all' ? '#111111' : '#e4e1da',
-              color: selectedCategory === 'all' ? '#fff' : '#111111',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            All
-          </button>
-          {categories.map((category) => (
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: 'none',
-                backgroundColor: selectedCategory === category ? '#111111' : '#e4e1da',
-                color: selectedCategory === category ? '#fff' : '#111111',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                textTransform: 'capitalize',
-              }}
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 sm:px-6 py-2 rounded-full font-semibold text-sm sm:text-base transition-all ${
+                selectedCategory === 'all'
+                  ? 'bg-neutral-900 text-white'
+                  : 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
+              }`}
             >
-              {category}
+              All
             </button>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQs List */}
-      <section style={{ maxWidth: '800px', margin: '0 auto', paddingX: '20px', paddingLeft: '20px', paddingRight: '20px' }}>
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ color: '#666' }}>Loading FAQs...</p>
-          </div>
-        ) : filteredFaqs.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ color: '#666', fontSize: '16px' }}>
-              {searchTerm ? 'No FAQs found matching your search.' : 'No FAQs available in this category.'}
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {filteredFaqs.map((faq) => (
-              <div
-                key={faq.id}
-                style={{
-                  border: '2px solid #e4e1da',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  backgroundColor: '#fff',
-                }}
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 sm:px-6 py-2 rounded-full font-semibold text-sm sm:text-base transition-all capitalize ${
+                  selectedCategory === category
+                    ? 'bg-neutral-900 text-white'
+                    : 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
+                }`}
               >
-                <button
-                  onClick={() => toggleExpand(faq.id)}
-                  style={{
-                    width: '100%',
-                    padding: '20px',
-                    backgroundColor: '#fff',
-                    border: 'none',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9f7f4'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
-                >
-                  <span style={{ fontSize: '16px', fontWeight: 600, color: '#111111' }}>{faq.question}</span>
-                  <span style={{ fontSize: '20px', color: '#666', transition: 'transform 0.2s', transform: expandedItems.has(faq.id) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                    ▼
-                  </span>
-                </button>
-
-                {expandedItems.has(faq.id) && (
-                  <div style={{ padding: '0 20px 20px 20px', borderTop: '1px solid #e4e1da', backgroundColor: '#fafaf8' }}>
-                    <p style={{ margin: '16px 0', lineHeight: '1.6', color: '#444' }}>{faq.answer}</p>
-
-                    {/* Helpful Buttons */}
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', color: '#666' }}>Was this helpful?</span>
-                      <button
-                        onClick={() => handleHelpful(faq.id, true)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#e8f5e9',
-                          border: '1px solid #4caf50',
-                          borderRadius: '4px',
-                          color: '#2e7d32',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#4caf50'
-                          e.currentTarget.style.color = '#fff'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#e8f5e9'
-                          e.currentTarget.style.color = '#2e7d32'
-                        }}
-                      >
-                        👍 Yes ({faq.helpful})
-                      </button>
-                      <button
-                        onClick={() => handleHelpful(faq.id, false)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#ffebee',
-                          border: '1px solid #f44336',
-                          borderRadius: '4px',
-                          color: '#c62828',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#f44336'
-                          e.currentTarget.style.color = '#fff'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#ffebee'
-                          e.currentTarget.style.color = '#c62828'
-                        }}
-                      >
-                        👎 No ({faq.notHelpful})
-                      </button>
-                      <span style={{ fontSize: '12px', color: '#999', marginLeft: 'auto' }}>Views: {faq.views}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+                {category}
+              </button>
             ))}
           </div>
-        )}
-      </section>
+        </section>
 
-      {/* Contact Section */}
-      <section style={{ maxWidth: '800px', margin: '60px auto 0', paddingX: '20px', textAlign: 'center', paddingLeft: '20px', paddingRight: '20px' }}>
-        <div style={{ backgroundColor: '#f0ebe5', padding: '40px', borderRadius: '12px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111111', marginBottom: '16px' }}>Didn&apos;t find your answer?</h2>
-          <p style={{ color: '#666', marginBottom: '24px' }}>Contact our support team or visit our ChatBot for immediate assistance.</p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a
-              href="mailto:support@passiveblessings.com"
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#111111',
-                color: '#fff',
-                textDecoration: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 600,
-                display: 'inline-block',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              Email Support
-            </a>
-            <a
-              href="/chatbot"
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#111111',
-                color: '#fff',
-                textDecoration: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 600,
-                display: 'inline-block',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              Ask ChatBot
-            </a>
+        {/* FAQs List */}
+        <section className="max-w-3xl mx-auto">
+          {loading ? (
+            <div className="text-center py-12 sm:py-16">
+              <p className="text-neutral-600 text-base sm:text-lg">Loading FAQs...</p>
+            </div>
+          ) : filteredFaqs.length === 0 ? (
+            <div className="text-center py-12 sm:py-16">
+              <p className="text-neutral-600 text-base sm:text-lg">
+                {searchTerm ? 'No FAQs found matching your search.' : 'No FAQs available in this category.'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 sm:space-y-4">
+              {filteredFaqs.map((faq) => (
+                <div key={faq.id} className="border-2 border-neutral-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
+                  <button
+                    onClick={() => toggleExpand(faq.id)}
+                    className="w-full px-4 sm:px-6 py-4 sm:py-5 bg-white hover:bg-neutral-50 transition-colors flex justify-between items-start sm:items-center gap-4 text-left"
+                    aria-expanded={expandedItems.has(faq.id)}
+                  >
+                    <span className="text-base sm:text-lg font-semibold text-neutral-900 flex-1 break-words">
+                      {faq.question}
+                    </span>
+                    <span
+                      className="text-xl sm:text-2xl text-neutral-600 flex-shrink-0 transition-transform"
+                      style={{ transform: expandedItems.has(faq.id) ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    >
+                      ▼
+                    </span>
+                  </button>
+
+                  {expandedItems.has(faq.id) && (
+                    <div className="px-4 sm:px-6 py-4 sm:py-5 border-t-2 border-neutral-200 bg-neutral-50">
+                      <p className="text-neutral-700 leading-relaxed mb-4 sm:mb-6 text-sm sm:text-base">
+                        {faq.answer}
+                      </p>
+
+                      {/* Helpful Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
+                        <span className="text-xs sm:text-sm text-neutral-600 font-medium">Was this helpful?</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleHelpful(faq.id, true)}
+                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-50 hover:bg-green-100 border border-green-300 rounded text-green-700 text-xs sm:text-sm font-semibold transition-colors"
+                          >
+                            👍 Yes ({faq.helpful})
+                          </button>
+                          <button
+                            onClick={() => handleHelpful(faq.id, false)}
+                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-50 hover:bg-red-100 border border-red-300 rounded text-red-700 text-xs sm:text-sm font-semibold transition-colors"
+                          >
+                            👎 No ({faq.notHelpful})
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Contact Section */}
+        <section className="max-w-3xl mx-auto mt-16 sm:mt-20 px-4">
+          <div className="bg-neutral-100 p-8 sm:p-10 rounded-lg text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3 sm:mb-4">
+              Didn&apos;t find your answer?
+            </h2>
+            <p className="text-neutral-600 mb-6 sm:mb-8 text-base sm:text-lg">
+              Contact our support team or visit our ChatBot for immediate assistance.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <a
+                href="mailto:support@passiveblessings.com"
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-neutral-900 text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-neutral-800 transition-colors"
+              >
+                Email Support
+              </a>
+              <button
+                onClick={() => {
+                  // This would open the chat widget
+                  const chatButton = document.querySelector('button[aria-label="Open chat"]')
+                  if (chatButton) {
+                    (chatButton as HTMLButtonElement).click()
+                  }
+                }}
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-neutral-900 text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-neutral-800 transition-colors"
+              >
+                Ask ChatBot
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       </main>
       <Footer />
     </>
   )
 }
+
