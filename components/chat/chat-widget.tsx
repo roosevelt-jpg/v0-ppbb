@@ -213,17 +213,17 @@ export function ChatWidget() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-neutral-50">
             {messages.map((message, idx) => (
-              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className="max-w-xs sm:max-w-sm">
+              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
+                <div className="max-w-sm sm:max-w-md">
                   <div
-                    className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm break-words ${
+                    className={`px-4 sm:px-5 py-2 sm:py-3 rounded-lg text-sm sm:text-base break-words whitespace-normal ${
                       message.role === 'user'
                         ? 'text-white rounded-br-none'
                         : 'bg-white text-neutral-900 rounded-bl-none border border-neutral-200'
                     }`}
                     style={message.role === 'user' ? { backgroundColor: '#111111' } : {}}
                   >
-                    <p className="leading-relaxed">{message.content}</p>
+                    <p className="leading-relaxed word-break break-word">{message.content}</p>
                   </div>
                   {/* FAQ Source Badge */}
                   {message.faqSource && (
