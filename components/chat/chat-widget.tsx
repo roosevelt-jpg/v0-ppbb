@@ -195,7 +195,7 @@ export function ChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-80 h-96 sm:w-96 sm:h-[500px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-72 h-96 sm:w-96 sm:h-[500px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200 max-w-[calc(100vw-32px)]">
           {/* Header */}
           <div className="flex items-center justify-between p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div>
@@ -216,14 +216,14 @@ export function ChatWidget() {
               <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
                 <div className="max-w-sm sm:max-w-md">
                   <div
-                    className={`px-4 sm:px-5 py-2 sm:py-3 rounded-lg text-sm sm:text-base break-words whitespace-normal ${
+                    className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm break-words whitespace-normal overflow-hidden ${
                       message.role === 'user'
                         ? 'text-white rounded-br-none'
                         : 'bg-white text-neutral-900 rounded-bl-none border border-neutral-200'
                     }`}
-                    style={message.role === 'user' ? { backgroundColor: '#111111' } : {}}
+                    style={message.role === 'user' ? { backgroundColor: '#111111', maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word' } : { maxWidth: '100%', wordWrap: 'break-word', overflowWrap: 'break-word' }}
                   >
-                    <p className="leading-relaxed word-break break-word">{message.content}</p>
+                    <p className="leading-relaxed" style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}>{message.content}</p>
                   </div>
                   {/* FAQ Source Badge */}
                   {message.faqSource && (

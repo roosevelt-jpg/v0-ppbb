@@ -246,6 +246,27 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* YOUTUBE VIDEOS SECTION */}
+      {youtubeConfig && youtubeConfig.isEnabled ? (
+        <YouTubeWidget config={youtubeConfig} />
+      ) : (
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 font-playfair">
+                Featured Videos
+              </h2>
+              <p className="text-sm sm:text-base text-[#888888] mb-6">
+                Check back soon for our latest videos and tutorials.
+              </p>
+              <div className="bg-white border-2 border-dashed border-[#e4e1da] rounded-lg py-12 sm:py-16">
+                <p className="text-[#888888] text-sm">No videos configured yet</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ACTIVE CAUSES - Mobile First */}
       {causes.length > 0 && (
         <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">

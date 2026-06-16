@@ -168,7 +168,11 @@ export default function ContactPage() {
               {/* Social Media */}
               <div className="pt-4 border-t">
                 <p className="text-xs uppercase font-medium text-gray-500 mb-3">Follow Us</p>
-                <SocialMediaLinks links={contactInfo.socialLinks} size="md" />
+                {Object.keys(contactInfo.socialLinks).length > 0 ? (
+                  <SocialMediaLinks links={contactInfo.socialLinks} size="md" />
+                ) : (
+                  <p className="text-xs text-gray-400">No social media links configured</p>
+                )}
               </div>
             </div>
 
