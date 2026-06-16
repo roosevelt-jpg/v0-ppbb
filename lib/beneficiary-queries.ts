@@ -16,6 +16,7 @@ import {
   Query,
   DocumentData,
   Unsubscribe,
+  addDoc,
 } from 'firebase/firestore'
 import {
   BeneficiarySupportRequest,
@@ -491,6 +492,36 @@ export async function updateBeneficiaryConsent(
     await updateDoc(doc(db, 'beneficiaryConsents', consentId), updates)
   } catch (error) {
     console.error('[v0] Error updating consent:', error)
+    throw error
+  }
+}
+
+// Update beneficiary request details (admin only)
+export async function updateBeneficiaryRequest(
+  requestId: string,
+  updates: Partial<BeneficiarySupportRequest>,
+  adminId: string
+): Promise<void> {
+  try {
+    const requestRef = doc(db, 'beneficiaryRequests', requestId)
+    
+    // Add admin metadata
+    await updateDoc(requestRef, {
+      ...updates,
+      lastUpdatedBy: adminId,
+      lastUpdatedAt: Timestamp.now(),
+    })
+
+    // Log the update in audit trail
+    await addDoc(collection(db, 'adminAuditLogs'), {
+      action: 'update_beneficiary_request',
+      adminId,
+      requestId,
+      changes: updates,
+      timestamp: Timestamp.now(),
+    })
+  } catch (error) {
+    console.error('[v0] Error updating beneficiary request:', error)
     throw error
   }
 }

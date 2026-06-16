@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { X, Send, AlertCircle, CheckCircle2, User } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 interface Message {
@@ -86,8 +86,21 @@ export function ChatWidget() {
     }
 
     if (!conversationId) {
-      // Try to initialize if not already done
+      // Initialize conversation and wait for it to complete
       await initializeConversation()
+      // Don't return - we'll send the message after initialization
+      // However, we need to wait a bit for state to update
+      setError('')
+      const userMessage: Message = {
+        role: 'user',
+        content: input,
+        timestamp: new Date(),
+      }
+      setMessages(prev => [...prev, userMessage])
+      setInput('')
+      setLoading(true)
+      // Give a tiny delay for conversationId to be set
+      await new Promise(resolve => setTimeout(resolve, 500))
       return
     }
 
@@ -104,26 +117,37 @@ export function ChatWidget() {
     setLoading(true)
 
     try {
-      // Send message to chat API
+      // Send message to chat API with all previous messages
+      const allMessages = [...messages, userMessage].map(m => ({
+        role: m.role,
+        content: m.content,
+      }))
+
+      console.log('[v0] Sending message to API:', { conversationId, messageCount: allMessages.length })
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: messages.map(m => ({
-            role: m.role,
-            content: m.content,
-          })).concat({ role: 'user', content: userMessage.content }),
+          messages: allMessages,
           conversationId,
           userId: user?.id || 'anonymous',
         }),
       })
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to send message')
+        let errorMsg = 'Failed to send message'
+        try {
+          const data = await response.json()
+          errorMsg = data.error || errorMsg
+        } catch (e) {
+          // Response body not JSON
+        }
+        throw new Error(errorMsg)
       }
 
       const data = await response.json()
+      console.log('[v0] API response:', data)
 
       if (data.message) {
         const assistantMessage: Message = {
@@ -133,6 +157,8 @@ export function ChatWidget() {
           faqSource: data.faqSource,
         }
         setMessages(prev => [...prev, assistantMessage])
+      } else {
+        throw new Error('No message in response')
       }
     } catch (error) {
       console.error('[v0] Chat error:', error)
@@ -157,13 +183,13 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 text-xl sm:text-2xl"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
           style={{ backgroundColor: '#111111' }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
           aria-label="Open chat"
         >
-          💬
+          <User className="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
       )}
 

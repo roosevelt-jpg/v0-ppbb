@@ -3,284 +3,116 @@
 import React, { useState, useEffect } from 'react'
 import { FAQ } from '@/lib/types'
 import { getAllFAQsAdmin, addFAQ, updateFAQ, deleteFAQ, toggleFAQStatus } from '@/lib/faq-queries'
+import { Edit2, Trash2, Eye, EyeOff, Plus, X } from 'lucide-react'
 
-const DEFAULT_FAQS: Omit<FAQ, 'id'>[] = [
-  {
-    question: 'What is Passive Blessings?',
-    answer: 'Passive Blessings is a community-driven platform dedicated to connecting members, volunteers, businesses, and sponsors to create meaningful social impact. We facilitate volunteering, charitable giving, community support, and partnerships.',
-    category: 'general',
-    keywords: ['what', 'passive', 'blessings', 'platform', 'community'],
-    order: 1,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'How do I become a member?',
-    answer: 'You can register on our website by providing your basic information. Choose your role (Member, Volunteer, Business, or Sponsor) and complete your profile. Membership is free and open to all.',
-    category: 'general',
-    keywords: ['member', 'register', 'signup', 'join', 'account'],
-    order: 2,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'What are the membership tiers?',
-    answer: 'We offer three membership tiers: Standard (free), Gold (premium features), and Platinum (full access). Each tier provides different benefits and features.',
-    category: 'general',
-    keywords: ['membership', 'tiers', 'standard', 'gold', 'platinum'],
-    order: 3,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'How can I volunteer?',
-    answer: 'Browse our volunteering opportunities on the dashboard. Select opportunities that match your skills and interests, apply, and once approved, you can start contributing. You can track your volunteer hours on your profile.',
-    category: 'volunteering',
-    keywords: ['volunteer', 'opportunities', 'hours', 'apply', 'contribute'],
-    order: 1,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'How do I track my volunteering hours?',
-    answer: 'Your volunteer hours are automatically tracked in your dashboard. Visit the "Volunteering" section to see your total hours, monthly activity, and earned badges.',
-    category: 'volunteering',
-    keywords: ['hours', 'track', 'volunteer', 'activity', 'badges'],
-    order: 2,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'What is the sponsorship program?',
-    answer: 'Our sponsorship program allows businesses and organizations to partner with Passive Blessings to support our community initiatives. Sponsors gain visibility and recognition while supporting social causes.',
-    category: 'sponsorship',
-    keywords: ['sponsorship', 'sponsor', 'partner', 'business', 'support'],
-    order: 1,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'How can my business join the marketplace?',
-    answer: 'Register as a Business user, complete your business profile with details and logo, and start posting opportunities and offers. Your business will be visible to our community members.',
-    category: 'community',
-    keywords: ['business', 'marketplace', 'register', 'profile', 'opportunities'],
-    order: 1,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'Is there a referral program?',
-    answer: 'Yes! Our referral program rewards you for bringing new members. Share your referral code and earn benefits when they join. Check your dashboard for details.',
-    category: 'community',
-    keywords: ['referral', 'program', 'rewards', 'benefits', 'code'],
-    order: 2,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'How do I request charity support?',
-    answer: 'Visit the "Charity Support Request" page and fill out the comprehensive form with your details and supporting documents. Your request will be reviewed by our team and you\'ll be notified of the decision.',
-    category: 'support',
-    keywords: ['charity', 'support', 'request', 'help', 'assistance'],
-    order: 1,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'How is my personal data protected?',
-    answer: 'We use industry-standard encryption (AES-256) to protect all personal data. View our UAE Data Protection Policy for detailed information about how we handle your information.',
-    category: 'support',
-    keywords: ['data', 'protection', 'privacy', 'security', 'encryption'],
-    order: 2,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    question: 'What is the AI matching system?',
-    answer: 'Our AI matching system recommends volunteer opportunities and jobs based on your skills, interests, and availability. You\'ll see personalized matches on your dashboard.',
-    category: 'technical',
-    keywords: ['ai', 'matching', 'recommendations', 'smart', 'opportunities'],
-    order: 1,
-    isActive: true,
-    views: 0,
-    helpful: 0,
-    notHelpful: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-]
+const CATEGORIES = ['general', 'community', 'sponsorship', 'volunteering', 'support', 'technical']
 
-export default function AdminFAQPage() {
+export default function FAQManagementPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  
   const [formData, setFormData] = useState({
     question: '',
     answer: '',
-    category: 'general' as const,
+    category: 'general',
     keywords: '',
     order: 1,
   })
-  const [showForm, setShowForm] = useState(false)
 
+  // Load FAQs on mount
   useEffect(() => {
-    let isMounted = true
-    let unsubscribe: any
-
-    const loadFAQs = async () => {
-      try {
-        // Try to get FAQs first
-        const faqSnapshot = await new Promise((resolve) => {
-          const timeoutId = setTimeout(() => {
-            console.warn('[v0] FAQ fetch timeout after 3 seconds')
-            resolve([])
-          }, 3000)
-          
-          unsubscribe = getAllFAQsAdmin((foundFaqs) => {
-            clearTimeout(timeoutId)
-            resolve(foundFaqs)
-          })
-        })
-
-        if (!isMounted) return
-
-        if (Array.isArray(faqSnapshot) && faqSnapshot.length === 0) {
-          console.log('[v0] No FAQs found, initializing default FAQs...')
-          // Initialize default FAQs
-          for (const faq of DEFAULT_FAQS) {
-            await addFAQ(faq)
-          }
-          // After initialization, reload FAQs
-          await new Promise((resolve) => {
-            const timeoutId = setTimeout(() => {
-              console.warn('[v0] FAQ reload timeout')
-              resolve([])
-            }, 3000)
-            
-            unsubscribe = getAllFAQsAdmin((foundFaqs) => {
-              clearTimeout(timeoutId)
-              if (isMounted) {
-                setFaqs(foundFaqs)
-              }
-              resolve(foundFaqs)
-            })
-          })
-        } else if (isMounted) {
-          setFaqs(faqSnapshot as FAQ[])
-        }
-        
-        if (isMounted) {
-          setLoading(false)
-        }
-      } catch (error) {
-        console.error('[v0] Error loading FAQs:', error)
-        if (isMounted) {
-          setLoading(false)
-          setFaqs([])
-        }
-      }
-    }
-
-    // Set a maximum timeout to ensure loading state doesn't hang forever
-    const maxTimeout = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn('[v0] FAQ page loading timeout - displaying empty state')
-        setLoading(false)
-      }
-    }, 8000)
-
     loadFAQs()
-
-    return () => {
-      isMounted = false
-      clearTimeout(maxTimeout)
-      if (unsubscribe) unsubscribe()
-    }
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.question.trim() || !formData.answer.trim()) return
-
+  const loadFAQs = async () => {
     try {
-      const keywordsList = formData.keywords
-        .split(',')
-        .map(k => k.trim())
-        .filter(k => k)
+      setLoading(true)
+      setError('')
+      
+      // Set a timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('[v0] FAQ loading timeout')
+        setLoading(false)
+      }, 5000)
 
-      if (editingId) {
-        await updateFAQ(editingId, {
-          question: formData.question,
-          answer: formData.answer,
-          category: formData.category,
-          keywords: keywordsList,
-          order: formData.order,
-        })
-      } else {
-        await addFAQ({
-          question: formData.question,
-          answer: formData.answer,
-          category: formData.category,
-          keywords: keywordsList,
-          order: formData.order,
-          isActive: true,
-          views: 0,
-          helpful: 0,
-          notHelpful: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-      }
-
-      setFormData({ question: '', answer: '', category: 'general', keywords: '', order: 1 })
-      setEditingId(null)
-      setShowForm(false)
-    } catch (error) {
-      console.error('Error saving FAQ:', error)
+      getAllFAQsAdmin((loadedFaqs) => {
+        clearTimeout(timeoutId)
+        setFaqs(loadedFaqs)
+        setLoading(false)
+      })
+    } catch (err) {
+      console.error('[v0] Error loading FAQs:', err)
+      setError('Failed to load FAQs')
+      setLoading(false)
     }
   }
 
-  const handleEdit = (faq: FAQ) => {
+  const handleAddFAQ = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.question.trim() || !formData.answer.trim()) {
+      setError('Question and answer are required')
+      return
+    }
+
+    try {
+      setError('')
+      setLoading(true)
+      
+      const newFAQ: Omit<FAQ, 'id'> = {
+        question: formData.question,
+        answer: formData.answer,
+        category: formData.category as any,
+        keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k),
+        order: formData.order,
+        isActive: true,
+        views: 0,
+        helpful: 0,
+        notHelpful: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      if (editingId) {
+        // Update existing FAQ
+        await updateFAQ(editingId, newFAQ)
+        setSuccess('FAQ updated successfully!')
+        setEditingId(null)
+      } else {
+        // Add new FAQ
+        await addFAQ(newFAQ)
+        setSuccess('FAQ added successfully!')
+      }
+
+      // Reset form
+      setFormData({
+        question: '',
+        answer: '',
+        category: 'general',
+        keywords: '',
+        order: 1,
+      })
+      setShowForm(false)
+      
+      // Reload FAQs
+      await new Promise(resolve => setTimeout(resolve, 500))
+      loadFAQs()
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('[v0] Error saving FAQ:', err)
+      setError(err instanceof Error ? err.message : 'Failed to save FAQ')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEditFAQ = (faq: FAQ) => {
     setFormData({
       question: faq.question,
       answer: faq.answer,
@@ -292,192 +124,214 @@ export default function AdminFAQPage() {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this FAQ?')) {
-      try {
-        await deleteFAQ(id)
-      } catch (error) {
-        console.error('Error deleting FAQ:', error)
-      }
-    }
-  }
+  const handleDeleteFAQ = async (faqId: string) => {
+    if (!confirm('Are you sure you want to delete this FAQ?')) return
 
-  const handleToggleStatus = async (id: string, isActive: boolean) => {
     try {
-      await toggleFAQStatus(id, !isActive)
-    } catch (error) {
-      console.error('Error toggling status:', error)
+      setError('')
+      await deleteFAQ(faqId)
+      setSuccess('FAQ deleted successfully!')
+      loadFAQs()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('[v0] Error deleting FAQ:', err)
+      setError(err instanceof Error ? err.message : 'Failed to delete FAQ')
     }
   }
 
-  if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
+  const handleToggleFAQStatus = async (faq: FAQ) => {
+    try {
+      setError('')
+      await toggleFAQStatus(faq.id)
+      setSuccess(`FAQ ${faq.isActive ? 'disabled' : 'enabled'} successfully!`)
+      loadFAQs()
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err) {
+      console.error('[v0] Error toggling FAQ status:', err)
+      setError(err instanceof Error ? err.message : 'Failed to toggle FAQ status')
+    }
+  }
+
+  const handleCancel = () => {
+    setFormData({
+      question: '',
+      answer: '',
+      category: 'general',
+      keywords: '',
+      order: 1,
+    })
+    setEditingId(null)
+    setShowForm(false)
+    setError('')
+  }
 
   return (
-    <div style={{ padding: '30px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#111111' }}>FAQ Management</h1>
-        <button
-          onClick={() => {
-            setShowForm(!showForm)
-            setEditingId(null)
-            setFormData({ question: '', answer: '', category: 'general', keywords: '', order: 1 })
-          }}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#111111',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 600,
-          }}
-        >
-          {showForm ? 'Cancel' : 'Add FAQ'}
-        </button>
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-neutral-900">FAQ Management</h1>
+          <p className="text-neutral-600 mt-2">Create, edit, and manage frequently asked questions</p>
+        </div>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 px-6 py-2 bg-neutral-900 text-white rounded-lg font-semibold hover:bg-neutral-800 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add FAQ
+          </button>
+        )}
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} style={{ backgroundColor: '#f9f7f4', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Question</label>
-            <input
-              type="text"
-              value={formData.question}
-              onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-              style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', boxSizing: 'border-box' }}
-              required
-            />
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Answer</label>
-            <textarea
-              value={formData.answer}
-              onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-              style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', minHeight: '120px', boxSizing: 'border-box', fontFamily: 'inherit' }}
-              required
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', boxSizing: 'border-box' }}
-              >
-                <option value="general">General</option>
-                <option value="community">Community</option>
-                <option value="sponsorship">Sponsorship</option>
-                <option value="volunteering">Volunteering</option>
-                <option value="support">Support</option>
-                <option value="technical">Technical</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Order</label>
-              <input
-                type="number"
-                value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', boxSizing: 'border-box' }}
-                min="1"
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Keywords (comma-separated)</label>
-            <input
-              type="text"
-              value={formData.keywords}
-              onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
-              style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', boxSizing: 'border-box' }}
-              placeholder="e.g., help, question, faq"
-            />
-          </div>
-
-          <button
-            type="submit"
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#111111',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
-            {editingId ? 'Update FAQ' : 'Create FAQ'}
-          </button>
-        </form>
+      {/* Messages */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
+          {success}
+        </div>
       )}
 
-      <div style={{ display: 'grid', gap: '16px' }}>
-        {faqs.map((faq) => (
-          <div key={faq.id} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', backgroundColor: faq.isActive ? '#fff' : '#f0f0f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+      {/* Form */}
+      {showForm && (
+        <div className="mb-8 p-6 bg-neutral-50 border border-neutral-200 rounded-lg">
+          <form onSubmit={handleAddFAQ} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">Question *</label>
+              <input
+                type="text"
+                value={formData.question}
+                onChange={(e) => setFormData({...formData, question: e.target.value})}
+                placeholder="Enter FAQ question..."
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">Answer *</label>
+              <textarea
+                value={formData.answer}
+                onChange={(e) => setFormData({...formData, answer: e.target.value})}
+                placeholder="Enter FAQ answer..."
+                rows={5}
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 600, color: '#111111' }}>{faq.question}</h3>
-                <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>
-                  <span style={{ backgroundColor: '#e4e1da', padding: '2px 8px', borderRadius: '4px', marginRight: '8px' }}>{faq.category}</span>
-                  Views: {faq.views} | Helpful: {faq.helpful} | Not Helpful: {faq.notHelpful}
-                </p>
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">Category</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {CATEGORIES.map(cat => (
+                    <option key={cat} value={cat} className="capitalize">
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => handleToggleStatus(faq.id, faq.isActive)}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: faq.isActive ? '#4caf50' : '#f44336',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                  }}
-                >
-                  {faq.isActive ? 'Active' : 'Inactive'}
-                </button>
-                <button
-                  onClick={() => handleEdit(faq)}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#2196f3',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(faq.id)}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#f44336',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                  }}
-                >
-                  Delete
-                </button>
+
+              <div>
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">Order</label>
+                <input
+                  type="number"
+                  value={formData.order}
+                  onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 1})}
+                  min="1"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
-            <p style={{ margin: '12px 0 0 0', fontSize: '14px', color: '#555', lineHeight: '1.5' }}>{faq.answer}</p>
+
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">Keywords (comma-separated)</label>
+              <input
+                type="text"
+                value={formData.keywords}
+                onChange={(e) => setFormData({...formData, keywords: e.target.value})}
+                placeholder="e.g. membership, join, register"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-neutral-400"
+              >
+                {loading ? 'Saving...' : editingId ? 'Update FAQ' : 'Create FAQ'}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="flex-1 px-6 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-semibold hover:bg-neutral-400 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* FAQ List */}
+      <div className="space-y-3">
+        {loading && !faqs.length ? (
+          <p className="text-center py-12 text-neutral-600">Loading FAQs...</p>
+        ) : faqs.length === 0 ? (
+          <div className="text-center py-12 bg-neutral-50 border border-neutral-200 rounded-lg">
+            <p className="text-neutral-600">No FAQs yet. Create your first one!</p>
           </div>
-        ))}
+        ) : (
+          faqs.map((faq) => (
+            <div key={faq.id} className="border border-neutral-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-neutral-900 mb-2">{faq.question}</h3>
+                  <p className="text-neutral-600 text-sm mb-3">{faq.answer}</p>
+                  <div className="flex gap-2 items-center flex-wrap">
+                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded capitalize font-medium">
+                      {faq.category}
+                    </span>
+                    <span className="text-xs text-neutral-600">
+                      Views: {faq.views} | Helpful: {faq.helpful}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleToggleFAQStatus(faq)}
+                    className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+                    title={faq.isActive ? 'Disable FAQ' : 'Enable FAQ'}
+                  >
+                    {faq.isActive ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={() => handleEditFAQ(faq)}
+                    className="p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+                    title="Edit FAQ"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteFAQ(faq.id)}
+                    className="p-2 text-red-600 hover:text-red-900 transition-colors"
+                    title="Delete FAQ"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )
