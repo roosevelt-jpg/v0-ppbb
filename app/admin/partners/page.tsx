@@ -7,12 +7,15 @@ import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
+import { uploadImageToFirebase, validateImageFile } from '@/lib/upload-utils'
 import Link from 'next/link'
 
 export default function CharityPartnersPage() {
   const [partners, setPartners] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [editingPartner, setEditingPartner] = React.useState<any>(null)
+  const [uploading, setUploading] = React.useState(false)
+  const [uploadError, setUploadError] = React.useState('')
   const [newPartner, setNewPartner] = React.useState({
     name: '',
     description: '',
@@ -38,6 +41,7 @@ export default function CharityPartnersPage() {
   const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newPartner.name.trim()) return
+    setUploadError('')
 
     await addDoc(collection(db, 'charityPartners'), {
       ...newPartner,
@@ -53,6 +57,25 @@ export default function CharityPartnersPage() {
       logo: '',
       status: 'active',
     })
+  }
+
+  const handleLogoUpload = async (file: File) => {
+    try {
+      setUploadError('')
+      setUploading(true)
+      const validation = validateImageFile(file)
+      if (!validation.valid) {
+        setUploadError(validation.error || 'Invalid file')
+        return
+      }
+      const url = await uploadImageToFirebase(file, 'partner-logos')
+      setNewPartner({ ...newPartner, logo: url })
+    } catch (error: any) {
+      setUploadError(error.message || 'Upload failed')
+      console.error('[v0] Logo upload error:', error)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleDeletePartner = async (id: string) => {
@@ -118,13 +141,21 @@ export default function CharityPartnersPage() {
               className="border rounded px-3 py-2"
               required
             />
-            <input
-              type="url"
-              placeholder="Logo URL"
-              value={newPartner.logo}
-              onChange={(e) => setNewPartner({ ...newPartner, logo: e.target.value })}
-              className="border rounded px-3 py-2"
-            />
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => e.target.files && handleLogoUpload(e.target.files[0])}
+                disabled={uploading}
+                className="border rounded px-3 py-2 w-full cursor-pointer"
+                placeholder="Upload Logo"
+              />
+              {newPartner.logo && (
+                <div className="absolute right-3 top-2 text-sm text-green-600 font-medium">
+                  ✓ Uploaded
+                </div>
+              )}
+            </div>
             <textarea
               placeholder="Partner Description"
               value={newPartner.description}
@@ -132,11 +163,17 @@ export default function CharityPartnersPage() {
               className="border rounded px-3 py-2 md:col-span-2"
               rows={3}
             />
+            {uploadError && (
+              <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+                {uploadError}
+              </div>
+            )}
             <button
               type="submit"
-              className="md:col-span-2 bg-black hover:bg-gray-800 text-white py-2 rounded font-medium"
+              disabled={uploading}
+              className="md:col-span-2 bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 rounded font-medium"
             >
-              Add Partner
+              {uploading ? 'Uploading...' : 'Add Partner'}
             </button>
           </form>
         </div>
