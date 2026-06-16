@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { X, Send, AlertCircle, CheckCircle2, User } from 'lucide-react'
+import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 
 interface Message {
@@ -183,13 +183,13 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 text-2xl"
           style={{ backgroundColor: '#111111' }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
           aria-label="Open chat"
         >
-          <User className="w-6 h-6 sm:w-7 sm:h-7" />
+          👨🏽
         </button>
       )}
 
@@ -216,7 +216,7 @@ export function ChatWidget() {
               <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className="max-w-xs sm:max-w-sm">
                   <div
-                    className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm ${
+                    className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm break-words ${
                       message.role === 'user'
                         ? 'text-white rounded-br-none'
                         : 'bg-white text-neutral-900 rounded-bl-none border border-neutral-200'
