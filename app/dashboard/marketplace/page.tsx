@@ -158,7 +158,7 @@ export default function MarketplacePage() {
               <p className="text-sm text-muted-foreground">{cart.length} items in cart</p>
               <p className="text-2xl font-bold">AED {totalPrice.toLocaleString()}</p>
             </div>
-            <Button className="bg-blue-600 text-white">Proceed to Checkout</Button>
+            <Button className="bg-black text-white hover:bg-gray-800">Proceed to Checkout</Button>
           </div>
         </Card>
       )}
