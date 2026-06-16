@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Globe } from 'lucide-react'
 
 interface LanguageSelectorProps {
@@ -10,6 +10,7 @@ interface LanguageSelectorProps {
 export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
   const [open, setOpen] = useState(false)
   const [currentLanguage, setCurrentLanguage] = useState('en')
+  const [mounted, setMounted] = useState(false)
 
   const languages = [
     { code: 'en', label: 'English' },
@@ -26,6 +27,22 @@ export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
     { code: 'ru', label: 'Русский' },
   ]
 
+  useEffect(() => {
+    // Load stored language on mount
+    const stored = localStorage.getItem('preferred-language')
+    setCurrentLanguage(stored || 'en')
+    setMounted(true)
+  }, [])
+
+  const handleLanguageChange = (code: string) => {
+    setCurrentLanguage(code)
+    localStorage.setItem('preferred-language', code)
+    window.location.reload()
+    setOpen(false)
+  }
+
+  if (!mounted) return null
+
   if (mobile) {
     return (
       <div className="w-full">
@@ -41,10 +58,7 @@ export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
             {languages.map((lang) => (
               <button
                 key={lang.code}
-                onClick={() => {
-                  setCurrentLanguage(lang.code)
-                  setOpen(false)
-                }}
+                onClick={() => handleLanguageChange(lang.code)}
                 className={`w-full px-4 py-2 text-left text-sm rounded transition-colors ${
                   currentLanguage === lang.code
                     ? 'bg-neutral-600 text-white'
@@ -75,10 +89,7 @@ export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
           {languages.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => {
-                setCurrentLanguage(lang.code)
-                setOpen(false)
-              }}
+              onClick={() => handleLanguageChange(lang.code)}
               className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                 currentLanguage === lang.code
                   ? 'bg-neutral-700 dark:bg-neutral-800 text-white'

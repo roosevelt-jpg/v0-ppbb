@@ -35,9 +35,10 @@ export function LanguageSwitcher() {
   const currentLanguage = LANGUAGES.find((l) => l.code === locale) || LANGUAGES[0]
 
   const handleLanguageChange = (code: string) => {
-    // Remove current locale from path and add new one
-    const pathWithoutLocale = pathname.replace(`/${locale}`, '')
-    router.push(`/${code}${pathWithoutLocale || '/'}`)
+    // Store language preference and stay on current page
+    localStorage.setItem('preferred-language', code)
+    // Refresh to apply language changes
+    window.location.reload()
     setOpen(false)
   }
 

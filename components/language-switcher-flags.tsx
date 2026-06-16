@@ -50,19 +50,9 @@ export function LanguageSwitcherWithFlags() {
   const currentLanguage = LANGUAGES.find((lang) => lang.code === currentLocale) || LANGUAGES[0]
 
   const handleLanguageChange = (newLocale: string) => {
-    // Store preference
+    // Store preference and reload to apply language changes
     localStorage.setItem('preferredLanguage', newLocale)
-
-    // Replace the locale in the pathname
-    const segments = pathname.split('/')
-    // Remove empty first segment and locale if present
-    const pathSegments = segments.filter(s => s && !LANGUAGES.some(l => l.code === s))
-    
-    // Build new pathname
-    const newPathname = `/${newLocale}${pathSegments.length > 0 ? '/' + pathSegments.join('/') : ''}`
-
-    // Navigate to new locale
-    router.push(newPathname)
+    window.location.reload()
     setIsOpen(false)
   }
 

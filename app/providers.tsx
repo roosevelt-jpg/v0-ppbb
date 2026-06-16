@@ -15,11 +15,18 @@ export function Providers({ children }: ProvidersProps) {
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
-    // Get locale from browser language or URL
-    const browserLocale = navigator.language.split('-')[0]
-    const locales = ['en', 'ar', 'es', 'fr', 'de', 'pt', 'ja', 'zh', 'ko', 'it', 'nl', 'ru']
-    const detectedLocale = locales.includes(browserLocale) ? browserLocale : 'en'
-    setLocale(detectedLocale)
+    // Try to get stored language preference first
+    const storedLocale = localStorage.getItem('preferred-language')
+    
+    if (storedLocale) {
+      setLocale(storedLocale)
+    } else {
+      // Fall back to browser language detection
+      const browserLocale = navigator.language.split('-')[0]
+      const locales = ['en', 'ar', 'es', 'fr', 'de', 'pt', 'ja', 'zh', 'ko', 'it', 'nl', 'ru']
+      const detectedLocale = locales.includes(browserLocale) ? browserLocale : 'en'
+      setLocale(detectedLocale)
+    }
     setMounted(true)
   }, [])
 
