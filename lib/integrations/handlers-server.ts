@@ -44,6 +44,49 @@ function getAdminDb() {
   return getFirestore(app)
 }
 
+/**
+ * Parses a Firebase service account JSON string that may have been mangled
+ * by copy/paste (e.g. a code editor or browser converting the literal "\n"
+ * escape sequence inside private_key into a real newline byte). A raw,
+ * unescaped newline inside a JSON string is invalid and throws
+ * "Bad control character in string literal in JSON".
+ *
+ * Strategy: try a normal parse first (covers well-formed input). If that
+ * fails, attempt a targeted repair that re-escapes raw control characters
+ * (newlines, carriage returns, tabs) ONLY when they appear inside the
+ * private_key value, since that's the one field that legitimately contains
+ * embedded "\n" sequences and the one place copy/paste tends to corrupt.
+ */
+function parseServiceAccountJson(input: string): any {
+  try {
+    return JSON.parse(input)
+  } catch (firstError) {
+    // Targeted repair: find the private_key field and re-escape any raw
+    // control characters within its quoted value, leaving the rest of the
+    // JSON untouched.
+    const repaired = input.replace(
+      /("private_key"\s*:\s*")([\s\S]*?)("(?:\s*,|\s*}))/,
+      (_match, prefix, keyBody, suffix) => {
+        const escaped = keyBody
+          .replace(/\r\n/g, '\\n')
+          .replace(/\r/g, '\\n')
+          .replace(/\n/g, '\\n')
+          .replace(/\t/g, '\\t')
+        return `${prefix}${escaped}${suffix}`
+      }
+    )
+
+    try {
+      return JSON.parse(repaired)
+    } catch {
+      // Repair didn't work either — surface the original error, it's more
+      // likely to point at the real problem (e.g. truncated paste, missing
+      // brace, trailing comma) than the repair attempt's error would.
+      throw firstError
+    }
+  }
+}
+
 export async function saveIntegrationServer(
   userId: string,
   serviceId: string,
@@ -54,17 +97,31 @@ export async function saveIntegrationServer(
 
     // If Firebase integration, parse the serviceAccountJson blob into individual fields
     if (serviceId === 'firebase' && credentials.serviceAccountJson) {
+      let sa: any
       try {
-        const sa = JSON.parse(credentials.serviceAccountJson)
-        credentials = {
-          ...credentials,
-          projectId: sa.project_id || sa.projectId,
-          privateKeyId: sa.private_key_id || sa.privateKeyId,
-          privateKey: sa.private_key || sa.privateKey,
-          clientEmail: sa.client_email || sa.clientEmail,
-        }
+        sa = parseServiceAccountJson(credentials.serviceAccountJson)
       } catch (parseErr) {
         throw new Error('Invalid service account JSON. Please paste the complete JSON file.')
+      }
+
+      const requiredFields = ['project_id', 'private_key', 'client_email']
+      const missing = requiredFields.filter((field) => !sa?.[field] && !sa?.[toCamelCase(field)])
+      if (missing.length > 0) {
+        throw new Error(
+          `Service account JSON is missing required field(s): ${missing.join(', ')}`
+        )
+      }
+
+      // Drop the raw blob so the private key isn't stored twice (once in
+      // the blob, once in the extracted field) once we have the parsed
+      // fields we actually need.
+      const { serviceAccountJson, ...rest } = credentials
+      credentials = {
+        ...rest,
+        projectId: sa.project_id || sa.projectId,
+        privateKeyId: sa.private_key_id || sa.privateKeyId,
+        privateKey: sa.private_key || sa.privateKey,
+        clientEmail: sa.client_email || sa.clientEmail,
       }
     }
 
@@ -78,7 +135,13 @@ export async function saveIntegrationServer(
       serviceId,
       serviceName: credentials.serviceName || serviceId,
       credentials: encrypted,
-      status: 'active',
+      // NOTE: previously hardcoded to 'active' on every save, regardless of
+      // whether the credentials were ever verified against the provider.
+      // Marking as 'pending' here is honest about the fact that we haven't
+      // confirmed this works yet. If you have (or add) a step that actually
+      // calls the provider to verify the credentials, set 'active' there
+      // instead and only fall back to 'pending'/'error' here.
+      status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -95,6 +158,10 @@ export async function saveIntegrationServer(
     console.error('[v0] Error saving integration (server):', error)
     throw error
   }
+}
+
+function toCamelCase(snake: string): string {
+  return snake.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
 }
 
 export async function getIntegrationServer(userId: string, serviceId: string): Promise<Integration | null> {
@@ -149,7 +216,7 @@ export async function deleteIntegrationServer(userId: string, serviceId: string)
 export async function updateIntegrationStatusServer(
   userId: string,
   serviceId: string,
-  status: 'active' | 'inactive' | 'error'
+  status: 'active' | 'inactive' | 'error' | 'pending'
 ): Promise<void> {
   try {
     const integrationId = `${userId}_${serviceId}`
