@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Briefcase, Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
 import { BusinessOnboardingModal, BusinessFormData } from './business-onboarding-modal'
 
 export function BusinessPortalSwitcher() {
@@ -13,13 +14,13 @@ export function BusinessPortalSwitcher() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Check if user has business role
-  const hasBusinessRole = user?.roles?.includes('business') || false
+  // Check if user has business access (business role or admin)
+  const hasBusinessRole = hasBusinessAccess(user)
 
   const handleClick = async () => {
     if (hasBusinessRole) {
-      // Direct redirect if already has business role
-      router.push('/admin/business')
+      // Direct redirect if already has business access
+      router.push('/business/dashboard')
     } else {
       // Show onboarding modal
       setIsModalOpen(true)
@@ -53,9 +54,10 @@ export function BusinessPortalSwitcher() {
 
       console.log('[v0] Business upgrade successful')
 
-      // Close modal and redirect to business portal
+      // Close modal and redirect to business portal. Reload so the auth
+      // context picks up the newly-added business role from Firestore.
       setIsModalOpen(false)
-      router.push('/admin/business')
+      window.location.href = '/business/dashboard'
     } catch (err: any) {
       console.error('[v0] Business upgrade error:', err)
       setError(err.message || 'Failed to upgrade to business')

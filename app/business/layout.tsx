@@ -1,10 +1,25 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
 import Link from 'next/link'
-import { LogOut, Settings, BarChart3, Briefcase, TrendingUp, Users, ShoppingBag, Zap, DollarSign, Heart, Share2, LayoutGrid, Menu, X } from 'lucide-react'
+import {
+  LogOut,
+  BarChart3,
+  Briefcase,
+  TrendingUp,
+  Users,
+  ShoppingBag,
+  Zap,
+  DollarSign,
+  Heart,
+  Share2,
+  LayoutGrid,
+  Menu,
+  X,
+} from 'lucide-react'
 
 const businessMenuItems = [
   { label: 'Dashboard', href: '/business/dashboard', icon: BarChart3 },
@@ -19,8 +34,9 @@ const businessMenuItems = [
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },
 ]
 
-function BusinessSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const router = useRouter()
+  const pathname = usePathname()
   const { logout } = useAuth()
 
   const handleLogout = async () => {
@@ -29,113 +45,61 @@ function BusinessSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   }
 
   return (
-    <>
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          onClick={onClose}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 30,
-          }}
-        />
-      )}
-      
-      <aside
-        style={{
-          position: isOpen ? 'fixed' : 'sticky',
-          top: 0,
-          left: 0,
-          width: '256px',
-          backgroundColor: '#ffffff',
-          borderRight: '1px solid #e4e1da',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          zIndex: 40,
-          transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.3s ease',
-        }}
-      >
-        {/* Header */}
-        <div style={{ padding: '24px', borderBottom: '1px solid #e4e1da' }}>
-          <h2 style={{ color: '#111111', fontSize: '18px', fontWeight: 700 }}>
-            Business Portal
-          </h2>
-          <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>
-            Passive Blessings
-          </p>
-        </div>
+    <div className="flex h-full min-h-screen flex-col bg-white">
+      {/* Header */}
+      <div className="border-b border-neutral-200 p-6">
+        <Link href="/business/dashboard" className="block">
+          <h2 className="text-lg font-bold text-neutral-900">Business Portal</h2>
+          <p className="mt-1 text-xs text-neutral-500">Passive Blessings</p>
+        </Link>
+      </div>
 
-        {/* Navigation */}
-        <nav style={{ flex: 1, padding: '16px', overflowY: 'auto' }} className="space-y-2">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto p-4">
+        <ul className="flex flex-col gap-1">
           {businessMenuItems.map((item) => {
             const Icon = item.icon
+            const isActive =
+              pathname === item.href || pathname?.startsWith(item.href + '/')
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  color: '#111111',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
-              >
-                <Icon className="w-4 h-4" />
-                <span style={{ fontSize: '14px', fontWeight: 500 }}>{item.label}</span>
-              </Link>
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-neutral-900 text-white'
+                      : 'text-neutral-700 hover:bg-neutral-100'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
             )
           })}
-        </nav>
+        </ul>
+      </nav>
 
-        {/* Footer */}
-        <div style={{ padding: '16px', borderTop: '1px solid #e4e1da' }}>
-          <button
-            onClick={handleLogout}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              border: '1px solid #e4e1da',
-              backgroundColor: '#ffffff',
-              color: '#111111',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 500,
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#fee2e2'
-              e.currentTarget.style.borderColor = '#dc2626'
-              e.currentTarget.style.color = '#dc2626'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#ffffff'
-              e.currentTarget.style.borderColor = '#e4e1da'
-              e.currentTarget.style.color = '#111111'
-            }}
-          >
-            <LogOut className="w-4 h-4" />
-            Sign out
-          </button>
-        </div>
-      </aside>
-    </>
+      {/* Footer */}
+      <div className="border-t border-neutral-200 p-4">
+        <Link
+          href="/dashboard"
+          onClick={onNavigate}
+          className="mb-2 flex items-center gap-3 rounded-lg border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100"
+        >
+          <Users className="h-4 w-4 shrink-0" />
+          Member Dashboard
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-red-500 hover:bg-red-50 hover:text-red-600"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          Sign out
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -148,72 +112,73 @@ export default function BusinessLayout({
   const { user, loading } = useAuth()
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
 
+  const canAccess = hasBusinessAccess(user)
+
   React.useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return
+    if (!user) {
       router.push('/login')
+    } else if (!canAccess) {
+      // Logged in but no business account yet - send to business signup
+      router.push('/business/signup')
     }
-  }, [user, loading, router])
+  }, [user, loading, canAccess, router])
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#888888' }}>Loading business portal...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
+        <p className="text-neutral-500">Loading business portal...</p>
       </div>
     )
   }
 
-  if (!user) {
+  if (!user || !canAccess) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#dc2626' }}>Access denied. Please login to access the business portal.</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
+        <p className="text-neutral-500">Redirecting...</p>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#faf9f7' }}>
+    <div className="flex min-h-screen bg-[#faf9f7]">
       {/* Desktop Sidebar */}
-      <div style={{ display: 'none', '@media (min-width: 768px)': { display: 'block' } }}>
-        <BusinessSidebar isOpen={true} onClose={() => {}} />
-      </div>
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-neutral-200 md:block">
+        <BusinessSidebarContent />
+      </aside>
 
-      {/* Mobile Sidebar */}
-      <BusinessSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      {/* Mobile Sidebar + Overlay */}
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        className={`fixed left-0 top-0 z-40 h-full w-64 transform border-r border-neutral-200 transition-transform duration-300 md:hidden ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <BusinessSidebarContent onNavigate={() => setIsSidebarOpen(false)} />
+      </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile Header */}
-        <div
-          style={{
-            display: 'none',
-            '@media (max-width: 768px)': { display: 'flex' },
-            backgroundColor: '#ffffff',
-            borderBottom: '1px solid #e4e1da',
-            padding: '16px',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <h1 style={{ color: '#111111', fontSize: '20px', fontWeight: 700 }}>
-            Business Portal
-          </h1>
+        <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-4 md:hidden">
+          <h1 className="text-xl font-bold text-neutral-900">Business Portal</h1>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            style={{
-              backgroundColor: '#transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-            }}
+            className="rounded-md p-2 text-neutral-700 hover:bg-neutral-100"
+            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
           >
-            {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1 }}>
-          {children}
-        </div>
+        <div className="flex-1 overflow-auto">{children}</div>
       </main>
     </div>
   )

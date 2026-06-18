@@ -124,6 +124,9 @@ export interface User {
   avatar?: UploadedImage
   avatarUrl?: string
   role: UserRole
+  // Additional roles a user holds beyond their primary role (e.g. a member who
+  // also runs a business). Used to grant access to the business portal.
+  roles?: UserRole[]
   phone?: string
   whatsappNumber?: string
   location?: LocationData
@@ -662,21 +665,46 @@ export interface BusinessOpportunity {
   id: string
   businessId: string
   businessName: string
+  businessLogoUrl?: string
   title: string
-  type: 'job' | 'internship' | 'gig'
+  type: 'job' | 'internship' | 'gig' | 'volunteer' | 'contract'
   description: string
   category: string
   salary?: number
   salaryRange?: { min: number; max: number }
+  compensation?: string
   location?: LocationData
+  locationText?: string
   remote: boolean
   duration?: string
   hoursPerWeek?: number
   requirements?: string[]
   benefits?: string[]
+  deadline?: Date
+  featured?: boolean
+  views?: number
   applications: number
   applicants: string[]
   status: 'open' | 'closed' | 'filled' | 'archived'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// A member's application to a business opportunity
+export interface JobApplication {
+  id: string
+  opportunityId: string
+  opportunityTitle: string
+  businessId: string
+  businessName: string
+  applicantId: string
+  applicantName: string
+  applicantEmail: string
+  applicantPhone?: string
+  applicantAvatarUrl?: string
+  coverLetter?: string
+  resumeUrl?: string
+  status: 'pending' | 'reviewing' | 'shortlisted' | 'accepted' | 'rejected'
   createdAt: Date
   updatedAt: Date
 }
@@ -770,120 +798,6 @@ export interface BusinessSupportRequest {
   currentAmount: number
   deadline?: Date
   status: 'pending' | 'approved' | 'rejected' | 'completed'
-  createdAt: Date
-  updatedAt: Date
-}
-
-// Business Opportunities (Jobs, Internships, Gigs)
-export interface BusinessOpportunity {
-  id: string
-  businessId: string
-  businessName: string
-  title: string
-  slug: string
-  description: string
-  type: 'job' | 'internship' | 'gig' | 'contract'
-  category: string
-  salary?: number
-  salaryRange?: { min: number; max: number }
-  location?: LocationData
-  remote: boolean
-  duration?: string
-  deadline?: Date
-  requirements: string[]
-  benefits?: string[]
-  applications: string[] // User IDs
-  accepted: string[]
-  status: 'open' | 'closed' | 'filled'
-  featured: boolean
-  views: number
-  createdAt: Date
-  updatedAt: Date
-}
-
-// Business Offers (Products, Services, Discounts)
-export interface BusinessOffer {
-  id: string
-  businessId: string
-  businessName: string
-  title: string
-  slug: string
-  description: string
-  type: 'product' | 'service' | 'discount' | 'promotion'
-  category: string
-  price?: number
-  discountPercentage?: number
-  originalPrice?: number
-  image?: UploadedImage
-  imageUrl?: string
-  quantity?: number
-  isLimited: boolean
-  deadline?: Date
-  memberTierRequired?: 'standard' | 'gold' | 'platinum'
-  targetAudience?: string[]
-  status: 'active' | 'inactive' | 'archived'
-  views: number
-  conversions: number
-  likes: number
-  likedBy?: string[]
-  createdAt: Date
-  updatedAt: Date
-}
-
-// Business Leads & Conversions
-export interface BusinessLead {
-  id: string
-  businessId: string
-  memberId: string
-  memberName: string
-  memberEmail: string
-  memberPhone?: string
-  sourceType: 'opportunity' | 'offer' | 'partnership' | 'event' | 'direct'
-  sourceId?: string
-  leadStatus: 'new' | 'contacted' | 'interested' | 'quoted' | 'converted' | 'lost'
-  notes?: string
-  conversionValue?: number
-  conversionDate?: Date
-  followUpDate?: Date
-  assignedTo?: string
-  tags: string[]
-  createdAt: Date
-  updatedAt: Date
-}
-
-// Business Referrals & Commissions
-export interface BusinessReferral {
-  id: string
-  businessId: string
-  referralCode: string
-  memberId?: string // Member who referred
-  conversionType: 'signup' | 'purchase' | 'event' | 'donation'
-  referralAmount: number
-  commissionPercentage: number
-  commissionAmount: number
-  referredUserId?: string
-  status: 'pending' | 'confirmed' | 'paid' | 'cancelled'
-  payoutDate?: Date
-  notes?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-// Business Partnerships & Collaborations
-export interface BusinessPartnership {
-  id: string
-  businessId: string
-  partnerId: string
-  partnerName: string
-  partnerType: 'business' | 'nonprofit' | 'individual'
-  collaborationType: 'joint_venture' | 'sponsorship' | 'co_marketing' | 'affiliate' | 'other'
-  description: string
-  status: 'requested' | 'pending' | 'active' | 'completed' | 'declined'
-  startDate?: Date
-  endDate?: Date
-  value?: number
-  notes?: string
-  attachments?: string[]
   createdAt: Date
   updatedAt: Date
 }
