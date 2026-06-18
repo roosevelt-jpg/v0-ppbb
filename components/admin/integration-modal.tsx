@@ -30,28 +30,22 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
       
       const endpoint = integration ? `/api/admin/integrations/${service.id}` : '/api/admin/integrations'
       const method = integration ? 'PATCH' : 'POST'
-      
-      // Sanitize credentials for JSON transmission
-      const sanitizedCredentials: Record<string, string> = {}
-      for (const [key, value] of Object.entries(credentials)) {
-        if (typeof value === 'string') {
-          // Remove control characters and properly escape special characters
-          sanitizedCredentials[key] = value
-            .replace(/[\x00-\x1F\x7F]/g, ' ') // Replace control characters with space
-            .replace(/\n/g, '\\n')            // Escape newlines
-            .replace(/\r/g, '\\r')            // Escape carriage returns
-            .replace(/\t/g, '\\t')            // Escape tabs
-        } else {
-          sanitizedCredentials[key] = value
-        }
-      }
-      
-      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(sanitizedCredentials).length })
+
+      // NOTE: previously this block hand-escaped control characters before
+      // sending, but did so in an order that destroyed real newlines (e.g.
+      // inside a pasted private_key) by replacing them with spaces BEFORE
+      // attempting to escape them. JSON.stringify() below already escapes
+      // every control character (including \n, \r, \t) correctly and
+      // losslessly on its own -- no manual sanitization is needed or safe
+      // here. Sending `credentials` as-is preserves the exact bytes the
+      // user pasted, which matters for PEM-formatted keys where the
+      // newlines are structurally significant.
+      console.log('[v0] Request:', method, endpoint, { serviceId: service.id, credentialsCount: Object.keys(credentials).length })
 
       const response = await fetch(endpoint, {
         method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId: service.id, credentials: sanitizedCredentials, serviceName: service.name }),
+        body: JSON.stringify({ serviceId: service.id, credentials, serviceName: service.name }),
       })
 
       console.log('[v0] Response status:', response.status, response.ok)
