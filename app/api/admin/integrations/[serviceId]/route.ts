@@ -1,28 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getIntegrationServer, saveIntegrationServer, deleteIntegrationServer, updateIntegrationStatusServer } from '@/lib/integrations/handlers-server'
 
-// Temporary: Use mock userId for development until Firebase Admin SDK is properly configured
+// TODO: Replace MOCK_USER_ID with real auth token verification once Firebase
+// Admin SDK is configured. The Authorization header is already being sent by
+// the frontend (Bearer token) but is currently ignored here.
 const MOCK_USER_ID = 'dev-user-001'
 
 export async function GET(request: NextRequest, { params }: { params: { serviceId: string } }) {
   try {
     const userId = MOCK_USER_ID
 
-    try {
-      const integration = await getIntegrationServer(userId, params.serviceId)
-      
-      if (!integration) {
-        return NextResponse.json({ error: 'Integration not found' }, { status: 404 })
-      }
+    const integration = await getIntegrationServer(userId, params.serviceId)
 
-      return NextResponse.json({ data: integration })
-    } catch (firebaseError) {
-      console.error('[v0] Firestore error:', firebaseError instanceof Error ? firebaseError.message : String(firebaseError))
+    if (!integration) {
       return NextResponse.json({ error: 'Integration not found' }, { status: 404 })
     }
+
+    return NextResponse.json({ data: integration })
   } catch (error) {
-    console.error('[v0] GET error:', error instanceof Error ? error.message : String(error))
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    // Surface the real error message so it's visible in server logs and the
+    // frontend can show something meaningful rather than a generic 404.
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[v0] GET error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -32,23 +32,39 @@ export async function PATCH(request: NextRequest, { params }: { params: { servic
     const body = await request.json()
     const { credentials, status } = body
 
-    try {
-      if (credentials) {
+    if (credentials) {
+      try {
         const integration = await saveIntegrationServer(userId, params.serviceId, credentials)
         return NextResponse.json({ success: true, integration })
-      } else if (status && ['active', 'inactive', 'error'].includes(status)) {
+      } catch (error) {
+        // Previously this caught any Firestore/Firebase error and returned
+        // { success: true } anyway, silently lying to the frontend.
+        // Now we surface the real error so the modal can show it to the user.
+        const message = error instanceof Error ? error.message : String(error)
+        console.error('[v0] Save integration error:', message)
+        return NextResponse.json({ error: message }, { status: 500 })
+      }
+    }
+
+    if (status && ['active', 'inactive', 'error', 'pending'].includes(status)) {
+      try {
         await updateIntegrationStatusServer(userId, params.serviceId, status)
         return NextResponse.json({ success: true })
-      } else {
-        return NextResponse.json({ error: 'Provide credentials or valid status (active/inactive/error)' }, { status: 400 })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error('[v0] Update status error:', message)
+        return NextResponse.json({ error: message }, { status: 500 })
       }
-    } catch (firebaseError) {
-      console.error('[v0] Firestore error:', firebaseError instanceof Error ? firebaseError.message : String(firebaseError))
-      return NextResponse.json({ success: true }) // Still return success as fallback
     }
+
+    return NextResponse.json(
+      { error: 'Provide credentials or a valid status (active/inactive/error/pending)' },
+      { status: 400 }
+    )
   } catch (error) {
-    console.error('[v0] PATCH error:', error instanceof Error ? error.message : String(error))
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[v0] PATCH error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -59,12 +75,16 @@ export async function DELETE(request: NextRequest, { params }: { params: { servi
     try {
       await deleteIntegrationServer(userId, params.serviceId)
       return NextResponse.json({ success: true, message: 'Integration deleted' })
-    } catch (firebaseError) {
-      console.error('[v0] Firestore error:', firebaseError instanceof Error ? firebaseError.message : String(firebaseError))
-      return NextResponse.json({ success: true, message: 'Integration deleted' }) // Still return success as fallback
+    } catch (error) {
+      // Previously returned { success: true } even when delete failed.
+      // Now surfaces the real error.
+      const message = error instanceof Error ? error.message : String(error)
+      console.error('[v0] Delete integration error:', message)
+      return NextResponse.json({ error: message }, { status: 500 })
     }
   } catch (error) {
-    console.error('[v0] DELETE error:', error instanceof Error ? error.message : String(error))
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[v0] DELETE error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
