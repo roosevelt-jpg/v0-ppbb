@@ -9,6 +9,7 @@ import {
   BusinessRating,
   BusinessPayment,
   BusinessAnalytics,
+  JobApplication,
 } from '@/lib/types'
 import {
   collection,

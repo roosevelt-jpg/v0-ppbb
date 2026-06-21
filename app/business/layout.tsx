@@ -109,20 +109,28 @@ export default function BusinessLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, loading } = useAuth()
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
 
   const canAccess = hasBusinessAccess(user)
+  // The signup page must render without the portal chrome or access gating,
+  // otherwise members without a business account can never reach it.
+  const isSignupRoute = pathname === '/business/signup'
 
   React.useEffect(() => {
-    if (loading) return
+    if (loading || isSignupRoute) return
     if (!user) {
       router.push('/login')
     } else if (!canAccess) {
       // Logged in but no business account yet - send to business signup
       router.push('/business/signup')
     }
-  }, [user, loading, canAccess, router])
+  }, [user, loading, canAccess, router, isSignupRoute])
+
+  if (isSignupRoute) {
+    return <>{children}</>
+  }
 
   if (loading) {
     return (

@@ -15,7 +15,7 @@ const memberMenuItems = [
   { label: 'My Donations', href: '/dashboard/donations', icon: Heart },
   { label: 'Volunteering', href: '/dashboard/volunteering', icon: Briefcase },
   { label: 'Charity Requests', href: '/dashboard/charity-requests', icon: HelpCircle },
-  { label: 'Opportunities', href: '/dashboard/community', icon: Users },
+  { label: 'Opportunities', href: '/dashboard/opportunities', icon: Users },
   { label: 'Marketplace', href: '/dashboard/marketplace', icon: ShoppingBag },
   { label: 'Orders', href: '/dashboard/orders', icon: Package },
   { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
@@ -23,10 +23,17 @@ const memberMenuItems = [
   { label: 'Certificates', href: '/dashboard/certificates', icon: Award },
   { label: 'Membership', href: '/dashboard/membership', icon: Crown },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
-  { label: 'Business Portal', href: '/business/dashboard', icon: Briefcase, divider: true },
 ]
 
-export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
+export function MemberSidebar({
+  open,
+  setOpen,
+  showBusinessPortal = false,
+}: {
+  open: boolean
+  setOpen: (open: boolean) => void
+  showBusinessPortal?: boolean
+}) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -66,7 +73,7 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {memberMenuItems.map((item: any) => {
             const Icon = item.icon
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
@@ -88,6 +95,29 @@ export function MemberSidebar({ open, setOpen }: { open: boolean; setOpen: (open
               </div>
             )
           })}
+
+          {/* Business portal: link to dashboard if the member has a business
+              account, otherwise invite them to create one. */}
+          <div className="h-px bg-border my-2" />
+          {showBusinessPortal ? (
+            <Link
+              href="/business/dashboard"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-foreground hover:bg-secondary"
+            >
+              <Briefcase className="h-4 w-4" />
+              <span className="text-sm font-medium">Business Portal</span>
+            </Link>
+          ) : (
+            <Link
+              href="/business/signup"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-primary hover:bg-secondary"
+            >
+              <Briefcase className="h-4 w-4" />
+              <span className="text-sm font-medium">Create Business Account</span>
+            </Link>
+          )}
         </nav>
 
         {/* Footer */}
