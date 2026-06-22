@@ -12,6 +12,7 @@ import {
   updateOpportunity,
 } from '@/lib/business-queries'
 import { BusinessOpportunity } from '@/lib/types'
+import { hasBusinessAccess } from '@/lib/roles'
 import { Plus, Trash2, Edit2, Eye } from 'lucide-react'
 
 export default function BusinessOpportunities() {
@@ -23,8 +24,9 @@ export default function BusinessOpportunities() {
   const [isEditingModal, setIsEditingModal] = React.useState(false)
 
   React.useEffect(() => {
-    if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
-      router.push('/login')
+    if (!user) return
+    if (!hasBusinessAccess(user)) {
+      router.push('/business/signup')
       return
     }
 
@@ -58,7 +60,7 @@ export default function BusinessOpportunities() {
     }
   }
 
-  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
+  if (user && !hasBusinessAccess(user)) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
@@ -66,7 +68,7 @@ export default function BusinessOpportunities() {
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
       {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
+        <div className="max-w-6xl mx-auto flex flex-wrap gap-4 justify-between items-center">
           <div>
             <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
               Posted Opportunities
@@ -75,17 +77,27 @@ export default function BusinessOpportunities() {
               Manage your jobs, internships, and gigs
             </p>
           </div>
-          <Button
-            onClick={() => router.push('/business/opportunities/new')}
-            style={{
-              backgroundColor: '#111111',
-              color: '#ffffff',
-            }}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Post Opportunity
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => router.push('/business/opportunities/applicants')}
+              style={{ backgroundColor: '#e4e1da', color: '#111111' }}
+              className="flex items-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              View Applicants
+            </Button>
+            <Button
+              onClick={() => router.push('/business/opportunities/new')}
+              style={{
+                backgroundColor: '#111111',
+                color: '#ffffff',
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Post Opportunity
+            </Button>
+          </div>
         </div>
       </div>
 
