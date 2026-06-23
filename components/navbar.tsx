@@ -15,6 +15,7 @@ export function Navbar() {
     { label: 'Impact', href: '/transparency' },
     { label: 'Events', href: '/events' },
     { label: 'Marketplace', href: '/marketplace' },
+    { label: 'Opportunities', href: '/opportunities' },
     { label: 'Contact', href: '/contact' },
   ])
 

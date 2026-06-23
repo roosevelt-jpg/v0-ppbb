@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { BusinessOffersSection } from '@/components/business-offers-section'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import Link from 'next/link'
@@ -210,6 +211,9 @@ export default function MarketplacePage() {
               ))}
             </div>
           )}
+
+          {/* Business Offers Section */}
+          <BusinessOffersSection title="From Our Businesses" />
 
           {/* Business Directory Section */}
           {businesses.length > 0 && (

@@ -4,6 +4,7 @@ import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { BusinessOffersSection } from '@/components/business-offers-section'
 import { ShoppingCart, Star } from 'lucide-react'
 
 export default function MarketplacePage() {
@@ -149,6 +150,9 @@ export default function MarketplacePage() {
           </div>
         </div>
       </div>
+
+      {/* Business Offers Section */}
+      <BusinessOffersSection title="From Our Businesses" />
 
       {/* Cart Summary */}
       {cart.length > 0 && (

@@ -119,6 +119,22 @@ export async function getBusinessOffers(businessId: string) {
   return snapshot.docs.map((doc) => doc.data() as BusinessOffer)
 }
 
+// Get all active offers across every business (for the public marketplace and
+// member dashboard marketplace). Sorted client-side to avoid a composite index.
+export async function getAllActiveOffers(): Promise<BusinessOffer[]> {
+  const q = query(
+    collection(db, 'businessOffers'),
+    where('status', '==', 'active')
+  )
+  const snapshot = await getDocs(q)
+  const offers = snapshot.docs.map((d) => d.data() as BusinessOffer)
+  return offers.sort((a, b) => {
+    const aTime = new Date(a.createdAt as any).getTime() || 0
+    const bTime = new Date(b.createdAt as any).getTime() || 0
+    return bTime - aTime
+  })
+}
+
 export function subscribeToBusinessOffers(
   businessId: string,
   callback: (offers: BusinessOffer[]) => void
