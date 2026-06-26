@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
 
 export default function BusinessPortal() {
   const router = useRouter()
@@ -10,9 +11,12 @@ export default function BusinessPortal() {
 
   useEffect(() => {
     if (!loading) {
-      if (user?.role === 'business') {
+      if (hasBusinessAccess(user)) {
         router.push('/business/dashboard')
       } else if (user) {
+        // Logged in but no business account yet - send to signup
+        router.push('/business/signup')
+      } else {
         router.push('/login')
       }
     }

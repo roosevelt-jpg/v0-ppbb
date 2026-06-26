@@ -20,6 +20,28 @@ export default function LoginPage() {
   const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
   const [statsLoading, setStatsLoading] = React.useState(true)
 
+  // Route the user after a successful login. If a ?redirect= param is present
+  // (e.g. coming from "Create Business Account"), honor it; otherwise route by role.
+  const routeAfterLogin = (user: { role?: string }) => {
+    const params = new URLSearchParams(window.location.search)
+    const redirectTo = params.get('redirect')
+    if (redirectTo && redirectTo.startsWith('/')) {
+      router.push(redirectTo)
+      return
+    }
+    if (user.role === 'admin') {
+      router.push('/admin')
+    } else if (user.role === 'super_admin') {
+      router.push('/business/dashboard')
+    } else if (user.role === 'business') {
+      router.push('/business/dashboard')
+    } else if (user.role === 'sponsor') {
+      router.push('/sponsor')
+    } else {
+      router.push('/dashboard')
+    }
+  }
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -84,17 +106,7 @@ export default function LoginPage() {
         timestamp: new Date().toISOString()
       })
 
-      if (user.role === 'admin') {
-        router.push('/admin')
-      } else if (user.role === 'super_admin') {
-        router.push('/business/dashboard')
-      } else if (user.role === 'business') {
-        router.push('/business/dashboard')
-      } else if (user.role === 'sponsor') {
-        router.push('/sponsor')
-      } else {
-        router.push('/dashboard')
-      }
+      routeAfterLogin(user)
     }
   }
 
@@ -116,17 +128,7 @@ export default function LoginPage() {
         timestamp: new Date().toISOString()
       })
 
-      if (user.role === 'admin') {
-        router.push('/admin')
-      } else if (user.role === 'super_admin') {
-        router.push('/business/dashboard')
-      } else if (user.role === 'business') {
-        router.push('/business/dashboard')
-      } else if (user.role === 'sponsor') {
-        router.push('/sponsor')
-      } else {
-        router.push('/dashboard')
-      }
+      routeAfterLogin(user)
     }
   }
 
@@ -148,17 +150,7 @@ export default function LoginPage() {
         timestamp: new Date().toISOString()
       })
 
-      if (user.role === 'admin') {
-        router.push('/admin')
-      } else if (user.role === 'super_admin') {
-        router.push('/business/dashboard')
-      } else if (user.role === 'business') {
-        router.push('/business/dashboard')
-      } else if (user.role === 'sponsor') {
-        router.push('/sponsor')
-      } else {
-        router.push('/dashboard')
-      }
+      routeAfterLogin(user)
     }
   }
 

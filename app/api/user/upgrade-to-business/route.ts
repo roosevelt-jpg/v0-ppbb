@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
       businessProfileRef,
       {
         ...userData,
+        id: userId,
         businessName,
         businessType,
         businessDescription,
@@ -43,20 +44,26 @@ export async function POST(request: NextRequest) {
         activeOpportunities: 0,
         referralEarnings: 0,
         conversionRate: 0,
-        createdAt: new Date(),
+        active: true,
+        createdAt: userData.createdAt || new Date(),
         updatedAt: new Date(),
       },
       { merge: true }
     )
 
-    // Update user roles
-    const roles = userData.roles || []
+    // Update user roles - keep primary role intact but add 'business' to the
+    // roles array so the user can access both the member and business portals.
+    const roles: string[] = Array.isArray(userData.roles) ? [...userData.roles] : []
+    if (userData.role && !roles.includes(userData.role)) {
+      roles.push(userData.role)
+    }
     if (!roles.includes('business')) {
       roles.push('business')
     }
 
     await updateDoc(userRef, {
       roles,
+      hasBusinessProfile: true,
       updatedAt: new Date(),
     })
 

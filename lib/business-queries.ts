@@ -9,6 +9,7 @@ import {
   BusinessRating,
   BusinessPayment,
   BusinessAnalytics,
+  JobApplication,
 } from '@/lib/types'
 import {
   collection,
@@ -116,6 +117,22 @@ export async function getBusinessOffers(businessId: string) {
   )
   const snapshot = await getDocs(q)
   return snapshot.docs.map((doc) => doc.data() as BusinessOffer)
+}
+
+// Get all active offers across every business (for the public marketplace and
+// member dashboard marketplace). Sorted client-side to avoid a composite index.
+export async function getAllActiveOffers(): Promise<BusinessOffer[]> {
+  const q = query(
+    collection(db, 'businessOffers'),
+    where('status', '==', 'active')
+  )
+  const snapshot = await getDocs(q)
+  const offers = snapshot.docs.map((d) => d.data() as BusinessOffer)
+  return offers.sort((a, b) => {
+    const aTime = new Date(a.createdAt as any).getTime() || 0
+    const bTime = new Date(b.createdAt as any).getTime() || 0
+    return bTime - aTime
+  })
 }
 
 export function subscribeToBusinessOffers(
@@ -547,4 +564,150 @@ export async function getBusinessDashboardStats(businessId: string) {
     totalPayments: payments.length,
     completedPayments: payments.filter((p) => p.status === 'completed').length,
   }
+}
+
+// PUBLIC / CROSS-BUSINESS OPPORTUNITY BROWSING
+
+// Get all open opportunities across every business (for the public jobs board
+// and the member dashboard). Sorted client-side to avoid a composite index.
+export async function getAllOpenOpportunities(): Promise<BusinessOpportunity[]> {
+  const q = query(
+    collection(db, 'businessOpportunities'),
+    where('status', '==', 'open')
+  )
+  const snapshot = await getDocs(q)
+  const opportunities = snapshot.docs.map((d) => d.data() as BusinessOpportunity)
+  return opportunities.sort((a, b) => {
+    const aTime = new Date(a.createdAt as any).getTime() || 0
+    const bTime = new Date(b.createdAt as any).getTime() || 0
+    return bTime - aTime
+  })
+}
+
+export async function getOpportunityById(
+  opportunityId: string
+): Promise<BusinessOpportunity | null> {
+  const ref = doc(db, 'businessOpportunities', opportunityId)
+  const snap = await getDoc(ref)
+  return snap.exists() ? (snap.data() as BusinessOpportunity) : null
+}
+
+// JOB APPLICATION QUERIES
+
+export async function applyToOpportunity(
+  opportunity: BusinessOpportunity,
+  applicant: {
+    id: string
+    name: string
+    email: string
+    phone?: string
+    avatarUrl?: string
+  },
+  coverLetter?: string,
+  resumeUrl?: string
+): Promise<JobApplication> {
+  const id = doc(collection(db, 'jobApplications')).id
+  const now = Timestamp.now()
+  const application: JobApplication = {
+    id,
+    opportunityId: opportunity.id,
+    opportunityTitle: opportunity.title,
+    businessId: opportunity.businessId,
+    businessName: opportunity.businessName,
+    applicantId: applicant.id,
+    applicantName: applicant.name,
+    applicantEmail: applicant.email,
+    applicantPhone: applicant.phone || '',
+    applicantAvatarUrl: applicant.avatarUrl || '',
+    coverLetter: coverLetter || '',
+    resumeUrl: resumeUrl || '',
+    status: 'pending',
+    createdAt: now.toDate(),
+    updatedAt: now.toDate(),
+  }
+  await setDoc(doc(db, 'jobApplications', id), application)
+
+  // Increment the opportunity's application count and track applicant id.
+  const oppRef = doc(db, 'businessOpportunities', opportunity.id)
+  const applicants = Array.isArray(opportunity.applicants) ? [...opportunity.applicants] : []
+  if (!applicants.includes(applicant.id)) {
+    applicants.push(applicant.id)
+  }
+  await updateDoc(oppRef, {
+    applicants,
+    applications: applicants.length,
+    updatedAt: now.toDate(),
+  })
+
+  return application
+}
+
+// Has a given member already applied to a given opportunity?
+export async function hasApplied(
+  opportunityId: string,
+  applicantId: string
+): Promise<boolean> {
+  const q = query(
+    collection(db, 'jobApplications'),
+    where('opportunityId', '==', opportunityId),
+    where('applicantId', '==', applicantId)
+  )
+  const snapshot = await getDocs(q)
+  return !snapshot.empty
+}
+
+// All applications a member has submitted.
+export async function getMemberApplications(
+  applicantId: string
+): Promise<JobApplication[]> {
+  const q = query(
+    collection(db, 'jobApplications'),
+    where('applicantId', '==', applicantId)
+  )
+  const snapshot = await getDocs(q)
+  const apps = snapshot.docs.map((d) => d.data() as JobApplication)
+  return apps.sort((a, b) => {
+    const aTime = new Date(a.createdAt as any).getTime() || 0
+    const bTime = new Date(b.createdAt as any).getTime() || 0
+    return bTime - aTime
+  })
+}
+
+// All applications submitted to a business (for the business applicants view).
+export async function getBusinessApplications(
+  businessId: string
+): Promise<JobApplication[]> {
+  const q = query(
+    collection(db, 'jobApplications'),
+    where('businessId', '==', businessId)
+  )
+  const snapshot = await getDocs(q)
+  const apps = snapshot.docs.map((d) => d.data() as JobApplication)
+  return apps.sort((a, b) => {
+    const aTime = new Date(a.createdAt as any).getTime() || 0
+    const bTime = new Date(b.createdAt as any).getTime() || 0
+    return bTime - aTime
+  })
+}
+
+// Applications for one specific opportunity.
+export async function getOpportunityApplications(
+  opportunityId: string
+): Promise<JobApplication[]> {
+  const q = query(
+    collection(db, 'jobApplications'),
+    where('opportunityId', '==', opportunityId)
+  )
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map((d) => d.data() as JobApplication)
+}
+
+export async function updateApplicationStatus(
+  applicationId: string,
+  status: JobApplication['status']
+): Promise<void> {
+  await updateDoc(doc(db, 'jobApplications', applicationId), {
+    status,
+    updatedAt: Timestamp.now().toDate(),
+  })
 }
