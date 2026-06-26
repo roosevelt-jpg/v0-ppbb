@@ -71,12 +71,24 @@ export function HeroSlider({ settings }: HeroSliderProps) {
               key={image.id}
               className="flex-[0_0_100%] min-w-0 relative h-96 md:h-[500px] lg:h-[600px]"
             >
-              {/* Image Container with proper aspect ratio handling */}
-              <div className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
+              {/* Image Container with proper aspect ratio handling.
+                  A blurred, scaled copy fills the frame as a backdrop, while
+                  the foreground image is shown in full via object-contain so
+                  it is never stretched, cropped, or distorted regardless of
+                  the source aspect ratio. */}
+              <div className="w-full h-full bg-black overflow-hidden relative">
+                <img
+                  src={image.imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-50"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <img
                   src={image.imageUrl}
                   alt={image.title}
-                  className="w-full h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-contain"
                   loading="lazy"
                   decoding="async"
                 />

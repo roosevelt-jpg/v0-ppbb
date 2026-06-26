@@ -55,6 +55,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
+    // Hero Slider - Public read (config + images subcollection), admin write.
+    // The recursive wildcard ensures the `images` subcollection is covered.
+    match /heroSlider/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // YouTube config - Public read, admin write
+    match /youtubeConfig/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
     // Pages (CMS) - Public read, admin write
     match /pages/{document=**} {
       allow read: if true;

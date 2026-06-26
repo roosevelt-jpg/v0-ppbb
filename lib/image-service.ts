@@ -8,6 +8,120 @@ export interface ImageDimensions {
   height: number
 }
 
+export interface ProcessedImage {
+  /** Optimized base64 data URL ready to store in Firestore */
+  dataUrl: string
+  width: number
+  height: number
+  /** Approximate stored size in bytes */
+  sizeBytes: number
+}
+
+/** Estimate the decoded byte size of a base64 data URL. */
+function estimateDataUrlBytes(dataUrl: string): number {
+  const comma = dataUrl.indexOf(',')
+  const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl
+  // 4 base64 chars => 3 bytes
+  return Math.floor((b64.length * 3) / 4)
+}
+
+/** Load a File/URL into an HTMLImageElement. */
+function loadImageElement(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error('Failed to load image'))
+    img.src = src
+  })
+}
+
+/**
+ * Process an uploaded image file entirely in the browser:
+ * - Preserves aspect ratio (never stretches/distorts).
+ * - Downscales oversized images to a max dimension for optimization.
+ * - Uses high-quality smoothing so smaller images stay crisp.
+ * - Iteratively reduces quality/size to keep the result safely under the
+ *   Firestore per-document limit (~1 MiB) so it can be stored directly.
+ *
+ * Returns an optimized base64 data URL suitable for storing in Firestore.
+ */
+export async function processImageFile(
+  file: File,
+  options: { maxDimension?: number; maxBytes?: number } = {}
+): Promise<ProcessedImage> {
+  if (typeof document === 'undefined') {
+    throw new Error('processImageFile must run in the browser')
+  }
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Selected file is not an image')
+  }
+
+  const maxDimension = options.maxDimension ?? 1920
+  // Keep well under Firestore's 1,048,576-byte document limit, leaving room
+  // for the other fields stored alongside the image.
+  const maxBytes = options.maxBytes ?? 750_000
+
+  // GIFs would lose animation through canvas; store small ones as-is.
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const img = await loadImageElement(objectUrl)
+    let targetWidth = img.naturalWidth
+    let targetHeight = img.naturalHeight
+
+    // Downscale large images while preserving aspect ratio.
+    if (targetWidth > maxDimension || targetHeight > maxDimension) {
+      const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
+      targetWidth = Math.round(targetWidth * scale)
+      targetHeight = Math.round(targetHeight * scale)
+    }
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas is not supported in this browser')
+
+    const draw = (w: number, h: number) => {
+      canvas.width = w
+      canvas.height = h
+      // White backdrop so transparent PNGs converted to JPEG aren't black.
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, w, h)
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(img, 0, 0, w, h)
+    }
+
+    draw(targetWidth, targetHeight)
+
+    // Step 1: reduce JPEG quality until under the size cap.
+    let quality = 0.92
+    let dataUrl = canvas.toDataURL('image/jpeg', quality)
+    while (estimateDataUrlBytes(dataUrl) > maxBytes && quality > 0.45) {
+      quality -= 0.08
+      dataUrl = canvas.toDataURL('image/jpeg', quality)
+    }
+
+    // Step 2: if still too large, progressively downscale dimensions.
+    while (
+      estimateDataUrlBytes(dataUrl) > maxBytes &&
+      (targetWidth > 640 || targetHeight > 640)
+    ) {
+      targetWidth = Math.round(targetWidth * 0.85)
+      targetHeight = Math.round(targetHeight * 0.85)
+      draw(targetWidth, targetHeight)
+      dataUrl = canvas.toDataURL('image/jpeg', quality)
+    }
+
+    return {
+      dataUrl,
+      width: targetWidth,
+      height: targetHeight,
+      sizeBytes: estimateDataUrlBytes(dataUrl),
+    }
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 export interface OptimizedImage {
   url: string
   srcSet: string

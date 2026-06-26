@@ -11,10 +11,7 @@ import {
   updateHeroSliderSettings,
   publishHeroSlider 
 } from '@/lib/hero-slider'
-import { getImageDimensions, validateImage } from '@/lib/image-service'
-import { db } from '@/lib/firebase'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { storage } from '@/lib/firebase'
+import { validateImage, processImageFile } from '@/lib/image-service'
 import { Upload, Trash2, Eye, EyeOff, Save, AlertCircle, CheckCircle, Info, Settings as SettingsIcon, Cloud } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
@@ -27,6 +24,7 @@ export default function AssetsPage() {
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null)
   const [imageValidation, setImageValidation] = useState<{ errors: string[]; warnings: string[] } | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [showSettingsPanel, setShowSettingsPanel] = useState(false)
   const [editableSettings, setEditableSettings] = useState<Partial<HeroSliderSettings>>({})
   const [formData, setFormData] = useState({
@@ -51,8 +49,7 @@ export default function AssetsPage() {
     setLoading(false)
   }
 
-  const handleFirebaseImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const processSelectedFile = async (file: File | undefined | null) => {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
@@ -62,32 +59,39 @@ export default function AssetsPage() {
 
     setIsUploadingImage(true)
     try {
-      const timestamp = Date.now()
-      const fileName = `hero-slider/${timestamp}-${file.name}`
-      const storageRef = ref(storage, fileName)
-      
-      await uploadBytes(storageRef, file)
-      const downloadURL = await getDownloadURL(storageRef)
-      
-      setFormData(prev => ({ ...prev, imageUrl: downloadURL }))
-      setPreviewImage(downloadURL)
-      
-      // Get image dimensions
-      const dimensions = await getImageDimensions(downloadURL)
-      setImageDimensions(dimensions)
-      
-      // Validate image
-      const validation = validateImage(dimensions.width, dimensions.height)
+      // Optimize entirely in the browser and store the result as a base64
+      // data URL directly in Firestore (no Firebase Storage bucket needed).
+      // Large images are downscaled/compressed; smaller images keep high
+      // quality. Aspect ratio is always preserved so nothing is distorted.
+      const processed = await processImageFile(file)
+
+      setFormData(prev => ({ ...prev, imageUrl: processed.dataUrl }))
+      setPreviewImage(processed.dataUrl)
+      setImageDimensions({ width: processed.width, height: processed.height })
+
+      const validation = validateImage(processed.width, processed.height)
       setImageValidation({
         errors: validation.errors,
         warnings: validation.warnings,
       })
     } catch (error) {
-      console.error('[v0] Error uploading image:', error)
-      alert('Failed to upload image')
+      console.error('[v0] Error processing image:', error)
+      alert('Failed to process image. Please try a different file.')
     } finally {
       setIsUploadingImage(false)
     }
+  }
+
+  const handleFirebaseImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    await processSelectedFile(e.target.files?.[0])
+    // Reset so selecting the same file again still fires onChange.
+    e.target.value = ''
+  }
+
+  const handleDrop = async (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault()
+    setIsDragging(false)
+    await processSelectedFile(e.dataTransfer.files?.[0])
   }
 
   const handleSaveSettings = async () => {
@@ -109,38 +113,9 @@ export default function AssetsPage() {
     }
   }
 
-  const handleImageUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setFormData(prev => ({ ...prev, imageUrl: url }))
-    setPreviewImage(url)
-    setImageValidation(null)
-    
-    if (url) {
-      try {
-        // Get image dimensions
-        const dimensions = await getImageDimensions(url)
-        setImageDimensions(dimensions)
-        
-        // Validate image
-        const validation = validateImage(dimensions.width, dimensions.height)
-        setImageValidation({
-          errors: validation.errors,
-          warnings: validation.warnings,
-        })
-      } catch (error) {
-        console.error('[v0] Error loading image:', error)
-        setImageDimensions(null)
-        setImageValidation({
-          errors: ['Failed to load image. Please check the URL.'],
-          warnings: [],
-        })
-      }
-    }
-  }
-
   const handleAddImage = async () => {
     if (!formData.title || !formData.imageUrl) {
-      alert('Please fill in title and image URL')
+      alert('Please upload an image and enter a title')
       return
     }
 
@@ -253,42 +228,31 @@ export default function AssetsPage() {
 
         {isAddingImage ? (
           <div className="space-y-4">
-            {/* Image Upload Methods */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {/* Firebase Upload */}
-              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6">
-                <label className="flex flex-col items-center gap-2 cursor-pointer">
-                  <Cloud className="w-8 h-8 text-neutral-400" />
-                  <span className="font-semibold text-neutral-700">Upload to Cloud</span>
-                  <span className="text-sm text-neutral-500">or drag and drop</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFirebaseImageUpload}
-                    disabled={isUploadingImage}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* URL Input */}
-              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 flex flex-col items-center justify-center">
-                <span className="font-semibold text-neutral-700 mb-2">Or paste URL</span>
+            {/* Image Upload (click to select or drag and drop) */}
+            <div className="mb-6">
+              <label
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center gap-2 cursor-pointer transition-colors ${
+                  isDragging ? 'border-black bg-neutral-100' : 'border-neutral-300 hover:border-neutral-400'
+                } ${isUploadingImage ? 'opacity-60 pointer-events-none' : ''}`}
+              >
+                <Cloud className="w-8 h-8 text-neutral-400" />
+                <span className="font-semibold text-neutral-700">
+                  {isUploadingImage ? 'Processing image…' : 'Upload Image'}
+                </span>
+                <span className="text-sm text-neutral-500">
+                  {isUploadingImage ? 'Optimizing for the slider' : 'Click to select or drag and drop'}
+                </span>
                 <input
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  onPaste={(e) => {
-                    const url = e.clipboardData?.getData('text') || ''
-                    if (url) {
-                      setFormData(prev => ({ ...prev, imageUrl: url }))
-                      // Trigger the image URL change handler
-                      handleImageUrlChange({ target: { value: url } } as any)
-                    }
-                  }}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFirebaseImageUpload}
+                  disabled={isUploadingImage}
                   className="hidden"
                 />
-                <span className="text-xs text-neutral-400 mt-2">Paste image URL here</span>
-              </div>
+              </label>
             </div>
 
             {/* Image Preview with info */}
@@ -354,18 +318,16 @@ export default function AssetsPage() {
             )}
 
             {/* Form Fields */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Image URL
-              </label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={handleImageUrlChange}
-                placeholder="https://example.com/image.jpg"
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-              />
-            </div>
+            {formData.imageUrl && (
+              <div className="flex items-center gap-2 text-sm text-green-700">
+                <CheckCircle className="w-4 h-4" />
+                <span>
+                  {formData.imageUrl.startsWith('data:')
+                    ? 'Image uploaded and optimized — ready to add'
+                    : 'Image URL set — ready to add'}
+                </span>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">
