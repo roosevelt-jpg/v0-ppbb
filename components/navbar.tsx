@@ -24,10 +24,23 @@ export function Navbar() {
       try {
         const menuPages = await getPagesByMenuLocation('navbar')
         if (menuPages.length > 0) {
-          setNavItems(menuPages.map(page => ({
-            label: page.menuLabel || page.title,
-            href: `/${page.slug}`,
-          })))
+          // Dedupe by href so duplicate-slug CMS pages don't produce
+          // colliding React keys (e.g. two pages resolving to "/signup"),
+          // which causes unstable reconciliation and Fast Refresh errors.
+          const seen = new Set<string>()
+          const items = menuPages
+            .map((page) => ({
+              label: page.menuLabel || page.title,
+              href: `/${page.slug}`,
+            }))
+            .filter((item) => {
+              if (!item.href || item.href === '/' || seen.has(item.href)) return false
+              seen.add(item.href)
+              return true
+            })
+          if (items.length > 0) {
+            setNavItems(items)
+          }
         }
       } catch (error) {
         // Silently fail - use default items
@@ -56,9 +69,9 @@ export function Navbar() {
 
           {/* Center Menu Items */}
           <div className="flex-1 flex items-center justify-center gap-6 lg:gap-8">
-            {navItems.map((item) => (
+            {navItems.map((item, idx) => (
               <Link
-                key={item.href}
+                key={`${item.href}-${idx}`}
                 href={item.href}
                 className="text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
               >
@@ -113,9 +126,9 @@ export function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-neutral-800 dark:bg-neutral-900 border-t border-neutral-700 max-h-96 overflow-y-auto">
-          {navItems.map((item) => (
+          {navItems.map((item, idx) => (
             <Link
-              key={item.href}
+              key={`${item.href}-${idx}`}
               href={item.href}
               className="block px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700"
               onClick={() => setMobileMenuOpen(false)}

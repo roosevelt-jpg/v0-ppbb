@@ -157,8 +157,8 @@ export function Footer() {
               Quick Links
             </h3>
             <ul className="space-y-2">
-              {quickLinksToDisplay.map((link) => (
-                <li key={link.href}>
+              {quickLinksToDisplay.map((link, idx) => (
+                <li key={`${link.href}-${idx}`}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>
@@ -173,8 +173,8 @@ export function Footer() {
               Get Involved
             </h3>
             <ul className="space-y-2">
-              {getInvolvedToDisplay.map((link) => (
-                <li key={link.href}>
+              {getInvolvedToDisplay.map((link, idx) => (
+                <li key={`${link.href}-${idx}`}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>
@@ -189,8 +189,8 @@ export function Footer() {
               Legal
             </h3>
             <ul className="space-y-2">
-              {legalToDisplay.map((link) => (
-                <li key={link.href}>
+              {legalToDisplay.map((link, idx) => (
+                <li key={`${link.href}-${idx}`}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>

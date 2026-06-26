@@ -147,16 +147,22 @@ export default function IntegrationsPage() {
         <div style={{ flex: 1, minWidth: '250px', position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Search className="absolute left-3 h-4 w-4 text-gray-400" style={{ pointerEvents: 'none' }} />
           <input
-            type="text"
+            type="search"
+            name="integration-search"
             placeholder="Search integrations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onBlur={() => {
-              // Clear search if it doesn't match any service
-              if (searchTerm && filteredServices.length === 0) {
-                setSearchTerm('')
-              }
-            }}
+            // Prevent the browser / password managers from autofilling an
+            // email into this box. When that happened, the search filtered
+            // out every service, unmounting the card whose modal was open and
+            // making the configure modal appear to "close" by itself.
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-1p-ignore="true"
+            data-lpignore="true"
+            data-form-type="other"
             style={{
               width: '100%',
               paddingLeft: '2.5rem',

@@ -1,7 +1,7 @@
 import { getFirestore } from 'firebase-admin/firestore'
 import { Integration, IntegrationHealth } from './types'
 import { encryptCredentials, decryptCredentials } from './encryption'
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
+import { initializeApp, getApps, cert, deleteApp } from 'firebase-admin/app'
 
 const INTEGRATIONS_COLLECTION = 'integrations'
 const HEALTH_COLLECTION = 'integrationHealth'
@@ -75,6 +75,50 @@ function getAdminDb() {
 }
 
 /**
+ * Verify a pasted Firebase service account by spinning up a throwaway named
+ * admin app with those exact credentials and performing a trivial Firestore
+ * read (listCollections). If the credentials are valid and have access, this
+ * resolves; otherwise it throws. The temporary app is always torn down so we
+ * don't leak initialized apps. Returns true on success, false on failure.
+ */
+async function verifyFirebaseCredentials(sa: {
+  projectId?: string
+  clientEmail?: string
+  privateKey?: string
+}): Promise<boolean> {
+  const appName = `verify-${sa.projectId || 'fb'}-${Date.now()}`
+  let app
+  try {
+    app = initializeApp(
+      {
+        credential: cert({
+          projectId: sa.projectId,
+          clientEmail: sa.clientEmail,
+          privateKey: sa.privateKey,
+        } as any),
+        projectId: sa.projectId,
+      },
+      appName
+    )
+    const db = getFirestore(app)
+    // Lightweight, read-only check that requires valid, authorized creds.
+    await db.listCollections()
+    return true
+  } catch (error) {
+    console.error('[v0] Firebase credential verification failed:', error instanceof Error ? error.message : String(error))
+    return false
+  } finally {
+    if (app) {
+      try {
+        await deleteApp(app)
+      } catch {
+        // ignore teardown errors
+      }
+    }
+  }
+}
+
+/**
  * Parses a Firebase service account JSON string that may have been mangled
  * by copy/paste (e.g. a code editor or browser converting the literal "\n"
  * escape sequence inside private_key into a real newline byte). A raw,
@@ -125,6 +169,12 @@ export async function saveIntegrationServer(
   try {
     console.log('[v0] Saving integration (server):', serviceId, 'for', userId)
 
+    // A successful save (credentials provided + required fields validated by
+    // the modal/provider config) marks the integration 'active'. Firebase is
+    // the one provider we can verify live from the server, so it may override
+    // this to 'error' below if the pasted key doesn't actually connect.
+    let status: Integration['status'] = 'active'
+
     // If Firebase integration, parse the serviceAccountJson blob into individual fields
     if (serviceId === 'firebase' && credentials.serviceAccountJson) {
       let sa: any
@@ -153,6 +203,16 @@ export async function saveIntegrationServer(
         privateKey: sa.private_key || sa.privateKey,
         clientEmail: sa.client_email || sa.clientEmail,
       }
+
+      // Verify the pasted credentials actually connect to Firestore. If they
+      // do, mark the integration active; otherwise leave it as 'error' so the
+      // admin knows the key was saved but isn't working.
+      const verified = await verifyFirebaseCredentials({
+        projectId: credentials.projectId,
+        clientEmail: credentials.clientEmail,
+        privateKey: credentials.privateKey,
+      })
+      status = verified ? 'active' : 'error'
     }
 
     const encrypted = encryptCredentials(credentials, serviceId)
@@ -165,13 +225,7 @@ export async function saveIntegrationServer(
       serviceId,
       serviceName: credentials.serviceName || serviceId,
       credentials: encrypted,
-      // NOTE: previously hardcoded to 'active' on every save, regardless of
-      // whether the credentials were ever verified against the provider.
-      // Marking as 'pending' here is honest about the fact that we haven't
-      // confirmed this works yet. If you have (or add) a step that actually
-      // calls the provider to verify the credentials, set 'active' there
-      // instead and only fall back to 'pending'/'error' here.
-      status: 'pending',
+      status,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -218,13 +272,56 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
     const db = getAdminDb()
     const snap = await db.collection(INTEGRATIONS_COLLECTION).where('userId', '==', userId).get()
 
-    return snap.docs.map((doc) => {
+    const integrations = snap.docs.map((doc) => {
       const data = doc.data() as Integration
       return {
         ...data,
         credentials: decryptCredentials(data.credentials, data.serviceId),
       }
     })
+
+    // Self-heal: integrations saved before this status logic existed are stuck
+    // as 'pending' even though they have stored credentials. Promote them so
+    // the badge reflects that they're configured. Firebase is verified live
+    // (active/error); every other provider with stored credentials becomes
+    // 'active'. Persist the change so future loads are fast.
+    await Promise.all(
+      integrations.map(async (integration) => {
+        const hasCredentials =
+          !!integration.credentials && Object.keys(integration.credentials).length > 0
+        if (integration.status === 'active' || !hasCredentials) return
+
+        let newStatus: Integration['status']
+        if (
+          integration.serviceId === 'firebase' &&
+          integration.credentials?.privateKey &&
+          integration.credentials?.clientEmail &&
+          integration.credentials?.projectId
+        ) {
+          const verified = await verifyFirebaseCredentials({
+            projectId: integration.credentials.projectId,
+            clientEmail: integration.credentials.clientEmail,
+            privateKey: integration.credentials.privateKey,
+          })
+          newStatus = verified ? 'active' : 'error'
+        } else if (integration.status === 'pending') {
+          // Configured non-Firebase integration that was never marked active.
+          newStatus = 'active'
+        } else {
+          return
+        }
+
+        if (newStatus !== integration.status) {
+          integration.status = newStatus
+          await db
+            .collection(INTEGRATIONS_COLLECTION)
+            .doc(integration.id)
+            .set({ status: newStatus, updatedAt: new Date() }, { merge: true })
+        }
+      })
+    )
+
+    return integrations
   } catch (error) {
     console.error('[v0] Error getting all integrations (server):', error)
     throw error
