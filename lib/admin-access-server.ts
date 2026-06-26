@@ -19,26 +19,37 @@ function getAdminApp() {
     
     if (process.env.GCP_SERVICE_ACCOUNT) {
       console.log('[v0] Attempting to parse GCP_SERVICE_ACCOUNT...')
+      const raw = process.env.GCP_SERVICE_ACCOUNT
+
+      // Strategy 1: parse as-is. The env var is normally a complete JSON
+      // document whose private_key already contains escaped "\n" sequences;
+      // JSON.parse converts those to real newlines, exactly what cert() needs.
+      // This MUST be tried before any \n replacement, otherwise we corrupt the
+      // JSON string literal and get "Bad control character in string literal".
       try {
-        // Try base64 decoding first
-        const decoded = Buffer.from(process.env.GCP_SERVICE_ACCOUNT, 'base64').toString()
-        serviceAccount = JSON.parse(decoded)
-        console.log('[v0] Successfully parsed GCP_SERVICE_ACCOUNT as base64-encoded JSON')
-      } catch (base64Error) {
-        console.log('[v0] Base64 parsing failed, trying direct JSON...')
+        serviceAccount = JSON.parse(raw)
+        console.log('[v0] Successfully parsed GCP_SERVICE_ACCOUNT as direct JSON')
+      } catch (directError) {
+        // Strategy 2: maybe it's base64-encoded JSON.
         try {
-          // If base64 fails, try parsing as direct JSON
-          let jsonStr = process.env.GCP_SERVICE_ACCOUNT
-          
-          // Handle escaped newlines in the private key - replace \\n with actual newlines
-          // This is needed because environment variables with literal \n get stored as \\n
-          jsonStr = jsonStr.replace(/\\n/g, '\n')
-          
-          serviceAccount = JSON.parse(jsonStr)
-          console.log('[v0] Successfully parsed GCP_SERVICE_ACCOUNT as direct JSON')
-        } catch (jsonError) {
-          console.error('[v0] Failed to parse GCP_SERVICE_ACCOUNT as JSON:', jsonError instanceof Error ? jsonError.message : String(jsonError))
-          throw new Error(`Invalid GCP_SERVICE_ACCOUNT format: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`)
+          const decoded = Buffer.from(raw, 'base64').toString('utf8')
+          serviceAccount = JSON.parse(decoded)
+          console.log('[v0] Successfully parsed GCP_SERVICE_ACCOUNT as base64-encoded JSON')
+        } catch (base64Error) {
+          // Strategy 3: last resort — the value had its newlines unescaped
+          // somewhere along the way; re-escape raw control chars and retry.
+          try {
+            const repaired = raw
+              .replace(/\r\n/g, '\\n')
+              .replace(/\n/g, '\\n')
+              .replace(/\r/g, '\\n')
+              .replace(/\t/g, '\\t')
+            serviceAccount = JSON.parse(repaired)
+            console.log('[v0] Successfully parsed GCP_SERVICE_ACCOUNT after re-escaping newlines')
+          } catch (jsonError) {
+            console.error('[v0] Failed to parse GCP_SERVICE_ACCOUNT as JSON:', jsonError instanceof Error ? jsonError.message : String(jsonError))
+            throw new Error(`Invalid GCP_SERVICE_ACCOUNT format: ${jsonError instanceof Error ? jsonError.message : 'Unknown error'}`)
+          }
         }
       }
     } else {

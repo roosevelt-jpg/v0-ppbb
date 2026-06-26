@@ -6,11 +6,12 @@ import { getIntegrationServer, saveIntegrationServer, deleteIntegrationServer, u
 // the frontend (Bearer token) but is currently ignored here.
 const MOCK_USER_ID = 'dev-user-001'
 
-export async function GET(request: NextRequest, { params }: { params: { serviceId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ serviceId: string }> }) {
   try {
     const userId = MOCK_USER_ID
+    const { serviceId } = await params
 
-    const integration = await getIntegrationServer(userId, params.serviceId)
+    const integration = await getIntegrationServer(userId, serviceId)
 
     if (!integration) {
       return NextResponse.json({ error: 'Integration not found' }, { status: 404 })
@@ -26,15 +27,16 @@ export async function GET(request: NextRequest, { params }: { params: { serviceI
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { serviceId: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ serviceId: string }> }) {
   try {
     const userId = MOCK_USER_ID
+    const { serviceId } = await params
     const body = await request.json()
     const { credentials, status } = body
 
     if (credentials) {
       try {
-        const integration = await saveIntegrationServer(userId, params.serviceId, credentials)
+        const integration = await saveIntegrationServer(userId, serviceId, credentials)
         return NextResponse.json({ success: true, integration })
       } catch (error) {
         // Previously this caught any Firestore/Firebase error and returned
@@ -48,7 +50,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { servic
 
     if (status && ['active', 'inactive', 'error', 'pending'].includes(status)) {
       try {
-        await updateIntegrationStatusServer(userId, params.serviceId, status)
+        await updateIntegrationStatusServer(userId, serviceId, status)
         return NextResponse.json({ success: true })
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -68,12 +70,13 @@ export async function PATCH(request: NextRequest, { params }: { params: { servic
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { serviceId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ serviceId: string }> }) {
   try {
     const userId = MOCK_USER_ID
+    const { serviceId } = await params
 
     try {
-      await deleteIntegrationServer(userId, params.serviceId)
+      await deleteIntegrationServer(userId, serviceId)
       return NextResponse.json({ success: true, message: 'Integration deleted' })
     } catch (error) {
       // Previously returned { success: true } even when delete failed.
