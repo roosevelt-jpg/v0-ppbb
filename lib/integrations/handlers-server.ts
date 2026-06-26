@@ -169,9 +169,11 @@ export async function saveIntegrationServer(
   try {
     console.log('[v0] Saving integration (server):', serviceId, 'for', userId)
 
-    // Default status. We only promote to 'active' once we've actually
-    // verified the credentials work against the provider (currently Firebase).
-    let status: Integration['status'] = 'pending'
+    // A successful save (credentials provided + required fields validated by
+    // the modal/provider config) marks the integration 'active'. Firebase is
+    // the one provider we can verify live from the server, so it may override
+    // this to 'error' below if the pasted key doesn't actually connect.
+    let status: Integration['status'] = 'active'
 
     // If Firebase integration, parse the serviceAccountJson blob into individual fields
     if (serviceId === 'firebase' && credentials.serviceAccountJson) {
@@ -278,15 +280,20 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
       }
     })
 
-    // Self-heal: a Firebase integration that was saved before verification
-    // existed (or whose verification previously failed) will be stuck as
-    // 'pending'/'error'. Re-verify its stored credentials once here; if they
-    // work, promote it to 'active' and persist that so future loads are fast.
+    // Self-heal: integrations saved before this status logic existed are stuck
+    // as 'pending' even though they have stored credentials. Promote them so
+    // the badge reflects that they're configured. Firebase is verified live
+    // (active/error); every other provider with stored credentials becomes
+    // 'active'. Persist the change so future loads are fast.
     await Promise.all(
       integrations.map(async (integration) => {
+        const hasCredentials =
+          !!integration.credentials && Object.keys(integration.credentials).length > 0
+        if (integration.status === 'active' || !hasCredentials) return
+
+        let newStatus: Integration['status']
         if (
           integration.serviceId === 'firebase' &&
-          integration.status !== 'active' &&
           integration.credentials?.privateKey &&
           integration.credentials?.clientEmail &&
           integration.credentials?.projectId
@@ -296,14 +303,20 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
             clientEmail: integration.credentials.clientEmail,
             privateKey: integration.credentials.privateKey,
           })
-          const newStatus: Integration['status'] = verified ? 'active' : 'error'
-          if (newStatus !== integration.status) {
-            integration.status = newStatus
-            await db
-              .collection(INTEGRATIONS_COLLECTION)
-              .doc(integration.id)
-              .set({ status: newStatus, updatedAt: new Date() }, { merge: true })
-          }
+          newStatus = verified ? 'active' : 'error'
+        } else if (integration.status === 'pending') {
+          // Configured non-Firebase integration that was never marked active.
+          newStatus = 'active'
+        } else {
+          return
+        }
+
+        if (newStatus !== integration.status) {
+          integration.status = newStatus
+          await db
+            .collection(INTEGRATIONS_COLLECTION)
+            .doc(integration.id)
+            .set({ status: newStatus, updatedAt: new Date() }, { merge: true })
         }
       })
     )
