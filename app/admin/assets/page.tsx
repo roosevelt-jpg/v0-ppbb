@@ -11,7 +11,7 @@ import {
   updateHeroSliderSettings,
   publishHeroSlider 
 } from '@/lib/hero-slider'
-import { getImageDimensions, validateImage, processImageFile } from '@/lib/image-service'
+import { validateImage, processImageFile } from '@/lib/image-service'
 import { Upload, Trash2, Eye, EyeOff, Save, AlertCircle, CheckCircle, Info, Settings as SettingsIcon, Cloud } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
@@ -113,38 +113,9 @@ export default function AssetsPage() {
     }
   }
 
-  const handleImageUrlChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setFormData(prev => ({ ...prev, imageUrl: url }))
-    setPreviewImage(url)
-    setImageValidation(null)
-    
-    if (url) {
-      try {
-        // Get image dimensions
-        const dimensions = await getImageDimensions(url)
-        setImageDimensions(dimensions)
-        
-        // Validate image
-        const validation = validateImage(dimensions.width, dimensions.height)
-        setImageValidation({
-          errors: validation.errors,
-          warnings: validation.warnings,
-        })
-      } catch (error) {
-        console.error('[v0] Error loading image:', error)
-        setImageDimensions(null)
-        setImageValidation({
-          errors: ['Failed to load image. Please check the URL.'],
-          warnings: [],
-        })
-      }
-    }
-  }
-
   const handleAddImage = async () => {
     if (!formData.title || !formData.imageUrl) {
-      alert('Please fill in title and image URL')
+      alert('Please upload an image and enter a title')
       return
     }
 
@@ -257,14 +228,13 @@ export default function AssetsPage() {
 
         {isAddingImage ? (
           <div className="space-y-4">
-            {/* Image Upload Methods */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {/* Direct Upload (with drag and drop) */}
+            {/* Image Upload (click to select or drag and drop) */}
+            <div className="mb-6">
               <label
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center gap-2 cursor-pointer transition-colors ${
+                className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center gap-2 cursor-pointer transition-colors ${
                   isDragging ? 'border-black bg-neutral-100' : 'border-neutral-300 hover:border-neutral-400'
                 } ${isUploadingImage ? 'opacity-60 pointer-events-none' : ''}`}
               >
@@ -283,19 +253,6 @@ export default function AssetsPage() {
                   className="hidden"
                 />
               </label>
-
-              {/* URL Input */}
-              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 flex flex-col items-center justify-center">
-                <span className="font-semibold text-neutral-700 mb-2">Or paste an image URL</span>
-                <input
-                  type="url"
-                  value={formData.imageUrl.startsWith('data:') ? '' : formData.imageUrl}
-                  placeholder="https://example.com/image.jpg"
-                  onChange={handleImageUrlChange}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent text-sm"
-                />
-                <span className="text-xs text-neutral-400 mt-2">Paste a direct link to an image</span>
-              </div>
             </div>
 
             {/* Image Preview with info */}

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, limit, doc } from 'firebase/firestore'
+import type { SliderImage } from '@/lib/types'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { HeroSlider } from '@/components/hero-slider'
@@ -30,17 +31,49 @@ export default function HomePage() {
     const statsListeners: any[] = []
     
     try {
-      // Real-time hero slider settings listener
-      const heroSliderUnsubscribe = onSnapshot(
+      // Real-time hero slider config listener. Images live in the
+      // `heroSlider/default/images` subcollection (one doc per image) so the
+      // slider can hold an unlimited number of images without hitting
+      // Firestore's ~1 MiB per-document limit. We keep the latest config and
+      // images in refs and merge them whenever either changes.
+      let sliderConfig: Partial<HeroSliderSettings> = {}
+      let sliderImages: SliderImage[] = []
+      const mergeSlider = () => {
+        setHeroSliderSettings({
+          id: 'default',
+          transitionEffect: 'fade',
+          transitionDuration: 500,
+          autoplay: true,
+          autoplayDuration: 5,
+          displayMode: 'auto',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ...sliderConfig,
+          images: sliderImages,
+        } as HeroSliderSettings)
+      }
+
+      const heroConfigUnsubscribe = onSnapshot(
         doc(db, 'heroSlider', 'default'),
         (snapshot) => {
-          if (snapshot.exists()) {
-            setHeroSliderSettings(snapshot.data() as HeroSliderSettings)
-          }
+          sliderConfig = snapshot.exists() ? (snapshot.data() as Partial<HeroSliderSettings>) : {}
+          mergeSlider()
         },
-        (error) => console.error('Hero slider listener error:', error)
+        (error) => console.error('Hero slider config listener error:', error)
       )
-      statsListeners.push(heroSliderUnsubscribe)
+      statsListeners.push(heroConfigUnsubscribe)
+
+      const heroImagesUnsubscribe = onSnapshot(
+        collection(db, 'heroSlider', 'default', 'images'),
+        (snapshot) => {
+          sliderImages = snapshot.docs
+            .map((d) => d.data() as SliderImage)
+            .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+          mergeSlider()
+        },
+        (error) => console.error('Hero slider images listener error:', error)
+      )
+      statsListeners.push(heroImagesUnsubscribe)
       
       // Real-time YouTube config listener
       const youtubeUnsubscribe = onSnapshot(
