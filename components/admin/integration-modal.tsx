@@ -156,6 +156,9 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
                 <select
                   value={credentials[field.name] || ''}
                   onChange={(e) => setCredentials({ ...credentials, [field.name]: e.target.value })}
+                  autoComplete="off"
+                  data-1p-ignore="true"
+                  data-lpignore="true"
                   style={{
                     width: '100%',
                     padding: '0.5rem',
@@ -179,6 +182,12 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
                   onChange={(e) => setCredentials({ ...credentials, [field.name]: e.target.value })}
                   placeholder={field.placeholder}
                   rows={4}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-1p-ignore="true"
+                  data-lpignore="true"
                   style={{
                     width: '100%',
                     padding: '0.5rem',
@@ -197,6 +206,13 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
                   value={credentials[field.name] || ''}
                   onChange={(e) => setCredentials({ ...credentials, [field.name]: e.target.value })}
                   placeholder={field.placeholder}
+                  autoComplete={field.type === 'password' ? 'new-password' : 'off'}
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-1p-ignore="true"
+                  data-lpignore="true"
+                  data-form-type="other"
                   style={{
                     width: '100%',
                     padding: '0.5rem',
