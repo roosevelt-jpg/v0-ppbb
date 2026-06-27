@@ -4,8 +4,10 @@ export const dynamic = 'force-dynamic'
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, ArrowLeft, Loader2, X } from 'lucide-react'
+import { Upload, ArrowLeft, Loader2, X, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
+import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
+import type { LocationData, EventTag, GenderRestriction } from '@/lib/types'
 
 interface EventFormData {
   title: string
@@ -13,7 +15,8 @@ interface EventFormData {
   date: string
   startTime: string
   endTime: string
-  location: { address: string; city: string }
+  location: string
+  locationData?: LocationData
   bannerImageUrl: string
   isPaid: boolean
   price: number
@@ -21,6 +24,8 @@ interface EventFormData {
   paymentGateway?: 'stripe' | 'paypal' | 'ziina'
   maxAttendees?: number
   status: 'draft' | 'published'
+  genderRestriction?: GenderRestriction
+  tags?: EventTag[]
 }
 
 export default function CreateEventPage() {
@@ -36,13 +41,16 @@ export default function CreateEventPage() {
     date: new Date().toISOString().split('T')[0],
     startTime: '09:00',
     endTime: '17:00',
-    location: { address: '', city: '' },
+    location: '',
+    locationData: undefined,
     bannerImageUrl: '',
     isPaid: false,
     price: 0,
     currency: 'AED',
     maxAttendees: undefined,
     status: 'draft',
+    genderRestriction: 'mixed',
+    tags: [],
   })
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,29 +206,35 @@ export default function CreateEventPage() {
 
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-black">Location</h2>
+              <p className="text-sm text-gray-600">Start typing to get real-time location suggestions powered by Google Maps</p>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                <input
-                  type="text"
-                  value={formData.location.address}
-                  onChange={(e) => handleChange('location.address', e.target.value)}
-                  placeholder="Street address"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-                <input
-                  type="text"
-                  value={formData.location.city}
-                  onChange={(e) => handleChange('location.city', e.target.value)}
-                  placeholder="Dubai"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
+              <GooglePlacesAutocomplete
+                value={formData.location}
+                onChange={(place) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    location: place.mainText,
+                    locationData: {
+                      placeId: place.placeId,
+                      address: `${place.mainText}${place.secondaryText ? ', ' + place.secondaryText : ''}`,
+                      lat: place.lat || 0,
+                      lng: place.lng || 0,
+                      city: place.secondaryText,
+                    }
+                  }))
+                }}
+                countryRestrictions={['AE']}
+              />
+              
+              {formData.locationData && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
+                  <MapPin size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900">{formData.locationData.address}</p>
+                    <p className="text-blue-700 text-xs">Coordinates: {formData.locationData.lat.toFixed(4)}, {formData.locationData.lng.toFixed(4)}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -255,6 +269,60 @@ export default function CreateEventPage() {
                     />
                   </label>
                 )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-black">Event Type & Audience</h2>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Who can attend?</label>
+                <div className="space-y-2">
+                  {(['mixed', 'ladies-only', 'men-only'] as const).map(option => (
+                    <label key={option} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="radio"
+                        name="genderRestriction"
+                        value={option}
+                        checked={formData.genderRestriction === option}
+                        onChange={(e) => handleChange('genderRestriction', e.target.value)}
+                        className="w-4 h-4"
+                      />
+                      <div>
+                        <p className="font-medium text-gray-900 capitalize">{option.replace('-', ' ')}</p>
+                        <p className="text-xs text-gray-500">
+                          {option === 'mixed' && 'Everyone is welcome'}
+                          {option === 'ladies-only' && 'Exclusively for women'}
+                          {option === 'men-only' && 'Exclusively for men'}
+                        </p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Event Tags</label>
+                <p className="text-xs text-gray-600 mb-3">Select all that apply</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['free', 'rsvp', 'premium', 'member-only', 'ladies-only', 'men-only', 'networking', 'workshop', 'fundraiser', 'celebration', 'educational'] as EventTag[]).map(tag => (
+                    <label key={tag} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="checkbox"
+                        checked={formData.tags?.includes(tag) || false}
+                        onChange={(e) => {
+                          const currentTags = formData.tags || []
+                          const newTags = e.target.checked 
+                            ? [...currentTags, tag]
+                            : currentTags.filter(t => t !== tag)
+                          handleChange('tags', newTags)
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm font-medium text-gray-700 capitalize">{tag.replace('-', ' ')}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 

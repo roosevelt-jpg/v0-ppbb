@@ -360,6 +360,23 @@ export interface VolunteerDepartment {
 }
 
 // Events
+// Event tags for categorization
+export type EventTag = 'free' | 'rsvp' | 'premium' | 'member-only' | 'ladies-only' | 'men-only' | 'networking' | 'workshop' | 'fundraiser' | 'celebration' | 'educational'
+
+// Gender restriction for events
+export type GenderRestriction = 'mixed' | 'ladies-only' | 'men-only'
+
+// Google Places location data
+export interface LocationData {
+  placeId: string
+  address: string
+  lat: number
+  lng: number
+  city?: string
+  country?: string
+  postalCode?: string
+}
+
 export interface Event {
   id: string
   title: string
@@ -367,7 +384,10 @@ export interface Event {
   description: string
   image?: UploadedImage
   imageUrl?: string
+  bannerImage?: string // Firebase Storage URL (no base64)
+  bannerImageSize?: { width: number; height: number } // Original dimensions for aspect ratio
   location: string
+  locationData?: LocationData // Google Places coordinates and details
   date: Date
   time: string
   endTime: string
@@ -380,6 +400,9 @@ export interface Event {
   attendees: string[]
   createdAt: Date
   updatedAt: Date
+  // Gender and Tag system
+  genderRestriction?: GenderRestriction // mixed, ladies-only, men-only
+  tags?: EventTag[] // Array of event tags
   // Pricing and Payment Configuration
   ticketType?: 'free' | 'paid' | 'rsvp'
   ticketPrice?: number

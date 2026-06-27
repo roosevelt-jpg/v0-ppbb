@@ -29,7 +29,24 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, description, date, startTime, endTime, location, bannerImageUrl, isPaid, price, maxAttendees, genderRestriction, dressCode, logistics, status } = body
+    const { 
+      title, 
+      description, 
+      date, 
+      startTime, 
+      endTime, 
+      location,
+      locationData,
+      bannerImageUrl,
+      isPaid, 
+      price, 
+      maxAttendees, 
+      genderRestriction,
+      tags,
+      currency,
+      paymentGateway,
+      status 
+    } = body
 
     if (!title || !date || !location) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
@@ -42,16 +59,22 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       location,
-      bannerImageUrl,
+      locationData: locationData || undefined, // Google Places data with lat/lng
+      bannerImage: bannerImageUrl, // Firebase Storage URL (no base64)
+      genderRestriction: genderRestriction || 'mixed',
+      tags: tags || [], // Event tags array
       isPaid,
       price: isPaid ? price : 0,
+      currency: currency || 'AED',
+      paymentGateway: paymentGateway,
       maxAttendees,
-      genderRestriction,
-      dressCode,
-      logistics,
       status: status || 'draft',
       attendees: [],
-      createdBy: '', // Will be set by client if needed
+      registered: 0,
+      capacity: maxAttendees || 100,
+      eventType: 'community',
+      category: 'event',
+      organizerId: '', // Will be set by client if needed
       createdAt: new Date(),
       updatedAt: new Date(),
     }

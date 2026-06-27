@@ -3,30 +3,16 @@
 import React, { useEffect, useState } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import Link from 'next/link'
-import { Calendar, MapPin, Users, Heart, Download, Filter } from 'lucide-react'
-import { format } from 'date-fns'
-
-interface Event {
-  id: string
-  title: string
-  description: string
-  date: string
-  startTime?: string
-  endTime?: string
-  location?: { address: string; city: string }
-  bannerImageUrl?: string
-  isPaid?: boolean
-  price?: number
-  currency?: string
-  maxAttendees?: number
-  status: string
-}
+import EventCard from '@/components/event-card'
+import { Filter, Calendar, MapPin, Users } from 'lucide-react'
+import type { Event } from '@/lib/types'
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterType, setFilterType] = useState<'all' | 'upcoming' | 'past'>('all')
+  const [filterType, setFilterType] = useState<'all' | 'upcoming' | 'past'>('upcoming')
+  const [genderFilter, setGenderFilter] = useState<string>('all')
+  const [tagFilter, setTagFilter] = useState<string>('all')
 
   useEffect(() => {
     loadEvents()
@@ -37,7 +23,7 @@ export default function EventsPage() {
       const res = await fetch('/api/events?status=published', { cache: 'no-store' })
       const json = await res.json()
       if (json.success) {
-        const sorted = json.data.sort((a: any, b: any) => 
+        const sorted = (json.data || []).sort((a: any, b: any) => 
           new Date(a.date).getTime() - new Date(b.date).getTime()
         )
         setEvents(sorted)
@@ -49,202 +35,167 @@ export default function EventsPage() {
     }
   }
 
-  const downloadToCalendar = (event: Event) => {
-    const startDate = new Date(event.date)
-    if (event.startTime) {
-      const [hours, minutes] = event.startTime.split(':')
-      startDate.setHours(parseInt(hours), parseInt(minutes))
-    }
-
-    const endDate = new Date(startDate)
-    if (event.endTime) {
-      const [hours, minutes] = event.endTime.split(':')
-      endDate.setHours(parseInt(hours), parseInt(minutes))
-    } else {
-      endDate.setHours(startDate.getHours() + 2)
-    }
-
-    // ICS format for calendar export
-    const icsContent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Passive Blessings//Events//EN',
-      'BEGIN:VEVENT',
-      `UID:${event.id}@passiveblessings.ae`,
-      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-      `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-      `DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-      `SUMMARY:${event.title}`,
-      `DESCRIPTION:${event.description?.replace(/\n/g, '\\n')}`,
-      `LOCATION:${event.location?.address || 'TBA'}`,
-      'END:VEVENT',
-      'END:VCALENDAR',
-    ].join('\r\n')
-
-    const blob = new Blob([icsContent], { type: 'text/calendar' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${event.title.replace(/\s+/g, '_')}.ics`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
   const filteredEvents = events.filter(event => {
     const eventDate = new Date(event.date)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    if (filterType === 'upcoming') return eventDate >= today
-    if (filterType === 'past') return eventDate < today
+    // Date filter
+    if (filterType === 'upcoming' && eventDate < today) return false
+    if (filterType === 'past' && eventDate >= today) return false
+
+    // Gender filter
+    if (genderFilter !== 'all' && event.genderRestriction !== genderFilter) return false
+
+    // Tag filter
+    if (tagFilter !== 'all' && !event.tags?.includes(tagFilter as any)) return false
+
     return true
   })
 
+  const allTags = Array.from(new Set(events.flatMap(e => e.tags || [])))
+  const upcomingCount = events.filter(e => new Date(e.date) >= new Date()).length
+  const totalEvents = events.length
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 px-4">
+      <section className="bg-gradient-to-r from-black to-gray-900 text-white py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Events & Workshops</h1>
-          <p className="text-gray-300 text-lg">Join our community events and make a meaningful impact</p>
+          <p className="text-gray-300 text-lg mb-2">Join our community events and make a meaningful impact</p>
+          <div className="flex gap-6 mt-6 text-sm">
+            <div className="flex items-center gap-2">
+              <Calendar size={18} />
+              <span>{upcomingCount} upcoming events</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users size={18} />
+              <span>{totalEvents} total events</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Filter */}
-      <section className="border-b border-gray-200 px-4 py-6">
+      {/* Filters */}
+      <section className="bg-white border-b border-gray-200 sticky top-0 z-40 px-4 py-6">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Filter size={20} className="text-gray-600" />
-            <button
-              onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterType === 'all'
-                  ? 'bg-black text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              All Events
-            </button>
-            <button
-              onClick={() => setFilterType('upcoming')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterType === 'upcoming'
-                  ? 'bg-black text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Upcoming
-            </button>
-            <button
-              onClick={() => setFilterType('past')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterType === 'past'
-                  ? 'bg-black text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Past Events
-            </button>
+          <div className="space-y-4">
+            {/* Date Filter */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Filter size={16} />
+                When
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {(['all', 'upcoming', 'past'] as const).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setFilterType(type)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
+                      filterType === type
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Gender Filter */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <Users size={16} />
+                Audience
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {([
+                  { value: 'all', label: 'All Events' },
+                  { value: 'mixed', label: 'Everyone Welcome' },
+                  { value: 'ladies-only', label: 'Ladies Only' },
+                  { value: 'men-only', label: 'Men Only' },
+                ] as const).map(option => (
+                  <button
+                    key={option.value}
+                    onClick={() => setGenderFilter(option.value)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      genderFilter === option.value
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tag Filter */}
+            {allTags.length > 0 && (
+              <div>
+                <label className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  Tags
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setTagFilter('all')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      tagFilter === 'all'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    All Tags
+                  </button>
+                  {allTags.map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => setTagFilter(tag)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
+                        tagFilter === tag
+                          ? 'bg-black text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {tag.replace('-', ' ')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Events Grid */}
-      <section className="px-4 py-16">
+      <section className="px-4 py-12">
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">Loading events...</p>
+              <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+              <p className="mt-4 text-gray-600">Loading events...</p>
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No events found for this category</p>
+            <div className="text-center py-12 bg-white rounded-lg">
+              <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No events found</h3>
+              <p className="text-gray-600">Try adjusting your filters or check back soon</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEvents.map(event => (
-                <div key={event.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                  {/* Image */}
-                  {event.bannerImageUrl && (
-                    <div className="relative h-40 overflow-hidden">
-                      <img
-                        src={event.bannerImageUrl}
-                        alt={event.title}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-black mb-2 line-clamp-2">{event.title}</h3>
-
-                    <div className="space-y-2 mb-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={16} className="text-black" />
-                        <span>{format(new Date(event.date), 'MMM dd, yyyy')}</span>
-                      </div>
-
-                      {event.startTime && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400">⏰</span>
-                          <span>
-                            {event.startTime}
-                            {event.endTime && ` - ${event.endTime}`}
-                          </span>
-                        </div>
-                      )}
-
-                      {event.location?.address && (
-                        <div className="flex items-center gap-2">
-                          <MapPin size={16} className="text-black" />
-                          <span>{event.location.address}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-4">{event.description}</p>
-
-                    {/* Price & Capacity */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        {event.isPaid ? (
-                          <span className="font-bold text-black">
-                            {event.currency} {event.price}
-                          </span>
-                        ) : (
-                          <span className="text-green-600 font-medium">Free</span>
-                        )}
-                      </div>
-                      {event.maxAttendees && (
-                        <div className="flex items-center gap-1 text-gray-600 text-sm">
-                          <Users size={14} />
-                          <span>Max {event.maxAttendees}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => downloadToCalendar(event)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition-colors"
-                      >
-                        <Download size={16} />
-                        Add to Calendar
-                      </button>
-                      <button className="flex items-center justify-center p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <Heart size={16} className="text-gray-600" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <>
+              <div className="mb-6 text-sm text-gray-600">
+                Showing {filteredEvents.length} of {events.length} events
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredEvents.map(event => (
+                  <EventCard key={event.id} event={event} showActions={true} />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
