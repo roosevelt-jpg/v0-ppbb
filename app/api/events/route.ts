@@ -76,6 +76,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Build event data with proper defaults - no undefined values for Firestore
+    const maxAttendeesValue = maxAttendees ? parseInt(maxAttendees.toString()) : 100
     const eventData = {
       title,
       description,
@@ -83,19 +85,19 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       location,
-      locationData: sanitizedLocationData, // Google Places data with lat/lng
-      bannerImage: bannerImageUrl, // Firebase Storage URL (no base64)
+      ...(sanitizedLocationData && { locationData: sanitizedLocationData }), // Only include if exists
+      bannerImage: bannerImageUrl || '', // Firebase Storage URL (no base64)
       genderRestriction: genderRestriction || 'mixed',
       tags: tags || [], // Event tags array
       isPaid,
       price: isPaid ? price : 0,
       currency: currency || 'AED',
-      paymentGateway: paymentGateway,
-      maxAttendees,
+      paymentGateway: isPaid ? (paymentGateway || 'stripe') : '', // Empty if not paid
+      maxAttendees: maxAttendeesValue,
       status: status || 'draft',
       attendees: [],
       registered: 0,
-      capacity: maxAttendees || 100,
+      capacity: maxAttendeesValue,
       eventType: 'community',
       category: 'event',
       organizerId: '', // Will be set by client if needed

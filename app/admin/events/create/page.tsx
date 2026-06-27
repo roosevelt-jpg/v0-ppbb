@@ -47,6 +47,7 @@ export default function CreateEventPage() {
     isPaid: false,
     price: 0,
     currency: 'AED',
+    paymentGateway: 'stripe', // Initialize with default value
     maxAttendees: undefined,
     status: 'draft',
     genderRestriction: 'mixed',
