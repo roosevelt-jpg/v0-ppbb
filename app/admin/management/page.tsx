@@ -13,6 +13,9 @@ export default function AdminManagementPage() {
   const [loading, setLoading] = React.useState(true)
   const [visibleCodes, setVisibleCodes] = React.useState<Set<string>>(new Set())
   const [generatingCode, setGeneratingCode] = React.useState(false)
+  const [adminEmail, setAdminEmail] = React.useState('')
+  const [adminName, setAdminName] = React.useState('')
+  const [adminRole, setAdminRole] = React.useState('admin')
 
   React.useEffect(() => {
     loadData()
@@ -37,19 +40,40 @@ export default function AdminManagementPage() {
   }
 
   const handleGenerateCode = async () => {
+    if (!adminEmail) {
+      alert('Please enter admin email address')
+      return
+    }
+    if (!adminName) {
+      alert('Please enter admin name')
+      return
+    }
+
     setGeneratingCode(true)
     try {
       const res = await fetch('/api/admin/management', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'generate-access-code' }),
+        body: JSON.stringify({ 
+          action: 'generate-access-code',
+          email: adminEmail,
+          name: adminName,
+          role: adminRole,
+          sendEmail: true
+        }),
       })
       const json = await res.json()
       if (json.success) {
         setCodes([json.data, ...codes])
+        setAdminEmail('')
+        setAdminName('')
+        alert('Access code generated and invitation email sent to ' + adminEmail)
+      } else {
+        alert('Error: ' + (json.error || 'Failed to generate code'))
       }
     } catch (error) {
       console.error('[v0] Error generating code:', error)
+      alert('Failed to generate code')
     } finally {
       setGeneratingCode(false)
     }
@@ -123,19 +147,60 @@ export default function AdminManagementPage() {
         {/* Access Codes Tab */}
         {activeTab === 'access-codes' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-gray-900">Generate Access Codes</h3>
-                <p className="text-sm text-gray-600">Each code can be used once to create a new admin account</p>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="font-bold text-gray-900 mb-4">Generate New Admin Invitation</h3>
+              <p className="text-sm text-gray-600 mb-4">Send an invitation to a new admin with an access code</p>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Admin Name *</label>
+                    <input
+                      type="text"
+                      value={adminName}
+                      onChange={(e) => setAdminName(e.target.value)}
+                      placeholder="e.g., John Doe"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                    <input
+                      type="email"
+                      value={adminEmail}
+                      onChange={(e) => setAdminEmail(e.target.value)}
+                      placeholder="admin@example.com"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                  <select
+                    value={adminRole}
+                    onChange={(e) => setAdminRole(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                </div>
+                
+                <button
+                  onClick={handleGenerateCode}
+                  disabled={generatingCode}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 font-medium transition"
+                >
+                  <Plus size={18} />
+                  {generatingCode ? 'Generating...' : 'Generate & Send Invitation'}
+                </button>
               </div>
-              <button
-                onClick={handleGenerateCode}
-                disabled={generatingCode}
-                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50"
-              >
-                <Plus size={18} />
-                Generate New Code
-              </button>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-gray-900 mb-3">Generated Access Codes</h3>
+              <p className="text-sm text-gray-600 mb-4">Active access codes ready to be used</p>
             </div>
 
             {codes.length === 0 ? (

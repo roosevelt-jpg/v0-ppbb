@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { SiteSettings } from '@/lib/types'
-import { Save, AlertCircle, Upload, X } from 'lucide-react'
+import { Save, AlertCircle, Upload, X, Share2, Globe, MessageCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -275,6 +275,37 @@ export default function AdminSettings() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
+          </div>
+        </Card>
+
+        {/* Social Media Links */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Social Media Links</h2>
+
+          <div className="space-y-4">
+            {[
+              { key: 'twitter', label: 'Twitter' },
+              { key: 'facebook', label: 'Facebook' },
+              { key: 'instagram', label: 'Instagram' },
+              { key: 'linkedin', label: 'LinkedIn' },
+              { key: 'youtube', label: 'YouTube' },
+            ].map(({ key, label }) => (
+              <div key={key}>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {label} URL
+                </label>
+                <input
+                  type="url"
+                  placeholder={`https://${key}.com/yourprofile`}
+                  value={(siteSettings.socialLinks as any)?.[key] || ''}
+                  onChange={(e) => handleSettingChange('socialLinks', {
+                    ...siteSettings.socialLinks,
+                    [key]: e.target.value
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+              </div>
+            ))}
           </div>
         </Card>
 
