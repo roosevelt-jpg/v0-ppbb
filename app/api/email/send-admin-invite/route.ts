@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSettings } from '@/lib/db-service'
+import { getSiteSettings } from '@/lib/admin'
 import { createGmailTransporter, sendAdminInviteEmail } from '@/lib/gmail-service'
 
 interface SendAdminInviteRequest {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     console.log('[v0] Processing admin invite for:', body.adminEmail)
 
     // Get site settings with email config
-    const settings = await getSettings()
+    const settings = await getSiteSettings()
 
     if (!settings?.emailConfig?.enabled) {
       console.warn('[v0] Email not configured in settings')

@@ -16,6 +16,18 @@ export default function AdminManagementPage() {
   const [adminEmail, setAdminEmail] = React.useState('')
   const [adminName, setAdminName] = React.useState('')
   const [adminRole, setAdminRole] = React.useState('admin')
+  const [selectedPermissions, setSelectedPermissions] = React.useState<string[]>([])
+
+  // Available permissions for admins
+  const ADMIN_PERMISSIONS = [
+    { id: 'manage_members', label: 'Manage Members', description: 'Add, edit, and remove members' },
+    { id: 'manage_events', label: 'Manage Events', description: 'Create, edit, and delete events' },
+    { id: 'manage_admins', label: 'Manage Admins', description: 'Create and manage admin accounts' },
+    { id: 'manage_settings', label: 'Manage Settings', description: 'Update site settings and configurations' },
+    { id: 'view_reports', label: 'View Reports', description: 'Access analytics and reporting dashboard' },
+    { id: 'manage_content', label: 'Manage Content', description: 'Edit pages, FAQs, and content' },
+    { id: 'manage_integrations', label: 'Manage Integrations', description: 'Configure external services' },
+  ]
 
   React.useEffect(() => {
     loadData()
@@ -49,6 +61,10 @@ export default function AdminManagementPage() {
       return
     }
 
+    // Calculate expiration (24 hours from now)
+    const expiresAt = new Date()
+    expiresAt.setHours(expiresAt.getHours() + 24)
+
     setGeneratingCode(true)
     try {
       const res = await fetch('/api/admin/management', {
@@ -56,10 +72,12 @@ export default function AdminManagementPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           action: 'generate-access-code',
-          email: adminEmail,
-          name: adminName,
+          adminName,
+          adminEmail,
           role: adminRole,
-          sendEmail: true
+          permissions: selectedPermissions.length > 0 ? selectedPermissions : ['full_access'],
+          sendEmail: true,
+          expiresAt: expiresAt.toISOString(),
         }),
       })
       const json = await res.json()
@@ -67,13 +85,14 @@ export default function AdminManagementPage() {
         setCodes([json.data, ...codes])
         setAdminEmail('')
         setAdminName('')
-        alert('Access code generated and invitation email sent to ' + adminEmail)
+        setSelectedPermissions([])
+        alert('✓ Access code generated and invitation email sent to ' + adminEmail)
       } else {
         alert('Error: ' + (json.error || 'Failed to generate code'))
       }
     } catch (error) {
       console.error('[v0] Error generating code:', error)
-      alert('Failed to generate code')
+      alert('Failed to generate code: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setGeneratingCode(false)
     }
@@ -185,6 +204,34 @@ export default function AdminManagementPage() {
                     <option value="admin">Admin</option>
                     <option value="super_admin">Super Admin</option>
                   </select>
+                </div>
+
+                {/* Permissions Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Permissions (Optional)</label>
+                  <p className="text-xs text-gray-500 mb-3">Select specific permissions or leave empty for full access</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {ADMIN_PERMISSIONS.map((permission) => (
+                      <label key={permission.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+                        <input
+                          type="checkbox"
+                          checked={selectedPermissions.includes(permission.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPermissions([...selectedPermissions, permission.id])
+                            } else {
+                              setSelectedPermissions(selectedPermissions.filter(id => id !== permission.id))
+                            }
+                          }}
+                          className="w-4 h-4 mt-0.5 cursor-pointer"
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 text-sm">{permission.label}</div>
+                          <div className="text-xs text-gray-600">{permission.description}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 </div>
                 
                 <button

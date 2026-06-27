@@ -135,6 +135,20 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'fromAddress', label: 'From Address', type: 'text', required: true, placeholder: 'noreply@passiveblessings.ae' },
     ],
   },
+  gmailSmtp: {
+    id: 'gmailSmtp',
+    name: 'Gmail SMTP',
+    category: 'messaging',
+    description: 'Gmail SMTP for admin invitations & notifications',
+    icon: '📧',
+    fields: [
+      { name: 'gmailEmail', label: 'Gmail Email Address', type: 'email', required: true, placeholder: 'your-email@gmail.com' },
+      { name: 'gmailAppPassword', label: 'Gmail App Password', type: 'password', required: true, encrypt: true, placeholder: '16-character app password' },
+      { name: 'fromName', label: 'From Name', type: 'text', required: false, placeholder: 'Passive Blessings' },
+    ],
+    docs: 'https://support.google.com/accounts/answer/185833',
+    help: 'Use an App Password (not your Gmail password). Enable 2FA on your Google account, then generate an App Password in Security settings.',
+  },
   twilio: {
     id: 'twilio',
     name: 'SMS (Twilio/Nexmo)',
