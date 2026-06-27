@@ -55,17 +55,26 @@ export default function HomePage() {
         clearInterval(heroSliderInterval)
       })
       
-      // Real-time YouTube config listener
-      const youtubeUnsubscribe = onSnapshot(
-        doc(db, 'youtubeConfig', 'default'),
-        (snapshot) => {
-          if (snapshot.exists()) {
-            setYoutubeConfig(snapshot.data() as YouTubeConfig)
+      // YouTube config is served by a public Admin SDK route (/api/youtube/config);
+      // client reads of `youtubeConfig` are denied by deployed Firestore rules.
+      let youtubeCancelled = false
+      const loadYouTube = async () => {
+        try {
+          const res = await fetch('/api/youtube/config', { cache: 'no-store' })
+          const json = await res.json()
+          if (!youtubeCancelled && json.success && json.data) {
+            setYoutubeConfig(json.data as YouTubeConfig)
           }
-        },
-        (error) => console.error('YouTube config listener error:', error)
-      )
-      statsListeners.push(youtubeUnsubscribe)
+        } catch (err) {
+          console.error('[v0] YouTube config fetch error:', err)
+        }
+      }
+      loadYouTube()
+      const youtubeInterval = setInterval(loadYouTube, 60000)
+      statsListeners.push(() => {
+        youtubeCancelled = true
+        clearInterval(youtubeInterval)
+      })
 
       // Members count
       const usersQuery = query(collection(db, 'users'), where('role', '==', 'member'))
