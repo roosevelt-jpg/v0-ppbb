@@ -294,9 +294,10 @@ export default function AdminManagementPage() {
                           <Copy size={16} />
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500">
-                        Expires: {format(new Date(code.expiresAt), 'MMM dd, yyyy')}
-                      </p>
+                      <div className="flex flex-col gap-1 text-xs text-gray-500">
+                        <p>Generated: {format(new Date(code.createdAt), 'MMM dd, yyyy h:mm a')}</p>
+                        <p>Expires: {format(new Date(code.expiresAt), 'MMM dd, yyyy')}</p>
+                      </div>
                     </div>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
                       code.used ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'

@@ -150,7 +150,7 @@ export const sendAdminInviteEmail = async (
         <div class="container">
           <!-- Header -->
           <div class="header">
-            <div class="logo">Passive Blessings</div>
+            <img src="https://test.myflynai.com/pb-logo-black.png" alt="Passive Blessings" style="max-width: 180px; height: auto; margin-bottom: 10px;">
             <div class="subtitle">Admin Portal</div>
           </div>
 
