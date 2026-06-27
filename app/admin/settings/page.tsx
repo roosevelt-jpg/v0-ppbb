@@ -1,14 +1,13 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { getSiteSettings, updateSiteSettings } from '@/lib/admin'
-import { fileToBase64 } from '@/lib/image-upload'
 import { SiteSettings } from '@/lib/types'
 import { Save, AlertCircle, Upload, X } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export default function AdminSettings() {
   const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null)
@@ -18,16 +17,19 @@ export default function AdminSettings() {
   const [logoPreview, setLogoPreview] = React.useState<string>('')
   const [logoDarkPreview, setLogoDarkPreview] = React.useState<string>('')
 
+  // Load settings from API
   React.useEffect(() => {
     const loadSettings = async () => {
       try {
-        const settings = await getSiteSettings()
-        if (settings) {
-          setSiteSettings(settings)
-          setLogoPreview(settings.logoUrl || '')
-          setLogoDarkPreview(settings.logoUrlDark || '')
+        const res = await fetch('/api/settings', { cache: 'no-store' })
+        const json = await res.json()
+
+        if (json.success && json.data) {
+          setSiteSettings(json.data)
+          setLogoPreview(json.data.logoUrl || '')
+          setLogoDarkPreview(json.data.logoUrlDark || '')
         } else {
-          // Initialize default settings
+          // Default settings
           const defaultSettings: SiteSettings = {
             id: 'default',
             siteName: 'Passive Blessings',
@@ -59,12 +61,9 @@ export default function AdminSettings() {
     loadSettings()
   }, [])
 
-  const handleSiteSettingsChange = (field: keyof SiteSettings, value: any) => {
+  const handleSettingChange = (field: keyof SiteSettings, value: any) => {
     if (!siteSettings) return
-    setSiteSettings({
-      ...siteSettings,
-      [field]: value,
-    })
+    setSiteSettings({ ...siteSettings, [field]: value })
   }
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, isDark: boolean) => {
@@ -72,541 +71,224 @@ export default function AdminSettings() {
     if (!file) return
 
     try {
-      const base64 = await fileToBase64(file)
+      setSaving(true)
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('path', isDark ? 'branding/logo-dark' : 'branding/logo-light')
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Upload failed')
+
+      const preview = URL.createObjectURL(file)
       if (isDark) {
-        setLogoDarkPreview(base64)
-        handleSiteSettingsChange('logoUrlDark', base64)
+        setLogoDarkPreview(preview)
+        handleSettingChange('logoUrlDark', json.data.url)
       } else {
-        setLogoPreview(base64)
-        handleSiteSettingsChange('logoUrl', base64)
+        setLogoPreview(preview)
+        handleSettingChange('logoUrl', json.data.url)
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to upload logo' })
-    }
-  }
 
-  const handleApiConfigChange = (service: 'stripe' | 'sendgrid', field: string, value: string) => {
-    // Removed - API configs are now managed in /admin/integrations
-  }
-
-  const handleSaveSiteSettings = async () => {
-    if (!siteSettings) return
-    setSaving(true)
-    try {
-      await updateSiteSettings(siteSettings)
-      setMessage({ type: 'success', text: 'Site settings saved successfully' })
+      setMessage({ type: 'success', text: 'Logo uploaded successfully' })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to save site settings' })
+      setMessage({ type: 'error', text: 'Upload failed' })
     } finally {
       setSaving(false)
     }
   }
 
-  const handleSaveApiConfig = async (service: 'stripe' | 'sendgrid') => {
-    // Removed - API configs are now managed in /admin/integrations
+  const handleSave = async () => {
+    if (!siteSettings) return
+
+    setSaving(true)
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(siteSettings),
+      })
+
+      const json = await res.json()
+      if (json.success) {
+        setMessage({ type: 'success', text: 'Settings saved successfully' })
+        setTimeout(() => setMessage(null), 3000)
+      } else {
+        setMessage({ type: 'error', text: json.error || 'Failed to save' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to save settings' })
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) {
     return (
-      <>
-        <div className="p-8" style={{ backgroundColor: '#f7f6f2' }}>
-          <p style={{ color: '#888888' }}>Loading settings...</p>
+      <AdminPageLayout title="Settings" subtitle="Configure platform settings">
+        <div className="text-center py-12">
+          <p className="text-gray-600">Loading settings...</p>
         </div>
-      </>
+      </AdminPageLayout>
+    )
+  }
+
+  if (!siteSettings) {
+    return (
+      <AdminPageLayout title="Settings" subtitle="Configure platform settings">
+        <div className="text-center py-12 text-red-600">
+          <p>Failed to load settings</p>
+        </div>
+      </AdminPageLayout>
     )
   }
 
   return (
-    <AdminPageLayout title="Settings" subtitle="Configure platform settings and integrations">
-      <div className="space-y-8">
+    <AdminPageLayout title="Settings" subtitle="Configure platform settings">
+      <div className="space-y-6">
         {message && (
           <div
-            className="p-4 rounded-lg border"
-            style={{
-              backgroundColor: message.type === 'success' ? '#e8f5e9' : '#ffebee',
-              borderColor: message.type === 'success' ? '#2e7d32' : '#c62828',
-              color: message.type === 'success' ? '#2e7d32' : '#c62828',
-            }}
+            className={`p-4 rounded-lg flex items-center gap-3 ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}
           >
-            <p style={{ fontSize: '13px', fontWeight: 500 }}>{message.text}</p>
+            <AlertCircle className="w-5 h-5" />
+            <p>{message.text}</p>
           </div>
         )}
 
-        {/* Site Branding Settings */}
-        <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-          <h2
-            className="text-2xl font-bold mb-6"
-            style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}
-          >
+        {/* Site Branding */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <span className="w-5 h-5 bg-black rounded" />
             Site Branding
           </h2>
 
-          <div className="space-y-6">
-            {/* Site Name */}
+          <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Site Name
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Site Name</label>
               <input
                 type="text"
-                value={siteSettings?.siteName || ''}
-                onChange={(e) => handleSiteSettingsChange('siteName', e.target.value)}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+                value={siteSettings.siteName}
+                onChange={(e) => handleSettingChange('siteName', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
 
-            {/* Site Description */}
             <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Site Description
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Site Description</label>
               <textarea
-                value={siteSettings?.siteDescription || ''}
-                onChange={(e) => handleSiteSettingsChange('siteDescription', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333', minHeight: '100px' }}
+                value={siteSettings.siteDescription}
+                onChange={(e) => handleSettingChange('siteDescription', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
 
-            {/* Logo Upload */}
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Logo (Light Background)
-              </label>
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <div
-                    className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-warm-white transition cursor-pointer"
-                    style={{ borderColor: '#e4e1da' }}
-                  >
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Logo (Light)</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  {logoPreview && (
+                    <img src={logoPreview} alt="Logo preview" className="w-24 h-24 mx-auto mb-2 object-contain" />
+                  )}
+                  <label className="block">
+                    <span className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+                      {logoPreview ? 'Change' : 'Upload'} Logo
+                    </span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => handleLogoUpload(e, false)}
                       className="hidden"
-                      id="logoUpload"
+                      disabled={saving}
                     />
-                    <label htmlFor="logoUpload" className="cursor-pointer block">
-                      <Upload className="w-4 h-4 mx-auto mb-1" style={{ color: '#888888' }} />
-                      <div className="text-xs" style={{ color: '#888888' }}>Click to upload</div>
-                    </label>
-                  </div>
+                  </label>
                 </div>
-                {logoPreview && (
-                  <div className="flex items-center gap-2">
-                    <img src={logoPreview} alt="Logo preview" style={{ maxHeight: '50px', maxWidth: '100px' }} />
-                    <button
-                      onClick={() => {
-                        setLogoPreview('')
-                        handleSiteSettingsChange('logoUrl', '')
-                      }}
-                      className="p-1 hover:bg-muted rounded"
-                    >
-                      <X className="w-4 h-4" style={{ color: '#c62828' }} />
-                    </button>
-                  </div>
-                )}
               </div>
-            </div>
 
-            {/* Dark Logo Upload */}
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Logo (Dark Background)
-              </label>
-              <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                  <div
-                    className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-warm-white transition cursor-pointer"
-                    style={{ borderColor: '#e4e1da' }}
-                  >
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Logo (Dark)</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                  {logoDarkPreview && (
+                    <img
+                      src={logoDarkPreview}
+                      alt="Dark logo preview"
+                      className="w-24 h-24 mx-auto mb-2 object-contain"
+                    />
+                  )}
+                  <label className="block">
+                    <span className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
+                      {logoDarkPreview ? 'Change' : 'Upload'} Logo
+                    </span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={(e) => handleLogoUpload(e, true)}
                       className="hidden"
-                      id="logoDarkUpload"
+                      disabled={saving}
                     />
-                    <label htmlFor="logoDarkUpload" className="cursor-pointer block">
-                      <Upload className="w-4 h-4 mx-auto mb-1" style={{ color: '#888888' }} />
-                      <div className="text-xs" style={{ color: '#888888' }}>Click to upload</div>
-                    </label>
-                  </div>
+                  </label>
                 </div>
-                {logoDarkPreview && (
-                  <div className="flex items-center gap-2">
-                    <img src={logoDarkPreview} alt="Dark logo preview" style={{ maxHeight: '50px', maxWidth: '100px' }} />
-                    <button
-                      onClick={() => {
-                        setLogoDarkPreview('')
-                        handleSiteSettingsChange('logoUrlDark', '')
-                      }}
-                      className="p-1 hover:bg-muted rounded"
-                    >
-                      <X className="w-4 h-4" style={{ color: '#c62828' }} />
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
-
-            {/* Brand Colors */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Primary Color
-                </label>
-                <input
-                  type="color"
-                  value={siteSettings?.primaryColor || '#111111'}
-                  onChange={(e) => handleSiteSettingsChange('primaryColor', e.target.value)}
-                  className="w-full h-9 border rounded-lg cursor-pointer"
-                  style={{ borderColor: '#e4e1da' }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Secondary Color
-                </label>
-                <input
-                  type="color"
-                  value={siteSettings?.secondaryColor || '#f7f6f2'}
-                  onChange={(e) => handleSiteSettingsChange('secondaryColor', e.target.value)}
-                  className="w-full h-9 border rounded-lg cursor-pointer"
-                  style={{ borderColor: '#e4e1da' }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Accent Color
-                </label>
-                <input
-                  type="color"
-                  value={siteSettings?.accentColor || '#888888'}
-                  onChange={(e) => handleSiteSettingsChange('accentColor', e.target.value)}
-                  className="w-full h-9 border rounded-lg cursor-pointer"
-                  style={{ borderColor: '#e4e1da' }}
-                />
-              </div>
-            </div>
-
-            {/* Contact Info */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Contact Email
-                </label>
-                <input
-                  type="email"
-                  value={siteSettings?.email || ''}
-                  onChange={(e) => handleSiteSettingsChange('email', e.target.value)}
-                  className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                  style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Contact Phone
-                </label>
-                <input
-                  type="tel"
-                  value={siteSettings?.phone || ''}
-                  onChange={(e) => handleSiteSettingsChange('phone', e.target.value)}
-                  className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                  style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Address
-              </label>
-              <input
-                type="text"
-                value={siteSettings?.address || ''}
-                onChange={(e) => handleSiteSettingsChange('address', e.target.value)}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Footer Text
-              </label>
-              <input
-                type="text"
-                value={siteSettings?.footerText || ''}
-                onChange={(e) => handleSiteSettingsChange('footerText', e.target.value)}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <button
-              onClick={handleSaveSiteSettings}
-              disabled={saving}
-              className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
-              style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-            >
-              <Save className="w-4 h-4 inline mr-2" />
-              {saving ? 'Saving...' : 'Save Site Settings'}
-            </button>
           </div>
         </Card>
 
-        {/* Social Media Links */}
-        <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-          <h2
-            className="text-2xl font-bold mb-2"
-            style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}
-          >
-            Social Media Links
-          </h2>
-          <p className="text-sm mb-6" style={{ color: '#888888' }}>
-            Add your social media URLs. They will appear in the footer.
-          </p>
+        {/* Contact Information */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Contact Information</h2>
+
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Facebook URL
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
               <input
-                type="url"
-                placeholder="https://facebook.com/passiveblessings"
-                value={siteSettings?.socialLinks?.facebook || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, facebook: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+                type="email"
+                value={siteSettings.email}
+                onChange={(e) => handleSettingChange('email', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Twitter URL
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
               <input
-                type="url"
-                placeholder="https://twitter.com/passiveblessings"
-                value={siteSettings?.socialLinks?.twitter || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, twitter: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+                type="tel"
+                value={siteSettings.phone}
+                onChange={(e) => handleSettingChange('phone', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Instagram URL
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
               <input
-                type="url"
-                placeholder="https://instagram.com/passiveblessings"
-                value={siteSettings?.socialLinks?.instagram || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, instagram: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
+                type="text"
+                value={siteSettings.address}
+                onChange={(e) => handleSettingChange('address', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                LinkedIn URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://linkedin.com/company/passiveblessings"
-                value={siteSettings?.socialLinks?.linkedin || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, linkedin: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                YouTube URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://youtube.com/passiveblessings"
-                value={siteSettings?.socialLinks?.youtube || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, youtube: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Discord URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://discord.gg/passiveblessings"
-                value={siteSettings?.socialLinks?.discord || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, discord: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                TikTok URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://tiktok.com/@passiveblessings"
-                value={siteSettings?.socialLinks?.tiktok || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, tiktok: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Snapchat URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://snapchat.com/add/passiveblessings"
-                value={siteSettings?.socialLinks?.snapchat || ''}
-                onChange={(e) => handleSiteSettingsChange('socialLinks', { ...siteSettings?.socialLinks, snapchat: e.target.value })}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            <button
-              onClick={handleSaveSiteSettings}
-              disabled={saving}
-              className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
-              style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-            >
-              <Save className="w-4 h-4 inline mr-2" />
-              {saving ? 'Saving...' : 'Save Social Media Links'}
-            </button>
           </div>
         </Card>
 
-        {/* SEO & Analytics Settings */}
-        <Card className="p-8" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
-          <h2
-            className="text-2xl font-bold mb-6"
-            style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-black text-white hover:bg-gray-900 disabled:opacity-50"
           >
-            SEO & Analytics
-          </h2>
-
-          <div className="space-y-6">
-            {/* SEO Title */}
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                SEO Title
-              </label>
-              <input
-                type="text"
-                placeholder="Passive Blessings - Community Platform for Events & Volunteering"
-                value={siteSettings?.seoTitle || ''}
-                onChange={(e) => handleSiteSettingsChange('seoTitle', e.target.value)}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-                maxLength={60}
-              />
-              <p className="text-xs mt-1" style={{ color: '#888888' }}>
-                {(siteSettings?.seoTitle || '').length}/60 characters
-              </p>
-            </div>
-
-            {/* SEO Description */}
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                SEO Description
-              </label>
-              <textarea
-                placeholder="Discover Passive Blessings - a vibrant community platform connecting volunteers, members, businesses, and sponsors for meaningful events and charitable causes in the UAE."
-                value={siteSettings?.seoDescription || ''}
-                onChange={(e) => handleSiteSettingsChange('seoDescription', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333', minHeight: '80px' }}
-                maxLength={160}
-              />
-              <p className="text-xs mt-1" style={{ color: '#888888' }}>
-                {(siteSettings?.seoDescription || '').length}/160 characters
-              </p>
-            </div>
-
-            {/* SEO Keywords */}
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                SEO Keywords (comma-separated)
-              </label>
-              <input
-                type="text"
-                placeholder="volunteering, events, community, charitable, UAE, Dubai, sponsorship, membership"
-                value={siteSettings?.seoKeywords || ''}
-                onChange={(e) => handleSiteSettingsChange('seoKeywords', e.target.value)}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-            </div>
-
-            {/* Google Analytics ID */}
-            <div>
-              <label className="block text-xs font-medium mb-2" style={{ color: '#333333', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Google Analytics ID
-              </label>
-              <input
-                type="text"
-                placeholder="G-XXXXXXXXXX"
-                value={siteSettings?.googleAnalyticsId || ''}
-                onChange={(e) => handleSiteSettingsChange('googleAnalyticsId', e.target.value)}
-                className="w-full h-9 px-3 py-2 text-sm rounded-lg border"
-                style={{ borderColor: '#e4e1da', backgroundColor: '#ffffff', color: '#333333' }}
-              />
-              <p className="text-xs mt-1" style={{ color: '#888888' }}>
-                Get your tracking ID from Google Analytics 4 (GA4)
-              </p>
-            </div>
-
-            <button
-              onClick={handleSaveSiteSettings}
-              disabled={saving}
-              className="w-full h-8 px-4 rounded-lg text-sm font-medium transition disabled:opacity-50"
-              style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-            >
-              <Save className="w-4 h-4 inline mr-2" />
-              {saving ? 'Saving...' : 'Save SEO & Analytics'}
-            </button>
-          </div>
-        </Card>
-
-        {/* System Alert */}
-        <Card
-          className="p-8 border flex gap-4"
-          style={{
-            backgroundColor: '#fff3cd',
-            borderColor: '#ffc107',
-          }}
-        >
-          <AlertCircle className="w-6 h-6 flex-shrink-0 mt-0" style={{ color: '#856404' }} />
-          <div>
-            <h3 className="font-semibold" style={{ color: '#856404' }}>
-              Important
-            </h3>
-            <p className="text-sm mt-2" style={{ color: '#856404' }}>
-              API keys are encrypted and stored securely. Never share these keys with anyone. Consider these as passwords. All keys are stored in Firestore with encryption enabled.
-            </p>
-          </div>
-        </Card>
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? 'Saving...' : 'Save Settings'}
+          </Button>
+        </div>
       </div>
     </AdminPageLayout>
   )
