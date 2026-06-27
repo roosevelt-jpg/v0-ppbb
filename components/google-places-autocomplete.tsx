@@ -149,9 +149,13 @@ export default function GooglePlacesAutocomplete({
 
       console.log('[v0] Predictions response:', response)
 
-      if (response.status && response.status !== 'OK') {
+      if (!response) {
+        console.warn('[v0] Predictions API returned undefined response')
+        setError('No response from location service')
+        setPredictions([])
+      } else if (response.status && response.status !== 'OK') {
         console.warn('[v0] Predictions API returned status:', response.status)
-        setError(`API returned: ${response.status}`)
+        setError(`Location service: ${response.status}`)
         setPredictions([])
       } else if (response.predictions && response.predictions.length > 0) {
         const formattedPredictions = response.predictions.map((prediction: any) => ({
@@ -170,7 +174,8 @@ export default function GooglePlacesAutocomplete({
       }
     } catch (error) {
       console.error('[v0] Error fetching predictions:', error)
-      setError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+      setError(`Location error: ${errorMsg}`)
       setPredictions([])
     } finally {
       setLoading(false)
