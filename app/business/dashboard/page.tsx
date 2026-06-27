@@ -3,6 +3,7 @@
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { getBusinessDashboardStats } from '@/lib/business-queries'
+import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -40,14 +41,14 @@ export default function BusinessDashboard() {
 
   // Redirect if not authenticated or not a business user
   React.useEffect(() => {
-    if (!loading && (!user || ((user.role !== 'business' && user.role !== 'super_admin') && user.role !== 'super_admin'))) {
+    if (!loading && (!user || !hasBusinessAccess(user))) {
       router.push('/login')
     }
   }, [user, loading, router])
 
   // Fetch dashboard stats
   React.useEffect(() => {
-    if (user?.id && (user.role === 'business' || user.role === 'super_admin')) {
+    if (user?.id && hasBusinessAccess(user)) {
       const fetchStats = async () => {
         try {
           const dashboardStats = await getBusinessDashboardStats(user.id)
@@ -66,7 +67,7 @@ export default function BusinessDashboard() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
   }
 
-  if ((user.role !== 'business' && user.role !== 'super_admin')) {
+  if (!hasBusinessAccess(user)) {
     return <div className="flex items-center justify-center h-screen">Access Denied</div>
   }
 

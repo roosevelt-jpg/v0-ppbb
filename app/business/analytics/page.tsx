@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { subscribeToBusinessAnalytics, getBusinessDashboardStats } from '@/lib/business-queries'
@@ -14,7 +15,7 @@ export default function Analytics() {
   const [stats, setStats] = React.useState<any>(null)
 
   React.useEffect(() => {
-    if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
+    if (!user || (!hasBusinessAccess(user))) {
       router.push('/login')
       return
     }
@@ -33,7 +34,7 @@ export default function Analytics() {
     fetchStats()
   }, [user, router])
 
-  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
+  if (!user || (!hasBusinessAccess(user))) {
     return <div className="text-center py-8">Access Denied</div>
   }
 

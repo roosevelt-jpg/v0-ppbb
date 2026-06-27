@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -58,7 +59,7 @@ export default function NewOpportunity() {
     }
   }
 
-  if (!user || (user.role !== 'business' && user.role !== 'super_admin')) {
+  if (!user || (!hasBusinessAccess(user))) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
