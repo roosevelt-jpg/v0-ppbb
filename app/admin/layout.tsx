@@ -150,7 +150,7 @@ export default function AdminLayout({
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-background">
-          <div className="p-8">
+          <div className="p-8 max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
