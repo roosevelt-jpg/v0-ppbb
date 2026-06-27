@@ -1,8 +1,6 @@
 'use client'
 
 import React from 'react'
-import { db } from '@/lib/firebase'
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { Save, AlertCircle, CheckCircle, MapPin } from 'lucide-react'
 
 export default function LocationConfigPage() {
@@ -27,20 +25,24 @@ export default function LocationConfigPage() {
     try {
       setLoading(true)
       setError(null)
-      const docRef = doc(db, 'admin', 'locationConfig')
-      const docSnap = await getDoc(docRef)
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data()
-        setConfig(data)
-        setFormData({
-          googleMapsApiKey: data.googleMapsApiKey || '',
-          googlePlacesApiKey: data.googlePlacesApiKey || '',
-          enableAutoDetect: data.enableAutoDetect ?? true,
-          autoDetectRadius: data.autoDetectRadius || 50,
-          defaultCountry: data.defaultCountry || 'AE',
-        })
+      // Read via the Admin SDK API route. Client-side Firestore reads of the
+      // protected `admin` collection are denied by security rules.
+      const res = await fetch('/api/admin/location-config', { cache: 'no-store' })
+      const json = await res.json()
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to load configuration')
       }
+
+      const data = json.data
+      setConfig(data)
+      setFormData({
+        googleMapsApiKey: data.googleMapsApiKey || '',
+        googlePlacesApiKey: data.googlePlacesApiKey || '',
+        enableAutoDetect: data.enableAutoDetect ?? true,
+        autoDetectRadius: data.autoDetectRadius || 50,
+        defaultCountry: data.defaultCountry || 'AE',
+      })
     } catch (err) {
       setError('Failed to load configuration. Please try again.')
       console.error('[v0] Error loading location config:', err)
@@ -78,22 +80,24 @@ export default function LocationConfigPage() {
         return
       }
 
-      const docRef = doc(db, 'admin', 'locationConfig')
-      await setDoc(
-        docRef,
-        {
-          ...formData,
-          updatedAt: serverTimestamp(),
-          updatedBy: 'admin',
-        },
-        { merge: true }
-      )
+      // Save via the Admin SDK API route (client-side writes to the protected
+      // `admin` collection are denied by Firestore security rules).
+      const res = await fetch('/api/admin/location-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      const json = await res.json()
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to save configuration')
+      }
 
       setConfig(formData)
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      setError('Failed to save configuration. Please try again.')
+      setError(err instanceof Error ? err.message : 'Failed to save configuration. Please try again.')
       console.error('[v0] Error saving location config:', err)
     } finally {
       setIsSaving(false)
