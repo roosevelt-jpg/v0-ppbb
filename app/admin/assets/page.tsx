@@ -59,14 +59,23 @@ export default function AssetsPage() {
 
     setIsUploadingImage(true)
     try {
-      // Optimize entirely in the browser and store the result as a base64
-      // data URL directly in Firestore (no Firebase Storage bucket needed).
-      // Large images are downscaled/compressed; smaller images keep high
-      // quality. Aspect ratio is always preserved so nothing is distorted.
+      // Optimize in the browser (downscale/compress, aspect ratio preserved),
+      // then upload the bytes to Firebase Storage via the server. Only the
+      // resulting public Storage URL is kept — never base64 in Firestore.
       const processed = await processImageFile(file)
 
-      setFormData(prev => ({ ...prev, imageUrl: processed.dataUrl }))
-      setPreviewImage(processed.dataUrl)
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl: processed.dataUrl, folder: 'hero-slider' }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Upload failed')
+      }
+
+      setFormData(prev => ({ ...prev, imageUrl: json.url }))
+      setPreviewImage(json.url)
       setImageDimensions({ width: processed.width, height: processed.height })
 
       const validation = validateImage(processed.width, processed.height)
@@ -75,8 +84,8 @@ export default function AssetsPage() {
         warnings: validation.warnings,
       })
     } catch (error) {
-      console.error('[v0] Error processing image:', error)
-      alert('Failed to process image. Please try a different file.')
+      console.error('[v0] Error uploading image:', error)
+      alert(error instanceof Error ? error.message : 'Failed to upload image. Please try a different file.')
     } finally {
       setIsUploadingImage(false)
     }

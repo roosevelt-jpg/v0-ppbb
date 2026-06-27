@@ -1,5 +1,13 @@
 import { initializeApp, getApps, cert, type App } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
+import { getStorage } from 'firebase-admin/storage'
+
+/**
+ * The GCS bucket that holds all binary files (images, PDFs, videos).
+ * Firestore only ever stores the resulting public download URL — never the
+ * file bytes themselves.
+ */
+export const STORAGE_BUCKET = process.env.FIREBASE_STORAGE_BUCKET || 'pasiveblessings-media'
 
 /**
  * Robustly parse the GCP_SERVICE_ACCOUNT env var into a service-account object.
@@ -60,4 +68,14 @@ export function getAdminApp(): App {
 
 export function getAdminDb() {
   return getFirestore(getAdminApp())
+}
+
+/**
+ * Returns the GCS bucket used for file storage. Uploads go here via the Admin
+ * SDK and objects are made public, yielding a stable
+ * https://storage.googleapis.com/<bucket>/<path> URL that is stored in
+ * Firestore.
+ */
+export function getAdminBucket() {
+  return getStorage(getAdminApp()).bucket(STORAGE_BUCKET)
 }
