@@ -99,7 +99,7 @@ export default function HomePage() {
       // Upcoming events - fetch 8+ events sorted by date for homepage display
       const upcomingQuery = query(
         collection(db, 'events'), 
-        where('status', 'in', ['published', 'active']),
+        where('status', '==', 'published'),
         orderBy('date', 'asc'),
         limit(8)
       )

@@ -90,10 +90,10 @@ export default function EventsPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 font-medium text-sm transition-colors ${
+              className={`px-4 py-2 font-medium text-sm transition-colors rounded-t-lg ${
                 activeTab === tab
-                  ? 'text-black border-b-2 border-black'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-black text-white border-b-2 border-black'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
               {tab === 'all' ? 'All Events' : tab === 'draft' ? 'Drafts' : 'Published'}
