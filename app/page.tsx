@@ -105,8 +105,14 @@ export default function HomePage() {
       )
       statsListeners.push(onSnapshot(upcomingQuery, (snapshot) => {
         const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        console.log('[v0] Upcoming events fetched:', events.length, 'events')
+        if (events.length === 0) {
+          console.log('[v0] No published events found. Checking database...')
+        } else {
+          console.log('[v0] Events:', events.map(e => ({ title: e.title, status: e.status, date: e.date })))
+        }
         setUpcomingEvents(events)
-      }, (error) => console.error('Upcoming events listener error:', error)))
+      }, (error) => console.error('[v0] Upcoming events listener error:', error)))
 
       // Testimonials
       const testimonialsQuery = query(collection(db, 'testimonials'), where('isPublished', '==', true), limit(3))

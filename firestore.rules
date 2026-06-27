@@ -80,12 +80,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
     
-    // Events - Authenticated read, specific write
+    // Events - Public read of published events, authenticated create/update/delete
     match /events/{eventId} {
-      allow read: if isAuth();
+      allow read: if resource.data.status == 'published' || isAuth();
       allow create: if isAuth() && (isAdmin() || isBusiness(request.auth.uid));
-      allow update: if isAdmin() || request.resource.data.organizerId == request.auth.uid;
-      allow delete: if isAdmin() || resource.data.organizerId == request.auth.uid;
+      allow update: if isAdmin() || (isAuth() && request.resource.data.organizerId == request.auth.uid);
+      allow delete: if isAdmin() || (isAuth() && resource.data.organizerId == request.auth.uid);
     }
     
     // Opportunities - Authenticated read, business write
