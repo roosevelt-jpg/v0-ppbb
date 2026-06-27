@@ -54,15 +54,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, ...data } = body
 
+    console.log('[v0] Admin management POST received:', {
+      action,
+      hasData: !!data,
+      dataKeys: Object.keys(data),
+    })
+
     if (action === 'generate-access-code') {
       const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr } = data
       
-      console.log('[v0] Generating access code with data:', {
+      console.log('[v0] Processing generate-access-code with:', {
         adminName,
         adminEmail,
         role,
         permissions,
         sendEmail,
+        hasExpiresAt: !!expiresAtStr,
       })
 
       if (!adminEmail || !adminName || !role) {
@@ -93,15 +100,25 @@ export async function POST(request: NextRequest) {
         code,
         permissions: accessCodeData.permissions,
         expiresAt,
+        collectionName: 'admin-access-codes',
       })
 
-      const docRef = await db.collection('admin-access-codes').add(accessCodeData)
-
-      console.log('[v0] Access code saved successfully:', {
-        docId: docRef.id,
-        code,
-        permissions: accessCodeData.permissions,
-      })
+      let docRef
+      try {
+        docRef = await db.collection('admin-access-codes').add(accessCodeData)
+        console.log('[v0] Access code saved successfully:', {
+          docId: docRef.id,
+          code,
+          permissions: accessCodeData.permissions,
+        })
+      } catch (dbError) {
+        console.error('[v0] Firestore write error:', {
+          error: dbError instanceof Error ? dbError.message : String(dbError),
+          collection: 'admin-access-codes',
+          dataSize: JSON.stringify(accessCodeData).length,
+        })
+        throw dbError
+      }
 
       // If sendEmail is true, trigger the email sending
       if (sendEmail) {
@@ -187,8 +204,19 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
   } catch (error) {
-    console.error('[v0] Admin management error:', error)
-    return NextResponse.json({ success: false, error: 'Operation failed' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : 'No stack trace'
+    
+    console.error('[v0] Admin management error:', {
+      message: errorMessage,
+      stack: errorStack,
+      type: error?.constructor?.name,
+    })
+    
+    return NextResponse.json({
+      success: false,
+      error: errorMessage || 'Operation failed'
+    }, { status: 500 })
   }
 }
 
