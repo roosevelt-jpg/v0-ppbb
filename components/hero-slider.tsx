@@ -21,7 +21,9 @@ export function HeroSlider({ settings }: HeroSliderProps) {
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return
-    setSelectedIndex(emblaApi.selectedIndex())
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+    setPrevBtnDisabled(!emblaApi.canScrollPrev())
+    setNextBtnDisabled(!emblaApi.canScrollNext())
   }, [emblaApi])
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
@@ -62,7 +64,7 @@ export function HeroSlider({ settings }: HeroSliderProps) {
   }
 
   return (
-    <div className="w-full bg-black rounded-2xl overflow-hidden">
+    <div className="relative w-full bg-black rounded-2xl overflow-hidden">
       {/* Carousel Container */}
       <div ref={emblaRef} className="overflow-hidden">
         <div className="flex">

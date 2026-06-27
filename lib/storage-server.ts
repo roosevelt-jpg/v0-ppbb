@@ -46,6 +46,49 @@ export async function uploadBufferToStorage(
 }
 
 /**
+ * Uploads bytes to an explicit Storage path with optional custom metadata.
+ * Used when the caller needs a deterministic path (e.g. beneficiary documents
+ * keyed by request + document type) rather than a random one.
+ */
+export async function uploadBufferToPath(
+  buffer: Buffer,
+  mimeType: string,
+  path: string,
+  customMetadata: Record<string, string> = {}
+): Promise<UploadResult> {
+  if (!buffer.length) {
+    throw new Error('Empty file')
+  }
+  const bucket = getAdminBucket()
+  const cleanPath = path.replace(/^\/+/, '')
+  const file = bucket.file(cleanPath)
+  await file.save(buffer, {
+    contentType: mimeType,
+    resumable: false,
+    metadata: { cacheControl: 'private, max-age=3600', metadata: customMetadata },
+  })
+  await file.makePublic()
+  return {
+    url: `https://storage.googleapis.com/${bucket.name}/${cleanPath}`,
+    path: cleanPath,
+    contentType: mimeType,
+    size: buffer.length,
+  }
+}
+
+/**
+ * Deletes a file from Storage by its path. Never throws — the object may
+ * already be gone.
+ */
+export async function deleteFromStorage(path: string): Promise<void> {
+  try {
+    await getAdminBucket().file(path.replace(/^\/+/, '')).delete()
+  } catch {
+    // ignore — already deleted or missing
+  }
+}
+
+/**
  * Parses a request (multipart form-data with `file`, or JSON with `dataUrl`)
  * into a buffer + metadata ready for {@link uploadBufferToStorage}.
  */
