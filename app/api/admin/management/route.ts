@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       if (sendEmail) {
         console.log('[v0] Triggering email send to:', adminEmail)
         try {
-          await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/api/email/send-admin-invite`, {
+          const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/api/email/send-admin-invite`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -119,9 +119,25 @@ export async function POST(request: NextRequest) {
               permissions: accessCodeData.permissions,
             }),
           })
-          console.log('[v0] Email sent successfully')
+          
+          const emailData = await emailResponse.json()
+          console.log('[v0] Email API response:', {
+            status: emailResponse.status,
+            success: emailData.success,
+            message: emailData.message,
+            error: emailData.error,
+          })
+          
+          if (!emailResponse.ok) {
+            console.error('[v0] Email API returned error:', emailData.error || 'Unknown error')
+          } else {
+            console.log('[v0] Email sent successfully to:', adminEmail)
+          }
         } catch (emailError) {
-          console.error('[v0] Failed to send email:', emailError)
+          console.error('[v0] Failed to send email:', {
+            error: emailError instanceof Error ? emailError.message : String(emailError),
+            email: adminEmail,
+          })
           // Don't fail the entire operation if email fails
         }
       }
