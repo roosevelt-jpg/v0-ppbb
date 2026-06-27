@@ -55,19 +55,76 @@ export async function POST(request: NextRequest) {
     const { action, ...data } = body
 
     if (action === 'generate-access-code') {
+      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr } = data
+      
+      console.log('[v0] Generating access code with data:', {
+        adminName,
+        adminEmail,
+        role,
+        permissions,
+        sendEmail,
+      })
+
+      if (!adminEmail || !adminName || !role) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Missing required fields: adminName, adminEmail, role' 
+        }, { status: 400 })
+      }
+
       const code = generateAccessCode()
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      const expiresAt = expiresAtStr ? new Date(expiresAtStr) : new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours default
 
       const accessCodeData = {
         code,
+        adminName,
+        adminEmail,
+        role,
+        permissions: permissions || ['full_access'],
         used: false,
         usedBy: null,
         usedAt: null,
         createdAt: new Date(),
         expiresAt,
+        sendEmail: !!sendEmail,
       }
 
+      console.log('[v0] Saving access code to Firestore:', {
+        code,
+        permissions: accessCodeData.permissions,
+        expiresAt,
+      })
+
       const docRef = await db.collection('admin-access-codes').add(accessCodeData)
+
+      console.log('[v0] Access code saved successfully:', {
+        docId: docRef.id,
+        code,
+        permissions: accessCodeData.permissions,
+      })
+
+      // If sendEmail is true, trigger the email sending
+      if (sendEmail) {
+        console.log('[v0] Triggering email send to:', adminEmail)
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/api/email/send-admin-invite`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accessCode: code,
+              adminEmail,
+              adminName,
+              role,
+              expiresAt: expiresAt.toISOString(),
+              permissions: accessCodeData.permissions,
+            }),
+          })
+          console.log('[v0] Email sent successfully')
+        } catch (emailError) {
+          console.error('[v0] Failed to send email:', emailError)
+          // Don't fail the entire operation if email fails
+        }
+      }
 
       return NextResponse.json({
         success: true,

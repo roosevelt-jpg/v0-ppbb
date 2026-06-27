@@ -11,11 +11,20 @@ import { SiteSettings } from './types'
  */
 export const createGmailTransporter = (emailConfig?: SiteSettings['emailConfig']) => {
   if (!emailConfig?.enabled || !emailConfig.gmailEmail || !emailConfig.gmailAppPassword) {
-    console.warn('[v0] Gmail email config not properly configured')
+    console.warn('[v0] Gmail email config not properly configured:', {
+      enabled: emailConfig?.enabled,
+      hasEmail: !!emailConfig?.gmailEmail,
+      hasPassword: !!emailConfig?.gmailAppPassword,
+    })
     return null
   }
 
   try {
+    console.log('[v0] Creating Gmail transporter with:', {
+      email: emailConfig.gmailEmail,
+      hasAppPassword: !!emailConfig.gmailAppPassword,
+    })
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -24,9 +33,13 @@ export const createGmailTransporter = (emailConfig?: SiteSettings['emailConfig']
       },
     })
 
+    console.log('[v0] Gmail transporter created successfully')
     return transporter
   } catch (error) {
-    console.error('[v0] Failed to create Gmail transporter:', error)
+    console.error('[v0] Failed to create Gmail transporter:', {
+      error: error instanceof Error ? error.message : String(error),
+      email: emailConfig.gmailEmail,
+    })
     return null
   }
 }
@@ -200,11 +213,27 @@ export const sendAdminInviteEmail = async (
       html,
     }
 
+    console.log('[v0] Sending admin invite email with config:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      transporterExists: !!transporter,
+    })
+
     const info = await transporter.sendMail(mailOptions)
-    console.log('[v0] Admin invite email sent:', info.messageId)
+    console.log('[v0] Admin invite email sent successfully:', {
+      messageId: info.messageId,
+      to: details.adminEmail,
+      timestamp: new Date().toISOString(),
+    })
     return { success: true, messageId: info.messageId }
   } catch (error) {
-    console.error('[v0] Failed to send admin invite email:', error)
+    console.error('[v0] Failed to send admin invite email:', {
+      error: error instanceof Error ? error.message : String(error),
+      to: details.adminEmail,
+      from: gmailEmail,
+      timestamp: new Date().toISOString(),
+    })
     throw error
   }
 }

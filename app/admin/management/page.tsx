@@ -66,6 +66,15 @@ export default function AdminManagementPage() {
     expiresAt.setHours(expiresAt.getHours() + 24)
 
     setGeneratingCode(true)
+    const permissionsToSend = selectedPermissions.length > 0 ? selectedPermissions : ['full_access']
+    console.log('[v0] Generating access code with permissions:', {
+      adminName,
+      adminEmail,
+      role: adminRole,
+      selectedPermissions: selectedPermissions,
+      finalPermissions: permissionsToSend,
+    })
+
     try {
       const res = await fetch('/api/admin/management', {
         method: 'POST',
@@ -75,13 +84,22 @@ export default function AdminManagementPage() {
           adminName,
           adminEmail,
           role: adminRole,
-          permissions: selectedPermissions.length > 0 ? selectedPermissions : ['full_access'],
+          permissions: permissionsToSend,
           sendEmail: true,
           expiresAt: expiresAt.toISOString(),
         }),
       })
       const json = await res.json()
+      console.log('[v0] Access code generation response:', {
+        success: json.success,
+        hasData: !!json.data,
+        error: json.error,
+      })
       if (json.success) {
+        console.log('[v0] Access code created:', {
+          code: json.data?.accessCode,
+          permissions: json.data?.permissions,
+        })
         setCodes([json.data, ...codes])
         setAdminEmail('')
         setAdminName('')
@@ -144,7 +162,7 @@ export default function AdminManagementPage() {
         <h2 className="text-2xl font-bold text-black">Admin Management</h2>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-gray-200">
+        <div className="flex gap-3">
           {['access-codes', 'admins'].map(tab => (
             <button
               key={tab}
@@ -152,10 +170,10 @@ export default function AdminManagementPage() {
                 setActiveTab(tab as any)
                 setLoading(true)
               }}
-              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+              className={`px-6 py-2 font-medium text-sm rounded-full transition-colors ${
                 activeTab === tab
-                  ? 'border-black text-black'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  ? 'bg-black text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
               {tab === 'access-codes' ? 'Access Codes' : 'Active Admins'}
