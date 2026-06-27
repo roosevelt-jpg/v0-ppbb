@@ -1,242 +1,168 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { FAQ } from '@/lib/types'
-import { getAllFAQs, searchFAQs, incrementFAQViews, markFAQHelpful } from '@/lib/faq-queries'
-import { initializeFAQs } from '@/lib/initialize-faqs'
+
+interface FAQ {
+  id: string
+  question: string
+  answer: string
+  category: string
+  order: number
+  status: 'published' | 'draft'
+}
 
 export default function FAQPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
+  const [categories, setCategories] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
-  const [initialized, setInitialized] = useState(false)
+  const [error, setError] = useState('')
 
-  const categories = ['general', 'community', 'sponsorship', 'volunteering', 'support', 'technical']
-
-  // Initialize FAQs on mount
   useEffect(() => {
-    console.log('[v0] Starting FAQ initialization...')
-    initializeFAQs()
-      .then(() => {
-        console.log('[v0] FAQ initialization complete')
-        setInitialized(true)
-      })
-      .catch(err => {
-        console.error('[v0] FAQ init error:', err)
-        setInitialized(true) // Set to true anyway to proceed
-      })
-  }, [])
+    loadFAQs()
+  }, [selectedCategory])
 
-  // Fetch FAQs after initialization
-  useEffect(() => {
-    if (!initialized) return
+  const loadFAQs = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      const url = selectedCategory
+        ? `/api/faqs?category=${encodeURIComponent(selectedCategory)}`
+        : '/api/faqs'
 
-    console.log('[v0] Fetching FAQs with search term:', searchTerm)
-    setLoading(true)
-    
-    // Set a timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      console.log('[v0] FAQ loading timeout, setting default state')
-      setFaqs([])
+      const res = await fetch(url, { cache: 'no-store' })
+      const json = await res.json()
+
+      if (json.success && Array.isArray(json.data)) {
+        setFaqs(json.data)
+        // Extract unique categories on first load
+        if (!selectedCategory) {
+          const uniqueCategories = [...new Set(json.data.map((faq: FAQ) => faq.category))]
+          setCategories(uniqueCategories)
+        }
+      } else {
+        setFaqs([])
+      }
+    } catch (err) {
+      console.error('[v0] Error loading FAQs:', err)
+      setError('Failed to load FAQs. Please try again.')
+    } finally {
       setLoading(false)
-    }, 5000)
-
-    if (searchTerm.trim()) {
-      const unsubscribe = searchFAQs(searchTerm, (foundFaqs) => {
-        console.log('[v0] Search found', foundFaqs.length, 'FAQs')
-        setFaqs(foundFaqs)
-        setLoading(false)
-      })
-      return () => {
-        clearTimeout(timeout)
-        unsubscribe()
-      }
-    } else {
-      const unsubscribe = getAllFAQs((foundFaqs) => {
-        console.log('[v0] Got', foundFaqs.length, 'FAQs')
-        setFaqs(foundFaqs)
-        setLoading(false)
-      })
-      return () => {
-        clearTimeout(timeout)
-        unsubscribe()
-      }
     }
-  }, [searchTerm, initialized])
-
-  const filteredFaqs = selectedCategory === 'all' ? faqs : faqs.filter(faq => faq.category === selectedCategory)
+  }
 
   const toggleExpand = (id: string) => {
-    const newExpanded = new Set(expandedItems)
+    const newExpanded = new Set(expandedIds)
     if (newExpanded.has(id)) {
       newExpanded.delete(id)
     } else {
       newExpanded.add(id)
-      incrementFAQViews(id)
     }
-    setExpandedItems(newExpanded)
-  }
-
-  const handleHelpful = (id: string, helpful: boolean) => {
-    markFAQHelpful(id, helpful)
+    setExpandedIds(newExpanded)
   }
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-neutral-50 py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
-        <section className="max-w-6xl mx-auto mb-8 sm:mb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-            {/* Left: Title and Description */}
-            <div className="lg:col-span-2">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 mb-4 leading-tight">
-                Frequently Asked Questions
-              </h1>
-              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
-                Find answers to common questions about Passive Blessings, our community, sponsorships, and more.
-              </p>
-            </div>
-            
-            {/* Right: Search Bar */}
-            <div className="lg:col-span-1">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search FAQs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 sm:px-5 py-2 sm:py-3 border-2 border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-lg"
-                />
+      <main className="min-h-screen bg-white">
+        {/* Header */}
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-gray-50">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-playfair mb-4 text-black">
+              Frequently Asked Questions
+            </h1>
+            <p className="text-gray-600 text-base sm:text-lg">
+              Find answers to common questions about Passive Blessings
+            </p>
+          </div>
+        </section>
+
+        {/* Category Filter */}
+        {categories.length > 0 && (
+          <section className="w-full px-4 sm:px-6 lg:px-8 py-8 bg-white border-b border-gray-200">
+            <div className="max-w-4xl mx-auto">
+              <p className="text-sm font-semibold text-gray-600 mb-4">Filter by category:</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    !selectedCategory
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  All
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCategory === cat
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
+          </section>
+        )}
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 mt-6 sm:mt-8 justify-start">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-3 sm:px-5 py-1.5 rounded-full font-semibold text-xs sm:text-sm transition-all ${
-                selectedCategory === 'all'
-                  ? 'bg-neutral-900 text-white'
-                  : 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
-              }`}
-            >
-              All
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-3 sm:px-5 py-1.5 rounded-full font-semibold text-xs sm:text-sm transition-all capitalize ${
-                  selectedCategory === category
-                    ? 'bg-neutral-900 text-white'
-                    : 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* FAQs List */}
-        <section className="max-w-6xl mx-auto">
-          {loading ? (
-            <div className="text-center py-8 sm:py-12">
-              <p className="text-neutral-600 text-base sm:text-lg">Loading FAQs...</p>
-            </div>
-          ) : filteredFaqs.length === 0 ? (
-            <div className="text-center py-8 sm:py-12">
-              <p className="text-neutral-600 text-base sm:text-lg">
-                {searchTerm ? 'No FAQs found matching your search.' : 'No FAQs available in this category.'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 sm:space-y-3">
-              {filteredFaqs.map((faq) => (
-                <div key={faq.id} className="border-2 border-neutral-200 rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow">
-                  <button
-                    onClick={() => toggleExpand(faq.id)}
-                    className="w-full px-3 sm:px-5 py-3 sm:py-4 bg-white hover:bg-neutral-50 transition-colors flex justify-between items-start sm:items-center gap-4 text-left"
-                    aria-expanded={expandedItems.has(faq.id)}
+        {/* FAQs Content */}
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-12">
+          <div className="max-w-4xl mx-auto">
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Loading FAQs...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12 bg-red-50 rounded-lg p-6">
+                <p className="text-red-600">{error}</p>
+              </div>
+            ) : faqs.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">No FAQs found. Check back soon!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {faqs.map((faq) => (
+                  <div
+                    key={faq.id}
+                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <span className="text-sm sm:text-base font-semibold text-neutral-900 flex-1 break-words">
-                      {faq.question}
-                    </span>
-                    <span
-                      className="text-lg sm:text-xl text-neutral-600 flex-shrink-0 transition-transform"
-                      style={{ transform: expandedItems.has(faq.id) ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    <button
+                      onClick={() => toggleExpand(faq.id)}
+                      className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left"
                     >
-                      ▼
-                    </span>
-                  </button>
-
-                  {expandedItems.has(faq.id) && (
-                    <div className="px-4 sm:px-6 py-4 sm:py-5 border-t-2 border-neutral-200 bg-neutral-50">
-                      <p className="text-neutral-700 leading-relaxed mb-4 sm:mb-6 text-sm sm:text-base">
-                        {faq.answer}
-                      </p>
-
-                      {/* Helpful Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-start sm:items-center">
-                        <span className="text-xs sm:text-sm text-neutral-600 font-medium">Was this helpful?</span>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleHelpful(faq.id, true)}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-50 hover:bg-green-100 border border-green-300 rounded text-green-700 text-xs sm:text-sm font-semibold transition-colors"
-                          >
-                            👍 Yes ({faq.helpful})
-                          </button>
-                          <button
-                            onClick={() => handleHelpful(faq.id, false)}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-50 hover:bg-red-100 border border-red-300 rounded text-red-700 text-xs sm:text-sm font-semibold transition-colors"
-                          >
-                            👎 No ({faq.notHelpful})
-                          </button>
-                        </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-black">{faq.question}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{faq.category}</p>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                      <ChevronDown
+                        className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 ml-4 ${
+                          expandedIds.has(faq.id) ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
 
-        {/* Contact Section */}
-        <section className="max-w-6xl mx-auto mt-16 sm:mt-20">
-          <div className="bg-neutral-100 p-8 sm:p-10 rounded-lg text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3 sm:mb-4">
-              Didn&apos;t find your answer?
-            </h2>
-            <p className="text-neutral-600 mb-6 sm:mb-8 text-base sm:text-lg">
-              Contact our support team or visit our ChatBot for immediate assistance.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <a
-                href="mailto:support@passiveblessings.com"
-                className="px-4 sm:px-6 py-2 sm:py-3 bg-neutral-900 text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-neutral-800 transition-colors"
-              >
-                Email Support
-              </a>
-              <button
-                onClick={() => {
-                  // This would open the chat widget
-                  const chatButton = document.querySelector('button[aria-label="Open chat"]')
-                  if (chatButton) {
-                    (chatButton as HTMLButtonElement).click()
-                  }
-                }}
-                className="px-4 sm:px-6 py-2 sm:py-3 bg-neutral-900 text-white rounded-lg font-semibold text-sm sm:text-base hover:bg-neutral-800 transition-colors"
-              >
-                Ask ChatBot
-              </button>
-            </div>
+                    {expandedIds.has(faq.id) && (
+                      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
@@ -244,4 +170,3 @@ export default function FAQPage() {
     </>
   )
 }
-
