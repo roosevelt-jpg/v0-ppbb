@@ -77,7 +77,8 @@ const DEFAULT_SETTINGS: SiteSettings = {
 // GET: Fetch settings
 export async function GET(request: NextRequest) {
   try {
-    const docRef = await db.collection('settings').doc('general').get()
+    // Always read from settings/global to be consistent with POST
+    const docRef = await db.collection('settings').doc('global').get()
 
     if (docRef.exists) {
       return NextResponse.json({

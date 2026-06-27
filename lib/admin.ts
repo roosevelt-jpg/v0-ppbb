@@ -7,7 +7,8 @@ const SITE_SETTINGS_ID = 'default'
 // Site Settings
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   try {
-    const docSnap = await getDoc(doc(db, 'siteSettings', SITE_SETTINGS_ID))
+    // Read from settings/global (same as admin API)
+    const docSnap = await getDoc(doc(db, 'settings', 'global'))
     return docSnap.exists() ? (docSnap.data() as SiteSettings) : null
   } catch (error) {
     console.error('[v0] Error fetching site settings:', error)
