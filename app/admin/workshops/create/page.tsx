@@ -98,12 +98,11 @@ export default function CreateWorkshopPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/admin/workshops" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
-          <ArrowLeft size={20} />
-          Back to Workshops
-        </Link>
+    <div className="w-full">
+      <Link href="/admin/workshops" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
+        <ArrowLeft size={20} />
+        Back to Workshops
+      </Link>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h1 className="text-3xl font-bold text-black mb-8">Create Workshop</h1>
@@ -188,7 +187,7 @@ export default function CreateWorkshopPage() {
               <button
                 type="button"
                 onClick={() => router.push('/admin/workshops')}
-                className="flex-1 px-4 py-2 bg-gray-200 text-black rounded-lg font-medium hover:bg-gray-300 transition"
+                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 transition"
               >
                 Cancel
               </button>
@@ -213,7 +212,6 @@ export default function CreateWorkshopPage() {
             </div>
           </form>
         </div>
-      </div>
     </div>
   )
 }

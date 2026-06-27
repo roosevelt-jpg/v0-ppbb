@@ -116,7 +116,7 @@ export default function CreateTeamMemberPage() {
 
   return (
     <AdminPageLayout title="Add Team Member">
-      <div className="max-w-2xl">
+      <div className="w-full max-w-4xl">
         <Link
           href="/admin/team"
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"

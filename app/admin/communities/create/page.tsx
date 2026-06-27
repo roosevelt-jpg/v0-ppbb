@@ -61,7 +61,7 @@ export default function CreateCommunityPage() {
 
   return (
     <AdminPageLayout title="Create Community" subtitle="Add a new community to the platform">
-      <div className="max-w-2xl">
+      <div className="w-full max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg border border-gray-200">
           <div>
             <label className="block text-sm font-medium text-black mb-2">Community Name *</label>

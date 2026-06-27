@@ -115,12 +115,11 @@ export default function CreateEventPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/admin/events" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
-          <ArrowLeft size={20} />
-          Back to Events
-        </Link>
+    <div className="w-full">
+      <Link href="/admin/events" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
+        <ArrowLeft size={20} />
+        Back to Events
+      </Link>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
           <h1 className="text-3xl font-bold text-black mb-8">Create Event</h1>
@@ -345,7 +344,6 @@ export default function CreateEventPage() {
             </div>
           </form>
         </div>
-      </div>
     </div>
   )
 }
