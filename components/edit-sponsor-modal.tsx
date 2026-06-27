@@ -27,7 +27,20 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
   const handleSave = async () => {
     setLoading(true)
     try {
+      console.log('[v0] Saving sponsor changes to Firestore:', {
+        sponsorId: sponsor.id,
+        sponsorName: formData.name,
+        sponsorshipLevel: formData.sponsorshipLevel,
+        timestamp: new Date().toISOString(),
+      })
+      
       await updateDocument('sponsors', sponsor.id, formData)
+      
+      console.log('[v0] Sponsor saved successfully:', {
+        sponsorId: sponsor.id,
+        sponsorshipLevel: formData.sponsorshipLevel,
+      })
+      
       onClose()
       onSuccess?.()
     } catch (error) {
@@ -73,9 +86,12 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
           </Button>
           <div className="flex gap-2">
             <Button
-              variant="ghost"
               onClick={onClose}
               disabled={loading}
+              style={{
+                backgroundColor: '#111111',
+                color: '#f7f6f2',
+              }}
             >
               Cancel
             </Button>
@@ -137,7 +153,17 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
           <label className="text-sm font-medium" style={{ color: '#111111', display: 'block', marginBottom: '0.5rem' }}>Sponsorship Level</label>
           <select
             value={formData.sponsorshipLevel || 'standard'}
-            onChange={(e) => setFormData({ ...formData, sponsorshipLevel: e.target.value })}
+            onChange={(e) => {
+              const newLevel = e.target.value
+              const previousLevel = formData.sponsorshipLevel || 'standard'
+              console.log('[v0] Sponsorship level changed:', {
+                sponsorName: formData.name,
+                previousLevel,
+                newLevel,
+                timestamp: new Date().toISOString(),
+              })
+              setFormData({ ...formData, sponsorshipLevel: newLevel })
+            }}
             style={{
               width: '100%',
               padding: '8px 12px',

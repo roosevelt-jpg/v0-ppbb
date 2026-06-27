@@ -7,12 +7,15 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { User } from '@/lib/types'
 import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
+import { Bell } from 'lucide-react'
 
 function SettingsContent() {
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [editing, setEditing] = React.useState(false)
+  const [editingNotifications, setEditingNotifications] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
+  const [savingNotifications, setSavingNotifications] = React.useState(false)
   const [formData, setFormData] = React.useState({
     firstName: '',
     lastName: '',
@@ -21,6 +24,13 @@ function SettingsContent() {
     bio: '',
     skills: [] as string[],
     departments: [] as string[],
+  })
+  const [notificationPreferences, setNotificationPreferences] = React.useState({
+    emailNotifications: true,
+    communityUpdates: true,
+    eventReminders: true,
+    memberMessages: true,
+    systemAlerts: true,
   })
 
   React.useEffect(() => {
@@ -45,6 +55,11 @@ function SettingsContent() {
             skills: userData.skills || [],
             departments: userData.departments || [],
           })
+          
+          // Load notification preferences
+          if (userData.notificationPreferences) {
+            setNotificationPreferences(userData.notificationPreferences)
+          }
         }
       } catch (error) {
         console.error('[v0] Error fetching user:', error)
@@ -78,6 +93,32 @@ function SettingsContent() {
       console.error('[v0] Error updating profile:', error)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSaveNotifications = async () => {
+    const firebaseUser = auth.currentUser
+    if (!firebaseUser) return
+
+    setSavingNotifications(true)
+    try {
+      console.log('[v0] Saving notification preferences:', {
+        userId: firebaseUser.uid,
+        preferences: notificationPreferences,
+        timestamp: new Date().toISOString(),
+      })
+      
+      await updateDoc(doc(db, 'users', firebaseUser.uid), {
+        notificationPreferences,
+        updatedAt: new Date(),
+      })
+      
+      console.log('[v0] Notification preferences saved successfully')
+      setEditingNotifications(false)
+    } catch (error) {
+      console.error('[v0] Error saving notification preferences:', error)
+    } finally {
+      setSavingNotifications(false)
     }
   }
 
@@ -254,6 +295,120 @@ function SettingsContent() {
               </span>
             </div>
           </div>
+        </Card>
+
+        <Card className="p-6 mt-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              <h2 className="text-xl font-bold">Notification Preferences</h2>
+            </div>
+          </div>
+
+          {editingNotifications ? (
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificationPreferences.emailNotifications}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, emailNotifications: e.target.checked})}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <div>
+                    <p className="font-medium text-sm">Email Notifications</p>
+                    <p className="text-xs text-gray-600">Receive updates via email</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificationPreferences.communityUpdates}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, communityUpdates: e.target.checked})}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <div>
+                    <p className="font-medium text-sm">Community Updates</p>
+                    <p className="text-xs text-gray-600">Get notified about new communities and groups</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificationPreferences.eventReminders}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, eventReminders: e.target.checked})}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <div>
+                    <p className="font-medium text-sm">Event Reminders</p>
+                    <p className="text-xs text-gray-600">Reminders for upcoming events and activities</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificationPreferences.memberMessages}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, memberMessages: e.target.checked})}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <div>
+                    <p className="font-medium text-sm">Community Messages</p>
+                    <p className="text-xs text-gray-600">Notifications for new messages in communities</p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificationPreferences.systemAlerts}
+                    onChange={(e) => setNotificationPreferences({...notificationPreferences, systemAlerts: e.target.checked})}
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <div>
+                    <p className="font-medium text-sm">System Alerts</p>
+                    <p className="text-xs text-gray-600">Important system and security notifications</p>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleSaveNotifications} disabled={savingNotifications} className="bg-black hover:bg-gray-800 text-white">{savingNotifications ? 'Saving...' : 'Save Preferences'}</Button>
+                <Button variant="outline" onClick={() => setEditingNotifications(false)}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium">Email Notifications</span>
+                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.emailNotifications ? 'Enabled' : 'Disabled'}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium">Community Updates</span>
+                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.communityUpdates ? 'Enabled' : 'Disabled'}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium">Event Reminders</span>
+                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.eventReminders ? 'Enabled' : 'Disabled'}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium">Community Messages</span>
+                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.memberMessages ? 'Enabled' : 'Disabled'}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <span className="text-sm font-medium">System Alerts</span>
+                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.systemAlerts ? 'Enabled' : 'Disabled'}</span>
+              </div>
+
+              <Button onClick={() => setEditingNotifications(true)} className="mt-4 bg-black hover:bg-gray-800 text-white w-full">Edit Notification Preferences</Button>
+            </div>
+          )}
         </Card>
       </div>
     </div>

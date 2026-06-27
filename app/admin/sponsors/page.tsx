@@ -53,6 +53,12 @@ export default function SponsorsPage() {
     }
 
     try {
+      console.log('[v0] Saving sponsor to Firestore with tier:', {
+        sponsorName: newSponsor.name,
+        sponsorshipLevel: newSponsor.sponsorshipLevel,
+        timestamp: new Date().toISOString(),
+      })
+      
       await addDoc(collection(db, 'sponsors'), {
         name: newSponsor.name,
         category: newSponsor.category,
@@ -62,6 +68,8 @@ export default function SponsorsPage() {
         createdAt: serverTimestamp(),
         status: 'active',
       })
+      
+      console.log('[v0] Sponsor saved successfully with tier:', newSponsor.sponsorshipLevel)
 
       setNewSponsor({
         name: '',
@@ -241,7 +249,15 @@ export default function SponsorsPage() {
                 <label className="block text-sm font-medium mb-1">Sponsorship Level</label>
                 <select
                   value={newSponsor.sponsorshipLevel}
-                  onChange={(e) => setNewSponsor({ ...newSponsor, sponsorshipLevel: e.target.value as any })}
+                  onChange={(e) => {
+                    const newLevel = e.target.value as any
+                    console.log('[v0] Sponsorship level selected:', {
+                      previousLevel: newSponsor.sponsorshipLevel,
+                      newLevel,
+                      timestamp: new Date().toISOString(),
+                    })
+                    setNewSponsor({ ...newSponsor, sponsorshipLevel: newLevel })
+                  }}
                   className="w-full border border-neutral-300 rounded-lg px-3 py-2"
                 >
                   <option value="standard">Standard</option>
@@ -255,7 +271,7 @@ export default function SponsorsPage() {
                 <button
                   type="button"
                   onClick={() => setAddModalOpen(false)}
-                  className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition font-medium"
+                  className="flex-1 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition font-medium"
                 >
                   Cancel
                 </button>
