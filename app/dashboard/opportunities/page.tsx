@@ -20,13 +20,24 @@ export default function DashboardOpportunitiesPage() {
   const [tab, setTab] = useState<'browse' | 'applications'>('browse')
   const [applications, setApplications] = useState<JobApplication[]>([])
   const [loadingApps, setLoadingApps] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (tab !== 'applications' || !user) return
+    
+    console.log('[v0] Loading applications for user:', user.id)
     setLoadingApps(true)
+    setError(null)
+    
     getMemberApplications(user.id)
-      .then(setApplications)
-      .catch((e) => console.log('[v0] Failed to load applications:', e))
+      .then((apps) => {
+        console.log('[v0] Applications loaded:', apps.length)
+        setApplications(apps)
+      })
+      .catch((e) => {
+        console.error('[v0] Failed to load applications:', e)
+        setError(e.message || 'Failed to load applications')
+      })
       .finally(() => setLoadingApps(false))
   }, [tab, user])
 
@@ -65,6 +76,16 @@ export default function DashboardOpportunitiesPage() {
 
       {tab === 'browse' ? (
         <OpportunitiesList />
+      ) : error ? (
+        <div className="text-center py-12 border border-red-200 rounded-lg bg-red-50">
+          <p className="text-red-700 font-semibold">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
       ) : loadingApps ? (
         <div className="text-center py-12 text-muted-foreground">Loading your applications...</div>
       ) : applications.length === 0 ? (
