@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, limit, doc } from 'firebase/firestore'
-import type { SliderImage } from '@/lib/types'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { HeroSlider } from '@/components/hero-slider'
@@ -31,49 +30,30 @@ export default function HomePage() {
     const statsListeners: any[] = []
     
     try {
-      // Real-time hero slider config listener. Images live in the
-      // `heroSlider/default/images` subcollection (one doc per image) so the
-      // slider can hold an unlimited number of images without hitting
-      // Firestore's ~1 MiB per-document limit. We keep the latest config and
-      // images in refs and merge them whenever either changes.
-      let sliderConfig: Partial<HeroSliderSettings> = {}
-      let sliderImages: SliderImage[] = []
-      const mergeSlider = () => {
-        setHeroSliderSettings({
-          id: 'default',
-          transitionEffect: 'fade',
-          transitionDuration: 500,
-          autoplay: true,
-          autoplayDuration: 5,
-          displayMode: 'auto',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          ...sliderConfig,
-          images: sliderImages,
-        } as HeroSliderSettings)
+      // Hero slider data is served by a public Admin SDK API route
+      // (/api/hero-slider). The slider config + images live in the
+      // `heroSlider/default` doc and its `images` subcollection; client-side
+      // reads of that subcollection are denied by the deployed Firestore
+      // rules, so we fetch via the server instead. Poll periodically so newly
+      // added/edited slides appear without a manual refresh.
+      let sliderCancelled = false
+      const loadHeroSlider = async () => {
+        try {
+          const res = await fetch('/api/hero-slider', { cache: 'no-store' })
+          const json = await res.json()
+          if (!sliderCancelled && res.ok && json.success && json.data) {
+            setHeroSliderSettings(json.data as HeroSliderSettings)
+          }
+        } catch (err) {
+          console.error('Hero slider fetch error:', err)
+        }
       }
-
-      const heroConfigUnsubscribe = onSnapshot(
-        doc(db, 'heroSlider', 'default'),
-        (snapshot) => {
-          sliderConfig = snapshot.exists() ? (snapshot.data() as Partial<HeroSliderSettings>) : {}
-          mergeSlider()
-        },
-        (error) => console.error('Hero slider config listener error:', error)
-      )
-      statsListeners.push(heroConfigUnsubscribe)
-
-      const heroImagesUnsubscribe = onSnapshot(
-        collection(db, 'heroSlider', 'default', 'images'),
-        (snapshot) => {
-          sliderImages = snapshot.docs
-            .map((d) => d.data() as SliderImage)
-            .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
-          mergeSlider()
-        },
-        (error) => console.error('Hero slider images listener error:', error)
-      )
-      statsListeners.push(heroImagesUnsubscribe)
+      loadHeroSlider()
+      const heroSliderInterval = setInterval(loadHeroSlider, 30000)
+      statsListeners.push(() => {
+        sliderCancelled = true
+        clearInterval(heroSliderInterval)
+      })
       
       // Real-time YouTube config listener
       const youtubeUnsubscribe = onSnapshot(
