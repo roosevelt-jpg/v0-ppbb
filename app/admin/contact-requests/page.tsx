@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Mail, Trash2, Check, AlertCircle } from 'lucide-react'
 
 interface ContactMessage {
@@ -104,7 +105,8 @@ export default function ContactRequestsPage() {
   const resolvedCount = messages.filter((m) => m.status === 'resolved').length
 
   return (
-    <div className="space-y-6">
+    <AdminPageLayout title="Contact Requests" subtitle="Manage and respond to user inquiries">
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-black">Contact Requests</h1>
         <p className="text-gray-600 mt-2">Manage and respond to user inquiries</p>
@@ -287,5 +289,6 @@ export default function ContactRequestsPage() {
         )}
       </div>
     </div>
+    </AdminPageLayout>
   )
 }

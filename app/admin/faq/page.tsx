@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Plus, Edit2, Trash2, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { FAQEditor } from './editor'
 
@@ -107,7 +108,8 @@ export default function FAQManagementPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AdminPageLayout title="FAQ Management" subtitle="Create, edit, and manage frequently asked questions">
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-black">FAQ Management</h1>
@@ -213,5 +215,6 @@ export default function FAQManagementPage() {
         />
       )}
     </div>
+    </AdminPageLayout>
   )
 }

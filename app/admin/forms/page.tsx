@@ -8,6 +8,7 @@ import {
   getFormStatistics,
   createDefaultForms,
 } from '@/lib/form-builder-queries'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Plus, Edit2, Eye, Trash2, Archive } from 'lucide-react'
@@ -71,7 +72,8 @@ export default function FormsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AdminPageLayout title="Custom Forms" subtitle="Create and manage custom forms for different purposes">
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -185,5 +187,6 @@ export default function FormsPage() {
         )}
       </div>
     </div>
+    </AdminPageLayout>
   )
 }
