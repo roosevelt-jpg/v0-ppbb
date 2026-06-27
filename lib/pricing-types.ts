@@ -11,6 +11,7 @@ export interface PricingPlan {
   benefits: string[] // array of benefit descriptions
   icon?: string // emoji or icon name
   color?: string // hex color for UI
+  paymentGateway?: 'stripe' | 'paypal' | 'ziina' // which gateway collects payment for this plan
   stripeProductId?: string
   stripePriceId?: string
   paypalPlanId?: string

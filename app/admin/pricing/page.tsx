@@ -263,6 +263,19 @@ export default function PricingManagementPage() {
               </select>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1">Payment Gateway</label>
+              <select
+                value={(formData as any).paymentGateway || 'stripe'}
+                onChange={(e) => setFormData({ ...formData, paymentGateway: e.target.value as any })}
+                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+              >
+                <option value="stripe">Stripe</option>
+                <option value="paypal">PayPal</option>
+                <option value="ziina">Ziina</option>
+              </select>
+            </div>
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Description</label>
               <textarea

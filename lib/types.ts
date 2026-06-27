@@ -380,6 +380,13 @@ export interface Event {
   attendees: string[]
   createdAt: Date
   updatedAt: Date
+  // Pricing and Payment Configuration
+  ticketType?: 'free' | 'paid' | 'rsvp'
+  ticketPrice?: number
+  ticketCurrency?: string
+  paymentGateway?: 'stripe' | 'paypal' | 'ziina'
+  stripeProductId?: string
+  stripePriceId?: string
 }
 
 // Opportunities (volunteer/job opportunities)

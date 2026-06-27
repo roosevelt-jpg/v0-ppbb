@@ -234,7 +234,7 @@ export default function ReportingPage() {
                     setReportData(null)
                     setSelectedReport(null)
                   }}
-                  className="text-neutral-500 hover:text-neutral-700 text-2xl"
+                  className="w-8 h-8 flex items-center justify-center bg-neutral-900 text-white rounded-full hover:bg-neutral-800 transition"
                 >
                   ×
                 </button>
@@ -300,7 +300,7 @@ export default function ReportingPage() {
                     setReportData(null)
                     setSelectedReport(null)
                   }}
-                  className="flex-1 px-4 py-2 border border-neutral-300 text-neutral-900 rounded-lg hover:bg-neutral-50 transition font-medium"
+                  className="flex-1 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition font-medium"
                 >
                   Close
                 </button>

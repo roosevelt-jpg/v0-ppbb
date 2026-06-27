@@ -99,7 +99,7 @@ export default function DonationPage() {
           {/* Header */}
           <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Make a Difference</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Passive Blessings acts as a community mobilizer and awareness partner. Funds are collected through official
             charitable partners including Beit Al Khair, ensuring transparency and direct impact.
           </p>
@@ -195,7 +195,7 @@ export default function DonationPage() {
 
                       <button
                         onClick={() => setSelectedCause(cause)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-semibold flex items-center justify-center gap-2"
+                        className="w-full bg-black hover:bg-neutral-900 text-white py-2 rounded font-semibold flex items-center justify-center gap-2"
                       >
                         Donate <ArrowRight className="w-4 h-4" />
                       </button>

@@ -18,6 +18,7 @@ interface EventFormData {
   isPaid: boolean
   price: number
   currency: string
+  paymentGateway?: 'stripe' | 'paypal' | 'ziina'
   maxAttendees?: number
   status: 'draft' | 'published'
 }
@@ -258,6 +259,63 @@ export default function CreateEventPage() {
               </div>
             </div>
 
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-black">Pricing & Payment</h2>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="isPaid"
+                  checked={formData.isPaid}
+                  onChange={(e) => handleChange('isPaid', e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="isPaid" className="text-sm font-medium text-gray-700">This is a paid event</label>
+              </div>
+
+              {formData.isPaid && (
+                <div className="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Ticket Price</label>
+                    <input
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => handleChange('price', parseFloat(e.target.value))}
+                      placeholder="0.00"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                    <select
+                      value={formData.currency}
+                      onChange={(e) => handleChange('currency', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="AED">AED</option>
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Payment Gateway</label>
+                    <select
+                      value={formData.paymentGateway || 'stripe'}
+                      onChange={(e) => handleChange('paymentGateway', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="stripe">Stripe</option>
+                      <option value="paypal">PayPal</option>
+                      <option value="ziina">Ziina</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex gap-4 pt-6 border-t border-gray-200">
               <button
                 type="button"
@@ -279,7 +337,7 @@ export default function CreateEventPage() {
                 type="button"
                 onClick={() => saveEvent('published')}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 Save & Publish
