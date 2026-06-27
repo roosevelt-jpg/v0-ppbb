@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSiteSettings } from '@/lib/admin'
-import { createGmailTransporter, sendAdminInviteEmail } from '@/lib/gmail-service'
+import { createGmailTransporter, sendAdminInviteEmail, getGmailSmtpConfig } from '@/lib/gmail-service'
 
 interface SendAdminInviteRequest {
   adminName: string
@@ -17,19 +16,25 @@ export async function POST(request: NextRequest) {
 
     console.log('[v0] Processing admin invite for:', body.adminEmail)
 
-    // Get site settings with email config
-    const settings = await getSiteSettings()
+    // Load Gmail SMTP from integrations collection
+    const gmailConfig = await getGmailSmtpConfig()
 
-    if (!settings?.emailConfig?.enabled) {
-      console.warn('[v0] Email not configured in settings')
+    if (!gmailConfig?.gmailEmail || !gmailConfig?.gmailAppPassword) {
+      console.error('[v0] Gmail SMTP not configured in integrations')
       return NextResponse.json({
         success: false,
-        error: 'Email service not configured. Please configure Gmail SMTP in admin settings.',
-      }, { status: 400 })
+        error: 'Email service not configured. Please configure Gmail SMTP in Admin > Integrations.',
+      }, { status: 503 })
     }
 
-    // Create Gmail transporter
-    const transporter = createGmailTransporter(settings.emailConfig)
+    console.log('[v0] Gmail SMTP config loaded from integrations')
+
+    // Create Gmail transporter with loaded credentials
+    const transporter = createGmailTransporter({
+      enabled: true,
+      gmailEmail: gmailConfig.gmailEmail,
+      gmailAppPassword: gmailConfig.gmailAppPassword,
+    } as any)
 
     if (!transporter) {
       console.error('[v0] Failed to create Gmail transporter')
@@ -42,7 +47,7 @@ export async function POST(request: NextRequest) {
     // Send the admin invite email
     const setupUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/admin/setup`
 
-    const result = await sendAdminInviteEmail(transporter, settings.emailConfig.gmailEmail!, {
+    const result = await sendAdminInviteEmail(transporter, gmailConfig.gmailEmail, {
       adminName: body.adminName,
       adminEmail: body.adminEmail,
       role: body.role,
@@ -50,7 +55,7 @@ export async function POST(request: NextRequest) {
       accessCode: body.accessCode,
       expiresAt: new Date(body.expiresAt),
       setupUrl,
-      fromName: settings.siteName || 'Passive Blessings',
+      fromName: gmailConfig.fromName || 'Passive Blessings',
     })
 
     console.log('[v0] Admin invite email sent successfully:', result.messageId)

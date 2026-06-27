@@ -5,6 +5,49 @@
 
 import nodemailer from 'nodemailer'
 import { SiteSettings } from './types'
+import { getFirestore } from 'firebase-admin/firestore'
+import { getApps, cert, initializeApp } from 'firebase-admin/app'
+
+/**
+ * Get admin Firestore instance for loading integrations
+ */
+function getAdminDb() {
+  const app = getApps().length > 0 ? getApps()[0] : initializeApp({
+    credential: cert({
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    } as any),
+  })
+  return getFirestore(app)
+}
+
+/**
+ * Load Gmail SMTP credentials from integrations collection
+ */
+export async function getGmailSmtpConfig() {
+  try {
+    const db = getAdminDb()
+    const integrationDoc = await db.collection('integrations').doc('dev-user-001_gmailSmtp').get()
+    
+    if (!integrationDoc.exists) {
+      console.warn('[v0] Gmail SMTP integration not found in Firestore')
+      return null
+    }
+
+    const data = integrationDoc.data()
+    console.log('[v0] Loaded Gmail SMTP config from integrations')
+    
+    return {
+      gmailEmail: data?.credentials?.gmailEmail,
+      gmailAppPassword: data?.credentials?.gmailAppPassword,
+      fromName: data?.credentials?.fromName,
+    }
+  } catch (error) {
+    console.error('[v0] Failed to load Gmail SMTP from integrations:', error instanceof Error ? error.message : String(error))
+    return null
+  }
+}
 
 /**
  * Create Nodemailer transporter with Gmail credentials
