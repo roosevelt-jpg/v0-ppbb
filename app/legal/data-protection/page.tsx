@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { db } from '@/lib/firebase'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { getPageBySlug } from '@/lib/admin'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 
@@ -15,12 +14,11 @@ export default function UAEDataProtectionPage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const pagesRef = collection(db, 'pages')
-        const q = query(pagesRef, where('slug', '==', 'data-protection'))
-        const snapshot = await getDocs(q)
-        
-        if (snapshot.docs.length > 0) {
-          setContent(snapshot.docs[0].data().content)
+        // Read via the Admin SDK API route; client-side reads of `pages`
+        // are denied by deployed Firestore rules.
+        const page = await getPageBySlug('data-protection')
+        if (page?.content) {
+          setContent(page.content)
         } else {
           setContent(getDefaultContent())
         }

@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase'
 import { SiteSettings, Page, AuditLog } from '@/lib/types'
-import { doc, getDoc, setDoc, collection, getDocs, query, where, addDoc, Timestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore'
 
 const SITE_SETTINGS_ID = 'default'
 
@@ -54,17 +54,15 @@ export async function updateSiteSettings(updates: Partial<SiteSettings>): Promis
 }
 
 // CMS Pages
+// All page reads/writes go through the Admin SDK API route (/api/pages).
+// Client-side Firestore access to the `pages` collection is denied by the
+// deployed security rules (admins are authorized server-side, not via client
+// Firebase Auth), so direct client reads/writes fail silently.
 export async function getPages(): Promise<Page[]> {
   try {
-    const q = query(
-      collection(db, 'pages'),
-      where('status', '==', 'published')
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Page[]
+    const res = await fetch('/api/pages', { cache: 'no-store' })
+    const json = await res.json()
+    return json.success ? (json.data as Page[]) : []
   } catch (error) {
     console.error('[v0] Error fetching pages:', error)
     return []
@@ -73,14 +71,9 @@ export async function getPages(): Promise<Page[]> {
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
   try {
-    const q = query(
-      collection(db, 'pages'),
-      where('slug', '==', slug),
-      where('status', '==', 'published')
-    )
-    const snapshot = await getDocs(q)
-    if (snapshot.empty) return null
-    return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Page
+    const res = await fetch(`/api/pages?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' })
+    const json = await res.json()
+    return json.success ? (json.data as Page | null) : null
   } catch (error) {
     console.error('[v0] Error fetching page:', error)
     return null
@@ -89,14 +82,9 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
 
 export async function getAllPages(includePublished: boolean = false): Promise<Page[]> {
   try {
-    const q = includePublished
-      ? query(collection(db, 'pages'))
-      : query(collection(db, 'pages'), where('status', '==', 'published'))
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Page[]
+    const res = await fetch(`/api/pages${includePublished ? '?all=true' : ''}`, { cache: 'no-store' })
+    const json = await res.json()
+    return json.success ? (json.data as Page[]) : []
   } catch (error) {
     console.error('[v0] Error fetching all pages:', error)
     return []
@@ -105,12 +93,13 @@ export async function getAllPages(includePublished: boolean = false): Promise<Pa
 
 export async function createPage(pageData: Omit<Page, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
   try {
-    const docRef = await addDoc(collection(db, 'pages'), {
-      ...pageData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const res = await fetch('/api/pages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', payload: pageData }),
     })
-    return docRef.id
+    const json = await res.json()
+    return json.success ? (json.id as string) : null
   } catch (error) {
     console.error('[v0] Error creating page:', error)
     return null
@@ -119,9 +108,13 @@ export async function createPage(pageData: Omit<Page, 'id' | 'createdAt' | 'upda
 
 export async function updatePage(pageId: string, updates: Partial<Page>): Promise<boolean> {
   try {
-    const pageRef = doc(db, 'pages', pageId)
-    await setDoc(pageRef, { ...updates, updatedAt: new Date() }, { merge: true })
-    return true
+    const res = await fetch('/api/pages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update', payload: { id: pageId, ...updates } }),
+    })
+    const json = await res.json()
+    return !!json.success
   } catch (error) {
     console.error('[v0] Error updating page:', error)
     return false
@@ -130,8 +123,13 @@ export async function updatePage(pageId: string, updates: Partial<Page>): Promis
 
 export async function deletePage(pageId: string): Promise<boolean> {
   try {
-    await setDoc(doc(db, 'pages', pageId), { status: 'deleted', updatedAt: new Date() }, { merge: true })
-    return true
+    const res = await fetch('/api/pages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', payload: { id: pageId } }),
+    })
+    const json = await res.json()
+    return !!json.success
   } catch (error) {
     console.error('[v0] Error deleting page:', error)
     return false
@@ -140,20 +138,9 @@ export async function deletePage(pageId: string): Promise<boolean> {
 
 export async function getPagesByMenuLocation(menuLocation: string): Promise<Page[]> {
   try {
-    const q = query(
-      collection(db, 'pages'),
-      where('status', '==', 'published'),
-      where('menuLocation', '==', menuLocation),
-      where('showInMenu', '==', true)
-    )
-    const snapshot = await getDocs(q)
-    const pages = snapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as Page))
-      .sort((a, b) => (a.menuOrder || 0) - (b.menuOrder || 0))
-    return pages
+    const res = await fetch(`/api/pages?menuLocation=${encodeURIComponent(menuLocation)}`, { cache: 'no-store' })
+    const json = await res.json()
+    return json.success ? (json.data as Page[]) : []
   } catch (error) {
     console.error('[v0] Error fetching pages by menu location:', error)
     return []
