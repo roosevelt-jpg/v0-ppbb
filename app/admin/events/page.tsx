@@ -10,14 +10,16 @@ import { Plus, Trash2, Eye, Edit2 } from 'lucide-react'
 export default function EventsPage() {
   const [events, setEvents] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [activeTab, setActiveTab] = React.useState<'all' | 'draft' | 'published'>('all')
 
   React.useEffect(() => {
     loadEvents()
-  }, [])
+  }, [activeTab])
 
   const loadEvents = async () => {
     try {
-      const res = await fetch('/api/events?status=draft', { cache: 'no-store' })
+      const query = activeTab === 'all' ? '' : `?status=${activeTab}`
+      const res = await fetch(`/api/events${query}`, { cache: 'no-store' })
       const json = await res.json()
       if (json.success) {
         setEvents(json.data.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
@@ -72,7 +74,7 @@ export default function EventsPage() {
     <AdminPageLayout title="Events">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black">All Events (Draft)</h2>
+          <h2 className="text-2xl font-bold text-black">Events</h2>
           <Link
             href="/admin/events/create"
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
@@ -80,6 +82,24 @@ export default function EventsPage() {
             <Plus size={20} />
             Create Event
           </Link>
+        </div>
+
+        {/* Status Tabs */}
+        <div className="flex gap-2 border-b border-gray-200">
+          {(['all', 'draft', 'published'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 font-medium text-sm transition-colors ${
+                activeTab === tab
+                  ? 'text-black border-b-2 border-black'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab === 'all' ? 'All Events' : tab === 'draft' ? 'Drafts' : 'Published'}
+              {events.length > 0 && ` (${events.length})`}
+            </button>
+          ))}
         </div>
 
         {events.length === 0 ? (
@@ -105,7 +125,13 @@ export default function EventsPage() {
                     <td className="px-6 py-3 text-sm text-gray-600">{format(new Date(event.date), 'MMM dd, yyyy')}</td>
                     <td className="px-6 py-3 text-sm text-gray-600">{event.location?.address || '-'}</td>
                     <td className="px-6 py-3 text-sm">
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">Draft</span>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        event.status === 'published'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {event.status === 'published' ? 'Published' : 'Draft'}
+                      </span>
                     </td>
                     <td className="px-6 py-3 text-sm space-x-2 flex">
                       <Link

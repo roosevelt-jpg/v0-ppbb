@@ -5,10 +5,17 @@ const db = getAdminDb()
 
 export async function GET(request: NextRequest) {
   try {
-    const status = request.nextUrl.searchParams.get('status') || 'published'
+    const status = request.nextUrl.searchParams.get('status') // If not provided, fetch all
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100')
 
-    let query = db.collection('events').where('status', '==', status).orderBy('date', 'asc').limit(limit)
+    let query
+    if (status) {
+      // Fetch events with specific status
+      query = db.collection('events').where('status', '==', status).orderBy('date', 'asc').limit(limit)
+    } else {
+      // Fetch all events regardless of status
+      query = db.collection('events').orderBy('date', 'asc').limit(limit)
+    }
 
     const snapshot = await query.get()
     const events = snapshot.docs.map(doc => ({
