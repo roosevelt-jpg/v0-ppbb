@@ -84,6 +84,26 @@ export default function CreateEventPage() {
     setError(null)
 
     try {
+      // Client-side validation
+      if (!formData.title?.trim()) {
+        throw new Error('Event title is required')
+      }
+      if (!formData.description?.trim()) {
+        throw new Error('Event description is required')
+      }
+      if (!formData.date?.trim()) {
+        throw new Error('Event date is required')
+      }
+      if (!formData.location?.trim()) {
+        throw new Error('Event location is required')
+      }
+
+      // Validate date format
+      const dateObj = new Date(formData.date)
+      if (isNaN(dateObj.getTime())) {
+        throw new Error('Please select a valid date')
+      }
+
       let imageUrl = formData.bannerImageUrl
       if (imageFile) {
         imageUrl = await handleUploadImage()

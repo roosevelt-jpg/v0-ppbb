@@ -49,13 +49,25 @@ export async function POST(request: NextRequest) {
     } = body
 
     if (!title || !date || !location) {
-      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json({ 
+        success: false, 
+        error: `Missing required fields: ${!title ? 'Title, ' : ''}${!date ? 'Date, ' : ''}${!location ? 'Location' : ''}` 
+      }, { status: 400 })
+    }
+
+    // Validate and parse date
+    const parsedDate = new Date(date)
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Invalid date format. Please provide a valid date.' 
+      }, { status: 400 })
     }
 
     const eventData = {
       title,
       description,
-      date: new Date(date),
+      date: parsedDate,
       startTime,
       endTime,
       location,
