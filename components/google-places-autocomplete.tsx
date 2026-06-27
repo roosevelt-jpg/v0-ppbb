@@ -51,8 +51,14 @@ export default function GooglePlacesAutocomplete({
     const loadGoogleMapsAPI = () => {
       if (window.google) return
 
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
+      if (!apiKey) {
+        console.warn('[v0] Google Places API key not configured. Please set NEXT_PUBLIC_GOOGLE_PLACES_API_KEY')
+        return
+      }
+
       const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}&libraries=places`
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
       script.async = true
       script.defer = true
       script.onload = () => {
@@ -63,6 +69,9 @@ export default function GooglePlacesAutocomplete({
           mapRef.current = new window.google.maps.Map(dummyDiv)
           placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
         }
+      }
+      script.onerror = () => {
+        console.error('[v0] Failed to load Google Maps API')
       }
       document.head.appendChild(script)
     }

@@ -71,8 +71,8 @@ export default function CreateEventPage() {
       fd.append('path', 'events/banner')
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       const json = await res.json()
-      if (!json.success) throw new Error(json.error)
-      return json.data.url
+      if (!json.success) throw new Error(json.error || 'Upload failed')
+      return json.url
     } catch (err) {
       console.error('[v0] Upload error:', err)
       throw err
@@ -231,7 +231,9 @@ export default function CreateEventPage() {
                   <MapPin size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
                     <p className="font-medium text-blue-900">{formData.locationData.address}</p>
-                    <p className="text-blue-700 text-xs">Coordinates: {formData.locationData.lat.toFixed(4)}, {formData.locationData.lng.toFixed(4)}</p>
+                    {formData.locationData.lat && formData.locationData.lng && (
+                      <p className="text-blue-700 text-xs">Coordinates: {formData.locationData.lat.toFixed(4)}, {formData.locationData.lng.toFixed(4)}</p>
+                    )}
                   </div>
                 </div>
               )}
