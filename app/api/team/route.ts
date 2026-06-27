@@ -5,6 +5,26 @@ const db = getAdminDb()
 
 export async function GET(request: NextRequest) {
   try {
+    const id = request.nextUrl.searchParams.get('id')
+
+    // Get single team member by ID
+    if (id) {
+      const doc = await db.collection('team-members').doc(id).get()
+      if (!doc.exists) {
+        return NextResponse.json({ success: false, error: 'Team member not found' }, { status: 404 })
+      }
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data()?.createdAt?.toDate?.() || doc.data()?.createdAt,
+          updatedAt: doc.data()?.updatedAt?.toDate?.() || doc.data()?.updatedAt,
+        },
+      })
+    }
+
+    // Get all team members (filtered or all)
     const status = request.nextUrl.searchParams.get('status') || 'published'
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100')
 
