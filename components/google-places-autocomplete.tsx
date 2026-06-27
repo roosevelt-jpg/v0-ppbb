@@ -48,12 +48,26 @@ export default function GooglePlacesAutocomplete({
 
   // Load Google Maps API on mount
   useEffect(() => {
-    const loadGoogleMapsAPI = () => {
+    const loadGoogleMapsAPI = async () => {
       if (window.google) return
 
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
+      // First try environment variable, then fetch from integrations API
+      let apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
+      
       if (!apiKey) {
-        console.warn('[v0] Google Places API key not configured. Please set NEXT_PUBLIC_GOOGLE_PLACES_API_KEY')
+        try {
+          const res = await fetch('/api/admin/integrations/googleMaps')
+          if (res.ok) {
+            const data = await res.json()
+            apiKey = data.data?.apiKey
+          }
+        } catch (error) {
+          console.warn('[v0] Failed to fetch Google Maps API key from integrations:', error)
+        }
+      }
+
+      if (!apiKey) {
+        console.warn('[v0] Google Places API key not configured. Please configure it in Admin > Integrations > Google Maps API')
         return
       }
 
