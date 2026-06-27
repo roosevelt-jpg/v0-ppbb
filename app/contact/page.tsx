@@ -54,11 +54,19 @@ export default function ContactPage() {
         const settingsSnapshot = await getDocs(collection(db, 'settings'))
         settingsSnapshot.forEach(doc => {
           const data = doc.data()
+          console.log('[v0] Contact page - Settings data:', data)
+          
           setContactInfo({
-            email: data.email || 'support@passiveblessings.ae',
-            phone: data.phone || '+971 50 000 0000',
-            address: data.address || 'Dubai, UAE',
-            socialLinks: data.socialLinks || {},
+            email: data.email || data.contact?.email || 'support@passiveblessings.ae',
+            phone: data.phone || data.contact?.phone || '+971 50 000 0000',
+            address: data.address || data.contact?.address || 'Dubai, UAE',
+            socialLinks: data.socialLinks || data.social || {},
+          })
+          console.log('[v0] Contact page - Contact info set:', {
+            email: data.email || data.contact?.email,
+            phone: data.phone || data.contact?.phone,
+            address: data.address || data.contact?.address,
+            socialLinks: data.socialLinks || data.social || {},
           })
         })
       } catch (error) {

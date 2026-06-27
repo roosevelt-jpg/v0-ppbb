@@ -24,6 +24,13 @@ interface SiteSettings {
     linkedin?: string
     youtube?: string
   }
+  socialLinks?: {
+    facebook?: string
+    twitter?: string
+    instagram?: string
+    linkedin?: string
+    youtube?: string
+  }
   seo?: {
     googleAnalyticsId?: string
     facebookPixelId?: string
@@ -36,6 +43,14 @@ interface SiteSettings {
     model: string
     systemPrompt: string
   }
+  // Flat structure fields (for backwards compatibility)
+  siteName?: string
+  description?: string
+  logoUrl?: string
+  logoUrlDark?: string
+  email?: string
+  phone?: string
+  address?: string
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -89,25 +104,60 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    if (!body.branding && !body.contact && !body.social && !body.seo && !body.chatbot) {
-      return NextResponse.json(
-        { success: false, error: 'No valid settings provided' },
-        { status: 400 }
-      )
+    const docRef = db.collection('settings').doc('global')
+    const currentDoc = await docRef.get()
+    const currentData = currentDoc.exists ? currentDoc.data() : {}
+
+    // Handle both nested and flat structures
+    const updatedSettings: any = {
+      ...currentData,
+      updatedAt: new Date(),
     }
 
-    const docRef = db.collection('settings').doc('general')
-    const currentDoc = await docRef.get()
-    const currentData = currentDoc.exists ? currentDoc.data() : DEFAULT_SETTINGS
+    // Merge nested structures
+    if (body.branding) {
+      updatedSettings.branding = { ...currentData.branding, ...body.branding }
+    }
+    if (body.contact) {
+      updatedSettings.contact = { ...currentData.contact, ...body.contact }
+    }
+    if (body.social) {
+      updatedSettings.social = { ...currentData.social, ...body.social }
+    }
+    if (body.socialLinks) {
+      updatedSettings.socialLinks = { ...currentData.socialLinks, ...body.socialLinks }
+    }
+    if (body.seo) {
+      updatedSettings.seo = { ...currentData.seo, ...body.seo }
+    }
+    if (body.chatbot) {
+      updatedSettings.chatbot = { ...currentData.chatbot, ...body.chatbot }
+    }
 
-    const updatedSettings = {
-      ...currentData,
-      ...(body.branding && { branding: { ...currentData.branding, ...body.branding } }),
-      ...(body.contact && { contact: { ...currentData.contact, ...body.contact } }),
-      ...(body.social && { social: { ...currentData.social, ...body.social } }),
-      ...(body.seo && { seo: { ...currentData.seo, ...body.seo } }),
-      ...(body.chatbot && { chatbot: { ...currentData.chatbot, ...body.chatbot } }),
-      updatedAt: new Date(),
+    // Handle flat structure fields
+    const flatFields = ['siteName', 'description', 'logoUrl', 'logoUrlDark', 'email', 'phone', 'address', 'emailConfig']
+    flatFields.forEach(field => {
+      if (body[field] !== undefined) {
+        updatedSettings[field] = body[field]
+      }
+    })
+
+    // Also save to nested structure for backwards compatibility
+    if (body.siteName || body.description) {
+      updatedSettings.branding = {
+        ...updatedSettings.branding,
+        siteName: body.siteName || updatedSettings.branding?.siteName,
+        description: body.description || updatedSettings.branding?.description,
+      }
+    }
+
+    if (body.email || body.phone || body.address) {
+      updatedSettings.contact = {
+        ...updatedSettings.contact,
+        email: body.email || updatedSettings.contact?.email,
+        phone: body.phone || updatedSettings.contact?.phone,
+        address: body.address || updatedSettings.contact?.address,
+      }
     }
 
     await docRef.set(updatedSettings, { merge: true })

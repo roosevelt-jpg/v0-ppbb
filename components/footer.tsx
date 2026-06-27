@@ -43,9 +43,12 @@ export function Footer() {
         // Fetch social links from settings
         const settingsSnapshot = await getDocs(collection(db, 'settings'))
         settingsSnapshot.forEach(doc => {
-          if (doc.data().socialLinks) {
-            setSocialLinks(doc.data().socialLinks)
-          }
+          const data = doc.data()
+          console.log('[v0] Footer - Settings data:', data)
+          
+          const socialData = data.socialLinks || data.social || {}
+          console.log('[v0] Footer - Social links:', socialData)
+          setSocialLinks(socialData)
         })
 
         // Fetch menu pages by location
