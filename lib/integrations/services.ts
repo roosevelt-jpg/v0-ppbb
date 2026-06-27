@@ -58,6 +58,22 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       },
     ],
   },
+  firebaseClient: {
+    id: 'firebaseClient',
+    name: 'Firebase Client SDK',
+    category: 'backend',
+    description: 'Web app config (auth, firestore)',
+    icon: '🔆',
+    fields: [
+      { name: 'apiKey', label: 'API Key', type: 'text', required: true, placeholder: 'AIza...' },
+      { name: 'authDomain', label: 'Auth Domain', type: 'text', required: true, placeholder: 'your-project.firebaseapp.com' },
+      { name: 'projectId', label: 'Project ID', type: 'text', required: true, placeholder: 'your-project' },
+      { name: 'storageBucket', label: 'Storage Bucket', type: 'text', required: false, placeholder: 'your-project.appspot.com' },
+      { name: 'messagingSenderId', label: 'Messaging Sender ID', type: 'text', required: false, placeholder: '1234567890' },
+      { name: 'appId', label: 'App ID', type: 'text', required: true, placeholder: '1:1234567890:web:abc123' },
+    ],
+    docs: 'https://firebase.google.com/docs/web/setup',
+  },
   // Calendars
   googleCalendar: {
     id: 'googleCalendar',
