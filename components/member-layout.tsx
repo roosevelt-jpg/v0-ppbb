@@ -28,11 +28,9 @@ const memberMenuItems = [
 export function MemberSidebar({
   open,
   setOpen,
-  showBusinessPortal = false,
 }: {
   open: boolean
   setOpen: (open: boolean) => void
-  showBusinessPortal?: boolean
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -96,28 +94,7 @@ export function MemberSidebar({
             )
           })}
 
-          {/* Business portal: link to dashboard if the member has a business
-              account, otherwise invite them to create one. */}
-          <div className="h-px bg-border my-2" />
-          {showBusinessPortal ? (
-            <Link
-              href="/business/dashboard"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-foreground hover:bg-secondary"
-            >
-              <Briefcase className="h-4 w-4" />
-              <span className="text-sm font-medium">Business Portal</span>
-            </Link>
-          ) : (
-            <Link
-              href="/business/signup"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-primary hover:bg-secondary"
-            >
-              <Briefcase className="h-4 w-4" />
-              <span className="text-sm font-medium">Create Business Account</span>
-            </Link>
-          )}
+
         </nav>
 
         {/* Footer */}

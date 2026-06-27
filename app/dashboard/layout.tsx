@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { MemberSidebar, MemberHeader } from '@/components/member-layout'
-import { hasBusinessAccess } from '@/lib/roles'
 import { User } from '@/lib/types'
 
 export default function DashboardLayout({
@@ -49,7 +48,6 @@ export default function DashboardLayout({
       <MemberSidebar
         open={sidebarOpen}
         setOpen={setSidebarOpen}
-        showBusinessPortal={hasBusinessAccess(user)}
       />
       <main className="flex-1 overflow-auto flex flex-col">
         <MemberHeader
