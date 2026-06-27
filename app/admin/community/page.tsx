@@ -1,240 +1,188 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
 import React from 'react'
-import { auth, db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where, updateDoc, doc } from 'firebase/firestore'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Flag, Trash2, Users, MessageSquare, Eye, Check, X } from 'lucide-react'
+import Link from 'next/link'
+import { AdminPageLayout } from '@/components/admin-page-layout'
+import { Plus, Trash2, Edit2 } from 'lucide-react'
 
-interface Flag {
-  id: string
-  type: 'post' | 'comment' | 'user' | 'group'
-  targetId: string
-  reason: string
-  reportedBy: string
-  reportedAt: any
-  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed'
-  groupId?: string
-  adminNotes?: string
-}
-
-export default function CommunityAdminPage() {
-  const [flags, setFlags] = React.useState<Flag[]>([])
+export default function AdminCommunityPage() {
+  const [activeTab, setActiveTab] = React.useState<'stats' | 'groups' | 'activities'>('stats')
+  const [stats, setStats] = React.useState<any>(null)
+  const [groups, setGroups] = React.useState<any[]>([])
+  const [activities, setActivities] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [selectedFlag, setSelectedFlag] = React.useState<Flag | null>(null)
-  const [adminNotes, setAdminNotes] = React.useState('')
-  const [statusFilter, setStatusFilter] = React.useState('pending')
 
-  // Load flagged content
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'communityModeration'), where('status', '==', statusFilter)),
-      (snapshot) => {
-        const flagsData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Flag[]
-        setFlags(flagsData.sort((a, b) => (b.reportedAt?.toDate?.() || 0) - (a.reportedAt?.toDate?.() || 0)))
-        setLoading(false)
-      },
-      (error) => {
-        console.error('[v0] Error loading flags:', error)
-        setLoading(false)
-      }
-    )
+    loadCommunityData()
+  }, [activeTab])
 
-    return () => unsubscribe()
-  }, [statusFilter])
-
-  const handleResolve = async (flagId: string, action: 'approve' | 'delete' | 'ban') => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) return
-
+  const loadCommunityData = async () => {
     try {
-      await updateDoc(doc(db, 'communityModeration', flagId), {
-        status: 'resolved',
-        action,
-        adminNotes,
-        resolvedBy: firebaseUser.uid,
-        resolvedAt: new Date(),
-      })
-
-      setSelectedFlag(null)
-      setAdminNotes('')
+      if (activeTab === 'stats') {
+        const res = await fetch('/api/community?query=stats', { cache: 'no-store' })
+        const json = await res.json()
+        if (json.success) setStats(json.data)
+      } else if (activeTab === 'groups') {
+        const res = await fetch('/api/community?query=groups', { cache: 'no-store' })
+        const json = await res.json()
+        if (json.success) setGroups(json.data)
+      } else if (activeTab === 'activities') {
+        const res = await fetch('/api/community?query=activities', { cache: 'no-store' })
+        const json = await res.json()
+        if (json.success) setActivities(json.data)
+      }
     } catch (error) {
-      console.error('[v0] Error resolving flag:', error)
+      console.error('[v0] Error loading community data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-red-100 text-red-800'
-      case 'reviewed':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'resolved':
-        return 'bg-green-100 text-green-800'
-      case 'dismissed':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+  const handleDeleteGroup = async (id: string) => {
+    if (!confirm('Are you sure?')) return
+    try {
+      const res = await fetch(`/api/community?id=${id}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (json.success) {
+        setGroups(groups.filter(g => g.id !== id))
+      }
+    } catch (error) {
+      console.error('[v0] Error deleting group:', error)
     }
+  }
+
+  if (loading) {
+    return (
+      <AdminPageLayout title="Community">
+        <div className="flex items-center justify-center py-12">
+          <p className="text-gray-500">Loading community data...</p>
+        </div>
+      </AdminPageLayout>
+    )
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Community Moderation</h1>
+    <AdminPageLayout title="Community">
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-black">Community Management</h2>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="p-4">
-          <p className="text-gray-600 text-sm">Pending</p>
-          <p className="text-2xl font-bold">{flags.filter((f) => f.status === 'pending').length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-gray-600 text-sm">Reviewed</p>
-          <p className="text-2xl font-bold">{flags.filter((f) => f.status === 'reviewed').length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-gray-600 text-sm">Resolved</p>
-          <p className="text-2xl font-bold">{flags.filter((f) => f.status === 'resolved').length}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-gray-600 text-sm">Dismissed</p>
-          <p className="text-2xl font-bold">{flags.filter((f) => f.status === 'dismissed').length}</p>
-        </Card>
-      </div>
-
-      {/* Status Filter */}
-      <div className="mb-6 flex gap-2 flex-wrap">
-        {['pending', 'reviewed', 'resolved', 'dismissed'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
-              statusFilter === status ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Flags List */}
-        <div className="lg:col-span-2">
-          {!loading ? (
-            <div className="space-y-4">
-              {flags.map((flag) => (
-                <Card
-                  key={flag.id}
-                  className={`p-4 cursor-pointer border-2 transition ${
-                    selectedFlag?.id === flag.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedFlag(flag)}
-                >
-                  <div className="flex gap-4">
-                    <div className="text-2xl">
-                      {flag.type === 'post' && '📝'}
-                      {flag.type === 'comment' && '💬'}
-                      {flag.type === 'user' && '👤'}
-                      {flag.type === 'group' && '👥'}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-bold">
-                          {flag.type === 'post' && 'Post Flagged'}
-                          {flag.type === 'comment' && 'Comment Flagged'}
-                          {flag.type === 'user' && 'User Flagged'}
-                          {flag.type === 'group' && 'Group Flagged'}
-                        </h3>
-                        <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(flag.status)}`}>
-                          {flag.status}
-                        </span>
-                      </div>
-
-                      <p className="text-sm text-gray-600 mb-2">
-                        <strong>Reason:</strong> {flag.reason}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <strong>Reported:</strong> {flag.reportedAt?.toDate?.()?.toLocaleDateString() || 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">Loading...</div>
-          )}
-
-          {!loading && flags.length === 0 && (
-            <Card className="p-8 text-center">
-              <p className="text-gray-600">No {statusFilter} flags</p>
-            </Card>
-          )}
+        {/* Tabs */}
+        <div className="flex gap-4 border-b border-gray-200">
+          {['stats', 'groups', 'activities'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab as any)
+                setLoading(true)
+              }}
+              className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors ${
+                activeTab === tab
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
-        {/* Detail Panel */}
-        {selectedFlag && (
-          <Card className="p-6 h-fit sticky top-8">
-            <h3 className="font-bold text-lg mb-4">Review Details</h3>
+        {/* Stats Tab */}
+        {activeTab === 'stats' && stats && (
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <p className="text-sm text-gray-600 mb-2">Community Members</p>
+              <p className="text-3xl font-bold text-black">{stats.totalMembers}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <p className="text-sm text-gray-600 mb-2">Published Events</p>
+              <p className="text-3xl font-bold text-black">{stats.publishedEvents}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <p className="text-sm text-gray-600 mb-2">Active Volunteers</p>
+              <p className="text-3xl font-bold text-black">{stats.volunteers}</p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <p className="text-sm text-gray-600 mb-2">Donations Tracked</p>
+              <p className="text-3xl font-bold text-black">AED {stats.donations?.toLocaleString()}</p>
+            </div>
+          </div>
+        )}
 
-            <div className="space-y-4 mb-6">
-              <div>
-                <p className="text-sm text-gray-600">Type</p>
-                <p className="font-medium">{selectedFlag.type}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Reason</p>
-                <p className="font-medium">{selectedFlag.reason}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Target ID</p>
-                <p className="font-medium text-xs break-all">{selectedFlag.targetId}</p>
-              </div>
+        {/* Groups Tab */}
+        {activeTab === 'groups' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-600">{groups.length} groups</p>
+              <Link
+                href="/admin/community/create-group"
+                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+              >
+                <Plus size={18} />
+                Create Group
+              </Link>
             </div>
 
-            {selectedFlag.status === 'pending' && (
-              <>
-                <textarea
-                  placeholder="Add admin notes..."
-                  value={adminNotes}
-                  onChange={(e) => setAdminNotes(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-sm mb-4 h-24"
-                />
-
-                <div className="space-y-2">
-                  <Button onClick={() => handleResolve(selectedFlag.id, 'approve')} className="w-full bg-green-600 hover:bg-green-700">
-                    <Check className="w-4 h-4 mr-2" />
-                    Approve
-                  </Button>
-                  <Button onClick={() => handleResolve(selectedFlag.id, 'delete')} className="w-full bg-red-600 hover:bg-red-700">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                  <Button onClick={() => handleResolve(selectedFlag.id, 'ban')} className="w-full bg-orange-600 hover:bg-orange-700">
-                    <X className="w-4 h-4 mr-2" />
-                    Ban User
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {selectedFlag.status === 'resolved' && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-800">Resolved</p>
-                {selectedFlag.adminNotes && (
-                  <p className="text-sm text-green-800 mt-2">{selectedFlag.adminNotes}</p>
-                )}
+            {groups.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No groups created yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {groups.map((group: any) => (
+                  <div key={group.id} className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center">
+                    <div>
+                      <h4 className="font-bold text-gray-900">{group.name}</h4>
+                      <p className="text-sm text-gray-600">{group.description}</p>
+                      <p className="text-xs text-gray-500 mt-1">{group.members?.length || 0} members</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteGroup(group.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
-          </Card>
+          </div>
+        )}
+
+        {/* Activities Tab */}
+        {activeTab === 'activities' && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">{activities.length} recent activities</p>
+
+            {activities.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No activities recorded yet.</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Activity</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Type</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {activities.map((activity: any) => (
+                      <tr key={activity.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-3 text-gray-900">{activity.description}</td>
+                        <td className="px-6 py-3 text-gray-600 capitalize">{activity.type}</td>
+                        <td className="px-6 py-3 text-gray-600">{new Date(activity.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         )}
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }
