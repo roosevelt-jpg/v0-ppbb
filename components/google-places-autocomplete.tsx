@@ -41,6 +41,8 @@ export default function GooglePlacesAutocomplete({
   const [predictions, setPredictions] = useState<PlacePrediction[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [apiReady, setApiReady] = useState(false)
   const autocompleteService = useRef<any>(null)
   const placesService = useRef<any>(null)
   const mapRef = useRef<any>(null)
@@ -49,25 +51,43 @@ export default function GooglePlacesAutocomplete({
   // Load Google Maps API on mount
   useEffect(() => {
     const loadGoogleMapsAPI = async () => {
-      if (window.google) return
+      // Check if already loaded
+      if (window.google?.maps?.places?.AutocompleteService) {
+        console.log('[v0] Google Maps API already loaded')
+        autocompleteService.current = new window.google.maps.places.AutocompleteService()
+        const dummyDiv = document.createElement('div')
+        mapRef.current = new window.google.maps.Map(dummyDiv)
+        placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
+        setApiReady(true)
+        return
+      }
 
       // First try environment variable, then fetch from integrations API
       let apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
       
       if (!apiKey) {
         try {
+          console.log('[v0] Fetching Google Maps API key from integrations...')
           const res = await fetch('/api/admin/integrations/googleMaps')
           if (res.ok) {
             const data = await res.json()
             apiKey = data.data?.apiKey
+            console.log('[v0] API key fetched from integrations:', apiKey ? 'Success' : 'Empty')
+          } else {
+            console.warn('[v0] Integration endpoint returned:', res.status)
           }
         } catch (error) {
           console.warn('[v0] Failed to fetch Google Maps API key from integrations:', error)
+          setError('Failed to load integrations')
         }
+      } else {
+        console.log('[v0] Using environment variable API key')
       }
 
       if (!apiKey) {
-        console.warn('[v0] Google Places API key not configured. Please configure it in Admin > Integrations > Google Maps API')
+        const msg = 'Google Places API key not configured. Please configure it in Admin > Integrations > Google Maps API'
+        console.warn('[v0]', msg)
+        setError(msg)
         return
       }
 
@@ -76,16 +96,26 @@ export default function GooglePlacesAutocomplete({
       script.async = true
       script.defer = true
       script.onload = () => {
+        console.log('[v0] Google Maps script loaded successfully')
         if (window.google?.maps?.places) {
-          autocompleteService.current = new window.google.maps.places.AutocompleteService()
-          // Create a dummy map for PlacesService
-          const dummyDiv = document.createElement('div')
-          mapRef.current = new window.google.maps.Map(dummyDiv)
-          placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
+          try {
+            autocompleteService.current = new window.google.maps.places.AutocompleteService()
+            const dummyDiv = document.createElement('div')
+            mapRef.current = new window.google.maps.Map(dummyDiv)
+            placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
+            setApiReady(true)
+            setError(null)
+            console.log('[v0] Google Places services initialized')
+          } catch (err) {
+            console.error('[v0] Error initializing Places services:', err)
+            setError('Failed to initialize Places services')
+          }
         }
       }
       script.onerror = () => {
-        console.error('[v0] Failed to load Google Maps API')
+        const msg = 'Failed to load Google Maps API script'
+        console.error('[v0]', msg)
+        setError(msg)
       }
       document.head.appendChild(script)
     }
@@ -94,12 +124,21 @@ export default function GooglePlacesAutocomplete({
   }, [])
 
   const fetchPlacePredictions = async (searchTerm: string) => {
-    if (!searchTerm.trim() || !autocompleteService.current) {
+    if (!searchTerm.trim()) {
+      setPredictions([])
+      return
+    }
+
+    if (!autocompleteService.current) {
+      console.warn('[v0] AutocompleteService not ready yet')
+      setError('Google Places service not initialized')
       setPredictions([])
       return
     }
 
     setLoading(true)
+    console.log('[v0] Fetching predictions for:', searchTerm, 'Country restrictions:', countryRestrictions)
+    
     try {
       const response = await autocompleteService.current.getPlacePredictions({
         input: searchTerm,
@@ -108,17 +147,25 @@ export default function GooglePlacesAutocomplete({
           : undefined,
       })
 
-      if (response.predictions) {
+      console.log('[v0] Predictions response:', response)
+
+      if (response.predictions && response.predictions.length > 0) {
         const formattedPredictions = response.predictions.map((prediction: any) => ({
           placeId: prediction.place_id,
           mainText: prediction.structured_formatting?.main_text || prediction.description,
           secondaryText: prediction.structured_formatting?.secondary_text,
         }))
+        console.log('[v0] Formatted predictions:', formattedPredictions)
         setPredictions(formattedPredictions)
         setIsOpen(true)
+        setError(null)
+      } else {
+        console.log('[v0] No predictions found')
+        setPredictions([])
       }
     } catch (error) {
       console.error('[v0] Error fetching predictions:', error)
+      setError('Error fetching predictions')
       setPredictions([])
     } finally {
       setLoading(false)
@@ -172,6 +219,12 @@ export default function GooglePlacesAutocomplete({
 
   return (
     <div className="relative w-full">
+      {error && (
+        <div className="mb-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      
       <div className="relative">
         <Search className="absolute left-3 top-3 text-gray-400" size={18} />
         <input
@@ -181,9 +234,12 @@ export default function GooglePlacesAutocomplete({
           onChange={handleInputChange}
           onFocus={() => input && setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+          disabled={!apiReady}
+          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
+            !apiReady ? 'bg-gray-100 cursor-not-allowed border-gray-300' : 'border-gray-300'
+          }`}
         />
-        {input && (
+        {input && apiReady && (
           <button
             type="button"
             onClick={handleClear}
@@ -194,7 +250,7 @@ export default function GooglePlacesAutocomplete({
         )}
       </div>
 
-      {isOpen && (
+      {isOpen && apiReady && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
           {loading && (
             <div className="p-4 text-center text-gray-500">
