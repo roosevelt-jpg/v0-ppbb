@@ -1,14 +1,5 @@
 'use client'
 
-import { storage } from '@/lib/firebase'
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage'
-import crypto from 'crypto'
-
 export interface UploadedDocument {
   fileName: string
   fileSize: number
@@ -32,7 +23,7 @@ export async function uploadBeneficiaryDocument(
   documentType: string,
   file: File
 ): Promise<UploadedDocument> {
-  // Validate file
+  // Validate file client-side for fast feedback (the server re-validates).
   if (!file) {
     throw new Error('No file provided')
   }
@@ -42,79 +33,29 @@ export async function uploadBeneficiaryDocument(
     throw new Error(`File size must be less than 10MB. Current size: ${(file.size / 1024 / 1024).toFixed(2)}MB`)
   }
 
-  // Allowed MIME types for documents
-  const allowedMimeTypes = [
-    'application/pdf',
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  ]
+  // Upload via the Admin SDK API route. The file bytes go to Firebase Storage
+  // and only the download URL + metadata are returned (and later stored in
+  // Firestore). The client Storage SDK is blocked by the deployed rules.
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('requestId', requestId)
+  fd.append('documentType', documentType)
 
-  if (!allowedMimeTypes.includes(file.type)) {
-    throw new Error(
-      `File type not allowed. Accepted types: PDF, JPG, PNG, WebP, DOC, DOCX, XLS, XLSX`
-    )
+  const res = await fetch('/api/beneficiary-documents', { method: 'POST', body: fd })
+  const json = await res.json()
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || 'Upload failed')
   }
 
-  try {
-    // Generate file hash for integrity verification
-    const fileBuffer = await file.arrayBuffer()
-    const hashBuffer = crypto.subtle
-      ? await crypto.subtle.digest('SHA-256', fileBuffer)
-      : Buffer.from(file.name) // Fallback for browser environments
-
-    const fileHash = Array.from(new Uint8Array(hashBuffer))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')
-      .substring(0, 16)
-
-    // Create storage path: beneficiary-documents/{requestId}/{documentType}/{timestamp}-{hash}-{fileName}
-    const timestamp = Date.now()
-    const sanitizedFileName = file.name
-      .replace(/[^a-zA-Z0-9.-]/g, '_')
-      .substring(0, 50)
-    const storagePath = `beneficiary-documents/${requestId}/${documentType}/${timestamp}-${fileHash}-${sanitizedFileName}`
-
-    console.log('[v0] Uploading document to Firebase Storage:', storagePath)
-
-    // Upload file to Firebase Storage
-    const fileRef = ref(storage, storagePath)
-    const metadata = {
-      contentType: file.type,
-      customMetadata: {
-        documentType,
-        requestId,
-        originalFileName: file.name,
-        uploadedAt: new Date().toISOString(),
-      },
-    }
-
-    await uploadBytes(fileRef, fileBuffer, metadata)
-
-    // Get download URL
-    const downloadUrl = await getDownloadURL(fileRef)
-
-    console.log('[v0] Document uploaded successfully:', downloadUrl)
-
-    return {
-      fileName: file.name,
-      fileSize: file.size,
-      mimeType: file.type,
-      downloadUrl,
-      storagePath,
-      uploadedAt: new Date(),
-      fileHash,
-    }
-  } catch (error) {
-    console.error('[v0] Error uploading document:', error)
-    if (error instanceof Error) {
-      throw new Error(`Upload failed: ${error.message}`)
-    }
-    throw error
+  const doc = json.document
+  return {
+    fileName: doc.fileName,
+    fileSize: doc.fileSize,
+    mimeType: doc.mimeType,
+    downloadUrl: doc.downloadUrl,
+    storagePath: doc.storagePath,
+    uploadedAt: new Date(doc.uploadedAt),
+    fileHash: doc.fileHash,
   }
 }
 
@@ -124,10 +65,11 @@ export async function uploadBeneficiaryDocument(
  */
 export async function deleteBeneficiaryDocument(storagePath: string): Promise<void> {
   try {
-    console.log('[v0] Deleting document from Firebase Storage:', storagePath)
-    const fileRef = ref(storage, storagePath)
-    await deleteObject(fileRef)
-    console.log('[v0] Document deleted successfully')
+    await fetch('/api/beneficiary-documents', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ storagePath }),
+    })
   } catch (error) {
     console.error('[v0] Error deleting document:', error)
     // Don't throw - document may have already been deleted
@@ -135,18 +77,14 @@ export async function deleteBeneficiaryDocument(storagePath: string): Promise<vo
 }
 
 /**
- * Get download URL for a stored document
+ * Get the public download URL for a stored document. Files are uploaded as
+ * public objects, so the URL is derived directly from the storage path.
  * @param storagePath - Storage path of the document
  * @returns Download URL
  */
 export async function getBeneficiaryDocumentUrl(storagePath: string): Promise<string> {
-  try {
-    const fileRef = ref(storage, storagePath)
-    return await getDownloadURL(fileRef)
-  } catch (error) {
-    console.error('[v0] Error getting document URL:', error)
-    throw new Error('Failed to retrieve document URL')
-  }
+  const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_NAME || 'pasiveblessings-media'
+  return `https://storage.googleapis.com/${bucket}/${storagePath.replace(/^\/+/, '')}`
 }
 
 /**
