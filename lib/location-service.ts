@@ -1,6 +1,3 @@
-import { db } from './firebase'
-import { doc, getDoc } from 'firebase/firestore'
-
 export interface LocationConfig {
   googleMapsApiKey: string
   googlePlacesApiKey: string
@@ -11,13 +8,14 @@ export interface LocationConfig {
 
 export async function getLocationConfig(): Promise<LocationConfig | null> {
   try {
-    const docRef = doc(db, 'admin', 'locationConfig')
-    const docSnap = await getDoc(docRef)
-    
-    if (docSnap.exists()) {
-      return docSnap.data() as LocationConfig
+    // Read via the Admin SDK API route; client-side Firestore reads of the
+    // protected `admin` collection are denied by security rules.
+    const res = await fetch('/api/admin/location-config', { cache: 'no-store' })
+    const json = await res.json()
+    if (!res.ok || !json.success) {
+      return null
     }
-    return null
+    return json.data as LocationConfig
   } catch (error) {
     console.error('[v0] Error loading location config:', error)
     return null

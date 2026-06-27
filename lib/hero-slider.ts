@@ -1,175 +1,80 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  getDocs,
-  writeBatch,
-  serverTimestamp,
-} from 'firebase/firestore'
-import { db } from './firebase'
 import { HeroSliderSettings, SliderImage } from './types'
 
-const SLIDER_COLLECTION = 'heroSlider'
-const SLIDER_DOC = 'default'
-const IMAGES_SUBCOLLECTION = 'images'
-
-function configDocRef() {
-  return doc(db, SLIDER_COLLECTION, SLIDER_DOC)
-}
-
-function imagesColRef() {
-  return collection(db, SLIDER_COLLECTION, SLIDER_DOC, IMAGES_SUBCOLLECTION)
-}
-
-const DEFAULT_CONFIG: Omit<HeroSliderSettings, 'images'> = {
-  id: 'default',
-  transitionEffect: 'fade',
-  transitionDuration: 500,
-  autoplay: true,
-  autoplayDuration: 5,
-  displayMode: 'auto',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
 /**
- * Read the slider config doc plus all images from the images subcollection.
- * Images are stored as individual documents (not a single array) so the
- * slider can hold an unlimited number of base64-encoded images without
- * hitting Firestore's ~1 MiB per-document limit.
+ * Client-side hero slider data access.
+ *
+ * All operations go through the `/api/admin/hero-slider` route, which uses the
+ * Firebase Admin SDK on the server. This is required because the admin is
+ * authorized server-side (not via client Firebase Auth), so direct client-side
+ * Firestore writes to the `heroSlider` collection are denied by security rules
+ * and previously failed silently ("nothing happens" on add/save).
+ *
+ * Images are stored as individual documents in the `heroSlider/default/images`
+ * subcollection so the slider can hold an unlimited number of base64-encoded
+ * images without hitting Firestore's ~1 MiB per-document limit.
  */
+
+const API_URL = '/api/admin/hero-slider'
+
+async function postAction(action: string, payload?: unknown): Promise<boolean> {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, payload }),
+    })
+    const json = await res.json()
+    if (!res.ok || !json.success) {
+      console.error('[v0] Hero slider action failed:', action, json.error)
+      return false
+    }
+    return true
+  } catch (error) {
+    console.error('[v0] Hero slider action error:', action, error)
+    return false
+  }
+}
+
 export async function getHeroSliderSettings(): Promise<HeroSliderSettings | null> {
   try {
-    const [configSnap, imagesSnap] = await Promise.all([
-      getDoc(configDocRef()),
-      getDocs(imagesColRef()),
-    ])
-
-    const config = configSnap.exists()
-      ? (configSnap.data() as Partial<HeroSliderSettings>)
-      : {}
-
-    const images: SliderImage[] = imagesSnap.docs
-      .map((d) => d.data() as SliderImage)
-      .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
-
-    // Return null only if nothing has ever been configured.
-    if (!configSnap.exists() && images.length === 0) {
+    const res = await fetch(API_URL, { cache: 'no-store' })
+    const json = await res.json()
+    if (!res.ok || !json.success) {
+      console.error('[v0] Error fetching hero slider settings:', json.error)
       return null
     }
-
-    return {
-      ...DEFAULT_CONFIG,
-      ...config,
-      id: 'default',
-      images,
-    } as HeroSliderSettings
+    return json.data as HeroSliderSettings | null
   } catch (error) {
     console.error('[v0] Error fetching hero slider settings:', error)
     return null
   }
 }
 
-/** Ensure the config document exists before writing related data. */
-async function ensureConfigDoc(): Promise<void> {
-  const snap = await getDoc(configDocRef())
-  if (!snap.exists()) {
-    await setDoc(configDocRef(), {
-      ...DEFAULT_CONFIG,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
-  }
-}
-
 export async function updateHeroSliderSettings(
   settings: Partial<HeroSliderSettings>
 ): Promise<boolean> {
-  try {
-    await ensureConfigDoc()
-    // Never write the images array into the config doc; images live in the
-    // subcollection.
-    const { images, ...config } = settings
-    await updateDoc(configDocRef(), {
-      ...config,
-      updatedAt: serverTimestamp(),
-    })
-    return true
-  } catch (error) {
-    console.error('[v0] Error updating hero slider settings:', error)
-    return false
-  }
+  // Never send the images array to the config update; images live in the
+  // subcollection and are managed via the image actions.
+  const { images, ...config } = settings
+  return postAction('updateSettings', config)
 }
 
 export async function addSliderImage(image: SliderImage): Promise<boolean> {
-  try {
-    await ensureConfigDoc()
-    await setDoc(doc(imagesColRef(), image.id), {
-      ...image,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
-    return true
-  } catch (error) {
-    console.error('[v0] Error adding slider image:', error)
-    return false
-  }
+  return postAction('addImage', image)
 }
 
 export async function updateSliderImage(image: SliderImage): Promise<boolean> {
-  try {
-    await setDoc(
-      doc(imagesColRef(), image.id),
-      { ...image, updatedAt: serverTimestamp() },
-      { merge: true }
-    )
-    return true
-  } catch (error) {
-    console.error('[v0] Error updating slider image:', error)
-    return false
-  }
+  return postAction('updateImage', image)
 }
 
 export async function deleteSliderImage(imageId: string): Promise<boolean> {
-  try {
-    await deleteDoc(doc(imagesColRef(), imageId))
-    return true
-  } catch (error) {
-    console.error('[v0] Error deleting slider image:', error)
-    return false
-  }
+  return postAction('deleteImage', { imageId })
 }
 
 export async function reorderSliderImages(imageIds: string[]): Promise<boolean> {
-  try {
-    const batch = writeBatch(db)
-    imageIds.forEach((id, index) => {
-      batch.update(doc(imagesColRef(), id), {
-        displayOrder: index,
-        updatedAt: serverTimestamp(),
-      })
-    })
-    await batch.commit()
-    return true
-  } catch (error) {
-    console.error('[v0] Error reordering slider images:', error)
-    return false
-  }
+  return postAction('reorder', { imageIds })
 }
 
 export async function publishHeroSlider(): Promise<boolean> {
-  try {
-    await ensureConfigDoc()
-    await updateDoc(configDocRef(), {
-      publishedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
-    return true
-  } catch (error) {
-    console.error('[v0] Error publishing hero slider:', error)
-    return false
-  }
+  return postAction('publish')
 }
