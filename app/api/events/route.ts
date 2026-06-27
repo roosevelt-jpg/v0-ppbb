@@ -64,6 +64,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Sanitize locationData for Firestore (remove functions, non-serializable properties)
+    let sanitizedLocationData = undefined
+    if (locationData) {
+      sanitizedLocationData = {
+        address: locationData.mainText || locationData.address,
+        secondaryText: locationData.secondaryText || '',
+        placeId: locationData.placeId || '',
+        lat: locationData.lat || 0,
+        lng: locationData.lng || 0,
+      }
+    }
+
     const eventData = {
       title,
       description,
@@ -71,7 +83,7 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       location,
-      locationData: locationData || undefined, // Google Places data with lat/lng
+      locationData: sanitizedLocationData, // Google Places data with lat/lng
       bannerImage: bannerImageUrl, // Firebase Storage URL (no base64)
       genderRestriction: genderRestriction || 'mixed',
       tags: tags || [], // Event tags array
@@ -91,15 +103,29 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     }
 
+    console.log('[v0] Creating event with data:', JSON.stringify({
+      title,
+      date: parsedDate.toISOString(),
+      location,
+      locationData,
+      status,
+    }, null, 2))
+
     const docRef = await db.collection('events').add(eventData)
 
+    console.log('[v0] Event created successfully with ID:', docRef.id)
     return NextResponse.json({
       success: true,
       data: { id: docRef.id, ...eventData },
     })
   } catch (error) {
-    console.error('[v0] Event creation error:', error)
-    return NextResponse.json({ success: false, error: 'Failed to create event' }, { status: 500 })
+    console.error('[v0] Event creation error:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : '',
+      errorFull: error,
+    })
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 })
   }
 }
 
