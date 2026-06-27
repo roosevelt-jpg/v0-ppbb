@@ -44,8 +44,10 @@ export default function ReportingPage() {
   }, [dateRange])
 
   const handleViewReport = async (reportType: ReportType) => {
-    console.log('[v0] View report clicked for:', reportType)
+    console.log('[v0] handleViewReport called with:', reportType)
+    console.log('[v0] Current state - selectedReport:', selectedReport, 'reportData exists:', !!reportData)
     try {
+      console.log('[v0] Setting selected report to:', reportType)
       setSelectedReport(reportType)
       let data: any = null
 
@@ -114,9 +116,12 @@ export default function ReportingPage() {
       }
 
       console.log('[v0] Report data loaded:', data)
+      console.log('[v0] Setting reportData state with:', data)
       setReportData(data)
+      console.log('[v0] Modal should now be visible')
     } catch (error) {
       console.error('[v0] Error fetching report:', error)
+      console.log('[v0] Error details:', error instanceof Error ? error.message : error)
     }
   }
 
