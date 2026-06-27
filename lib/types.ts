@@ -512,6 +512,13 @@ export interface SiteSettings {
   seoKeywords?: string
   // Analytics
   googleAnalyticsId?: string
+  // Email Configuration (Gmail SMTP)
+  emailConfig?: {
+    enabled: boolean
+    gmailEmail?: string
+    gmailAppPassword?: string
+    fromName?: string
+  }
   createdAt: Date
   updatedAt: Date
 }

@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { SiteSettings } from '@/lib/types'
-import { Save, AlertCircle, Upload, X, Share2, Globe, MessageCircle } from 'lucide-react'
+import { Save, AlertCircle, Upload, X, Share2, Globe, MessageCircle, Mail, CheckCircle2, AlertTriangle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -275,6 +275,115 @@ export default function AdminSettings() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
             </div>
+          </div>
+        </Card>
+
+        {/* Gmail SMTP Configuration */}
+        <Card className="p-6 border-2 border-blue-200 bg-blue-50">
+          <div className="flex items-start gap-3 mb-4">
+            <Mail className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+            <div>
+              <h2 className="text-xl font-bold mb-2">Email Configuration (Gmail SMTP)</h2>
+              <p className="text-sm text-gray-600">
+                Configure Gmail SMTP to send admin invitations and notifications. 
+                <a href="https://support.google.com/accounts/answer/185833" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
+                  How to get Gmail App Password →
+                </a>
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* Enable/Disable Toggle */}
+            <div className="flex items-center gap-3 py-3 border-b border-gray-200">
+              <input
+                type="checkbox"
+                checked={siteSettings?.emailConfig?.enabled || false}
+                onChange={(e) => handleSettingChange('emailConfig', {
+                  ...siteSettings?.emailConfig,
+                  enabled: e.target.checked
+                })}
+                className="w-4 h-4 cursor-pointer"
+              />
+              <label className="font-medium text-gray-700 cursor-pointer flex-1">
+                Enable Gmail SMTP for admin invitations
+              </label>
+              {siteSettings?.emailConfig?.enabled && (
+                <span className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Active
+                </span>
+              )}
+            </div>
+
+            {siteSettings?.emailConfig?.enabled && (
+              <>
+                {/* Gmail Email Address */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gmail Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="your-email@gmail.com"
+                    value={siteSettings?.emailConfig?.gmailEmail || ''}
+                    onChange={(e) => handleSettingChange('emailConfig', {
+                      ...siteSettings?.emailConfig,
+                      gmailEmail: e.target.value
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">The Gmail account to send emails from</p>
+                </div>
+
+                {/* Gmail App Password */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gmail App Password *
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="••••••••••••••••"
+                    value={siteSettings?.emailConfig?.gmailAppPassword || ''}
+                    onChange={(e) => handleSettingChange('emailConfig', {
+                      ...siteSettings?.emailConfig,
+                      gmailAppPassword: e.target.value
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent font-mono"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    NOT your Gmail password. Generate an App Password in Google Account settings.
+                  </p>
+                </div>
+
+                {/* From Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    From Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={siteSettings?.siteName || 'Passive Blessings'}
+                    value={siteSettings?.emailConfig?.fromName || ''}
+                    onChange={(e) => handleSettingChange('emailConfig', {
+                      ...siteSettings?.emailConfig,
+                      fromName: e.target.value
+                    })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Name displayed in "From" field of emails</p>
+                </div>
+
+                {/* Warning */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-yellow-800">
+                    <strong>Keep these credentials secure.</strong> Do not share your Gmail password or app password with anyone. 
+                    These are stored encrypted in Firestore.
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </Card>
 
