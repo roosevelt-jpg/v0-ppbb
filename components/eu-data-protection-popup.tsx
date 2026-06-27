@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { db } from '@/lib/firebase'
-import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore'
+import { collection, addDoc } from 'firebase/firestore'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { EUDataProtectionPolicy } from '@/lib/types'
 import { AlertCircle, X } from 'lucide-react'
@@ -29,12 +29,13 @@ export function EUDataProtectionPopup() {
   useEffect(() => {
     const loadPolicy = async () => {
       try {
-        // Get active policy from Firestore
-        const policyRef = doc(db, 'euDataProtectionPolicy', 'current')
-        const policySnap = await getDoc(policyRef)
+        // Read the current policy via the Admin SDK API route; client-side
+        // reads of `euDataProtectionPolicy` are denied by Firestore rules.
+        const res = await fetch('/api/eu-policy', { cache: 'no-store' })
+        const json = await res.json()
 
-        if (policySnap.exists()) {
-          const policyData = policySnap.data() as EUDataProtectionPolicy
+        if (json.success && json.data) {
+          const policyData = json.data as EUDataProtectionPolicy
           setPolicy(policyData)
 
           // Only show popup if policy requires acceptance and is active
