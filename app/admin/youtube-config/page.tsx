@@ -4,9 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { YouTubeConfig, YouTubeVideo } from '@/lib/types'
 import { 
-  getYouTubeConfig, 
-  saveYouTubeConfig,
-  updateYouTubeVideos,
   formatViewCount,
   formatDuration
 } from '@/lib/youtube-service'
@@ -34,19 +31,49 @@ export default function YouTubeConfigPage() {
   const loadConfig = async () => {
     setLoading(true)
     setError(null)
-    const data = await getYouTubeConfig()
-    
-    if (data) {
-      setConfig(data)
-      setFormData({
-        channelId: data.channelId,
-        apiKey: data.apiKey,
-        maxVideosDisplay: data.maxVideosDisplay,
-        refreshInterval: data.refreshInterval,
-        autoRefresh: data.autoRefresh,
-      })
+    try {
+      const res = await fetch('/api/youtube/config', { cache: 'no-store' })
+      const json = await res.json()
+      const data: YouTubeConfig | null = json.success ? json.data : null
+      if (data) {
+        setConfig(data)
+        setFormData({
+          channelId: data.channelId,
+          apiKey: data.apiKey,
+          maxVideosDisplay: data.maxVideosDisplay,
+          refreshInterval: data.refreshInterval,
+          autoRefresh: data.autoRefresh,
+        })
+      }
+    } catch (err) {
+      console.error('[v0] Error loading YouTube config:', err)
     }
     setLoading(false)
+  }
+
+  // Saving and refreshing both go through the same server route: it normalizes
+  // the channel ID (accepts full URLs / @handles), fetches the latest videos,
+  // and persists via the Admin SDK (client writes are denied by Firestore rules).
+  const saveAndFetch = async () => {
+    const res = await fetch('/api/youtube/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        channelId: formData.channelId,
+        apiKey: formData.apiKey,
+        maxVideosDisplay: formData.maxVideosDisplay,
+        refreshInterval: formData.refreshInterval,
+        autoRefresh: formData.autoRefresh,
+        isEnabled: true,
+      }),
+    })
+    const json = await res.json()
+    if (json.success && json.data) {
+      setConfig(json.data as YouTubeConfig)
+      setFormData((prev) => ({ ...prev, channelId: (json.data as YouTubeConfig).channelId }))
+      return { ok: true }
+    }
+    return { ok: false, error: json.error || 'Failed to save configuration' }
   }
 
   const handleSave = async () => {
@@ -58,27 +85,9 @@ export default function YouTubeConfigPage() {
     setIsSaving(true)
     setError(null)
 
-    const newConfig: YouTubeConfig = {
-      id: 'default',
-      channelId: formData.channelId,
-      apiKey: formData.apiKey,
-      maxVideosDisplay: formData.maxVideosDisplay,
-      refreshInterval: formData.refreshInterval,
-      autoRefresh: formData.autoRefresh,
-      videos: config?.videos || [],
-      createdAt: config?.createdAt || new Date(),
-      updatedAt: new Date(),
-      lastFetched: config?.lastFetched,
-    }
-
-    const success = await saveYouTubeConfig(newConfig)
-    
-    if (success) {
-      await loadConfig()
-      // Try to fetch videos
-      await handleRefresh()
-    } else {
-      setError('Failed to save configuration')
+    const result = await saveAndFetch()
+    if (!result.ok) {
+      setError(result.error || null)
     }
 
     setIsSaving(false)
@@ -86,31 +95,16 @@ export default function YouTubeConfigPage() {
 
   const handleRefresh = async () => {
     if (!formData.channelId || !formData.apiKey) {
-      setError('Please save Channel ID and API Key first')
+      setError('Please enter Channel ID and API Key first')
       return
     }
 
     setIsRefreshing(true)
     setError(null)
 
-    const currentConfig: YouTubeConfig = {
-      id: 'default',
-      channelId: formData.channelId,
-      apiKey: formData.apiKey,
-      maxVideosDisplay: formData.maxVideosDisplay,
-      refreshInterval: formData.refreshInterval,
-      autoRefresh: formData.autoRefresh,
-      videos: config?.videos || [],
-      createdAt: config?.createdAt || new Date(),
-      updatedAt: new Date(),
-    }
-
-    const updated = await updateYouTubeVideos(currentConfig)
-    
-    if (updated) {
-      setConfig(updated)
-    } else {
-      setError('Failed to fetch videos. Check your API key and Channel ID.')
+    const result = await saveAndFetch()
+    if (!result.ok) {
+      setError(result.error || null)
     }
 
     setIsRefreshing(false)

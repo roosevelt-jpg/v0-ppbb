@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getYouTubeConfig, updateYouTubeVideos } from '@/lib/youtube-service'
+import { getYouTubeConfigServer, saveAndRefreshYouTube } from '@/lib/youtube-server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get current YouTube config
-    const config = await getYouTubeConfig()
+    const config = await getYouTubeConfigServer()
     
     if (!config || !config.channelId || !config.apiKey) {
       return NextResponse.json(
@@ -25,12 +25,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Update YouTube videos
-    const updatedConfig = await updateYouTubeVideos(config)
+    // Re-fetch and persist the latest videos
+    const { config: updatedConfig, error } = await saveAndRefreshYouTube(config)
     
-    if (!updatedConfig) {
+    if (error || !updatedConfig) {
       return NextResponse.json(
-        { error: 'Failed to update YouTube videos' },
+        { error: error || 'Failed to update YouTube videos' },
         { status: 500 }
       )
     }
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current YouTube config
-    const config = await getYouTubeConfig()
+    const config = await getYouTubeConfigServer()
     
     if (!config || !config.channelId || !config.apiKey) {
       return NextResponse.json(
@@ -71,12 +71,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update YouTube videos
-    const updatedConfig = await updateYouTubeVideos(config)
+    // Re-fetch and persist the latest videos
+    const { config: updatedConfig, error } = await saveAndRefreshYouTube(config)
     
-    if (!updatedConfig) {
+    if (error || !updatedConfig) {
       return NextResponse.json(
-        { error: 'Failed to update YouTube videos' },
+        { error: error || 'Failed to update YouTube videos' },
         { status: 500 }
       )
     }
