@@ -3,9 +3,8 @@
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminTable } from '@/components/admin-table'
-import { db, storage } from '@/lib/firebase'
+import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { formatDistanceToNow } from 'date-fns'
 import { Upload } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
@@ -58,13 +57,16 @@ export default function DonationCausesPage() {
 
     let imageUrl = newCause.image
 
-    // Upload image to Firebase Storage if a file is selected
+    // Upload image via Admin SDK API if a file is selected
     if (newCause.imageFile) {
       try {
-        const fileName = `${Date.now()}-${newCause.imageFile.name}`
-        const fileRef = ref(storage, `causes/${fileName}`)
-        await uploadBytes(fileRef, newCause.imageFile)
-        imageUrl = await getDownloadURL(fileRef)
+        const fd = new FormData()
+        fd.append('file', newCause.imageFile)
+        fd.append('folder', 'causes')
+        const res = await fetch('/api/upload', { method: 'POST', body: fd })
+        const json = await res.json()
+        if (!json.success) throw new Error(json.error)
+        imageUrl = json.url
       } catch (error) {
         console.error('[v0] Error uploading image:', error)
         alert('Failed to upload image. Please try again.')
@@ -109,13 +111,16 @@ export default function DonationCausesPage() {
     try {
       let imageUrl = editingCause.image
 
-      // Upload new image to Firebase Storage if a file is selected
+      // Upload new image via Admin SDK API if a file is selected
       if (editingCause.imageFile) {
         try {
-          const fileName = `${Date.now()}-${editingCause.imageFile.name}`
-          const fileRef = ref(storage, `causes/${fileName}`)
-          await uploadBytes(fileRef, editingCause.imageFile)
-          imageUrl = await getDownloadURL(fileRef)
+          const fd = new FormData()
+          fd.append('file', editingCause.imageFile)
+          fd.append('folder', 'causes')
+          const res = await fetch('/api/upload', { method: 'POST', body: fd })
+          const json = await res.json()
+          if (!json.success) throw new Error(json.error)
+          imageUrl = json.url
         } catch (error) {
           console.error('[v0] Error uploading image:', error)
           alert('Failed to upload image. Please try again.')

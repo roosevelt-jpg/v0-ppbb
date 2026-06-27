@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { getAdminDb, getAdminBucket } from '@/lib/firebase-admin'
 import { generateDonationReceipt } from '@/lib/pdf-receipt-generator'
-import { storage } from '@/lib/firebase'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { uploadBufferToPath } from '@/lib/storage-server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,21 +11,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Donation ID required' }, { status: 400 })
     }
 
-    // Get donation details from Firestore
-    const donationDoc = await getDoc(doc(db, 'donationSubmissions', donationId))
+    // Get donation details from Firestore using Admin SDK
+    const db = getAdminDb()
+    const donationDoc = await db.collection('donationSubmissions').doc(donationId).get()
 
-    if (!donationDoc.exists()) {
+    if (!donationDoc.exists) {
       return NextResponse.json({ error: 'Donation not found' }, { status: 404 })
     }
 
-    const donation = donationDoc.data()
+    const donation = donationDoc.data() as any
 
     // Get cause details
-    const causeDoc = await getDoc(doc(db, 'causes', donation.causeId))
+    const causeDoc = await db.collection('causes').doc(donation.causeId).get()
     const cause = causeDoc.data() || {}
 
     // Get partner details
-    const partnerDoc = await getDoc(doc(db, 'charityPartners', donation.partnerId))
+    const partnerDoc = await db.collection('charityPartners').doc(donation.partnerId).get()
     const partner = partnerDoc.data() || {}
 
     // Generate PDF receipt
@@ -37,37 +36,28 @@ export async function POST(req: NextRequest) {
       donorEmail: donation.donorEmail || 'donor@example.com',
       amount: donation.amount,
       currency: 'AED',
-      causeName: cause.name || donation.causeName,
-      category: cause.category || 'General',
-      partnerName: partner.name || donation.partnerName,
+      causeName: (cause as any).name || donation.causeName,
+      category: (cause as any).category || 'General',
+      partnerName: (partner as any).name || donation.partnerName,
       referenceNumber: donation.referenceNumber,
       verificationDate: donation.verifiedAt || new Date(),
       notes: donation.notes,
       organizationName: 'Passive Blessings',
     })
 
-    // Upload PDF to Firebase Storage
+    // Upload PDF to Firebase Storage using Admin SDK
     const timestamp = new Date().getTime()
-    const fileName = `receipts/donation_${donationId}_${timestamp}.pdf`
-    const fileRef = ref(storage, fileName)
+    const path = `receipts/donation_${donationId}_${timestamp}.pdf`
 
-    await uploadBytes(fileRef, receiptBuffer, {
-      contentType: 'application/pdf',
-      metadata: {
-        customMetadata: {
-          donationId,
-          donorEmail: donation.donorEmail,
-        },
-      },
+    const result = await uploadBufferToPath(receiptBuffer, 'application/pdf', path, {
+      donationId,
+      donorEmail: donation.donorEmail,
     })
-
-    // Get download URL
-    const downloadURL = await getDownloadURL(fileRef)
 
     return NextResponse.json({
       success: true,
-      receiptUrl: downloadURL,
-      fileName,
+      receiptUrl: result.url,
+      fileName: `donation_${donationId}_${timestamp}.pdf`,
     })
   } catch (error: any) {
     console.error('[v0] Error generating receipt:', error)
