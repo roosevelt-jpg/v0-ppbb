@@ -243,7 +243,12 @@ export default function ReportingPage() {
                 <p className="text-sm text-neutral-600 mt-2">{report.description}</p>
                 <button 
                   type="button"
-                  onClick={() => handleViewReport(report.type)}
+                  onClick={(e) => {
+                    console.log('[v0] BUTTON CLICKED - report type:', report.type)
+                    console.log('[v0] Event target:', e.target)
+                    console.log('[v0] Event type:', e.type)
+                    handleViewReport(report.type)
+                  }}
                   className="mt-4 px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition flex items-center gap-2">
                   <BarChart3 className="w-4 h-4" />
                   View Report →
