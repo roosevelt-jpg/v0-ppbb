@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot, limit, doc } from 'firebase/firestore'
+import { collection, query, where, onSnapshot, limit, orderBy, doc } from 'firebase/firestore'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { HeroSlider } from '@/components/hero-slider'
 import { YouTubeWidget } from '@/components/youtube-widget'
+import EventCard from '@/components/event-card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Users2, Heart, Zap, Building2, BookOpen, Briefcase, TrendingUp } from 'lucide-react'
+import { ArrowRight, Users2, Heart, Zap, Building2, BookOpen, Briefcase, TrendingUp, Calendar } from 'lucide-react'
 import { HeroSliderSettings, YouTubeConfig } from '@/lib/types'
 import { getYouTubeConfig } from '@/lib/youtube-service'
 
@@ -95,10 +96,16 @@ export default function HomePage() {
         setStats((prev) => ({ ...prev, donations: total }))
       }, (error) => console.error('Donations listener error:', error)))
 
-      // Upcoming events
-      const upcomingQuery = query(collection(db, 'events'), where('status', 'in', ['published', 'active']), limit(3))
+      // Upcoming events - fetch 8+ events sorted by date for homepage display
+      const upcomingQuery = query(
+        collection(db, 'events'), 
+        where('status', 'in', ['published', 'active']),
+        orderBy('date', 'asc'),
+        limit(8)
+      )
       statsListeners.push(onSnapshot(upcomingQuery, (snapshot) => {
-        setUpcomingEvents(snapshot.docs.map(doc => doc.data()))
+        const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        setUpcomingEvents(events)
       }, (error) => console.error('Upcoming events listener error:', error)))
 
       // Testimonials
@@ -188,12 +195,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* UPCOMING EVENTS - Mobile First */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
-        <div className="max-w-6xl mx-auto">
+      {/* UPCOMING EVENTS - Enhanced with 4+ Cards, Responsive */}
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-[#f7f6f2]">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10 md:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair">Upcoming Events</h2>
-            <Link href="/events">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#111111]" />
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair">Upcoming Events</h2>
+              </div>
+              <p className="text-xs sm:text-sm text-[#888888] mt-1">Join our community and participate in meaningful events</p>
+            </div>
+            <Link href="/events" className="flex-shrink-0">
               <Button size="sm" className="w-full sm:w-auto bg-[#111111] hover:bg-[#333333] text-white">
                 View All Events
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -201,24 +215,32 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {upcomingEvents.map((event) => (
-              <div key={event.id} className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                {event.image && (
-                  <img src={event.image} alt={event.title} className="w-full h-32 sm:h-40 object-cover" />
-                )}
-                <div className="p-3 sm:p-4">
-                  <h3 className="font-bold text-base sm:text-lg mb-1 line-clamp-2">{event.title}</h3>
-                  <p className="text-xs sm:text-sm text-[#888888] mb-3">{event.location}</p>
-                  <Link href={`/dashboard/events/${event.id}`}>
-                    <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm py-1">
-                      Learn More
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Events Grid - 4+ Cards Responsive */}
+          {upcomingEvents.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {upcomingEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Calendar className="h-12 w-12 text-[#e4e1da] mx-auto mb-4" />
+              <p className="text-base sm:text-lg text-[#888888] font-medium">No upcoming events yet</p>
+              <p className="text-xs sm:text-sm text-[#c0b5a8] mt-1">Check back soon for exciting events</p>
+            </div>
+          )}
+
+          {/* View All Link */}
+          {upcomingEvents.length >= 4 && (
+            <div className="text-center mt-8 sm:mt-10">
+              <Link href="/events">
+                <Button variant="outline" className="bg-white border-[#111111] text-[#111111] hover:bg-[#f7f6f2]">
+                  Explore All Events & Filters
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
