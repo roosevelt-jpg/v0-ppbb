@@ -81,6 +81,37 @@ export default function ContactPage() {
     setSuccess(false)
 
     try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      })
+
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Failed to submit')
+
+      setSuccess(true)
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+      setTimeout(() => setSuccess(false), 5000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmitOld = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    setSuccess(false)
+
+    try {
       // Validate form
       if (!formData.name || !formData.email || !formData.subject || !formData.message) {
         throw new Error('Please fill in all required fields')

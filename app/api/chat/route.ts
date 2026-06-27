@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, collection, query, where, getDocs, orderBy } from 'firebase-admin/firestore'
-import { initializeApp, getApps } from 'firebase-admin/app'
-import { generateChatResponse, categorizeIssue, detectSentiment, UserRole } from '@/lib/ai/client'
+import { generateText } from 'ai'
+import { getAdminDb, getAdminBucket } from '@/lib/firebase-admin'
+import type { YouTubeConfig } from '@/lib/types'
 
-// Initialize Firebase Admin
-if (!getApps().length) {
-  initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  })
-}
-
-const db = getFirestore()
+const db = getAdminDb()
 
 interface FAQ {
   id: string
@@ -102,45 +95,24 @@ export async function POST(request: NextRequest) {
       }
       console.log(`[v0] FAQ match found: ${faq.question} (score: ${matchScore})`)
     } else {
-      // Fall back to AI generation if no good FAQ match
-      response = await generateChatResponse(messages, 'user')
+      // Fall back to AI generation if no good FAQ match (using Vercel AI SDK via gateway)
+      const aiResult = await generateText({
+        model: 'openai/gpt-4o-mini',
+        system: `You are a helpful assistant for Passive Blessings, a community platform for events, volunteering, and community support. 
+Be concise, friendly, and focus on helping users navigate the platform or understand our mission.
+If you don't know the answer, suggest they contact support at contact@passiveblessings.org.`,
+        messages: messages,
+        temperature: 0.7,
+        maxTokens: 500,
+      })
+      response = aiResult.text
       console.log('[v0] No strong FAQ match, using AI response')
     }
 
-    // Categorize and detect sentiment
-    const category = categorizeIssue(lastUserMessage)
-    const sentiment = detectSentiment(lastUserMessage)
 
-    // Save to Firestore if conversationId provided
-    if (conversationId && userId) {
-      try {
-        const conversationRef = db.collection('conversations').doc(conversationId)
-        const currentDoc = await conversationRef.get()
-        const existingMessages = currentDoc.data()?.messages || []
-
-        await conversationRef.update({
-          messages: [
-            ...existingMessages,
-            { role: 'user', content: lastUserMessage, timestamp: new Date() },
-            { role: 'assistant', content: response, timestamp: new Date(), faqSourceId },
-          ],
-          lastMessageAt: new Date(),
-          category,
-          sentiment,
-          status: 'active',
-          faqSourceId: faqSourceId || null,
-          updatedAt: new Date(),
-        })
-      } catch (error) {
-        console.error('[v0] Error saving conversation:', error)
-        // Continue even if save fails
-      }
-    }
 
     return NextResponse.json({
       message: response,
-      category,
-      sentiment,
       conversationId,
       faqSource: faqSourceData,
       faqMatch: faq ? true : false,
