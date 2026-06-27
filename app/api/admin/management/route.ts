@@ -1,0 +1,199 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getAdminDb } from '@/lib/firebase-admin'
+import crypto from 'crypto'
+
+const db = getAdminDb()
+
+// Generate a random access code
+function generateAccessCode(): string {
+  return crypto.randomBytes(6).toString('hex').toUpperCase()
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const query = request.nextUrl.searchParams.get('query')
+
+    if (query === 'admins') {
+      const snapshot = await db.collection('admin-users').orderBy('createdAt', 'desc').get()
+      const admins = snapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || data.createdAt,
+          lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
+        }
+      })
+      return NextResponse.json({ success: true, data: admins })
+    }
+
+    if (query === 'access-codes') {
+      const snapshot = await db.collection('admin-access-codes').where('used', '==', false).get()
+      const codes = snapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.() || data.createdAt,
+          expiresAt: data.expiresAt?.toDate?.() || data.expiresAt,
+        }
+      })
+      return NextResponse.json({ success: true, data: codes })
+    }
+
+    return NextResponse.json({ success: false, error: 'Invalid query' }, { status: 400 })
+  } catch (error) {
+    console.error('[v0] Admin management fetch error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to fetch admin data' }, { status: 500 })
+  }
+}
+
+// Generate new access code for admin invitation
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { action, ...data } = body
+
+    if (action === 'generate-access-code') {
+      const code = generateAccessCode()
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+
+      const accessCodeData = {
+        code,
+        used: false,
+        usedBy: null,
+        usedAt: null,
+        createdAt: new Date(),
+        expiresAt,
+      }
+
+      const docRef = await db.collection('admin-access-codes').add(accessCodeData)
+
+      return NextResponse.json({
+        success: true,
+        data: { id: docRef.id, ...accessCodeData },
+      })
+    }
+
+    if (action === 'create-admin') {
+      // Called after user signs up with access code
+      const { email, name, role, accessCodeId } = data
+
+      if (!email || !role || !accessCodeId) {
+        return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
+      }
+
+      // Mark access code as used
+      await db.collection('admin-access-codes').doc(accessCodeId).update({
+        used: true,
+        usedBy: email,
+        usedAt: new Date(),
+      })
+
+      // Create admin user
+      const adminData = {
+        email,
+        name,
+        role, // 'super_admin' | 'admin' | 'moderator'
+        permissions: getRolePermissions(role),
+        avatarUrl: '', // User uploads this after signup
+        bio: '',
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: null,
+      }
+
+      const docRef = await db.collection('admin-users').add(adminData)
+
+      return NextResponse.json({
+        success: true,
+        data: { id: docRef.id, ...adminData },
+      })
+    }
+
+    return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
+  } catch (error) {
+    console.error('[v0] Admin management error:', error)
+    return NextResponse.json({ success: false, error: 'Operation failed' }, { status: 500 })
+  }
+}
+
+// Update admin user
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id, ...updateData } = body
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
+    }
+
+    updateData.updatedAt = new Date()
+
+    // If role changed, update permissions
+    if (updateData.role) {
+      updateData.permissions = getRolePermissions(updateData.role)
+    }
+
+    await db.collection('admin-users').doc(id).update(updateData)
+
+    return NextResponse.json({ success: true, message: 'Admin user updated' })
+  } catch (error) {
+    console.error('[v0] Admin update error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to update admin' }, { status: 500 })
+  }
+}
+
+// Delete admin user
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
+    }
+
+    await db.collection('admin-users').doc(id).delete()
+
+    return NextResponse.json({ success: true, message: 'Admin user deleted' })
+  } catch (error) {
+    console.error('[v0] Admin delete error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to delete admin' }, { status: 500 })
+  }
+}
+
+// Helper function to map roles to permissions
+function getRolePermissions(role: string): string[] {
+  const permissionMap: Record<string, string[]> = {
+    super_admin: [
+      'manage_admins',
+      'manage_events',
+      'manage_workshops',
+      'manage_recordings',
+      'manage_team',
+      'manage_community',
+      'manage_members',
+      'manage_settings',
+      'view_analytics',
+      'manage_security',
+    ],
+    admin: [
+      'manage_events',
+      'manage_workshops',
+      'manage_recordings',
+      'manage_team',
+      'manage_community',
+      'manage_members',
+      'view_analytics',
+    ],
+    moderator: [
+      'manage_events',
+      'manage_community',
+      'manage_members',
+    ],
+  }
+
+  return permissionMap[role] || []
+}
