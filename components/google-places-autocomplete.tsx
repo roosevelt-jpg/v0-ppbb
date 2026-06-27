@@ -71,10 +71,10 @@ export default function GooglePlacesAutocomplete({
           const res = await fetch('/api/admin/integrations/googleMaps')
           if (res.ok) {
             const data = await res.json()
-            apiKey = data.data?.apiKey
+            apiKey = data.data?.credentials?.apiKey
             console.log('[v0] API key fetched from integrations:', apiKey ? 'Success' : 'Empty')
           } else {
-            console.warn('[v0] Integration endpoint returned:', res.status)
+            console.warn('[v0] Integration endpoint returned:', res.status, 'Response:', await res.text())
           }
         } catch (error) {
           console.warn('[v0] Failed to fetch Google Maps API key from integrations:', error)
