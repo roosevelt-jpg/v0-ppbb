@@ -95,11 +95,11 @@ export default function DonationPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar />
       <div className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto w-full">
           {/* Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 w-full">
           <h1 className="text-4xl font-bold mb-4">Make a Difference</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 w-full mx-auto leading-relaxed px-4 sm:px-0">
             Passive Blessings acts as a community mobilizer and awareness partner. Funds are collected through official
             charitable partners including Beit Al Khair, ensuring transparency and direct impact.
           </p>
