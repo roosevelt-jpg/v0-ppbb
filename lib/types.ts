@@ -1209,3 +1209,152 @@ export interface FAQ {
   createdAt: Date
   updatedAt: Date
 }
+
+// Community and Group Types
+export interface Community {
+  id: string
+  name: string
+  description: string
+  icon?: string // URL to icon in Firebase Storage
+  banner?: string // URL to banner image in Firebase Storage
+  category: 'general' | 'interest' | 'support' | 'events' | 'volunteer' | 'business' | 'charity'
+  visibility: 'public' | 'private' | 'restricted'
+  status: 'active' | 'inactive' | 'archived'
+  createdBy: string // User ID of admin
+  members: {
+    total: number
+    admins: string[] // User IDs
+  }
+  tags: CommunityTag[]
+  rules?: string[] // Community guidelines
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CommunityTag {
+  id: string
+  name: string
+  color?: string
+  icon?: string
+  isOfficial: boolean // Created by admin vs user
+  usageCount: number
+}
+
+export interface CommunityGroup {
+  id: string
+  communityId: string
+  name: string
+  description: string
+  tags: CommunityTag[]
+  status: 'active' | 'archived'
+  visibility: 'public' | 'private'
+  createdBy: string // User ID of group creator
+  moderators: string[] // User IDs
+  members: {
+    total: number
+  }
+  rules?: string[] // Group specific rules
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CommunityMembership {
+  id: string
+  userId: string
+  communityId: string
+  groupIds?: string[] // Groups they're part of in this community
+  role: 'member' | 'moderator' | 'admin'
+  joinedAt: Date
+  status: 'active' | 'suspended' | 'banned'
+  permissions: CommunityPermission[]
+  mutedUntil?: Date // If member muted group notifications
+}
+
+export type CommunityPermission = 
+  | 'post_message'
+  | 'post_image'
+  | 'post_file'
+  | 'create_group'
+  | 'moderate_content'
+  | 'manage_members'
+  | 'delete_message'
+
+export interface CommunityMessage {
+  id: string
+  communityId: string
+  groupId: string
+  authorId: string
+  authorName: string
+  authorAvatar?: string
+  content: string
+  type: 'text' | 'image' | 'file' | 'announcement'
+  imageUrls?: string[] // URLs from Firebase Storage
+  fileAttachments?: Array<{
+    url: string // URL from Firebase Storage
+    name: string
+    size: number
+    type: string // MIME type
+  }>
+  reactions: Array<{
+    emoji: string
+    users: string[] // User IDs
+  }>
+  repliesCount: number
+  isEdited: boolean
+  editedAt?: Date
+  isPinned: boolean
+  flaggedCount: number
+  isFlagged: boolean
+  flagReason?: string
+  moderationStatus: 'approved' | 'pending' | 'rejected'
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CommunityMessageReply {
+  id: string
+  messageId: string
+  authorId: string
+  authorName: string
+  authorAvatar?: string
+  content: string
+  imageUrls?: string[]
+  fileAttachments?: Array<{
+    url: string
+    name: string
+    size: number
+    type: string
+  }>
+  reactions: Array<{
+    emoji: string
+    users: string[]
+  }>
+  isEdited: boolean
+  editedAt?: Date
+  createdAt: Date
+}
+
+export interface CommunityModeration {
+  id: string
+  communityId: string
+  type: 'message_flag' | 'user_ban' | 'user_warning' | 'content_removal'
+  targetId: string // Message ID or User ID
+  reportedBy: string
+  reason: string
+  bannedWords?: string[]
+  action: 'warning' | 'mute' | 'ban' | 'delete' | 'pending'
+  actionTakenBy?: string
+  duration?: number // In days, null for permanent
+  notes?: string
+  createdAt: Date
+  resolvedAt?: Date
+}
+
+export interface CommunityUserPresence {
+  id: string
+  userId: string
+  communityId: string
+  groupId?: string
+  status: 'online' | 'away' | 'offline'
+  lastSeen: Date
+}
