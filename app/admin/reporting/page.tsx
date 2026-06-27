@@ -53,63 +53,91 @@ export default function ReportingPage() {
 
       switch (reportType) {
         case 'members': {
-          const snap = await getDocs(collection(db, 'users'))
-          data = {
-            type: 'Member Analytics',
-            total: snap.size,
-            details: snap.docs.map(d => ({
-              id: d.id,
-              name: d.data().firstName + ' ' + d.data().lastName,
-              email: d.data().email,
-              joinedAt: d.data().createdAt,
-              status: d.data().status || 'active'
-            }))
+          try {
+            console.log('[v0] Fetching members collection...')
+            const snap = await getDocs(collection(db, 'users'))
+            console.log('[v0] Members fetched:', snap.size, 'docs')
+            data = {
+              type: 'Member Analytics',
+              total: snap.size,
+              details: snap.docs.map(d => ({
+                id: d.id,
+                name: (d.data().firstName || '') + ' ' + (d.data().lastName || ''),
+                email: d.data().email,
+                joinedAt: d.data().createdAt,
+                status: d.data().status || 'active'
+              }))
+            }
+          } catch (err) {
+            console.error('[v0] Error fetching members:', err)
+            throw err
           }
           break
         }
         case 'donations': {
-          const snap = await getDocs(collection(db, 'donations'))
-          const total = snap.docs.reduce((sum, d) => sum + (d.data().amount || 0), 0)
-          data = {
-            type: 'Donation Reports',
-            total: snap.size,
-            totalAmount: total,
-            details: snap.docs.map(d => ({
-              id: d.id,
-              donor: d.data().donorName,
-              amount: d.data().amount,
-              date: d.data().createdAt,
-              status: d.data().status || 'completed'
-            }))
+          try {
+            console.log('[v0] Fetching donations collection...')
+            const snap = await getDocs(collection(db, 'donations'))
+            console.log('[v0] Donations fetched:', snap.size, 'docs')
+            const total = snap.docs.reduce((sum, d) => sum + (d.data().amount || 0), 0)
+            data = {
+              type: 'Donation Reports',
+              total: snap.size,
+              totalAmount: total,
+              details: snap.docs.map(d => ({
+                id: d.id,
+                donor: d.data().donorName || 'Anonymous',
+                amount: d.data().amount || 0,
+                date: d.data().createdAt,
+                status: d.data().status || 'completed'
+              }))
+            }
+          } catch (err) {
+            console.error('[v0] Error fetching donations:', err)
+            throw err
           }
           break
         }
         case 'events': {
-          const snap = await getDocs(collection(db, 'events'))
-          data = {
-            type: 'Event Performance',
-            total: snap.size,
-            details: snap.docs.map(d => ({
-              id: d.id,
-              name: d.data().name,
-              date: d.data().date,
-              attendees: d.data().attendees || 0,
-              status: d.data().status || 'scheduled'
-            }))
+          try {
+            console.log('[v0] Fetching events collection...')
+            const snap = await getDocs(collection(db, 'events'))
+            console.log('[v0] Events fetched:', snap.size, 'docs')
+            data = {
+              type: 'Event Performance',
+              total: snap.size,
+              details: snap.docs.map(d => ({
+                id: d.id,
+                name: d.data().name || 'Untitled',
+                date: d.data().date,
+                attendees: d.data().attendees || 0,
+                status: d.data().status || 'scheduled'
+              }))
+            }
+          } catch (err) {
+            console.error('[v0] Error fetching events:', err)
+            throw err
           }
           break
         }
         case 'volunteers': {
-          const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'volunteer')))
-          data = {
-            type: 'Volunteer Metrics',
-            total: snap.size,
-            details: snap.docs.map(d => ({
-              id: d.id,
-              name: d.data().firstName + ' ' + d.data().lastName,
-              hours: d.data().volunteerHours || 0,
-              status: d.data().status || 'active'
-            }))
+          try {
+            console.log('[v0] Fetching volunteers...')
+            const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'volunteer')))
+            console.log('[v0] Volunteers fetched:', snap.size, 'docs')
+            data = {
+              type: 'Volunteer Metrics',
+              total: snap.size,
+              details: snap.docs.map(d => ({
+                id: d.id,
+                name: (d.data().firstName || '') + ' ' + (d.data().lastName || ''),
+                hours: d.data().volunteerHours || 0,
+                status: d.data().status || 'active'
+              }))
+            }
+          } catch (err) {
+            console.error('[v0] Error fetching volunteers:', err)
+            throw err
           }
           break
         }
