@@ -8,6 +8,7 @@ import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/commun
 import { Logo } from '@/components/logo'
 import { AlertCircle, Check } from 'lucide-react'
 import { logActivity } from '@/lib/activity-logger'
+import { hasBusinessAccess } from '@/lib/roles'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function LoginPage() {
 
   // Route the user after a successful login. If a ?redirect= param is present
   // (e.g. coming from "Create Business Account"), honor it; otherwise route by role.
-  const routeAfterLogin = (user: { role?: string }) => {
+  const routeAfterLogin = (user: any) => {
     const params = new URLSearchParams(window.location.search)
     const redirectTo = params.get('redirect')
     if (redirectTo && redirectTo.startsWith('/')) {
@@ -32,8 +33,9 @@ export default function LoginPage() {
     if (user.role === 'admin') {
       router.push('/admin')
     } else if (user.role === 'super_admin') {
-      router.push('/business/dashboard')
-    } else if (user.role === 'business') {
+      router.push('/admin')
+    } else if (hasBusinessAccess(user)) {
+      // User has business access (either primary role or via roles array)
       router.push('/business/dashboard')
     } else if (user.role === 'sponsor') {
       router.push('/sponsor')
