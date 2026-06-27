@@ -149,7 +149,11 @@ export default function GooglePlacesAutocomplete({
 
       console.log('[v0] Predictions response:', response)
 
-      if (response.predictions && response.predictions.length > 0) {
+      if (response.status && response.status !== 'OK') {
+        console.warn('[v0] Predictions API returned status:', response.status)
+        setError(`API returned: ${response.status}`)
+        setPredictions([])
+      } else if (response.predictions && response.predictions.length > 0) {
         const formattedPredictions = response.predictions.map((prediction: any) => ({
           placeId: prediction.place_id,
           mainText: prediction.structured_formatting?.main_text || prediction.description,
@@ -160,12 +164,13 @@ export default function GooglePlacesAutocomplete({
         setIsOpen(true)
         setError(null)
       } else {
-        console.log('[v0] No predictions found')
+        console.log('[v0] No predictions found for:', searchTerm)
         setPredictions([])
+        setError(null)
       }
     } catch (error) {
       console.error('[v0] Error fetching predictions:', error)
-      setError('Error fetching predictions')
+      setError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
       setPredictions([])
     } finally {
       setLoading(false)
@@ -192,22 +197,43 @@ export default function GooglePlacesAutocomplete({
     )
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setInput(value)
-    if (value.trim()) {
-      fetchPlacePredictions(value)
-    } else {
-      setPredictions([])
-      setIsOpen(false)
-    }
-  }
-
   const handleSelectPrediction = (prediction: PlacePrediction) => {
     setInput(prediction.mainText)
     setPredictions([])
     setIsOpen(false)
-    getPlaceDetails(prediction.placeId)
+    onChange(prediction)
+  }
+
+  const handleManualEntry = () => {
+    // Allow user to proceed with manual location entry
+    if (input.trim()) {
+      const manualPrediction: PlacePrediction = {
+        placeId: `manual-${Date.now()}`,
+        mainText: input.trim(),
+        secondaryText: 'Manual entry',
+        lat: 0,
+        lng: 0,
+      }
+      onChange(manualPrediction)
+      setIsOpen(false)
+      setError(null)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setInput(value)
+    if (value.trim()) {
+      if (apiReady && autocompleteService.current) {
+        fetchPlacePredictions(value)
+      } else {
+        // If API not ready, show option to use manual entry
+        console.log('[v0] API not ready, showing manual entry option')
+      }
+    } else {
+      setPredictions([])
+      setIsOpen(false)
+    }
   }
 
   const handleClear = () => {
@@ -259,8 +285,20 @@ export default function GooglePlacesAutocomplete({
           )}
           
           {!loading && predictions.length === 0 && input.trim() && (
-            <div className="p-4 text-center text-gray-500 text-sm">
-              No locations found
+            <div className="space-y-2 p-3">
+              <div className="text-center text-gray-500 text-sm">
+                No locations found
+              </div>
+              {error && (
+                <button
+                  type="button"
+                  onClick={handleManualEntry}
+                  className="w-full p-3 text-left bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                >
+                  <p className="font-medium text-blue-900 text-sm">Use entered location</p>
+                  <p className="text-xs text-blue-700">"{input.trim()}"</p>
+                </button>
+              )}
             </div>
           )}
 
