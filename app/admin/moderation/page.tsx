@@ -4,22 +4,26 @@ import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
-import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy, writeBatch } from 'firebase/firestore'
-import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquare, TrendingUp } from 'lucide-react'
+import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy, writeBatch, addDoc } from 'firebase/firestore'
+import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquare, TrendingUp, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
-type ModerationTab = 'reports' | 'users' | 'content'
+type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
 export default function ModerationPage() {
   const [reports, setReports] = React.useState<any[]>([])
   const [flaggedUsers, setFlaggedUsers] = React.useState<any[]>([])
   const [flaggedContent, setFlaggedContent] = React.useState<any[]>([])
+  const [communityMessages, setCommunityMessages] = React.useState<any[]>([])
+  const [bannedWords, setBannedWords] = React.useState<string[]>([])
   const [loading, setLoading] = React.useState(true)
   const [filter, setFilter] = React.useState<'all' | 'pending' | 'resolved'>('pending')
   const [activeTab, setActiveTab] = React.useState<ModerationTab>('reports')
   const [searchTerm, setSearchTerm] = React.useState('')
   const [selectedReports, setSelectedReports] = React.useState<Set<string>>(new Set())
   const [bulkAction, setBulkAction] = React.useState<'approve' | 'reject' | 'delete' | null>(null)
+  const [newBannedWord, setNewBannedWord] = React.useState('')
+  const [communityFilter, setCommunityFilter] = React.useState<'all' | 'pending'>('pending')
 
   // Fetch reports
   React.useEffect(() => {
@@ -75,6 +79,40 @@ export default function ModerationPage() {
       }
     )
     return () => unsubscribe()
+  }, [])
+
+  // Fetch flagged community messages
+  React.useEffect(() => {
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'community_messages'), where('isFlagged', '==', true), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const messagesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        setCommunityMessages(messagesData)
+      },
+      (error) => {
+        console.error('[v0] Error fetching flagged messages:', error)
+      }
+    )
+    return () => unsubscribe()
+  }, [])
+
+  // Fetch banned words
+  React.useEffect(() => {
+    const fetchBannedWords = async () => {
+      try {
+        const settingsSnap = await getDocs(collection(db, 'moderation_settings'))
+        if (settingsSnap.docs.length > 0) {
+          const words = settingsSnap.docs[0]?.data()?.bannedWords || []
+          setBannedWords(words)
+        }
+      } catch (error) {
+        console.error('[v0] Error fetching banned words:', error)
+      }
+    }
+    fetchBannedWords()
   }, [])
 
   const handleApprove = async (reportId: string) => {
@@ -156,6 +194,81 @@ export default function ModerationPage() {
     setSelectedReports(newSelected)
   }
 
+  const handleDeleteCommunityMessage = async (messageId: string) => {
+    try {
+      console.log('[v0] Deleting community message:', messageId)
+      await updateDoc(doc(db, 'community_messages', messageId), {
+        moderationStatus: 'rejected',
+        isFlagged: false,
+        deletedAt: new Date(),
+        deletedBy: 'admin'
+      })
+    } catch (error) {
+      console.error('[v0] Error deleting community message:', error)
+    }
+  }
+
+  const handleApproveCommunityMessage = async (messageId: string) => {
+    try {
+      console.log('[v0] Approving community message:', messageId)
+      await updateDoc(doc(db, 'community_messages', messageId), {
+        moderationStatus: 'approved',
+        isFlagged: false
+      })
+    } catch (error) {
+      console.error('[v0] Error approving community message:', error)
+    }
+  }
+
+  const handleAddBannedWord = async () => {
+    if (!newBannedWord.trim()) return
+
+    try {
+      const word = newBannedWord.toLowerCase().trim()
+      const updatedWords = [...bannedWords, word]
+      
+      console.log('[v0] Adding banned word:', word)
+      
+      const settingsSnap = await getDocs(collection(db, 'moderation_settings'))
+      if (settingsSnap.docs.length > 0) {
+        await updateDoc(doc(db, 'moderation_settings', settingsSnap.docs[0].id), {
+          bannedWords: updatedWords,
+          updatedAt: new Date()
+        })
+      } else {
+        await addDoc(collection(db, 'moderation_settings'), {
+          bannedWords: updatedWords,
+          createdAt: new Date()
+        })
+      }
+      
+      setBannedWords(updatedWords)
+      setNewBannedWord('')
+    } catch (error) {
+      console.error('[v0] Error adding banned word:', error)
+    }
+  }
+
+  const handleRemoveBannedWord = async (wordToRemove: string) => {
+    try {
+      const updatedWords = bannedWords.filter(w => w !== wordToRemove)
+      
+      console.log('[v0] Removing banned word:', wordToRemove)
+      
+      const settingsSnap = await getDocs(collection(db, 'moderation_settings'))
+      if (settingsSnap.docs.length > 0) {
+        await updateDoc(doc(db, 'moderation_settings', settingsSnap.docs[0].id), {
+          bannedWords: updatedWords,
+          updatedAt: new Date()
+        })
+      }
+      
+      setBannedWords(updatedWords)
+    } catch (error) {
+      console.error('[v0] Error removing banned word:', error)
+    }
+  }
+
   const filteredReports = reports.filter(r => {
     const matchesFilter = filter === 'all' ? true : filter === 'pending' ? r.status === 'pending' : r.status !== 'pending'
     const matchesSearch = searchTerm === '' || 
@@ -170,7 +283,9 @@ export default function ModerationPage() {
     approvedReports: reports.filter(r => r.status === 'approved').length,
     rejectedReports: reports.filter(r => r.status === 'rejected').length,
     flaggedUsers: flaggedUsers.length,
-    flaggedContent: flaggedContent.length
+    flaggedContent: flaggedContent.length,
+    flaggedMessages: communityMessages.filter(m => m.moderationStatus === 'pending').length,
+    totalBannedWords: bannedWords.length
   }
 
   return (
@@ -205,12 +320,12 @@ export default function ModerationPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-neutral-200">
-          {(['reports', 'users', 'content'] as const).map(tab => (
+        <div className="flex gap-2 border-b border-neutral-200 overflow-x-auto">
+          {(['reports', 'users', 'content', 'community-messages', 'banned-words'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium border-b-2 transition ${
+              className={`px-4 py-3 font-medium border-b-2 transition whitespace-nowrap ${
                 activeTab === tab
                   ? 'border-neutral-900 bg-neutral-900 text-white'
                   : 'border-transparent text-neutral-600 hover:text-neutral-900'
@@ -219,6 +334,8 @@ export default function ModerationPage() {
               {tab === 'reports' && `Reports (${stats.pendingReports})`}
               {tab === 'users' && `Flagged Users (${stats.flaggedUsers})`}
               {tab === 'content' && `Flagged Content (${stats.flaggedContent})`}
+              {tab === 'community-messages' && `Community Messages (${stats.flaggedMessages})`}
+              {tab === 'banned-words' && `Banned Words (${stats.totalBannedWords})`}
             </button>
           ))}
         </div>
@@ -400,6 +517,126 @@ export default function ModerationPage() {
                 </Card>
               ))
             )}
+          </div>
+        )}
+
+        {/* Community Messages Tab */}
+        {activeTab === 'community-messages' && (
+          <div className="space-y-4">
+            <div className="flex gap-2 flex-wrap items-center">
+              {['pending', 'all'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setCommunityFilter(f as any)}
+                  className={`px-4 py-2 rounded-lg font-medium transition text-sm ${
+                    communityFilter === f
+                      ? 'bg-neutral-900 text-white'
+                      : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-300'
+                  }`}
+                >
+                  {f === 'pending' ? 'Pending' : 'All'}
+                </button>
+              ))}
+            </div>
+
+            {communityMessages.length === 0 ? (
+              <Card className="p-8 border border-neutral-200 text-center text-neutral-600">No flagged community messages</Card>
+            ) : (
+              <div className="space-y-3">
+                {(communityFilter === 'all' ? communityMessages : communityMessages.filter(m => m.moderationStatus === 'pending')).map(message => (
+                  <Card key={message.id} className="p-4 border border-neutral-200">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Flag className="w-4 h-4 text-red-600" />
+                          <span className="font-semibold text-neutral-900">{message.content.slice(0, 100)}</span>
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${
+                            message.moderationStatus === 'pending' ? 'bg-amber-100 text-amber-800' :
+                            message.moderationStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {message.moderationStatus}
+                          </span>
+                        </div>
+                        <p className="text-sm text-neutral-600 mb-2">{message.content}</p>
+                        <div className="flex gap-4 text-xs text-neutral-500">
+                          <span>By: {message.authorName}</span>
+                          <span>Community: {message.communityId}</span>
+                          <span>{formatDistanceToNow(message.createdAt?.toDate?.() || new Date(), { addSuffix: true })}</span>
+                        </div>
+                      </div>
+                      {message.moderationStatus === 'pending' && (
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => handleApproveCommunityMessage(message.id)}
+                            className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition flex items-center gap-1"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCommunityMessage(message.id)}
+                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition flex items-center gap-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Banned Words Tab */}
+        {activeTab === 'banned-words' && (
+          <div className="space-y-4">
+            <Card className="p-6 border border-neutral-200">
+              <h3 className="text-lg font-semibold mb-4">Add Banned Word</h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter word to ban..."
+                  value={newBannedWord}
+                  onChange={(e) => setNewBannedWord(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddBannedWord()}
+                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                />
+                <button
+                  onClick={handleAddBannedWord}
+                  className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition"
+                >
+                  Add Word
+                </button>
+              </div>
+            </Card>
+
+            <div className="space-y-2">
+              <h3 className="font-semibold text-neutral-900">Current Banned Words ({bannedWords.length})</h3>
+              {bannedWords.length === 0 ? (
+                <Card className="p-4 border border-neutral-200 text-center text-neutral-600">No banned words configured</Card>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {bannedWords.map(word => (
+                    <div
+                      key={word}
+                      className="flex items-center gap-2 bg-red-100 text-red-700 px-3 py-2 rounded-lg text-sm"
+                    >
+                      <span className="font-medium">{word}</span>
+                      <button
+                        onClick={() => handleRemoveBannedWord(word)}
+                        className="ml-1 hover:text-red-900 font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
