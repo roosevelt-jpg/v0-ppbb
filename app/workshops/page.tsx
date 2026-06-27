@@ -2,134 +2,167 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot } from 'firebase/firestore'
-import { Workshop } from '@/lib/types'
-import { Calendar, Clock, MapPin, Users, ArrowRight } from 'lucide-react'
+import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { Calendar, Clock, MapPin, Users, ArrowRight } from 'lucide-react'
+import { format } from 'date-fns'
+
+interface Workshop {
+  id: string
+  title: string
+  description: string
+  date: string
+  startTime?: string
+  endTime?: string
+  instructor?: string
+  location?: { address: string; city: string }
+  bannerImageUrl?: string
+  maxCapacity?: number
+  status: string
+}
 
 export default function WorkshopsPage() {
   const [workshops, setWorkshops] = useState<Workshop[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'workshops'), where('status', '==', 'published')),
-      (snapshot) => {
-        setWorkshops(snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          date: doc.data().date?.toDate?.() || new Date(),
-          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-          updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-        } as Workshop)))
-        setLoading(false)
-      }
-    )
-    return unsubscribe
+    loadWorkshops()
   }, [])
 
-  const upcomingWorkshops = workshops.filter(w => w.date > new Date())
-  const pastWorkshops = workshops.filter(w => w.date <= new Date())
+  const loadWorkshops = async () => {
+    try {
+      const res = await fetch('/api/workshops?status=published', { cache: 'no-store' })
+      const json = await res.json()
+      if (json.success) {
+        setWorkshops(json.data)
+      }
+    } catch (error) {
+      console.error('[v0] Error loading workshops:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const upcomingWorkshops = workshops.filter(w => new Date(w.date) > new Date())
+  const pastWorkshops = workshops.filter(w => new Date(w.date) <= new Date())
+
+  const WorkshopCard = ({ workshop }: { workshop: Workshop }) => (
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+      {workshop.bannerImageUrl && (
+        <div className="h-40 overflow-hidden bg-gray-100">
+          <img
+            src={workshop.bannerImageUrl}
+            alt={workshop.title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform"
+          />
+        </div>
+      )}
+      <div className="p-4">
+        <h3 className="text-lg font-bold text-black mb-2 line-clamp-2">{workshop.title}</h3>
+
+        <div className="space-y-2 mb-4 text-sm text-gray-600">
+          <div className="flex items-center gap-2">
+            <Calendar size={16} className="text-black" />
+            <span>{format(new Date(workshop.date), 'MMM dd, yyyy')}</span>
+          </div>
+
+          {workshop.startTime && (
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-black" />
+              <span>
+                {workshop.startTime}
+                {workshop.endTime && ` - ${workshop.endTime}`}
+              </span>
+            </div>
+          )}
+
+          {workshop.instructor && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">👨‍🏫</span>
+              <span>{workshop.instructor}</span>
+            </div>
+          )}
+
+          {workshop.location?.address && (
+            <div className="flex items-center gap-2">
+              <MapPin size={16} className="text-black" />
+              <span>{workshop.location.address}</span>
+            </div>
+          )}
+
+          {workshop.maxCapacity && (
+            <div className="flex items-center gap-2">
+              <Users size={16} className="text-black" />
+              <span>Capacity: {workshop.maxCapacity}</span>
+            </div>
+          )}
+        </div>
+
+        <p className="text-sm text-gray-600 line-clamp-2 mb-4">{workshop.description}</p>
+
+        <Link
+          href={`/workshops/${workshop.id}`}
+          className="inline-flex items-center gap-2 text-black font-medium hover:gap-3 transition-all"
+        >
+          View Details <ArrowRight size={16} />
+        </Link>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f7f6f2' }}>
-      {/* Header */}
-      <div className="py-12 px-4 sm:px-6 lg:px-8 border-b" style={{ backgroundColor: '#111111', borderColor: '#333333' }}>
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold" style={{ color: '#ffffff' }}>Educational Workshops</h1>
-          <p className="mt-2" style={{ color: '#888888' }}>Learn, grow, and develop new skills with our community workshops</p>
+    <div className="min-h-screen bg-white">
+      <Navbar />
+
+      {/* Hero */}
+      <section className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Educational Workshops</h1>
+          <p className="text-gray-300 text-lg">Learn, grow, and develop new skills with our community workshops</p>
         </div>
-      </div>
+      </section>
 
       {/* Content */}
-      <div className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="text-center py-12">
-              <p style={{ color: '#888888' }}>Loading workshops...</p>
-            </div>
-          ) : upcomingWorkshops.length === 0 ? (
-            <div className="text-center py-12">
-              <p style={{ color: '#888888' }}>No upcoming workshops at the moment.</p>
+              <p className="text-gray-500">Loading workshops...</p>
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-bold mb-8" style={{ color: '#111111' }}>Upcoming Workshops</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-                {upcomingWorkshops.map(workshop => (
-                  <div
-                    key={workshop.id}
-                    className="rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105"
-                    style={{ backgroundColor: '#ffffff', borderTop: '4px solid #111111' }}
-                  >
-                    <div className="p-6 space-y-4">
-                      <h3 style={{ color: '#111111' }} className="text-xl font-bold">{workshop.title}</h3>
-                      <p style={{ color: '#888888' }} className="text-sm">{workshop.description}</p>
-
-                      <div className="space-y-3 py-4 border-t border-b" style={{ borderColor: '#e4e1da' }}>
-                        <div className="flex items-center gap-2 text-sm" style={{ color: '#666666' }}>
-                          <Calendar className="h-4 w-4" />
-                          {workshop.date.toLocaleDateString()} at {workshop.time}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm" style={{ color: '#666666' }}>
-                          <Clock className="h-4 w-4" />
-                          {workshop.duration} minutes
-                        </div>
-                        <div className="flex items-center gap-2 text-sm" style={{ color: '#666666' }}>
-                          <MapPin className="h-4 w-4" />
-                          {workshop.location}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm" style={{ color: '#666666' }}>
-                          <Users className="h-4 w-4" />
-                          {workshop.registered}/{workshop.capacity} registered
-                        </div>
-                      </div>
-
-                      <div style={{ color: '#999999' }} className="text-sm">
-                        <strong>Instructor:</strong> {workshop.instructorName}
-                      </div>
-
-                      <button
-                        className="w-full py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                        style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
-                      >
-                        Register Now
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </div>
+              {upcomingWorkshops.length > 0 && (
+                <div className="mb-16">
+                  <h2 className="text-3xl font-bold text-black mb-8">Upcoming Workshops</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {upcomingWorkshops.map(workshop => (
+                      <WorkshopCard key={workshop.id} workshop={workshop} />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+
+              {pastWorkshops.length > 0 && (
+                <div>
+                  <h2 className="text-3xl font-bold text-black mb-8">Past Workshops</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75">
+                    {pastWorkshops.map(workshop => (
+                      <WorkshopCard key={workshop.id} workshop={workshop} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {workshops.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">No workshops available yet</p>
+                </div>
+              )}
             </>
           )}
-
-          {pastWorkshops.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-8" style={{ color: '#111111' }}>Past Workshops</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {pastWorkshops.map(workshop => (
-                  <div
-                    key={workshop.id}
-                    className="rounded-lg overflow-hidden shadow"
-                    style={{ backgroundColor: '#ffffff', opacity: 0.7 }}
-                  >
-                    <div className="p-6">
-                      <h3 style={{ color: '#111111' }} className="text-lg font-bold mb-2">{workshop.title}</h3>
-                      <div className="flex items-center gap-2 text-sm" style={{ color: '#999999' }}>
-                        <Calendar className="h-4 w-4" />
-                        {workshop.date.toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      </section>
+
       <Footer />
     </div>
   )

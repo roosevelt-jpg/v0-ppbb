@@ -1,88 +1,48 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { auth, db } from '@/lib/firebase'
-import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore'
-import { Upload, ArrowLeft, Loader2 } from 'lucide-react'
-import { Event, GenderRestriction } from '@/lib/event-types'
-
 export const dynamic = 'force-dynamic'
 
-interface PageProps {
-  params: { id?: string }
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Upload, ArrowLeft, Loader2, X } from 'lucide-react'
+import Link from 'next/link'
+
+interface EventFormData {
+  title: string
+  description: string
+  date: string
+  startTime: string
+  endTime: string
+  location: { address: string; city: string }
+  bannerImageUrl: string
+  isPaid: boolean
+  price: number
+  currency: string
+  maxAttendees?: number
+  status: 'draft' | 'published'
 }
 
-// Shared inline styles to bypass global CSS
-const s = {
-  input: {
-    display: 'block', width: '100%', boxSizing: 'border-box' as const,
-    border: '1px solid #d1d5db', borderRadius: '8px', padding: '8px 12px',
-    fontSize: '14px', lineHeight: '1.5', outline: 'none', height: 'auto',
-    backgroundColor: 'white', color: '#111',
-  } as React.CSSProperties,
-  label: {
-    display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px',
-    color: '#374151', textTransform: 'none' as const, letterSpacing: 'normal',
-  } as React.CSSProperties,
-  section: { display: 'flex', flexDirection: 'column' as const, gap: '16px' } as React.CSSProperties,
-  sectionTitle: { fontSize: '18px', fontWeight: 600, color: '#111', margin: 0 } as React.CSSProperties,
-  btnPrimary: {
-    flex: 1, padding: '10px 16px', backgroundColor: '#111827', color: 'white',
-    borderRadius: '8px', fontSize: '14px', fontWeight: 500, cursor: 'pointer',
-    border: 'none', height: 'auto', minHeight: '42px', display: 'flex',
-    alignItems: 'center', justifyContent: 'center', gap: '8px',
-  } as React.CSSProperties,
-  btnSecondary: {
-    flex: 1, padding: '10px 16px', backgroundColor: 'white', color: '#111',
-    borderRadius: '8px', fontSize: '14px', fontWeight: 500, cursor: 'pointer',
-    border: '1px solid #d1d5db', height: 'auto', minHeight: '42px',
-  } as React.CSSProperties,
-  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' } as React.CSSProperties,
-  grid3: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' } as React.CSSProperties,
-}
-
-export default function CreateEventPage({ params }: PageProps) {
+export default function CreateEventPage() {
   const router = useRouter()
-  const isEditing = !!params?.id
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [imagePreview, setImagePreview] = useState<string>('')
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const [formData, setFormData] = useState<Partial<Event>>({
-    title: '', description: '', date: new Date(),
-    startTime: '09:00', endTime: '17:00',
-    location: { address: '', city: '', coordinates: { latitude: 0, longitude: 0 }, placeId: '' },
-    bannerImageUrl: '', isPaid: false, price: 0, currency: 'AED',
-    genderRestriction: 'mixed', dressCode: '', logistics: '',
-    maxAttendees: undefined, status: 'draft',
+  const [formData, setFormData] = useState<EventFormData>({
+    title: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0],
+    startTime: '09:00',
+    endTime: '17:00',
+    location: { address: '', city: '' },
+    bannerImageUrl: '',
+    isPaid: false,
+    price: 0,
+    currency: 'AED',
+    maxAttendees: undefined,
+    status: 'draft',
   })
-
-  useEffect(() => {
-    if (isEditing && params?.id) {
-      const loadEvent = async () => {
-        setLoading(true)
-        try {
-          const eventDoc = await getDoc(doc(db, 'events', params.id))
-          if (eventDoc.exists()) {
-            const eventData = eventDoc.data() as Event
-            setFormData({
-              ...eventData,
-              date: eventData.date instanceof Date ? eventData.date : (eventData.date as any).toDate?.() || new Date(),
-            })
-            if (eventData.bannerImageUrl) setImagePreview(eventData.bannerImageUrl)
-          }
-        } catch (error) {
-          console.error('[v0] Error loading event:', error)
-          alert('Failed to load event')
-        } finally {
-          setLoading(false)
-        }
-      }
-      loadEvent()
-    }
-  }, [isEditing, params?.id])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -94,236 +54,237 @@ export default function CreateEventPage({ params }: PageProps) {
     }
   }
 
-  const uploadImageToFirebase = async (file: File): Promise<string> => {
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('type', 'event-banner')
-    const response = await fetch('/api/upload', { method: 'POST', body: fd })
-    if (!response.ok) throw new Error('Upload failed')
-    const data = await response.json()
-    return data.url
+  const handleUploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return formData.bannerImageUrl
+    try {
+      const fd = new FormData()
+      fd.append('file', imageFile)
+      fd.append('path', 'events/banner')
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error)
+      return json.data.url
+    } catch (err) {
+      console.error('[v0] Upload error:', err)
+      throw err
+    }
   }
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!auth.currentUser) { alert('Please log in first'); return }
-    if (!formData.title?.trim() || !formData.location?.address?.trim()) {
-      alert('Please fill in required fields (title and location)'); return
-    }
+  const saveEvent = async (status: 'draft' | 'published') => {
     setSaving(true)
+    setError(null)
+
     try {
-      let bannerUrl = formData.bannerImageUrl
-      if (imageFile) bannerUrl = await uploadImageToFirebase(imageFile)
-      const eventData: Partial<Event> = { ...formData, bannerImageUrl: bannerUrl, updatedAt: serverTimestamp() }
-      if (isEditing && params?.id) {
-        await updateDoc(doc(db, 'events', params.id), eventData)
-        alert('Event updated successfully!')
-      } else {
-        await addDoc(collection(db, 'events'), {
-          ...eventData, createdBy: auth.currentUser.uid,
-          createdAt: serverTimestamp(), attendees: [],
-        })
-        alert('Event created successfully!')
+      let imageUrl = formData.bannerImageUrl
+      if (imageFile) {
+        imageUrl = await handleUploadImage()
       }
-      router.push('/admin/events')
-    } catch (error) {
-      console.error('[v0] Error saving event:', error)
-      alert('Failed to save event. Please try again.')
+
+      const payload = { ...formData, bannerImageUrl: imageUrl, status }
+
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const json = await res.json()
+      if (json.success) {
+        router.push('/admin/events')
+      } else {
+        setError(json.error || 'Failed to save event')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error saving event')
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '384px' }}>
-      <Loader2 style={{ width: 32, height: 32 }} className="animate-spin" />
-    </div>
+  const handleChange = (field: string, value: any) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.')
+      setFormData(prev => ({
+        ...prev,
+        [parent]: { ...prev[parent as keyof typeof prev], [child]: value }
+      }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   return (
-    <div style={{ width: '100%', padding: '32px' }}>
-      <div style={{ maxWidth: '896px', margin: '0 auto' }}>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-2xl mx-auto">
+        <Link href="/admin/events" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
+          <ArrowLeft size={20} />
+          Back to Events
+        </Link>
 
-        {/* Back button */}
-        <button onClick={() => router.back()}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px',
-            background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer',
-            fontSize: '14px', padding: 0, height: 'auto', minHeight: 'auto', boxShadow: 'none' }}>
-          <ArrowLeft style={{ width: 16, height: 16 }} />
-          Back
-        </button>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <h1 className="text-3xl font-bold text-black mb-8">Create Event</h1>
 
-        <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e5e7eb', padding: '32px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '32px', color: '#111' }}>
-            {isEditing ? 'Edit Event' : 'Create New Event'}
-          </h1>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <X className="text-red-600 mt-0.5 flex-shrink-0" size={18} />
+              <p className="text-red-800">{error}</p>
+            </div>
+          )}
 
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <form className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-black">Basic Information</h2>
 
-            {/* Basic Information */}
-            <div style={s.section}>
-              <h2 style={s.sectionTitle}>Basic Information</h2>
               <div>
-                <label style={s.label}>Event Title *</label>
-                <input type="text" value={formData.title || ''}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Annual Charity Gala" style={s.input} required />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => handleChange('title', e.target.value)}
+                  placeholder="e.g., Annual Charity Gala"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                />
               </div>
+
               <div>
-                <label style={s.label}>Description</label>
-                <textarea value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Event description and details" rows={5}
-                  style={{ ...s.input, height: 'auto', resize: 'vertical' }} />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleChange('description', e.target.value)}
+                  placeholder="Event description"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                />
               </div>
             </div>
 
-            {/* Date and Time */}
-            <div style={s.section}>
-              <h2 style={s.sectionTitle}>Date &amp; Time</h2>
-              <div style={s.grid3}>
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-black">Date & Time</h2>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label style={s.label}>Date *</label>
-                  <input type="date"
-                    value={formData.date instanceof Date ? formData.date.toISOString().split('T')[0] : ''}
-                    onChange={(e) => setFormData({ ...formData, date: new Date(e.target.value) })}
-                    style={s.input} required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleChange('date', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    required
+                  />
                 </div>
                 <div>
-                  <label style={s.label}>Start Time *</label>
-                  <input type="time" value={formData.startTime || '09:00'}
-                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    style={s.input} required />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                  <input
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) => handleChange('startTime', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
                 </div>
-                <div>
-                  <label style={s.label}>End Time *</label>
-                  <input type="time" value={formData.endTime || '17:00'}
-                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    style={s.input} required />
-                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                <input
+                  type="time"
+                  value={formData.endTime}
+                  onChange={(e) => handleChange('endTime', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
               </div>
             </div>
 
-            {/* Location */}
-            <div style={s.section}>
-              <h2 style={s.sectionTitle}>Location</h2>
-              <div style={s.grid2}>
-                <div>
-                  <label style={s.label}>Address *</label>
-                  <input type="text" value={formData.location?.address || ''}
-                    onChange={(e) => setFormData({ ...formData, location: { ...formData.location!, address: e.target.value } })}
-                    placeholder="Street address" style={s.input} required />
-                </div>
-                <div>
-                  <label style={s.label}>City *</label>
-                  <input type="text" value={formData.location?.city || ''}
-                    onChange={(e) => setFormData({ ...formData, location: { ...formData.location!, city: e.target.value } })}
-                    placeholder="City" style={s.input} required />
-                </div>
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-black">Location</h2>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                <input
+                  type="text"
+                  value={formData.location.address}
+                  onChange={(e) => handleChange('location.address', e.target.value)}
+                  placeholder="Street address"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  required
+                />
               </div>
-              <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
-                Note: Integrate Google Places API for autocomplete location selection
-              </p>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                <input
+                  type="text"
+                  value={formData.location.city}
+                  onChange={(e) => handleChange('location.city', e.target.value)}
+                  placeholder="Dubai"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
             </div>
 
-            {/* Event Settings */}
-            <div style={s.section}>
-              <h2 style={s.sectionTitle}>Event Settings</h2>
-              <div style={s.grid2}>
-                <div>
-                  <label style={s.label}>Gender Restriction</label>
-                  <select value={formData.genderRestriction || 'mixed'}
-                    onChange={(e) => setFormData({ ...formData, genderRestriction: e.target.value as GenderRestriction })}
-                    style={s.input}>
-                    <option value="mixed">Mixed Gender</option>
-                    <option value="men-only">Men Only</option>
-                    <option value="ladies-only">Ladies Only</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={s.label}>Event Status</label>
-                  <select value={formData.status || 'draft'}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    style={s.input}>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label style={s.label}>Dress Code</label>
-                <input type="text" value={formData.dressCode || ''}
-                  onChange={(e) => setFormData({ ...formData, dressCode: e.target.value })}
-                  placeholder="e.g., Formal, Business Casual, Casual" style={s.input} />
-              </div>
-              <div>
-                <label style={s.label}>Logistics &amp; Additional Info</label>
-                <textarea value={formData.logistics || ''}
-                  onChange={(e) => setFormData({ ...formData, logistics: e.target.value })}
-                  placeholder="Transportation, accommodation, dietary requirements, etc."
-                  rows={4} style={{ ...s.input, height: 'auto', resize: 'vertical' }} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input type="checkbox" id="isPaid" checked={formData.isPaid || false}
-                  onChange={(e) => setFormData({ ...formData, isPaid: e.target.checked })}
-                  style={{ width: '16px', height: '16px', display: 'inline-block' }} />
-                <label htmlFor="isPaid" style={{ ...s.label, margin: 0 }}>Paid Event</label>
-              </div>
-              {formData.isPaid && (
-                <div style={s.grid2}>
-                  <div>
-                    <label style={s.label}>Price</label>
-                    <input type="number" value={formData.price || 0}
-                      onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                      placeholder="0" style={s.input} />
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-black">Banner Image</h2>
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                {imagePreview ? (
+                  <div className="relative">
+                    <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImageFile(null)
+                        setImagePreview('')
+                      }}
+                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full"
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
-                  <div>
-                    <label style={s.label}>Currency</label>
-                    <select value={formData.currency || 'AED'}
-                      onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                      style={s.input}>
-                      <option value="AED">AED</option>
-                      <option value="USD">USD</option>
-                      <option value="GBP">GBP</option>
-                      <option value="EUR">EUR</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-              <div>
-                <label style={s.label}>Max Attendees (Optional)</label>
-                <input type="number" value={formData.maxAttendees || ''}
-                  onChange={(e) => setFormData({ ...formData, maxAttendees: e.target.value ? parseInt(e.target.value) : undefined })}
-                  placeholder="Leave blank for unlimited" style={s.input} />
+                ) : (
+                  <label className="cursor-pointer block">
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <Upload className="text-gray-400 mb-2" size={28} />
+                      <p className="text-gray-600 font-medium">Click to upload</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
               </div>
             </div>
 
-            {/* Banner Image */}
-            <div style={s.section}>
-              <h2 style={s.sectionTitle}>Event Banner Image</h2>
-              <div style={{ border: '2px dashed #d1d5db', borderRadius: '8px', padding: '32px', textAlign: 'center', cursor: 'pointer' }}>
-                <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} id="banner-upload" />
-                <label htmlFor="banner-upload" style={{ cursor: 'pointer', display: 'block' }}>
-                  <Upload style={{ width: 32, height: 32, margin: '0 auto 8px', color: '#9ca3af' }} />
-                  <p style={{ fontSize: '14px', fontWeight: 500, margin: '0 0 4px' }}>Click to upload event banner</p>
-                  <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>PNG, JPG, GIF up to 10MB</p>
-                </label>
-              </div>
-              {imagePreview && (
-                <img src={imagePreview} alt="Banner preview"
-                  style={{ width: '100%', height: '192px', objectFit: 'cover', borderRadius: '8px' }} />
-              )}
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: '16px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
-              <button type="button" onClick={() => router.back()} style={s.btnSecondary}>Cancel</button>
-              <button type="submit" disabled={saving} style={s.btnPrimary}>
-                {saving ? <><Loader2 style={{ width: 16, height: 16 }} className="animate-spin" /> Saving...</> : isEditing ? 'Update Event' : 'Create Event'}
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => router.push('/admin/events')}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => saveEvent('draft')}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving && <Loader2 size={16} className="animate-spin" />}
+                Save as Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => saveEvent('published')}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving && <Loader2 size={16} className="animate-spin" />}
+                Save & Publish
               </button>
             </div>
-
           </form>
         </div>
       </div>

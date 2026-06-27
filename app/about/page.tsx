@@ -4,8 +4,6 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
 import { Mail, Globe, Link as LinkIcon, Share2, MessageCircle } from 'lucide-react'
 
 interface TeamMember {
@@ -34,24 +32,22 @@ export default function AboutPage() {
   })
 
   useEffect(() => {
-    // Fetch team members
-    const teamQuery = query(
-      collection(db, 'team'),
-      where('isPublished', '==', true),
-      orderBy('order', 'asc')
-    )
-
-    const unsubscribe = onSnapshot(teamQuery, (snapshot) => {
-      const members = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as TeamMember[]
-      
-      setTeamMembers(members)
-      setLoading(false)
-    })
-
-    return () => unsubscribe()
+    // Fetch team members from API
+    const loadTeamMembers = async () => {
+      try {
+        const res = await fetch('/api/team?status=published', { cache: 'no-store' })
+        const json = await res.json()
+        if (json.success) {
+          setTeamMembers(json.data)
+        }
+      } catch (error) {
+        console.error('[v0] Error loading team members:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadTeamMembers()
   }, [])
 
   return (
