@@ -31,10 +31,10 @@ service cloud.firestore {
       return isAuth() && isBusiness(request.auth.uid) && request.auth.uid == businessId;
     }
     
-    // Users collection - Public read, restricted write
+    // Users collection - Own read, restricted write
     match /users/{userId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && isOwnUser(userId) && request.resource.data.role in ['member', 'volunteer'];
+      allow read: if isOwnUser(userId) || isAdmin();
+      allow create: if isAuth() && isOwnUser(userId) && request.resource.data.role in ['member', 'volunteer', 'business'];
       allow update: if isAdmin() || isOwnUser(userId);
       allow delete: if isAdmin() || isOwnUser(userId);
       

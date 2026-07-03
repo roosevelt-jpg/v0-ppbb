@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/lib/firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { collection, doc, setDoc } from 'firebase/firestore'
+import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
 
@@ -41,6 +41,13 @@ export default function SignupClient() {
     bio: '',
     consentTerms: false,
     consentPrivacy: false,
+    // Business fields (Step 3)
+    businessName: '',
+    businessType: '',
+    businessRegistration: '',
+    businessLocation: '',
+    businessDescription: '',
+    wantsBusiness: false,
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -60,7 +67,7 @@ export default function SignupClient() {
     }))
   }
 
-  const validateStep = (step: number): boolean => {
+  const validateStep = async (step: number): Promise<boolean> => {
     setError('')
     
     if (step === 1) {
@@ -80,6 +87,19 @@ export default function SignupClient() {
         setError('Please enter a valid email address')
         return false
       }
+      
+      // Check email uniqueness by querying Firestore
+      try {
+        const emailQuery = query(collection(db, 'users'), where('email', '==', formData.email.toLowerCase()))
+        const emailSnapshot = await getDocs(emailQuery)
+        if (!emailSnapshot.empty) {
+          setError('This email is already registered. Please log in or use a different email.')
+          return false
+        }
+      } catch (err) {
+        console.error('[v0] Error checking email uniqueness:', err)
+      }
+      
       if (!formData.password) {
         setError('Password is required')
         return false
@@ -116,8 +136,8 @@ export default function SignupClient() {
     return true
   }
 
-  const handleStepChange = (nextStep: number) => {
-    if (!validateStep(currentStep)) return
+  const handleStepChange = async (nextStep: number) => {
+    if (!(await validateStep(currentStep))) return
 
     if (nextStep >= 1 && nextStep <= STEPS.length) {
       setCurrentStep(nextStep)
@@ -126,7 +146,7 @@ export default function SignupClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validateStep(currentStep)) return
+    if (!(await validateStep(currentStep))) return
 
     setIsLoading(true)
     setError('')
@@ -135,11 +155,12 @@ export default function SignupClient() {
       // Create Firebase Auth account
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        formData.email,
+        formData.email.toLowerCase(),
         formData.password
       )
 
       const firebaseUser = userCredential.user
+      const now = new Date()
 
       // Update profile with display name
       await updateProfile(firebaseUser, {
@@ -148,12 +169,14 @@ export default function SignupClient() {
 
       // Create user document in Firestore with proper schema
       const userDocRef = doc(db, 'users', firebaseUser.uid)
-      await setDoc(userDocRef, {
+      
+      const userData: any = {
         // Auth info (Firebase Auth manages email/password, we reference UID)
         uid: firebaseUser.uid,
-        email: formData.email,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        email: formData.email.toLowerCase(),
+        createdAt: now,
+        dateJoined: now, // Explicitly track when user joined
+        updatedAt: now,
 
         // Display info (stored in Firestore per golden rule)
         firstName: formData.firstName,
@@ -162,12 +185,13 @@ export default function SignupClient() {
         phone: formData.phone,
         country: formData.country,
         emirate: formData.emirate,
+        location: formData.emirate, // For location-based queries
         bio: formData.bio,
         skills: formData.skills,
 
         // Role management
-        role: formData.memberType, // Primary role
-        roles: [formData.memberType], // Role array for multi-role support
+        role: formData.wantsBusiness ? 'business' : formData.memberType,
+        roles: formData.wantsBusiness ? ['business', 'member'] : [formData.memberType],
 
         // User preferences
         language: 'en',
@@ -186,13 +210,37 @@ export default function SignupClient() {
         documentUrls: {
           idVerification: null,
           addressProof: null,
+        },
+        
+        // Volunteer tracking
+        volunteerHours: 0,
+      }
+      
+      // Add business profile if user selected it
+      if (formData.wantsBusiness) {
+        userData.business = {
+          name: formData.businessName,
+          type: formData.businessType,
+          registration: formData.businessRegistration,
+          location: formData.businessLocation,
+          description: formData.businessDescription,
+          createdAt: now,
         }
-      }, { merge: false })
+      }
+      
+      await setDoc(userDocRef, userData, { merge: false })
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)
 
-      // Redirect to dashboard or completion page
-      router.push(`/login?email=${encodeURIComponent(formData.email)}&registered=true`)
+      // Show success message and redirect to dashboard
+      setError('')
+      // Automatically redirect to dashboard after 1.5 seconds
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 1500)
+      
+      // Show success state
+      setFormData(prev => ({ ...prev, email: 'success' }))
     } catch (err: any) {
       console.error('[v0] Signup error:', err)
       if (err.code === 'auth/email-already-in-use') {
@@ -415,13 +463,102 @@ export default function SignupClient() {
 
                 {currentStep === 3 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Business profile</h2>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Business profile (optional)</h2>
                     <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>You can add a business profile now or skip this for later. You can always upgrade to a business account from your dashboard.</p>
                     
-                    <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem', border: '1px solid #e4e1da' }}>
-                      <p style={{ fontSize: '0.875rem', color: '#666', fontWeight: 600 }}>For now, your personal account has been created successfully!</p>
-                      <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>You can set up a business account anytime from your dashboard.</p>
-                    </div>
+                    {/* Business Option Checkbox */}
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.75rem', backgroundColor: '#f7f6f2', borderRadius: '0.375rem' }}>
+                      <input 
+                        type="checkbox" 
+                        name="wantsBusiness" 
+                        checked={formData.wantsBusiness} 
+                        onChange={handleInputChange} 
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }} 
+                      />
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#111111' }}>Yes, I want to register a business</span>
+                    </label>
+
+                    {/* Business Form Fields (shown only if wantsBusiness is checked) */}
+                    {formData.wantsBusiness && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', paddingTop: '0.5rem', borderTop: '1px solid #e4e1da' }}>
+                        {/* Business Name */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Name *</label>
+                          <input 
+                            type="text" 
+                            name="businessName" 
+                            value={formData.businessName} 
+                            onChange={handleInputChange} 
+                            placeholder="Your company name" 
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+
+                        {/* Business Type */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Type *</label>
+                          <select 
+                            name="businessType" 
+                            value={formData.businessType} 
+                            onChange={handleInputChange} 
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                          >
+                            <option value="">Select business type</option>
+                            <option value="nonprofit">Non-profit Organization</option>
+                            <option value="social">Social Enterprise</option>
+                            <option value="corporation">Corporation</option>
+                            <option value="small-business">Small Business</option>
+                            <option value="freelance">Freelance/Consultant</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+
+                        {/* Business Registration */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Registration Number (optional)</label>
+                          <input 
+                            type="text" 
+                            name="businessRegistration" 
+                            value={formData.businessRegistration} 
+                            onChange={handleInputChange} 
+                            placeholder="Business registration number" 
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+
+                        {/* Business Location */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Location *</label>
+                          <input 
+                            type="text" 
+                            name="businessLocation" 
+                            value={formData.businessLocation} 
+                            onChange={handleInputChange} 
+                            placeholder="City/Emirate or address" 
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
+                          />
+                        </div>
+
+                        {/* Business Description */}
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>About Your Business (optional)</label>
+                          <textarea 
+                            name="businessDescription" 
+                            value={formData.businessDescription} 
+                            onChange={handleInputChange} 
+                            placeholder="Tell us about your business..." 
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', minHeight: '80px', fontFamily: 'inherit' }} 
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {!formData.wantsBusiness && (
+                      <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem', border: '1px solid #e4e1da' }}>
+                        <p style={{ fontSize: '0.875rem', color: '#666', fontWeight: 600 }}>Your personal account is ready to go!</p>
+                        <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>You can add a business profile anytime from your dashboard.</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
