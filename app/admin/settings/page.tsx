@@ -11,6 +11,14 @@ export const dynamic = 'force-dynamic'
 
 type TabType = 'general' | 'contact' | 'social' | 'integrations'
 
+interface Integration {
+  id: string
+  name: string
+  description: string
+  configured: boolean
+  fields: { key: string; label: string; type: 'text' | 'password' | 'url' }[]
+}
+
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = React.useState<TabType>('general')
   const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null)
@@ -19,6 +27,63 @@ export default function AdminSettings() {
   const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [logoPreview, setLogoPreview] = React.useState<string>('')
   const [logoDarkPreview, setLogoDarkPreview] = React.useState<string>('')
+  const [expandedIntegration, setExpandedIntegration] = React.useState<string | null>(null)
+  const [integrations, setIntegrations] = React.useState<Record<string, Integration>>({})
+  const [integrationValues, setIntegrationValues] = React.useState<Record<string, Record<string, string>>>({})
+
+  const availableIntegrations: Record<string, Integration> = {
+    gmail: {
+      id: 'gmail',
+      name: 'Gmail SMTP',
+      description: 'Configure email notifications',
+      configured: false,
+      fields: [
+        { key: 'email', label: 'Email Address', type: 'text' },
+        { key: 'appPassword', label: 'App Password', type: 'password' },
+        { key: 'host', label: 'SMTP Host', type: 'text' },
+        { key: 'port', label: 'SMTP Port', type: 'text' },
+      ]
+    },
+    stripe: {
+      id: 'stripe',
+      name: 'Stripe',
+      description: 'Payment processing',
+      configured: false,
+      fields: [
+        { key: 'publishableKey', label: 'Publishable Key', type: 'text' },
+        { key: 'secretKey', label: 'Secret Key', type: 'password' },
+      ]
+    },
+    googleCalendar: {
+      id: 'googleCalendar',
+      name: 'Google Calendar',
+      description: 'Event synchronization',
+      configured: false,
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password' },
+        { key: 'calendarId', label: 'Calendar ID', type: 'text' },
+      ]
+    },
+    youtubeApi: {
+      id: 'youtubeApi',
+      name: 'YouTube Data API',
+      description: 'Video integration and management',
+      configured: false,
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password' },
+        { key: 'channelId', label: 'Channel ID', type: 'text' },
+      ]
+    },
+    googleMaps: {
+      id: 'googleMaps',
+      name: 'Google Maps / Places',
+      description: 'Location services and mapping',
+      configured: false,
+      fields: [
+        { key: 'apiKey', label: 'API Key', type: 'password' },
+      ]
+    },
+  }
 
   // Load settings from API
   React.useEffect(() => {
@@ -349,38 +414,76 @@ export default function AdminSettings() {
         {activeTab === 'integrations' && (
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">API Integrations</h2>
-          <p className="text-gray-600 mb-6">Manage and configure external integrations for your platform.</p>
+          <p className="text-gray-600 mb-6">Connect external services to extend platform functionality.</p>
           
-          <div className="space-y-4">
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-semibold mb-2">Gmail SMTP</h3>
-              <p className="text-sm text-gray-600 mb-3">Configure email notifications</p>
-              <Button variant="outline" className="text-sm">Configure</Button>
-            </div>
+          <div className="space-y-3">
+            {Object.values(availableIntegrations).map((integration) => (
+              <div
+                key={integration.id}
+                className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{integration.name}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{integration.description}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-medium px-3 py-1 rounded-full ${
+                      integration.configured
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}>
+                      {integration.configured ? 'Connected' : 'Not Connected'}
+                    </span>
+                    <Button
+                      onClick={() => setExpandedIntegration(
+                        expandedIntegration === integration.id ? null : integration.id
+                      )}
+                      variant="outline"
+                      className="text-sm"
+                    >
+                      {expandedIntegration === integration.id ? 'Hide' : 'Configure'}
+                    </Button>
+                  </div>
+                </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-semibold mb-2">Stripe</h3>
-              <p className="text-sm text-gray-600 mb-3">Payment processing</p>
-              <Button variant="outline" className="text-sm">Configure</Button>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-semibold mb-2">Google Calendar</h3>
-              <p className="text-sm text-gray-600 mb-3">Event synchronization</p>
-              <Button variant="outline" className="text-sm">Configure</Button>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-semibold mb-2">YouTube Data API</h3>
-              <p className="text-sm text-gray-600 mb-3">Video integration and management</p>
-              <Button variant="outline" className="text-sm">Configure</Button>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="font-semibold mb-2">Google Maps / Places</h3>
-              <p className="text-sm text-gray-600 mb-3">Location services and mapping</p>
-              <Button variant="outline" className="text-sm">Configure</Button>
-            </div>
+                {expandedIntegration === integration.id && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                    {integration.fields.map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          {field.label}
+                        </label>
+                        <input
+                          type={field.type}
+                          placeholder={`Enter your ${field.label.toLowerCase()}`}
+                          value={integrationValues[integration.id]?.[field.key] || ''}
+                          onChange={(e) => {
+                            setIntegrationValues(prev => ({
+                              ...prev,
+                              [integration.id]: {
+                                ...prev[integration.id],
+                                [field.key]: e.target.value
+                              }
+                            }))
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                        />
+                      </div>
+                    ))}
+                    <Button
+                      onClick={() => {
+                        setMessage({ type: 'success', text: `${integration.name} integration saved` })
+                        setTimeout(() => setMessage(null), 3000)
+                      }}
+                      className="w-full bg-black text-white hover:bg-gray-900 mt-4"
+                    >
+                      Save Integration
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </Card>
         )}
