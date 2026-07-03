@@ -311,6 +311,7 @@ export default function SignupClient() {
                           { value: 'member', label: 'Member', desc: 'Community events & charity' },
                           { value: 'volunteer', label: 'Volunteer', desc: 'Member + contribute time & skills' },
                           { value: 'sponsor', label: 'Sponsor', desc: 'Support & partner opportunities' },
+                          { value: 'business', label: 'Business', desc: 'Company partnerships & corporate engagement' },
                         ].map(option => (
                           <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff' }}>
                             <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }} />
