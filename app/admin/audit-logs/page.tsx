@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { getAllAuditLogs, AuditLog } from '@/lib/admin-audit'
 import { format } from 'date-fns'
-import { ChevronDown, Search, Download } from 'lucide-react'
+import { ChevronDown, Search, Download, MapPin, Monitor, Globe } from 'lucide-react'
 
 export default function AuditLogsPage() {
   const { user: authUser } = useAuth()
@@ -233,25 +233,54 @@ export default function AuditLogsPage() {
                     padding: '1rem',
                     backgroundColor: '#f9f8f5',
                     borderTop: '1px solid #e4e1da',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '1rem',
                   }}>
-                    {log.details && (
-                      <div style={{ marginBottom: '1rem' }}>
-                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.5rem' }}>Details</p>
-                        <p style={{ fontSize: '0.875rem', color: '#666666', fontFamily: 'monospace' }}>{log.details}</p>
-                      </div>
-                    )}
-                    {log.changes && Object.keys(log.changes).length > 0 && (
-                      <div>
-                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.5rem' }}>Changes</p>
-                        <div style={{ fontSize: '0.875rem', color: '#666666' }}>
-                          {Object.entries(log.changes).map(([key, value]) => (
-                            <div key={key} style={{ marginBottom: '0.5rem' }}>
-                              <strong>{key}:</strong> {JSON.stringify(value.before)} → {JSON.stringify(value.after)}
-                            </div>
-                          ))}
+                    {/* Security Details */}
+                    <div>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.75rem' }}>Security Information</p>
+                      {log.ipAddress && (
+                        <div style={{ marginBottom: '0.75rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                            <Globe className="h-4 w-4" style={{ color: '#888888' }} />
+                            <span style={{ fontSize: '0.75rem', color: '#888888' }}>IP Address</span>
+                          </div>
+                          <p style={{ fontSize: '0.875rem', color: '#111111', fontFamily: 'monospace', marginLeft: '1.5rem' }}>{log.ipAddress}</p>
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {log.userAgent && (
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                            <Monitor className="h-4 w-4" style={{ color: '#888888' }} />
+                            <span style={{ fontSize: '0.75rem', color: '#888888' }}>User Agent</span>
+                          </div>
+                          <p style={{ fontSize: '0.75rem', color: '#666666', fontFamily: 'monospace', marginLeft: '1.5rem', wordBreak: 'break-word' }}>{log.userAgent}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Details and Changes */}
+                    <div>
+                      {log.details && (
+                        <div style={{ marginBottom: '1rem' }}>
+                          <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.5rem' }}>Details</p>
+                          <p style={{ fontSize: '0.875rem', color: '#666666', fontFamily: 'monospace' }}>{log.details}</p>
+                        </div>
+                      )}
+                      {log.changes && Object.keys(log.changes).length > 0 && (
+                        <div>
+                          <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.5rem' }}>Changes</p>
+                          <div style={{ fontSize: '0.75rem', color: '#666666' }}>
+                            {Object.entries(log.changes).map(([key, value]) => (
+                              <div key={key} style={{ marginBottom: '0.5rem' }}>
+                                <strong>{key}:</strong> {JSON.stringify(value.before)} → {JSON.stringify(value.after)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
