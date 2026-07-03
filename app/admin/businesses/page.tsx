@@ -81,6 +81,16 @@ export default function BusinessesPage() {
       ),
     },
     {
+      key: 'dateJoined',
+      label: 'Registration Date',
+      width: '150px',
+      render: (value: any) => {
+        if (!value) return '-'
+        const date = value.toDate ? value.toDate() : new Date(value)
+        return <span style={{ color: '#888888' }}>{date.toLocaleDateString()}</span>
+      },
+    },
+    {
       key: 'createdAt',
       label: 'Listed',
       width: '150px',

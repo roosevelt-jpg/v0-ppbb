@@ -131,6 +131,7 @@ export default function AdminMembersPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Volunteer Hours</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Joined</th>
                 </tr>
@@ -145,7 +146,10 @@ export default function AdminMembersPage() {
                         {member.role || member.userType || 'member'}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{member.location?.city || member.location || '-'}</td>
+                    <td className="px-6 py-3 text-sm text-gray-600">{member.location?.city || member.emirate || member.location || '-'}</td>
+                    <td className="px-6 py-3 text-sm">
+                      <span className="font-medium text-gray-900">{member.volunteerHours || 0} hrs</span>
+                    </td>
                     <td className="px-6 py-3 text-sm">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         member.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -154,7 +158,7 @@ export default function AdminMembersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
-                      {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : '-'}
+                      {member.dateJoined ? new Date(member.dateJoined).toLocaleDateString() : member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : '-'}
                     </td>
                   </tr>
                 ))}
