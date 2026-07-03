@@ -5,11 +5,14 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { SiteSettings } from '@/lib/types'
-import { Save, AlertCircle, Upload, X, Share2, Globe, MessageCircle } from 'lucide-react'
+import { Save, AlertCircle, Upload, X, Share2, Globe, MessageCircle, Settings, Mail, Link2, Zap } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
+type TabType = 'general' | 'contact' | 'social' | 'integrations'
+
 export default function AdminSettings() {
+  const [activeTab, setActiveTab] = React.useState<TabType>('general')
   const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
@@ -147,6 +150,13 @@ export default function AdminSettings() {
     )
   }
 
+  const tabs: Array<{ id: TabType; label: string; icon: React.ReactNode }> = [
+    { id: 'general', label: 'General', icon: <Settings className="w-4 h-4" /> },
+    { id: 'contact', label: 'Contact', icon: <Mail className="w-4 h-4" /> },
+    { id: 'social', label: 'Social Media', icon: <Share2 className="w-4 h-4" /> },
+    { id: 'integrations', label: 'Integrations', icon: <Zap className="w-4 h-4" /> },
+  ]
+
   return (
     <AdminPageLayout title="Settings" subtitle="Configure platform settings">
       <div className="space-y-6">
@@ -163,7 +173,28 @@ export default function AdminSettings() {
           </div>
         )}
 
-        {/* Site Branding */}
+        {/* Tab Navigation */}
+        <div className="border-b border-gray-200">
+          <div className="flex gap-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-3 px-1 border-b-2 font-medium flex items-center gap-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* General Tab */}
+        {activeTab === 'general' && (
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span className="w-5 h-5 bg-black rounded" />
@@ -240,8 +271,10 @@ export default function AdminSettings() {
             </div>
           </div>
         </Card>
+        )}
 
-        {/* Contact Information */}
+        {/* Contact Tab */}
+        {activeTab === 'contact' && (
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Contact Information</h2>
 
@@ -277,8 +310,10 @@ export default function AdminSettings() {
             </div>
           </div>
         </Card>
+        )}
 
-        {/* Social Media Links */}
+        {/* Social Tab */}
+        {activeTab === 'social' && (
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Social Media Links</h2>
 
@@ -308,6 +343,47 @@ export default function AdminSettings() {
             ))}
           </div>
         </Card>
+        )}
+
+        {/* Integrations Tab */}
+        {activeTab === 'integrations' && (
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">API Integrations</h2>
+          <p className="text-gray-600 mb-6">Manage and configure external integrations for your platform.</p>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold mb-2">Gmail SMTP</h3>
+              <p className="text-sm text-gray-600 mb-3">Configure email notifications</p>
+              <Button variant="outline" className="text-sm">Configure</Button>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold mb-2">Stripe</h3>
+              <p className="text-sm text-gray-600 mb-3">Payment processing</p>
+              <Button variant="outline" className="text-sm">Configure</Button>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold mb-2">Google Calendar</h3>
+              <p className="text-sm text-gray-600 mb-3">Event synchronization</p>
+              <Button variant="outline" className="text-sm">Configure</Button>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold mb-2">YouTube Data API</h3>
+              <p className="text-sm text-gray-600 mb-3">Video integration and management</p>
+              <Button variant="outline" className="text-sm">Configure</Button>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold mb-2">Google Maps / Places</h3>
+              <p className="text-sm text-gray-600 mb-3">Location services and mapping</p>
+              <Button variant="outline" className="text-sm">Configure</Button>
+            </div>
+          </div>
+        </Card>
+        )}
 
         {/* Save Button */}
         <div className="flex justify-end">
