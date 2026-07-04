@@ -12,7 +12,7 @@ import { Loader2, Eye, EyeOff } from 'lucide-react'
 const STEPS = [
   { id: 1, label: 'Personal info & account' },
   { id: 2, label: 'Verify & activate' },
-  { id: 3, label: 'Add business profile (optional)' },
+  { id: 3, label: 'Complete profile' },
 ]
 
 const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
@@ -41,13 +41,12 @@ export default function SignupClient() {
     bio: '',
     consentTerms: false,
     consentPrivacy: false,
-    // Business fields (Step 3)
+    // Business fields (Step 3, for business user type)
     businessName: '',
     businessType: '',
     businessRegistration: '',
     businessLocation: '',
     businessDescription: '',
-    wantsBusiness: false,
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -190,8 +189,8 @@ export default function SignupClient() {
         skills: formData.skills,
 
         // Role management
-        role: formData.wantsBusiness ? 'business' : formData.memberType,
-        roles: formData.wantsBusiness ? ['business', 'member'] : [formData.memberType],
+        role: formData.memberType,
+        roles: [formData.memberType],
 
         // User preferences
         language: 'en',
@@ -216,8 +215,8 @@ export default function SignupClient() {
         volunteerHours: 0,
       }
       
-      // Add business profile if user selected it
-      if (formData.wantsBusiness) {
+      // Add business profile if user type is business
+      if (formData.memberType === 'business') {
         userData.business = {
           name: formData.businessName,
           type: formData.businessType,
@@ -303,14 +302,12 @@ export default function SignupClient() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Create your account</h2>
                     
-                    {/* Member Type */}
+                    {/* User Type */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>I want to join as</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                         {[
-                          { value: 'member', label: 'Member', desc: 'Community events & charity' },
-                          { value: 'volunteer', label: 'Volunteer', desc: 'Member + contribute time & skills' },
-                          { value: 'sponsor', label: 'Sponsor', desc: 'Support & partner opportunities' },
+                          { value: 'member', label: 'Member', desc: 'Join our community & participate in activities' },
                           { value: 'business', label: 'Business', desc: 'Company partnerships & corporate engagement' },
                         ].map(option => (
                           <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff' }}>
@@ -462,104 +459,92 @@ export default function SignupClient() {
                   </div>
                 )}
 
-                {currentStep === 3 && (
+                {currentStep === 3 && formData.memberType === 'member' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Business profile (optional)</h2>
-                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>You can add a business profile now or skip this for later. You can always upgrade to a business account from your dashboard.</p>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>All set!</h2>
+                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>Your member account has been created successfully. Complete your signup to access your dashboard.</p>
                     
-                    {/* Business Option Checkbox */}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.75rem', backgroundColor: '#f7f6f2', borderRadius: '0.375rem' }}>
+                    <div style={{ padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem', border: '1px solid #bbf7d0' }}>
+                      <p style={{ fontSize: '0.875rem', color: '#166534', fontWeight: 600 }}>Welcome to Passive Blessings!</p>
+                      <p style={{ fontSize: '0.875rem', color: '#166534', marginTop: '0.5rem' }}>You can become a volunteer or sponsor by filling out forms from your member dashboard.</p>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 3 && formData.memberType === 'business' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Business profile</h2>
+                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>Complete your business information to activate your business account.</p>
+                    
+                    {/* Business Name */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Name *</label>
                       <input 
-                        type="checkbox" 
-                        name="wantsBusiness" 
-                        checked={formData.wantsBusiness} 
+                        type="text" 
+                        name="businessName" 
+                        value={formData.businessName} 
                         onChange={handleInputChange} 
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }} 
+                        placeholder="Your company name" 
+                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
                       />
-                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#111111' }}>Yes, I want to register a business</span>
-                    </label>
+                    </div>
 
-                    {/* Business Form Fields (shown only if wantsBusiness is checked) */}
-                    {formData.wantsBusiness && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', paddingTop: '0.5rem', borderTop: '1px solid #e4e1da' }}>
-                        {/* Business Name */}
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Name *</label>
-                          <input 
-                            type="text" 
-                            name="businessName" 
-                            value={formData.businessName} 
-                            onChange={handleInputChange} 
-                            placeholder="Your company name" 
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
-                          />
-                        </div>
+                    {/* Business Type */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Type *</label>
+                      <select 
+                        name="businessType" 
+                        value={formData.businessType} 
+                        onChange={handleInputChange} 
+                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                      >
+                        <option value="">Select business type</option>
+                        <option value="nonprofit">Non-profit Organization</option>
+                        <option value="social">Social Enterprise</option>
+                        <option value="corporation">Corporation</option>
+                        <option value="small-business">Small Business</option>
+                        <option value="freelance">Freelance/Consultant</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
 
-                        {/* Business Type */}
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Type *</label>
-                          <select 
-                            name="businessType" 
-                            value={formData.businessType} 
-                            onChange={handleInputChange} 
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                          >
-                            <option value="">Select business type</option>
-                            <option value="nonprofit">Non-profit Organization</option>
-                            <option value="social">Social Enterprise</option>
-                            <option value="corporation">Corporation</option>
-                            <option value="small-business">Small Business</option>
-                            <option value="freelance">Freelance/Consultant</option>
-                            <option value="other">Other</option>
-                          </select>
-                        </div>
+                    {/* Business Registration */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Registration Number (optional)</label>
+                      <input 
+                        type="text" 
+                        name="businessRegistration" 
+                        value={formData.businessRegistration} 
+                        onChange={handleInputChange} 
+                        placeholder="Business registration number" 
+                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
+                      />
+                    </div>
 
-                        {/* Business Registration */}
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Registration Number (optional)</label>
-                          <input 
-                            type="text" 
-                            name="businessRegistration" 
-                            value={formData.businessRegistration} 
-                            onChange={handleInputChange} 
-                            placeholder="Business registration number" 
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
-                          />
-                        </div>
+                    {/* Business Location */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Location *</label>
+                      <input 
+                        type="text" 
+                        name="businessLocation" 
+                        value={formData.businessLocation} 
+                        onChange={handleInputChange} 
+                        placeholder="City/Emirate or address" 
+                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
+                      />
+                    </div>
 
-                        {/* Business Location */}
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Location *</label>
-                          <input 
-                            type="text" 
-                            name="businessLocation" 
-                            value={formData.businessLocation} 
-                            onChange={handleInputChange} 
-                            placeholder="City/Emirate or address" 
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
-                          />
-                        </div>
-
-                        {/* Business Description */}
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>About Your Business (optional)</label>
-                          <textarea 
-                            name="businessDescription" 
-                            value={formData.businessDescription} 
-                            onChange={handleInputChange} 
-                            placeholder="Tell us about your business..." 
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', minHeight: '80px', fontFamily: 'inherit' }} 
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {!formData.wantsBusiness && (
-                      <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem', border: '1px solid #e4e1da' }}>
-                        <p style={{ fontSize: '0.875rem', color: '#666', fontWeight: 600 }}>Your personal account is ready to go!</p>
-                        <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>You can add a business profile anytime from your dashboard.</p>
-                      </div>
-                    )}
+                    {/* Business Description */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>About Your Business (optional)</label>
+                      <textarea 
+                        name="businessDescription" 
+                        value={formData.businessDescription} 
+                        onChange={handleInputChange} 
+                        placeholder="Tell us about your business..." 
+                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', minHeight: '80px', fontFamily: 'inherit' }} 
+                      />
+                    </div>
                   </div>
                 )}
               </div>
