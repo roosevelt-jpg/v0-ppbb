@@ -133,145 +133,155 @@ function SettingsContent() {
           <h2 className="text-xl font-bold mb-6">Personal Information</h2>
           
           {editing ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">First Name</label>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium mb-2 block">First Name</label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                    className="w-full mt-1 px-3 py-2 border rounded"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Last Name</label>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium mb-2 block">Last Name</label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                    className="w-full mt-1 px-3 py-2 border rounded"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Phone</label>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-2 block">Email</label>
+                <input
+                  type="email"
+                  value={formData.email || user?.email}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-600"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-2 block">Phone</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full mt-1 px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Location</label>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-2 block">Location</label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  className="w-full mt-1 px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Bio</label>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-2 block">Bio</label>
                 <textarea
                   value={formData.bio}
                   onChange={(e) => setFormData({...formData, bio: e.target.value})}
                   placeholder="Tell us about yourself"
-                  rows={3}
-                  className="w-full mt-1 px-3 py-2 border rounded"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black resize-none"
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Skills (comma-separated)</label>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-2 block">Skills (comma-separated)</label>
                 <input
                   type="text"
                   value={formData.skills.join(', ')}
-                  onChange={(e) => setFormData({...formData, skills: e.target.value.split(',').map(s => s.trim())})}
+                  onChange={(e) => setFormData({...formData, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
                   placeholder="e.g., Teaching, Cooking, Programming"
-                  className="w-full mt-1 px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Interested Departments (comma-separated)</label>
+              <div className="flex flex-col">
+                <label className="text-sm font-medium mb-2 block">Interested Departments (comma-separated)</label>
                 <input
                   type="text"
                   value={formData.departments.join(', ')}
-                  onChange={(e) => setFormData({...formData, departments: e.target.value.split(',').map(d => d.trim())})}
+                  onChange={(e) => setFormData({...formData, departments: e.target.value.split(',').map(d => d.trim()).filter(Boolean)})}
                   placeholder="e.g., Education, Healthcare, Community Service"
-                  className="w-full mt-1 px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button onClick={handleSaveProfile} disabled={saving} className="bg-black hover:bg-gray-800 text-white">{saving ? 'Saving...' : 'Save Changes'}</Button>
-                <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+              <div className="flex gap-3 pt-4">
+                <Button onClick={handleSaveProfile} disabled={saving} className="bg-black hover:bg-gray-800 text-white px-6">{saving ? 'Saving...' : 'Save Changes'}</Button>
+                <Button variant="outline" onClick={() => setEditing(false)} className="border-gray-300 text-black hover:bg-gray-50">Cancel</Button>
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-muted-foreground">First Name</p>
-                  <p className="font-medium">{user?.firstName || '-'}</p>
+                  <p className="text-sm text-gray-500 mb-1">First Name</p>
+                  <p className="font-medium text-gray-900">{user?.firstName || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Last Name</p>
-                  <p className="font-medium">{user?.lastName || '-'}</p>
+                  <p className="text-sm text-gray-500 mb-1">Last Name</p>
+                  <p className="font-medium text-gray-900">{user?.lastName || '-'}</p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{user?.email}</p>
+                <p className="text-sm text-gray-500 mb-1">Email</p>
+                <p className="font-medium text-gray-900">{user?.email}</p>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{user?.phone || '-'}</p>
+                <p className="text-sm text-gray-500 mb-1">Phone</p>
+                <p className="font-medium text-gray-900">{user?.phone || '-'}</p>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">Location</p>
-                <p className="font-medium">{user?.location || '-'}</p>
+                <p className="text-sm text-gray-500 mb-1">Location</p>
+                <p className="font-medium text-gray-900">{user?.location || '-'}</p>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">Bio</p>
-                <p className="font-medium">{user?.bio || '-'}</p>
+                <p className="text-sm text-gray-500 mb-1">Bio</p>
+                <p className="font-medium text-gray-900 whitespace-pre-wrap">{user?.bio || '-'}</p>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">Skills</p>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <p className="text-sm text-gray-500 mb-2">Skills</p>
+                <div className="flex flex-wrap gap-2">
                   {user?.skills && user.skills.length > 0 ? (
                     user.skills.map((skill: string) => (
-                      <span key={skill} className="px-3 py-1 bg-gray-100 text-black rounded-full text-sm">
+                      <span key={skill} className="px-3 py-1 bg-gray-200 text-gray-900 rounded-full text-sm font-medium">
                         {skill}
                       </span>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">No skills added</p>
+                    <p className="text-sm text-gray-500">No skills added</p>
                   )}
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground">Interested Departments</p>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <p className="text-sm text-gray-500 mb-2">Interested Departments</p>
+                <div className="flex flex-wrap gap-2">
                   {user?.departments && user.departments.length > 0 ? (
                     user.departments.map((dept: string) => (
-                      <span key={dept} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                      <span key={dept} className="px-3 py-1 bg-black text-white rounded-full text-sm font-medium">
                         {dept}
                       </span>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">No departments selected</p>
+                    <p className="text-sm text-gray-500">No departments selected</p>
                   )}
                 </div>
               </div>

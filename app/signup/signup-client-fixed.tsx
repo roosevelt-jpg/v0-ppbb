@@ -231,15 +231,11 @@ export default function SignupClient() {
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)
 
-      // Show success message and redirect to dashboard
+      // Redirect to success page instead of auto-logging in
       setError('')
-      // Automatically redirect to dashboard after 1.5 seconds
       setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
-      
-      // Show success state
-      setFormData(prev => ({ ...prev, email: 'success' }))
+        router.push('/signup/success')
+      }, 500)
     } catch (err: any) {
       console.error('[v0] Signup error:', err)
       if (err.code === 'auth/email-already-in-use') {
