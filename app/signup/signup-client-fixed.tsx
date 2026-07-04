@@ -8,6 +8,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
+import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
 
 const STEPS = [
   { id: 1, label: 'Personal info & account' },
@@ -37,6 +38,9 @@ export default function SignupClient() {
     phone: '',
     country: 'United Arab Emirates',
     emirate: 'Dubai',
+    gender: '',
+    dateOfBirth: '',
+    placesData: null as any,
     skills: [] as string[],
     bio: '',
     consentTerms: false,
@@ -76,6 +80,10 @@ export default function SignupClient() {
       }
       if (!formData.lastName.trim()) {
         setError('Last name is required')
+        return false
+      }
+      if (!formData.gender) {
+        setError('Please select your gender')
         return false
       }
       if (!formData.email.trim()) {
@@ -126,8 +134,12 @@ export default function SignupClient() {
         setError('Phone number is required')
         return false
       }
+      if (!formData.dateOfBirth) {
+        setError('Date of birth is required')
+        return false
+      }
       if (!formData.emirate) {
-        setError('Please select your emirate')
+        setError('Please select your address')
         return false
       }
     }
@@ -185,6 +197,9 @@ export default function SignupClient() {
         country: formData.country,
         emirate: formData.emirate,
         location: formData.emirate, // For location-based queries
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null,
+        placesData: formData.placesData,
         bio: formData.bio,
         skills: formData.skills,
 
@@ -329,6 +344,19 @@ export default function SignupClient() {
                       </div>
                     </div>
 
+                    {/* Gender */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Gender</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.375rem' }}>
+                        {['Male', 'Female', 'Other', 'Prefer not to say'].map(g => (
+                          <label key={g} style={{ display: 'flex', alignItems: 'center', padding: '0.5rem', border: `1px solid ${formData.gender === g ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', backgroundColor: formData.gender === g ? '#f7f6f2' : '#fff', transition: 'all 0.2s' }}>
+                            <input type="radio" name="gender" value={g} checked={formData.gender === g} onChange={handleInputChange} style={{ width: '14px', height: '14px', cursor: 'pointer', flexShrink: 0 }} />
+                            <span style={{ fontSize: '0.7rem', marginLeft: '0.375rem', color: '#111111', fontWeight: 500 }}>{g}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Email */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Email Address *</label>
@@ -403,14 +431,27 @@ export default function SignupClient() {
                       <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+971 50 1234567" style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
                     </div>
 
-                    {/* Emirate */}
+                    {/* Date of Birth */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Your Emirate *</label>
-                      <select name="emirate" value={formData.emirate} onChange={handleInputChange} style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}>
-                        {EMIRATES.map(em => (
-                          <option key={em} value={em}>{em}</option>
-                        ))}
-                      </select>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Date of Birth *</label>
+                      <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} max={new Date().toISOString().split('T')[0]} style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
+                    </div>
+
+                    {/* Address - Google Places */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Your Address *</label>
+                      <GooglePlacesAutocomplete
+                        value={formData.emirate}
+                        onChange={(place: any) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            emirate: place.mainText || place.placeId,
+                            placesData: place,
+                          }))
+                        }}
+                        countryRestrictions={['ae']}
+                        placeholder="Enter your address in UAE"
+                      />
                     </div>
 
                     {/* Skills (if volunteer/sponsor) */}

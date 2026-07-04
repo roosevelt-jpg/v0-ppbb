@@ -10,16 +10,19 @@ export async function GET(request: NextRequest) {
     const search = request.nextUrl.searchParams.get('search')
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '1000')
 
-    let query = db.collection('users').limit(limit)
+    let query = db.collection('users').orderBy('dateJoined', 'desc').limit(limit)
 
     const snapshot = await query.get()
     let members = snapshot.docs.map(doc => {
       const data = doc.data()
+      const dateJoined = data.dateJoined?.toDate?.() || (data.dateJoined instanceof Date ? data.dateJoined : new Date(data.dateJoined))
+      const createdAt = data.createdAt?.toDate?.() || (data.createdAt instanceof Date ? data.createdAt : new Date(data.createdAt))
       return {
         id: doc.id,
         ...data,
+        dateJoined: dateJoined,
         joinedAt: data.joinedAt?.toDate?.() || data.joinedAt,
-        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        createdAt: createdAt,
       }
     })
 
