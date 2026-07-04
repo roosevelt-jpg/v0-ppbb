@@ -91,8 +91,8 @@ export function OpportunitiesList() {
             onClick={() => setTypeFilter(t)}
             className={`px-4 py-2 rounded-lg font-medium capitalize transition-colors ${
               typeFilter === t
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:opacity-80'
+                ? 'bg-black text-white hover:bg-gray-800'
+                : 'bg-white border border-gray-300 text-black hover:bg-gray-50'
             }`}
           >
             {t === 'all' ? 'All' : TYPE_LABELS[t]}

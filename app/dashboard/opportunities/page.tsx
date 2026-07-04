@@ -5,7 +5,7 @@ import { OpportunitiesList } from '@/components/opportunities-list'
 import { useAuth } from '@/lib/auth-context'
 import { getMemberApplications } from '@/lib/business-queries'
 import { JobApplication } from '@/lib/types'
-import { Building2, Clock } from 'lucide-react'
+import { Building2, Clock, AlertCircle } from 'lucide-react'
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-secondary text-secondary-foreground',
@@ -75,7 +75,9 @@ export default function DashboardOpportunitiesPage() {
       </div>
 
       {tab === 'browse' ? (
-        <OpportunitiesList />
+        <div>
+          <OpportunitiesList />
+        </div>
       ) : error ? (
         <div className="text-center py-12 border border-red-200 rounded-lg bg-red-50">
           <p className="text-red-700 font-semibold">{error}</p>

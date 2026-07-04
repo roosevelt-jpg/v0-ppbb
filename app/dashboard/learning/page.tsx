@@ -70,14 +70,17 @@ export default function LearningPage() {
         {/* Filter */}
         <div className="flex gap-2">
           {['all', 'video', 'document', 'workshop'].map((f) => (
-            <Button
+            <button
               key={f}
-              variant={filter === f ? 'default' : 'outline'}
               onClick={() => setFilter(f)}
-              className="capitalize"
+              className={`px-4 py-2 rounded-lg font-medium capitalize transition-colors ${
+                filter === f
+                  ? 'bg-black text-white hover:bg-gray-800'
+                  : 'bg-white border border-gray-300 text-black hover:bg-gray-50'
+              }`}
             >
               {f}
-            </Button>
+            </button>
           ))}
         </div>
 
