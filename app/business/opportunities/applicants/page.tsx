@@ -9,6 +9,8 @@ import { JobApplication } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Mail, Phone, FileText } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 const STATUS_OPTIONS: JobApplication['status'][] = [
   'pending',
   'reviewing',
