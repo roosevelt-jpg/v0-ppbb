@@ -144,6 +144,21 @@ export default function SignupClient() {
       }
     }
 
+    if (step === 3 && formData.memberType === 'business') {
+      if (!formData.businessName.trim()) {
+        setError('Business name is required')
+        return false
+      }
+      if (!formData.businessType) {
+        setError('Please select a business type')
+        return false
+      }
+      if (!formData.businessLocation.trim()) {
+        setError('Business location is required')
+        return false
+      }
+    }
+
     return true
   }
 
@@ -203,9 +218,9 @@ export default function SignupClient() {
         bio: formData.bio,
         skills: formData.skills,
 
-        // Role management
+        // Role management - business users get BOTH member and business roles
         role: formData.memberType,
-        roles: [formData.memberType],
+        roles: formData.memberType === 'business' ? ['member', 'business'] : [formData.memberType],
 
         // User preferences
         language: 'en',

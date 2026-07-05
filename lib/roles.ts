@@ -24,13 +24,25 @@ export function hasRole(
 
 /**
  * Whether the user can access the business portal. True if they have the
- * `business` role, or are an admin/super_admin (who can view everything).
+ * `business` role AND the 'member' role (golden rule: business users must be members),
+ * or are an admin/super_admin (who can view everything).
  */
 export function hasBusinessAccess(
   user: Pick<User, 'role' | 'roles'> | null | undefined
 ): boolean {
   const roles = getUserRoles(user)
-  return roles.includes('business') || roles.includes('admin') || roles.includes('super_admin')
+  
+  // Admins can always access
+  if (roles.includes('admin') || roles.includes('super_admin')) {
+    return true
+  }
+  
+  // Business users must also have member role
+  if (roles.includes('business')) {
+    return roles.includes('member')
+  }
+  
+  return false
 }
 
 /** Whether the user has any admin-level access. */
