@@ -1,8 +1,10 @@
 import { Timestamp } from 'firebase/firestore'
 
-export type GenderRestriction = 'mixed' | 'men-only' | 'ladies-only'
+export type GenderRestriction = 'mixed' | 'male' | 'female'
 export type CommunityStatus = 'active' | 'inactive' | 'archived'
+export type CommunityVisibility = 'public' | 'private' | 'restricted'
 export type GroupType = 'discussion' | 'support' | 'prayer' | 'skill-share' | 'networking'
+export type CommunityCategory = 'general' | 'interest' | 'support' | 'events' | 'volunteer' | 'business' | 'charity'
 
 export interface Member {
   id: string
@@ -20,9 +22,11 @@ export interface Community {
   description: string
   bannerURL: string
   logoURL?: string
-  category: string
+  category: CommunityCategory
   tags: string[]
   genderRestriction: GenderRestriction
+  visibility: CommunityVisibility
+  rules: string[]
   isFeatured: boolean
   status: CommunityStatus
 

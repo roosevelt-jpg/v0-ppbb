@@ -55,7 +55,7 @@ const adminMenuItems = [
   { label: 'Businesses', href: '/admin/businesses', icon: Store, group: 'Users' },
 
   // Community & Events
-  { label: 'Community', href: '/admin/community', icon: Users, group: 'Community' },
+  { label: 'Community', href: '/admin/communities', icon: Users, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
   { label: 'Workshops', href: '/admin/workshops', icon: Calendar, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },

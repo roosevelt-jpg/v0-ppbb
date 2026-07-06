@@ -132,6 +132,21 @@ export default function CommunityDetailPage() {
             )}
           </div>
 
+          {/* Rules */}
+          {community.rules && community.rules.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-bold text-black mb-3">Community Rules</h3>
+              <ul className="space-y-2">
+                {community.rules.map((rule, idx) => (
+                  <li key={idx} className="text-sm text-gray-700 flex gap-2">
+                    <span className="font-bold text-blue-600">{idx + 1}.</span>
+                    <span>{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -199,6 +214,17 @@ export default function CommunityDetailPage() {
                       )}
                     </div>
 
+                    {/* Gender Restriction Badge */}
+                    {group.genderRestriction !== 'mixed' && (
+                      <div className={`text-xs font-medium px-3 py-1 rounded-full inline-block ${
+                        group.genderRestriction === 'male'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-pink-100 text-pink-700'
+                      }`}>
+                        {group.genderRestriction === 'male' ? 'Men Only' : 'Women Only'}
+                      </div>
+                    )}
+
                     {/* Group Stats */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                       <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -214,10 +240,10 @@ export default function CommunityDetailPage() {
                     {isRestricted && (
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
                         <p className="text-amber-900 font-medium">
-                          {group.genderRestriction === 'male' ? 'Men Only' : 'Women Only'}
+                          {group.genderRestriction === 'male' ? 'Men Only Group' : 'Women Only Group'}
                         </p>
                         <p className="text-amber-700 text-xs mt-1">
-                          This group is restricted to {group.genderRestriction === 'male' ? 'male' : 'female'} members only
+                          This group is restricted to {group.genderRestriction === 'male' ? 'men' : 'women'} only
                         </p>
                       </div>
                     )}

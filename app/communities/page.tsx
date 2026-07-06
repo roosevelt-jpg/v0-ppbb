@@ -22,7 +22,7 @@ export default function CommunitiesPage() {
 
   React.useEffect(() => {
     const unsubscribe = subscribeToAllCommunities((data) => {
-      setCommunities(data.filter(c => c.status === 'active'))
+      setCommunities(data.filter(c => c.status === 'active' && c.visibility === 'public'))
       setLoading(false)
     })
     return () => unsubscribe()
@@ -131,8 +131,8 @@ export default function CommunitiesPage() {
               >
                 <option value="all">All</option>
                 <option value="mixed">All genders</option>
-                <option value="men-only">Men only</option>
-                <option value="ladies-only">Ladies only</option>
+                <option value="male">Men only</option>
+                <option value="female">Women only</option>
               </select>
             </div>
 
