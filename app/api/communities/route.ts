@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
       bannerURL,
       isFeatured,
       createdBy,
+      businessId,
     } = body
 
     const docRef = await db.collection('communities').add({
@@ -80,11 +81,13 @@ export async function POST(request: NextRequest) {
       memberCount: 1,
       groupCount: 0,
       createdBy,
+      businessId: businessId || null,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     })
 
-    return NextResponse.json({ success: true, id: docRef.id })
+    const doc = await db.collection('communities').doc(docRef.id).get()
+    return NextResponse.json({ success: true, data: { id: docRef.id, ...doc.data() } })
   } catch (error) {
     console.error('[v0] Error creating community:', error)
     return NextResponse.json({ success: false, error: 'Failed to create community' }, { status: 500 })

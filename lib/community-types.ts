@@ -34,6 +34,7 @@ export interface Community {
   groupCount: number
 
   createdBy: string
+  businessId?: string
   createdAt: Timestamp | Date
   updatedAt: Timestamp | Date
 

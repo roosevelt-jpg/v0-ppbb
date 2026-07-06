@@ -11,6 +11,7 @@ import {
   BusinessAnalytics,
   JobApplication,
 } from '@/lib/types'
+import { Community } from '@/lib/community-types'
 import {
   collection,
   doc,
@@ -458,6 +459,50 @@ export async function updatePayment(paymentId: string, data: Partial<BusinessPay
     ...data,
     updatedAt: Timestamp.now(),
   })
+}
+
+// BUSINESS COMMUNITIES QUERIES
+
+export function subscribeToBusinessCommunities(
+  businessId: string,
+  callback: (communities: Community[]) => void
+) {
+  const q = query(
+    collection(db, 'communities'),
+    where('businessId', '==', businessId),
+    orderBy('createdAt', 'desc')
+  )
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const communities = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
+        updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
+      })) as Community[]
+      callback(communities)
+    },
+    (error) => {
+      console.error('[v0] Error in subscribeToBusinessCommunities:', error)
+      callback([])
+    }
+  )
+}
+
+export async function getBusinessCommunities(businessId: string): Promise<Community[]> {
+  const q = query(
+    collection(db, 'communities'),
+    where('businessId', '==', businessId),
+    orderBy('createdAt', 'desc')
+  )
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
+    updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
+  })) as Community[]
 }
 
 // BUSINESS ANALYTICS QUERIES

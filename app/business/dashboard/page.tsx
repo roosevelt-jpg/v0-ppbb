@@ -234,6 +234,89 @@ export default function BusinessDashboard() {
           </div>
         </Card>
 
+        {/* Community & Events Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Events Card */}
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600 }}>
+                Events
+              </h3>
+              <Button
+                onClick={() => router.push('/business/events/create')}
+                style={{
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
+                  padding: '8px 12px',
+                  fontSize: '14px',
+                  borderRadius: '6px',
+                }}
+                className="hover:bg-black"
+              >
+                Create Event
+              </Button>
+            </div>
+            <p style={{ color: '#888888', fontSize: '14px', marginBottom: '16px' }}>
+              Host events and connect with community members
+            </p>
+            <button
+              onClick={() => router.push('/business/events')}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#111111',
+                color: '#ffffff',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+              }}
+              className="hover:bg-black transition-colors"
+            >
+              View All Events
+            </button>
+          </Card>
+
+          {/* Communities Card */}
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600 }}>
+                Communities
+              </h3>
+              <Button
+                onClick={() => router.push('/business/communities/create')}
+                style={{
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
+                  padding: '8px 12px',
+                  fontSize: '14px',
+                  borderRadius: '6px',
+                }}
+                className="hover:bg-black"
+              >
+                Create Community
+              </Button>
+            </div>
+            <p style={{ color: '#888888', fontSize: '14px', marginBottom: '16px' }}>
+              Build communities and groups for your business
+            </p>
+            <button
+              onClick={() => router.push('/business/communities')}
+              style={{
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#111111',
+                color: '#ffffff',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+              }}
+              className="hover:bg-black transition-colors"
+            >
+              View All Communities
+            </button>
+          </Card>
+        </div>
+
         {/* Navigation Grid */}
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
           <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>

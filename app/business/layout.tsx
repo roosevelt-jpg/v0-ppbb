@@ -23,11 +23,15 @@ import {
   Moon,
   Sun,
   Globe,
+  Calendar,
+  Users2,
 } from 'lucide-react'
 
 const businessMenuItems = [
   { label: 'Dashboard', href: '/business/dashboard', icon: BarChart3 },
   { label: 'Profile', href: '/business/profile', icon: Users },
+  { label: 'Events', href: '/business/events', icon: Calendar },
+  { label: 'Communities', href: '/business/communities', icon: Users2 },
   { label: 'Opportunities', href: '/business/opportunities', icon: Briefcase },
   { label: 'Offers', href: '/business/offers', icon: ShoppingBag },
   { label: 'Leads', href: '/business/leads', icon: Zap },
