@@ -6,12 +6,14 @@ import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { useAuth } from '@/lib/auth-context'
-import { ChevronLeft, Send, Upload, Download, FileText, Play } from 'lucide-react'
+import { ChevronLeft, Send, Upload, Download, FileText, Play, Smile, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'
 import { uploadGroupFile, getFileType } from '@/lib/firebase-storage'
 import { format } from 'date-fns'
+import EmojiPicker from 'emoji-picker-react'
+import { addEmojiReaction, removeEmojiReaction, editMessage, deleteMessage, markMessageAsRead } from '@/lib/chat-utils'
 
 interface Message {
   id: string
@@ -22,6 +24,11 @@ interface Message {
   fileURL?: string
   fileType?: 'image' | 'video' | 'pdf' | 'file'
   sentAt: any
+  edited?: boolean
+  editedAt?: any
+  isDeleted?: boolean
+  reactions?: { emoji: string; users: string[] }[]
+  readBy?: { userId: string; readAt: any }[]
 }
 
 interface Group {
@@ -47,6 +54,10 @@ export default function GroupChatPage() {
   const [sending, setSending] = React.useState(false)
   const [uploading, setUploading] = React.useState(false)
   const [isMember, setIsMember] = React.useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = React.useState(false)
+  const [emojiPickerFor, setEmojiPickerFor] = React.useState<string | null>(null)
+  const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [editText, setEditText] = React.useState('')
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
   // Check membership and load group
@@ -147,6 +158,8 @@ export default function GroupChatPage() {
         fileURL,
         fileType,
         sentAt: serverTimestamp(),
+        reactions: [],
+        readBy: [{ userId: user.id, readAt: serverTimestamp() }],
       })
     } catch (error) {
       console.error('[v0] Error uploading file:', error)
@@ -154,6 +167,53 @@ export default function GroupChatPage() {
     } finally {
       setUploading(false)
     }
+  }
+
+  const handleAddReaction = async (messageId: string, emoji: string) => {
+    if (!user) return
+    try {
+      await addEmojiReaction(communityId, groupId, messageId, emoji, user.id)
+      setShowEmojiPicker(false)
+      setEmojiPickerFor(null)
+    } catch (error) {
+      console.error('[v0] Error adding reaction:', error)
+    }
+  }
+
+  const handleRemoveReaction = async (messageId: string, emoji: string) => {
+    if (!user) return
+    try {
+      await removeEmojiReaction(communityId, groupId, messageId, emoji, user.id)
+    } catch (error) {
+      console.error('[v0] Error removing reaction:', error)
+    }
+  }
+
+  const handleEditMessage = async (messageId: string) => {
+    if (!editText.trim()) return
+    try {
+      await editMessage(communityId, groupId, messageId, editText)
+      setEditingId(null)
+      setEditText('')
+    } catch (error) {
+      console.error('[v0] Error editing message:', error)
+      alert('Failed to edit message')
+    }
+  }
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('Delete this message?')) return
+    try {
+      await deleteMessage(communityId, groupId, messageId)
+    } catch (error) {
+      console.error('[v0] Error deleting message:', error)
+      alert('Failed to delete message')
+    }
+  }
+
+  const startEditMessage = (msg: Message) => {
+    setEditingId(msg.id)
+    setEditText(msg.text || '')
   }
 
   if (loading) {
@@ -211,7 +271,7 @@ export default function GroupChatPage() {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-gray-500">No messages yet. Start the conversation!</p>
@@ -219,84 +279,190 @@ export default function GroupChatPage() {
           ) : (
             messages.map((msg) => {
               const isOwn = msg.senderId === user?.id
+              const isEditing = editingId === msg.id
               return (
-                <div
-                  key={msg.id}
-                  className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-xs lg:max-w-md ${isOwn ? 'items-end' : 'items-start'} flex gap-2`}>
-                    {!isOwn && msg.senderAvatar && (
-                      <img
-                        src={msg.senderAvatar}
-                        alt={msg.senderName}
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <div>
-                      {!isOwn && (
-                        <p className="text-xs font-medium text-gray-600 mb-1">
-                          {msg.senderName}
-                        </p>
+                <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs lg:max-w-md space-y-1`}>
+                    <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-2 items-end group`}>
+                      {!isOwn && msg.senderAvatar && (
+                        <img
+                          src={msg.senderAvatar}
+                          alt={msg.senderName}
+                          className="w-8 h-8 rounded-full flex-shrink-0"
+                        />
                       )}
-                      <div
-                        className={`rounded-lg px-4 py-2 ${
-                          isOwn
-                            ? 'bg-black text-white'
-                            : 'bg-white text-black border border-gray-200'
-                        }`}
-                      >
-                        {msg.text && <p className="text-sm break-words">{msg.text}</p>}
-
-                        {msg.fileType === 'image' && msg.fileURL && (
-                          <img
-                            src={msg.fileURL}
-                            alt="Shared image"
-                            className="max-w-xs rounded mt-2"
-                          />
+                      
+                      <div className="flex-1">
+                        {!isOwn && (
+                          <p className="text-xs font-medium text-gray-600 mb-1 px-2">
+                            {msg.senderName}
+                          </p>
                         )}
-
-                        {msg.fileType === 'video' && msg.fileURL && (
-                          <video
-                            src={msg.fileURL}
-                            controls
-                            className="max-w-xs rounded mt-2"
-                          />
-                        )}
-
-                        {msg.fileType === 'pdf' && msg.fileURL && (
-                          <a
-                            href={msg.fileURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:underline"
+                        
+                        {/* Message Bubble */}
+                        {isEditing ? (
+                          <div className={`rounded-lg px-4 py-2 ${isOwn ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                            <textarea
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="w-full p-2 rounded border border-gray-300 text-sm"
+                              rows={2}
+                            />
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => handleEditMessage(msg.id)}
+                                className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                              >
+                                <Check size={14} />
+                                Save
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingId(null)
+                                  setEditText('')
+                                }}
+                                className="flex items-center gap-1 px-2 py-1 bg-gray-400 text-white rounded text-xs hover:bg-gray-500"
+                              >
+                                <X size={14} />
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            className={`rounded-lg px-4 py-2 relative ${
+                              isOwn
+                                ? 'bg-black text-white'
+                                : 'bg-white text-black border border-gray-200'
+                            }`}
                           >
-                            <FileText size={16} />
-                            Download PDF
-                          </a>
-                        )}
+                            {msg.isDeleted ? (
+                              <p className="text-sm italic opacity-50">[Message deleted]</p>
+                            ) : (
+                              <>
+                                {msg.text && <p className="text-sm break-words">{msg.text}</p>}
 
-                        {msg.fileType === 'file' && msg.fileURL && (
-                          <a
-                            href={msg.fileURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:underline"
-                          >
-                            <Download size={16} />
-                            Download File
-                          </a>
-                        )}
+                                {msg.fileType === 'image' && msg.fileURL && (
+                                  <img
+                                    src={msg.fileURL}
+                                    alt="Shared image"
+                                    className="max-w-xs rounded mt-2"
+                                  />
+                                )}
 
-                        <p
-                          className={`text-xs mt-1 ${
-                            isOwn ? 'text-gray-200' : 'text-gray-500'
-                          }`}
-                        >
-                          {msg.sentAt &&
-                            format(msg.sentAt.toDate(), 'HH:mm')}
-                        </p>
+                                {msg.fileType === 'video' && msg.fileURL && (
+                                  <video
+                                    src={msg.fileURL}
+                                    controls
+                                    className="max-w-xs rounded mt-2"
+                                  />
+                                )}
+
+                                {msg.fileType === 'pdf' && msg.fileURL && (
+                                  <a
+                                    href={msg.fileURL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:underline"
+                                  >
+                                    <FileText size={16} />
+                                    Download PDF
+                                  </a>
+                                )}
+
+                                {msg.fileType === 'file' && msg.fileURL && (
+                                  <a
+                                    href={msg.fileURL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:underline"
+                                  >
+                                    <Download size={16} />
+                                    Download File
+                                  </a>
+                                )}
+
+                                <div className="flex justify-between items-center mt-1">
+                                  <p className={`text-xs ${isOwn ? 'text-gray-300' : 'text-gray-500'}`}>
+                                    {msg.sentAt && format(msg.sentAt.toDate(), 'HH:mm')}
+                                    {msg.edited && ' (edited)'}
+                                  </p>
+                                  
+                                  {/* Message Actions */}
+                                  <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2`}>
+                                    <button
+                                      onClick={() => setEmojiPickerFor(msg.id)}
+                                      className="p-1 hover:bg-gray-200 rounded"
+                                    >
+                                      <Smile size={14} className="text-gray-600" />
+                                    </button>
+                                    {isOwn && (
+                                      <>
+                                        <button
+                                          onClick={() => startEditMessage(msg)}
+                                          className="p-1 hover:bg-gray-200 rounded"
+                                        >
+                                          <Edit2 size={14} className="text-gray-600" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteMessage(msg.id)}
+                                          className="p-1 hover:bg-gray-200 rounded"
+                                        >
+                                          <Trash2 size={14} className="text-red-600" />
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
+
+                    {/* Emoji Picker */}
+                    {emojiPickerFor === msg.id && (
+                      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} ml-2`}>
+                        <div className="bg-white rounded-lg border border-gray-200 shadow-lg">
+                          <EmojiPicker
+                            onEmojiClick={(e) => {
+                              handleAddReaction(msg.id, e.emoji)
+                            }}
+                            width={300}
+                            height={300}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Reactions */}
+                    {msg.reactions && msg.reactions.length > 0 && (
+                      <div className="flex flex-wrap gap-1 px-2 mt-1">
+                        {msg.reactions.map((reaction) => (
+                          <button
+                            key={reaction.emoji}
+                            onClick={() => {
+                              const hasReacted = reaction.users.includes(user?.id || '')
+                              if (hasReacted) {
+                                handleRemoveReaction(msg.id, reaction.emoji)
+                              } else {
+                                handleAddReaction(msg.id, reaction.emoji)
+                              }
+                            }}
+                            title={reaction.users.join(', ')}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm border transition-colors ${
+                              reaction.users.includes(user?.id || '')
+                                ? 'bg-yellow-100 border-yellow-300'
+                                : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
+                            }`}
+                          >
+                            <span>{reaction.emoji}</span>
+                            <span className="text-xs text-gray-600">{reaction.users.length}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )
@@ -308,36 +474,60 @@ export default function GroupChatPage() {
         {/* Input Area */}
         <form
           onSubmit={handleSendMessage}
-          className="bg-white border-t border-gray-200 p-4 flex gap-2"
+          className="bg-white border-t border-gray-200 p-4 space-y-2"
         >
-          <label className="cursor-pointer hover:opacity-70">
-            <Upload size={20} className="text-gray-600" />
+          {showEmojiPicker && (
+            <div className="flex justify-start mb-2">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-lg">
+                <EmojiPicker
+                  onEmojiClick={(e) => {
+                    setNewMessage(newMessage + e.emoji)
+                  }}
+                  width={300}
+                  height={300}
+                />
+              </div>
+            </div>
+          )}
+          
+          <div className="flex gap-2">
+            <label className="cursor-pointer hover:opacity-70 p-2">
+              <Upload size={20} className="text-gray-600" />
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                disabled={uploading || sending}
+                className="hidden"
+                accept="image/*,video/*,.pdf"
+              />
+            </label>
+
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="p-2 hover:opacity-70"
+            >
+              <Smile size={20} className="text-gray-600" />
+            </button>
+
             <input
-              type="file"
-              onChange={handleFileUpload}
-              disabled={uploading || sending}
-              className="hidden"
-              accept="image/*,video/*,.pdf"
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+              disabled={sending || uploading}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent disabled:opacity-50"
             />
-          </label>
 
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type a message..."
-            disabled={sending || uploading}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent disabled:opacity-50"
-          />
-
-          <button
-            type="submit"
-            disabled={sending || uploading || !newMessage.trim()}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 flex items-center gap-2"
-          >
-            <Send size={18} />
-            Send
-          </button>
+            <button
+              type="submit"
+              disabled={sending || uploading || !newMessage.trim()}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 flex items-center gap-2"
+            >
+              <Send size={18} />
+              Send
+            </button>
+          </div>
         </form>
       </main>
 

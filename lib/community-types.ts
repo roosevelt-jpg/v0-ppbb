@@ -70,10 +70,25 @@ export interface Message {
   senderPhoto?: string
   content: string
   imageURL?: string
+  fileURL?: string
+  fileName?: string
   timestamp: Timestamp | Date
   edited: boolean
   editedAt?: Timestamp | Date
   reactions: { emoji: string; users: string[] }[]
+  readBy: { userId: string; readAt: Timestamp | Date }[]
+  isDeleted?: boolean
+  deletedAt?: Timestamp | Date
+}
+
+export interface UserPresence {
+  userId: string
+  userName: string
+  groupId: string
+  communityId: string
+  status: 'online' | 'away' | 'offline'
+  lastSeen: Timestamp | Date
+  isTyping?: boolean
 }
 
 export interface GroupMember {
