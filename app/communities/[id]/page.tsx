@@ -1,282 +1,244 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
-import { useParams } from 'next/navigation'
-import { db, auth } from '@/lib/firebase'
-import { collection, query, where, onSnapshot } from 'firebase/firestore'
-import { Send, MessageCircle, Users, Loader2 } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+export const dynamic = 'force-dynamic'
+import React from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
+import { subscribeToCommunity, subscribeToCommunityGroups, joinGroup } from '@/lib/community-queries'
+import type { Community, Group } from '@/lib/community-types'
+import { useAuth } from '@/lib/auth-context'
+import { ChevronLeft, Users, Tag, MessageCircle, Lock } from 'lucide-react'
 
 export default function CommunityDetailPage() {
+  const router = useRouter()
   const params = useParams()
+  const { user } = useAuth()
   const communityId = params.id as string
-  const [user, setUser] = useState<any>(null)
-  
-  const [community, setCommunity] = useState<any>(null)
-  const [groups, setGroups] = useState<any[]>([])
-  const [selectedGroup, setSelectedGroup] = useState<any>(null)
-  const [messages, setMessages] = useState<any[]>([])
-  const [newMessage, setNewMessage] = useState('')
-  const [sendingMessage, setSendingMessage] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser)
-    })
-    return () => unsubscribe()
-  }, [])
+  const [community, setCommunity] = React.useState<Community | null>(null)
+  const [groups, setGroups] = React.useState<Group[]>([])
+  const [userGroups, setUserGroups] = React.useState<Set<string>>(new Set())
+  const [loading, setLoading] = React.useState(true)
+  const [joiningGroup, setJoiningGroup] = React.useState<string | null>(null)
 
-  // Fetch community
-  useEffect(() => {
-    if (!communityId) return
-
-    const fetchCommunity = async () => {
-      try {
-        const response = await fetch(`/api/communities?id=${communityId}`)
-        const data = await response.json()
-        if (data.success) {
-          setCommunity(data.data)
-        }
-      } catch (error) {
-        console.error('[v0] Error fetching community:', error)
-      }
-    }
-
-    fetchCommunity()
-  }, [communityId])
-
-  // Fetch groups
-  useEffect(() => {
-    if (!communityId) return
-
-    const q = query(
-      collection(db, 'community-groups'),
-      where('communityId', '==', communityId),
-      where('status', '==', 'active')
-    )
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.(),
-      }))
-      setGroups(data)
-      if (data.length > 0 && !selectedGroup) {
-        setSelectedGroup(data[0])
-      }
+  React.useEffect(() => {
+    const unsubCommunity = subscribeToCommunity(communityId, (data) => {
+      setCommunity(data)
       setLoading(false)
     })
 
-    return () => unsubscribe()
-  }, [communityId, selectedGroup])
-
-  // Fetch messages for selected group
-  useEffect(() => {
-    if (!selectedGroup) return
-
-    const q = query(
-      collection(db, 'community-messages'),
-      where('groupId', '==', selectedGroup.id),
-      where('moderationStatus', '!=', 'rejected')
-    )
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate?.(),
-        }))
-        .sort((a, b) => a.createdAt - b.createdAt)
-      setMessages(data)
+    const unsubGroups = subscribeToCommunityGroups(communityId, (data) => {
+      setGroups(data)
     })
 
-    return () => unsubscribe()
-  }, [selectedGroup])
-
-  // Auto-scroll to latest message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newMessage.trim() || !user || !selectedGroup) return
-
-    setSendingMessage(true)
-    try {
-      console.log('[v0] Sending message:', { groupId: selectedGroup.id, authorId: user.uid })
-
-      const response = await fetch('/api/community-messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          groupId: selectedGroup.id,
-          communityId,
-          authorId: user.uid,
-          authorName: user.displayName || 'Anonymous',
-          content: newMessage,
-          type: 'text',
-        }),
-      })
-
-      const data = await response.json()
-      if (data.success) {
-        setNewMessage('')
-        console.log('[v0] Message sent successfully')
-      } else {
-        throw new Error(data.error)
-      }
-    } catch (error: any) {
-      console.error('[v0] Error sending message:', error)
-      alert(`Failed to send message: ${error.message}`)
-    } finally {
-      setSendingMessage(false)
+    return () => {
+      unsubCommunity()
+      unsubGroups()
     }
+  }, [communityId])
+
+  const handleJoinGroup = async (group: Group) => {
+    if (!user) {
+      alert('Please log in to join groups')
+      return
+    }
+
+    setJoiningGroup(group.id!)
+    try {
+      await joinGroup(communityId, group.id!, user.id, user.displayName || '', user.email || '', user.gender, user.photoURL)
+      setUserGroups(new Set([...userGroups, group.id!]))
+    } catch (error) {
+      console.error('[v0] Error joining group:', error)
+      alert('Failed to join group')
+    } finally {
+      setJoiningGroup(null)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500">Loading community...</p>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   if (!community) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-black" />
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center">
+          <p className="text-gray-500 mb-4">Community not found</p>
+          <button
+            onClick={() => router.push('/communities')}
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+          >
+            Back to Communities
+          </button>
+        </main>
+        <Footer />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-black">{community.name}</h1>
-        <p className="text-gray-600 text-sm sm:text-base">{community.description}</p>
-      </div>
+      <Navbar />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Groups Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto hidden md:block">
-          <div className="p-4">
-            <h2 className="font-bold text-black mb-4 flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" />
-              Groups
-            </h2>
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 md:py-12">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+        >
+          <ChevronLeft size={20} />
+          Back
+        </button>
 
-            {loading ? (
-              <div className="text-center py-8 text-gray-600">
-                <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-                Loading...
-              </div>
-            ) : groups.length === 0 ? (
-              <p className="text-sm text-gray-600">No groups yet</p>
-            ) : (
-              <div className="space-y-2">
-                {groups.map(group => (
-                  <button
-                    key={group.id}
-                    onClick={() => setSelectedGroup(group)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition ${
-                      selectedGroup?.id === group.id
-                        ? 'bg-black text-white'
-                        : 'text-black hover:bg-gray-100'
-                    }`}
+        {/* Header */}
+        <div className="space-y-4 mb-8">
+          {community.bannerURL && (
+            <div
+              className="w-full h-40 md:h-56 bg-gray-200 bg-cover bg-center rounded-lg"
+              style={{ backgroundImage: `url(${community.bannerURL})` }}
+            />
+          )}
+
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">
+              {community.name}
+            </h1>
+            <p className="text-gray-600 text-base md:text-lg mb-4">
+              {community.description}
+            </p>
+
+            {/* Tags */}
+            {community.tags && community.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {community.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
                   >
-                    <p className="font-medium text-sm">{group.name}</p>
-                    <p className={`text-xs ${selectedGroup?.id === group.id ? 'text-gray-200' : 'text-gray-500'}`}>
-                      {group.members?.total || 1} members
-                    </p>
-                  </button>
+                    <Tag size={14} />
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
           </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Users size={16} className="text-gray-600" />
+                <p className="text-sm text-gray-600">Members</p>
+              </div>
+              <p className="text-2xl font-bold text-black">{community.memberCount}</p>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm text-gray-600 mb-1">Groups</p>
+              <p className="text-2xl font-bold text-black">{community.groupCount}</p>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm text-gray-600 mb-1">Category</p>
+              <p className="text-lg font-bold text-black">{community.category}</p>
+            </div>
+
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <p className="text-sm text-gray-600 mb-1">Access</p>
+              <p className="text-lg font-bold text-black capitalize">
+                {community.genderRestriction === 'mixed'
+                  ? 'All'
+                  : community.genderRestriction.replace('-', ' ')}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {selectedGroup ? (
-            <>
-              {/* Chat Header */}
-              <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-                <div>
-                  <h2 className="font-bold text-black">{selectedGroup.name}</h2>
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    {selectedGroup.members?.total || 1} members
-                  </p>
-                </div>
-              </div>
+        {/* Groups Section */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-black">Discussion Groups</h2>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 ? (
-                  <div className="text-center py-12 text-gray-600">
-                    <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                    <p>No messages yet. Be the first to say hello!</p>
-                  </div>
-                ) : (
-                  messages.map(msg => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.authorId === user?.uid ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          msg.authorId === user?.uid
-                            ? 'bg-black text-white'
-                            : 'bg-gray-200 text-black'
-                        }`}
-                      >
-                        {msg.authorId !== user?.uid && (
-                          <p className="text-xs font-bold mb-1 opacity-75">{msg.authorName}</p>
-                        )}
-                        <p className="text-sm break-words">{msg.content}</p>
-                        <p className="text-xs mt-1 opacity-70">
-                          {formatDistanceToNow(msg.createdAt, { addSuffix: true })}
+          {groups.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+              <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No groups available yet</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              {groups.map((group) => {
+                const isMember = userGroups.has(group.id!)
+                const isRestricted =
+                  group.genderRestriction !== 'mixed' &&
+                  group.genderRestriction !== user?.gender
+
+                return (
+                  <div
+                    key={group.id}
+                    className="bg-white rounded-lg border border-gray-200 p-6 space-y-4"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-black text-lg mb-1">
+                          {group.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {group.description}
                         </p>
                       </div>
+                      {isRestricted && (
+                        <Lock className="text-gray-400" size={20} />
+                      )}
                     </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
 
-              {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="border-t border-gray-200 p-4 bg-white">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    disabled={sendingMessage}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-white text-black placeholder-gray-500 disabled:opacity-50"
-                  />
-                  <button
-                    type="submit"
-                    disabled={sendingMessage || !newMessage.trim()}
-                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-600 disabled:opacity-50 transition"
-                  >
-                    {sendingMessage ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </form>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-600">
-              <div className="text-center">
-                <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p>Select a group to start chatting</p>
-              </div>
+                    {/* Group Stats */}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <Users size={14} />
+                        {group.memberCount} members
+                      </div>
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded capitalize text-gray-700">
+                        {group.type.replace('-', ' ')}
+                      </span>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      onClick={() => handleJoinGroup(group)}
+                      disabled={joiningGroup === group.id || isRestricted}
+                      className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
+                        isMember
+                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          : isRestricted
+                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                          : 'bg-black text-white hover:bg-gray-900'
+                      }`}
+                    >
+                      {isRestricted
+                        ? `${group.genderRestriction === 'men-only' ? 'Men only' : 'Ladies only'}`
+                        : isMember
+                        ? 'Joined'
+                        : joiningGroup === group.id
+                        ? 'Joining...'
+                        : 'Join Group'}
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }
