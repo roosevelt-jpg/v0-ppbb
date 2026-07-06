@@ -598,6 +598,246 @@ export interface NewsletterSubscriber {
   isActive: boolean
 }
 
+// ======================== BUSINESS SUITE TYPES ========================
+
+// Business Profile
+export interface Business {
+  id: string
+  userId: string
+  businessName: string
+  businessType: 'service' | 'product' | 'hybrid' | 'consulting' | 'agency' | 'startup'
+  industry: string
+  description: string
+  logo?: string
+  banner?: string
+  website?: string
+  phone?: string
+  email?: string
+  location?: LocationData
+  socialLinks?: {
+    facebook?: string
+    instagram?: string
+    linkedin?: string
+    twitter?: string
+  }
+  yearsInBusiness?: number
+  teamSize?: string
+  languages?: string[]
+  certifications?: string[]
+  status: 'active' | 'inactive' | 'suspended'
+  verificationStatus: 'pending' | 'verified' | 'rejected'
+  rating: number
+  reviewCount: number
+  membershipTier: 'free' | 'premium' | 'enterprise'
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Jobs & Gigs
+export interface Job {
+  id: string
+  businessId: string
+  title: string
+  description: string
+  category: string
+  jobType: 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | 'gig'
+  experienceLevel: 'entry' | 'mid' | 'senior' | 'executive'
+  salaryMin?: number
+  salaryMax?: number
+  currency?: string
+  location?: LocationData
+  remote: 'onsite' | 'remote' | 'hybrid'
+  skills: string[]
+  requirements: string[]
+  benefits: string[]
+  applicantCount: number
+  status: 'open' | 'closed' | 'on-hold'
+  createdAt: Date
+  updatedAt: Date
+  deadline: Date
+}
+
+export interface JobApplication {
+  id: string
+  jobId: string
+  businessId: string
+  userId: string
+  userName: string
+  email: string
+  phone: string
+  cvUrl?: string
+  coverLetter?: string
+  linkedinProfile?: string
+  portfolioUrl?: string
+  customAnswers?: { question: string; answer: string }[]
+  status: 'submitted' | 'reviewing' | 'shortlisted' | 'rejected' | 'hired'
+  rating?: number
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Offers & Products
+export interface Offer {
+  id: string
+  businessId: string
+  title: string
+  description: string
+  category: string
+  images: string[]
+  price: number
+  originalPrice?: number
+  currency: string
+  quantity?: number
+  status: 'available' | 'sold-out' | 'archived'
+  tags: string[]
+  specifications?: { [key: string]: string }
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Discounts & Promotions
+export interface Discount {
+  id: string
+  businessId: string
+  title: string
+  description: string
+  discountType: 'percentage' | 'fixed' | 'bogo' | 'tiered'
+  discountValue: number
+  maxDiscount?: number
+  minPurchase?: number
+  applicableCategories: string[]
+  code?: string
+  status: 'active' | 'inactive' | 'expired'
+  startDate: Date
+  endDate: Date
+  usageCount: number
+  maxUsage?: number
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Referrals & Commissions
+export interface Referral {
+  id: string
+  referrerBusinessId: string
+  referredUserId: string
+  referredBusinessId?: string
+  conversionType: 'signup' | 'purchase' | 'subscription'
+  conversionAmount?: number
+  commissionRate: number
+  commissionAmount: number
+  status: 'pending' | 'approved' | 'paid' | 'rejected'
+  referralCode: string
+  expiryDate?: Date
+  createdAt: Date
+  paidAt?: Date
+}
+
+// Leads & Conversions
+export interface Lead {
+  id: string
+  businessId: string
+  leadName: string
+  email: string
+  phone: string
+  company?: string
+  message: string
+  source: 'website' | 'job-posting' | 'offer' | 'discount' | 'referral' | 'direct'
+  status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+  value?: number
+  notes?: string
+  lastContactedAt?: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Partnerships & Sponsorships
+export interface Partnership {
+  id: string
+  businessId: string
+  partnerBusinessId?: string
+  title: string
+  description: string
+  type: 'partnership' | 'sponsorship' | 'collaboration' | 'affiliate'
+  status: 'pending' | 'active' | 'completed' | 'rejected'
+  startDate: Date
+  endDate?: Date
+  terms?: string
+  benefits?: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Payments & Subscriptions
+export interface Subscription {
+  id: string
+  businessId: string
+  planName: string
+  planType: 'free' | 'premium' | 'enterprise'
+  price: number
+  billingCycle: 'monthly' | 'yearly'
+  status: 'active' | 'cancelled' | 'suspended' | 'expired'
+  features: string[]
+  startDate: Date
+  endDate?: Date
+  nextBillingDate: Date
+  stripeSubscriptionId?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Payment {
+  id: string
+  businessId: string
+  type: 'subscription' | 'commission' | 'refund' | 'adjustment'
+  amount: number
+  currency: string
+  status: 'pending' | 'completed' | 'failed' | 'refunded'
+  stripePaymentIntentId?: string
+  description?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Analytics & Metrics
+export interface BusinessAnalytics {
+  id: string
+  businessId: string
+  month: string
+  jobsPosted: number
+  jobsApplications: number
+  offersCreated: number
+  offersSold: number
+  discountsCreated: number
+  discountsUsed: number
+  leadsGenerated: number
+  leadsConverted: number
+  totalRevenue: number
+  referralEarnings: number
+  profileViews: number
+  clicks: number
+  conversionRate: number
+  createdAt: Date
+}
+
+// Vendor Application (for marketplace vendors)
+export interface VendorApplication {
+  id: string
+  userId: string
+  businessName: string
+  email: string
+  phone: string
+  businessType: string
+  description: string
+  documents: string[]
+  status: 'pending' | 'approved' | 'rejected'
+  rejectionReason?: string
+  createdAt: Date
+  reviewedAt?: Date
+  reviewedBy?: string
+}
+
 export interface Conversation {
   id: string
   userId: string

@@ -756,3 +756,50 @@ export async function updateApplicationStatus(
     updatedAt: Timestamp.now().toDate(),
   })
 }
+
+// ======================== ADDITIONAL BUSINESS SUITE QUERIES ========================
+
+// JOBS QUERIES (Enhanced)
+export async function createJob(jobData: any): Promise<string> {
+  const docRef = await addDoc(collection(db, 'jobs'), {
+    ...jobData,
+    applicantCount: 0,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  })
+  return docRef.id
+}
+
+export async function getJob(jobId: string): Promise<any> {
+  const snapshot = await getDoc(doc(db, 'jobs', jobId))
+  return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null
+}
+
+// REFERRAL EARNINGS QUERIES
+export async function getReferralEarnings(businessId: string): Promise<number> {
+  const referrals = await getBusinessReferral(businessId)
+  return referrals?.totalCommissions || 0
+}
+
+// VENDOR APPLICATION QUERIES
+export async function createVendorApplication(applicationData: any): Promise<string> {
+  const docRef = await addDoc(collection(db, 'vendorApplications'), {
+    ...applicationData,
+    status: 'pending',
+    createdAt: Timestamp.now(),
+  })
+  return docRef.id
+}
+
+export async function getAllVendorApplications(): Promise<any[]> {
+  const q = query(collection(db, 'vendorApplications'), orderBy('createdAt', 'desc'))
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function updateVendorApplication(applicationId: string, updates: any): Promise<void> {
+  await updateDoc(doc(db, 'vendorApplications', applicationId), {
+    ...updates,
+    updatedAt: Timestamp.now(),
+  })
+}
