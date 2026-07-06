@@ -219,7 +219,8 @@ export default function SignupClient() {
         skills: formData.skills,
 
         // Role management - business users get BOTH member and business roles
-        role: formData.memberType,
+        // Primary role: business users have 'member' as primary, with 'business' as secondary
+        role: formData.memberType === 'business' ? 'member' : formData.memberType,
         roles: formData.memberType === 'business' ? ['member', 'business'] : [formData.memberType],
 
         // User preferences

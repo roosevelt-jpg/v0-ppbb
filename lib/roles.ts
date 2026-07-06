@@ -26,6 +26,9 @@ export function hasRole(
  * Whether the user can access the business portal. True if they have the
  * `business` role AND the 'member' role (golden rule: business users must be members),
  * or are an admin/super_admin (who can view everything).
+ * 
+ * For backward compatibility: also allows users with ONLY 'business' role
+ * (legacy accounts before dual-role implementation) but logs a warning.
  */
 export function hasBusinessAccess(
   user: Pick<User, 'role' | 'roles'> | null | undefined
@@ -37,9 +40,20 @@ export function hasBusinessAccess(
     return true
   }
   
-  // Business users must also have member role
-  if (roles.includes('business')) {
-    return roles.includes('member')
+  // Business users must also have member role (ideal state)
+  if (roles.includes('business') && roles.includes('member')) {
+    return true
+  }
+  
+  // Fallback for existing business users who only have 'business' role (pre-migration)
+  if (roles.includes('business') && !roles.includes('member')) {
+    if (typeof window !== 'undefined') {
+      console.warn(
+        '[v0] Business user missing member role - should be migrated:',
+        user
+      )
+    }
+    return true // Allow access but log warning
   }
   
   return false
