@@ -16,6 +16,7 @@ export default function BusinessOffers() {
   const router = useRouter()
   const [offers, setOffers] = React.useState<BusinessOffer[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (!user || (!hasBusinessAccess(user))) {
@@ -24,12 +25,19 @@ export default function BusinessOffers() {
     }
 
     setLoading(true)
-    const unsubscribe = subscribeToBusinessOffers(user.id, (data) => {
-      setOffers(data)
-      setLoading(false)
-    })
+    setError(null)
+    try {
+      const unsubscribe = subscribeToBusinessOffers(user.id, (data) => {
+        setOffers(data)
+        setLoading(false)
+      })
 
-    return () => unsubscribe()
+      return () => unsubscribe()
+    } catch (err) {
+      console.error('[v0] Error loading offers:', err)
+      setError('Unable to load offers')
+      setLoading(false)
+    }
   }, [user, router])
 
   const handleDelete = async (id: string) => {
@@ -77,7 +85,17 @@ export default function BusinessOffers() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-8">
-        {loading ? (
+        {error ? (
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>
+            <p style={{ color: '#888888', marginBottom: '16px' }}>No offers to display</p>
+            <Button
+              onClick={() => router.push('/business/offers/new')}
+              style={{ backgroundColor: '#111111', color: '#ffffff' }}
+            >
+              Post Your First Offer
+            </Button>
+          </Card>
+        ) : loading ? (
           <div className="text-center py-8">Loading offers...</div>
         ) : offers.length === 0 ? (
           <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>

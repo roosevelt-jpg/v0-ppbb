@@ -15,6 +15,7 @@ export default function ReferralSystem() {
   const router = useRouter()
   const [referral, setReferral] = React.useState<BusinessReferral | null>(null)
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (!user || (!hasBusinessAccess(user))) {
@@ -23,12 +24,19 @@ export default function ReferralSystem() {
     }
 
     setLoading(true)
-    const unsubscribe = subscribeToReferral(user.id, (data) => {
-      setReferral(data || null)
-      setLoading(false)
-    })
+    setError(null)
+    try {
+      const unsubscribe = subscribeToReferral(user.id, (data) => {
+        setReferral(data || null)
+        setLoading(false)
+      })
 
-    return () => unsubscribe()
+      return () => unsubscribe()
+    } catch (err) {
+      console.error('[v0] Error loading referrals:', err)
+      setError('Unable to load referral data')
+      setLoading(false)
+    }
   }, [user, router])
 
   if (!user || (!hasBusinessAccess(user))) {
@@ -51,7 +59,11 @@ export default function ReferralSystem() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-8">
-        {loading ? (
+        {error ? (
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>
+            <p style={{ color: '#888888' }}>Referral data not available</p>
+          </Card>
+        ) : loading ? (
           <div className="text-center py-8">Loading referral data...</div>
         ) : (
           <div className="space-y-8">

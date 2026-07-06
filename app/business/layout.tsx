@@ -81,19 +81,15 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full min-h-screen flex-col bg-white">
       {/* Header with Logo */}
       <div className="border-b border-neutral-200 p-6">
-        <Link href="/business/dashboard" className="block text-center">
-          {/* Passive Blessings Logo */}
-          <div className="mb-4 flex items-center justify-center">
-            <Image
-              src="/pb-logo-black.png"
-              alt="Passive Blessings"
-              width={48}
-              height={48}
-              className="rounded-lg"
-            />
-          </div>
-          <h2 className="text-lg font-bold text-neutral-900">Passive Blessings</h2>
-          <p className="mt-1 text-xs text-neutral-500">Business Portal</p>
+        <Link href="/business/dashboard" className="flex items-center justify-center">
+          {/* Passive Blessings Logo - Full Logo Only */}
+          <Image
+            src="/pb-logo-black.png"
+            alt="Passive Blessings"
+            width={64}
+            height={64}
+            className="rounded-lg"
+          />
         </Link>
       </div>
 

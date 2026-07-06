@@ -77,9 +77,9 @@ export default function NewOffer() {
       </div>
 
       {/* Form */}
-      <div className="max-w-2xl mx-auto p-8">
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Title */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
@@ -103,7 +103,7 @@ export default function NewOffer() {
             </div>
 
             {/* Type and Category */}
-            <div className="grid grid-cols-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Type *
