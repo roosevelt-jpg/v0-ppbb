@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import * as admin from 'firebase-admin'
-import { initializeAdminSDK } from '@/lib/firebase-admin'
-
-initializeAdminSDK()
-const db = admin.firestore()
+import { getAdminDb } from '@/lib/firebase-admin'
+import { Timestamp } from 'firebase-admin/firestore'
 
 export async function POST(request: NextRequest) {
   try {
-    const { eventId, userId, registrationType } = await request.json()
+    const body = await request.json()
+    const { eventId, userId, registrationType, userName, userEmail, userGender } = body
+    const db = getAdminDb()
 
     if (!eventId || !userId) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
@@ -27,39 +26,47 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Event is full' }, { status: 400 })
     }
 
+    // Calculate payment splits
+    const price = event.price || 0
+    const pbPercent = event.pbCommissionPercent || 10
+    const pbCut = (price * pbPercent) / 100
+    const businessCut = price - pbCut
+
     // Create registration
     const registration = {
       eventId,
       userId,
-      registrationType,
-      registeredAt: new Date().toISOString(),
+      userName,
+      userEmail,
+      userGender,
+      registeredAt: Timestamp.now(),
+      status: 'confirmed',
       paymentStatus: registrationType === 'free' ? 'free' : 'pending',
-      amountPaid: registrationType === 'free' ? 0 : event.price,
-      pbCut: registrationType === 'free' ? 0 : (event.price * event.pbCommissionPercent) / 100,
-      businessCut: registrationType === 'free' ? 0 : event.price - (event.price * event.pbCommissionPercent) / 100,
+      amountPaid: registrationType === 'free' ? 0 : price,
+      pbCut,
+      businessCut,
+      currency: event.currency || 'AED',
+      paymentGateway: event.paymentGateway,
+      calendarSynced: false,
     }
 
     const regRef = await db.collection('eventRegistrations').add(registration)
 
-    // Update event attendee count
-    await eventRef.update({
-      currentAttendees: admin.firestore.FieldValue.increment(1),
-      totalRevenue: admin.firestore.FieldValue.increment(registration.amountPaid),
-      pbCommissionAmount: admin.firestore.FieldValue.increment(registration.pbCut),
-      businessPayoutAmount: admin.firestore.FieldValue.increment(registration.businessCut),
-    })
+    // Update event attendee count and revenue
+    const increment = (value: number) => value
 
-    // For paid events, return checkout URL (Stripe integration)
-    let checkoutUrl = ''
-    if (registrationType === 'paid_by_business' || registrationType === 'paid_by_pb') {
-      // TODO: Create Stripe checkout session
-      checkoutUrl = `/checkout/${regRef.id}`
-    }
+    await eventRef.update({
+      currentAttendees: event.currentAttendees + 1,
+      totalRevenue: event.totalRevenue + price,
+      pbRevenue: (event.pbRevenue || 0) + pbCut,
+      businessRevenue: (event.businessRevenue || 0) + businessCut,
+      updatedAt: Timestamp.now(),
+    })
 
     return NextResponse.json({
       success: true,
       registrationId: regRef.id,
-      checkoutUrl,
+      registration,
     })
   } catch (error) {
     console.error('[v0] Registration error:', error)

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import * as admin from 'firebase-admin'
-import { initializeAdminSDK } from '@/lib/firebase-admin'
-
-initializeAdminSDK()
-const db = admin.firestore()
+import { getAdminDb } from '@/lib/firebase-admin'
+import { Timestamp } from 'firebase-admin/firestore'
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const eventId = params.id
     const userId = request.nextUrl.searchParams.get('userId')
+    const db = getAdminDb()
 
     if (!userId) {
       return NextResponse.json({ success: false, error: 'userId required' }, { status: 400 })
@@ -27,15 +25,20 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const regDoc = regSnapshot.docs[0]
     const registration = regDoc.data() as any
 
+    // Get current event data
+    const eventDoc = await db.collection('events').doc(eventId).get()
+    const event = eventDoc.data() as any
+
     // Delete registration
     await regDoc.ref.delete()
 
     // Update event attendee count
     await db.collection('events').doc(eventId).update({
-      currentAttendees: admin.firestore.FieldValue.increment(-1),
-      totalRevenue: admin.firestore.FieldValue.increment(-(registration.amountPaid || 0)),
-      pbCommissionAmount: admin.firestore.FieldValue.increment(-(registration.pbCut || 0)),
-      businessPayoutAmount: admin.firestore.FieldValue.increment(-(registration.businessCut || 0)),
+      currentAttendees: Math.max(0, (event.currentAttendees || 0) - 1),
+      totalRevenue: Math.max(0, (event.totalRevenue || 0) - (registration.amountPaid || 0)),
+      pbRevenue: Math.max(0, (event.pbRevenue || 0) - (registration.pbCut || 0)),
+      businessRevenue: Math.max(0, (event.businessRevenue || 0) - (registration.businessCut || 0)),
+      updatedAt: Timestamp.now(),
     })
 
     return NextResponse.json({ success: true })
