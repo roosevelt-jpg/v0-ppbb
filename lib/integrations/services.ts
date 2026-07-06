@@ -161,6 +161,20 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'authToken', label: 'Auth Token / Secret', type: 'password', required: true, encrypt: true },
     ],
   },
+  firebaseCloudMessaging: {
+    id: 'firebaseCloudMessaging',
+    name: 'Firebase Cloud Messaging (FCM)',
+    category: 'messaging',
+    description: 'Push notifications for web & mobile',
+    icon: '🔔',
+    fields: [
+      { name: 'serverKey', label: 'Server Key (Legacy)', type: 'password', required: false, encrypt: true, placeholder: 'AAAA...' },
+      { name: 'senderId', label: 'Sender ID', type: 'text', required: true, placeholder: '1234567890', help: 'Project number from Firebase Console' },
+      { name: 'serviceAccountJson', label: 'Service Account JSON', type: 'textarea', required: true, encrypt: true, placeholder: '{"type":"service_account",...}', help: 'Firebase service account with FCM permissions' },
+      { name: 'enabled', label: 'Enable Push Notifications', type: 'checkbox', required: false },
+    ],
+    docs: 'https://firebase.google.com/docs/cloud-messaging',
+  },
   // Storage & Maps & Analytics
   googleMaps: {
     id: 'googleMaps',

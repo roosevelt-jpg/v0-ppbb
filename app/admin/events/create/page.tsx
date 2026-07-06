@@ -410,7 +410,7 @@ export default function CreateEventPage() {
               <button
                 type="button"
                 onClick={() => router.push('/admin/events')}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-black active:bg-black disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 Cancel
               </button>
@@ -418,7 +418,7 @@ export default function CreateEventPage() {
                 type="button"
                 onClick={() => saveEvent('draft')}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-black active:bg-black disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 Save as Draft
@@ -427,7 +427,7 @@ export default function CreateEventPage() {
                 type="button"
                 onClick={() => saveEvent('published')}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-black active:bg-black disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 Save & Publish

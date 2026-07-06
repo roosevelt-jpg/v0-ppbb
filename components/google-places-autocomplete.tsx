@@ -123,7 +123,7 @@ export default function GooglePlacesAutocomplete({
     loadGoogleMapsAPI()
   }, [])
 
-  const fetchPlacePredictions = async (searchTerm: string) => {
+  const fetchPlacePredictions = (searchTerm: string) => {
     if (!searchTerm.trim()) {
       setPredictions([])
       return
@@ -140,44 +140,49 @@ export default function GooglePlacesAutocomplete({
     console.log('[v0] Fetching predictions for:', searchTerm, 'Country restrictions:', countryRestrictions)
     
     try {
-      const response = await autocompleteService.current.getPlacePredictions({
-        input: searchTerm,
-        componentRestrictions: countryRestrictions.length > 0 
-          ? { country: countryRestrictions }
-          : undefined,
-      })
+      autocompleteService.current.getPlacePredictions(
+        {
+          input: searchTerm,
+          componentRestrictions: countryRestrictions.length > 0 
+            ? { country: countryRestrictions }
+            : undefined,
+        },
+        (predictions: any[], status: string) => {
+          console.log('[v0] Predictions callback - status:', status, 'predictions:', predictions)
 
-      console.log('[v0] Predictions response:', response)
+          if (status !== 'OK' && status !== 'ZERO_RESULTS') {
+            console.warn('[v0] Predictions API returned status:', status)
+            setError(status === 'REQUEST_DENIED' ? 'Google API key not authorized for Places API' : `Location service: ${status}`)
+            setPredictions([])
+            setLoading(false)
+            return
+          }
 
-      if (!response) {
-        console.warn('[v0] Predictions API returned undefined response')
-        setError('No response from location service')
-        setPredictions([])
-      } else if (response.status && response.status !== 'OK') {
-        console.warn('[v0] Predictions API returned status:', response.status)
-        setError(`Location service: ${response.status}`)
-        setPredictions([])
-      } else if (response.predictions && response.predictions.length > 0) {
-        const formattedPredictions = response.predictions.map((prediction: any) => ({
-          placeId: prediction.place_id,
-          mainText: prediction.structured_formatting?.main_text || prediction.description,
-          secondaryText: prediction.structured_formatting?.secondary_text,
-        }))
-        console.log('[v0] Formatted predictions:', formattedPredictions)
-        setPredictions(formattedPredictions)
-        setIsOpen(true)
-        setError(null)
-      } else {
-        console.log('[v0] No predictions found for:', searchTerm)
-        setPredictions([])
-        setError(null)
-      }
+          if (!predictions || predictions.length === 0) {
+            console.log('[v0] No predictions found for:', searchTerm)
+            setPredictions([])
+            setError(null)
+            setLoading(false)
+            return
+          }
+
+          const formattedPredictions = predictions.map((prediction: any) => ({
+            placeId: prediction.place_id,
+            mainText: prediction.structured_formatting?.main_text || prediction.description,
+            secondaryText: prediction.structured_formatting?.secondary_text,
+          }))
+          console.log('[v0] Formatted predictions:', formattedPredictions)
+          setPredictions(formattedPredictions)
+          setIsOpen(true)
+          setError(null)
+          setLoading(false)
+        }
+      )
     } catch (error) {
       console.error('[v0] Error fetching predictions:', error)
       const errorMsg = error instanceof Error ? error.message : 'Unknown error'
       setError(`Location error: ${errorMsg}`)
       setPredictions([])
-    } finally {
       setLoading(false)
     }
   }
