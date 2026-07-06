@@ -30,15 +30,22 @@ export function subscribeToAllCommunities(
       q = query(collection(db, 'communities'), where('isFeatured', '==', true), orderBy('createdAt', 'desc'))
     }
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const communities = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
-        updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
-      })) as Community[]
-      onData(communities)
-    })
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const communities = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
+          updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
+        })) as Community[]
+        onData(communities)
+      },
+      (error) => {
+        console.error('[v0] Error in subscribeToAllCommunities:', error)
+        onData([])
+      }
+    )
 
     return unsubscribe
   } catch (error) {
@@ -52,19 +59,26 @@ export function subscribeToCommunity(
   onData: (community: Community | null) => void
 ) {
   try {
-    const unsubscribe = onSnapshot(doc(db, 'communities', communityId), (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data()
-        onData({
-          id: snapshot.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-        } as Community)
-      } else {
+    const unsubscribe = onSnapshot(
+      doc(db, 'communities', communityId),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data()
+          onData({
+            id: snapshot.id,
+            ...data,
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+          } as Community)
+        } else {
+          onData(null)
+        }
+      },
+      (error) => {
+        console.error('[v0] Error in subscribeToCommunity:', error)
         onData(null)
       }
-    })
+    )
 
     return unsubscribe
   } catch (error) {
@@ -92,6 +106,10 @@ export function subscribeToUserCommunities(
           updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
         })) as Community[]
         onData(communities)
+      },
+      (error) => {
+        console.error('[v0] Error in subscribeToUserCommunities:', error)
+        onData([])
       }
     )
 
@@ -122,6 +140,10 @@ export function subscribeToCommunityGroups(
           updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
         })) as Group[]
         onData(groups)
+      },
+      (error) => {
+        console.error('[v0] Error in subscribeToCommunityGroups:', error)
+        onData([])
       }
     )
 
@@ -155,6 +177,10 @@ export function subscribeToGroupMessages(
           editedAt: doc.data().editedAt?.toDate?.() || doc.data().editedAt,
         })) as Message[]
         onData(messages)
+      },
+      (error) => {
+        console.error('[v0] Error in subscribeToGroupMessages:', error)
+        onData([])
       }
     )
 

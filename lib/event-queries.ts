@@ -39,13 +39,20 @@ export function subscribeToAllEvents(
 
   const q = query(collection(db, 'events'), ...constraints)
 
-  return onSnapshot(q, (snapshot) => {
-    const events = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Event[]
-    callback(events)
-  })
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const events = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Event[]
+      callback(events)
+    },
+    (error) => {
+      console.error('[v0] Error subscribing to events:', error)
+      callback([])
+    }
+  )
 }
 
 export async function getEventById(eventId: string): Promise<Event | null> {
