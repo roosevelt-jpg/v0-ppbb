@@ -1,96 +1,62 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
 import React from 'react'
-import { auth, db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { useAuth } from '@/lib/auth-context'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MapPin, Users, Clock, ArrowRight } from 'lucide-react'
-
-interface Event {
-  id: string
-  title: string
-  description: string
-  date: Timestamp
-  time?: string
-  endTime?: string
-  location: string
-  imageUrl?: string
-  capacity?: number
-  registered?: number
-  attendees: string[]
-  eventType?: string
-  status?: string
-}
+import { Card } from '@/components/ui/card'
+import { format } from 'date-fns'
+import { Calendar, MapPin, Users, Trash2, ArrowRight } from 'lucide-react'
+import type { Event } from '@/lib/event-types'
 
 export default function MyEventsPage() {
+  const { user } = useAuth()
+  const router = useRouter()
   const [registeredEvents, setRegisteredEvents] = React.useState<Event[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
+  const [activeTab, setActiveTab] = React.useState<'upcoming' | 'past'>('upcoming')
 
   React.useEffect(() => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) {
-      setError('Not authenticated')
-      setLoading(false)
+    if (!user) {
+      router.push('/login')
       return
     }
+    loadEvents()
+  }, [user, activeTab])
 
-    console.log('[v0] Setting up realtime listener for user events, userId:', firebaseUser.uid)
-
-    // Realtime listener for events where this user is an attendee
-    const q = query(
-      collection(db, 'events'),
-      where('attendees', 'array-contains', firebaseUser.uid)
-    )
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        try {
-          const events = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          } as Event))
-          
-          // Sort by date (upcoming first)
-          events.sort((a, b) => {
-            const aDate = a.date?.toDate?.() || new Date(0)
-            const bDate = b.date?.toDate?.() || new Date(0)
-            return aDate.getTime() - bDate.getTime()
-          })
-
-          console.log('[v0] Loaded registered events:', events.length)
-          setRegisteredEvents(events)
-          setError(null)
-        } catch (err) {
-          console.error('[v0] Error processing events:', err)
-          setError('Failed to process events data')
-        } finally {
-          setLoading(false)
-        }
-      },
-      (err) => {
-        console.error('[v0] Firestore error fetching events:', err)
-        setError(err.message || 'Failed to load events')
-        setLoading(false)
-      }
-    )
-
-    return () => {
-      console.log('[v0] Cleaning up events listener')
-      unsubscribe()
-    }
-  }, [])
-
-  const formatDate = (timestamp: Timestamp | undefined) => {
-    if (!timestamp) return 'Date TBA'
+  const loadEvents = async () => {
     try {
-      const date = timestamp.toDate?.() || new Date(timestamp as any)
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    } catch {
-      return 'Invalid date'
+      const res = await fetch(`/api/user/events?userId=${user?.id}`)
+      const json = await res.json()
+      if (json.success) {
+        const eventList = Array.isArray(json.data) ? json.data : [json.data]
+        setRegisteredEvents(eventList)
+      }
+    } catch (err) {
+      console.error('[v0] Error loading events:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const now = new Date()
+  const filteredEvents = registeredEvents.filter(event => {
+    const eventDate = new Date(event.startDate)
+    if (activeTab === 'upcoming') return eventDate >= now
+    return eventDate < now
+  })
+
+  const handleCancel = async (eventId: string) => {
+    if (!confirm('Cancel registration for this event?')) return
+    try {
+      const res = await fetch(`/api/user/events/${eventId}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (json.success) {
+        loadEvents()
+      }
+    } catch (err) {
+      console.error('[v0] Error canceling event:', err)
     }
   }
 
@@ -98,24 +64,7 @@ export default function MyEventsPage() {
     return (
       <div className="p-8">
         <h1 className="text-3xl font-bold mb-6">My Events</h1>
-        <Card className="p-8 text-center text-gray-500">
-          <div className="animate-pulse">Loading your registered events...</div>
-        </Card>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-6">My Events</h1>
-        <Card className="p-8 border-red-200 bg-red-50">
-          <p className="text-red-700 font-semibold">Error loading events</p>
-          <p className="text-red-600 text-sm mt-2">{error}</p>
-          <Button className="mt-4" onClick={() => window.location.reload()}>
-            Retry
-          </Button>
-        </Card>
+        <Card className="p-8 text-center text-gray-500">Loading your registered events...</Card>
       </div>
     )
   }
@@ -130,110 +79,95 @@ export default function MyEventsPage() {
           </p>
         </div>
         <Link href="/events">
-          <Button>Browse All Events</Button>
+          <button
+            className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 inline-flex items-center gap-2"
+          >
+            Browse Events <ArrowRight className="w-4 h-4" />
+          </button>
         </Link>
       </div>
 
-      {registeredEvents.length === 0 ? (
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+        {(['upcoming', 'past'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: activeTab === tab ? '#111111' : '#e4e1da',
+              color: activeTab === tab ? '#ffffff' : '#111111',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: activeTab === tab ? 600 : 500,
+              textTransform: 'capitalize',
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {filteredEvents.length === 0 ? (
         <Card className="p-12 text-center">
           <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">No events registered yet</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No {activeTab} events</h2>
           <p className="text-gray-500 mb-6">Browse upcoming events and register to get started</p>
           <Link href="/events">
-            <Button className="inline-flex items-center gap-2">
+            <button className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 inline-flex items-center gap-2">
               Browse Events <ArrowRight className="w-4 h-4" />
-            </Button>
+            </button>
           </Link>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
-          {registeredEvents.map((event) => {
-            const eventDate = event.date?.toDate?.() || new Date()
-            const isUpcoming = eventDate > new Date()
-
-            return (
-              <Card
-                key={event.id}
-                className="overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <div className="flex gap-6 p-6">
-                  {/* Event Image or Icon */}
-                  {event.imageUrl ? (
-                    <div
-                      className="w-32 h-32 rounded-lg bg-gray-200 flex-shrink-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${event.imageUrl})` }}
-                    />
-                  ) : (
-                    <div className="w-32 h-32 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex-shrink-0 flex items-center justify-center">
-                      <Calendar className="w-8 h-8 text-white" />
+        <div className="grid gap-6">
+          {filteredEvents.map((event) => (
+            <Card
+              key={event.id}
+              style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <Link href={`/events/${event.id}`} style={{ textDecoration: 'none' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111111', marginBottom: '8px', cursor: 'pointer' }}>
+                      {event.title}
+                    </h3>
+                  </Link>
+                  <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px' }}>{event.description}</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '13px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
+                      <Calendar size={14} />
+                      {format(new Date(event.startDate), 'MMM dd, yyyy')}
                     </div>
-                  )}
-
-                  {/* Event Details */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">{event.title}</h3>
-                        {event.eventType && (
-                          <p className="text-sm text-gray-500 mt-1 capitalize">{event.eventType}</p>
-                        )}
-                      </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          isUpcoming
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {isUpcoming ? 'Upcoming' : 'Past'}
-                      </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
+                      <MapPin size={14} />
+                      {event.locationName}
                     </div>
-
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {event.description}
-                    </p>
-
-                    {/* Event Info */}
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(event.date)}</span>
-                      </div>
-                      {event.time && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          <span>{event.time}</span>
-                        </div>
-                      )}
-                      {event.location && (
-                        <div className="flex items-center gap-2 col-span-2">
-                          <MapPin className="w-4 h-4" />
-                          <span>{event.location}</span>
-                        </div>
-                      )}
-                      {event.capacity && (
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          <span>
-                            {event.attendees?.length || 0} / {event.capacity} attendees
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-3">
-                      <Link href={`/events/${event.id}`}>
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                      </Link>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
+                      <Users size={14} />
+                      {event.currentAttendees} attending
                     </div>
                   </div>
                 </div>
-              </Card>
-            )
-          })}
+                {activeTab === 'upcoming' && (
+                  <button
+                    onClick={() => handleCancel(event.id!)}
+                    style={{
+                      padding: '8px 12px',
+                      backgroundColor: '#ffebee',
+                      color: '#c62828',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      marginLeft: '12px',
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            </Card>
+          ))}
         </div>
       )}
     </div>

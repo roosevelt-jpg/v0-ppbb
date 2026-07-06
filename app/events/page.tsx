@@ -1,11 +1,13 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
 import React, { useEffect, useState } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import EventCard from '@/components/event-card'
 import { Filter, Calendar, MapPin, Users } from 'lucide-react'
-import type { Event } from '@/lib/types'
+import type { Event } from '@/lib/event-types'
+import { format } from 'date-fns'
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -36,7 +38,7 @@ export default function EventsPage() {
   }
 
   const filteredEvents = events.filter(event => {
-    const eventDate = new Date(event.date)
+    const eventDate = new Date(event.startDate)
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -54,7 +56,7 @@ export default function EventsPage() {
   })
 
   const allTags = Array.from(new Set(events.flatMap(e => e.tags || [])))
-  const upcomingCount = events.filter(e => new Date(e.date) >= new Date()).length
+  const upcomingCount = events.filter(e => new Date(e.startDate) >= new Date()).length
   const totalEvents = events.length
 
   return (
