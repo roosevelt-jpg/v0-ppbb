@@ -210,6 +210,18 @@ export default function CommunityDetailPage() {
                       </span>
                     </div>
 
+                    {/* Gender Restriction Badge */}
+                    {isRestricted && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
+                        <p className="text-amber-900 font-medium">
+                          {group.genderRestriction === 'male' ? 'Men Only' : 'Women Only'}
+                        </p>
+                        <p className="text-amber-700 text-xs mt-1">
+                          This group is restricted to {group.genderRestriction === 'male' ? 'male' : 'female'} members only
+                        </p>
+                      </div>
+                    )}
+
                     {/* Action Button */}
                     <button
                       onClick={() => handleJoinGroup(group)}
@@ -223,7 +235,7 @@ export default function CommunityDetailPage() {
                       }`}
                     >
                       {isRestricted
-                        ? `${group.genderRestriction === 'men-only' ? 'Men only' : 'Ladies only'}`
+                        ? 'Access Denied'
                         : isMember
                         ? 'Joined'
                         : joiningGroup === group.id
