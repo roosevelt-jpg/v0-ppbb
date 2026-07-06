@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
@@ -80,9 +81,9 @@ export default function BusinessProfile() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-2xl mx-auto p-8 space-y-6">
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Business Name */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
@@ -255,7 +256,7 @@ export default function BusinessProfile() {
           <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
             Membership Information
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             <div>
               <p style={{ color: '#888888', fontSize: '14px' }}>Membership Tier</p>
               <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>

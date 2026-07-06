@@ -37,7 +37,7 @@ export default function BusinessApplicants() {
   React.useEffect(() => {
     if (!user) return
     if (!hasBusinessAccess(user)) {
-      router.push('/business/signup')
+      router.push('/signup')
       return
     }
     loadApplications()

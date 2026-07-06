@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
@@ -26,7 +27,7 @@ export default function BusinessOpportunities() {
   React.useEffect(() => {
     if (!user) return
     if (!hasBusinessAccess(user)) {
-      router.push('/business/signup')
+      router.push('/signup')
       return
     }
 
@@ -68,7 +69,7 @@ export default function BusinessOpportunities() {
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
       {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-6xl mx-auto flex flex-wrap gap-4 justify-between items-center">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
               Posted Opportunities

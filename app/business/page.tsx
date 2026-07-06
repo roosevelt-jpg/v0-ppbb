@@ -15,7 +15,7 @@ export default function BusinessPortal() {
         router.push('/business/dashboard')
       } else if (user) {
         // Logged in but no business account yet - send to signup
-        router.push('/business/signup')
+        router.push('/signup')
       } else {
         router.push('/login')
       }

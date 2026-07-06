@@ -82,11 +82,15 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       {/* Header with Logo */}
       <div className="border-b border-neutral-200 p-6">
         <Link href="/business/dashboard" className="block text-center">
-          {/* Logo Placeholder - will display Passive Blessings logo */}
+          {/* Passive Blessings Logo */}
           <div className="mb-4 flex items-center justify-center">
-            <div className="h-12 w-12 rounded-lg bg-neutral-900 flex items-center justify-center text-white font-bold text-lg">
-              PB
-            </div>
+            <Image
+              src="/pb-logo-black.png"
+              alt="Passive Blessings"
+              width={48}
+              height={48}
+              className="rounded-lg"
+            />
           </div>
           <h2 className="text-lg font-bold text-neutral-900">Passive Blessings</h2>
           <p className="mt-1 text-xs text-neutral-500">Business Portal</p>
@@ -161,7 +165,7 @@ export default function BusinessLayout({
       router.push('/login')
     } else if (!canAccess) {
       // Logged in but no business account yet - send to business signup
-      router.push('/business/signup')
+      router.push('/signup')
     }
   }, [user, loading, canAccess, router, isSignupRoute])
 
