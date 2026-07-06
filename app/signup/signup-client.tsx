@@ -757,7 +757,7 @@ function SignupPageContent() {
         </div>
 
         {/* Right Sidebar - Hidden on mobile */}
-        <div style={{ flex: 1, padding: '2rem 1rem', backgroundColor: '#111111', color: '#ffffff', display: 'none', '@media (min-width: 1024px)': { display: 'flex' }, flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-between" style={{ padding: '2rem 1rem', backgroundColor: '#111111', color: '#ffffff' }}>
           <div>
             <p style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Registration progress</p>
             <div style={{ height: '4px', width: `${(currentStep / STEPS.length) * 100}%`, backgroundColor: '#ffffff', borderRadius: '9999px', marginBottom: '2rem' }} />

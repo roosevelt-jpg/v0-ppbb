@@ -337,8 +337,8 @@ export async function getRecentActivity(limit = 20): Promise<any[]> {
     const snapshot = await getDocs(
       query(
         collection(db, 'communityReports'),
-        orderBy: 'createdAt',
-        limit
+        orderBy('createdAt', 'desc'),
+        limit(limit)
       )
     )
     return snapshot.docs.map(doc => ({
