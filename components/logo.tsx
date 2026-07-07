@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/theme-provider'
 import Link from 'next/link'
 import { useLogos } from '@/hooks/use-logos'
 import { DEFAULT_LOGOS } from '@/lib/logo-manager'

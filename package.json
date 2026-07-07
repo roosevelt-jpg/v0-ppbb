@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postinstall": "node scripts/patch-next-themes-react19.mjs"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.4",
