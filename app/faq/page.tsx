@@ -72,7 +72,7 @@ export default function FAQPage() {
         {/* Header */}
         <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-gray-50">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-playfair mb-4 text-black">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-headline mb-4 text-black">
               Frequently Asked Questions
             </h1>
             <p className="text-gray-600 text-base sm:text-lg">

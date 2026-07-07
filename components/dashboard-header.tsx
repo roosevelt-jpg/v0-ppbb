@@ -46,7 +46,7 @@ export function DashboardHeader({ title, subtitle, showDateTime = true }: Dashbo
   return (
     <div className="border-b px-8 py-4 flex items-center justify-between" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       <div className="flex-1">
-        <h1 className="text-2xl font-bold" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+        <h1 className="text-2xl font-bold font-headline" style={{ color: '#111111', fontWeight: 700 }}>
           {title}
         </h1>
         <div className="flex items-center gap-4 mt-2">

@@ -150,7 +150,7 @@ export default function TransparencyPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
             <div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-playfair leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-headline leading-tight mb-6">
                 Transparency & Impact Report
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground mb-4 leading-relaxed">
@@ -173,7 +173,7 @@ export default function TransparencyPage() {
       {/* Key Metrics - Mobile First Grid */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-10 sm:mb-12 font-playfair">Our Impact at a Glance</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-10 sm:mb-12 font-headline">Our Impact at a Glance</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {metrics.map((metric, idx) => {
@@ -201,7 +201,7 @@ export default function TransparencyPage() {
       {/* Causes Breakdown */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-10 sm:mb-12 font-playfair">Donations by Cause</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-10 sm:mb-12 font-headline">Donations by Cause</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Chart placeholder - Left side */}
@@ -280,7 +280,7 @@ export default function TransparencyPage() {
       {/* Monthly Timeline (informational) */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-10 sm:mb-12 font-playfair">Impact Timeline</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-10 sm:mb-12 font-headline">Impact Timeline</h2>
 
           <div className="bg-white p-6 sm:p-8 rounded-lg border border-[#e4e1da]">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -351,7 +351,7 @@ export default function TransparencyPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 font-playfair leading-tight">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 font-headline leading-tight">
                 Help Us Make a Greater Impact
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground mb-8 leading-relaxed">

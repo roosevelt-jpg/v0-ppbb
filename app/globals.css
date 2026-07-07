@@ -20,8 +20,9 @@ input[type='checkbox'] {
 }
 
 @theme inline {
-  --font-playfair: var(--font-playfair-display);
-  --font-sans: var(--font-dm-sans), 'DM Sans Fallback';
+  --font-headline: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --font-sans: var(--font-body);
   --font-mono: 'DM Mono', 'Courier New', monospace;
   --color-ink-black: #111111;
   --color-charcoal: #333333;
@@ -84,6 +85,8 @@ input[type='checkbox'] {
 }
 
 :root {
+  --font-headline: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
   --background: #f7f6f2;
   --foreground: #111111;
   --card: #ffffff;
@@ -152,21 +155,37 @@ input[type='checkbox'] {
   --sidebar-ring: #888888;
 }
 
+.font-headline { font-family: var(--font-headline); }
+.font-body     { font-family: var(--font-body); }
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.caption-mixed {
+  font-family: var(--font-body);
+}
+.caption-mixed em,
+.caption-mixed i {
+  font-family: var(--font-headline);
+  font-style: italic;
+}
+
 @layer base {
   * { @apply border-border outline-ring/50; }
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
+    @apply bg-background text-foreground font-body;
     font-size: 13px;
     line-height: 1.5;
   }
-  html { @apply font-sans; }
+  html { @apply font-body; }
 
-  h1 { @apply font-playfair font-bold text-3xl tracking-tight leading-tight; }
-  h2 { @apply font-playfair font-bold text-2xl tracking-tight leading-snug; }
-  h3 { @apply font-sans font-semibold text-lg leading-snug; }
-  h4 { @apply font-sans font-semibold text-base leading-snug; }
-  p  { @apply leading-relaxed; }
+  h1 { @apply font-headline font-bold text-3xl tracking-tight leading-tight; }
+  h2 { @apply font-headline font-bold text-2xl tracking-tight leading-snug; }
+  h3 { @apply font-body font-semibold text-lg leading-snug; }
+  h4 { @apply font-body font-semibold text-base leading-snug; }
+  p  { @apply leading-relaxed font-body; }
 
   input, textarea, select {
     @apply px-4 py-2 text-sm rounded-xl border border-sand-border bg-white text-charcoal placeholder:text-warm-grey focus:outline-none focus:ring-2 focus:ring-ink-black focus:border-transparent transition-all;
@@ -181,7 +200,7 @@ input[type='checkbox'] {
   }
 
   button {
-    @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-warm-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-warm-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md font-body;
     font-size: 13px;
     /* REMOVED h-10 — let height be natural */
     min-height: 36px;

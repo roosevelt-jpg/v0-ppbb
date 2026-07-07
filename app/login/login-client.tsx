@@ -9,6 +9,7 @@ import { Logo } from '@/components/logo'
 import { AlertCircle, Check } from 'lucide-react'
 import { logActivity } from '@/lib/activity-logger'
 import { hasBusinessAccess } from '@/lib/roles'
+import { User } from '@/lib/types'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -21,21 +22,23 @@ export default function LoginPage() {
   const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
   const [statsLoading, setStatsLoading] = React.useState(true)
 
-  // Route the user after a successful login. If a ?redirect= param is present
-  // (e.g. coming from "Create Business Account"), honor it; otherwise route by role.
-  const routeAfterLogin = (user: any) => {
+  // Route the user after a successful login. Honor returnUrl or redirect query params first.
+  const routeAfterLogin = (user: User) => {
     const params = new URLSearchParams(window.location.search)
-    const redirectTo = params.get('redirect')
-    if (redirectTo && redirectTo.startsWith('/')) {
-      router.push(redirectTo)
+    const returnUrl = params.get('returnUrl') || params.get('redirect')
+    if (returnUrl && returnUrl.startsWith('/')) {
+      router.push(returnUrl)
       return
     }
-    if (user.role === 'admin') {
-      router.push('/admin')
-    } else if (user.role === 'super_admin') {
+
+    if (!user.role) {
+      router.push('/')
+      return
+    }
+
+    if (user.role === 'admin' || user.role === 'super_admin') {
       router.push('/admin')
     } else if (hasBusinessAccess(user)) {
-      // User has business access (either primary role or via roles array)
       router.push('/business/dashboard')
     } else if (user.role === 'sponsor') {
       router.push('/sponsor')

@@ -166,7 +166,7 @@ export default function HomePage() {
       {/* IMPACT SECTION - Mobile First Grid */}
       <section id="impact" className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-playfair">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-headline">
             Our Impact
           </h2>
           
@@ -203,7 +203,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#111111]" />
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-playfair">Upcoming Events</h2>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-headline">Upcoming Events</h2>
               </div>
               <p className="text-xs sm:text-sm text-[#888888] mt-1">Join our community and participate in meaningful events</p>
             </div>
@@ -247,7 +247,7 @@ export default function HomePage() {
       {/* 6 PILLARS - Mobile First */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-playfair">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-headline">
             Our 6 Pillars
           </h2>
           
@@ -270,7 +270,7 @@ export default function HomePage() {
       {testimonials.length > 0 && (
         <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-playfair">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-headline">
               Success Stories
             </h2>
             
@@ -294,7 +294,7 @@ export default function HomePage() {
       {causes.length > 0 && (
         <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-playfair">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-headline">
               Active Causes
             </h2>
             
@@ -338,7 +338,7 @@ export default function HomePage() {
       {sponsors.length > 0 && (
         <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-playfair">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-headline">
               Our Partners & Sponsors
             </h2>
             
@@ -370,7 +370,7 @@ export default function HomePage() {
       {news.length > 0 && (
         <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-playfair">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-headline">
               Latest News
             </h2>
             

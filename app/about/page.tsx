@@ -59,7 +59,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-playfair mb-4 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-headline mb-4 leading-tight">
                 About Us
               </h1>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
@@ -81,7 +81,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {/* Mission */}
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold font-playfair mb-3">Our Mission</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold font-headline mb-3">Our Mission</h2>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
                 {aboutContent.mission}
               </p>
@@ -89,7 +89,7 @@ export default function AboutPage() {
 
             {/* Vision */}
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold font-playfair mb-3">Our Vision</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold font-headline mb-3">Our Vision</h2>
               <p className="text-sm sm:text-base text-[#333333] leading-relaxed">
                 {aboutContent.vision}
               </p>
@@ -101,7 +101,7 @@ export default function AboutPage() {
       {/* Our Values */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold font-playfair text-center mb-8 sm:mb-10">
+          <h2 className="text-3xl sm:text-4xl font-bold font-headline text-center mb-8 sm:mb-10">
             Our Values
           </h2>
 
@@ -144,7 +144,7 @@ export default function AboutPage() {
       {/* Team Section */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold font-playfair text-center mb-8 sm:mb-10">
+          <h2 className="text-3xl sm:text-4xl font-bold font-headline text-center mb-8 sm:mb-10">
             Meet Our Team
           </h2>
 

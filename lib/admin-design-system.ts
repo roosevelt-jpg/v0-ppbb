@@ -65,8 +65,8 @@ export const FLEX_BETWEEN = 'flex items-center justify-between'
 export const FLEX_COLUMN = 'flex flex-col'
 
 // Typography
-export const TEXT_HEADING = 'font-playfair text-3xl md:text-4xl font-bold text-neutral-900'
-export const TEXT_SUBHEADING = 'font-playfair text-2xl md:text-3xl font-bold text-neutral-900'
+export const TEXT_HEADING = 'font-headline text-3xl md:text-4xl font-bold text-neutral-900'
+export const TEXT_SUBHEADING = 'font-headline text-2xl md:text-3xl font-bold text-neutral-900'
 export const TEXT_SECTION = 'font-bold text-lg md:text-xl text-neutral-900'
 export const TEXT_LABEL = 'text-sm font-medium text-neutral-700'
 export const TEXT_SMALL = 'text-xs md:text-sm text-neutral-600'

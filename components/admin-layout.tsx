@@ -81,6 +81,8 @@ const adminMenuItems = [
 
   // Content Management
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText, group: 'Content' },
+  { label: 'Navigation', href: '/admin/cms/navigation', icon: FileText, group: 'CMS' },
+  { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
   { label: 'Custom Forms', href: '/admin/forms', icon: FileText, group: 'Content' },
   { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },
   { label: 'Policies', href: '/admin/policies', icon: FileText, group: 'Content' },
@@ -118,7 +120,7 @@ export function AdminSidebar() {
   }, {} as Record<string, typeof adminMenuItems>)
 
   // Sort groups in order of appearance
-  const groupOrder = ['Dashboard', 'Security', 'Users', 'Community', 'Charity', 'Memberships', 'Communication', 'Content', 'Assets', 'Configuration']
+  const groupOrder = ['Dashboard', 'Security', 'Users', 'Community', 'Charity', 'Memberships', 'Communication', 'Content', 'CMS', 'Assets', 'Configuration']
   const sortedGroups = groupOrder.filter(g => groupedItems[g])
 
   return (
@@ -302,7 +304,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
   return (
     <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       <div className="flex-1 min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold truncate" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+        <h1 className="text-xl sm:text-2xl font-bold truncate font-headline" style={{ color: '#111111', fontWeight: 700 }}>
           {title}
         </h1>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
