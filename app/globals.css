@@ -282,3 +282,17 @@ input[type='checkbox'] {
 
 .modal-enter { animation: fadeIn 0.2s ease-out; }
 .modal-slide { animation: slideIn 0.3s ease-out; }
+
+@keyframes partners-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.partners-marquee-track {
+  animation: partners-marquee var(--marquee-duration, 40s) linear infinite;
+  width: max-content;
+}
+
+.partners-marquee-track:hover {
+  animation-play-state: paused;
+}

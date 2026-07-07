@@ -1,291 +1,362 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { AdminTable } from '@/components/admin-table'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import {
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  AlertCircle,
+  CheckCircle2,
+  Upload,
+  Sparkles,
+} from 'lucide-react'
 import { db } from '@/lib/firebase'
-import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { formatDistanceToNow } from 'date-fns'
-import { uploadImageToFirebase, validateImageFile } from '@/lib/upload-utils'
-import Link from 'next/link'
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import {
+  DEFAULT_PARTNER_NAMES,
+  Partner,
+  PartnerType,
+  subscribeToAllPartners,
+} from '@/lib/partners'
+import { useAuth } from '@/lib/auth-context'
 
-export default function CharityPartnersPage() {
-  const [partners, setPartners] = React.useState<any[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [editingPartner, setEditingPartner] = React.useState<any>(null)
-  const [uploading, setUploading] = React.useState(false)
-  const [uploadError, setUploadError] = React.useState('')
-  const [newPartner, setNewPartner] = React.useState({
+const PARTNER_TYPES: PartnerType[] = [
+  'sponsor',
+  'partner',
+  'charity',
+  'government',
+  'corporate',
+  'grassroots',
+]
+
+async function uploadPartnerLogo(file: File): Promise<string> {
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
+  if (!validTypes.includes(file.type)) {
+    throw new Error('Logo must be PNG, SVG, or WebP')
+  }
+  if (file.size > 5 * 1024 * 1024) throw new Error('File must be under 5MB')
+
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('folder', 'partners/logos')
+  const res = await fetch('/api/upload', { method: 'POST', body: fd })
+  const json = await res.json()
+  if (!res.ok || !json.success) throw new Error(json.error || 'Upload failed')
+  return json.url as string
+}
+
+export default function AdminPartnersLogosPage() {
+  const { user } = useAuth()
+  const [partners, setPartners] = useState<Partner[]>([])
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [seeding, setSeeding] = useState(false)
+  const [form, setForm] = useState({
     name: '',
-    description: '',
-    website: '',
-    paymentLink: '',
-    logo: '',
-    status: 'active',
+    logoURL: '',
+    websiteURL: '',
+    type: 'partner' as PartnerType,
+    order: 0,
+    isActive: true,
   })
 
-  React.useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'charityPartners'), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      setPartners(data)
-      setLoading(false)
-    })
+  useEffect(() => subscribeToAllPartners(setPartners), [])
+  useEffect(() => {
+    if (partners.length >= 0) setLoading(false)
+  }, [partners])
 
-    return () => unsubscribe()
-  }, [])
-
-  const handleAddPartner = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newPartner.name.trim()) return
-    setUploadError('')
-
-    await addDoc(collection(db, 'charityPartners'), {
-      ...newPartner,
-      createdAt: serverTimestamp(),
-      active: true,
-    })
-
-    setNewPartner({
-      name: '',
-      description: '',
-      website: '',
-      paymentLink: '',
-      logo: '',
-      status: 'active',
-    })
-  }
+  const showMessage = (type: 'success' | 'error', text: string) => setMessage({ type, text })
 
   const handleLogoUpload = async (file: File) => {
     try {
-      setUploadError('')
       setUploading(true)
-      const validation = validateImageFile(file)
-      if (!validation.valid) {
-        setUploadError(validation.error || 'Invalid file')
-        return
-      }
-      const url = await uploadImageToFirebase(file, 'partner-logos')
-      setNewPartner({ ...newPartner, logo: url })
-    } catch (error: any) {
-      setUploadError(error.message || 'Upload failed')
-      console.error('[v0] Logo upload error:', error)
+      const url = await uploadPartnerLogo(file)
+      setForm((prev) => ({ ...prev, logoURL: url }))
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Upload failed')
     } finally {
       setUploading(false)
     }
   }
 
-  const handleDeletePartner = async (id: string) => {
-    if (!confirm('Delete this charity partner?')) return
-    await deleteDoc(doc(db, 'charityPartners', id))
-  }
-
-  const handleEditPartner = (partner: any) => {
-    setEditingPartner(partner)
-  }
-
-  const handleUpdatePartner = async (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!editingPartner.id) return
-
+    if (!form.name.trim()) return
     try {
-      await updateDoc(doc(db, 'charityPartners', editingPartner.id), {
-        name: editingPartner.name,
-        description: editingPartner.description,
-        website: editingPartner.website,
-        paymentLink: editingPartner.paymentLink,
-        logo: editingPartner.logo,
-        status: editingPartner.status,
-        updatedAt: serverTimestamp(),
+      await addDoc(collection(db, 'partners'), {
+        name: form.name.trim(),
+        logoURL: form.logoURL || '',
+        websiteURL: form.websiteURL.trim() || null,
+        type: form.type,
+        isActive: form.isActive,
+        order: form.order || partners.length,
+        createdAt: serverTimestamp(),
+        addedBy: user?.id || 'admin',
       })
-      setEditingPartner(null)
-    } catch (error) {
-      console.error('[v0] Error updating partner:', error)
+      setForm({
+        name: '',
+        logoURL: '',
+        websiteURL: '',
+        type: 'partner',
+        order: partners.length + 1,
+        isActive: true,
+      })
+      showMessage('success', 'Partner added.')
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Failed to add partner')
     }
   }
 
-  const handleCloseEditModal = () => {
-    setEditingPartner(null)
+  const handleSeedDefaults = async () => {
+    setSeeding(true)
+    setMessage(null)
+    try {
+      const existing = new Set(partners.map((p) => p.name.toLowerCase()))
+      let order = partners.length
+      let added = 0
+      for (const name of DEFAULT_PARTNER_NAMES) {
+        if (existing.has(name.toLowerCase())) continue
+        await addDoc(collection(db, 'partners'), {
+          name,
+          logoURL: '',
+          websiteURL: null,
+          type: 'partner',
+          isActive: true,
+          order: order++,
+          createdAt: serverTimestamp(),
+          addedBy: user?.id || 'admin',
+        })
+        added++
+      }
+      showMessage('success', added > 0 ? `Seeded ${added} partner names.` : 'All default partners already exist.')
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Seed failed')
+    } finally {
+      setSeeding(false)
+    }
+  }
+
+  const toggleActive = async (partner: Partner) => {
+    await updateDoc(doc(db, 'partners', partner.id), { isActive: !partner.isActive })
+  }
+
+  const movePartner = async (index: number, direction: 'up' | 'down') => {
+    const target = direction === 'up' ? index - 1 : index + 1
+    if (target < 0 || target >= partners.length) return
+    const a = partners[index]
+    const b = partners[target]
+    await Promise.all([
+      updateDoc(doc(db, 'partners', a.id), { order: b.order }),
+      updateDoc(doc(db, 'partners', b.id), { order: a.order }),
+    ])
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this partner?')) return
+    await deleteDoc(doc(db, 'partners', id))
   }
 
   return (
-    <AdminPageLayout title="Charity Partners" subtitle="Manage and coordinate with nonprofit partners">
+    <AdminPageLayout title="Partners & Logos">
       <div className="space-y-6">
-        {/* Add New Partner Form */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h2 className="text-lg font-bold mb-4">Add New Charity Partner</h2>
-          <form onSubmit={handleAddPartner} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Partner Name (e.g., Beit Al Khair)"
-              value={newPartner.name}
-              onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })}
-              className="border rounded px-3 py-2"
-              required
-            />
-            <input
-              type="url"
-              placeholder="Website URL"
-              value={newPartner.website}
-              onChange={(e) => setNewPartner({ ...newPartner, website: e.target.value })}
-              className="border rounded px-3 py-2"
-            />
-            <input
-              type="url"
-              placeholder="Payment Link"
-              value={newPartner.paymentLink}
-              onChange={(e) => setNewPartner({ ...newPartner, paymentLink: e.target.value })}
-              className="border rounded px-3 py-2"
-              required
-            />
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => e.target.files && handleLogoUpload(e.target.files[0])}
-                disabled={uploading}
-                className="border rounded px-3 py-2 w-full cursor-pointer"
-                placeholder="Upload Logo"
-              />
-              {newPartner.logo && (
-                <div className="absolute right-3 top-2 text-sm text-green-600 font-medium">
-                  ✓ Uploaded
-                </div>
-              )}
-            </div>
-            <textarea
-              placeholder="Partner Description"
-              value={newPartner.description}
-              onChange={(e) => setNewPartner({ ...newPartner, description: e.target.value })}
-              className="border rounded px-3 py-2 md:col-span-2"
-              rows={3}
-            />
-            {uploadError && (
-              <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
-                {uploadError}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={uploading}
-              className="md:col-span-2 bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 rounded font-medium"
-            >
-              {uploading ? 'Uploading...' : 'Add Partner'}
-            </button>
-          </form>
+        <div>
+          <h1 className="font-headline text-3xl font-bold text-neutral-900">Partners &amp; Logos</h1>
+          <p className="text-sm text-neutral-600 mt-1">
+            Manage logos for the homepage marquee and Partners page. Changes sync live via Firestore.
+          </p>
         </div>
 
-        {/* Partners List Table */}
-        <AdminTable
-          title="Charity Partners"
-          columns={['Name', 'Website', 'Payment Link', 'Status', 'Added', 'Actions']}
-          data={partners.map((partner) => ({
-            name: partner.name,
-            website: (
-              <a href={partner.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                View
-              </a>
-            ),
-            paymentLink: (
-              <a href={partner.paymentLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                Payment Link
-              </a>
-            ),
-            status: (
-              <span className={`px-2 py-1 rounded text-sm ${partner.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
-                {partner.status}
-              </span>
-            ),
-            added: formatDistanceToNow(partner.createdAt?.toDate?.() || new Date(), { addSuffix: true }),
-            actions: (
-              <div className="flex gap-2">
-                <button onClick={() => handleEditPartner(partner)} className="text-blue-600 hover:text-blue-800 font-medium">
-                  Edit
-                </button>
-                <button onClick={() => handleDeletePartner(partner.id)} className="text-red-600 hover:text-red-800 font-medium">
-                  Delete
-                </button>
-              </div>
-            ),
-          }))}
-          onEdit={() => {}}
-          onDelete={handleDeletePartner}
-          loading={loading}
-        />
-
-        {/* Edit Partner Modal */}
-        {editingPartner && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-              <h2 className="text-lg font-bold mb-4">Edit Charity Partner</h2>
-              <form onSubmit={handleUpdatePartner} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Partner Name"
-                  value={editingPartner.name}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, name: e.target.value })}
-                  className="border rounded px-3 py-2"
-                  required
-                />
-                <input
-                  type="url"
-                  placeholder="Website URL"
-                  value={editingPartner.website}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, website: e.target.value })}
-                  className="border rounded px-3 py-2"
-                />
-                <input
-                  type="url"
-                  placeholder="Payment Link - Update here for new links"
-                  value={editingPartner.paymentLink}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, paymentLink: e.target.value })}
-                  className="border rounded px-3 py-2 md:col-span-2"
-                  required
-                />
-                <input
-                  type="url"
-                  placeholder="Logo URL"
-                  value={editingPartner.logo}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, logo: e.target.value })}
-                  className="border rounded px-3 py-2"
-                />
-                <select
-                  value={editingPartner.status}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, status: e.target.value })}
-                  className="border rounded px-3 py-2"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <textarea
-                  placeholder="Partner Description"
-                  value={editingPartner.description}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, description: e.target.value })}
-                  className="border rounded px-3 py-2 md:col-span-2"
-                  rows={2}
-                />
-                <div className="md:col-span-2 flex gap-2">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-medium"
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCloseEditModal}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded font-medium"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+        {message && (
+          <div
+            className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            )}
+            {message.text}
           </div>
         )}
+
+        <div className="flex flex-wrap gap-3">
+          <Button
+            type="button"
+            onClick={handleSeedDefaults}
+            disabled={seeding}
+            className="bg-white text-black border border-gray-300 hover:bg-gray-50 shadow-none min-h-0"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            {seeding ? 'Seeding…' : 'Seed default partner names'}
+          </Button>
+        </div>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Add partner</h2>
+          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Name *</label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                className="w-full"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Type</label>
+              <select
+                value={form.type}
+                onChange={(e) => setForm((p) => ({ ...p, type: e.target.value as PartnerType }))}
+                className="w-full"
+              >
+                {PARTNER_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Website URL</label>
+              <input
+                type="url"
+                value={form.websiteURL}
+                onChange={(e) => setForm((p) => ({ ...p, websiteURL: e.target.value }))}
+                className="w-full"
+                placeholder="https://"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Order</label>
+              <input
+                type="number"
+                value={form.order}
+                onChange={(e) => setForm((p) => ({ ...p, order: parseInt(e.target.value, 10) || 0 }))}
+                className="w-full"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Logo (PNG, SVG, WebP)</label>
+              <div className="flex items-center gap-4">
+                <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg cursor-pointer hover:bg-neutral-50">
+                  <Upload className="w-4 h-4" />
+                  {uploading ? 'Uploading…' : 'Upload logo'}
+                  <input
+                    type="file"
+                    accept="image/png,image/webp,image/svg+xml"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                  />
+                </label>
+                {form.logoURL && (
+                  <img src={form.logoURL} alt="" className="h-10 w-auto object-contain border rounded p-1" />
+                )}
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <Button type="submit" className="bg-black text-white hover:bg-gray-800">
+                <Plus className="w-4 h-4 mr-2" />
+                Add partner
+              </Button>
+            </div>
+          </form>
+        </Card>
+
+        <Card className="p-6 overflow-x-auto">
+          <h2 className="font-headline text-xl font-bold mb-4">All partners</h2>
+          {loading ? (
+            <p className="text-sm text-neutral-500">Loading…</p>
+          ) : partners.length === 0 ? (
+            <p className="text-sm text-neutral-500">No partners yet. Seed defaults or add one above.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-neutral-500">
+                  <th className="py-2 pr-4">Logo</th>
+                  <th className="py-2 pr-4">Name</th>
+                  <th className="py-2 pr-4">Type</th>
+                  <th className="py-2 pr-4">Active</th>
+                  <th className="py-2 pr-4">Order</th>
+                  <th className="py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {partners.map((partner, index) => (
+                  <tr key={partner.id} className="border-b border-neutral-100">
+                    <td className="py-3 pr-4">
+                      {partner.logoURL ? (
+                        <img src={partner.logoURL} alt="" className="h-10 w-10 object-contain" />
+                      ) : (
+                        <span className="text-xs text-neutral-400">Text only</span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-4 font-medium">{partner.name}</td>
+                    <td className="py-3 pr-4 capitalize">{partner.type}</td>
+                    <td className="py-3 pr-4">
+                      <button
+                        type="button"
+                        onClick={() => toggleActive(partner)}
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          partner.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'
+                        }`}
+                      >
+                        {partner.isActive ? 'Active' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td className="py-3 pr-4">{partner.order}</td>
+                    <td className="py-3">
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => movePartner(index, 'up')}
+                          disabled={index === 0}
+                          className="p-1.5 border rounded bg-white shadow-none min-h-0"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => movePartner(index, 'down')}
+                          disabled={index === partners.length - 1}
+                          className="p-1.5 border rounded bg-white shadow-none min-h-0"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(partner.id)}
+                          className="p-1.5 bg-red-600 text-white rounded shadow-none min-h-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
       </div>
     </AdminPageLayout>
   )

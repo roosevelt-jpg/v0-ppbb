@@ -64,7 +64,7 @@ const adminMenuItems = [
   { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert, group: 'Charity' },
   { label: 'Donations', href: '/admin/donations', icon: DollarSign, group: 'Charity' },
   { label: 'Donation Causes', href: '/admin/causes', icon: Target, group: 'Charity' },
-  { label: 'Charity Partners', href: '/admin/partners', icon: HandHeart, group: 'Charity' },
+  { label: 'Charity Partners', href: '/admin/charity-partners', icon: HandHeart, group: 'Charity' },
   { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },
   { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: HandHeart, group: 'Charity' },
 
@@ -82,7 +82,9 @@ const adminMenuItems = [
   // Content Management
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText, group: 'Content' },
   { label: 'Navigation', href: '/admin/cms/navigation', icon: FileText, group: 'CMS' },
+  { label: 'Homepage', href: '/admin/cms/homepage', icon: FileText, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
+  { label: 'Partners & Logos', href: '/admin/partners', icon: Image, group: 'CMS' },
   { label: 'Custom Forms', href: '/admin/forms', icon: FileText, group: 'Content' },
   { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },
   { label: 'Policies', href: '/admin/policies', icon: FileText, group: 'Content' },

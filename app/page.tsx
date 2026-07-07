@@ -3,59 +3,33 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot, limit, orderBy, doc } from 'firebase/firestore'
+import { collection, query, where, onSnapshot, limit, orderBy } from 'firebase/firestore'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { HeroSlider } from '@/components/hero-slider'
+import { HomeHero } from '@/components/homepage/home-hero'
+import { HomeStatsBar } from '@/components/homepage/home-stats-bar'
+import { PartnersMarquee } from '@/components/homepage/partners-marquee'
+import { HomeMission } from '@/components/homepage/home-mission'
 import { YouTubeWidget } from '@/components/youtube-widget'
 import EventCard from '@/components/event-card'
 import { Button } from '@/components/ui/button'
-import { ArrowRight, Users2, Heart, Zap, Building2, BookOpen, Briefcase, TrendingUp, Calendar } from 'lucide-react'
-import { HeroSliderSettings, YouTubeConfig } from '@/lib/types'
-import { getYouTubeConfig } from '@/lib/youtube-service'
+import { ArrowRight, Users2, Heart, Zap, Building2, BookOpen, Briefcase, Calendar } from 'lucide-react'
+import { YouTubeConfig } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
-  const [stats, setStats] = useState({ members: 0, events: 0, donations: 0 })
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([])
   const [testimonials, setTestimonials] = useState<any[]>([])
   const [causes, setCauses] = useState<any[]>([])
   const [sponsors, setSponsors] = useState<any[]>([])
   const [news, setNews] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [heroSliderSettings, setHeroSliderSettings] = useState<HeroSliderSettings | null>(null)
   const [youtubeConfig, setYoutubeConfig] = useState<YouTubeConfig | null>(null)
 
   useEffect(() => {
-    const statsListeners: any[] = []
+    const statsListeners: (() => void)[] = []
     
     try {
-      // Hero slider data is served by a public Admin SDK API route
-      // (/api/hero-slider). The slider config + images live in the
-      // `heroSlider/default` doc and its `images` subcollection; client-side
-      // reads of that subcollection are denied by the deployed Firestore
-      // rules, so we fetch via the server instead. Poll periodically so newly
-      // added/edited slides appear without a manual refresh.
-      let sliderCancelled = false
-      const loadHeroSlider = async () => {
-        try {
-          const res = await fetch('/api/hero-slider', { cache: 'no-store' })
-          const json = await res.json()
-          if (!sliderCancelled && res.ok && json.success && json.data) {
-            setHeroSliderSettings(json.data as HeroSliderSettings)
-          }
-        } catch (err) {
-          console.error('Hero slider fetch error:', err)
-        }
-      }
-      loadHeroSlider()
-      const heroSliderInterval = setInterval(loadHeroSlider, 30000)
-      statsListeners.push(() => {
-        sliderCancelled = true
-        clearInterval(heroSliderInterval)
-      })
-      
       // YouTube config is served by a public Admin SDK route (/api/youtube/config);
       // client reads of `youtubeConfig` are denied by deployed Firestore rules.
       let youtubeCancelled = false
@@ -76,25 +50,6 @@ export default function HomePage() {
         youtubeCancelled = true
         clearInterval(youtubeInterval)
       })
-
-      // Members count
-      const usersQuery = query(collection(db, 'users'), where('role', '==', 'member'))
-      statsListeners.push(onSnapshot(usersQuery, (snapshot) => {
-        setStats((prev) => ({ ...prev, members: snapshot.docs.length }))
-      }, (error) => console.error('Members listener error:', error)))
-
-      // Events count
-      const eventsQuery = query(collection(db, 'events'), where('status', '==', 'published'))
-      statsListeners.push(onSnapshot(eventsQuery, (snapshot) => {
-        setStats((prev) => ({ ...prev, events: snapshot.docs.length }))
-      }, (error) => console.error('Events listener error:', error)))
-
-      // Donations sum
-      const donationsQuery = query(collection(db, 'donations'), where('status', '==', 'completed'))
-      statsListeners.push(onSnapshot(donationsQuery, (snapshot) => {
-        const total = snapshot.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0)
-        setStats((prev) => ({ ...prev, donations: total }))
-      }, (error) => console.error('Donations listener error:', error)))
 
       // Upcoming events - fetch 8+ events sorted by date for homepage display
       const upcomingQuery = query(
@@ -131,11 +86,8 @@ export default function HomePage() {
       statsListeners.push(onSnapshot(newsQuery, (snapshot) => {
         setNews(snapshot.docs.map(doc => doc.data()))
       }, (error) => console.error('News listener error:', error)))
-
-      setLoading(false)
     } catch (error) {
       console.error('Error setting up listeners:', error)
-      setLoading(false)
     }
 
     return () => {
@@ -156,44 +108,10 @@ export default function HomePage() {
     <div className="w-full bg-background text-foreground">
       <Navbar />
 
-      {/* HERO SLIDER - Full Width Image Carousel */}
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="max-w-7xl mx-auto">
-          <HeroSlider settings={heroSliderSettings} />
-        </div>
-      </section>
-
-      {/* IMPACT SECTION - Mobile First Grid */}
-      <section id="impact" className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-headline">
-            Our Impact
-          </h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-            <div className="flex flex-col items-center p-4 sm:p-5 bg-white rounded-lg border border-[#e4e1da]">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-1">
-                {loading ? '-' : stats.members.toLocaleString()}
-              </div>
-              <p className="text-xs sm:text-sm text-[#888888] text-center">Active Members</p>
-            </div>
-            
-            <div className="flex flex-col items-center p-4 sm:p-5 bg-white rounded-lg border border-[#e4e1da]">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-1">
-                {loading ? '-' : stats.events.toLocaleString()}
-              </div>
-              <p className="text-xs sm:text-sm text-[#888888] text-center">Events Hosted</p>
-            </div>
-            
-            <div className="flex flex-col items-center p-4 sm:p-5 bg-white rounded-lg border border-[#e4e1da]">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#111111] mb-1">
-                {loading ? '-' : `AED ${(stats.donations / 1000).toFixed(1)}K`}
-              </div>
-              <p className="text-xs sm:text-sm text-[#888888] text-center">Donations Raised</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeHero />
+      <HomeStatsBar />
+      <PartnersMarquee />
+      <HomeMission />
 
       {/* UPCOMING EVENTS - Enhanced with 4+ Cards, Responsive */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-[#f7f6f2]">
