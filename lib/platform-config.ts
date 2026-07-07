@@ -33,6 +33,7 @@ export const DEFAULT_NAVIGATION: NavigationConfig = {
     { label: 'Marketplace', href: '/marketplace', order: 3, isVisible: true },
     { label: 'Opportunities', href: '/opportunities', order: 4, isVisible: true },
     { label: 'Partners', href: '/partners', order: 5, isVisible: true },
+    { label: 'Contact', href: '/contact', order: 6, isVisible: true },
   ],
   ctaButton: { label: 'Join now', href: '/join' },
   signInLabel: 'Sign in',
