@@ -133,9 +133,14 @@ export default function AdminSetup() {
           { role: role, updatedAt: new Date() },
           { merge: true }
         )
+        // Wait 1 second after role update for Firestore to propagate
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
 
-      console.log('[v0] Login successful, redirecting to /admin')
+      console.log('[v0] Login successful, waiting for auth context to update...')
+      // Wait 1 second for auth context to refresh from Firestore
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      console.log('[v0] Redirecting to /admin')
       router.push('/admin')
     } catch (err: any) {
       console.error('[v0] Login error:', err)
