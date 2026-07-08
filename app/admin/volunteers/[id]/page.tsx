@@ -184,7 +184,7 @@ export default function VolunteerDetailPage() {
               <input
                 type="text"
                 name="location"
-                value={formData.location || ''}
+                value={typeof formData.location === 'string' ? formData.location : ''}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               />
@@ -194,7 +194,7 @@ export default function VolunteerDetailPage() {
               <input
                 type="number"
                 name="volunteerHours"
-                value={formData.volunteerHours || 0}
+                value={formData.volunteerHours ?? formData.volunteeredHours ?? 0}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               />
@@ -219,7 +219,7 @@ export default function VolunteerDetailPage() {
               <Clock className="w-4 h-4 text-blue-600" />
               <span className="text-sm text-neutral-600">Total Hours</span>
             </div>
-            <p className="text-2xl font-bold text-neutral-900">{volunteer?.volunteerHours || 0}</p>
+            <p className="text-2xl font-bold text-neutral-900">{volunteer?.volunteeredHours ?? volunteer?.volunteerHours ?? 0}</p>
           </Card>
           <Card className="p-4 border border-neutral-200">
             <div className="flex items-center gap-2 mb-2">
@@ -247,8 +247,8 @@ export default function VolunteerDetailPage() {
               {volunteerEvents.map(event => (
                 <div key={event.id} className="p-3 border border-neutral-200 rounded-lg flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-neutral-900">{event.title}</p>
-                    <p className="text-xs text-neutral-600">{event.date}</p>
+                    <p className="font-medium text-neutral-900">{event.title || 'Untitled event'}</p>
+                    <p className="text-xs text-neutral-600">{event.date ? String(event.date) : 'Date not provided'}</p>
                   </div>
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">Event</span>
                 </div>

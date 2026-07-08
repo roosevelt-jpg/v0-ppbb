@@ -105,14 +105,14 @@ export default function BusinessDetailPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Building className="w-6 h-6 text-blue-600" />
-              <h1 className="text-3xl font-bold text-neutral-900">{business.name}</h1>
+              <h1 className="text-3xl font-bold text-neutral-900">{business.name || 'Not provided'}</h1>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
               business.status === 'active' ? 'bg-green-100 text-green-700' :
               business.status === 'inactive' ? 'bg-red-100 text-red-700' :
               'bg-neutral-100 text-neutral-700'
             }`}>
-              {business.status ? business.status.toUpperCase() : 'ACTIVE'}
+              {business.status ? String(business.status).toUpperCase() : 'ACTIVE'}
             </span>
           </div>
 

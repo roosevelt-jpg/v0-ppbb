@@ -50,7 +50,7 @@ export function profileFromMember(member: Record<string, unknown>): AdminProfile
     status: String(member.status || 'active'),
     profilePictureURL: (member.profilePictureURL || member.avatarUrl) as string | null,
     stats: [
-      { label: 'Volunteer hours', value: `${member.volunteerHours || member.volunteeredHours || 0} hrs` },
+      { label: 'Volunteer hours', value: `${Number(member.volunteerHours ?? member.volunteeredHours ?? 0)} hrs` },
     ],
     editHref: `/admin/members/${member.id}`,
   }
@@ -69,7 +69,7 @@ export function profileFromVolunteer(volunteer: Record<string, unknown>): AdminP
     status: String(volunteer.status || 'active'),
     profilePictureURL: (volunteer.profilePictureURL || volunteer.avatarUrl) as string | null,
     stats: [
-      { label: 'Volunteer hours', value: `${volunteer.volunteeredHours || volunteer.volunteerHours || 0} hrs` },
+      { label: 'Volunteer hours', value: `${Number(volunteer.volunteeredHours ?? volunteer.volunteerHours ?? 0)} hrs` },
     ],
     editHref: `/admin/volunteers/${volunteer.id}`,
   }

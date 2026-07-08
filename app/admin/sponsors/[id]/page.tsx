@@ -105,13 +105,13 @@ export default function SponsorDetailPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Award className="w-6 h-6 text-yellow-600" />
-              <h1 className="text-3xl font-bold text-neutral-900">{sponsor.name}</h1>
+              <h1 className="text-3xl font-bold text-neutral-900">{sponsor.name || 'Not provided'}</h1>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
               sponsor.status === 'active' ? 'bg-green-100 text-green-700' :
               'bg-neutral-100 text-neutral-700'
             }`}>
-              {sponsor.status ? sponsor.status.toUpperCase() : 'ACTIVE'}
+              {sponsor.status ? String(sponsor.status).toUpperCase() : 'ACTIVE'}
             </span>
           </div>
 
@@ -145,7 +145,16 @@ export default function SponsorDetailPage() {
             <Card className="p-4 border border-neutral-200">
               <p className="text-sm text-neutral-600">Since</p>
               <p className="text-lg font-bold text-neutral-900 mt-1">
-                {sponsor.joinedAt ? new Date(sponsor.joinedAt?.toDate?.() || sponsor.joinedAt).toLocaleDateString() : 'N/A'}
+                {(() => {
+                  if (!sponsor.joinedAt) return 'N/A'
+                  try {
+                    const raw = sponsor.joinedAt?.toDate?.() || sponsor.joinedAt
+                    const d = raw instanceof Date ? raw : new Date(String(raw))
+                    return Number.isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString()
+                  } catch {
+                    return 'N/A'
+                  }
+                })()}
               </p>
             </Card>
           </div>
