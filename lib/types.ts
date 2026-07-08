@@ -490,6 +490,10 @@ export interface Page {
   order: number
   // Menu configuration
   menuLocation?: 'navbar' | 'footer-quicklinks' | 'footer-getinvolved' | 'footer-legal' | 'none'
+  /** When menuLocation is navbar — parent nav item href from platformConfig/navigation */
+  headerSection?: string
+  /** Link to an existing app route instead of /pages/[slug] */
+  externalHref?: string
   showInMenu: boolean
   menuLabel?: string
   menuOrder: number

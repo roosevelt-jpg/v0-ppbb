@@ -9,7 +9,13 @@ import {
   createDefaultForms,
 } from '@/lib/form-builder-queries'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Button } from '@/components/ui/button'
+import {
+  BUTTON_PRIMARY,
+  BUTTON_ICON_PRIMARY,
+  BUTTON_ICON_DANGER,
+  FILTER_PILL_ACTIVE,
+  FILTER_PILL_INACTIVE,
+} from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
 import { Plus, Edit2, Eye, Trash2, Archive } from 'lucide-react'
 import { deleteForm } from '@/lib/form-builder-queries'
@@ -80,11 +86,9 @@ export default function FormsPage() {
           <h1 className="text-3xl font-bold">Custom Forms</h1>
           <p className="text-gray-600 mt-1">Create and manage custom forms for different purposes</p>
         </div>
-        <Link href="/admin/forms/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Form
-          </Button>
+        <Link href="/admin/forms/new" className={`inline-flex items-center gap-2 ${BUTTON_PRIMARY}`}>
+          <Plus className="h-4 w-4" />
+          Create Form
         </Link>
       </div>
 
@@ -111,16 +115,16 @@ export default function FormsPage() {
       )}
 
       {/* Filter Buttons */}
-      <div className="flex gap-2">
-        {(['all', 'active', 'inactive'] as const).map(option => (
-          <Button
+      <div className="flex flex-wrap gap-2">
+        {(['all', 'active', 'inactive'] as const).map((option) => (
+          <button
             key={option}
-            variant={filter === option ? 'default' : 'outline'}
+            type="button"
             onClick={() => setFilter(option)}
-            className="capitalize"
+            className={filter === option ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
           >
             {option}
-          </Button>
+          </button>
         ))}
       </div>
 
@@ -162,24 +166,20 @@ export default function FormsPage() {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  <Link href={`/admin/forms/${form.id}/submissions`}>
-                    <Button variant="ghost" size="sm" title="View Submissions">
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                  <Link href={`/admin/forms/${form.id}/submissions`} className={BUTTON_ICON_PRIMARY} title="View Submissions">
+                    <Eye className="h-4 w-4" />
                   </Link>
-                  <Link href={`/admin/forms/${form.id}`}>
-                    <Button variant="ghost" size="sm" title="Edit Form">
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
+                  <Link href={`/admin/forms/${form.id}`} className={BUTTON_ICON_PRIMARY} title="Edit Form">
+                    <Edit2 className="h-4 w-4" />
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
+                    type="button"
                     onClick={() => handleDeleteForm(form.id)}
                     title="Delete Form"
+                    className={BUTTON_ICON_DANGER}
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </Card>

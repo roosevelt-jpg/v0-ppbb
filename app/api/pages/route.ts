@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,18 +87,20 @@ export async function POST(request: Request) {
     const now = new Date()
 
     if (action === 'create') {
-      const ref = await pagesRef.add({ ...payload, createdAt: now, updatedAt: now })
+      const ref = await pagesRef.add(
+        sanitizeForFirestore({ ...payload, createdAt: now, updatedAt: now })
+      )
       return NextResponse.json({ success: true, id: ref.id })
     }
 
     if (action === 'update') {
       const { id, ...updates } = payload
-      await pagesRef.doc(id).set({ ...updates, updatedAt: now }, { merge: true })
+      await pagesRef.doc(id).set(sanitizeForFirestore({ ...updates, updatedAt: now }), { merge: true })
       return NextResponse.json({ success: true })
     }
 
     if (action === 'delete') {
-      await pagesRef.doc(payload.id).set({ status: 'deleted', updatedAt: now }, { merge: true })
+      await pagesRef.doc(payload.id).set(sanitizeForFirestore({ status: 'deleted', updatedAt: now }), { merge: true })
       return NextResponse.json({ success: true })
     }
 

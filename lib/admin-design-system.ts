@@ -39,6 +39,13 @@ export const BUTTON_BASE = 'inline-flex items-center justify-center font-medium 
 export const BUTTON_PRIMARY = `${BUTTON_BASE} bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 px-4 py-2 rounded-lg`
 export const BUTTON_SECONDARY = `${BUTTON_BASE} bg-white text-black border border-black hover:bg-neutral-50 active:bg-neutral-100 px-4 py-2 rounded-lg`
 export const BUTTON_DANGER = `${BUTTON_BASE} bg-red-600 text-white hover:bg-red-700 active:bg-red-800 px-4 py-2 rounded-lg`
+/** Icon-only table actions — black primary */
+export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white`
+/** Icon-only table actions — danger delete */
+export const BUTTON_ICON_DANGER = `${BUTTON_BASE} inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 active:bg-red-800 border-0 shadow-none [&_svg]:text-white`
+/** Filter / tab pills */
+export const FILTER_PILL_ACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-black text-white border border-black'
+export const FILTER_PILL_INACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-white text-black border border-black hover:bg-neutral-50'
 /** Up/down reorder controls — black square with white icon */
 export const BUTTON_REORDER = `${BUTTON_BASE} min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0`
 /** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */

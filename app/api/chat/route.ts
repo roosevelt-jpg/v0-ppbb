@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateText } from 'ai'
-import { getAdminDb, getAdminBucket } from '@/lib/firebase-admin'
-import type { YouTubeConfig } from '@/lib/types'
+import { Anthropic } from '@anthropic-ai/sdk'
+import { getAdminDb } from '@/lib/firebase-admin'
+import { resolveAnthropicApiKey } from '@/lib/resolve-anthropic-key'
 
 const db = getAdminDb()
 
@@ -20,8 +20,7 @@ async function searchFAQs(userMessage: string): Promise<{ faq: FAQ | null; match
     const lowerMessage = userMessage.toLowerCase()
     const keywords = lowerMessage.split(/\s+/).filter(w => w.length > 3)
 
-    const q = query(collection(db, 'faqs'), where('isActive', '==', true))
-    const snapshot = await getDocs(q)
+    const snapshot = await db.collection('faqs').where('isActive', '==', true).get()
     const faqs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FAQ[]
 
     let bestMatch: FAQ | null = null
@@ -95,18 +94,28 @@ export async function POST(request: NextRequest) {
       }
       console.log(`[v0] FAQ match found: ${faq.question} (score: ${matchScore})`)
     } else {
-      // Fall back to AI generation if no good FAQ match (using Vercel AI SDK via gateway)
-      const aiResult = await generateText({
-        model: 'openai/gpt-4o-mini',
-        system: `You are a helpful assistant for Passive Blessings, a community platform for events, volunteering, and community support. 
+      const apiKey = await resolveAnthropicApiKey()
+      if (apiKey) {
+        const client = new Anthropic({ apiKey })
+        const aiResult = await client.messages.create({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 500,
+          system: `You are a helpful assistant for Passive Blessings, a community platform for events, volunteering, and community support.
 Be concise, friendly, and focus on helping users navigate the platform or understand our mission.
 If you don't know the answer, suggest they contact support at contact@passiveblessings.org.`,
-        messages: messages,
-        temperature: 0.7,
-        maxTokens: 500,
-      })
-      response = aiResult.text
-      console.log('[v0] No strong FAQ match, using AI response')
+          messages: messages.map((m: { role: string; content: string }) => ({
+            role: m.role === 'assistant' ? 'assistant' : 'user',
+            content: m.content,
+          })),
+        })
+        const textBlock = aiResult.content.find((block) => block.type === 'text')
+        response = textBlock && textBlock.type === 'text' ? textBlock.text : ''
+        console.log('[v0] No strong FAQ match, using Anthropic response')
+      } else {
+        response =
+          "I couldn't find a matching answer in our FAQ. Please contact support at contact@passiveblessings.org for help."
+        console.log('[v0] No FAQ match and Anthropic API key not configured')
+      }
     }
 
 

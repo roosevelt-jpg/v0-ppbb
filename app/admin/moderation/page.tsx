@@ -9,7 +9,7 @@ import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquar
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
-import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_DANGER, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
 
 type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
@@ -323,16 +323,13 @@ export default function ModerationPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-neutral-200 overflow-x-auto">
+        <div className="flex gap-2 flex-wrap overflow-x-auto">
           {(['reports', 'users', 'content', 'community-messages', 'banned-words'] as const).map(tab => (
             <button
               key={tab}
+              type="button"
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium border-b-2 transition whitespace-nowrap ${
-                activeTab === tab
-                  ? 'border-neutral-900 bg-neutral-900 text-white'
-                  : 'border-transparent text-neutral-600 hover:text-neutral-900'
-              }`}
+              className={activeTab === tab ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
             >
               {tab === 'reports' && `Reports (${stats.pendingReports})`}
               {tab === 'users' && `Flagged Users (${stats.flaggedUsers})`}
@@ -352,11 +349,7 @@ export default function ModerationPage() {
                 <button
                   key={f}
                   onClick={() => setFilter(f as any)}
-                  className={`px-4 py-2 rounded-lg font-medium transition text-sm ${
-                    filter === f
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-300'
-                  }`}
+                  className={filter === f ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
                 >
                   {f === 'all' ? 'All' : f === 'pending' ? 'Pending' : 'Resolved'}
                 </button>
@@ -394,7 +387,7 @@ export default function ModerationPage() {
                     </button>
                     <button
                       onClick={() => setSelectedReports(new Set())}
-                      className="px-4 py-2 bg-neutral-300 text-neutral-900 rounded-lg text-sm font-medium hover:bg-neutral-400 transition"
+                      className={`${FILTER_PILL_INACTIVE} text-sm`}
                     >
                       Clear
                     </button>
@@ -534,11 +527,7 @@ export default function ModerationPage() {
                 <button
                   key={f}
                   onClick={() => setCommunityFilter(f as any)}
-                  className={`px-4 py-2 rounded-lg font-medium transition text-sm ${
-                    communityFilter === f
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-300'
-                  }`}
+                  className={communityFilter === f ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
                 >
                   {f === 'pending' ? 'Pending' : 'All'}
                 </button>
