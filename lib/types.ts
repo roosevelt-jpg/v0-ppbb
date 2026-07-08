@@ -885,32 +885,6 @@ export interface AuditLog {
   ipAddress?: string
 }
 
-// Hero Slider
-export interface SliderImage {
-  id: string
-  imageUrl: string
-  image?: UploadedImage
-  title: string
-  subtitle?: string
-  link?: string
-  displayDuration: number // in seconds
-  displayOrder: number
-  isActive: boolean
-}
-
-export interface HeroSliderSettings {
-  id: string
-  transitionEffect: 'fade' | 'slide' | 'zoom' | 'fade-slide'
-  transitionDuration: number // in milliseconds
-  autoplay: boolean
-  autoplayDuration: number // in seconds
-  displayMode: 'auto' | 'manual'
-  images: SliderImage[]
-  createdAt: Date
-  updatedAt: Date
-  publishedAt?: Date
-}
-
 // YouTube Integration
 export interface YouTubeVideo {
   id: string

@@ -92,7 +92,6 @@ const adminMenuItems = [
   { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield, group: 'Content' },
 
   // Assets & Media
-  { label: 'Hero Slider', href: '/admin/assets', icon: Image, group: 'Assets' },
   { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play, group: 'Assets' },
 
   // Configuration

@@ -101,8 +101,6 @@ export interface HomepageDonationBanner {
 
 export interface HomepageSocialYoutube {
   isEnabled: boolean
-  channelId: string | null
-  apiKey: string | null
   maxVideos: number
   heading: string
 }
@@ -248,8 +246,6 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
   socialFeeds: {
     youtube: {
       isEnabled: false,
-      channelId: null,
-      apiKey: null,
       maxVideos: 6,
       heading: 'Watch Our Story',
     },
@@ -475,8 +471,6 @@ function mergeSocialFeeds(data: unknown): HomepageSocialFeeds {
   return {
     youtube: {
       isEnabled: yt.isEnabled === true,
-      channelId: typeof yt.channelId === 'string' ? yt.channelId : null,
-      apiKey: typeof yt.apiKey === 'string' ? yt.apiKey : null,
       maxVideos:
         typeof yt.maxVideos === 'number' && yt.maxVideos > 0
           ? yt.maxVideos

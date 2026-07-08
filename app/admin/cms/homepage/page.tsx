@@ -1002,7 +1002,12 @@ export default function AdminCmsHomepagePage() {
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Social Feeds (2H)</h2>
           <p className="text-sm text-neutral-600">
-            Toggle feeds on when API credentials are ready. Disabled feeds show a placeholder on the homepage.
+            Control homepage display for social feeds. YouTube Channel ID, API key, and video fetch
+            live at{' '}
+            <a href="/admin/youtube-config" className="underline font-medium">
+              /admin/youtube-config
+            </a>
+            . Disabled feeds show a placeholder on the homepage.
           </p>
 
           <div className="space-y-4 p-4 border rounded-lg">
@@ -1021,7 +1026,7 @@ export default function AdminCmsHomepagePage() {
                   }))
                 }
               />
-              Enable YouTube feed
+              Enable YouTube feed on homepage
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
@@ -1042,7 +1047,7 @@ export default function AdminCmsHomepagePage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium">Max videos</label>
+                <label className="text-xs font-medium">Max videos shown</label>
                 <input
                   type="number"
                   min={1}
@@ -1063,49 +1068,10 @@ export default function AdminCmsHomepagePage() {
                   className="w-full"
                 />
               </div>
-              <div>
-                <label className="text-xs font-medium">Channel ID</label>
-                <input
-                  type="text"
-                  value={config.socialFeeds.youtube.channelId || ''}
-                  onChange={(e) =>
-                    setConfig((p) => ({
-                      ...p,
-                      socialFeeds: {
-                        ...p.socialFeeds,
-                        youtube: {
-                          ...p.socialFeeds.youtube,
-                          channelId: e.target.value || null,
-                        },
-                      },
-                    }))
-                  }
-                  className="w-full"
-                  placeholder="Optional — for future API wiring"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium">API key</label>
-                <input
-                  type="password"
-                  value={config.socialFeeds.youtube.apiKey || ''}
-                  onChange={(e) =>
-                    setConfig((p) => ({
-                      ...p,
-                      socialFeeds: {
-                        ...p.socialFeeds,
-                        youtube: {
-                          ...p.socialFeeds.youtube,
-                          apiKey: e.target.value || null,
-                        },
-                      },
-                    }))
-                  }
-                  className="w-full"
-                  placeholder="Optional — stored in Firestore"
-                />
-              </div>
             </div>
+            <p className="text-xs text-neutral-500">
+              Video source data comes from the existing YouTube config page — not duplicated here.
+            </p>
           </div>
 
           <div className="space-y-4 p-4 border rounded-lg">
