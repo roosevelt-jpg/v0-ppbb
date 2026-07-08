@@ -140,7 +140,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <SiteLogo background="dark" href="/" heightClass="h-auto" maxWidth={140} />
+            <SiteLogo background="dark" variant="footer" href="/" />
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
               {footerBlurb}
             </p>

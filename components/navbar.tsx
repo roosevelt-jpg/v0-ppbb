@@ -90,8 +90,8 @@ export function Navbar() {
       {/* Desktop Navigation */}
       <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
-          <div className="flex-shrink-0 h-8">
-            <SiteLogo background="dark" heightClass="h-8" href="/" />
+          <div className="flex-shrink-0">
+            <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
 
           <div className="flex-1 flex items-center justify-center gap-6 lg:gap-8">
@@ -116,8 +116,8 @@ export function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between">
-        <SiteLogo background="dark" heightClass="h-6 sm:h-8" href="/" />
+      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
+        <SiteLogo background="dark" variant="navbar" href="/" className="max-w-[42vw]" />
         <div className="flex items-center gap-2">
           <LanguageSwitcherWithFlags />
           <ThemeToggle />

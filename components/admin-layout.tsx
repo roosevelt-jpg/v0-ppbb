@@ -189,8 +189,8 @@ export function AdminSidebar() {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-52 min-h-screen flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
         {/* Logo */}
-        <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
-          <SiteLogo background="light" href="/admin" heightClass="h-auto" maxWidth={140} />
+        <div className="px-4 py-3 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da' }}>
+          <SiteLogo background="light" variant="sidebar" href="/admin" />
         </div>
 
         {/* Navigation with Groups */}
@@ -254,9 +254,9 @@ export function AdminSidebar() {
           {/* Drawer */}
           <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-64 flex flex-col border-r overflow-y-auto z-30" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
             {/* Logo */}
-            <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
+            <div className="px-4 py-3 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da' }}>
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                <SiteLogo background="light" linked={false} heightClass="h-auto" maxWidth={140} />
+                <SiteLogo background="light" variant="sidebar" linked={false} />
               </Link>
             </div>
 

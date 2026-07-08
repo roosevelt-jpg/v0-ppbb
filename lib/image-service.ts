@@ -142,6 +142,8 @@ export interface CompressImageOptions {
   preset?: CmsImagePreset
   /** Target width ÷ height; when set, image is center-cropped (cover) before resize */
   aspectRatio?: number
+  /** Auto-trim fully transparent edges (logo preset enables this by default) */
+  trimTransparent?: boolean
 }
 
 function resolveCompressOptions(
@@ -149,6 +151,7 @@ function resolveCompressOptions(
 ): Required<Pick<CompressImageOptions, 'maxDimension' | 'maxBytes'>> & {
   allowSvg: boolean
   aspectRatio?: number
+  trimTransparent: boolean
 } {
   if (typeof presetOrOptions === 'string') {
     const defaults = CMS_IMAGE_PRESETS[presetOrOptions]
@@ -157,6 +160,7 @@ function resolveCompressOptions(
       maxBytes: defaults.maxBytes,
       allowSvg: presetOrOptions === 'logo',
       aspectRatio: 'aspectRatio' in defaults ? defaults.aspectRatio : undefined,
+      trimTransparent: presetOrOptions === 'logo',
     }
   }
 
@@ -171,6 +175,8 @@ function resolveCompressOptions(
     aspectRatio:
       presetOrOptions.aspectRatio ??
       ('aspectRatio' in presetDefaults ? presetDefaults.aspectRatio : undefined),
+    trimTransparent:
+      presetOrOptions.trimTransparent ?? presetOrOptions.preset === 'logo',
   }
 }
 
@@ -228,6 +234,200 @@ function replaceFileExtension(name: string, ext: string): string {
 
 const RASTER_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
+interface TrimBounds {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+/** Find tight bounding box of non-transparent pixels. */
+function findOpaqueBounds(imageData: ImageData, alphaThreshold = 8): TrimBounds | null {
+  const { width, height, data } = imageData
+  let minX = width
+  let minY = height
+  let maxX = 0
+  let maxY = 0
+  let found = false
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const alpha = data[(y * width + x) * 4 + 3]
+      if (alpha > alphaThreshold) {
+        found = true
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
+      }
+    }
+  }
+
+  if (!found) return null
+  return {
+    left: minX,
+    top: minY,
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+  }
+}
+
+/** Find tight bounding box of pixels that differ from a corner background sample. */
+function findContentBoundsFromBackground(
+  imageData: ImageData,
+  colorThreshold = 18
+): TrimBounds | null {
+  const { width, height, data } = imageData
+  if (width === 0 || height === 0) return null
+
+  const bgR = data[0]
+  const bgG = data[1]
+  const bgB = data[2]
+  const bgA = data[3]
+
+  let minX = width
+  let minY = height
+  let maxX = 0
+  let maxY = 0
+  let found = false
+
+  const differs = (i: number) => {
+    const dr = Math.abs(data[i] - bgR)
+    const dg = Math.abs(data[i + 1] - bgG)
+    const db = Math.abs(data[i + 2] - bgB)
+    const da = Math.abs(data[i + 3] - bgA)
+    return dr + dg + db + da > colorThreshold
+  }
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4
+      if (differs(i)) {
+        found = true
+        if (x < minX) minX = x
+        if (x > maxX) maxX = x
+        if (y < minY) minY = y
+        if (y > maxY) maxY = y
+      }
+    }
+  }
+
+  if (!found) return null
+  return {
+    left: minX,
+    top: minY,
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+  }
+}
+
+function cropCanvasToBounds(source: HTMLCanvasElement, bounds: TrimBounds, margin = 1): HTMLCanvasElement {
+  const out = document.createElement('canvas')
+  out.width = bounds.width + margin * 2
+  out.height = bounds.height + margin * 2
+  const outCtx = out.getContext('2d')
+  if (!outCtx) return source
+
+  outCtx.drawImage(
+    source,
+    bounds.left,
+    bounds.top,
+    bounds.width,
+    bounds.height,
+    margin,
+    margin,
+    bounds.width,
+    bounds.height
+  )
+  return out
+}
+
+/** Crop canvas to opaque content, optionally adding a tiny inner margin. */
+function trimCanvasToOpaqueContent(source: HTMLCanvasElement, margin = 1): HTMLCanvasElement {
+  const ctx = source.getContext('2d')
+  if (!ctx) return source
+
+  const imageData = ctx.getImageData(0, 0, source.width, source.height)
+  let bounds = findOpaqueBounds(imageData)
+
+  if (
+    !bounds ||
+    (bounds.width >= source.width - 2 && bounds.height >= source.height - 2)
+  ) {
+    bounds = findContentBoundsFromBackground(imageData)
+  }
+
+  if (!bounds) return source
+
+  if (bounds.width === source.width && bounds.height === source.height) {
+    return source
+  }
+
+  return cropCanvasToBounds(source, bounds, margin)
+}
+
+function scaleCanvas(source: HTMLCanvasElement, targetWidth: number, targetHeight: number): HTMLCanvasElement {
+  const out = document.createElement('canvas')
+  out.width = targetWidth
+  out.height = targetHeight
+  const ctx = out.getContext('2d')
+  if (!ctx) return source
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(source, 0, 0, targetWidth, targetHeight)
+  return out
+}
+
+/** Logo pipeline: trim transparent padding, preserve alpha, export PNG. */
+async function compressLogoToFile(file: File, maxDimension: number, maxBytes: number): Promise<File> {
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const img = await loadImageElement(objectUrl)
+
+    const stage = document.createElement('canvas')
+    stage.width = img.naturalWidth
+    stage.height = img.naturalHeight
+    const stageCtx = stage.getContext('2d')
+    if (!stageCtx) throw new Error('Canvas is not supported in this browser')
+
+    stageCtx.clearRect(0, 0, stage.width, stage.height)
+    stageCtx.drawImage(img, 0, 0)
+
+    let trimmed = trimCanvasToOpaqueContent(stage, 1)
+
+    let targetWidth = trimmed.width
+    let targetHeight = trimmed.height
+    if (targetWidth > maxDimension || targetHeight > maxDimension) {
+      const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
+      targetWidth = Math.max(1, Math.round(targetWidth * scale))
+      targetHeight = Math.max(1, Math.round(targetHeight * scale))
+      trimmed = scaleCanvas(trimmed, targetWidth, targetHeight)
+    }
+
+    let blob = await canvasToBlob(trimmed, 'image/png')
+
+    while (blob.size > maxBytes && (targetWidth > 120 || targetHeight > 120)) {
+      targetWidth = Math.max(1, Math.round(targetWidth * 0.85))
+      targetHeight = Math.max(1, Math.round(targetHeight * 0.85))
+      trimmed = scaleCanvas(trimmed, targetWidth, targetHeight)
+      blob = await canvasToBlob(trimmed, 'image/png')
+    }
+
+    if (blob.size > maxBytes) {
+      throw new Error(
+        'Logo is still too large after trimming and compression. Try a simpler image.'
+      )
+    }
+
+    return new File([blob], replaceFileExtension(file.name, 'png'), {
+      type: 'image/png',
+      lastModified: Date.now(),
+    })
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 /**
  * Resize and compress an image in the browser before upload.
  * SVG files are passed through unchanged when allowSvg is true.
@@ -240,7 +440,8 @@ export async function compressImageToFile(
     throw new Error('compressImageToFile must run in the browser')
   }
 
-  const { maxDimension, maxBytes, allowSvg, aspectRatio } = resolveCompressOptions(presetOrOptions)
+  const { maxDimension, maxBytes, allowSvg, aspectRatio, trimTransparent } =
+    resolveCompressOptions(presetOrOptions)
 
   if (file.type === 'image/svg+xml') {
     if (!allowSvg) {
@@ -256,6 +457,11 @@ export async function compressImageToFile(
 
   if (!RASTER_IMAGE_TYPES.has(file.type)) {
     throw new Error('File must be an image (JPEG, PNG, WebP, GIF, or SVG for logos).')
+  }
+
+  // Logos always run through trim pipeline (never skip early return).
+  if (trimTransparent && !aspectRatio) {
+    return compressLogoToFile(file, maxDimension, maxBytes)
   }
 
   const objectUrl = URL.createObjectURL(file)
