@@ -231,11 +231,15 @@
       ]
     },
     {
-      "collectionGroup": "groups",
-      "queryScope": "COLLECTION_GROUP",
+      "collectionGroup": "pricingPlans",
+      "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "createdBy",
+          "fieldPath": "active",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
           "order": "ASCENDING"
         }
       ]
