@@ -7,13 +7,12 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { AdminTable } from '@/components/admin-table'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Dialog } from '@/components/dialog'
-import { Button } from '@/components/ui/button'
 import { updateDocument } from '@/lib/admin-queries'
 import { useAuth } from '@/lib/auth-context'
 import { getUserDisplayName } from '@/lib/user-profile'
 import { Check, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_DANGER, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 
 export default function ApprovalsPage() {
   const { user } = useAuth()
@@ -182,14 +181,14 @@ export default function ApprovalsPage() {
           description={selectedItem?.title}
           footer={
             <div className="flex gap-2 justify-end">
-              <Button
-                variant="ghost"
+              <button
+                type="button"
                 onClick={() => setDetailsOpen(false)}
                 disabled={actionLoading}
-                className="text-neutral-600 hover:text-neutral-900"
+                className={BUTTON_SECONDARY}
               >
                 Close
-              </Button>
+              </button>
               <button
                 onClick={handleReject}
                 disabled={actionLoading}

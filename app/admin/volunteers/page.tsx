@@ -164,6 +164,17 @@ export default function VolunteersPage() {
           onClose={() => setProfileOpen(false)}
           profile={activeProfile}
           editLabel="Edit volunteer"
+          onEdit={
+            activeProfile
+              ? () => {
+                  const match = volunteers.find((v) => v.id === activeProfile.id)
+                  if (match) {
+                    handleEditVolunteer(match)
+                    setProfileOpen(false)
+                  }
+                }
+              : undefined
+          }
         />
       </div>
     </AdminPageLayout>

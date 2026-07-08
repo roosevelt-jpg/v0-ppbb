@@ -1,10 +1,10 @@
 'use client'
 
 import React from 'react'
-import { Button } from '@/components/ui/button'
-import { BUTTON_DANGER } from '@/lib/admin-design-system'
+import { BUTTON_ICON_DANGER, BUTTON_ICON_PRIMARY, BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
-import { ChevronRight, Plus, Search, Filter, Download } from 'lucide-react'
+import { Plus, Search, Download, Pencil, Trash2 } from 'lucide-react'
+import { AdminTableScroll } from '@/components/admin-table'
 
 interface Column {
   key: string
@@ -87,31 +87,16 @@ export function AdminTable({
         </h2>
         <div className="flex gap-2 flex-shrink-0">
           {onExport && (
-            <Button
-              size="sm"
-              onClick={onExport}
-              style={{
-                backgroundColor: '#f7f6f2',
-                color: '#111111',
-                border: '1px solid #e4e1da',
-              }}
-            >
-              <Download className="h-4 w-4 mr-2" />
+            <button type="button" onClick={onExport} className={`${BUTTON_SECONDARY} text-sm gap-2`}>
+              <Download className="h-4 w-4" />
               Export
-            </Button>
+            </button>
           )}
           {onAdd && (
-            <Button
-              size="sm"
-              onClick={onAdd}
-              style={{
-                backgroundColor: '#111111',
-                color: '#f7f6f2',
-              }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
+            <button type="button" onClick={onAdd} className={`${BUTTON_PRIMARY} text-sm gap-2`}>
+              <Plus className="h-4 w-4" />
               Add
-            </Button>
+            </button>
           )}
         </div>
       </div>
@@ -208,25 +193,28 @@ export function AdminTable({
                     ))}
                     {hasActions && (
                       <td className="px-4 sm:px-6 py-4 text-sm whitespace-nowrap">
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                           {onEdit && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
+                            <button
+                              type="button"
                               onClick={() => onEdit(item)}
-                              style={{ color: '#111111' }}
+                              className={BUTTON_ICON_PRIMARY}
+                              aria-label="Edit"
+                              title="Edit"
                             >
-                              Edit
-                            </Button>
+                              <Pencil className="h-4 w-4" />
+                            </button>
                           )}
                           {onDelete && (
-                            <Button
-                              size="sm"
+                            <button
+                              type="button"
                               onClick={() => onDelete(item)}
-                              className={`${BUTTON_DANGER} text-xs px-2 py-1 h-auto`}
+                              className={BUTTON_ICON_DANGER}
+                              aria-label="Delete"
+                              title="Delete"
                             >
-                              Delete
-                            </Button>
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           )}
                         </div>
                       </td>
