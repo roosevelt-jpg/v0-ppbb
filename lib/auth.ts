@@ -11,8 +11,33 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
 } from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc, DocumentSnapshot } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+
+async function fetchOwnUserProfile(firebaseUser: FirebaseUser): Promise<DocumentSnapshot> {
+  const userRef = doc(db, 'users', firebaseUser.uid)
+  const maxAttempts = 4
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await firebaseUser.getIdToken(attempt > 0)
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 75 * attempt))
+    }
+
+    try {
+      return await getDoc(userRef)
+    } catch (error: unknown) {
+      const code = (error as { code?: string })?.code
+      const isLastAttempt = attempt === maxAttempts - 1
+      if (code !== 'permission-denied' || isLastAttempt) {
+        throw error
+      }
+    }
+  }
+
+  return getDoc(userRef)
+}
 
 interface RegisterUserOptions {
   dateOfBirth?: string
@@ -65,7 +90,7 @@ export async function registerUser(
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
   } catch (error: any) {
@@ -84,11 +109,7 @@ export async function loginUser(
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const firebaseUser = userCredential.user
 
-    // Ensure the auth token is attached before Firestore reads (avoids permission-denied races)
-    await firebaseUser.getIdToken()
-
-    // Fetch user profile from Firestore
-    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+    const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
     if (userDocSnap.exists()) {
       return {
@@ -117,7 +138,7 @@ export async function loginUser(
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
   } catch (error: any) {
@@ -133,8 +154,8 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     const result = await signInWithPopup(auth, provider)
     const firebaseUser = result.user
 
-    // Check if user exists in Firestore
-    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+    await firebaseUser.getIdToken(true)
+    const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
     if (userDocSnap.exists()) {
       return { user: { id: firebaseUser.uid, ...userDocSnap.data() } as User, error: null }
@@ -160,7 +181,7 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
   } catch (error: any) {
@@ -176,8 +197,8 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     const result = await signInWithPopup(auth, provider)
     const firebaseUser = result.user
 
-    // Check if user exists in Firestore
-    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+    await firebaseUser.getIdToken(true)
+    const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
     if (userDocSnap.exists()) {
       return { user: { id: firebaseUser.uid, ...userDocSnap.data() } as User, error: null }
@@ -203,7 +224,7 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
   } catch (error: any) {

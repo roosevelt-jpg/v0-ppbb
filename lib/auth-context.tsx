@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let unsubscribeProfile: (() => void) | undefined
+    let cancelled = false
 
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (unsubscribeProfile) {
@@ -33,22 +34,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (currentUser) {
         setLoading(true)
-        unsubscribeProfile = onSnapshot(
-          doc(db, 'users', currentUser.uid),
-          (snap) => {
-            if (snap.exists()) {
-              setUser({ id: snap.id, ...snap.data() } as User | BusinessProfile)
-            } else {
-              setUser(null)
-            }
-            setLoading(false)
-          },
-          (error) => {
-            console.error('[v0] Error subscribing to user profile:', error)
+        const uid = currentUser.uid
+
+        const subscribeProfile = async () => {
+          try {
+            // Wait for the auth token before Firestore reads (avoids permission-denied races)
+            await currentUser.getIdToken(true)
+            if (cancelled) return
+
+            unsubscribeProfile = onSnapshot(
+              doc(db, 'users', uid),
+              (snap) => {
+                if (snap.exists()) {
+                  setUser({ id: snap.id, ...snap.data() } as User | BusinessProfile)
+                } else {
+                  setUser(null)
+                }
+                setLoading(false)
+              },
+              (error) => {
+                console.error('[v0] Error subscribing to user profile:', error)
+                setUser(null)
+                setLoading(false)
+              }
+            )
+          } catch (error) {
+            console.error('[v0] Error preparing user profile subscription:', error)
             setUser(null)
             setLoading(false)
           }
-        )
+        }
+
+        void subscribeProfile()
       } else {
         setUser(null)
         setLoading(false)
@@ -56,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     return () => {
+      cancelled = true
       unsubscribeAuth()
       unsubscribeProfile?.()
     }
