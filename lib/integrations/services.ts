@@ -125,15 +125,16 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
   },
   sendgrid: {
     id: 'sendgrid',
-    name: 'Email (SMTP/SendGrid)',
+    name: 'SendGrid',
     category: 'messaging',
-    description: 'Email delivery service',
+    description: 'Bulk newsletter & campaign email via SendGrid (separate from Gmail SMTP for admin invites)',
     icon: '📧',
     fields: [
       { name: 'provider', label: 'Provider', type: 'select', required: true, options: [{ label: 'SendGrid', value: 'sendgrid' }, { label: 'SMTP', value: 'smtp' }] },
-      { name: 'apiKey', label: 'API Key / Password', type: 'password', required: true, encrypt: true },
+      { name: 'apiKey', label: 'SendGrid API Key', type: 'password', required: true, encrypt: true },
       { name: 'fromAddress', label: 'From Address', type: 'text', required: true, placeholder: 'noreply@passiveblessings.ae' },
     ],
+    help: 'Emails are sent with display name "Passive Blessings". Verify your from address in SendGrid.',
   },
   gmailSmtp: {
     id: 'gmailSmtp',

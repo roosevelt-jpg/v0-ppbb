@@ -587,6 +587,15 @@ export interface Newsletter {
   scheduledFor?: Date
   sentAt?: Date
   recipientCount: number
+  totalTargeted?: number
+  failedCount?: number
+  sendStatus?: 'pending' | 'sent' | 'partial' | 'failed'
+  sendErrors?: string
+  subtitle?: string
+  seoTitle?: string
+  metaDescription?: string
+  ctaText?: string
+  ctaUrl?: string
   openedCount: number
   clickedCount: number
   createdBy: string
