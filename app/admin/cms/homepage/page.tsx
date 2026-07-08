@@ -305,10 +305,13 @@ export default function AdminCmsHomepagePage() {
             </a>
             . Configure animation here.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl">
-            <div className="flex flex-col gap-1.5 min-w-0">
-              <label className="text-sm font-medium leading-snug">Speed (seconds per loop)</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div className="flex flex-col gap-2 w-full min-w-0">
+              <label htmlFor="marquee-speed" className="block text-sm font-medium leading-normal">
+                Speed (seconds per loop)
+              </label>
               <input
+                id="marquee-speed"
                 type="number"
                 min={10}
                 max={120}
@@ -319,12 +322,15 @@ export default function AdminCmsHomepagePage() {
                     marquee: { ...p.marquee, speed: parseInt(e.target.value, 10) || 40 },
                   }))
                 }
-                className="w-full"
+                className="w-full block"
               />
             </div>
-            <div className="flex flex-col gap-1.5 min-w-0">
-              <label className="text-sm font-medium leading-snug">Gap (px between logos)</label>
+            <div className="flex flex-col gap-2 w-full min-w-0">
+              <label htmlFor="marquee-gap" className="block text-sm font-medium leading-normal">
+                Gap (px between logos)
+              </label>
               <input
+                id="marquee-gap"
                 type="number"
                 min={16}
                 max={120}
@@ -335,7 +341,7 @@ export default function AdminCmsHomepagePage() {
                     marquee: { ...p.marquee, gap: parseInt(e.target.value, 10) || 48 },
                   }))
                 }
-                className="w-full"
+                className="w-full block"
               />
             </div>
           </div>
