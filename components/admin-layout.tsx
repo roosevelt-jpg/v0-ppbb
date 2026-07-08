@@ -27,6 +27,7 @@ import {
   HelpCircle,
   Menu,
   Briefcase,
+  Share2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -70,6 +71,7 @@ const adminMenuItems = [
   // Finance
   { label: 'Donation Tracking', href: '/admin/finance/donations', icon: DollarSign, group: 'Finance' },
   { label: 'Event Finance', href: '/admin/finance/events', icon: Calendar, group: 'Finance' },
+  { label: 'Business Referrals', href: '/admin/finance/referrals', icon: Share2, group: 'Finance' },
 
   // Memberships & Commerce
   { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },
