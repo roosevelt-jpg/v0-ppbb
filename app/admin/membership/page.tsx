@@ -8,6 +8,7 @@ import { Crown, Gift, Zap, TrendingUp, Users, AlertCircle, CheckCircle, Download
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 
 export default function MembershipPage() {
   const [members, setMembers] = React.useState<any[]>([])
@@ -249,13 +250,13 @@ export default function MembershipPage() {
                 <button
                   onClick={handleBulkAction}
                   disabled={!bulkTierTarget || isProcessing}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+                  className={`${BUTTON_PRIMARY}`}
                 >
                   {isProcessing ? 'Processing...' : 'Apply to All'}
                 </button>
                 <button
                   onClick={() => setSelectedMembers(new Set())}
-                  className="px-4 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-medium hover:bg-neutral-400 transition"
+                  className={`${BUTTON_SECONDARY}`}
                 >
                   Clear Selection
                 </button>

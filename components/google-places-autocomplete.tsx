@@ -253,10 +253,10 @@ export default function GooglePlacesAutocomplete({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleManualEntry}
-                className="w-full p-3 text-left bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                className="w-full p-3 text-left bg-white border border-black rounded-lg hover:bg-neutral-50 transition"
               >
-                <p className="font-medium text-blue-900 text-sm">Use entered location</p>
-                <p className="text-xs text-blue-700">&quot;{input.trim()}&quot;</p>
+                <p className="font-medium text-neutral-900 text-sm">Use entered location</p>
+                <p className="text-xs text-neutral-600">&quot;{input.trim()}&quot;</p>
               </button>
             </div>
           )}

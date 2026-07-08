@@ -308,7 +308,7 @@ export default function MarketplaceDetailPage() {
                   <button
                     type="submit"
                     disabled={applying || !sponsorshipAmount}
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition font-medium"
+                    className="w-full px-6 py-3 bg-black text-white rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition font-medium"
                   >
                     {applying ? 'Submitting...' : 'Submit Sponsorship'}
                   </button>

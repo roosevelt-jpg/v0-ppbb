@@ -129,6 +129,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Membership pricing plans - Public read, admin write
+    match /pricingPlans/{planId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // Donation causes - Public read, admin write (legacy; prefer charityCases)
     match /causes/{causeId} {
       allow read: if true;

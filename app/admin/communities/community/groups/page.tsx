@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Users, MessageSquare, Trash2, Edit, Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 interface Group {
   id: string
@@ -358,14 +359,14 @@ export default function GroupsAdminPage() {
                     <Button
                       size="sm"
                       onClick={() => handleToggleActive(group.id, group.isActive)}
-                      className={group.isActive ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'}
+                      className={group.isActive ? BUTTON_SECONDARY : BUTTON_PRIMARY}
                     >
                       {group.isActive ? 'Deactivate' : 'Activate'}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => handleDelete(group.id, group.name)}
-                      className="bg-red-600 hover:bg-red-700 gap-1"
+                      className={`${BUTTON_DANGER} gap-1`}
                     >
                       <Trash2 className="w-4 h-4" /> Delete
                     </Button>

@@ -9,6 +9,7 @@ import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquar
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
@@ -387,7 +388,7 @@ export default function ModerationPage() {
                     <button
                       onClick={handleBulkModeration}
                       disabled={!bulkAction}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+                      className={`${BUTTON_PRIMARY} text-sm`}
                     >
                       Apply
                     </button>
@@ -440,14 +441,14 @@ export default function ModerationPage() {
                         <div className="flex gap-2 flex-shrink-0">
                           <button
                             onClick={() => handleApprove(report.id)}
-                            className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition flex items-center gap-1"
+                            className={`${BUTTON_PRIMARY} text-sm flex items-center gap-1`}
                           >
                             <CheckCircle className="w-4 h-4" />
                             Approve
                           </button>
                           <button
                             onClick={() => handleReject(report.id)}
-                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition flex items-center gap-1"
+                            className={`${BUTTON_DANGER} text-sm flex items-center gap-1`}
                           >
                             <XCircle className="w-4 h-4" />
                             Reject
@@ -574,14 +575,14 @@ export default function ModerationPage() {
                         <div className="flex gap-2 flex-shrink-0">
                           <button
                             onClick={() => handleApproveCommunityMessage(message.id)}
-                            className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition flex items-center gap-1"
+                            className={`${BUTTON_PRIMARY} text-sm flex items-center gap-1`}
                           >
                             <CheckCircle className="w-4 h-4" />
                             Approve
                           </button>
                           <button
                             onClick={() => handleDeleteCommunityMessage(message.id)}
-                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition flex items-center gap-1"
+                            className={`${BUTTON_DANGER} text-sm flex items-center gap-1`}
                           >
                             <Trash2 className="w-4 h-4" />
                             Delete

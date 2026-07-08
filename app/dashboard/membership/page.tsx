@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Check, Crown, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
+import { getPlanIncludedItems } from '@/lib/pricing-utils'
 
 
 export default function MembershipPage() {
@@ -159,28 +160,14 @@ export default function MembershipPage() {
               </div>
 
               <div className="space-y-4 mb-6">
-                {plan.features && plan.features.length > 0 && (
+                {getPlanIncludedItems(plan).length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-neutral-600 mb-2">Features:</p>
+                    <p className="text-xs font-semibold text-neutral-600 mb-2">What&apos;s Included:</p>
                     <div className="space-y-2">
-                      {plan.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {plan.benefits && plan.benefits.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-neutral-600 mb-2">Benefits:</p>
-                    <div className="space-y-2">
-                      {plan.benefits.map((benefit, idx) => (
+                      {getPlanIncludedItems(plan).map((item, idx) => (
                         <div key={idx} className="flex items-start gap-2">
                           <Check className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">{benefit}</span>
+                          <span className="text-sm">{item}</span>
                         </div>
                       ))}
                     </div>

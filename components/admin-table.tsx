@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
+import { BUTTON_DANGER } from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
 import { ChevronRight, Plus, Search, Filter, Download } from 'lucide-react'
 
@@ -177,9 +178,8 @@ export function AdminTable({
                         {onDelete && (
                           <Button
                             size="sm"
-                            variant="ghost"
                             onClick={() => onDelete(item)}
-                            style={{ color: '#888888' }}
+                            className={`${BUTTON_DANGER} text-xs px-2 py-1 h-auto`}
                           >
                             Delete
                           </Button>

@@ -3,34 +3,39 @@
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { AdminPageLayout } from '@/components/admin-page-layout'
+import { PricingEmojiPicker } from '@/components/pricing-emoji-picker'
+import { PricingColorPicker } from '@/components/pricing-color-picker'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { PricingPlan } from '@/lib/pricing-types'
+import { getPlanIncludedItems } from '@/lib/pricing-utils'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
-import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export const dynamic = 'force-dynamic'
+
+const EMPTY_FORM: Partial<PricingPlan> = {
+  name: '',
+  description: '',
+  price: 0,
+  currency: 'USD',
+  billingPeriod: 'monthly',
+  features: [],
+  benefits: [],
+  icon: '🎯',
+  color: '#111111',
+  active: true,
+  order: 0,
+}
 
 export default function PricingManagementPage() {
   const [plans, setPlans] = React.useState<PricingPlan[]>([])
   const [loading, setLoading] = React.useState(true)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [showAddForm, setShowAddForm] = React.useState(false)
-  const [formData, setFormData] = React.useState<Partial<PricingPlan>>({
-    name: '',
-    description: '',
-    price: 0,
-    currency: 'USD',
-    billingPeriod: 'monthly',
-    features: [],
-    benefits: [],
-    icon: '🎯',
-    color: '#3b82f6',
-    active: true,
-    order: 0,
-  })
-  const [newFeature, setNewFeature] = React.useState('')
-  const [newBenefit, setNewBenefit] = React.useState('')
+  const [formData, setFormData] = React.useState<Partial<PricingPlan>>({ ...EMPTY_FORM })
+  const [newIncludedItem, setNewIncludedItem] = React.useState('')
   const [saveLoading, setSaveLoading] = React.useState(false)
 
   React.useEffect(() => {
@@ -38,9 +43,9 @@ export default function PricingManagementPage() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const plansData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        const plansData = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
         })) as PricingPlan[]
         setPlans(plansData)
         setLoading(false)
@@ -54,37 +59,23 @@ export default function PricingManagementPage() {
     return () => unsubscribe()
   }, [])
 
-  const handleAddFeature = () => {
-    if (newFeature.trim()) {
-      setFormData({
-        ...formData,
-        features: [...(formData.features || []), newFeature],
-      })
-      setNewFeature('')
-    }
-  }
+  const includedItems = formData.features || []
 
-  const handleRemoveFeature = (index: number) => {
-    setFormData({
-      ...formData,
-      features: (formData.features || []).filter((_, i) => i !== index),
+  const handleAddIncludedItem = () => {
+    const trimmed = newIncludedItem.trim()
+    if (!trimmed) return
+    const merged = getPlanIncludedItems({
+      features: [...includedItems, trimmed],
+      benefits: [],
     })
+    setFormData({ ...formData, features: merged })
+    setNewIncludedItem('')
   }
 
-  const handleAddBenefit = () => {
-    if (newBenefit.trim()) {
-      setFormData({
-        ...formData,
-        benefits: [...(formData.benefits || []), newBenefit],
-      })
-      setNewBenefit('')
-    }
-  }
-
-  const handleRemoveBenefit = (index: number) => {
+  const handleRemoveIncludedItem = (index: number) => {
     setFormData({
       ...formData,
-      benefits: (formData.benefits || []).filter((_, i) => i !== index),
+      features: includedItems.filter((_, i) => i !== index),
     })
   }
 
@@ -96,35 +87,41 @@ export default function PricingManagementPage() {
 
     setSaveLoading(true)
     try {
+      const consolidatedFeatures = getPlanIncludedItems({
+        features: formData.features || [],
+        benefits: formData.benefits || [],
+      })
+
+      const payload = sanitizeForFirestore({
+        name: formData.name,
+        description: formData.description || '',
+        price: formData.price,
+        currency: formData.currency || 'USD',
+        billingPeriod: formData.billingPeriod || 'monthly',
+        features: consolidatedFeatures,
+        benefits: [],
+        icon: formData.icon || '🎯',
+        color: formData.color || '#111111',
+        active: formData.active ?? true,
+        order: formData.order ?? 0,
+        paymentGateway: (formData as PricingPlan).paymentGateway,
+        stripeProductId: formData.stripeProductId,
+        stripePriceId: formData.stripePriceId,
+        paypalPlanId: formData.paypalPlanId,
+        ziinaPlanId: formData.ziinaPlanId,
+        updatedAt: serverTimestamp(),
+      })
+
       if (editingId) {
-        // Update existing plan
-        await updateDoc(doc(db, 'pricingPlans', editingId), {
-          ...formData,
-          updatedAt: serverTimestamp(),
-        })
+        await updateDoc(doc(db, 'pricingPlans', editingId), payload)
       } else {
-        // Add new plan
         await addDoc(collection(db, 'pricingPlans'), {
-          ...formData,
+          ...payload,
           createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
         })
       }
 
-      // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        price: 0,
-        currency: 'USD',
-        billingPeriod: 'monthly',
-        features: [],
-        benefits: [],
-        icon: '🎯',
-        color: '#3b82f6',
-        active: true,
-        order: 0,
-      })
+      setFormData({ ...EMPTY_FORM })
       setEditingId(null)
       setShowAddForm(false)
       alert(editingId ? 'Plan updated successfully!' : 'Plan created successfully!')
@@ -137,7 +134,11 @@ export default function PricingManagementPage() {
   }
 
   const handleEditPlan = (plan: PricingPlan) => {
-    setFormData(plan)
+    setFormData({
+      ...plan,
+      features: getPlanIncludedItems(plan),
+      benefits: [],
+    })
     setEditingId(plan.id)
     setShowAddForm(true)
   }
@@ -155,23 +156,10 @@ export default function PricingManagementPage() {
   }
 
   const handleCancel = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: 0,
-      currency: 'USD',
-      billingPeriod: 'monthly',
-      features: [],
-      benefits: [],
-      icon: '🎯',
-      color: '#3b82f6',
-      active: true,
-      order: 0,
-    })
+    setFormData({ ...EMPTY_FORM })
     setEditingId(null)
     setShowAddForm(false)
-    setNewFeature('')
-    setNewBenefit('')
+    setNewIncludedItem('')
   }
 
   if (loading) {
@@ -188,7 +176,6 @@ export default function PricingManagementPage() {
   return (
     <AdminPageLayout title="Pricing Plans" subtitle="Create and manage subscription plans">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             {!showAddForm && (
@@ -203,18 +190,16 @@ export default function PricingManagementPage() {
           </div>
         </div>
 
-      {/* Add/Edit Form */}
       {showAddForm && (
-        <Card className="p-6 border border-neutral-200 space-y-4">
+        <Card className="p-4 sm:p-6 border border-neutral-200 space-y-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">{editingId ? 'Edit Plan' : 'Create New Plan'}</h2>
-            <button onClick={handleCancel} className="text-neutral-500 hover:text-neutral-700">
+            <h2 className="text-xl font-headline font-bold">{editingId ? 'Edit Plan' : 'Create New Plan'}</h2>
+            <button onClick={handleCancel} className="text-neutral-500 hover:text-neutral-700" aria-label="Close form">
               <X className="w-5 h-5" />
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Basic Info */}
             <div>
               <label className="block text-sm font-medium mb-1">Plan Name *</label>
               <input
@@ -255,7 +240,7 @@ export default function PricingManagementPage() {
               <label className="block text-sm font-medium mb-1">Billing Period</label>
               <select
                 value={formData.billingPeriod || 'monthly'}
-                onChange={(e) => setFormData({ ...formData, billingPeriod: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, billingPeriod: e.target.value as PricingPlan['billingPeriod'] })}
                 className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
               >
                 <option value="monthly">Monthly</option>
@@ -266,8 +251,8 @@ export default function PricingManagementPage() {
             <div>
               <label className="block text-sm font-medium mb-1">Payment Gateway</label>
               <select
-                value={(formData as any).paymentGateway || 'stripe'}
-                onChange={(e) => setFormData({ ...formData, paymentGateway: e.target.value as any })}
+                value={(formData as PricingPlan).paymentGateway || 'stripe'}
+                onChange={(e) => setFormData({ ...formData, paymentGateway: e.target.value as PricingPlan['paymentGateway'] })}
                 className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
               >
                 <option value="stripe">Stripe</option>
@@ -288,25 +273,18 @@ export default function PricingManagementPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Icon (Emoji)</label>
-              <input
-                type="text"
-                value={formData.icon || ''}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                placeholder="e.g., 🎯"
-                maxLength={2}
+              <label className="block text-sm font-medium mb-2">Icon (Emoji)</label>
+              <PricingEmojiPicker
+                value={formData.icon || '🎯'}
+                onChange={(emoji) => setFormData({ ...formData, icon: emoji })}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Color (Hex)</label>
-              <input
-                type="text"
-                value={formData.color || ''}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                placeholder="#3b82f6"
+              <label className="block text-sm font-medium mb-2">Color (Hex)</label>
+              <PricingColorPicker
+                value={formData.color || '#111111'}
+                onChange={(color) => setFormData({ ...formData, color })}
               />
             </div>
 
@@ -334,33 +312,35 @@ export default function PricingManagementPage() {
             </div>
           </div>
 
-          {/* Features */}
           <div className="border-t border-neutral-200 pt-4">
-            <h3 className="font-semibold mb-3">Features</h3>
+            <h3 className="font-semibold mb-3">What&apos;s Included</h3>
             <div className="space-y-2">
-              {(formData.features || []).map((feature, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-neutral-50 p-3 rounded-lg">
-                  <span className="text-sm">{feature}</span>
+              {includedItems.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-neutral-50 p-3 rounded-lg gap-2">
+                  <span className="text-sm">{item}</span>
                   <button
-                    onClick={() => handleRemoveFeature(idx)}
-                    className="text-red-600 hover:text-red-700"
+                    type="button"
+                    onClick={() => handleRemoveIncludedItem(idx)}
+                    className="text-red-600 hover:text-red-700 shrink-0"
+                    aria-label="Remove item"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               ))}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
-                  value={newFeature}
-                  onChange={(e) => setNewFeature(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddFeature()}
+                  value={newIncludedItem}
+                  onChange={(e) => setNewIncludedItem(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddIncludedItem())}
                   className="flex-1 border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                  placeholder="Add a feature..."
+                  placeholder="Add a feature or benefit..."
                 />
                 <button
-                  onClick={handleAddFeature}
-                  className="px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition text-sm font-medium"
+                  type="button"
+                  onClick={handleAddIncludedItem}
+                  className={`${BUTTON_PRIMARY} text-sm px-3 py-2`}
                 >
                   Add
                 </button>
@@ -368,53 +348,20 @@ export default function PricingManagementPage() {
             </div>
           </div>
 
-          {/* Benefits */}
-          <div className="border-t border-neutral-200 pt-4">
-            <h3 className="font-semibold mb-3">Benefits</h3>
-            <div className="space-y-2">
-              {(formData.benefits || []).map((benefit, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-neutral-50 p-3 rounded-lg">
-                  <span className="text-sm">{benefit}</span>
-                  <button
-                    onClick={() => handleRemoveBenefit(idx)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newBenefit}
-                  onChange={(e) => setNewBenefit(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddBenefit()}
-                  className="flex-1 border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                  placeholder="Add a benefit..."
-                />
-                <button
-                  onClick={handleAddBenefit}
-                  className="px-3 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition text-sm font-medium"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex gap-2 pt-4 border-t border-neutral-200">
+          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-neutral-200">
             <button
+              type="button"
               onClick={handleSavePlan}
               disabled={saveLoading}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition font-medium disabled:opacity-50"
+              className={`${BUTTON_PRIMARY} flex-1 flex items-center justify-center gap-2`}
             >
               <Save className="w-4 h-4" />
               {saveLoading ? 'Saving...' : 'Save Plan'}
             </button>
             <button
+              type="button"
               onClick={handleCancel}
-              className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition font-medium"
+              className={`${BUTTON_SECONDARY} flex-1`}
             >
               Cancel
             </button>
@@ -422,10 +369,11 @@ export default function PricingManagementPage() {
         </Card>
       )}
 
-      {/* Plans Grid */}
       {!showAddForm && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            const items = getPlanIncludedItems(plan)
+            return (
             <Card
               key={plan.id}
               className="p-6 border-2 transition hover:shadow-lg"
@@ -451,48 +399,35 @@ export default function PricingManagementPage() {
                 <p className="text-xs text-neutral-600">per {plan.billingPeriod}</p>
               </div>
 
-              <div className="space-y-3 mb-4">
-                {plan.features && plan.features.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-neutral-600 mb-2">Features:</p>
-                    <div className="space-y-1">
-                      {plan.features.map((feature, idx) => (
-                        <p key={idx} className="text-xs text-neutral-700">• {feature}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {plan.benefits && plan.benefits.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-neutral-600 mb-2">Benefits:</p>
-                    <div className="space-y-1">
-                      {plan.benefits.map((benefit, idx) => (
-                        <p key={idx} className="text-xs text-neutral-700">✓ {benefit}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              {items.length > 0 && (
+                <div className="space-y-1 mb-4">
+                  <p className="text-xs font-semibold text-neutral-600 mb-2">What&apos;s Included:</p>
+                  {items.map((item, idx) => (
+                    <p key={idx} className="text-xs text-neutral-700">• {item}</p>
+                  ))}
+                </div>
+              )}
 
               <div className="flex gap-2 pt-4 border-t border-neutral-200">
                 <button
+                  type="button"
                   onClick={() => handleEditPlan(plan)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition text-sm font-medium"
+                  className={`${BUTTON_SECONDARY} flex-1 flex items-center justify-center gap-2 text-sm`}
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDeletePlan(plan.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition text-sm font-medium"
+                  className={`${BUTTON_DANGER} flex-1 flex items-center justify-center gap-2 text-sm`}
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete
                 </button>
               </div>
             </Card>
-          ))}
+          )})}
         </div>
       )}
 

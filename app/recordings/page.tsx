@@ -176,7 +176,7 @@ export default function RecordingsPage() {
               onClick={() => setFilterType('audio')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
                 filterType === 'audio'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-black text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -187,7 +187,7 @@ export default function RecordingsPage() {
               onClick={() => setFilterType('video')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
                 filterType === 'video'
-                  ? 'bg-red-600 text-white'
+                  ? 'bg-black text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

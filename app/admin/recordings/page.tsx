@@ -144,14 +144,14 @@ export default function AdminRecordingsPage() {
                     <td className="px-6 py-3 text-sm space-x-2 flex">
                       <Link
                         href={`/admin/recordings/${recording.id}`}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        className="p-1 text-neutral-900 hover:bg-neutral-100 rounded"
                         title="Edit"
                       >
                         <Edit2 size={16} />
                       </Link>
                       <button
                         onClick={() => handlePublish(recording.id)}
-                        className="p-1 text-green-600 hover:bg-green-50 rounded"
+                        className="p-1 text-neutral-900 hover:bg-neutral-100 rounded"
                         title="Publish"
                       >
                         <Eye size={16} />

@@ -491,7 +491,7 @@ export default function GroupChatPage() {
                             <div className="flex gap-2 mt-2">
                               <button
                                 onClick={() => handleEditMessage(msg.id)}
-                                className="flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                                className="flex items-center gap-1 px-2 py-1 bg-black text-white rounded text-xs hover:bg-neutral-800"
                               >
                                 <Check size={14} />
                                 Save
@@ -501,7 +501,7 @@ export default function GroupChatPage() {
                                   setEditingId(null)
                                   setEditText('')
                                 }}
-                                className="flex items-center gap-1 px-2 py-1 bg-gray-400 text-white rounded text-xs hover:bg-gray-500"
+                                className="flex items-center gap-1 px-2 py-1 bg-white text-black border border-black rounded text-xs hover:bg-neutral-50"
                               >
                                 <X size={14} />
                                 Cancel

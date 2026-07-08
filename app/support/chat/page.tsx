@@ -173,7 +173,7 @@ export default function ChatPage() {
         <div className="p-4 border-b border-neutral-200">
           <button
             onClick={createNewConversation}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800 transition font-medium"
           >
             <Plus className="w-4 h-4" />
             New Chat
@@ -272,7 +272,7 @@ export default function ChatPage() {
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition flex items-center gap-2"
+                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -286,7 +286,7 @@ export default function ChatPage() {
               <p className="text-neutral-500 mb-4">Select a conversation or create a new one</p>
               <button
                 onClick={createNewConversation}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="px-6 py-2 bg-black text-white rounded-lg hover:bg-neutral-800 transition"
               >
                 Start Chat
               </button>

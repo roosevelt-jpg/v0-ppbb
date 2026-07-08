@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { ArrowLeft, Building, CheckCircle, AlertCircle, Mail, Phone, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 
 export default function BusinessDetailPage() {
   const params = useParams()
@@ -271,13 +272,13 @@ export default function BusinessDetailPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+                className={`${BUTTON_PRIMARY} flex-1`}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
               <button
                 onClick={() => router.back()}
-                className="flex-1 px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg font-medium hover:bg-neutral-300 transition"
+                className={`${BUTTON_SECONDARY} flex-1`}
               >
                 Cancel
               </button>

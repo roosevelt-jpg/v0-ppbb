@@ -96,8 +96,8 @@ export default function DonationsPage() {
       },
     },
     {
-      key: 'actions',
-      label: 'Actions',
+      key: 'details',
+      label: 'Details',
       width: '120px',
       render: (_: any, row: any) => (
         <a

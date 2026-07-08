@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Send, Check, X, Search, Filter, Archive, AlertCircle } from 'lucide-react'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 interface Conversation {
   id: string
@@ -315,7 +316,7 @@ export default function AdminChatbotPage() {
                       <button
                         type="submit"
                         disabled={replySending || !replyText.trim()}
-                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 transition"
+                        className={`${BUTTON_PRIMARY} text-sm`}
                       >
                         <Send className="w-4 h-4" />
                       </button>

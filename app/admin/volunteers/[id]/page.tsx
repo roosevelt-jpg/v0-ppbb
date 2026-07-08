@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase'
 import { AlertCircle, CheckCircle, ArrowLeft, Clock, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 
 export default function VolunteerDetailPage() {
   const params = useParams()
@@ -261,13 +262,13 @@ export default function VolunteerDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+            className={`${BUTTON_PRIMARY} px-6 py-2`}
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-medium hover:bg-neutral-400 transition"
+            className={`${BUTTON_SECONDARY} px-6 py-2`}
           >
             Cancel
           </button>
