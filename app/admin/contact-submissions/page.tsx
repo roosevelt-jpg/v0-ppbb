@@ -103,7 +103,7 @@ export default function ContactSubmissionsPage() {
   return (
     <AdminPageLayout
       title="Contact Submissions"
-      subtitle="Get in touch form messages from /partners (and other contact forms)"
+      subtitle="Get in touch messages from /contact and /partners"
     >
       <div className="space-y-4 w-full min-w-0">
         <div className="flex flex-col lg:flex-row gap-3">
@@ -149,7 +149,7 @@ export default function ContactSubmissionsPage() {
             <Inbox className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
             <p className="font-headline text-xl font-bold mb-1">No submissions yet</p>
             <p className="font-body text-sm text-neutral-600">
-              Messages from the Partners Get in Touch form will appear here in real time.
+              Messages from the Contact page (/contact) and Partners Get in Touch form (/partners) appear here in real time.
             </p>
           </Card>
         ) : (
