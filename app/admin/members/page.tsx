@@ -125,7 +125,7 @@ export default function AdminMembersPage() {
             <p className="text-gray-500">No members found matching your filters.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+          <div className="bg-white rounded-lg border border-gray-200 admin-table-scroll min-w-0">
             <table className="w-full min-w-[880px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>

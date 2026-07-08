@@ -295,8 +295,9 @@ export default function ReportingPage() {
                   )}
                 </div>
 
-                <div className="border border-neutral-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
+                <div className="border border-neutral-200 rounded-lg min-w-0">
+                  <div className="admin-table-scroll">
+                  <table className="w-full text-sm min-w-[640px]">
                     <thead className="bg-neutral-100 border-b border-neutral-200">
                       <tr>
                         {reportData.details.length > 0 && Object.keys(reportData.details[0]).map((key) => (
@@ -318,6 +319,7 @@ export default function ReportingPage() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               </div>
 

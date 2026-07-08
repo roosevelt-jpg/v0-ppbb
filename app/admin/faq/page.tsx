@@ -148,8 +148,8 @@ export default function FAQManagementPage() {
             No FAQs yet. Click "New FAQ" to create one.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="admin-table-scroll">
+            <table className="w-full min-w-[720px]">
               <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Question</th>

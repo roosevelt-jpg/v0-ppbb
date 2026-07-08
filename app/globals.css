@@ -321,3 +321,30 @@ input[type='checkbox'] {
 .partners-marquee-track:hover {
   animation-play-state: paused;
 }
+
+/* Admin tables: visible horizontal scrollbar (global CSS hides scrollbars elsewhere) */
+.admin-table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #888888 #e4e1da;
+}
+
+.admin-table-scroll::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+}
+
+.admin-table-scroll::-webkit-scrollbar-thumb {
+  background-color: #888888;
+  border-radius: 4px;
+}
+
+.admin-table-scroll::-webkit-scrollbar-track {
+  background-color: #e4e1da;
+  border-radius: 4px;
+}

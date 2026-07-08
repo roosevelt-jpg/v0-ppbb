@@ -322,8 +322,9 @@ export default function AdminManagementPage() {
                 <p className="text-gray-500">No admins found. Generate an access code to create the first admin.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="bg-white rounded-lg border border-gray-200 min-w-0">
+                <div className="admin-table-scroll">
+                <table className="w-full text-sm min-w-[900px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Admin</th>
@@ -368,6 +369,7 @@ export default function AdminManagementPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </div>

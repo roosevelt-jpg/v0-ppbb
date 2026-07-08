@@ -231,8 +231,8 @@ export default function IntegrationAnalyticsPage() {
             No activity in selected time range
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <div className="admin-table-scroll min-w-0">
+            <table style={{ width: '100%', minWidth: '640px', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f9f8f5', borderBottom: '1px solid #e4e1da' }}>
                   <th style={{ padding: '1rem', textAlign: 'left', color: '#888888', fontWeight: '600' }}>Timestamp</th>

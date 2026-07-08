@@ -614,7 +614,7 @@ export default function SponsorsCrmPage() {
               ))}
             </ul>
 
-            <div className="hidden lg:block overflow-x-auto border border-[#e4e1da] rounded-lg bg-white">
+            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
               <table
                 className="w-full text-sm min-w-[960px]"
                 style={{ fontFamily: 'Inter, sans-serif' }}

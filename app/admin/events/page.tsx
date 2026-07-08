@@ -234,8 +234,9 @@ function EventsPageContent() {
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-lg border border-gray-200 min-w-0">
+            <div className="admin-table-scroll">
+            <table className="w-full min-w-[1100px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
@@ -351,6 +352,7 @@ function EventsPageContent() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

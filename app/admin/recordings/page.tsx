@@ -112,8 +112,9 @@ export default function AdminRecordingsPage() {
             <p className="text-gray-500">No recordings found. Upload your first recording!</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-lg border border-gray-200 min-w-0">
+            <div className="admin-table-scroll">
+            <table className="w-full min-w-[800px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
@@ -168,6 +169,7 @@ export default function AdminRecordingsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

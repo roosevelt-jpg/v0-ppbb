@@ -86,8 +86,8 @@ export default function EventsFinancePage() {
           {loading ? (
             <p>Loading...</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table style={{ width: '100%' }}>
+            <div className="admin-table-scroll min-w-0">
+              <table style={{ width: '100%', minWidth: '640px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #e4e1da' }}>
                     <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>Event</th>

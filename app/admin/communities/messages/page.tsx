@@ -61,8 +61,8 @@ export default function AdminGroupMessagesPage() {
         ) : messages.length === 0 ? (
           <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No group messages yet.</p>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="bg-white border border-gray-200 rounded-lg min-w-0">
+            <div className="admin-table-scroll">
               <table className="w-full min-w-[640px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>

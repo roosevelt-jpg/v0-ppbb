@@ -443,8 +443,8 @@ export default function AdminPartnersLogosPage() {
             </ul>
 
             {/* Desktop table */}
-            <div className="hidden lg:block overflow-x-auto border border-[#e4e1da] rounded-lg bg-white">
-              <table className="w-full text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
+              <table className="w-full text-sm min-w-[960px]" style={{ fontFamily: 'Inter, sans-serif' }}>
                 <thead>
                   <tr className="border-b text-left text-neutral-500 text-xs uppercase tracking-wider">
                     <th className="py-3 px-3 w-10" />

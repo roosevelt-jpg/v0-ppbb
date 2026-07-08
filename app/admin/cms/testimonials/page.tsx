@@ -289,11 +289,12 @@ export default function AdminCmsTestimonialsPage() {
           </form>
         </Card>
 
-        <Card className="p-4 sm:p-6 overflow-x-auto">
+        <Card className="p-4 sm:p-6 min-w-0">
           <h2 className="font-headline text-xl font-bold mb-4">All testimonials</h2>
           {testimonials.length === 0 ? (
             <p className="text-sm text-neutral-500">No testimonials yet.</p>
           ) : (
+            <div className="admin-table-scroll">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b text-left">
@@ -355,6 +356,7 @@ export default function AdminCmsTestimonialsPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Card>
       </div>

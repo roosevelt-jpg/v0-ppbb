@@ -372,7 +372,7 @@ export default function CharityCasesPage() {
               </div>
 
               {/* Desktop table */}
-              <div className="hidden md:block overflow-x-auto -mx-1">
+              <div className="hidden md:block admin-table-scroll -mx-1 min-w-0">
                 <table className="w-full text-sm min-w-[720px]">
                   <thead>
                     <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 border-b">

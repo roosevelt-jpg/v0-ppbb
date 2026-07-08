@@ -380,13 +380,14 @@ export default function AdminTeamPage() {
           </form>
         </Card>
 
-        <Card className="p-4 sm:p-6 overflow-x-auto">
+        <Card className="p-4 sm:p-6 min-w-0">
           <h2 className="font-headline text-xl font-bold mb-4">All team members</h2>
           {members.length === 0 ? (
             <p className="text-sm text-neutral-500">
               No team members yet. Seed defaults or add one above.
             </p>
           ) : (
+            <div className="admin-table-scroll">
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b text-left">
@@ -483,6 +484,7 @@ export default function AdminTeamPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Card>
       </div>

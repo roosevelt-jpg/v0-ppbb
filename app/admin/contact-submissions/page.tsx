@@ -154,7 +154,7 @@ export default function ContactSubmissionsPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 min-w-0">
-            <div className="xl:col-span-3 overflow-x-auto border border-[#e4e1da] rounded-lg bg-white">
+            <div className="xl:col-span-3 admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
               <table className="w-full min-w-[640px] text-left text-sm font-body">
                 <thead className="bg-neutral-50 border-b border-[#e4e1da]">
                   <tr>

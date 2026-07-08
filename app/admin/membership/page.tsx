@@ -399,7 +399,7 @@ export default function MembershipPage() {
 
       {/* Members table */}
       <Card className="border border-neutral-200 min-w-0">
-        <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+        <div className="admin-table-scroll">
           <table className="w-full min-w-[900px]">
             <thead className="bg-neutral-100 border-b border-neutral-200">
               <tr>

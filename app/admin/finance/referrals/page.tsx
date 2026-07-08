@@ -799,7 +799,7 @@ export default function FinanceReferralsPage() {
               </div>
 
               {/* Desktop table */}
-              <div className="hidden md:block overflow-x-auto rounded-lg border border-[#e4e1da] bg-white">
+              <div className="hidden md:block admin-table-scroll rounded-lg border border-[#e4e1da] bg-white min-w-0">
                 <table
                   className="w-full text-sm text-left min-w-[840px]"
                   style={{ fontFamily: 'Inter, sans-serif' }}
@@ -927,7 +927,7 @@ function DetailList({ records }: { records: ReferralRow[] }) {
   }
 
   return (
-    <div className="mt-2 overflow-x-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="mt-2 admin-table-scroll min-w-0" style={{ fontFamily: 'Inter, sans-serif' }}>
       <table className="w-full text-xs sm:text-sm min-w-[640px]">
         <thead>
           <tr className="text-left text-neutral-500 border-b border-[#e4e1da]">

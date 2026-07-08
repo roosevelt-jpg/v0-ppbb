@@ -294,7 +294,7 @@ export default function CharityPartnersPage() {
                 ))}
               </div>
 
-              <div className="hidden md:block overflow-x-auto">
+              <div className="hidden md:block admin-table-scroll min-w-0">
                 <table className="w-full text-sm min-w-[720px]">
                   <thead>
                     <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 border-b">
