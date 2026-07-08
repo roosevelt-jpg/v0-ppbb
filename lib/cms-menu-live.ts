@@ -38,10 +38,16 @@ export function subscribeToMenuPages(
   }
 }
 
+let ensurePromise: Promise<void> | null = null
+
 export async function ensureMenuPagesSeeded(): Promise<void> {
-  try {
-    await fetch('/api/pages/ensure-menu', { cache: 'no-store' })
-  } catch {
-    // Non-blocking — footer still renders empty state
+  if (!ensurePromise) {
+    ensurePromise = fetch('/api/pages/ensure-menu', { cache: 'no-store' })
+      .then(() => undefined)
+      .catch(() => undefined)
+      .finally(() => {
+        ensurePromise = null
+      })
   }
+  return ensurePromise
 }

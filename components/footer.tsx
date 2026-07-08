@@ -23,10 +23,11 @@ interface Stats {
 
 const BUSINESS_GATE_LABELS = new Set(['Start Business', 'Host Event', 'List Your Business', 'Post a Job'])
 
-type MenuLink = { label: string; href: string }
+type MenuLink = { id: string; label: string; href: string }
 
 function pagesToLinks(pages: Page[]): MenuLink[] {
   return pages.map((p) => ({
+    id: p.id,
     label: getCmsPageLabel(p),
     href: getCmsPageHref(p),
   }))
@@ -108,7 +109,7 @@ export function Footer() {
             </h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.id}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>
@@ -128,7 +129,7 @@ export function Footer() {
                   link.href.includes('/join?type=business') ||
                   link.href.startsWith('/business/')
                 return (
-                  <li key={link.href}>
+                  <li key={link.id}>
                     {gate ? (
                       <BusinessFeatureLink
                         featureLabel={link.label}
@@ -155,7 +156,7 @@ export function Footer() {
             </h3>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.id}>
                   <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
                     {link.label}
                   </Link>

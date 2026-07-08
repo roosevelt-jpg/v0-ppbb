@@ -3,6 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { auditFromApiRequest } from '@/lib/audit-log-server'
 import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+import { findConflictingPageSlug, slugConflictMessage } from '@/lib/cms-menu-guard'
 
 type AuditActor = {
   adminId: string
@@ -125,6 +126,12 @@ export async function POST(request: Request) {
     const now = new Date()
 
     if (action === 'create') {
+      const slug = String(payload.slug || '').trim()
+      const conflict = await findConflictingPageSlug(db, { slug })
+      if (conflict) {
+        return NextResponse.json({ success: false, error: slugConflictMessage(slug) }, { status: 409 })
+      }
+
       const ref = await pagesRef.add(
         sanitizeForFirestore({ ...payload, createdAt: now, updatedAt: now })
       )
@@ -140,6 +147,14 @@ export async function POST(request: Request) {
     if (action === 'update') {
       const { id, ...updates } = payload
       const pageId = String(id)
+      const slug = String(updates.slug || '').trim()
+      if (slug) {
+        const conflict = await findConflictingPageSlug(db, { slug, excludeId: pageId })
+        if (conflict) {
+          return NextResponse.json({ success: false, error: slugConflictMessage(slug) }, { status: 409 })
+        }
+      }
+
       await pagesRef.doc(pageId).set(sanitizeForFirestore({ ...updates, updatedAt: now }), { merge: true })
       const title = String(updates.title || updates.slug || pageId)
       await auditPageMutation(request, audit, {
