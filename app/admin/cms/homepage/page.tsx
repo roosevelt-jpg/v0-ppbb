@@ -4,13 +4,15 @@ import React, { useEffect, useState } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Save, AlertCircle, CheckCircle2, Upload, Plus, Trash2 } from 'lucide-react'
+import { Save, AlertCircle, CheckCircle2, Upload, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
 import {
   subscribeToHomepage,
   DEFAULT_HOMEPAGE,
   HomepageConfig,
   HeroButton,
   HeroButtonStyle,
+  HeroImage,
+  HeroTransitionType,
 } from '@/lib/homepage-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 
@@ -48,15 +50,22 @@ export default function AdminCmsHomepagePage() {
     }
   }
 
-  const handleImageUpload = async (file: File, target: 'hero' | 'mission') => {
-    setUploading(target)
+  const handleHeroImagesAdd = async (files: FileList) => {
+    setUploading('hero')
     try {
-      const url = await uploadHomepageImage(file, `homepage/${target}`)
-      if (target === 'hero') {
-        setConfig((p) => ({ ...p, hero: { ...p.hero, imageURL: url } }))
-      } else {
-        setConfig((p) => ({ ...p, mission: { ...p.mission, imageURL: url } }))
+      const added: HeroImage[] = []
+      for (const file of Array.from(files)) {
+        const url = await uploadHomepageImage(file, 'homepage/hero')
+        added.push({
+          id: `hero-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          imageURL: url,
+          caption: '',
+        })
       }
+      setConfig((p) => ({
+        ...p,
+        hero: { ...p.hero, images: [...p.hero.images, ...added] },
+      }))
     } catch (error: unknown) {
       setMessage({
         type: 'error',
@@ -65,6 +74,48 @@ export default function AdminCmsHomepagePage() {
     } finally {
       setUploading(null)
     }
+  }
+
+  const handleMissionImageUpload = async (file: File) => {
+    setUploading('mission')
+    try {
+      const url = await uploadHomepageImage(file, 'homepage/mission')
+      setConfig((p) => ({ ...p, mission: { ...p.mission, imageURL: url } }))
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Image upload failed',
+      })
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const updateHeroImage = (id: string, field: 'caption', value: string) => {
+    setConfig((p) => ({
+      ...p,
+      hero: {
+        ...p.hero,
+        images: p.hero.images.map((img) => (img.id === id ? { ...img, [field]: value } : img)),
+      },
+    }))
+  }
+
+  const removeHeroImage = (id: string) => {
+    setConfig((p) => ({
+      ...p,
+      hero: { ...p.hero, images: p.hero.images.filter((img) => img.id !== id) },
+    }))
+  }
+
+  const moveHeroImage = (index: number, direction: 'up' | 'down') => {
+    setConfig((p) => {
+      const images = [...p.hero.images]
+      const swap = direction === 'up' ? index - 1 : index + 1
+      if (swap < 0 || swap >= images.length) return p
+      ;[images[index], images[swap]] = [images[swap], images[index]]
+      return { ...p, hero: { ...p.hero, images } }
+    })
   }
 
   const updateHeroButton = (index: number, field: keyof HeroButton, value: string) => {
@@ -168,33 +219,158 @@ export default function AdminCmsHomepagePage() {
                 className="w-full min-h-24"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Image caption</label>
-              <input
-                type="text"
-                value={config.hero.imageCaption}
-                onChange={(e) =>
-                  setConfig((p) => ({ ...p, hero: { ...p.hero, imageCaption: e.target.value } }))
-                }
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Hero image</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50">
+          </div>
+
+          <div className="space-y-4 pt-2 border-t border-neutral-200">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h3 className="font-semibold text-sm">Hero images (slider)</h3>
+              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
                 <Upload className="w-4 h-4" />
-                {uploading === 'hero' ? 'Uploading…' : 'Upload image'}
+                {uploading === 'hero' ? 'Uploading…' : 'Add image'}
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'hero')}
+                  disabled={uploading === 'hero'}
+                  onChange={(e) => {
+                    const files = e.target.files
+                    if (files?.length) void handleHeroImagesAdd(files)
+                    e.target.value = ''
+                  }}
                 />
               </label>
-              {config.hero.imageURL && (
-                <img src={config.hero.imageURL} alt="" className="mt-2 h-24 rounded object-cover" />
-              )}
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div className="flex flex-col gap-2 w-full min-w-0">
+                <label htmlFor="hero-transition" className="block text-sm font-medium leading-normal">
+                  Transition
+                </label>
+                <select
+                  id="hero-transition"
+                  value={config.hero.slider.transition}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      hero: {
+                        ...p.hero,
+                        slider: {
+                          ...p.hero.slider,
+                          transition: e.target.value as HeroTransitionType,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full block"
+                >
+                  <option value="fade">Fade</option>
+                  <option value="slide">Slide</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2 w-full min-w-0">
+                <label htmlFor="hero-speed" className="block text-sm font-medium leading-normal">
+                  Speed (seconds per slide)
+                </label>
+                <input
+                  id="hero-speed"
+                  type="number"
+                  min={2}
+                  max={30}
+                  value={config.hero.slider.speedSeconds}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      hero: {
+                        ...p.hero,
+                        slider: {
+                          ...p.hero.slider,
+                          speedSeconds: parseInt(e.target.value, 10) || 5,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full block"
+                />
+              </div>
+              <div className="flex flex-col gap-2 md:col-span-2">
+                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.hero.slider.autoplay}
+                    onChange={(e) =>
+                      setConfig((p) => ({
+                        ...p,
+                        hero: {
+                          ...p.hero,
+                          slider: { ...p.hero.slider, autoplay: e.target.checked },
+                        },
+                      }))
+                    }
+                  />
+                  Autoplay carousel
+                </label>
+              </div>
+            </div>
+
+            {config.hero.images.length === 0 ? (
+              <p className="text-sm text-neutral-500">No hero images yet. Add one or more above.</p>
+            ) : (
+              <div className="space-y-3">
+                {config.hero.images.map((img, i) => (
+                  <div
+                    key={img.id}
+                    className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start p-3 border rounded-lg"
+                  >
+                    <div className="md:col-span-2">
+                      <img
+                        src={img.imageURL}
+                        alt=""
+                        className="w-full h-20 object-cover rounded border border-neutral-200"
+                      />
+                    </div>
+                    <div className="md:col-span-7">
+                      <label className="block text-xs font-medium mb-1">Caption (optional)</label>
+                      <input
+                        type="text"
+                        value={img.caption || ''}
+                        onChange={(e) => updateHeroImage(img.id, 'caption', e.target.value)}
+                        placeholder="COMMUNITY LED since day one."
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="md:col-span-3 flex gap-1 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => moveHeroImage(i, 'up')}
+                        disabled={i === 0}
+                        className="p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
+                        aria-label="Move up"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveHeroImage(i, 'down')}
+                        disabled={i === config.hero.images.length - 1}
+                        className="p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
+                        aria-label="Move down"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeHeroImage(img.id)}
+                        className="p-2 bg-red-600 text-white rounded"
+                        aria-label="Remove image"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -396,7 +572,7 @@ export default function AdminCmsHomepagePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], 'mission')}
+                  onChange={(e) => e.target.files?.[0] && handleMissionImageUpload(e.target.files[0])}
                 />
               </label>
               {config.mission.imageURL && (

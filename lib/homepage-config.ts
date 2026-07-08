@@ -5,19 +5,37 @@ import { doc, onSnapshot } from 'firebase/firestore'
 
 export type HeroButtonStyle = 'primary' | 'secondary' | 'text'
 
+export type HeroTransitionType = 'fade' | 'slide'
+
 export interface HeroButton {
   label: string
   href: string
   style: HeroButtonStyle
 }
 
+export interface HeroImage {
+  id: string
+  imageURL: string
+  caption?: string
+}
+
+export interface HeroSlider {
+  transition: HeroTransitionType
+  speedSeconds: number
+  autoplay: boolean
+}
+
 export interface HomepageHero {
   eyebrow: string
   headline: string
   body: string
-  imageURL: string
-  imageCaption: string
+  images: HeroImage[]
+  slider: HeroSlider
   buttons: HeroButton[]
+  /** @deprecated Legacy single image — migrated into `images` on read */
+  imageURL?: string
+  /** @deprecated Legacy caption — migrated into first slide on read */
+  imageCaption?: string
 }
 
 export interface HomepageStatItem {
@@ -55,8 +73,12 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
     eyebrow: 'ESTD 2025 — A MOVEMENT, NOT JUST A CHARITY',
     headline: 'Building a purpose-driven community.',
     body: "Through charity, growth and connection, Passive Blessings is UAE's leading impact led community who want to do more than donate. We act, build and rise together.",
-    imageURL: '',
-    imageCaption: 'COMMUNITY LED since day one.',
+    images: [],
+    slider: {
+      transition: 'fade',
+      speedSeconds: 5,
+      autoplay: true,
+    },
     buttons: [
       { label: 'Join the community ↗', href: '/join', style: 'primary' },
       { label: 'Donate', href: '/donate', style: 'secondary' },
@@ -85,6 +107,46 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
   },
 }
 
+function mergeHeroImages(data: Partial<HomepageHero>): HeroImage[] {
+  const fromArray = Array.isArray(data.images)
+    ? data.images
+        .filter((img) => img && typeof img.imageURL === 'string' && img.imageURL.length > 0)
+        .map((img, i) => ({
+          id: typeof img.id === 'string' && img.id ? img.id : `hero-img-${i}`,
+          imageURL: img.imageURL,
+          caption: typeof img.caption === 'string' ? img.caption : '',
+        }))
+    : []
+
+  if (fromArray.length > 0) return fromArray
+
+  if (typeof data.imageURL === 'string' && data.imageURL) {
+    return [
+      {
+        id: 'legacy-hero-0',
+        imageURL: data.imageURL,
+        caption: typeof data.imageCaption === 'string' ? data.imageCaption : '',
+      },
+    ]
+  }
+
+  return []
+}
+
+function mergeHeroSlider(data: Partial<HomepageHero>): HeroSlider {
+  const raw = data.slider as Partial<HeroSlider> | undefined
+  const speed =
+    typeof raw?.speedSeconds === 'number' && raw.speedSeconds >= 2
+      ? raw.speedSeconds
+      : DEFAULT_HOMEPAGE.hero.slider.speedSeconds
+
+  return {
+    transition: raw?.transition === 'slide' ? 'slide' : 'fade',
+    speedSeconds: speed,
+    autoplay: raw?.autoplay !== false,
+  }
+}
+
 function mergeHero(data: unknown): HomepageHero {
   const d = (data || {}) as Partial<HomepageHero>
   const buttons = Array.isArray(d.buttons)
@@ -103,9 +165,8 @@ function mergeHero(data: unknown): HomepageHero {
     eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : DEFAULT_HOMEPAGE.hero.eyebrow,
     headline: typeof d.headline === 'string' ? d.headline : DEFAULT_HOMEPAGE.hero.headline,
     body: typeof d.body === 'string' ? d.body : DEFAULT_HOMEPAGE.hero.body,
-    imageURL: typeof d.imageURL === 'string' ? d.imageURL : DEFAULT_HOMEPAGE.hero.imageURL,
-    imageCaption:
-      typeof d.imageCaption === 'string' ? d.imageCaption : DEFAULT_HOMEPAGE.hero.imageCaption,
+    images: mergeHeroImages(d),
+    slider: mergeHeroSlider(d),
     buttons: buttons.length > 0 ? buttons : DEFAULT_HOMEPAGE.hero.buttons,
   }
 }

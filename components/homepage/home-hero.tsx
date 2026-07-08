@@ -7,8 +7,8 @@ import {
   DEFAULT_HOMEPAGE,
   HomepageConfig,
   HeroButton,
-  splitImageCaption,
 } from '@/lib/homepage-config'
+import { HeroImageCarousel } from '@/components/homepage/hero-image-carousel'
 
 function HeroButtonLink({ button }: { button: HeroButton }) {
   const base = 'inline-flex items-center justify-center font-body text-sm font-semibold transition-colors'
@@ -73,7 +73,6 @@ export function HomeHero() {
   if (!ready) return <HeroSkeleton />
 
   const { hero } = config
-  const caption = splitImageCaption(hero.imageCaption)
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-10 md:py-16 bg-background">
@@ -94,30 +93,7 @@ export function HomeHero() {
         </div>
 
         <div className="order-1 lg:order-2 relative">
-          {hero.imageURL ? (
-            <img
-              src={hero.imageURL}
-              alt=""
-              className="w-full aspect-[4/5] object-cover rounded-2xl"
-            />
-          ) : (
-            <div className="w-full aspect-[4/5] bg-neutral-100 rounded-2xl flex items-center justify-center border border-neutral-200">
-              <p className="text-sm text-muted-foreground font-body px-6 text-center">
-                Hero image — upload from Admin → CMS → Homepage
-              </p>
-            </div>
-          )}
-          {hero.imageCaption && (
-            <p className="caption-mixed mt-3 text-xs sm:text-sm text-muted-foreground">
-              <span className="eyebrow text-[0.65rem] sm:text-xs">{caption.prefix}</span>
-              {caption.italic && (
-                <>
-                  {' '}
-                  <em className="font-headline text-sm sm:text-base">{caption.italic}</em>
-                </>
-              )}
-            </p>
-          )}
+          <HeroImageCarousel images={hero.images} slider={hero.slider} />
         </div>
       </div>
     </section>
