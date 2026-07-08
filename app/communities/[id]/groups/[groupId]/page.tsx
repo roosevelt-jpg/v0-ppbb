@@ -77,10 +77,10 @@ export default function GroupChatPage() {
   const [showPending, setShowPending] = React.useState(true)
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
-  const canModerate = Boolean(
-    user && group && canApproveGroupMembers(user, group.createdBy)
-  )
-  const showPendingPanel = canModerate && group?.requiresApproval === true
+  // Chat-page approval UI: group creator only when requiresApproval is on.
+  // Admins continue to use their separate all-groups admin approval UI.
+  const isGroupCreator = Boolean(user?.id && group?.createdBy && user.id === group.createdBy)
+  const showPendingPanel = isGroupCreator && group?.requiresApproval === true
 
   // Check membership and load group
   React.useEffect(() => {
@@ -146,7 +146,7 @@ export default function GroupChatPage() {
 
   const loadPendingMembers = React.useCallback(async () => {
     if (!user || !group?.requiresApproval) return
-    if (!canApproveGroupMembers(user, group.createdBy)) return
+    if (user.id !== group.createdBy) return
 
     setPendingLoading(true)
     try {
@@ -160,6 +160,8 @@ export default function GroupChatPage() {
       const json = await res.json()
       if (json.success) {
         setPendingMembers(json.data || [])
+      } else if (res.status === 403) {
+        setPendingMembers([])
       }
     } catch (error) {
       console.error('[v0] Error loading pending members:', error)
@@ -415,14 +417,14 @@ export default function GroupChatPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
                       <button
                         type="button"
                         disabled={actingMemberId === member.id}
                         onClick={() => handleMemberDecision(member.id, 'active')}
                         className="flex-1 sm:flex-none px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 min-h-[44px]"
                       >
-                        Approve
+                        {actingMemberId === member.id ? '…' : 'Approve'}
                       </button>
                       <button
                         type="button"

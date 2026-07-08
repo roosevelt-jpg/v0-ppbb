@@ -60,15 +60,21 @@ export async function GET(request: NextRequest) {
     }
 
     const groupData = groupSnap.data()!
-    if (requesterId) {
-      const admin = await isAdminUser(requesterId)
-      const isOwner = groupData.createdBy === requesterId
-      if (!admin && !isOwner) {
-        return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
-      }
+
+    if (!requesterId) {
+      return NextResponse.json(
+        { success: false, error: 'requesterId is required' },
+        { status: 400 }
+      )
     }
 
-    let query = groupRef.collection('members').where('joinStatus', '==', joinStatus)
+    const admin = await isAdminUser(requesterId)
+    const isOwner = groupData.createdBy === requesterId
+    if (!admin && !isOwner) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+    }
+
+    const query = groupRef.collection('members').where('joinStatus', '==', joinStatus)
     const snapshot = await query.get()
     const members = snapshot.docs.map((doc) =>
       serializeFirestoreDoc(doc.id, doc.data() as Record<string, unknown>)
