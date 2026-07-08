@@ -52,6 +52,9 @@ export const INPUT_FOCUS = 'focus:outline-none focus:ring-2 focus:ring-black foc
 export const INPUT_STYLE = `${INPUT_BASE} ${INPUT_FOCUS}`
 export const TEXTAREA_STYLE = `${INPUT_BASE} ${INPUT_FOCUS} resize-vertical min-h-32`
 export const SELECT_STYLE = `${INPUT_BASE} ${INPUT_FOCUS} appearance-none cursor-pointer`
+/** Reset global button styles when using <button> as a select/combobox trigger */
+export const FIELD_TRIGGER_RESET =
+  '!min-h-0 !px-4 !py-2 !rounded-lg !font-normal !font-body !shadow-none hover:!shadow-none !bg-white !text-neutral-900 hover:!bg-white active:!bg-white'
 
 // Card styles
 export const CARD_BASE = 'bg-white border border-neutral-200 rounded-lg p-6 shadow-sm'

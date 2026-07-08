@@ -207,6 +207,23 @@ input[type='checkbox'] {
     box-shadow: 0 4px 12px rgba(17,17,17,0.1);
   }
 
+  /* Native select list highlight — OS defaults to blue without these overrides */
+  select {
+    accent-color: #111111;
+    color-scheme: light;
+  }
+
+  select option {
+    background-color: #ffffff;
+    color: #111111;
+  }
+
+  select option:checked,
+  select option:hover {
+    background-color: #111111;
+    color: #ffffff;
+  }
+
   button {
     @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md font-body;
     font-size: 13px;

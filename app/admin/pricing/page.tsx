@@ -5,13 +5,14 @@ import { Card } from '@/components/ui/card'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { PricingEmojiPicker } from '@/components/pricing-emoji-picker'
 import { PricingColorPicker } from '@/components/pricing-color-picker'
+import { AdminSelect } from '@/components/admin-select'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { PricingPlan } from '@/lib/pricing-types'
 import { getPlanIncludedItems } from '@/lib/pricing-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
 
 export const dynamic = 'force-dynamic'
 
@@ -224,41 +225,48 @@ export default function PricingManagementPage() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Currency</label>
-              <select
+              <AdminSelect
                 value={formData.currency || 'USD'}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              >
-                <option value="USD">USD</option>
-                <option value="GBP">GBP</option>
-                <option value="EUR">EUR</option>
-                <option value="AED">AED</option>
-              </select>
+                onChange={(currency) => setFormData({ ...formData, currency })}
+                aria-label="Currency"
+                options={[
+                  { value: 'USD', label: 'USD' },
+                  { value: 'GBP', label: 'GBP' },
+                  { value: 'EUR', label: 'EUR' },
+                  { value: 'AED', label: 'AED' },
+                ]}
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Billing Period</label>
-              <select
+              <AdminSelect
                 value={formData.billingPeriod || 'monthly'}
-                onChange={(e) => setFormData({ ...formData, billingPeriod: e.target.value as PricingPlan['billingPeriod'] })}
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
+                onChange={(billingPeriod) =>
+                  setFormData({ ...formData, billingPeriod: billingPeriod as PricingPlan['billingPeriod'] })
+                }
+                aria-label="Billing period"
+                options={[
+                  { value: 'monthly', label: 'Monthly' },
+                  { value: 'yearly', label: 'Yearly' },
+                ]}
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1">Payment Gateway</label>
-              <select
+              <AdminSelect
                 value={(formData as PricingPlan).paymentGateway || 'stripe'}
-                onChange={(e) => setFormData({ ...formData, paymentGateway: e.target.value as PricingPlan['paymentGateway'] })}
-                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              >
-                <option value="stripe">Stripe</option>
-                <option value="paypal">PayPal</option>
-                <option value="ziina">Ziina</option>
-              </select>
+                onChange={(paymentGateway) =>
+                  setFormData({ ...formData, paymentGateway: paymentGateway as PricingPlan['paymentGateway'] })
+                }
+                aria-label="Payment gateway"
+                options={[
+                  { value: 'stripe', label: 'Stripe' },
+                  { value: 'paypal', label: 'PayPal' },
+                  { value: 'ziina', label: 'Ziina' },
+                ]}
+              />
             </div>
 
             <div className="md:col-span-2">
@@ -305,7 +313,7 @@ export default function PricingManagementPage() {
                   type="checkbox"
                   checked={formData.active ?? true}
                   onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                  className="w-4 h-4"
+                  className="w-4 h-4 rounded border-neutral-300 accent-black"
                 />
                 <span className="text-sm font-medium">Active</span>
               </label>
