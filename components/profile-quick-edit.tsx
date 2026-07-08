@@ -175,6 +175,11 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
           </p>
         )}
 
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
+          <p className="font-medium text-neutral-900">{getUserDisplayName(user)}</p>
+          <p className="text-sm text-neutral-600 mt-0.5 break-all">{user.email || email || '—'}</p>
+        </div>
+
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <UserAvatar user={user} size="lg" imageUrl={pictureURL || null} name={fullName} />
           <div className="w-full sm:flex-1">
@@ -262,11 +267,11 @@ export function ProfileMenuButton({ className = '' }: ProfileMenuButtonProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`rounded-full p-0.5 hover:ring-2 hover:ring-neutral-300 transition min-h-[44px] min-w-[44px] inline-flex items-center justify-center ${className}`}
+        className={`rounded-full p-1 hover:ring-2 hover:ring-neutral-300 transition min-h-[44px] min-w-[44px] inline-flex items-center justify-center ${className}`}
         aria-label="Edit profile"
-        title="Edit profile"
+        title="Edit profile — view email and account details"
       >
-        <UserAvatar user={user} size="md" />
+        <UserAvatar user={user} size="sm" />
       </button>
       <ProfileQuickEdit open={open} onOpenChange={setOpen} />
     </>

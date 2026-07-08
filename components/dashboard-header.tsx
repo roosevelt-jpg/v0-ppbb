@@ -2,11 +2,10 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
-import { ProfileMenuButton } from '@/components/profile-quick-edit'
+import { DashboardHeaderActions } from '@/components/dashboard-header-actions'
 import { logoutUser } from '@/lib/auth'
 
 interface DashboardHeaderProps {
@@ -45,7 +44,7 @@ export function DashboardHeader({ title, subtitle, showDateTime = true }: Dashbo
   }
 
   return (
-    <div className="border-b px-8 py-4 flex items-center justify-between" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+    <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       <div className="flex-1">
         <h1 className="text-2xl font-bold font-headline" style={{ color: '#111111', fontWeight: 700 }}>
           {title}
@@ -60,23 +59,9 @@ export function DashboardHeader({ title, subtitle, showDateTime = true }: Dashbo
           )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <BusinessPortalSwitcher />
-        <LanguageSwitcherWithFlags />
-        <ThemeToggle />
-        <ProfileMenuButton />
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
-          style={{
-            backgroundColor: '#f7f6f2',
-            color: '#111111',
-            border: '1px solid #e4e1da',
-          }}
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </button>
+        <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
       </div>
     </div>
   )

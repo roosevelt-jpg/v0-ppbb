@@ -3,13 +3,12 @@
 import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, LayoutDashboard, Calendar, Heart, Users, Settings, Menu, X, Briefcase, ShoppingBag, BookOpen, Award, MessageSquare, HelpCircle, Crown, Inbox, Package } from 'lucide-react'
+import { LayoutDashboard, Calendar, Heart, Users, Settings, Menu, X, Briefcase, ShoppingBag, BookOpen, Award, MessageSquare, HelpCircle, Crown, Inbox, Package } from 'lucide-react'
 import { auth } from '@/lib/firebase'
 import { logoutUser } from '@/lib/auth'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
 import { SiteLogo } from '@/components/site-logo'
-import { ProfileMenuButton } from '@/components/profile-quick-edit'
+import { DashboardHeaderActions } from '@/components/dashboard-header-actions'
 
 /** Part 10A — ONLY these items for basic members. No admin/security/recordings. */
 const memberMenuItems = [
@@ -134,33 +133,30 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
   }
 
   return (
-    <div className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-      <div className="flex-1">
-        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-        <div className="flex items-center gap-4 mt-2">
-          {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+    <div className="bg-background border-b border-border px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex-1 min-w-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{title}</h1>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1 sm:mt-2">
+          {subtitle && <p className="text-xs sm:text-sm text-muted-foreground truncate">{subtitle}</p>}
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{dateTime}</span>
+            <span className="truncate max-w-[12rem] sm:max-w-none">{dateTime}</span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+      <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
         <BusinessPortalSwitcher />
-        <ThemeToggle />
-        <ProfileMenuButton />
+        <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
         <button
-          onClick={handleLogout}
-          className="min-h-[44px] px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2"
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="md:hidden inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg hover:bg-secondary"
+          aria-label={open ? 'Close menu' : 'Open menu'}
         >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </button>
-        <button onClick={() => setOpen(!open)} className="md:hidden">
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
         </button>
       </div>
     </div>

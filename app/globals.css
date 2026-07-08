@@ -8,6 +8,15 @@
 * { scrollbar-width: none; }
 body { -ms-overflow-style: none; }
 
+/* RTL layout when Arabic / Urdu selected */
+html[dir='rtl'] body {
+  text-align: right;
+}
+
+html[dir='rtl'] .rtl-flip-row {
+  flex-direction: row-reverse;
+}
+
 /* Custom checkbox styling for black theme */
 input[type='checkbox']:checked {
   background-color: #111111;

@@ -6,12 +6,10 @@ import { useAuth } from '@/lib/auth-context'
 import { hasAdminAccess } from '@/lib/roles'
 import { canAccessAdminPath } from '@/lib/admin-invite-permissions'
 import { AdminSidebar } from '@/components/admin-layout'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { LanguageSelector } from '@/components/language-selector'
-import { ProfileMenuButton } from '@/components/profile-quick-edit'
-import { LogOut } from 'lucide-react'
+import { DashboardHeaderActions } from '@/components/dashboard-header-actions'
 import { logoutUser } from '@/lib/auth'
 import { recordAdminAuditFromUser } from '@/lib/admin-audit'
+import { getUserDisplayName } from '@/lib/user-profile'
 
 export default function AdminLayout({
   children,
@@ -111,8 +109,8 @@ export default function AdminLayout({
     router.push('/admin/login')
   }
 
-  // Get user's first name or display email as fallback
-  const displayName = user && 'firstName' in user ? user.firstName || (user as any).email : (user as any)?.email || 'Admin'
+  // Display name only — email is shown inside profile quick-edit modal
+  const displayName = user ? getUserDisplayName(user) : 'Admin'
 
   // Wait for Firebase Auth + Firestore profile before any admin route guard runs
   if (loading && !isPublicAdminPage) {
@@ -218,17 +216,8 @@ export default function AdminLayout({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <LanguageSelector />
-            <ThemeToggle />
-            <ProfileMenuButton />
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium bg-black text-white hover:bg-gray-800 transition"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Logout" />
           </div>
         </header>
 

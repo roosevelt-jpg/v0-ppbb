@@ -7,9 +7,8 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { BusinessPortalAccessDenied } from '@/components/business-feature-gate'
 import Link from 'next/link'
 import { SiteLogo } from '@/components/site-logo'
-import { ProfileMenuButton } from '@/components/profile-quick-edit'
+import { DashboardHeaderActions } from '@/components/dashboard-header-actions'
 import {
-  LogOut,
   BarChart3,
   Briefcase,
   TrendingUp,
@@ -22,9 +21,6 @@ import {
   LayoutGrid,
   Menu,
   X,
-  Moon,
-  Sun,
-  Globe,
   Calendar,
   Users2,
 } from 'lucide-react'
@@ -211,47 +207,24 @@ export default function BusinessLayout({
       {/* Main Content */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Desktop Header */}
-        <div className="hidden items-center justify-between border-b border-neutral-200 bg-white px-6 py-4 md:flex">
+        <div className="hidden items-center justify-between border-b border-neutral-200 bg-white px-4 sm:px-6 py-3 md:flex">
           <BusinessHeaderDate />
-          <div className="flex items-center gap-3">
-            <ProfileMenuButton />
-            <button
-              className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
-              aria-label="Language"
-              title="Language"
-            >
-              <Globe className="h-5 w-5" />
-            </button>
-            <button
-              className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
-              aria-label="Theme"
-              title="Dark mode"
-            >
-              <Moon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
-              aria-label="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
+          <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
         </div>
 
         {/* Mobile Header */}
-        <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-4 md:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white px-4 py-3 md:hidden">
           <BusinessHeaderDate mobile />
-          <div className="flex items-center gap-2">
-            <ProfileMenuButton />
+          <div className="flex items-center gap-1.5">
+            <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
             <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="rounded-md p-2 text-neutral-700 hover:bg-neutral-100"
-            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-          >
-            {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+              type="button"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-md text-neutral-700 hover:bg-neutral-100"
+              aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+            >
+              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
 
