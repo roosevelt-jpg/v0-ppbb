@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { getPagesByMenuLocation } from '@/lib/admin'
 import { Page } from '@/lib/types'
 import { SocialMediaLinks } from '@/components/social-media-links'
+import { SiteLogo } from '@/components/site-logo'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
 import {
   subscribeToGlobalSettings,
@@ -33,7 +34,6 @@ export function Footer() {
     DEFAULT_GLOBAL_SETTINGS.socialLinks
   )
   const [footerBlurb, setFooterBlurb] = useState(DEFAULT_GLOBAL_SETTINGS.siteDescription)
-  const [logoUrl, setLogoUrl] = useState(DEFAULT_GLOBAL_SETTINGS.logoUrlDark)
 
   const [quickLinks, setQuickLinks] = useState<Page[]>([])
   const [getInvolvedLinks, setGetInvolvedLinks] = useState<Page[]>([])
@@ -43,7 +43,6 @@ export function Footer() {
     return subscribeToGlobalSettings((s) => {
       setSocialLinks(s.socialLinks || {})
       setFooterBlurb(s.siteDescription || DEFAULT_GLOBAL_SETTINGS.siteDescription)
-      setLogoUrl(s.logoUrlDark || s.logoUrlLight || '')
     })
   }, [])
 
@@ -141,14 +140,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <img
-              src={
-                logoUrl ||
-                'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-1IbVvpWYxxNsdvH8MfdFG37gnBEPOv.png'
-              }
-              alt="Passive Blessings"
-              style={{ width: '140px', height: 'auto' }}
-            />
+            <SiteLogo background="dark" href="/" heightClass="h-auto" maxWidth={140} />
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
               {footerBlurb}
             </p>

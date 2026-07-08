@@ -6,7 +6,8 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { BusinessPortalAccessDenied } from '@/components/business-feature-gate'
 import Link from 'next/link'
-import Image from 'next/image'
+import { SiteLogo } from '@/components/site-logo'
+import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import {
   LogOut,
   BarChart3,
@@ -86,16 +87,7 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full min-h-screen flex-col bg-white">
       {/* Header with Logo */}
       <div className="border-b border-neutral-200 p-6">
-        <Link href="/business/dashboard" className="flex items-center justify-center">
-          {/* Passive Blessings Logo - Full Logo Only */}
-          <Image
-            src="/pb-logo-black.png"
-            alt="Passive Blessings"
-            width={64}
-            height={64}
-            className="rounded-lg"
-          />
-        </Link>
+        <SiteLogo background="light" href="/business/dashboard" heightClass="h-16 w-16" maxWidth={64} />
       </div>
 
       {/* Navigation */}
@@ -222,6 +214,7 @@ export default function BusinessLayout({
         <div className="hidden items-center justify-between border-b border-neutral-200 bg-white px-6 py-4 md:flex">
           <BusinessHeaderDate />
           <div className="flex items-center gap-3">
+            <ProfileMenuButton />
             <button
               className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
               aria-label="Language"
@@ -250,13 +243,16 @@ export default function BusinessLayout({
         {/* Mobile Header */}
         <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-4 md:hidden">
           <BusinessHeaderDate mobile />
-          <button
+          <div className="flex items-center gap-2">
+            <ProfileMenuButton />
+            <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="rounded-md p-2 text-neutral-700 hover:bg-neutral-100"
             aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
           >
             {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
+          </div>
         </div>
 
         {/* Content */}

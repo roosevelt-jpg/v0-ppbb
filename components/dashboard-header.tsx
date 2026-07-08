@@ -6,6 +6,7 @@ import { LogOut, Clock } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
+import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import { logoutUser } from '@/lib/auth'
 
 interface DashboardHeaderProps {
@@ -63,6 +64,7 @@ export function DashboardHeader({ title, subtitle, showDateTime = true }: Dashbo
         <BusinessPortalSwitcher />
         <LanguageSwitcherWithFlags />
         <ThemeToggle />
+        <ProfileMenuButton />
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"

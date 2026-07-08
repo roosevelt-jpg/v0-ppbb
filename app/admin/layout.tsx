@@ -7,6 +7,7 @@ import { hasAdminAccess } from '@/lib/roles'
 import { AdminSidebar } from '@/components/admin-layout'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSelector } from '@/components/language-selector'
+import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import { LogOut } from 'lucide-react'
 import { logoutUser } from '@/lib/auth'
 
@@ -142,6 +143,7 @@ export default function AdminLayout({
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <LanguageSelector />
             <ThemeToggle />
+            <ProfileMenuButton />
             <button
               onClick={handleLogout}
               className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium bg-black text-white hover:bg-gray-800 transition"

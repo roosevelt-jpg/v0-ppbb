@@ -15,6 +15,7 @@ import {
   Store,
   AlertCircle,
 } from 'lucide-react'
+import { AdminUserCell } from '@/components/admin-user-cell'
 
 type BusinessRow = {
   id: string
@@ -29,6 +30,7 @@ type BusinessRow = {
   status: string
   referralCode?: string | null
   referralContributionPercent?: number | null
+  ownerProfilePictureURL?: string | null
   createdAt: string | Date | null
 }
 
@@ -248,8 +250,20 @@ export default function BusinessesPage() {
                           </span>
                         )}
                       </div>
-                      <p className="font-body text-sm text-neutral-600 break-words">
-                        {[biz.category, biz.ownerName, biz.email].filter(Boolean).join(' · ')}
+                      <p className="font-body text-sm text-neutral-600 break-words flex flex-wrap items-center gap-2">
+                        {biz.ownerName ? (
+                          <AdminUserCell
+                            user={{
+                              firstName: biz.ownerName,
+                              profilePictureURL: biz.ownerProfilePictureURL || undefined,
+                              email: biz.email,
+                            }}
+                            name={biz.ownerName}
+                            subtitle={[biz.category, biz.email].filter(Boolean).join(' · ')}
+                          />
+                        ) : (
+                          [biz.category, biz.ownerName, biz.email].filter(Boolean).join(' · ')
+                        )}
                       </p>
                       <p className="font-body text-xs text-neutral-500">ID: {biz.id}</p>
                       {biz.isApproved && biz.referralCode ? (

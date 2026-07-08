@@ -41,6 +41,7 @@ function mapBusinessDoc(id: string, data: Record<string, unknown>) {
     description: asString(data.description),
     ownerName: asString(data.ownerName) || asString(data.memberName),
     ownerId: asString(data.ownerId) || asString(data.userId),
+    ownerProfilePictureURL: '',
     email: asString(data.email),
     phone: asString(data.phone),
     location: asString(data.location),
@@ -134,6 +135,27 @@ export async function GET(request: NextRequest) {
           b.email.toLowerCase().includes(q) ||
           b.location.toLowerCase().includes(q)
       )
+    }
+
+    const ownerIds = [...new Set(businesses.map((b) => b.ownerId).filter(Boolean))]
+    if (ownerIds.length > 0) {
+      const ownerSnaps = await db.getAll(
+        ...ownerIds.map((id) => db.collection('users').doc(id))
+      )
+      const ownerPics = new Map<string, string>()
+      ownerSnaps.forEach((snap) => {
+        if (!snap.exists) return
+        const d = snap.data() as Record<string, unknown>
+        const pic =
+          (typeof d.profilePictureURL === 'string' && d.profilePictureURL) ||
+          (typeof d.avatarUrl === 'string' && d.avatarUrl) ||
+          ''
+        if (pic) ownerPics.set(snap.id, pic)
+      })
+      businesses = businesses.map((b) => ({
+        ...b,
+        ownerProfilePictureURL: b.ownerId ? ownerPics.get(b.ownerId) || '' : '',
+      }))
     }
 
     return NextResponse.json({ success: true, data: businesses })

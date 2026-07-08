@@ -9,6 +9,7 @@ import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firesto
 import { db } from '@/lib/firebase'
 import { Loader2, Eye, EyeOff } from 'lucide-react'
 import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
+import { SiteLogo } from '@/components/site-logo'
 
 const STEPS = [
   { id: 1, label: 'Personal info & account' },
@@ -334,11 +335,7 @@ export default function SignupClient() {
       <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
           <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#111111', height: '28px', display: 'flex', alignItems: 'center' }}>
-            <img 
-              src="/images/pb-logo-black.png" 
-              alt="Passive Blessings" 
-              style={{ height: '28px', width: 'auto' }}
-            />
+            <SiteLogo background="light" href="/" heightClass="h-7" />
           </div>
           <Link href="/login" style={{ fontSize: '0.75rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>Sign In</Link>
         </div>

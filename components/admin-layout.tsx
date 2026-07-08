@@ -62,6 +62,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
+import { SiteLogo } from '@/components/site-logo'
+import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import { logoutUser } from '@/lib/auth'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
@@ -188,13 +190,7 @@ export function AdminSidebar() {
       <aside className="hidden lg:flex w-52 min-h-screen flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
         {/* Logo */}
         <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
-          <Link href="/admin">
-            <img 
-              src="/pb-logo-black.png" 
-              alt="Passive Blessings"
-              style={{ maxWidth: '140px', height: 'auto' }}
-            />
-          </Link>
+          <SiteLogo background="light" href="/admin" heightClass="h-auto" maxWidth={140} />
         </div>
 
         {/* Navigation with Groups */}
@@ -260,11 +256,7 @@ export function AdminSidebar() {
             {/* Logo */}
             <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                <img 
-                  src="/pb-logo-black.png" 
-                  alt="Passive Blessings"
-                  style={{ maxWidth: '140px', height: 'auto' }}
-                />
+                <SiteLogo background="light" linked={false} heightClass="h-auto" maxWidth={140} />
               </Link>
             </div>
 
@@ -379,6 +371,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
       <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap justify-end">
         <LanguageSwitcherWithFlags />
         <ThemeToggle />
+        <ProfileMenuButton />
         
         {/* Message Notification Badge */}
         {unreadMessages > 0 && (

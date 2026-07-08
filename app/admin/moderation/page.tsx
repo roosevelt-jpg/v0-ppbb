@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy, writeBatch, addDoc } from 'firebase/firestore'
 import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquare, TrendingUp, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { AdminUserCell } from '@/components/admin-user-cell'
 
 type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
@@ -469,10 +470,9 @@ export default function ModerationPage() {
               flaggedUsers.map(user => (
                 <Card key={user.id} className="p-4 border border-neutral-200">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-neutral-900">{user.firstName} {user.lastName}</h4>
-                      <p className="text-sm text-neutral-600">{user.email}</p>
-                      <p className="text-xs text-neutral-500 mt-1">Flags: {user.flags || 0}</p>
+                    <div className="flex-1 min-w-0">
+                      <AdminUserCell user={user} />
+                      <p className="text-xs text-neutral-500 mt-2">Flags: {user.flags || 0}</p>
                     </div>
                     <button
                       onClick={() => handleBanUser(user.id)}

@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Search } from 'lucide-react'
+import { AdminUserCell } from '@/components/admin-user-cell'
 
 export default function AdminMembersPage() {
   const [members, setMembers] = React.useState<any[]>([])
@@ -127,7 +128,7 @@ export default function AdminMembersPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
@@ -139,8 +140,10 @@ export default function AdminMembersPage() {
               <tbody className="divide-y divide-gray-200">
                 {displayMembers.map((member: any) => (
                   <tr key={member.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 text-sm font-medium text-gray-900">{member.name || member.firstName + ' ' + member.lastName || 'Unknown'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{member.email}</td>
+                    <td className="px-6 py-3 text-sm">
+                        <AdminUserCell user={member} />
+                    </td>
+                    <td className="px-6 py-3 text-sm text-gray-600 hidden md:table-cell">{member.email}</td>
                     <td className="px-6 py-3 text-sm">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
                         {member.role || member.userType || 'member'}

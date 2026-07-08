@@ -8,6 +8,8 @@ import { auth } from '@/lib/firebase'
 import { logoutUser } from '@/lib/auth'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
+import { SiteLogo } from '@/components/site-logo'
+import { ProfileMenuButton } from '@/components/profile-quick-edit'
 
 /** Part 10A — ONLY these items for basic members. No admin/security/recordings. */
 const memberMenuItems = [
@@ -60,13 +62,7 @@ export function MemberSidebar({
       >
         {/* Logo and Close Button */}
         <div className="p-6 border-b border-border flex flex-col items-center justify-center" style={{ minHeight: '100px', position: 'relative' }}>
-          <Link href="/dashboard">
-            <img 
-              src="/pb-logo-black.png" 
-              alt="Passive Blessings"
-              style={{ maxWidth: '140px', height: 'auto' }}
-            />
-          </Link>
+          <SiteLogo background="light" href="/dashboard" heightClass="h-auto" maxWidth={140} />
           <button onClick={() => setOpen(false)} className="md:hidden absolute top-4 right-4">
             <X className="h-6 w-6" />
           </button>
@@ -155,6 +151,7 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
       <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
         <BusinessPortalSwitcher />
         <ThemeToggle />
+        <ProfileMenuButton />
         <button
           onClick={handleLogout}
           className="min-h-[44px] px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2"

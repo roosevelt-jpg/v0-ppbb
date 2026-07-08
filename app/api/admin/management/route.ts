@@ -15,15 +15,31 @@ export async function GET(request: NextRequest) {
 
     if (query === 'admins') {
       const snapshot = await db.collection('admin-users').orderBy('createdAt', 'desc').get()
-      const admins = snapshot.docs.map(doc => {
-        const data = doc.data()
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt,
-          lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
-        }
-      })
+      const admins = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const data = docSnap.data()
+          let profilePictureURL = ''
+          if (typeof data.profilePictureURL === 'string') {
+            profilePictureURL = data.profilePictureURL
+          } else {
+            const userSnap = await db.collection('users').doc(docSnap.id).get()
+            if (userSnap.exists) {
+              const u = userSnap.data() as Record<string, unknown>
+              profilePictureURL =
+                (typeof u.profilePictureURL === 'string' && u.profilePictureURL) ||
+                (typeof u.avatarUrl === 'string' && u.avatarUrl) ||
+                ''
+            }
+          }
+          return {
+            id: docSnap.id,
+            ...data,
+            profilePictureURL,
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
+          }
+        })
+      )
       return NextResponse.json({ success: true, data: admins })
     }
 

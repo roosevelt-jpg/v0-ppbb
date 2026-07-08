@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { auth, db } from '@/lib/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, onSnapshot } from 'firebase/firestore'
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
 import { User, BusinessProfile } from '@/lib/types'
 
@@ -21,28 +21,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      try {
-        if (currentUser) {
-          setFirebaseUser(currentUser)
-          // Fetch user profile from Firestore
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-          if (userDoc.exists()) {
-            setUser(userDoc.data() as User | BusinessProfile)
+    let unsubscribeProfile: (() => void) | undefined
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (unsubscribeProfile) {
+        unsubscribeProfile()
+        unsubscribeProfile = undefined
+      }
+
+      setFirebaseUser(currentUser)
+
+      if (currentUser) {
+        unsubscribeProfile = onSnapshot(
+          doc(db, 'users', currentUser.uid),
+          (snap) => {
+            if (snap.exists()) {
+              setUser({ id: snap.id, ...snap.data() } as User | BusinessProfile)
+            } else {
+              setUser(null)
+            }
+            setLoading(false)
+          },
+          (error) => {
+            console.error('[v0] Error subscribing to user profile:', error)
+            setUser(null)
+            setLoading(false)
           }
-        } else {
-          setFirebaseUser(null)
-          setUser(null)
-        }
-      } catch (error) {
-        console.error('[v0] Error fetching user:', error)
+        )
+      } else {
         setUser(null)
-      } finally {
         setLoading(false)
       }
     })
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribeAuth()
+      unsubscribeProfile?.()
+    }
   }, [])
 
   const logout = async () => {
@@ -61,7 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    // Return a default context instead of throwing to allow for non-auth pages
     return {
       user: null,
       firebaseUser: null,

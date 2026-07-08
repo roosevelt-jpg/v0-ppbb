@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
 import { AdminPageLayout } from '@/components/admin-page-layout'
+import { AdminUserCell } from '@/components/admin-user-cell'
 import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
@@ -41,8 +42,11 @@ export default function VolunteersPage() {
   const columns = [
     {
       key: 'name',
-      label: 'Name',
-      width: '200px',
+      label: 'Volunteer',
+      width: '240px',
+      render: (_: unknown, row: Record<string, unknown>) => (
+        <AdminUserCell user={row as Parameters<typeof AdminUserCell>[0]['user']} hideSubtitle />
+      ),
     },
     {
       key: 'email',

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/lib/firebase'
 import { DashboardHeader } from '@/components/dashboard-header'
+import { SiteLogo } from '@/components/site-logo'
 
 export default function SponsorLayout({
   children,
@@ -48,13 +49,7 @@ export default function SponsorLayout({
       <aside className="w-48 min-h-screen flex flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
         {/* Logo */}
         <div className="p-6 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
-          <Link href="/sponsor">
-            <img 
-              src="/pb-logo-black.png" 
-              alt="Passive Blessings"
-              style={{ maxWidth: '140px', height: 'auto' }}
-            />
-          </Link>
+          <SiteLogo background="light" href="/sponsor" heightClass="h-auto" maxWidth={140} />
         </div>
 
         {/* Navigation */}

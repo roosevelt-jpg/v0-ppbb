@@ -7,6 +7,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { verifyAdminAccessCode } from '@/lib/admin-access-code-generator'
 import Link from 'next/link'
+import { SiteLogo } from '@/components/site-logo'
 
 export default function AdminSetup() {
   const router = useRouter()
@@ -152,11 +153,9 @@ export default function AdminSetup() {
       <div style={{ width: '100%', maxWidth: '600px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <img 
-            src="/pb-logo-black.png" 
-            alt="Passive Blessings" 
-            style={{ height: '80px', marginBottom: '15px', display: 'block', margin: '0 auto 15px' }}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+            <SiteLogo background="light" href="/" heightClass="h-20" linked />
+          </div>
           <p style={{ fontSize: '16px', color: '#666' }}>Admin Dashboard Setup</p>
         </div>
 

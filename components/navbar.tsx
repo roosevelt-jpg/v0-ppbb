@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { LanguageSwitcherWithFlags } from './language-switcher-flags'
+import { SiteLogo } from './site-logo'
+import { ProfileMenuButton } from './profile-quick-edit'
 import { useAuth } from '@/lib/auth-context'
 import { logoutUser } from '@/lib/auth'
 import { hasAdminAccess, hasBusinessAccess } from '@/lib/roles'
@@ -89,13 +91,7 @@ export function Navbar() {
       <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
           <div className="flex-shrink-0 h-8">
-            <Link href="/">
-              <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png"
-                alt="Passive Blessings"
-                className="h-8 w-auto"
-              />
-            </Link>
+            <SiteLogo background="dark" heightClass="h-8" href="/" />
           </div>
 
           <div className="flex-1 flex items-center justify-center gap-6 lg:gap-8">
@@ -113,6 +109,7 @@ export function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <LanguageSwitcherWithFlags />
             <ThemeToggle />
+            <ProfileMenuButton />
             {authActions}
           </div>
         </div>
@@ -120,16 +117,11 @@ export function Navbar() {
 
       {/* Mobile Navigation */}
       <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between">
-        <Link href="/">
-          <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png"
-            alt="Passive Blessings"
-            className="h-6 sm:h-8 w-auto"
-          />
-        </Link>
+        <SiteLogo background="dark" heightClass="h-6 sm:h-8" href="/" />
         <div className="flex items-center gap-2">
           <LanguageSwitcherWithFlags />
           <ThemeToggle />
+          <ProfileMenuButton />
           <button
             className="p-2 -mr-2 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

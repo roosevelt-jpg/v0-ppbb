@@ -123,6 +123,7 @@ export interface User {
   emiratesIdNumber?: string
   avatar?: UploadedImage
   avatarUrl?: string
+  profilePictureURL?: string
   role: UserRole
   // Additional roles a user holds beyond their primary role (e.g. a member who
   // also runs a business). Used to grant access to the business portal.

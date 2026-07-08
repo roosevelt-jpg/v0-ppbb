@@ -6,6 +6,7 @@ import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, updateDoc, doc, writeBatch, onSnapshot } from 'firebase/firestore'
 import { Crown, Gift, Zap, TrendingUp, Users, AlertCircle, CheckCircle, Download, Filter } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { AdminUserCell } from '@/components/admin-user-cell'
 
 export default function MembershipPage() {
   const [members, setMembers] = React.useState<any[]>([])
@@ -323,7 +324,7 @@ export default function MembershipPage() {
                       className="cursor-pointer"
                     />
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Member</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Email</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Tier</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Status</th>
@@ -351,7 +352,9 @@ export default function MembershipPage() {
                           className="cursor-pointer"
                         />
                       </td>
-                      <td className="px-6 py-4 text-sm text-neutral-900 font-medium">{member.firstName} {member.lastName}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <AdminUserCell user={member} />
+                      </td>
                       <td className="px-6 py-4 text-sm text-neutral-600">{member.email}</td>
                       <td className="px-6 py-4">
                         <span className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${
