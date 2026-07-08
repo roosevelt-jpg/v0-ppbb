@@ -63,8 +63,13 @@ export async function uploadImageToFirebase(
 /**
  * Uploads any file (image, video, etc.) to Firebase Storage via the server
  * upload route. Only the returned URL should be stored in Firestore.
+ * Pass `exactPath` for a deterministic Storage object (e.g. partners/{id}/logo.png).
  */
-export async function uploadFileToFirebase(file: File, folder: string): Promise<string> {
+export async function uploadFileToFirebase(
+  file: File,
+  folder: string,
+  exactPath?: string
+): Promise<string> {
   if (!file) {
     throw new Error('No file selected')
   }
@@ -72,6 +77,7 @@ export async function uploadFileToFirebase(file: File, folder: string): Promise<
   const fd = new FormData()
   fd.append('file', file)
   fd.append('folder', folder)
+  if (exactPath) fd.append('path', exactPath)
   const res = await fetch('/api/upload', { method: 'POST', body: fd })
   const json = await res.json()
   if (!res.ok || !json.success) {

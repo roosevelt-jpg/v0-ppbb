@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { uploadBufferToStorage, parseUploadRequest } from '@/lib/storage-server'
+import {
+  uploadBufferToStorage,
+  uploadBufferToPath,
+  parseUploadRequest,
+} from '@/lib/storage-server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -11,8 +15,10 @@ export const maxDuration = 60
  */
 export async function POST(req: NextRequest) {
   try {
-    const { buffer, mimeType, folder, originalName } = await parseUploadRequest(req)
-    const result = await uploadBufferToStorage(buffer, mimeType, folder, originalName)
+    const { buffer, mimeType, folder, originalName, path } = await parseUploadRequest(req)
+    const result = path
+      ? await uploadBufferToPath(buffer, mimeType, path, {}, { makePublic: true })
+      : await uploadBufferToStorage(buffer, mimeType, folder, originalName)
     return NextResponse.json({ success: true, url: result.url, ...result })
   } catch (error) {
     console.error('[v0] Upload error:', error)

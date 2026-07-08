@@ -13,6 +13,7 @@ const ALLOWED_SECTIONS = new Set([
   'partners',
   'donations',
   'shop',
+  'volunteer',
 ])
 
 export async function GET(

@@ -121,10 +121,17 @@ export async function deleteFromStorage(path: string): Promise<void> {
 /**
  * Parses a request (multipart form-data with `file`, or JSON with `dataUrl`)
  * into a buffer + metadata ready for {@link uploadBufferToStorage}.
+ * Optional `path` forces an exact Storage object path (e.g. partners/{id}/logo.png).
  */
 export async function parseUploadRequest(
   req: Request
-): Promise<{ buffer: Buffer; mimeType: string; folder: string; originalName: string }> {
+): Promise<{
+  buffer: Buffer
+  mimeType: string
+  folder: string
+  originalName: string
+  path?: string
+}> {
   const contentType = req.headers.get('content-type') || ''
 
   if (contentType.includes('multipart/form-data')) {
@@ -133,11 +140,13 @@ export async function parseUploadRequest(
     if (!file) throw new Error('No file provided')
     // `type` is an alias some callers use to bucket uploads into a folder.
     const folder = (form.get('folder') as string) || (form.get('type') as string) || 'uploads'
+    const pathRaw = (form.get('path') as string) || ''
     return {
       buffer: Buffer.from(await file.arrayBuffer()),
       mimeType: file.type || 'application/octet-stream',
       folder,
       originalName: file.name || '',
+      path: pathRaw.trim() || undefined,
     }
   }
 
@@ -149,5 +158,6 @@ export async function parseUploadRequest(
     mimeType: match[1],
     folder: body.folder || 'uploads',
     originalName: body.filename || '',
+    path: typeof body.path === 'string' && body.path.trim() ? body.path.trim() : undefined,
   }
 }

@@ -48,7 +48,6 @@ const adminMenuItems = [
 
   // User Management
   { label: 'Members', href: '/admin/members', icon: Users, group: 'Users' },
-  { label: 'Team (About)', href: '/admin/team', icon: Users, group: 'Users' },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
   { label: 'Sponsors', href: '/admin/sponsors', icon: Store, group: 'Users' },
   { label: 'Businesses', href: '/admin/businesses', icon: Store, group: 'Users' },
@@ -80,16 +79,19 @@ const adminMenuItems = [
 
   // Content Management
   { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText, group: 'Content' },
-  { label: 'Navigation', href: '/admin/cms/navigation', icon: FileText, group: 'CMS' },
+  // Part 11 — CMS section order (do not scramble; Partners & Logos is logos collection)
   { label: 'Homepage', href: '/admin/cms/homepage', icon: FileText, group: 'CMS' },
-  { label: 'About', href: '/admin/cms/about', icon: FileText, group: 'CMS' },
-  { label: 'Events Page', href: '/admin/cms/events', icon: FileText, group: 'CMS' },
-  { label: 'Marketplace Page', href: '/admin/cms/marketplace', icon: FileText, group: 'CMS' },
+  { label: 'About Page', href: '/admin/cms/about', icon: FileText, group: 'CMS' },
+  { label: 'Events Config', href: '/admin/cms/events', icon: FileText, group: 'CMS' },
+  { label: 'Marketplace Config', href: '/admin/cms/marketplace', icon: FileText, group: 'CMS' },
   { label: 'Partners Page', href: '/admin/cms/partners', icon: FileText, group: 'CMS' },
-  { label: 'Donations Page', href: '/admin/cms/donations', icon: FileText, group: 'CMS' },
-  { label: 'Shop Page', href: '/admin/cms/shop', icon: FileText, group: 'CMS' },
-  { label: 'Testimonials', href: '/admin/cms/testimonials', icon: Image, group: 'CMS' },
+  { label: 'Donations Config', href: '/admin/cms/donations', icon: FileText, group: 'CMS' },
+  { label: 'Shop Config', href: '/admin/cms/shop', icon: FileText, group: 'CMS' },
+  { label: 'Volunteer Config', href: '/admin/cms/volunteer', icon: FileText, group: 'CMS' },
+  { label: 'Navigation', href: '/admin/cms/navigation', icon: FileText, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
+  { label: 'Team Members', href: '/admin/team', icon: Users, group: 'CMS' },
+  { label: 'Testimonials', href: '/admin/cms/testimonials', icon: Image, group: 'CMS' },
   { label: 'Partners & Logos', href: '/admin/partners', icon: Image, group: 'CMS' },
   { label: 'Custom Forms', href: '/admin/forms', icon: FileText, group: 'Content' },
   { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },
