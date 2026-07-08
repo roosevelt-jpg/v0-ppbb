@@ -60,6 +60,8 @@ export interface Group {
 
   members: Member[]
   moderators: string[]
+  requiresApproval?: boolean
+  iconURL?: string
 }
 
 export interface Message {
@@ -104,6 +106,7 @@ export interface GroupMember {
   joinedAt: Timestamp | Date
   role: 'admin' | 'moderator' | 'member'
   isActive: boolean
+  joinStatus?: 'pending' | 'active' | 'rejected'
 }
 
 export interface CommunityMember {

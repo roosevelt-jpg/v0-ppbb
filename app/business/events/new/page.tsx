@@ -35,7 +35,7 @@ export default function NewEventPage() {
     }
   }, [user])
 
-  const handleSave = async () => {
+  const handleSave = async (status: 'draft' | 'pending_approval') => {
     setSaving(true)
     setError(null)
 
@@ -50,14 +50,15 @@ export default function NewEventPage() {
         body: JSON.stringify({
           ...formData,
           price: formData.pricingType === 'free' ? null : parseFloat(formData.price),
-          status: 'draft',
+          status,
+          createdBy: user?.id,
           createdByRole: 'business',
         }),
       })
 
       const json = await res.json()
       if (json.success) {
-        router.push('/business/events')
+        router.push(status === 'pending_approval' ? '/business/events?tab=pending_approval' : '/business/events')
       } else {
         setError(json.error || 'Failed to create event')
       }
@@ -292,14 +293,14 @@ export default function NewEventPage() {
           </div>
 
           {/* Actions */}
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '24px', borderTop: '1px solid #e4e1da' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '24px', borderTop: '1px solid #e4e1da', flexWrap: 'wrap' }}>
             <button
               onClick={() => router.back()}
               style={{
                 padding: '12px 24px',
-                backgroundColor: '#f5f5f5',
+                backgroundColor: '#ffffff',
                 color: '#111111',
-                border: 'none',
+                border: '1px solid #e4e1da',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 500,
@@ -308,7 +309,23 @@ export default function NewEventPage() {
               Cancel
             </button>
             <button
-              onClick={handleSave}
+              onClick={() => handleSave('draft')}
+              disabled={saving}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#ffffff',
+                color: '#111111',
+                border: '1px solid #e4e1da',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 500,
+                opacity: saving ? 0.6 : 1,
+              }}
+            >
+              {saving ? 'Saving...' : 'Save as Draft'}
+            </button>
+            <button
+              onClick={() => handleSave('pending_approval')}
               disabled={saving}
               style={{
                 padding: '12px 24px',
@@ -321,7 +338,7 @@ export default function NewEventPage() {
                 opacity: saving ? 0.6 : 1,
               }}
             >
-              {saving ? 'Creating...' : 'Create Event'}
+              {saving ? 'Submitting...' : 'Submit for Approval'}
             </button>
           </div>
         </div>

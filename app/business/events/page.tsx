@@ -16,7 +16,7 @@ export default function BusinessEventsPage() {
   const router = useRouter()
   const [events, setEvents] = React.useState<Event[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [activeTab, setActiveTab] = React.useState<'draft' | 'submitted' | 'published' | 'rejected'>('draft')
+  const [activeTab, setActiveTab] = React.useState<'draft' | 'pending_approval' | 'published' | 'rejected'>('draft')
 
   React.useEffect(() => {
     if (!user || !hasBusinessAccess(user)) {
@@ -59,7 +59,7 @@ export default function BusinessEventsPage() {
       <div style={{ width: '280px', backgroundColor: '#ffffff', borderRight: '1px solid #e4e1da', padding: '24px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#111111' }}>Events</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {(['draft', 'submitted', 'published', 'rejected'] as const).map(tab => (
+          {(['draft', 'pending_approval', 'published', 'rejected'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -74,7 +74,13 @@ export default function BusinessEventsPage() {
                 fontWeight: activeTab === tab ? 600 : 500,
               }}
             >
-              {tab === 'draft' ? 'Drafts' : tab === 'submitted' ? 'Submitted' : tab === 'published' ? 'Published' : 'Rejected'}
+              {tab === 'draft'
+                ? 'Drafts'
+                : tab === 'pending_approval'
+                ? 'Pending Approval'
+                : tab === 'published'
+                ? 'Published'
+                : 'Rejected'}
             </button>
           ))}
         </div>

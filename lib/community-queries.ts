@@ -11,6 +11,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   arrayUnion,
   Timestamp,
@@ -397,6 +398,51 @@ export async function leaveCommunity(communityId: string, userId: string) {
   }
 }
 
+export function subscribeToUserGroupMemberships(
+  communityId: string,
+  userId: string,
+  onData: (memberships: Record<string, 'active' | 'pending' | 'rejected'>) => void
+) {
+  if (!userId) {
+    onData({})
+    return () => {}
+  }
+
+  const unsubscribers: Array<() => void> = []
+  const statuses: Record<string, 'active' | 'pending' | 'rejected'> = {}
+
+  const groupsUnsub = onSnapshot(collection(db, 'communities', communityId, 'groups'), (groupSnap) => {
+    unsubscribers.forEach((u) => u())
+    unsubscribers.length = 0
+    Object.keys(statuses).forEach((k) => delete statuses[k])
+
+    groupSnap.docs.forEach((groupDoc) => {
+      const groupId = groupDoc.id
+      const memberQuery = query(
+        collection(db, 'communities', communityId, 'groups', groupId, 'members'),
+        where('userId', '==', userId)
+      )
+      const unsub = onSnapshot(memberQuery, (memberSnap) => {
+        if (memberSnap.empty) {
+          delete statuses[groupId]
+        } else {
+          const data = memberSnap.docs[0].data()
+          statuses[groupId] = (data.joinStatus as 'active' | 'pending' | 'rejected') || 'active'
+        }
+        onData({ ...statuses })
+      })
+      unsubscribers.push(unsub)
+    })
+
+    if (groupSnap.empty) onData({})
+  })
+
+  return () => {
+    groupsUnsub()
+    unsubscribers.forEach((u) => u())
+  }
+}
+
 export async function joinGroup(
   communityId: string,
   groupId: string,
@@ -405,8 +451,28 @@ export async function joinGroup(
   userEmail: string,
   userGender?: string,
   userPhoto?: string
-) {
+): Promise<'active' | 'pending'> {
   try {
+    const groupRef = doc(db, 'communities', communityId, 'groups', groupId)
+    const groupSnap = await getDoc(groupRef)
+    if (!groupSnap.exists()) {
+      throw new Error('Group not found')
+    }
+
+    const groupData = groupSnap.data()
+    const requiresApproval = groupData.requiresApproval === true
+    const joinStatus = requiresApproval ? 'pending' : 'active'
+
+    const existing = await getDocs(
+      query(
+        collection(db, 'communities', communityId, 'groups', groupId, 'members'),
+        where('userId', '==', userId)
+      )
+    )
+    if (!existing.empty) {
+      return (existing.docs[0].data().joinStatus as 'active' | 'pending') || 'active'
+    }
+
     await addDoc(collection(db, 'communities', communityId, 'groups', groupId, 'members'), {
       userId,
       userName,
@@ -415,20 +481,18 @@ export async function joinGroup(
       userPhoto,
       joinedAt: Timestamp.now(),
       role: 'member',
-      isActive: true,
+      isActive: joinStatus === 'active',
+      joinStatus,
     })
 
-    // Update group member count
-    const groupRef = doc(db, 'communities', communityId, 'groups', groupId)
-    const groupSnapshot = await getDocs(
-      query(collection(db, 'communities', communityId, 'groups'))
-    )
-    const group = groupSnapshot.docs.find(d => d.id === groupId)?.data()
-    if (group) {
+    if (joinStatus === 'active') {
       await updateDoc(groupRef, {
-        memberCount: (group.memberCount || 0) + 1,
+        memberCount: (groupData.memberCount || 0) + 1,
+        updatedAt: Timestamp.now(),
       })
     }
+
+    return joinStatus
   } catch (error) {
     console.error('[v0] Error joining group:', error)
     throw error

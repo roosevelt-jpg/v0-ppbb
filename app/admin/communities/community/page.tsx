@@ -9,7 +9,7 @@ import { subscribeToAllCommunities, deleteCommunity } from '@/lib/community-quer
 import type { Community } from '@/lib/community-types'
 import { format } from 'date-fns'
 
-type Tab = 'communities' | 'groups' | 'stats'
+type Tab = 'communities' | 'groups' | 'messages' | 'stats'
 
 export default function AdminCommunityPage() {
   const [activeTab, setActiveTab] = React.useState<Tab>('communities')
@@ -63,7 +63,7 @@ export default function AdminCommunityPage() {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-black">Community Management</h2>
           <Link
-            href="/admin/community/create"
+            href="/admin/communities/create"
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium"
           >
             <Plus size={20} />
@@ -73,18 +73,20 @@ export default function AdminCommunityPage() {
 
         {/* Tabs */}
         <div className="flex gap-4 border-b border-gray-200 overflow-x-auto">
-          {(['communities', 'groups', 'stats'] as const).map((tab) => (
+          {(['communities', 'groups', 'messages', 'stats'] as const).map((tab) => (
             <button
               key={tab}
+              type="button"
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium text-sm whitespace-nowrap transition-colors ${
+              className={`px-4 py-3 font-medium text-sm whitespace-nowrap transition-colors rounded-lg ${
                 activeTab === tab
-                  ? 'bg-black text-white border-b-2 border-black'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-black !text-white'
+                  : 'bg-black !text-white opacity-70 hover:opacity-100'
               }`}
             >
               {tab === 'communities' && `Communities (${communities.length})`}
               {tab === 'groups' && `Groups (${stats.totalGroups})`}
+              {tab === 'messages' && 'Chat / Messages'}
               {tab === 'stats' && 'Statistics'}
             </button>
           ))}
@@ -97,7 +99,7 @@ export default function AdminCommunityPage() {
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <p className="text-gray-500 mb-4">No communities created yet.</p>
                 <Link
-                  href="/admin/community/create"
+                  href="/admin/communities/create"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
                 >
                   <Plus size={18} />
@@ -122,7 +124,7 @@ export default function AdminCommunityPage() {
                     {/* Content */}
                     <div className="p-4 space-y-3">
                       <Link
-                        href={`/admin/community/${community.id}`}
+                        href={`/admin/communities/${community.id}`}
                         className="block group"
                       >
                         <h3 className="font-bold text-black group-hover:text-blue-600 text-lg">
@@ -177,7 +179,7 @@ export default function AdminCommunityPage() {
                       {/* Actions */}
                       <div className="flex gap-2 pt-2 border-t border-gray-100">
                         <Link
-                          href={`/admin/community/${community.id}`}
+                          href={`/admin/communities/${community.id}`}
                           className="flex-1 px-3 py-1 bg-gray-100 text-gray-900 rounded hover:bg-gray-200 text-xs font-medium text-center"
                         >
                           <Edit2 className="inline mr-1" size={12} />
@@ -203,31 +205,41 @@ export default function AdminCommunityPage() {
         {activeTab === 'groups' && (
           <div className="space-y-4">
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <p className="text-gray-500 mb-4">Manage groups from individual community pages.</p>
+              <p className="text-gray-600 mb-4">Manage groups from individual community pages or the groups admin.</p>
               <Link
-                href="/admin/community"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+                href="/admin/communities/community/groups"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 min-h-[44px]"
               >
-                Go to Communities
+                Open Groups Admin
               </Link>
             </div>
           </div>
         )}
 
-        {/* Stats Tab */}
+        {activeTab === 'messages' && (
+          <div className="space-y-4">
+            <Link
+              href="/admin/communities/messages"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 min-h-[44px]"
+            >
+              Open Chat / Messages
+            </Link>
+          </div>
+        )}
+
         {activeTab === 'stats' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <p className="text-sm text-gray-600 mb-2">Total Communities</p>
-              <p className="text-4xl font-bold text-black">{stats.totalCommunities}</p>
+            <div className="bg-black rounded-lg border border-gray-800 p-6">
+              <p className="text-sm text-white mb-2 opacity-80">Total Communities</p>
+              <p className="text-4xl font-bold text-white">{stats.totalCommunities}</p>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <p className="text-sm text-gray-600 mb-2">Total Members</p>
-              <p className="text-4xl font-bold text-black">{stats.totalMembers}</p>
+            <div className="bg-black rounded-lg border border-gray-800 p-6">
+              <p className="text-sm text-white mb-2 opacity-80">Total Members</p>
+              <p className="text-4xl font-bold text-white">{stats.totalMembers}</p>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <p className="text-sm text-gray-600 mb-2">Total Groups</p>
-              <p className="text-4xl font-bold text-black">{stats.totalGroups}</p>
+            <div className="bg-black rounded-lg border border-gray-800 p-6">
+              <p className="text-sm text-white mb-2 opacity-80">Total Groups</p>
+              <p className="text-4xl font-bold text-white">{stats.totalGroups}</p>
             </div>
           </div>
         )}

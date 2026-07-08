@@ -243,7 +243,7 @@ export default function BusinessDashboard() {
                 Events
               </h3>
               <Button
-                onClick={() => router.push('/business/events/create')}
+                onClick={() => router.push('/business/events/new')}
                 style={{
                   backgroundColor: '#111111',
                   color: '#ffffff',

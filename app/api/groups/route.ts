@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,26 +36,27 @@ export async function POST(request: NextRequest) {
   try {
     const db = getAdminDb()
     const body = await request.json()
-    const { communityId, name, description, genderRestriction, iconURL, createdBy } = body
+    const { communityId, name, description, genderRestriction, iconURL, createdBy, requiresApproval, type } =
+      body
 
     if (!communityId || !name) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
     }
 
-    const docRef = await db
-      .collection('communities')
-      .doc(communityId)
-      .collection('groups')
-      .add({
-        name,
-        description: description || '',
-        genderRestriction: genderRestriction || 'mixed',
-        iconURL: iconURL || '',
-        memberCount: 0,
-        createdBy,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      })
+    const payload = sanitizeForFirestore({
+      name,
+      description: description || '',
+      genderRestriction: genderRestriction || 'mixed',
+      iconURL: iconURL || '',
+      type: type || 'discussion',
+      requiresApproval: requiresApproval === true,
+      memberCount: 0,
+      createdBy,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    })
+
+    const docRef = await db.collection('communities').doc(communityId).collection('groups').add(payload)
 
     return NextResponse.json({ success: true, id: docRef.id })
   } catch (error) {

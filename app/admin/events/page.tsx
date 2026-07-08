@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { format } from 'date-fns'
-import { Plus, Trash2, Edit2, CheckCircle, AlertCircle, XCircle } from 'lucide-react'
+import { Plus, Trash2, Edit2, CheckCircle, AlertCircle, XCircle, Eye } from 'lucide-react'
 import type { Event, EventStatus } from '@/lib/event-types'
 import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
 import { toEventDate } from '@/lib/event-utils'
@@ -91,6 +91,49 @@ function EventsPageContent() {
       console.error('[v0] Error deleting event:', error)
       alert('Failed to delete event')
     }
+  }
+
+  const updateEventStatus = async (
+    id: string,
+    status: EventStatus,
+    approvalNotes?: string
+  ) => {
+    try {
+      const res = await fetch('/api/events', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          status,
+          approvalNotes: approvalNotes || null,
+          approvedBy: 'admin',
+        }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        alert(json.error || 'Failed to update event')
+      }
+    } catch (error) {
+      console.error('[v0] Error updating event:', error)
+      alert('Failed to update event')
+    }
+  }
+
+  const handleApprove = async (id: string) => {
+    if (!confirm('Approve and publish this event?')) return
+    await updateEventStatus(id, 'published')
+  }
+
+  const handleReject = async (id: string) => {
+    const notes = prompt('Rejection reason (optional):')
+    if (notes === null) return
+    await updateEventStatus(id, 'rejected', notes)
+  }
+
+  const handleRequestChanges = async (id: string) => {
+    const notes = prompt('Describe the changes required:')
+    if (!notes?.trim()) return
+    await updateEventStatus(id, 'changes_requested', notes)
   }
 
   const getStatusBadgeColor = (status: EventStatus) => {
@@ -242,30 +285,67 @@ function EventsPageContent() {
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {event.pricingType === 'free' ? 'Free' : `AED ${event.totalRevenue || 0}`}
                     </td>
-                    <td className="px-6 py-3 text-sm space-x-2 flex">
-                      <Link
-                        href={`/admin/events/${event.id}`}
-                        className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded text-gray-700 font-medium"
-                        title="View/Edit"
-                      >
-                        View
-                      </Link>
-                      {event.status === 'published' && (
+                    <td className="px-6 py-3 text-sm">
+                      <div className="flex flex-wrap gap-2">
                         <Link
-                          href={`/admin/events/${event.id}/revenue`}
-                          className="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 rounded text-blue-700 font-medium"
-                          title="View Revenue"
+                          href={`/admin/events/${event.id}/preview`}
+                          className="p-2 bg-black !text-white rounded hover:bg-gray-900 min-h-[36px] min-w-[36px] inline-flex items-center justify-center"
+                          title="Preview"
                         >
-                          Revenue
+                          <Eye size={16} />
                         </Link>
-                      )}
-                      <button
-                        onClick={() => handleDelete(event.id)}
-                        className="px-2 py-1 text-xs bg-red-100 hover:bg-red-200 rounded text-red-700 font-medium"
-                        title="Delete"
-                      >
-                        Delete
-                      </button>
+                        <Link
+                          href={`/admin/events/${event.id}`}
+                          className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px] inline-flex items-center"
+                          title="Edit"
+                        >
+                          <Edit2 size={14} className="mr-1" />
+                          Edit
+                        </Link>
+                        {event.status === 'pending_approval' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleApprove(event.id!)}
+                              className="px-2 py-1 text-xs bg-black !text-white rounded font-medium hover:bg-gray-900 min-h-[36px]"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRequestChanges(event.id!)}
+                              className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px]"
+                            >
+                              Changes
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleReject(event.id!)}
+                              className="px-2 py-1 text-xs bg-red-600 !text-white rounded font-medium hover:bg-red-700 min-h-[36px]"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        {event.status === 'published' && (
+                          <Link
+                            href={`/admin/events/${event.id}/revenue`}
+                            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px] inline-flex items-center"
+                            title="View Revenue"
+                          >
+                            Revenue
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(event.id!)}
+                          className="px-2 py-1 text-xs bg-red-600 !text-white rounded font-medium hover:bg-red-700 min-h-[36px]"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} className="inline mr-1" />
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

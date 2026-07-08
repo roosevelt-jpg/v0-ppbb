@@ -19,6 +19,7 @@ export default function CreateGroupPage() {
     name: '',
     description: '',
     genderRestriction: 'mixed',
+    requiresApproval: false,
   })
   const [icon, setIcon] = React.useState<File | null>(null)
   const [iconPreview, setIconPreview] = React.useState<string>('')
@@ -62,6 +63,7 @@ export default function CreateGroupPage() {
           description: formData.description,
           genderRestriction: formData.genderRestriction,
           iconURL,
+          requiresApproval: formData.requiresApproval,
           createdBy: user?.id,
         }),
       })
@@ -157,6 +159,17 @@ export default function CreateGroupPage() {
             </div>
           </div>
 
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.requiresApproval}
+              onChange={(e) => setFormData({ ...formData, requiresApproval: e.target.checked })}
+              disabled={loading}
+              className="w-4 h-4"
+            />
+            <span className="text-sm text-gray-700">Require admin approval before members can join</span>
+          </label>
+
           {/* Group Icon */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -185,7 +198,7 @@ export default function CreateGroupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 font-medium disabled:opacity-50 min-h-[44px]"
             >
               {loading ? 'Creating...' : 'Create Group'}
             </button>

@@ -48,3 +48,29 @@ export function hasAdminAccess(
   const roles = getUserRoles(user)
   return roles.includes('admin') || roles.includes('super_admin')
 }
+
+/** Basic members/volunteers without business or admin roles. */
+export function isBasicMember(
+  user: Pick<User, 'role' | 'roles'> | null | undefined
+): boolean {
+  if (!user) return false
+  return !hasAdminAccess(user) && !hasBusinessAccess(user)
+}
+
+/** Who may create events via UI/API. */
+export function canCreateEvents(
+  user: Pick<User, 'role' | 'roles'> | null | undefined
+): boolean {
+  return hasAdminAccess(user) || hasBusinessAccess(user)
+}
+
+/** Admin can approve members for any group; business only for groups they created. */
+export function canApproveGroupMembers(
+  user: Pick<User, 'role' | 'roles' | 'id'> | null | undefined,
+  groupCreatedBy?: string | null
+): boolean {
+  if (!user) return false
+  if (hasAdminAccess(user)) return true
+  if (hasBusinessAccess(user) && groupCreatedBy && user.id === groupCreatedBy) return true
+  return false
+}

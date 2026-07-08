@@ -84,6 +84,13 @@ export function subscribeToPublishedEvents(
     },
     (error) => {
       console.error('[v0] Error subscribing to published events:', error)
+      const message = error instanceof Error ? error.message : String(error)
+      if (message.includes('index') || (error as { code?: string })?.code === 'failed-precondition') {
+        console.error(
+          '[v0] Firestore index may be required for published events query. Open Firebase Console → Firestore → Indexes and create a single-field index on events.status if prompted:',
+          message
+        )
+      }
       callback([])
     }
   )

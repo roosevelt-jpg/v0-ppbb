@@ -37,7 +37,7 @@ export default function CommunityGroupsPage() {
     if (!confirm('Delete this group? This action cannot be undone.')) return
 
     try {
-      const res = await fetch(`/api/groups/${groupId}`, { method: 'DELETE' })
+      const res = await fetch(`/api/groups/${groupId}?communityId=${communityId}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.success) {
         setGroups(groups.filter(g => g.id !== groupId))
@@ -64,7 +64,7 @@ export default function CommunityGroupsPage() {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-black">Groups</h2>
           <Link
-            href={`/admin/community/${communityId}/groups/create`}
+            href={`/admin/communities/${communityId}/groups/create`}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium"
           >
             <Plus size={20} />
@@ -76,7 +76,7 @@ export default function CommunityGroupsPage() {
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500 mb-4">No groups created yet.</p>
             <Link
-              href={`/admin/community/${communityId}/groups/create`}
+              href={`/admin/communities/${communityId}/groups/create`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
             >
               <Plus size={18} />
@@ -108,7 +108,7 @@ export default function CommunityGroupsPage() {
 
                 <div className="flex gap-2">
                   <Link
-                    href={`/admin/community/${communityId}/groups/${group.id}/edit`}
+                    href={`/admin/communities/${communityId}/groups/${group.id}/edit`}
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
                     title="Edit group"
                   >

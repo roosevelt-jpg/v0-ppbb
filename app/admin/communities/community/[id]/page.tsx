@@ -120,7 +120,7 @@ export default function CommunityDetailPage() {
               <p className="text-gray-600 mt-2">{community.description}</p>
             </div>
             <button
-              onClick={() => router.push(`/admin/community/create?id=${communityId}`)}
+              onClick={() => router.push(`/admin/communities/create?id=${communityId}`)}
               className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium flex items-center gap-2"
             >
               <Edit2 size={18} />

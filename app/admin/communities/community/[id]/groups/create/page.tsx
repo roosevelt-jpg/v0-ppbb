@@ -68,7 +68,7 @@ export default function CreateGroupPage() {
 
       const data = await res.json()
       if (data.success) {
-        router.push(`/admin/community/${communityId}/groups`)
+        router.push(`/admin/communities/${communityId}/groups`)
       } else {
         setError(data.error || 'Failed to create group')
       }
@@ -84,7 +84,7 @@ export default function CreateGroupPage() {
     <AdminPageLayout title="Create Group">
       <div className="max-w-2xl space-y-6">
         <Link
-          href={`/admin/community/${communityId}/groups`}
+          href={`/admin/communities/${communityId}/groups`}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <ChevronLeft size={20} />
@@ -190,7 +190,7 @@ export default function CreateGroupPage() {
               {loading ? 'Creating...' : 'Create Group'}
             </button>
             <Link
-              href={`/admin/community/${communityId}/groups`}
+              href={`/admin/communities/${communityId}/groups`}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-center"
             >
               Cancel

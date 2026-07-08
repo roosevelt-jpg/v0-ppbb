@@ -121,12 +121,64 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
     
-    // Events - Public read of published events, authenticated create/update/delete
+    // Events - Public read of published events; admin/business create via API + client rules
     match /events/{eventId} {
       allow read: if resource.data.status == 'published' || isAuth();
       allow create: if isAuth() && (isAdmin() || isBusiness(request.auth.uid));
-      allow update: if isAdmin() || (isAuth() && request.resource.data.organizerId == request.auth.uid);
-      allow delete: if isAdmin() || (isAuth() && resource.data.organizerId == request.auth.uid);
+      allow update: if isAdmin() || (isAuth() && resource.data.createdBy == request.auth.uid && isBusiness(request.auth.uid));
+      allow delete: if isAdmin() || (isAuth() && resource.data.createdBy == request.auth.uid);
+
+      match /registrations/{registrationId} {
+        allow read: if isAuth();
+        allow create: if isAuth();
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // Nested communities (groups, chat, members)
+    match /communities/{communityId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAdmin();
+
+      match /groups/{groupId} {
+        allow read: if isAuth();
+        allow create, update, delete: if isAdmin();
+
+        match /members/{memberId} {
+          allow read: if isAuth();
+          allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+          allow update: if isAdmin() || get(/databases/$(database)/documents/communities/$(communityId)/groups/$(groupId)).data.createdBy == request.auth.uid;
+          allow delete: if isAdmin() || resource.data.userId == request.auth.uid;
+        }
+
+        match /messages/{messageId} {
+          allow read: if isAuth();
+          allow create: if isAuth() && request.resource.data.senderId == request.auth.uid;
+          allow update, delete: if isAdmin() || resource.data.senderId == request.auth.uid;
+        }
+
+        match /presence/{userId} {
+          allow read: if isAuth();
+          allow write: if isAuth() && userId == request.auth.uid;
+        }
+      }
+
+      match /members/{memberId} {
+        allow read: if isAuth();
+        allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+        allow update, delete: if isAdmin() || resource.data.userId == request.auth.uid;
+      }
+    }
+
+    match /community-groups/{document=**} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    match /communityReports/{document=**} {
+      allow read: if isAdmin();
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
     }
     
     // Opportunities - Authenticated read, business write
