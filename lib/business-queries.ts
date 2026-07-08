@@ -28,6 +28,7 @@ import {
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 // BUSINESS OPPORTUNITIES QUERIES
 
@@ -47,6 +48,24 @@ export async function createOpportunity(
     updatedAt: now.toDate(),
   }
   await setDoc(doc(db, 'businessOpportunities', id), opportunity)
+
+  // Dual-write CMS canonical jobs collection (directory counts / profile)
+  await setDoc(
+    doc(db, 'jobs', id),
+    sanitizeForFirestore({
+      id,
+      businessId,
+      businessName,
+      title: data.title,
+      description: data.description || '',
+      category: data.category || data.type || '',
+      jobType: data.type || '',
+      status: data.status || 'open',
+      createdAt: now.toDate(),
+      updatedAt: now.toDate(),
+    })
+  )
+
   return opportunity
 }
 
@@ -107,6 +126,41 @@ export async function createOffer(
     updatedAt: now.toDate(),
   }
   await setDoc(doc(db, 'businessOffers', id), offer)
+
+  // Dual-write CMS canonical offers collection (directory counts / profile)
+  const imageURL =
+    (typeof data.imageUrl === 'string' && data.imageUrl) ||
+    (data.image && typeof data.image === 'object' && 'url' in data.image
+      ? String((data.image as { url?: string }).url || '')
+      : '')
+  const isMemberDiscount =
+    data.type === 'discount' ||
+    (typeof data.memberBenefit === 'number' && data.memberBenefit > 0) ||
+    (typeof data.discountPercentage === 'number' && data.discountPercentage > 0)
+
+  await setDoc(
+    doc(db, 'offers', id),
+    sanitizeForFirestore({
+      id,
+      businessId,
+      businessName,
+      title: data.title,
+      description: data.description || '',
+      category: data.category || data.type || '',
+      type: data.type || 'product',
+      status: data.status || 'active',
+      price: data.price,
+      originalPrice: data.originalPrice,
+      imageURL,
+      images: imageURL ? [imageURL] : [],
+      isMemberDiscount,
+      memberBenefit: data.memberBenefit,
+      discountPercentage: data.discountPercentage,
+      createdAt: now.toDate(),
+      updatedAt: now.toDate(),
+    })
+  )
+
   return offer
 }
 

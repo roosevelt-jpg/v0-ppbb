@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "deploy:firestore-rules": "firebase deploy --only firestore:rules",
+    "seed:businesses": "node --env-file=.env.local scripts/seed-businesses.mjs",
     "postinstall": "node scripts/patch-next-themes-react19.mjs"
   },
   "dependencies": {

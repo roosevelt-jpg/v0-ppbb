@@ -39,6 +39,12 @@ export default function BusinessDashboard() {
   const router = useRouter()
   const [stats, setStats] = React.useState<DashboardStats | null>(null)
   const [statsLoading, setStatsLoading] = React.useState(true)
+  const [listingStatus, setListingStatus] = React.useState<{
+    isApproved: boolean
+    isActive: boolean
+    status: string
+  } | null>(null)
+  const [listingReady, setListingReady] = React.useState(false)
 
   // Redirect if not authenticated or not a business user
   React.useEffect(() => {
@@ -64,6 +70,42 @@ export default function BusinessDashboard() {
     }
   }, [user])
 
+  React.useEffect(() => {
+    if (!user?.id) return
+
+    let cancelled = false
+    let unsub: (() => void) | undefined
+
+    void (async () => {
+      try {
+        const { doc, onSnapshot } = await import('firebase/firestore')
+        const { db } = await import('@/lib/firebase')
+        if (cancelled) return
+        unsub = onSnapshot(doc(db, 'businesses', user.id), (snap) => {
+          if (cancelled) return
+          if (!snap.exists()) {
+            setListingStatus(null)
+          } else {
+            const d = snap.data()
+            setListingStatus({
+              isApproved: d.isApproved === true,
+              isActive: d.isActive !== false,
+              status: d.status || 'pending_review',
+            })
+          }
+          setListingReady(true)
+        })
+      } catch {
+        if (!cancelled) setListingReady(true)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      unsub?.()
+    }
+  }, [user?.id])
+
   if (loading || !user) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
   }
@@ -71,6 +113,8 @@ export default function BusinessDashboard() {
   if (!hasBusinessAccess(user)) {
     return <div className="flex items-center justify-center h-screen">Access Denied</div>
   }
+
+  const canPostListings = listingStatus?.isApproved === true && listingStatus?.isActive === true
 
   const StatCard = ({
     label,
@@ -81,7 +125,7 @@ export default function BusinessDashboard() {
   }: {
     label: string
     value: string | number
-    icon: any
+    icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
     subtext?: string
     onClick?: () => void
   }) => (
@@ -124,6 +168,56 @@ export default function BusinessDashboard() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-8 space-y-8">
+        {listingReady && listingStatus && !listingStatus.isApproved && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 sm:p-5">
+            <p className="eyebrow text-amber-800 mb-1">LISTING STATUS</p>
+            <h2 className="font-headline text-xl font-bold text-neutral-900 mb-1">
+              Pending admin approval
+            </h2>
+            <p className="font-body text-sm text-neutral-700">
+              Your marketplace directory listing is under review. You can prepare offers and jobs
+              after approval — they appear on your public profile once your business is live.
+            </p>
+          </div>
+        )}
+
+        {listingReady && listingStatus && listingStatus.isApproved && !listingStatus.isActive && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-5">
+            <p className="eyebrow text-red-800 mb-1">LISTING STATUS</p>
+            <h2 className="font-headline text-xl font-bold text-neutral-900 mb-1">Suspended</h2>
+            <p className="font-body text-sm text-neutral-700">
+              Your listing is hidden from the public directory. Contact Passive Blessings support
+              for help.
+            </p>
+          </div>
+        )}
+
+        {listingReady && canPostListings && (
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              type="button"
+              onClick={() => router.push('/business/opportunities/new')}
+              className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            >
+              Post a job
+            </Button>
+            <Button
+              type="button"
+              onClick={() => router.push('/business/offers/new')}
+              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+            >
+              Post an offer
+            </Button>
+            <Button
+              type="button"
+              onClick={() => router.push(`/directory/${user.id}`)}
+              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+            >
+              View public profile
+            </Button>
+          </div>
+        )}
+
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Briefcase, Loader2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
@@ -12,24 +12,25 @@ export function BusinessPortalSwitcher() {
   const { firebaseUser, user } = useAuth()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
 
-  // Check if user has business access (business role or admin)
   const hasBusinessRole = hasBusinessAccess(user)
 
   const handleClick = async () => {
     if (hasBusinessRole) {
-      // Direct redirect if already has business access
       router.push('/business/dashboard')
     } else {
-      // Show onboarding modal
-      setIsModalOpen(true)
+      // Logged-in members: in-place upgrade + listing form
+      // Anonymous visitors get the join funnel
+      if (firebaseUser) {
+        setIsModalOpen(true)
+      } else {
+        router.push('/join?type=business')
+      }
     }
   }
 
   const handleOnboardingSubmit = async (formData: BusinessFormData) => {
     setIsLoading(true)
-    setError('')
 
     try {
       if (!firebaseUser || !user) {
@@ -38,12 +39,16 @@ export function BusinessPortalSwitcher() {
 
       const response = await fetch('/api/user/upgrade-to-business', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
           userId: firebaseUser.uid,
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+          businessDescription: formData.businessDescription,
+          communityBenefit: formData.communityBenefit,
+          services: formData.services,
+          tradeLicenceURL: formData.tradeLicenceURL,
+          productImages: formData.productImages,
         }),
       })
 
@@ -52,15 +57,11 @@ export function BusinessPortalSwitcher() {
         throw new Error(data.error || 'Failed to create business profile')
       }
 
-      console.log('[v0] Business upgrade successful')
-
-      // Close modal and redirect to business portal. Reload so the auth
-      // context picks up the newly-added business role from Firestore.
       setIsModalOpen(false)
-      window.location.href = '/business/dashboard'
-    } catch (err: any) {
+      window.location.href = '/business/dashboard?listing=pending'
+    } catch (err: unknown) {
       console.error('[v0] Business upgrade error:', err)
-      setError(err.message || 'Failed to upgrade to business')
+      throw err
     } finally {
       setIsLoading(false)
     }
@@ -71,28 +72,29 @@ export function BusinessPortalSwitcher() {
       <button
         onClick={handleClick}
         disabled={isLoading}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors text-sm font-medium disabled:opacity-50"
-        title={hasBusinessRole ? 'Go to Business Portal' : 'Create Business Profile'}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors text-sm font-medium disabled:opacity-50 min-h-[44px]"
+        title={
+          hasBusinessRole
+            ? 'Go to Business Portal'
+            : 'Upgrade to Business Account'
+        }
       >
         {isLoading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Creating...</span>
+            <span>Working…</span>
           </>
         ) : (
           <>
             <Briefcase className="w-4 h-4" />
-            <span>Business Portal</span>
+            <span>{hasBusinessRole ? 'Business Portal' : 'Upgrade to Business'}</span>
           </>
         )}
       </button>
 
       <BusinessOnboardingModal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setError('')
-        }}
+        onClose={() => setIsModalOpen(false)}
         onSubmit={handleOnboardingSubmit}
         isLoading={isLoading}
       />

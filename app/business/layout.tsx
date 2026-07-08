@@ -164,8 +164,8 @@ export default function BusinessLayout({
     if (!user) {
       router.push('/login')
     } else if (!canAccess) {
-      // Logged in but no business account yet - send to business signup
-      router.push('/signup')
+      // Logged in but no business account yet — business signup / upgrade
+      router.push('/join?type=business')
     }
   }, [user, loading, canAccess, router, isSignupRoute])
 

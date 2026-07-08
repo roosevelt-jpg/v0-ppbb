@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/lib/firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
@@ -22,6 +22,7 @@ const EMIRATES = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Fujairah', 'Ras Al 
 
 export default function SignupClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -29,7 +30,7 @@ export default function SignupClient() {
   const [showConfirm, setShowConfirm] = useState(false)
 
   const [formData, setFormData] = useState({
-    memberType: 'member',
+    memberType: searchParams.get('type') === 'business' ? 'business' : 'member',
     firstName: '',
     lastName: '',
     email: '',
@@ -52,6 +53,14 @@ export default function SignupClient() {
     businessLocation: '',
     businessDescription: '',
   })
+
+  useEffect(() => {
+    if (searchParams.get('type') === 'business') {
+      setFormData((prev) =>
+        prev.memberType === 'business' ? prev : { ...prev, memberType: 'business' }
+      )
+    }
+  }, [searchParams])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as any
@@ -256,9 +265,45 @@ export default function SignupClient() {
           description: formData.businessDescription,
           createdAt: now,
         }
+        userData.hasBusinessProfile = true
       }
       
       await setDoc(userDocRef, userData, { merge: false })
+
+      // Directory listing starts pending — admin must approve (Part 5C/5D)
+      if (formData.memberType === 'business') {
+        await setDoc(
+          doc(db, 'businesses', firebaseUser.uid),
+          {
+            name: formData.businessName || `${formData.firstName}'s Business`,
+            businessName: formData.businessName || `${formData.firstName}'s Business`,
+            category: formData.businessType || 'Services',
+            businessType: formData.businessType || 'Services',
+            description: formData.businessDescription || '',
+            communityBenefit: formData.businessDescription || '',
+            services: [],
+            productImages: [],
+            tradeLicenceURL: '',
+            logoURL: '',
+            bannerURL: '',
+            ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
+            ownerId: firebaseUser.uid,
+            userId: firebaseUser.uid,
+            email: formData.email.toLowerCase(),
+            phone: formData.phone || '',
+            location: formData.businessLocation || formData.emirate || '',
+            isApproved: false,
+            isActive: true,
+            isVerified: false,
+            featured: false,
+            status: 'pending_review',
+            createdAt: now,
+            updatedAt: now,
+            submittedAt: now,
+          },
+          { merge: true }
+        )
+      }
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)
 
