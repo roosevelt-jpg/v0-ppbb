@@ -63,7 +63,7 @@ export default function AdminEventPreviewPage() {
             Back to Events
           </button>
           <Link
-            href={`/admin/events/${eventId}`}
+            href={`/admin/events/create?id=${eventId}`}
             className="px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 min-h-[44px] inline-flex items-center"
           >
             Edit Event

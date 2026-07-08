@@ -75,3 +75,88 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     createdByRole: form.createdByRole || 'admin',
   }
 }
+
+/** Fields safe to PUT when editing — excludes createdAt / createdBy / createdByRole. */
+export function buildEventUpdatePayload(form: AdminEventFormInput) {
+  const { createdBy: _createdBy, createdByRole: _createdByRole, ...rest } = buildEventApiPayload(form)
+  return rest
+}
+
+function padTime(hours: number, minutes: number): string {
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+}
+
+function extractDateParts(value: unknown): { date: string; time: string } {
+  if (!value) {
+    return { date: new Date().toISOString().split('T')[0], time: '09:00' }
+  }
+  const d =
+    value instanceof Date
+      ? value
+      : typeof value === 'object' && value !== null && 'toDate' in value
+        ? (value as { toDate: () => Date }).toDate()
+        : new Date(value as string)
+  if (Number.isNaN(d.getTime())) {
+    return { date: new Date().toISOString().split('T')[0], time: '09:00' }
+  }
+  return {
+    date: d.toISOString().split('T')[0],
+    time: padTime(d.getHours(), d.getMinutes()),
+  }
+}
+
+export function mapEventDocToAdminForm(
+  data: Record<string, unknown>
+): AdminEventFormInput & { approvalNotes?: string | null; existingStatus?: EventStatus } {
+  const start = extractDateParts(data.startDate ?? data.date)
+  const end = extractDateParts(data.endDate ?? data.startDate ?? data.date)
+  const pricingType = (data.pricingType as string) || 'free'
+  const isPaid = pricingType !== 'free' && pricingType !== 'member_only'
+  const gender =
+    data.genderRestriction === 'ladies-only' ||
+    data.genderRestriction === 'men-only' ||
+    data.genderRestriction === 'mixed'
+      ? (data.genderRestriction as GenderRestriction)
+      : 'mixed'
+  const tags = Array.isArray(data.tags)
+    ? (data.tags.filter((t): t is EventTag => typeof t === 'string') as EventTag[])
+    : []
+
+  const gateway = data.paymentGateway
+  const paymentGateway =
+    gateway === 'stripe' || gateway === 'paypal' || gateway === 'ziina' ? gateway : 'stripe'
+
+  return {
+    title: typeof data.title === 'string' ? data.title : '',
+    description: typeof data.description === 'string' ? data.description : '',
+    date: start.date,
+    startTime: typeof data.startTime === 'string' && data.startTime ? data.startTime : start.time,
+    endTime: typeof data.endTime === 'string' && data.endTime ? data.endTime : end.time,
+    locationName:
+      (typeof data.locationName === 'string' && data.locationName) ||
+      (typeof data.location === 'string' && data.location) ||
+      '',
+    locationAddress:
+      (typeof data.locationAddress === 'string' && data.locationAddress) ||
+      (typeof data.locationName === 'string' && data.locationName) ||
+      '',
+    locationPlaceId: typeof data.locationPlaceId === 'string' ? data.locationPlaceId : '',
+    locationLat: typeof data.locationLat === 'number' ? data.locationLat : 0,
+    locationLng: typeof data.locationLng === 'number' ? data.locationLng : 0,
+    bannerURL:
+      (typeof data.bannerURL === 'string' && data.bannerURL) ||
+      (typeof data.bannerImageUrl === 'string' && data.bannerImageUrl) ||
+      '',
+    isPaid,
+    price: typeof data.price === 'number' ? data.price : 0,
+    currency: typeof data.currency === 'string' ? data.currency : 'AED',
+    paymentGateway,
+    maxAttendees: typeof data.maxAttendees === 'number' ? data.maxAttendees : undefined,
+    status: data.status === 'published' ? 'published' : 'draft',
+    genderRestriction: gender,
+    tags,
+    category: typeof data.category === 'string' ? data.category : undefined,
+    approvalNotes: typeof data.approvalNotes === 'string' ? data.approvalNotes : null,
+    existingStatus: (data.status as EventStatus) || 'draft',
+  }
+}

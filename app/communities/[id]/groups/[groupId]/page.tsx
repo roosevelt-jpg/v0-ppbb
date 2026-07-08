@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { useAuth } from '@/lib/auth-context'
+import { canApproveGroupMembers } from '@/lib/roles'
 import { ChevronLeft, Send, Upload, Download, FileText, Play, Smile, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
@@ -38,6 +39,18 @@ interface Group {
   genderRestriction: string
   memberCount: number
   iconURL?: string
+  createdBy?: string
+  requiresApproval?: boolean
+}
+
+interface PendingMember {
+  id: string
+  userId: string
+  userName?: string
+  userEmail?: string
+  userPhoto?: string
+  joinedAt?: string
+  joinStatus?: string
 }
 
 export default function GroupChatPage() {
@@ -58,14 +71,32 @@ export default function GroupChatPage() {
   const [emojiPickerFor, setEmojiPickerFor] = React.useState<string | null>(null)
   const [editingId, setEditingId] = React.useState<string | null>(null)
   const [editText, setEditText] = React.useState('')
+  const [pendingMembers, setPendingMembers] = React.useState<PendingMember[]>([])
+  const [pendingLoading, setPendingLoading] = React.useState(false)
+  const [actingMemberId, setActingMemberId] = React.useState<string | null>(null)
+  const [showPending, setShowPending] = React.useState(true)
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
+
+  const canModerate = Boolean(
+    user && group && canApproveGroupMembers(user, group.createdBy)
+  )
+  const showPendingPanel = canModerate && group?.requiresApproval === true
 
   // Check membership and load group
   React.useEffect(() => {
     if (!user) return
 
+    let unsubscribeMessages: (() => void) | undefined
+
     const checkMembership = async () => {
       try {
+        // Load group details first (needed for ownership check)
+        const groupRes = await fetch(`/api/groups/${groupId}?communityId=${communityId}`)
+        const groupData = await groupRes.json()
+        if (groupData.success) {
+          setGroup(groupData.data)
+        }
+
         const groupMembersRef = collection(
           db,
           `communities/${communityId}/groups/${groupId}/members`
@@ -73,7 +104,12 @@ export default function GroupChatPage() {
         const q = query(groupMembersRef, where('userId', '==', user.id))
         const snapshot = await getDocs(q)
 
-        if (snapshot.empty) {
+        const memberDoc = snapshot.docs[0]?.data()
+        const isActiveMember =
+          !snapshot.empty && (memberDoc?.joinStatus === 'active' || memberDoc?.isActive !== false)
+
+        const ownerOrAdmin = canApproveGroupMembers(user, groupData.data?.createdBy)
+        if (!isActiveMember && !ownerOrAdmin) {
           setIsMember(false)
           setLoading(false)
           return
@@ -81,31 +117,21 @@ export default function GroupChatPage() {
 
         setIsMember(true)
 
-        // Load group details
-        const groupRes = await fetch(`/api/groups/${groupId}?communityId=${communityId}`)
-        const groupData = await groupRes.json()
-        if (groupData.success) {
-          setGroup(groupData.data)
-        }
-
-        // Subscribe to messages
         const messagesRef = collection(
           db,
           `communities/${communityId}/groups/${groupId}/messages`
         )
-        const unsubscribe = onSnapshot(messagesRef, (snapshot) => {
-          const msgs = snapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
+        unsubscribeMessages = onSnapshot(messagesRef, (snap) => {
+          const msgs = snap.docs
+            .map((docSnap) => ({
+              id: docSnap.id,
+              ...docSnap.data(),
             }))
-            .sort((a, b) => a.sentAt?.toMillis?.() - b.sentAt?.toMillis?.())
+            .sort((a: any, b: any) => a.sentAt?.toMillis?.() - b.sentAt?.toMillis?.())
 
           setMessages(msgs as Message[])
           setLoading(false)
         })
-
-        return unsubscribe
       } catch (error) {
         console.error('[v0] Error checking membership:', error)
         setLoading(false)
@@ -113,7 +139,71 @@ export default function GroupChatPage() {
     }
 
     checkMembership()
+    return () => {
+      unsubscribeMessages?.()
+    }
   }, [user, communityId, groupId])
+
+  const loadPendingMembers = React.useCallback(async () => {
+    if (!user || !group?.requiresApproval) return
+    if (!canApproveGroupMembers(user, group.createdBy)) return
+
+    setPendingLoading(true)
+    try {
+      const params = new URLSearchParams({
+        communityId,
+        groupId,
+        joinStatus: 'pending',
+        requesterId: user.id,
+      })
+      const res = await fetch(`/api/groups/members?${params.toString()}`)
+      const json = await res.json()
+      if (json.success) {
+        setPendingMembers(json.data || [])
+      }
+    } catch (error) {
+      console.error('[v0] Error loading pending members:', error)
+    } finally {
+      setPendingLoading(false)
+    }
+  }, [user, group?.requiresApproval, group?.createdBy, communityId, groupId])
+
+  React.useEffect(() => {
+    if (showPendingPanel) {
+      loadPendingMembers()
+      const interval = window.setInterval(loadPendingMembers, 15000)
+      return () => window.clearInterval(interval)
+    }
+  }, [showPendingPanel, loadPendingMembers])
+
+  const handleMemberDecision = async (memberDocId: string, joinStatus: 'active' | 'rejected') => {
+    if (!user) return
+    setActingMemberId(memberDocId)
+    try {
+      const res = await fetch('/api/groups/members', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          communityId,
+          groupId,
+          memberDocId,
+          joinStatus,
+          approvedBy: user.id,
+        }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        alert(json.error || 'Failed to update member')
+        return
+      }
+      setPendingMembers((prev) => prev.filter((m) => m.id !== memberDocId))
+    } catch (error) {
+      console.error('[v0] Error updating member:', error)
+      alert('Failed to update member')
+    } finally {
+      setActingMemberId(null)
+    }
+  }
 
   // Auto-scroll to latest message
   React.useEffect(() => {
@@ -255,20 +345,100 @@ export default function GroupChatPage() {
 
       <main className="flex-1 flex flex-col max-h-[calc(100vh-120px)]">
         {/* Chat Header */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-4 min-w-0">
             <button
+              type="button"
               onClick={() => router.back()}
               className="text-gray-600 hover:text-gray-900"
             >
               <ChevronLeft size={24} />
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-black">{group?.name}</h1>
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold text-black truncate">{group?.name}</h1>
               <p className="text-sm text-gray-600">{messages.length} messages</p>
             </div>
           </div>
+          {showPendingPanel && (
+            <button
+              type="button"
+              onClick={() => setShowPending((v) => !v)}
+              className="px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 min-h-[44px]"
+            >
+              Pending Members ({pendingMembers.length})
+            </button>
+          )}
         </div>
+
+        {showPendingPanel && showPending && (
+          <div className="bg-amber-50 border-b border-amber-200 p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-amber-900">Pending Members</h2>
+              <button
+                type="button"
+                onClick={loadPendingMembers}
+                className="text-xs px-3 py-1 bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[36px]"
+              >
+                Refresh
+              </button>
+            </div>
+            {pendingLoading ? (
+              <p className="text-sm text-amber-800">Loading requests...</p>
+            ) : pendingMembers.length === 0 ? (
+              <p className="text-sm text-amber-800">No pending join requests.</p>
+            ) : (
+              <ul className="space-y-2">
+                {pendingMembers.map((member) => (
+                  <li
+                    key={member.id}
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white border border-amber-200 rounded-lg p-3"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {member.userPhoto ? (
+                        <img
+                          src={member.userPhoto}
+                          alt=""
+                          className="w-10 h-10 rounded-full object-cover shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium text-black truncate">
+                          {member.userName || member.userEmail || 'Member'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Requested{' '}
+                          {member.joinedAt
+                            ? format(new Date(member.joinedAt), 'MMM dd, yyyy')
+                            : 'recently'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        disabled={actingMemberId === member.id}
+                        onClick={() => handleMemberDecision(member.id, 'active')}
+                        className="flex-1 sm:flex-none px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 min-h-[44px]"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
+                        disabled={actingMemberId === member.id}
+                        onClick={() => handleMemberDecision(member.id, 'rejected')}
+                        className="flex-1 sm:flex-none px-3 py-2 bg-red-600 !text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 min-h-[44px]"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">

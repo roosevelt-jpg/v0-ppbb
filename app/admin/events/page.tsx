@@ -295,7 +295,7 @@ function EventsPageContent() {
                           <Eye size={16} />
                         </Link>
                         <Link
-                          href={`/admin/events/${event.id}`}
+                          href={`/admin/events/create?id=${event.id}`}
                           className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px] inline-flex items-center"
                           title="Edit"
                         >

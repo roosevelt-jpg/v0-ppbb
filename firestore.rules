@@ -148,7 +148,9 @@ service cloud.firestore {
           allow read: if isAuth();
           allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
           allow update: if isAdmin() || get(/databases/$(database)/documents/communities/$(communityId)/groups/$(groupId)).data.createdBy == request.auth.uid;
-          allow delete: if isAdmin() || resource.data.userId == request.auth.uid;
+          allow delete: if isAdmin()
+            || resource.data.userId == request.auth.uid
+            || get(/databases/$(database)/documents/communities/$(communityId)/groups/$(groupId)).data.createdBy == request.auth.uid;
         }
 
         match /messages/{messageId} {

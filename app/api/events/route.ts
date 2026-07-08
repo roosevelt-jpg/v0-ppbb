@@ -228,6 +228,10 @@ export async function PUT(request: NextRequest) {
       updates.publishedAt = Timestamp.now()
     }
 
+    if (updates.status === 'pending_approval' && !updates.submittedAt) {
+      updates.submittedAt = Timestamp.now()
+    }
+
     if (updates.status === 'published' && !updates.publishedAt) {
       updates.publishedAt = Timestamp.now()
       updates.approvedAt = Timestamp.now()
