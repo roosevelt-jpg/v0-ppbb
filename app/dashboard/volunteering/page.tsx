@@ -1,245 +1,311 @@
 'use client'
 
 import React from 'react'
-import { auth, db } from '@/lib/firebase'
-import { doc, getDoc, collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Clock, Heart, Award, TrendingUp } from 'lucide-react'
+import { useAuth } from '@/lib/auth-context'
+import { db } from '@/lib/firebase'
+import {
+  collection,
+  doc,
+  getDoc,
+  onSnapshot,
+  query,
+  where,
+  type Timestamp,
+} from 'firebase/firestore'
+import { Card } from '@/components/ui/card'
+import { Clock, Heart, Award, TrendingUp, Briefcase } from 'lucide-react'
+import { getAllOpenOpportunities, getMemberApplications } from '@/lib/business-queries'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+  DashboardTabButton,
+} from '@/components/dashboard-states'
 
 interface VolunteerRecord {
   id: string
   userId: string
-  eventId?: string
   eventTitle?: string
   hours: number
-  date: Timestamp
+  date?: Timestamp
   description?: string
   verified?: boolean
-  approvedBy?: string
-  approvedAt?: Timestamp
 }
 
 export default function VolunteeringPage() {
+  const { user, loading: authLoading } = useAuth()
+  const [activeTab, setActiveTab] = React.useState<'opportunities' | 'history'>('opportunities')
   const [volunteerData, setVolunteerData] = React.useState({
     totalHours: 0,
     thisMonthHours: 0,
     thisYearHours: 0,
     records: [] as VolunteerRecord[],
   })
+  const [opportunities, setOpportunities] = React.useState<Record<string, unknown>[]>([])
+  const [applications, setApplications] = React.useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) {
-      setError('Not authenticated')
+    if (authLoading) return
+    if (!user?.id) {
       setLoading(false)
       return
     }
 
-    console.log('[v0] Setting up volunteering listener for user:', firebaseUser.uid)
+    let cancelled = false
 
-    // Get user's total volunteered hours from profile
-    const userDocPromise = getDoc(doc(db, 'users', firebaseUser.uid))
+    const loadOpportunities = async () => {
+      try {
+        const opps = await getAllOpenOpportunities()
+        if (!cancelled) {
+          setOpportunities(
+            opps
+              .filter((o) => o.type === 'volunteer')
+              .map((o) => ({ id: o.id, title: o.title, businessName: o.businessName, description: o.description }))
+          )
+        }
+      } catch (err) {
+        console.error('[v0] Volunteer opportunities error:', err)
+      }
+    }
 
-    // Get volunteer records for this user
-    const q = query(
-      collection(db, 'volunteerRecords'),
-      where('userId', '==', firebaseUser.uid)
+    const loadApplications = async () => {
+      try {
+        const apps = await getMemberApplications(user.id)
+        const volunteerIds = new Set(
+          (await getAllOpenOpportunities()).filter((o) => o.type === 'volunteer').map((o) => o.id)
+        )
+        if (!cancelled) {
+          setApplications(
+            apps
+              .filter((a) => volunteerIds.has(a.opportunityId))
+              .map((a) => ({
+                id: a.id,
+                title: a.opportunityTitle,
+                company: a.businessName,
+                status: a.status,
+                date: a.createdAt,
+              }))
+          )
+        }
+      } catch (err) {
+        console.error('[v0] Volunteer applications error:', err)
+      }
+    }
+
+    loadOpportunities()
+    loadApplications()
+
+    const q = query(collection(db, 'volunteerRecords'), where('userId', '==', user.id))
+    const unsubscribe = onSnapshot(
+      q,
+      async (snapshot) => {
+        try {
+          const records =
+            snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as VolunteerRecord)) ?? []
+
+          records.sort((a, b) => {
+            const aDate = a.date?.toDate?.() ?? new Date(0)
+            const bDate = b.date?.toDate?.() ?? new Date(0)
+            return bDate.getTime() - aDate.getTime()
+          })
+
+          const now = new Date()
+          const currentMonth = now.getMonth()
+          const currentYear = now.getFullYear()
+
+          const thisMonthHours = records
+            .filter((r) => {
+              const rDate = r.date?.toDate?.() ?? new Date(0)
+              return rDate.getMonth() === currentMonth && rDate.getFullYear() === currentYear
+            })
+            .reduce((sum, r) => sum + (r.hours || 0), 0)
+
+          const thisYearHours = records
+            .filter((r) => (r.date?.toDate?.() ?? new Date(0)).getFullYear() === currentYear)
+            .reduce((sum, r) => sum + (r.hours || 0), 0)
+
+          const totalHours = records.reduce((sum, r) => sum + (r.hours || 0), 0)
+
+          const userSnap = await getDoc(doc(db, 'users', user.id))
+          const profileHours = Number(userSnap.data()?.volunteeredHours) || 0
+
+          if (!cancelled) {
+            setVolunteerData({
+              totalHours: Math.max(totalHours, profileHours),
+              thisMonthHours,
+              thisYearHours,
+              records,
+            })
+            setError(null)
+            setLoading(false)
+          }
+        } catch (err) {
+          console.error('[v0] Error processing volunteer data:', err)
+          if (!cancelled) {
+            setError('Failed to process volunteer data.')
+            setLoading(false)
+          }
+        }
+      },
+      (err) => {
+        console.error('[v0] Firestore volunteer records error:', err)
+        if (!cancelled) {
+          setError(err.message || 'Failed to load volunteer records.')
+          setLoading(false)
+        }
+      }
     )
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      try {
-        const records = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        } as VolunteerRecord))
-
-        // Sort by date (newest first)
-        records.sort((a, b) => {
-          const aDate = a.date?.toDate?.() || new Date(0)
-          const bDate = b.date?.toDate?.() || new Date(0)
-          return bDate.getTime() - aDate.getTime()
-        })
-
-        // Calculate hours
-        const now = new Date()
-        const currentMonth = now.getMonth()
-        const currentYear = now.getFullYear()
-
-        const thisMonthHours = records
-          .filter((r) => {
-            const rDate = r.date?.toDate?.() || new Date(0)
-            return rDate.getMonth() === currentMonth && rDate.getFullYear() === currentYear
-          })
-          .reduce((sum, r) => sum + (r.hours || 0), 0)
-
-        const thisYearHours = records
-          .filter((r) => {
-            const rDate = r.date?.toDate?.() || new Date(0)
-            return rDate.getFullYear() === currentYear
-          })
-          .reduce((sum, r) => sum + (r.hours || 0), 0)
-
-        const totalHours = records.reduce((sum, r) => sum + (r.hours || 0), 0)
-
-        // Also get total from user profile (may be more accurate)
-        const userSnap = await userDocPromise
-        const profileHours = userSnap.data()?.volunteeredHours || 0
-
-        console.log('[v0] Volunteer records loaded:', records.length, 'Total hours:', totalHours)
-
-        setVolunteerData({
-          totalHours: Math.max(totalHours, profileHours),
-          thisMonthHours,
-          thisYearHours,
-          records,
-        })
-        setError(null)
-      } catch (err) {
-        console.error('[v0] Error processing volunteer data:', err)
-        setError('Failed to process volunteer data')
-      } finally {
-        setLoading(false)
-      }
-    }, (err) => {
-      console.error('[v0] Firestore error fetching volunteer records:', err)
-      setError(err.message || 'Failed to load volunteer records')
-      setLoading(false)
-    })
-
     return () => {
-      console.log('[v0] Cleaning up volunteering listener')
+      cancelled = true
       unsubscribe()
     }
-  }, [])
+  }, [authLoading, user?.id])
 
-  const formatDate = (timestamp: Timestamp | undefined) => {
+  const formatDate = (timestamp: Timestamp | Date | undefined) => {
     if (!timestamp) return 'Date TBA'
     try {
-      const date = timestamp.toDate?.() || new Date(timestamp as any)
+      const date =
+        typeof timestamp === 'object' && 'toDate' in timestamp
+          ? (timestamp as Timestamp).toDate()
+          : new Date(timestamp as Date)
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     } catch {
       return 'Invalid date'
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-6">Volunteering Hours</h1>
-        <Card className="p-8 text-center text-gray-500">
-          <div className="animate-pulse">Loading your volunteering records...</div>
-        </Card>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-6">Volunteering Hours</h1>
-        <Card className="p-8 border-red-200 bg-red-50">
-          <p className="text-red-700 font-semibold">Error loading records</p>
-          <p className="text-red-600 text-sm mt-2">{error}</p>
-          <Button className="mt-4" onClick={() => window.location.reload()}>
-            Retry
-          </Button>
-        </Card>
-      </div>
-    )
-  }
+  if (authLoading || loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Volunteering Hours</h1>
-        <p className="text-gray-600">Track your volunteer contributions</p>
-      </div>
-
-      {/* Stats Cards */}
+    <DashboardPageShell title="Volunteering" subtitle="Give your time and skills to causes that matter">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Total Hours</p>
-              <p className="text-3xl font-bold text-gray-900">{volunteerData.totalHours}</p>
-              <p className="text-xs text-gray-500 mt-2">All-time</p>
-            </div>
-            <Clock className="w-12 h-12 text-blue-600 opacity-20" />
-          </div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">This Year</p>
-              <p className="text-3xl font-bold text-gray-900">{volunteerData.thisYearHours}</p>
-              <p className="text-xs text-gray-500 mt-2">{new Date().getFullYear()}</p>
-            </div>
-            <TrendingUp className="w-12 h-12 text-green-600 opacity-20" />
-          </div>
-        </Card>
-
-        <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">This Month</p>
-              <p className="text-3xl font-bold text-gray-900">{volunteerData.thisMonthHours}</p>
-              <p className="text-xs text-gray-500 mt-2">{new Date().toLocaleDateString('en-US', { month: 'long' })}</p>
-            </div>
-            <Heart className="w-12 h-12 text-purple-600 opacity-20" />
-          </div>
-        </Card>
+        {[
+          { label: 'Total Hours', value: volunteerData.totalHours, sub: 'All-time', icon: Clock },
+          { label: 'This Year', value: volunteerData.thisYearHours, sub: String(new Date().getFullYear()), icon: TrendingUp },
+          { label: 'This Month', value: volunteerData.thisMonthHours, sub: new Date().toLocaleDateString('en-US', { month: 'long' }), icon: Heart },
+        ].map((stat) => {
+          const Icon = stat.icon
+          return (
+            <Card key={stat.label} className="p-5 border border-neutral-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-neutral-500">{stat.label}</p>
+                  <p className="text-3xl font-bold text-neutral-900">{stat.value}</p>
+                  <p className="text-xs text-neutral-400 mt-1">{stat.sub}</p>
+                </div>
+                <Icon className="w-10 h-10 text-neutral-200" />
+              </div>
+            </Card>
+          )
+        })}
       </div>
 
-      {/* Volunteer Records */}
-      {volunteerData.records.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Award className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">No volunteer records yet</h2>
-          <p className="text-gray-500 mb-6">Your volunteering hours will appear here once admins log them</p>
-          <Link href="/dashboard">
-            <Button>Back to Dashboard</Button>
-          </Link>
-        </Card>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <DashboardTabButton active={activeTab === 'opportunities'} onClick={() => setActiveTab('opportunities')}>
+          Available Opportunities
+        </DashboardTabButton>
+        <DashboardTabButton active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
+          My Volunteer History
+        </DashboardTabButton>
+      </div>
+
+      {activeTab === 'opportunities' ? (
+        opportunities.length === 0 ? (
+          <DashboardEmptyState
+            icon={<Briefcase className="w-12 h-12" />}
+            title="No volunteering opportunities"
+            description="No volunteering opportunities right now. Check back soon."
+            action={
+              <Link href="/dashboard/opportunities" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                Browse Opportunities
+              </Link>
+            }
+          />
+        ) : (
+          <div className="space-y-3">
+            {opportunities.map((opp) => (
+              <Card key={String(opp.id)} className="p-4 border border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-semibold px-2 py-1 rounded bg-green-100 text-green-800">Volunteer</span>
+                    <h3 className="font-semibold text-neutral-900 mt-2">{String(opp.title ?? 'Role')}</h3>
+                    <p className="text-sm text-neutral-500">{String(opp.businessName ?? '')}</p>
+                    {opp.description ? (
+                      <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(opp.description)}</p>
+                    ) : null}
+                  </div>
+                  <Link
+                    href="/dashboard/opportunities"
+                    className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
+                  >
+                    Apply to Volunteer
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )
+      ) : volunteerData.records.length === 0 && applications.length === 0 ? (
+        <DashboardEmptyState
+          icon={<Award className="w-12 h-12" />}
+          title="No volunteer history yet"
+          description="You haven't volunteered yet. Browse opportunities above."
+          action={
+            <button
+              type="button"
+              onClick={() => setActiveTab('opportunities')}
+              className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+            >
+              Browse Opportunities
+            </button>
+          }
+        />
       ) : (
         <div className="space-y-3">
-          <h2 className="text-xl font-bold mb-4">Volunteer Records</h2>
+          {applications.map((app) => (
+            <Card key={`app-${app.id}`} className="p-4 border border-neutral-200">
+              <div className="flex justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold">{String(app.title ?? 'Volunteer role')}</h3>
+                  <p className="text-sm text-neutral-500">{String(app.company ?? '')}</p>
+                  <p className="text-xs text-neutral-400 mt-1">Applied {formatDate(app.date as Timestamp)}</p>
+                </div>
+                <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-100 capitalize h-fit">
+                  {String(app.status ?? 'submitted')}
+                </span>
+              </div>
+            </Card>
+          ))}
           {volunteerData.records.map((record) => (
-            <Card key={record.id} className="p-4 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  {record.eventTitle ? (
-                    <h3 className="font-semibold text-gray-900">{record.eventTitle}</h3>
-                  ) : (
-                    <h3 className="font-semibold text-gray-900">Volunteer Activity</h3>
-                  )}
-                  {record.description && (
-                    <p className="text-sm text-gray-600 mt-1">{record.description}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-2">{formatDate(record.date)}</p>
+            <Card key={record.id} className="p-4 border border-neutral-200">
+              <div className="flex justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold">{record.eventTitle || 'Volunteer Activity'}</h3>
+                  {record.description ? <p className="text-sm text-neutral-600 mt-1">{record.description}</p> : null}
+                  <p className="text-xs text-neutral-400 mt-2">{formatDate(record.date)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-blue-600">{record.hours}</p>
-                  <p className="text-xs text-gray-500">hours</p>
-                  {record.verified ? (
-                    <span className="inline-block mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-semibold">
-                      Verified
-                    </span>
-                  ) : (
-                    <span className="inline-block mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded font-semibold">
-                      Pending
-                    </span>
-                  )}
+                  <p className="text-2xl font-bold text-neutral-900">{record.hours}</p>
+                  <p className="text-xs text-neutral-500">hours</p>
+                  <span
+                    className={`inline-block mt-2 px-2 py-1 text-xs rounded font-semibold ${
+                      record.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
+                    {record.verified ? 'Verified' : 'Pending'}
+                  </span>
                 </div>
               </div>
             </Card>
           ))}
         </div>
       )}
-    </div>
+    </DashboardPageShell>
   )
 }

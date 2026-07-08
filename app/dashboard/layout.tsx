@@ -4,6 +4,7 @@ import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { MemberSidebar, MemberHeader } from '@/components/member-layout'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 import { User } from '@/lib/types'
 import {
   hasAdminAccess,
@@ -86,16 +87,18 @@ export default function DashboardLayout({
       : 'Active member'
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background min-w-0">
       <MemberSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-      <main className="flex-1 overflow-auto flex flex-col">
+      <main className="flex-1 min-w-0 overflow-auto flex flex-col">
         <MemberHeader
           title="Dashboard"
           subtitle={`${memberUser.firstName ?? 'Member'} • ${roleHint}`}
           open={sidebarOpen}
           setOpen={setSidebarOpen}
         />
-        <div className="flex-1 overflow-auto">{children}</div>
+        <div className="flex-1 min-w-0 overflow-auto">
+          <DashboardErrorBoundary>{children}</DashboardErrorBoundary>
+        </div>
       </main>
     </div>
   )

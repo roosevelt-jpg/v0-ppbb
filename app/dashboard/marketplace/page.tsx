@@ -1,71 +1,86 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+
+import React, { useEffect, useMemo, useState } from 'react'
 import { db } from '@/lib/firebase'
-import { collection, onSnapshot, query } from 'firebase/firestore'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { BusinessOffersSection } from '@/components/business-offers-section'
-import { ShoppingCart, Star } from 'lucide-react'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
+import { ShoppingCart, Tag } from 'lucide-react'
+import type { BusinessOffer } from '@/lib/types'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+} from '@/components/dashboard-states'
+
+const CATEGORY_MAP: Record<string, (offer: BusinessOffer) => boolean> = {
+  all: () => true,
+  merchandise: (o) =>
+    o.category?.toLowerCase() === 'merchandise' ||
+    (o.type === 'product' && o.category?.toLowerCase() !== 'books'),
+  books: (o) => ['books', 'education'].includes((o.category ?? '').toLowerCase()),
+  courses: (o) => ['courses', 'coaching', 'education'].includes((o.category ?? '').toLowerCase()),
+  discounts: (o) => o.type === 'discount' || Boolean(o.discountPercentage),
+}
 
 export default function MarketplacePage() {
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<BusinessOffer[]>([])
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
-  const [cart, setCart] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [cart, setCart] = useState<Array<BusinessOffer & { cartId: number }>>([])
 
   useEffect(() => {
+    const q = query(collection(db, 'businessOffers'), where('status', '==', 'active'))
     const unsubscribe = onSnapshot(
-      query(collection(db, 'products')),
+      q,
       (snapshot) => {
-        setProducts(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
+        const rows =
+          snapshot?.docs?.map((d) => ({ ...(d.data() as BusinessOffer), id: d.id })) ?? []
+        setProducts(rows)
         setLoading(false)
+        setError(null)
       },
-      (error) => {
-        console.error('[v0] Error fetching products:', error)
+      (err) => {
+        console.error('[v0] Marketplace error:', err)
+        setError('Failed to load marketplace.')
         setLoading(false)
       }
     )
-
     return () => unsubscribe()
   }, [])
 
-  const handleAddToCart = (product: any) => {
-    setCart([...cart, { ...product, cartId: Date.now() }])
+  const filtered = useMemo(() => {
+    const matcher = CATEGORY_MAP[filter] ?? CATEGORY_MAP.all
+    return products.filter(matcher)
+  }, [products, filter])
+
+  const handleAddToCart = (product: BusinessOffer) => {
+    setCart((prev) => [...prev, { ...product, cartId: Date.now() }])
   }
 
-  const handleRemoveFromCart = (cartId: number) => {
-    setCart(cart.filter((item) => item.cartId !== cartId))
-  }
+  const totalPrice = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
 
-  const filtered =
-    filter === 'all'
-      ? products
-      : products.filter((product) => product.category === filter)
-
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0)
+  if (loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="grid md:grid-cols-4 gap-6">
-        {/* Sidebar */}
+    <DashboardPageShell title="Marketplace" subtitle="Member offers from community businesses">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-1">
-          <Card className="p-4 sticky top-8">
-            <h3 className="font-bold mb-4">Categories</h3>
+          <Card className="p-4 border border-neutral-200 sticky top-4">
+            <h3 className="font-bold mb-4 text-neutral-900">Categories</h3>
             <div className="space-y-2">
               {['all', 'merchandise', 'books', 'courses', 'discounts'].map((cat) => (
                 <button
                   key={cat}
+                  type="button"
                   onClick={() => setFilter(cat)}
-                  className={`w-full text-left px-3 py-2 rounded text-sm font-medium transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     filter === cat
-                      ? 'bg-black text-white'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                      ? '!bg-black !text-white'
+                      : '!bg-white !text-black border border-gray-300 hover:bg-neutral-50'
                   }`}
                 >
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -75,107 +90,92 @@ export default function MarketplacePage() {
           </Card>
         </div>
 
-        {/* Products Grid */}
-        <div className="md:col-span-3 space-y-4">
+        <div className="md:col-span-3 space-y-4 min-w-0">
           <div className="flex justify-end">
             <BusinessFeatureLink
               featureLabel="List Your Business"
               href="/join?type=business"
-              className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50"
+              className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 !bg-white !text-black border border-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50"
             >
               List Your Business
             </BusinessFeatureLink>
           </div>
-          <div className="grid grid-cols-1 gap-4">
-            {loading ? (
-              <p className="text-muted-foreground">Loading products...</p>
-            ) : filtered.length === 0 ? (
-              <Card className="p-6">
-                <p className="text-muted-foreground text-center">No products in this category</p>
-              </Card>
-            ) : (
-              filtered.map((product) => (
-                <Card key={product.id} className="p-6 flex items-start gap-4">
-                  {product.image && (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-24 h-24 object-cover rounded"
-                    />
-                  )}
 
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <h3 className="font-bold text-lg">{product.name}</h3>
-                      {product.discount && (
-                        <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded font-medium">
-                          -{product.discount}%
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-muted-foreground text-sm mt-1">{product.description}</p>
-
-                    <div className="flex items-center gap-4 mt-3">
-                      <div className="flex items-center gap-1">
-                        <span className="font-bold text-lg">
-                          AED {product.salePrice || product.price}
-                        </span>
-                        {product.salePrice && (
-                          <span className="text-xs text-muted-foreground line-through">
-                            AED {product.price}
-                          </span>
-                        )}
+          {filtered.length === 0 ? (
+            <DashboardEmptyState title="No products in this category" description="Try another category or check back later." />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filtered.map((product) => {
+                const imageUrl = product.imageUrl || product.image?.url
+                const price = Number(product.price) || 0
+                const discounted =
+                  product.discountPercentage && product.originalPrice
+                    ? product.originalPrice * (1 - product.discountPercentage / 100)
+                    : price
+                return (
+                  <Card key={product.id} className="overflow-hidden border border-neutral-200 flex flex-col">
+                    {imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imageUrl} alt={product.title} className="w-full aspect-[4/3] object-cover" />
+                    ) : (
+                      <div className="w-full aspect-[4/3] bg-neutral-100 flex items-center justify-center">
+                        <Tag className="w-10 h-10 text-neutral-300" />
                       </div>
-
-                      {product.rating && (
-                        <div className="flex items-center gap-1">
-                          {Array(Math.floor(product.rating))
-                            .fill(0)
-                            .map((_, i) => (
-                              <Star
-                                key={i}
-                                size={14}
-                                className="fill-yellow-400 text-yellow-400"
-                              />
-                            ))}
-                          <span className="text-xs text-muted-foreground">
-                            ({product.reviews} reviews)
-                          </span>
-                        </div>
+                    )}
+                    <div className="p-4 flex flex-col flex-1">
+                      <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-100 text-neutral-700 w-fit capitalize mb-2">
+                        {product.category || product.type}
+                      </span>
+                      <h3 className="font-bold text-neutral-900 line-clamp-2">{product.title}</h3>
+                      <p className="text-sm text-neutral-500 mt-1">{product.businessName}</p>
+                      {product.description ? (
+                        <p className="text-sm text-neutral-600 mt-2 line-clamp-2 flex-1">{product.description}</p>
+                      ) : (
+                        <div className="flex-1" />
                       )}
+                      <div className="mt-3 flex items-center gap-2">
+                        <span className="font-bold text-lg text-neutral-900">AED {discounted.toLocaleString()}</span>
+                        {product.discountPercentage ? (
+                          <>
+                            <span className="text-xs line-through text-neutral-400">AED {price.toLocaleString()}</span>
+                            <span className="text-xs font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded">
+                              {product.discountPercentage}% OFF
+                            </span>
+                          </>
+                        ) : null}
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        <button type="button" className="flex-1 !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold">
+                          View Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddToCart(product)}
+                          className="flex-1 !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-1"
+                        >
+                          <ShoppingCart size={14} /> Buy Now
+                        </button>
+                      </div>
                     </div>
-
-                    <Button
-                      onClick={() => handleAddToCart(product)}
-                      className="mt-3"
-                    >
-                      <ShoppingCart size={16} className="mr-2" />
-                      Add to Cart
-                    </Button>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Business Offers Section */}
-      <BusinessOffersSection title="From Our Businesses" />
-
-      {/* Cart Summary */}
-      {cart.length > 0 && (
-        <Card className="p-6 fixed bottom-0 left-0 right-0">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">{cart.length} items in cart</p>
-              <p className="text-2xl font-bold">AED {totalPrice.toLocaleString()}</p>
-            </div>
-            <Button className="bg-black text-white hover:bg-gray-800">Proceed to Checkout</Button>
+      {cart.length > 0 ? (
+        <Card className="p-4 mt-6 border border-neutral-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm text-neutral-500">{cart.length} items in cart</p>
+            <p className="text-2xl font-bold text-neutral-900">AED {totalPrice.toLocaleString()}</p>
           </div>
+          <button type="button" className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold">
+            Proceed to Checkout
+          </button>
         </Card>
-      )}
-    </div>
+      ) : null}
+    </DashboardPageShell>
   )
 }

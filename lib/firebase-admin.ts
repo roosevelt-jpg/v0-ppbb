@@ -148,8 +148,19 @@ export function getAdminApp(): App {
   })
 }
 
+let adminDbSettingsApplied = false
+
 export function getAdminDb() {
-  return getFirestore(getAdminApp())
+  const db = getFirestore(getAdminApp())
+  if (!adminDbSettingsApplied) {
+    try {
+      db.settings({ ignoreUndefinedProperties: true })
+      adminDbSettingsApplied = true
+    } catch {
+      adminDbSettingsApplied = true
+    }
+  }
+  return db
 }
 
 /**

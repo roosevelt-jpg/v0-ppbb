@@ -1,21 +1,28 @@
 'use client'
 
 import React from 'react'
+import { useAuth } from '@/lib/auth-context'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { User } from '@/lib/types'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 import { Bell } from 'lucide-react'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+} from '@/components/dashboard-states'
 
 function SettingsContent() {
+  const { user: authUser, loading: authLoading } = useAuth()
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [editing, setEditing] = React.useState(false)
   const [editingNotifications, setEditingNotifications] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [savingNotifications, setSavingNotifications] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
   const [formData, setFormData] = React.useState({
     firstName: '',
     lastName: '',
@@ -35,6 +42,7 @@ function SettingsContent() {
 
   React.useEffect(() => {
     const fetchUser = async () => {
+      if (authLoading) return
       try {
         const firebaseUser = auth.currentUser
         if (!firebaseUser) {
@@ -55,21 +63,22 @@ function SettingsContent() {
             skills: userData.skills || [],
             departments: userData.departments || [],
           })
-          
-          // Load notification preferences
           if (userData.notificationPreferences) {
             setNotificationPreferences(userData.notificationPreferences)
           }
+        } else if (authUser) {
+          setUser(authUser as User)
         }
-      } catch (error) {
-        console.error('[v0] Error fetching user:', error)
+      } catch (err) {
+        console.error('[v0] Error fetching user:', err)
+        setError('Failed to load settings.')
       } finally {
         setLoading(false)
       }
     }
 
     fetchUser()
-  }, [])
+  }, [authLoading, authUser])
 
   const handleSaveProfile = async () => {
     const firebaseUser = auth.currentUser
@@ -77,20 +86,24 @@ function SettingsContent() {
 
     setSaving(true)
     try {
-      await updateDoc(doc(db, 'users', firebaseUser.uid), {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        location: formData.location,
-        bio: formData.bio,
-        skills: formData.skills,
-        departments: formData.departments,
-        updatedAt: new Date(),
-      })
-      setUser({...user, ...formData} as User)
+      await updateDoc(
+        doc(db, 'users', firebaseUser.uid),
+        sanitizeForFirestore({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          location: formData.location,
+          bio: formData.bio,
+          skills: formData.skills,
+          departments: formData.departments,
+          updatedAt: new Date(),
+        })
+      )
+      setUser({ ...(user ?? {}), ...formData } as User)
       setEditing(false)
-    } catch (error) {
-      console.error('[v0] Error updating profile:', error)
+    } catch (err) {
+      console.error('[v0] Error updating profile:', err)
+      setError('Failed to save profile.')
     } finally {
       setSaving(false)
     }
@@ -102,333 +115,222 @@ function SettingsContent() {
 
     setSavingNotifications(true)
     try {
-      console.log('[v0] Saving notification preferences:', {
-        userId: firebaseUser.uid,
-        preferences: notificationPreferences,
-        timestamp: new Date().toISOString(),
-      })
-      
-      await updateDoc(doc(db, 'users', firebaseUser.uid), {
-        notificationPreferences,
-        updatedAt: new Date(),
-      })
-      
-      console.log('[v0] Notification preferences saved successfully')
+      await updateDoc(
+        doc(db, 'users', firebaseUser.uid),
+        sanitizeForFirestore({
+          notificationPreferences,
+          updatedAt: new Date(),
+        })
+      )
       setEditingNotifications(false)
-    } catch (error) {
-      console.error('[v0] Error saving notification preferences:', error)
+    } catch (err) {
+      console.error('[v0] Error saving notification preferences:', err)
+      setError('Failed to save notification preferences.')
     } finally {
       setSavingNotifications(false)
     }
   }
 
-  if (loading) {
-    return <div className="p-8"><p className="text-gray-600">Loading settings...</p></div>
-  }
+  if (authLoading || loading) return <DashboardSkeleton rows={2} />
+  if (error && !user) return <DashboardErrorState message={error} />
 
   return (
-    <div className="p-8">
-      <div className="max-w-2xl">
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-6">Personal Information</h2>
-          
+    <DashboardPageShell title="Settings" subtitle="Manage your profile and preferences">
+      <div className="w-full max-w-2xl mx-auto flex flex-col gap-6">
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+        <Card className="p-6 border border-neutral-200 w-full">
+          <h2 className="text-xl font-bold mb-6 text-neutral-900">Personal Information</h2>
+
           {editing ? (
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <label className="text-sm font-medium mb-2 block">First Name</label>
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <label className="text-sm font-medium text-neutral-500">First Name</label>
                   <input
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
-                <div className="flex flex-col">
-                  <label className="text-sm font-medium mb-2 block">Last Name</label>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <label className="text-sm font-medium text-neutral-500">Last Name</label>
                   <input
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-2 block">Email</label>
-                <input
-                  type="email"
-                  value={formData.email || user?.email}
-                  disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 text-gray-600"
-                />
-              </div>
+              {[
+                { key: 'email', label: 'Email', value: user?.email ?? '', disabled: true },
+                { key: 'phone', label: 'Phone', value: formData.phone, field: 'phone' as const },
+                { key: 'location', label: 'Location', value: formData.location, field: 'location' as const },
+              ].map((field) => (
+                <div key={field.key} className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-neutral-500">{field.label}</label>
+                  <input
+                    type="text"
+                    value={field.field ? formData[field.field] : field.value}
+                    disabled={field.disabled}
+                    onChange={
+                      field.field
+                        ? (e) => setFormData({ ...formData, [field.field!]: e.target.value })
+                        : undefined
+                    }
+                    className={`w-full px-3 py-2 border border-neutral-300 rounded-lg ${
+                      field.disabled ? 'bg-neutral-50 text-neutral-600' : 'focus:outline-none focus:ring-2 focus:ring-black'
+                    }`}
+                  />
+                </div>
+              ))}
 
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-2 block">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-2 block">Location</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-2 block">Bio</label>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-neutral-500">Bio</label>
                 <textarea
                   value={formData.bio}
-                  onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                  placeholder="Tell us about yourself"
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
 
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-2 block">Skills (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.skills.join(', ')}
-                  onChange={(e) => setFormData({...formData, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean)})}
-                  placeholder="e.g., Teaching, Cooking, Programming"
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-2 block">Interested Departments (comma-separated)</label>
-                <input
-                  type="text"
-                  value={formData.departments.join(', ')}
-                  onChange={(e) => setFormData({...formData, departments: e.target.value.split(',').map(d => d.trim()).filter(Boolean)})}
-                  placeholder="e.g., Education, Healthcare, Community Service"
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button onClick={handleSaveProfile} disabled={saving} className="bg-black hover:bg-gray-800 text-white px-6">{saving ? 'Saving...' : 'Save Changes'}</Button>
-                <Button variant="outline" onClick={() => setEditing(false)} className="border-gray-300 text-black hover:bg-gray-50">Cancel</Button>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleSaveProfile}
+                  disabled={saving}
+                  className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  className="!bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">First Name</p>
-                  <p className="font-medium text-gray-900">{user?.firstName || '-'}</p>
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <p className="text-sm text-neutral-500">First Name</p>
+                  <p className="text-base font-medium text-neutral-900 break-words">{user?.firstName || '—'}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Last Name</p>
-                  <p className="font-medium text-gray-900">{user?.lastName || '-'}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Email</p>
-                <p className="font-medium text-gray-900">{user?.email}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Phone</p>
-                <p className="font-medium text-gray-900">{user?.phone || '-'}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Location</p>
-                <p className="font-medium text-gray-900">{user?.location || '-'}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Bio</p>
-                <p className="font-medium text-gray-900 whitespace-pre-wrap">{user?.bio || '-'}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Skills</p>
-                <div className="flex flex-wrap gap-2">
-                  {user?.skills && user.skills.length > 0 ? (
-                    user.skills.map((skill: string) => (
-                      <span key={skill} className="px-3 py-1 bg-gray-200 text-gray-900 rounded-full text-sm font-medium">
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No skills added</p>
-                  )}
+                <div className="flex flex-col gap-1 min-w-0">
+                  <p className="text-sm text-neutral-500">Last Name</p>
+                  <p className="text-base font-medium text-neutral-900 break-words">{user?.lastName || '—'}</p>
                 </div>
               </div>
 
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Interested Departments</p>
-                <div className="flex flex-wrap gap-2">
-                  {user?.departments && user.departments.length > 0 ? (
-                    user.departments.map((dept: string) => (
-                      <span key={dept} className="px-3 py-1 bg-black text-white rounded-full text-sm font-medium">
-                        {dept}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No departments selected</p>
-                  )}
+              {[
+                { label: 'Email', value: user?.email },
+                { label: 'Phone', value: user?.phone || '—' },
+                { label: 'Location', value: user?.location || '—' },
+              ].map((field) => (
+                <div key={field.label} className="flex flex-col gap-1">
+                  <p className="text-sm text-neutral-500">{field.label}</p>
+                  <p className="text-base font-medium text-neutral-900 break-words">{field.value}</p>
                 </div>
+              ))}
+
+              <div className="flex flex-col gap-1">
+                <p className="text-sm text-neutral-500">Bio</p>
+                <p className="text-base text-neutral-900 whitespace-pre-wrap break-words">{user?.bio || '—'}</p>
               </div>
 
-              <Button onClick={() => setEditing(true)} className="mt-4 bg-black hover:bg-gray-800 text-white">Edit Profile</Button>
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="self-start !bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold"
+              >
+                Edit Profile
+              </button>
             </div>
           )}
         </Card>
 
-        <Card className="p-6 mt-6">
-          <h2 className="text-xl font-bold mb-4">Membership</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Tier</span>
-              <span className="font-medium capitalize">{user?.membershipTier || 'Standard'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Member Since</span>
-              <span className="font-medium">
-                {user?.memberSince ? new Date(user.memberSince).toLocaleDateString() : '-'}
-              </span>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 mt-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              <h2 className="text-xl font-bold">Notification Preferences</h2>
-            </div>
+        <Card className="p-6 border border-neutral-200 w-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Bell className="w-5 h-5" />
+            <h2 className="text-xl font-bold text-neutral-900">Notification Preferences</h2>
           </div>
 
           {editingNotifications ? (
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer">
+            <div className="flex flex-col gap-4">
+              {(
+                [
+                  ['emailNotifications', 'Email Notifications', 'Receive updates via email'],
+                  ['communityUpdates', 'Community Updates', 'New communities and groups'],
+                  ['eventReminders', 'Event Reminders', 'Upcoming events and activities'],
+                  ['memberMessages', 'Community Messages', 'New messages in communities'],
+                  ['systemAlerts', 'System Alerts', 'Important security notifications'],
+                ] as const
+              ).map(([key, title, desc]) => (
+                <label key={key} className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={notificationPreferences.emailNotifications}
-                    onChange={(e) => setNotificationPreferences({...notificationPreferences, emailNotifications: e.target.checked})}
-                    className="w-4 h-4 rounded border-gray-300"
+                    checked={notificationPreferences[key]}
+                    onChange={(e) =>
+                      setNotificationPreferences({ ...notificationPreferences, [key]: e.target.checked })
+                    }
+                    className="mt-1 w-4 h-4 accent-black"
                   />
                   <div>
-                    <p className="font-medium text-sm">Email Notifications</p>
-                    <p className="text-xs text-gray-600">Receive updates via email</p>
+                    <p className="font-medium text-sm text-neutral-900">{title}</p>
+                    <p className="text-xs text-neutral-500">{desc}</p>
                   </div>
                 </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificationPreferences.communityUpdates}
-                    onChange={(e) => setNotificationPreferences({...notificationPreferences, communityUpdates: e.target.checked})}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <div>
-                    <p className="font-medium text-sm">Community Updates</p>
-                    <p className="text-xs text-gray-600">Get notified about new communities and groups</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificationPreferences.eventReminders}
-                    onChange={(e) => setNotificationPreferences({...notificationPreferences, eventReminders: e.target.checked})}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <div>
-                    <p className="font-medium text-sm">Event Reminders</p>
-                    <p className="text-xs text-gray-600">Reminders for upcoming events and activities</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificationPreferences.memberMessages}
-                    onChange={(e) => setNotificationPreferences({...notificationPreferences, memberMessages: e.target.checked})}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <div>
-                    <p className="font-medium text-sm">Community Messages</p>
-                    <p className="text-xs text-gray-600">Notifications for new messages in communities</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={notificationPreferences.systemAlerts}
-                    onChange={(e) => setNotificationPreferences({...notificationPreferences, systemAlerts: e.target.checked})}
-                    className="w-4 h-4 rounded border-gray-300"
-                  />
-                  <div>
-                    <p className="font-medium text-sm">System Alerts</p>
-                    <p className="text-xs text-gray-600">Important system and security notifications</p>
-                  </div>
-                </label>
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button onClick={handleSaveNotifications} disabled={savingNotifications} className="bg-black hover:bg-gray-800 text-white">{savingNotifications ? 'Saving...' : 'Save Preferences'}</Button>
-                <Button variant="outline" onClick={() => setEditingNotifications(false)}>Cancel</Button>
+              ))}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveNotifications}
+                  disabled={savingNotifications}
+                  className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold"
+                >
+                  {savingNotifications ? 'Saving...' : 'Save Preferences'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingNotifications(false)}
+                  className="!bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium">Email Notifications</span>
-                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.emailNotifications ? 'Enabled' : 'Disabled'}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium">Community Updates</span>
-                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.communityUpdates ? 'Enabled' : 'Disabled'}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium">Event Reminders</span>
-                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.eventReminders ? 'Enabled' : 'Disabled'}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium">Community Messages</span>
-                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.memberMessages ? 'Enabled' : 'Disabled'}</span>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                <span className="text-sm font-medium">System Alerts</span>
-                <span className="text-sm px-2 py-1 bg-gray-200 rounded">{notificationPreferences.systemAlerts ? 'Enabled' : 'Disabled'}</span>
-              </div>
-
-              <Button onClick={() => setEditingNotifications(true)} className="mt-4 bg-black hover:bg-gray-800 text-white w-full">Edit Notification Preferences</Button>
+            <div className="flex flex-col gap-3">
+              {Object.entries(notificationPreferences).map(([key, enabled]) => (
+                <div key={key} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
+                  <span className="text-sm font-medium capitalize text-neutral-800">
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </span>
+                  <span className="text-xs px-2 py-1 bg-neutral-200 rounded">{enabled ? 'Enabled' : 'Disabled'}</span>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setEditingNotifications(true)}
+                className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold w-full sm:w-auto"
+              >
+                Edit Notification Preferences
+              </button>
             </div>
           )}
         </Card>
       </div>
-    </div>
+    </DashboardPageShell>
   )
 }
 
 export default function SettingsPage() {
-  return (
-    <DashboardErrorBoundary>
-      <SettingsContent />
-    </DashboardErrorBoundary>
-  )
+  return <SettingsContent />
 }
