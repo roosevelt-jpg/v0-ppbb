@@ -4,19 +4,35 @@ import {
   doc,
   getDocs,
   getDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
   query,
   where,
   orderBy,
   onSnapshot,
-  Query,
   QueryConstraint,
   addDoc,
   writeBatch,
 } from 'firebase/firestore'
 import { CustomForm, FormSubmission, FormStatistics } from '@/lib/form-builder-types'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { slugifyFormTitle } from '@/lib/form-builder-utils'
+
+async function generateUniqueFormSlug(title: string, excludeFormId?: string): Promise<string> {
+  const base = slugifyFormTitle(title) || `form-${Date.now()}`
+  let candidate = base
+  let attempt = 0
+
+  while (attempt < 50) {
+    const snap = await getDocs(query(collection(db, 'customForms'), where('slug', '==', candidate)))
+    const collision = snap.docs.find((d) => d.id !== excludeFormId)
+    if (!collision) return candidate
+    attempt += 1
+    candidate = `${base}-${attempt}`
+  }
+
+  return `${base}-${Date.now()}`
+}
 
 // ============ FORM CRUD OPERATIONS ============
 
@@ -91,20 +107,21 @@ export async function createForm(
   form: Omit<CustomForm, 'id' | 'createdAt' | 'updatedAt' | 'submissionCount'>
 ): Promise<string> {
   try {
-    const newForm: CustomForm = {
-      ...form,
-      id: '', // Will be set by Firestore
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      submissionCount: 0,
-    }
+    const slug =
+      form.status === 'active'
+        ? form.slug || (await generateUniqueFormSlug(form.title))
+        : form.slug || ''
 
-    const docRef = await addDoc(collection(db, 'customForms'), {
-      ...newForm,
+    const payload = sanitizeForFirestore({
+      ...form,
+      slug: slug || '',
+      bannerImageUrl: form.bannerImageUrl || '',
+      submissionCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
 
+    const docRef = await addDoc(collection(db, 'customForms'), payload)
     return docRef.id
   } catch (error) {
     console.error('[v0] Error creating form:', error)
@@ -114,11 +131,21 @@ export async function createForm(
 
 export async function updateForm(formId: string, updates: Partial<CustomForm>) {
   try {
+    let slug = updates.slug
+    if (updates.status === 'active' && !slug) {
+      const existing = await getFormById(formId)
+      slug = existing?.slug || (await generateUniqueFormSlug(updates.title || existing?.title || 'form', formId))
+    }
+
     const docRef = doc(db, 'customForms', formId)
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: new Date(),
-    })
+    await updateDoc(
+      docRef,
+      sanitizeForFirestore({
+        ...updates,
+        ...(slug !== undefined ? { slug } : {}),
+        updatedAt: new Date(),
+      })
+    )
   } catch (error) {
     console.error('[v0] Error updating form:', error)
     throw error
@@ -197,6 +224,35 @@ export async function getSubmissionById(submissionId: string): Promise<FormSubmi
   } catch (error) {
     console.error('[v0] Error fetching submission:', error)
     return null
+  }
+}
+
+export function subscribeToFormSubmissions(
+  formId: string,
+  callback: (submissions: FormSubmission[]) => void,
+  filters?: { status?: string }
+) {
+  try {
+    const constraints: QueryConstraint[] = [
+      where('formId', '==', formId),
+      orderBy('submittedAt', 'desc'),
+    ]
+    if (filters?.status) {
+      constraints.push(where('status', '==', filters.status))
+    }
+    const q = query(collection(db, 'formSubmissions'), ...constraints)
+    return onSnapshot(q, (snapshot) => {
+      const submissions = snapshot.docs.map((d) => ({
+        ...d.data(),
+        id: d.id,
+        submittedAt: d.data().submittedAt?.toDate() || new Date(),
+        reviewedAt: d.data().reviewedAt?.toDate(),
+      })) as FormSubmission[]
+      callback(submissions)
+    })
+  } catch (error) {
+    console.error('[v0] Error subscribing to submissions:', error)
+    return () => {}
   }
 }
 
@@ -453,12 +509,14 @@ export async function createDefaultForms() {
       )
 
       if (existingForm.empty) {
-        await addDoc(formRef, {
+        const slug = slugifyFormTitle(form.title)
+        await addDoc(formRef, sanitizeForFirestore({
           ...form,
+          slug,
           submissionCount: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
-        })
+        }))
       }
     }
   } catch (error) {

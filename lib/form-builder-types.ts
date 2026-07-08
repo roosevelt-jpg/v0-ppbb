@@ -25,6 +25,7 @@ export interface FormField {
   type: FormFieldType
   label: string
   placeholder?: string
+  /** Default optional — admin toggles per field */
   required: boolean
   description?: string
   options?: FormFieldOption[]
@@ -33,6 +34,9 @@ export interface FormField {
     maxLength?: number
     pattern?: string
     customMessage?: string
+    /** File upload — enforced client + server */
+    maxFileSizeMb?: number
+    acceptedExtensions?: string[]
   }
   order: number
 }
@@ -52,6 +56,10 @@ export interface CustomForm {
   category: 'charity' | 'event' | 'volunteer' | 'partnership' | 'other'
   sections: FormSection[]
   status: 'active' | 'inactive' | 'archived'
+  /** Public shareable path segment — set when status is active */
+  slug?: string
+  /** Optional banner shown at top of public form */
+  bannerImageUrl?: string
   createdBy: string
   createdAt: Date
   updatedAt: Date

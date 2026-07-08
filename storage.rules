@@ -83,5 +83,9 @@ service firebase.storage {
       allow read: if true;
       allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
     }
+    match /forms/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
   }
 }

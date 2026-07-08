@@ -131,9 +131,20 @@ export default function SubmissionDetailPage() {
                   return (
                     <div key={field.id}>
                       <p className="text-sm text-gray-600">{field.label}</p>
-                      <p className="font-medium mt-1">
-                        {Array.isArray(value) ? value.join(', ') : value || '(No response)'}
-                      </p>
+                      {field.type === 'file' && typeof value === 'object' && value && 'url' in value ? (
+                        <a
+                          href={(value as { url: string; name?: string }).url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium mt-1 text-black underline break-all"
+                        >
+                          {(value as { name?: string }).name || 'Download attachment'}
+                        </a>
+                      ) : (
+                        <p className="font-medium mt-1 break-words">
+                          {Array.isArray(value) ? value.join(', ') : value || '(No response)'}
+                        </p>
+                      )}
                     </div>
                   )
                 })}
