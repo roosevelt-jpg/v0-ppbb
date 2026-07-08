@@ -19,6 +19,9 @@ import {
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { formatRecordPhoneDisplay } from '@/lib/user-profile'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromSponsor } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 import {
   Plus,
   Pencil,
@@ -208,6 +211,15 @@ export default function SponsorsCrmPage() {
   const [businessOptions, setBusinessOptions] = React.useState<
     { id: string; name: string; isSponsor?: boolean }[]
   >([])
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+  const [profileEditRow, setProfileEditRow] = React.useState<CrmRow | null>(null)
+
+  const openProfile = (row: CrmRow) => {
+    setActiveProfile(profileFromSponsor(row as unknown as Record<string, unknown>))
+    setProfileEditRow(row)
+    setProfileOpen(true)
+  }
 
   React.useEffect(() => {
     const unsubS = onSnapshot(collection(db, 'sponsors'), (snap) => {
@@ -595,6 +607,7 @@ export default function SponsorsCrmPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <AdminViewProfileButton compact onClick={() => openProfile(row)} />
                     <button
                       type="button"
                       onClick={() => openEdit(row)}
@@ -616,7 +629,7 @@ export default function SponsorsCrmPage() {
 
             <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
               <table
-                className="w-full text-sm min-w-[960px]"
+                className="w-full text-sm min-w-[1080px]"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <thead>
@@ -669,6 +682,7 @@ export default function SponsorsCrmPage() {
                       <td className="py-3 px-3 capitalize">{row.status}</td>
                       <td className="py-3 px-3">
                         <div className="flex gap-2">
+                          <AdminViewProfileButton compact onClick={() => openProfile(row)} />
                           <button
                             type="button"
                             onClick={() => openEdit(row)}
@@ -899,6 +913,14 @@ export default function SponsorsCrmPage() {
           </div>
         </div>
       )}
+
+      <AdminUserProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={activeProfile}
+        onEdit={profileEditRow ? () => openEdit(profileEditRow) : undefined}
+        editLabel={activeProfile?.editHref ? 'Edit business' : 'Edit sponsor'}
+      />
     </AdminPageLayout>
   )
 }

@@ -9,7 +9,7 @@ type AvatarUser = User | BusinessProfile | null | undefined
 
 interface UserAvatarProps {
   user: AvatarUser
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   className?: string
   imageUrl?: string | null
   name?: string
@@ -19,6 +19,7 @@ const sizeMap = {
   sm: { box: 'h-8 w-8', text: 'text-xs', icon: 'h-4 w-4' },
   md: { box: 'h-9 w-9', text: 'text-sm', icon: 'h-5 w-5' },
   lg: { box: 'h-12 w-12', text: 'text-base', icon: 'h-6 w-6' },
+  xl: { box: 'h-24 w-24', text: 'text-2xl', icon: 'h-10 w-10' },
 }
 
 export function UserAvatar({ user, size = 'md', className = '', imageUrl, name }: UserAvatarProps) {

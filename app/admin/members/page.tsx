@@ -6,12 +6,22 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Search } from 'lucide-react'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromMember } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 
 export default function AdminMembersPage() {
   const [members, setMembers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [userType, setUserType] = React.useState<string>('all')
   const [search, setSearch] = React.useState('')
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+
+  const openProfile = (member: Record<string, unknown>) => {
+    setActiveProfile(profileFromMember(member))
+    setProfileOpen(true)
+  }
 
   React.useEffect(() => {
     loadMembers()
@@ -126,7 +136,7 @@ export default function AdminMembersPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 admin-table-scroll min-w-0">
-            <table className="w-full min-w-[880px]">
+            <table className="w-full min-w-[1020px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
@@ -137,6 +147,7 @@ export default function AdminMembersPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Volunteer Hours</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Joined</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Profile</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -168,6 +179,9 @@ export default function AdminMembersPage() {
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {member.dateJoined ? new Date(member.dateJoined).toLocaleDateString() : member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : '-'}
                     </td>
+                    <td className="px-6 py-3 text-sm whitespace-nowrap">
+                      <AdminViewProfileButton compact onClick={() => openProfile(member)} />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -175,6 +189,13 @@ export default function AdminMembersPage() {
           </div>
         )}
       </div>
+
+      <AdminUserProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={activeProfile}
+        editLabel="Edit member"
+      />
     </AdminPageLayout>
   )
 }

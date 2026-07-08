@@ -17,6 +17,9 @@ import {
 } from 'lucide-react'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatRecordPhoneDisplay } from '@/lib/user-profile'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromBusiness } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 
 type BusinessRow = {
   id: string
@@ -47,6 +50,13 @@ export default function BusinessesPage() {
   const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(
     null
   )
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+
+  const openProfile = (biz: BusinessRow) => {
+    setActiveProfile(profileFromBusiness(biz as unknown as Record<string, unknown>))
+    setProfileOpen(true)
+  }
 
   const fetchBusinesses = React.useCallback(async () => {
     setLoading(true)
@@ -285,6 +295,7 @@ export default function BusinessesPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-2 shrink-0">
+                      <AdminViewProfileButton onClick={() => openProfile(biz)} />
                       {!biz.isApproved && (
                         <Button
                           type="button"
@@ -363,6 +374,13 @@ export default function BusinessesPage() {
           </div>
         )}
       </div>
+
+      <AdminUserProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={activeProfile}
+        editLabel="Edit business"
+      />
     </AdminPageLayout>
   )
 }

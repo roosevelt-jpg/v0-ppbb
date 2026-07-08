@@ -7,6 +7,9 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromVolunteer } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -16,6 +19,13 @@ export default function VolunteersPage() {
   const [loading, setLoading] = React.useState(true)
   const [selectedVolunteer, setSelectedVolunteer] = React.useState<any>(null)
   const [editModalOpen, setEditModalOpen] = React.useState(false)
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+
+  const openProfile = (volunteer: Record<string, unknown>) => {
+    setActiveProfile(profileFromVolunteer(volunteer))
+    setProfileOpen(true)
+  }
 
   React.useEffect(() => {
     // Subscribe to real-time volunteer updates
@@ -107,25 +117,11 @@ export default function VolunteersPage() {
       },
     },
     {
-      key: 'details',
-      label: 'Details',
-      width: '120px',
-      render: (_: any, row: any) => (
-        <a
-          href={`/admin/volunteers/${row.id}`}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            color: '#0066cc',
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 500,
-          }}
-          className="hover:underline"
-        >
-          View Details →
-        </a>
+      key: 'profile',
+      label: 'Profile',
+      width: '130px',
+      render: (_: unknown, row: Record<string, unknown>) => (
+        <AdminViewProfileButton compact onClick={() => openProfile(row)} />
       ),
     },
   ]
@@ -161,6 +157,13 @@ export default function VolunteersPage() {
             setEditModalOpen(false)
             setSelectedVolunteer(null)
           }}
+        />
+
+        <AdminUserProfileModal
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          profile={activeProfile}
+          editLabel="Edit volunteer"
         />
       </div>
     </AdminPageLayout>
