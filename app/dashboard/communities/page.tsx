@@ -1,6 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React from 'react'
 import Link from 'next/link'
 import { subscribeToUserCommunities } from '@/lib/community-queries'

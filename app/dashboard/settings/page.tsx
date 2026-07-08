@@ -1,13 +1,15 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { User } from '@/lib/types'
-import { Bell } from 'lucide-react'
+import { Bell, Shield, UserX } from 'lucide-react'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { sendPasswordReset } from '@/lib/auth'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -15,7 +17,8 @@ import {
 } from '@/components/dashboard-states'
 
 function SettingsContent() {
-  const { user: authUser, loading: authLoading } = useAuth()
+  const { user: authUser, firebaseUser, loading: authLoading, logout } = useAuth()
+  const router = useRouter()
   const [user, setUser] = React.useState<User | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [editing, setEditing] = React.useState(false)
@@ -34,11 +37,21 @@ function SettingsContent() {
   })
   const [notificationPreferences, setNotificationPreferences] = React.useState({
     emailNotifications: true,
-    communityUpdates: true,
+    pushNotifications: true,
     eventReminders: true,
     memberMessages: true,
     systemAlerts: true,
+    newsletter: true,
+    communityUpdates: true,
   })
+  const [privacySettings, setPrivacySettings] = React.useState({
+    showProfileToCommunity: true,
+    showInMemberDirectory: true,
+  })
+  const [editingPrivacy, setEditingPrivacy] = React.useState(false)
+  const [savingPrivacy, setSavingPrivacy] = React.useState(false)
+  const [passwordMessage, setPasswordMessage] = React.useState<string | null>(null)
+  const [deleting, setDeleting] = React.useState(false)
 
   React.useEffect(() => {
     const fetchUser = async () => {
@@ -64,7 +77,10 @@ function SettingsContent() {
             departments: userData.departments || [],
           })
           if (userData.notificationPreferences) {
-            setNotificationPreferences(userData.notificationPreferences)
+            setNotificationPreferences((prev) => ({ ...prev, ...userData.notificationPreferences }))
+          }
+          if (userData.privacySettings) {
+            setPrivacySettings(userData.privacySettings as typeof privacySettings)
           }
         } else if (authUser) {
           setUser(authUser as User)
@@ -128,6 +144,62 @@ function SettingsContent() {
       setError('Failed to save notification preferences.')
     } finally {
       setSavingNotifications(false)
+    }
+  }
+
+  const handleSavePrivacy = async () => {
+    const uid = authUser?.id ?? firebaseUser?.uid
+    if (!uid) return
+    setSavingPrivacy(true)
+    try {
+      await updateDoc(
+        doc(db, 'users', uid),
+        sanitizeForFirestore({ privacySettings, updatedAt: new Date() })
+      )
+      setEditingPrivacy(false)
+    } catch (err) {
+      console.error('[v0] Error saving privacy:', err)
+      setError('Failed to save privacy settings.')
+    } finally {
+      setSavingPrivacy(false)
+    }
+  }
+
+  const handleChangePassword = async () => {
+    const email = user?.email ?? firebaseUser?.email
+    if (!email) {
+      setPasswordMessage('No email on file for this account.')
+      return
+    }
+    const result = await sendPasswordReset(email)
+    setPasswordMessage(
+      result.success
+        ? 'Password reset email sent. Check your inbox.'
+        : result.error || 'Failed to send reset email.'
+    )
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('Delete your account? This cannot be undone. Your profile will be deactivated.')) return
+    const uid = authUser?.id ?? firebaseUser?.uid
+    if (!uid) return
+    setDeleting(true)
+    try {
+      await updateDoc(
+        doc(db, 'users', uid),
+        sanitizeForFirestore({
+          status: 'deleted',
+          deletedAt: new Date(),
+          updatedAt: new Date(),
+        })
+      )
+      await logout()
+      router.push('/login')
+    } catch (err) {
+      console.error('[v0] Delete account error:', err)
+      setError('Failed to delete account. Please contact support.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -267,9 +339,11 @@ function SettingsContent() {
               {(
                 [
                   ['emailNotifications', 'Email Notifications', 'Receive updates via email'],
-                  ['communityUpdates', 'Community Updates', 'New communities and groups'],
+                  ['pushNotifications', 'Push Notifications', 'Browser and mobile push alerts'],
                   ['eventReminders', 'Event Reminders', 'Upcoming events and activities'],
+                  ['newsletter', 'Newsletter', 'Periodic community newsletters'],
                   ['memberMessages', 'Community Messages', 'New messages in communities'],
+                  ['communityUpdates', 'Community Updates', 'New communities and groups'],
                   ['systemAlerts', 'System Alerts', 'Important security notifications'],
                 ] as const
               ).map(([key, title, desc]) => (
@@ -325,6 +399,112 @@ function SettingsContent() {
               </button>
             </div>
           )}
+        </Card>
+
+        <Card className="p-6 border border-neutral-200 w-full">
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="w-5 h-5" />
+            <h2 className="text-xl font-bold text-neutral-900">Privacy Settings</h2>
+          </div>
+          {editingPrivacy ? (
+            <div className="flex flex-col gap-4">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.showProfileToCommunity}
+                  onChange={(e) =>
+                    setPrivacySettings({ ...privacySettings, showProfileToCommunity: e.target.checked })
+                  }
+                  className="mt-1 w-4 h-4 accent-black"
+                />
+                <div>
+                  <p className="font-medium text-sm">Show profile to community members</p>
+                  <p className="text-xs text-neutral-500">Let members see your profile in groups</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.showInMemberDirectory}
+                  onChange={(e) =>
+                    setPrivacySettings({ ...privacySettings, showInMemberDirectory: e.target.checked })
+                  }
+                  className="mt-1 w-4 h-4 accent-black"
+                />
+                <div>
+                  <p className="font-medium text-sm">Show in member directory</p>
+                  <p className="text-xs text-neutral-500">Appear in the public member directory</p>
+                </div>
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleSavePrivacy}
+                  disabled={savingPrivacy}
+                  className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold"
+                >
+                  {savingPrivacy ? 'Saving...' : 'Save Privacy Settings'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingPrivacy(false)}
+                  className="!bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+                <span>Show profile to community</span>
+                <span>{privacySettings.showProfileToCommunity ? 'On' : 'Off'}</span>
+              </div>
+              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+                <span>Show in member directory</span>
+                <span>{privacySettings.showInMemberDirectory ? 'On' : 'Off'}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingPrivacy(true)}
+                className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold w-full sm:w-auto"
+              >
+                Edit Privacy Settings
+              </button>
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-6 border border-neutral-200 w-full">
+          <div className="flex items-center gap-2 mb-4">
+            <UserX className="w-5 h-5" />
+            <h2 className="text-xl font-bold text-neutral-900">Account</h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div>
+              <button
+                type="button"
+                onClick={handleChangePassword}
+                className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold"
+              >
+                Change Password
+              </button>
+              {passwordMessage ? (
+                <p className="text-sm text-neutral-600 mt-2">{passwordMessage}</p>
+              ) : null}
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                className="text-red-600 text-sm font-semibold hover:underline disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete Account'}
+              </button>
+              <p className="text-xs text-neutral-500 mt-1">Permanently deactivate your member account.</p>
+            </div>
+          </div>
         </Card>
       </div>
     </DashboardPageShell>

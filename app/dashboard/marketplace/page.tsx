@@ -1,8 +1,6 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
 import { ShoppingCart, Tag } from 'lucide-react'
@@ -13,16 +11,7 @@ import {
   DashboardErrorState,
   DashboardEmptyState,
 } from '@/components/dashboard-states'
-
-const CATEGORY_MAP: Record<string, (offer: BusinessOffer) => boolean> = {
-  all: () => true,
-  merchandise: (o) =>
-    o.category?.toLowerCase() === 'merchandise' ||
-    (o.type === 'product' && o.category?.toLowerCase() !== 'books'),
-  books: (o) => ['books', 'education'].includes((o.category ?? '').toLowerCase()),
-  courses: (o) => ['courses', 'coaching', 'education'].includes((o.category ?? '').toLowerCase()),
-  discounts: (o) => o.type === 'discount' || Boolean(o.discountPercentage),
-}
+import { subscribeToMarketplaceOffers, filterMarketplaceOffers } from '@/lib/member-dashboard'
 
 export default function MarketplacePage() {
   const [products, setProducts] = useState<BusinessOffer[]>([])
@@ -32,18 +21,14 @@ export default function MarketplacePage() {
   const [cart, setCart] = useState<Array<BusinessOffer & { cartId: number }>>([])
 
   useEffect(() => {
-    const q = query(collection(db, 'businessOffers'), where('status', '==', 'active'))
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const rows =
-          snapshot?.docs?.map((d) => ({ ...(d.data() as BusinessOffer), id: d.id })) ?? []
+    const unsubscribe = subscribeToMarketplaceOffers(
+      (rows) => {
         setProducts(rows)
         setLoading(false)
         setError(null)
       },
-      (err) => {
-        console.error('[v0] Marketplace error:', err)
+      (msg) => {
+        console.error('[v0] Marketplace error:', msg)
         setError('Failed to load marketplace.')
         setLoading(false)
       }
@@ -51,10 +36,7 @@ export default function MarketplacePage() {
     return () => unsubscribe()
   }, [])
 
-  const filtered = useMemo(() => {
-    const matcher = CATEGORY_MAP[filter] ?? CATEGORY_MAP.all
-    return products.filter(matcher)
-  }, [products, filter])
+  const filtered = useMemo(() => filterMarketplaceOffers(products, filter), [products, filter])
 
   const handleAddToCart = (product: BusinessOffer) => {
     setCart((prev) => [...prev, { ...product, cartId: Date.now() }])

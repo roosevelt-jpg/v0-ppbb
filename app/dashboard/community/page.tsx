@@ -2,14 +2,17 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { auth, db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
-import { getAllGroups, getGroupsByType } from '@/lib/community-service'
+import { useAuth } from '@/lib/auth-context'
+import { getAllGroups } from '@/lib/community-service'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Users, Plus, MessageSquare, Search, Filter } from 'lucide-react'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
+import { Users, Plus, MessageSquare, Search } from 'lucide-react'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardEmptyState,
+  DashboardTabButton,
+} from '@/components/dashboard-states'
 
 interface Group {
   id: string
@@ -23,12 +26,12 @@ interface Group {
 
 function CommunityContent() {
   const router = useRouter()
+  const { loading: authLoading } = useAuth()
   const [groups, setGroups] = React.useState<Group[]>([])
   const [filteredGroups, setFilteredGroups] = React.useState<Group[]>([])
   const [loading, setLoading] = React.useState(true)
   const [searchTerm, setSearchTerm] = React.useState('')
-  const [selectedType, setSelectedType] = React.useState<string | null>(null)
-  const [userGroups, setUserGroups] = React.useState<Set<string>>(new Set())
+  const [selectedType, setSelectedType] = React.useState<string>('all')
 
   const groupTypes = [
     { id: 'member_networking', label: 'Member Networking' },
@@ -42,8 +45,7 @@ function CommunityContent() {
     const loadGroups = async () => {
       try {
         const result = await getAllGroups(50)
-        setGroups(result.groups)
-        setFilteredGroups(result.groups)
+        setGroups(result?.groups ?? [])
         setLoading(false)
       } catch (error) {
         console.error('[v0] Error loading groups:', error)
@@ -54,28 +56,6 @@ function CommunityContent() {
     loadGroups()
   }, [])
 
-  // Load user's groups
-  React.useEffect(() => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) return
-
-    try {
-      const unsubscribe = onSnapshot(
-        query(collection(db, 'groups'), where('memberCount', '>', 0)),
-        (snapshot) => {
-          const userGroupIds = new Set<string>()
-          // This is a simplified check - in production you'd check membership collection
-          setUserGroups(userGroupIds)
-        }
-      )
-
-      return () => unsubscribe()
-    } catch (error) {
-      console.error('[v0] Error loading user groups:', error)
-    }
-  }, [])
-
-  // Filter groups
   React.useEffect(() => {
     let filtered = groups
 
@@ -87,67 +67,70 @@ function CommunityContent() {
       )
     }
 
-    if (selectedType) {
+    if (selectedType && selectedType !== 'all') {
       filtered = filtered.filter((g) => g.type === selectedType)
     }
 
     setFilteredGroups(filtered)
   }, [searchTerm, selectedType, groups])
 
+  if (authLoading || loading) return <DashboardSkeleton />
+
   return (
-    <div className="p-6 lg:p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Community Forum</h1>
-        <p className="text-gray-600">Join discussions, share ideas, and connect with members</p>
-      </div>
-
-      {/* Create Group Button */}
+    <DashboardPageShell title="Community Forum" subtitle="Join discussions and connect with members">
       <div className="mb-6">
-        <Button onClick={() => router.push('/dashboard/community/create')} className="bg-black hover:bg-gray-800 text-white">
-          <Plus className="w-4 h-4 mr-2" />
+        <button
+          type="button"
+          onClick={() => router.push('/dashboard/community/create')}
+          className="inline-flex items-center gap-2 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+        >
+          <Plus className="w-4 h-4" />
           Create New Group
-        </Button>
+        </button>
       </div>
 
-      {/* Search and Filter */}
       <div className="mb-6 space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-3 w-5 h-5 text-neutral-400" />
           <Input
             placeholder="Search groups..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 w-full"
           />
         </div>
 
-        {/* Type Filter */}
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedType(null)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              selectedType === null ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
-            }`}
-          >
+          <DashboardTabButton active={selectedType === 'all'} onClick={() => setSelectedType('all')}>
             All Types
-          </button>
+          </DashboardTabButton>
           {groupTypes.map((type) => (
-            <button
+            <DashboardTabButton
               key={type.id}
+              active={selectedType === type.id}
               onClick={() => setSelectedType(type.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                selectedType === type.id ? 'bg-black text-white' : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
-              }`}
             >
               {type.label}
-            </button>
+            </DashboardTabButton>
           ))}
         </div>
       </div>
 
-      {/* Groups Grid */}
-      {!loading ? (
+      {filteredGroups.length === 0 ? (
+        <DashboardEmptyState
+          title="No groups found"
+          description="No groups match your search. Create the first one."
+          action={
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard/community/create')}
+              className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+            >
+              Create First Group
+            </button>
+          }
+        />
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredGroups.map((group) => (
             <Card
@@ -189,44 +172,25 @@ function CommunityContent() {
                   </span>
                 </div>
 
-                {/* Join Button */}
-                <Button
+                <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     router.push(`/dashboard/community/${group.id}`)
                   }}
-                  className="w-full bg-black hover:bg-gray-800 text-white"
+                  className="w-full !bg-black !text-white py-2 rounded-lg text-sm font-semibold"
                 >
-                  {userGroups.has(group.id) ? 'View Group' : 'Join Group'}
-                </Button>
+                  View Group
+                </button>
               </div>
             </Card>
           ))}
         </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="animate-pulse">Loading groups...</div>
-        </div>
       )}
-
-      {/* Empty State */}
-      {!loading && filteredGroups.length === 0 && (
-        <Card className="p-8 text-center">
-          <p className="text-gray-600 mb-4">No groups found matching your criteria.</p>
-          <Button onClick={() => router.push('/dashboard/community/create')} className="bg-black hover:bg-gray-800 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Create First Group
-          </Button>
-        </Card>
-      )}
-    </div>
+    </DashboardPageShell>
   )
 }
 
 export default function CommunityPage() {
-  return (
-    <DashboardErrorBoundary>
-      <CommunityContent />
-    </DashboardErrorBoundary>
-  )
+  return <CommunityContent />
 }

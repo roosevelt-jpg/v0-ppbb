@@ -1,123 +1,122 @@
 'use client'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
-import { auth, db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot } from 'firebase/firestore'
+import { useAuth } from '@/lib/auth-context'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { ShoppingBag, Truck, CheckCircle, Clock } from 'lucide-react'
-
+import Link from 'next/link'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+} from '@/components/dashboard-states'
 
 const STATUS_CONFIG = {
   pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pending' },
-  processing: { color: 'bg-gray-100 text-black', icon: Clock, label: 'Processing' },
-  shipped: { color: 'bg-gray-100 text-black', icon: Truck, label: 'Shipped' },
+  processing: { color: 'bg-neutral-100 text-neutral-900', icon: Clock, label: 'Processing' },
+  shipped: { color: 'bg-neutral-100 text-neutral-900', icon: Truck, label: 'Shipped' },
   delivered: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Delivered' },
   cancelled: { color: 'bg-red-100 text-red-800', icon: Clock, label: 'Cancelled' },
 }
 
 export default function OrdersPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [orders, setOrders] = useState<any[]>([])
+  const { user, loading: authLoading } = useAuth()
+  const [orders, setOrders] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) return
+    if (authLoading) return
+    if (!user?.id) {
+      setLoading(false)
+      return
+    }
 
     const unsubscribe = onSnapshot(
-      query(
-        collection(db, 'orders'),
-        where('userId', '==', firebaseUser.uid)
-      ),
+      query(collection(db, 'orders'), where('userId', '==', user.id)),
       (snapshot) => {
-        const orderData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as any[]
-        setOrders(orderData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
+        const orderData =
+          snapshot?.docs?.map((doc) => ({ id: doc.id, ...doc.data() })) ?? []
+        orderData.sort((a, b) => {
+          const aT = (a.createdAt as { toMillis?: () => number })?.toMillis?.() ?? 0
+          const bT = (b.createdAt as { toMillis?: () => number })?.toMillis?.() ?? 0
+          return bT - aT
+        })
+        setOrders(orderData)
         setLoading(false)
+        setError(null)
       },
-      (error) => {
-        console.error('[v0] Error fetching orders:', error)
+      (err) => {
+        console.error('[v0] Error fetching orders:', err)
+        setError('Failed to load orders.')
         setLoading(false)
       }
     )
 
     return () => unsubscribe()
-  }, [])
+  }, [authLoading, user?.id])
 
-  const getStatusConfig = (status: string) => {
-    return STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending
-  }
+  if (authLoading || loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
 
   return (
-    <div className="p-8">
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <p className="text-muted-foreground">Loading orders...</p>
-          </div>
-        ) : orders.length === 0 ? (
-          <Card className="p-8 text-center">
-            <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-            <p className="text-muted-foreground">No orders yet</p>
-            <p className="text-sm text-muted-foreground mt-2">Start shopping in the marketplace to see your orders here</p>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {orders.map((order) => {
-              const statusConfig = getStatusConfig(order.status)
-              const StatusIcon = statusConfig.icon
-              
-              return (
-                <Card key={order.id} className="p-6 hover:shadow-lg transition">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-semibold">Order #{order.id.slice(0, 8).toUpperCase()}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {order.createdAt ? new Date(order.createdAt.toMillis?.() || order.createdAt).toLocaleDateString() : 'Date not available'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <StatusIcon className="w-5 h-5" />
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.color}`}>{statusConfig.label}</span>
-                    </div>
+    <DashboardPageShell title="Orders" subtitle="Track your marketplace purchases">
+      {orders.length === 0 ? (
+        <DashboardEmptyState
+          icon={<ShoppingBag className="w-12 h-12" />}
+          title="No orders yet"
+          description="Start shopping in the marketplace to see your orders here."
+          action={
+            <Link href="/dashboard/marketplace" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold">
+              Browse Marketplace
+            </Link>
+          }
+        />
+      ) : (
+        <div className="space-y-4">
+          {orders.map((order) => {
+            const status = String(order.status ?? 'pending')
+            const statusConfig = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending
+            const StatusIcon = statusConfig.icon
+            return (
+              <Card key={String(order.id)} className="p-5 border border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="font-semibold">Order #{String(order.id).slice(0, 8).toUpperCase()}</h3>
+                    <p className="text-sm text-neutral-500">
+                      {order.createdAt
+                        ? new Date(
+                            (order.createdAt as { toMillis?: () => number }).toMillis?.() ??
+                              (order.createdAt as string)
+                          ).toLocaleDateString()
+                        : 'Date not available'}
+                    </p>
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-4 mb-4 pb-4 border-b">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Items</p>
-                      <p className="font-semibold">{order.items?.length || 0} item(s)</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Total Amount</p>
-                      <p className="font-semibold">AED {order.total?.toLocaleString() || '0'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Shipping Address</p>
-                      <p className="text-sm">{order.shippingAddress || 'Not provided'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Tracking Number</p>
-                      <p className="text-sm font-mono">{order.trackingNumber || 'Not available yet'}</p>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <StatusIcon className="w-5 h-5" />
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.color}`}>
+                      {statusConfig.label}
+                    </span>
                   </div>
-
-                  {order.timeline && (
-                    <div className="flex gap-4 text-xs">
-                      {order.timeline.map((event: any, idx: number) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-blue-500" />
-                          <span className="text-muted-foreground">{event.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </Card>
-              )
-            })}
-          </div>
-        )}
-      </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs text-neutral-500">Items</p>
+                    <p className="font-semibold">{Array.isArray(order.items) ? order.items.length : 0} item(s)</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-neutral-500">Total</p>
+                    <p className="font-semibold">AED {Number(order.total ?? 0).toLocaleString()}</p>
+                  </div>
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+    </DashboardPageShell>
   )
 }

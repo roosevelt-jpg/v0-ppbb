@@ -12,38 +12,28 @@ import {
   limit,
   orderBy,
   query,
+  updateDoc,
   where,
 } from 'firebase/firestore'
-import { Calendar, Heart, Briefcase, Clock, ArrowRight } from 'lucide-react'
+import { Calendar, Heart, Briefcase, Clock, ArrowRight, Bell, X } from 'lucide-react'
 import {
   DashboardPageShell,
   DashboardSkeleton,
   DashboardErrorState,
 } from '@/components/dashboard-states'
 import { getMemberApplications } from '@/lib/business-queries'
+import {
+  eventVisibleToUser,
+  fetchMemberDonationTotal,
+  parseFirestoreDate,
+  subscribeToMemberNotifications,
+  type MemberNotification,
+} from '@/lib/member-dashboard'
 import type { User } from '@/lib/types'
 
 function formatMemberDate(value: unknown): string {
-  if (!value) return '—'
-  try {
-    const d =
-      typeof value === 'object' && value !== null && 'toDate' in value
-        ? (value as { toDate: () => Date }).toDate()
-        : new Date(value as string | number)
-    if (Number.isNaN(d.getTime())) return '—'
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-  } catch {
-    return '—'
-  }
-}
-
-function eventVisibleToUser(event: Record<string, unknown>, gender?: string): boolean {
-  const restriction = event.genderRestriction as string | undefined
-  if (!restriction || restriction === 'mixed') return true
-  if (!gender) return true
-  if (restriction === 'ladies-only') return gender === 'female'
-  if (restriction === 'men-only') return gender === 'male'
-  return true
+  const d = parseFirestoreDate(value)
+  return d ? d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '—'
 }
 
 export default function DashboardPage() {
@@ -56,6 +46,7 @@ export default function DashboardPage() {
   })
   const [upcomingEvents, setUpcomingEvents] = React.useState<Record<string, unknown>[]>([])
   const [applications, setApplications] = React.useState<Record<string, unknown>[]>([])
+  const [notifications, setNotifications] = React.useState<MemberNotification[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -67,6 +58,7 @@ export default function DashboardPage() {
     }
 
     let cancelled = false
+    let unsubNotifications: (() => void) | undefined
 
     const load = async () => {
       setLoading(true)
@@ -76,26 +68,19 @@ export default function DashboardPage() {
         const member = user as User
         const now = new Date()
 
-        const [eventsResult, appsResult, donationsResult, profileResult] =
-          await Promise.allSettled([
-            getDocs(
-              query(
-                collection(db, 'events'),
-                where('status', '==', 'published'),
-                orderBy('startDate', 'asc'),
-                limit(20)
-              )
-            ),
-            getMemberApplications(user.id),
-            getDocs(
-              query(
-                collection(db, 'donations'),
-                where('userId', '==', user.id),
-                limit(50)
-              )
-            ),
-            getDoc(doc(db, 'users', user.id)),
-          ])
+        const [eventsResult, appsResult, donationTotal, profileResult] = await Promise.allSettled([
+          getDocs(
+            query(
+              collection(db, 'events'),
+              where('status', '==', 'published'),
+              orderBy('startDate', 'asc'),
+              limit(20)
+            )
+          ),
+          getMemberApplications(user.id),
+          fetchMemberDonationTotal(user.id),
+          getDoc(doc(db, 'users', user.id)),
+        ])
 
         if (cancelled) return
 
@@ -106,27 +91,13 @@ export default function DashboardPage() {
 
         const futureEvents = allEvents
           .filter((e) => {
-            const start = e.startDate
-            const startDate =
-              typeof start === 'object' && start !== null && 'toDate' in start
-                ? (start as { toDate: () => Date }).toDate()
-                : new Date(start as string)
-            return !Number.isNaN(startDate.getTime()) && startDate >= now
+            const startDate = parseFirestoreDate(e.startDate)
+            return startDate && startDate >= now
           })
           .filter((e) => eventVisibleToUser(e, member.gender))
           .slice(0, 3)
 
-        const apps =
-          appsResult.status === 'fulfilled' ? (appsResult.value ?? []).slice(0, 3) : []
-
-        const donationDocs =
-          donationsResult.status === 'fulfilled'
-            ? (donationsResult.value?.docs?.map((d) => d.data()) ?? [])
-            : []
-
-        const verifiedTotal = donationDocs
-          .filter((d) => d.status === 'completed' || d.status === 'verified')
-          .reduce((sum, d) => sum + (Number(d.amount) || 0), 0)
+        const apps = appsResult.status === 'fulfilled' ? (appsResult.value ?? []).slice(0, 3) : []
 
         const profileHours =
           profileResult.status === 'fulfilled' && profileResult.value?.exists()
@@ -146,8 +117,12 @@ export default function DashboardPage() {
         setStats({
           upcomingEvents: futureEvents.length,
           applications: appsResult.status === 'fulfilled' ? appsResult.value.length : 0,
-          donations: verifiedTotal,
+          donations: donationTotal.status === 'fulfilled' ? donationTotal.value : 0,
           volunteerHours: profileHours,
+        })
+
+        unsubNotifications = subscribeToMemberNotifications(user.id, (items) => {
+          if (!cancelled) setNotifications(items)
         })
       } catch (err) {
         console.error('[v0] Dashboard load error:', err)
@@ -160,8 +135,19 @@ export default function DashboardPage() {
     load()
     return () => {
       cancelled = true
+      unsubNotifications?.()
     }
   }, [authLoading, user?.id, (user as User | null)?.gender])
+
+  const dismissNotification = async (id: string) => {
+    if (!user?.id) return
+    try {
+      await updateDoc(doc(db, 'users', user.id, 'notifications', id), { dismissed: true })
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+    } catch (err) {
+      console.error('[v0] Dismiss notification error:', err)
+    }
+  }
 
   if (authLoading || loading) return <DashboardSkeleton />
   if (error) return <DashboardErrorState message={error} />
@@ -208,6 +194,40 @@ export default function DashboardPage() {
           )
         })}
       </div>
+
+      {notifications.length > 0 ? (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Bell className="w-5 h-5 text-neutral-700" />
+            <h2 className="text-xl font-bold text-neutral-900">Notifications</h2>
+          </div>
+          <div className="space-y-2">
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                className="flex items-start justify-between gap-3 border border-neutral-200 rounded-xl p-4 bg-white"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-neutral-900 text-sm">
+                    {n.title ?? 'Notification'}
+                  </p>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {n.message ?? n.body ?? ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => dismissNotification(n.id)}
+                  className="shrink-0 !bg-white !text-neutral-500 border border-neutral-200 p-1.5 rounded-lg"
+                  aria-label="Dismiss"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="mb-8">
         <div className="flex items-center justify-between mb-4">

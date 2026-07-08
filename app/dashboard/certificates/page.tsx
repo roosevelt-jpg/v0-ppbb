@@ -1,197 +1,150 @@
 'use client'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
-import { auth, db } from '@/lib/firebase'
+import { useAuth } from '@/lib/auth-context'
+import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Award, Download, Share2 } from 'lucide-react'
-
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+} from '@/components/dashboard-states'
 
 export default function CertificatesPage() {
-  const [certificates, setCertificates] = useState<any[]>([])
-  const [badges, setBadges] = useState<any[]>([])
+  const { user, loading: authLoading } = useAuth()
+  const [certificates, setCertificates] = useState<Record<string, unknown>[]>([])
+  const [badges, setBadges] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) {
+    if (authLoading) return
+    if (!user?.id) {
       setLoading(false)
       return
     }
 
-    let certLoaded = false
-    let badgesLoaded = false
+    let certDone = false
+    let badgeDone = false
+    const maybeDone = () => {
+      if (certDone && badgeDone) setLoading(false)
+    }
 
-    // Fetch certificates
-    const certUnsubscribe = onSnapshot(
-      query(collection(db, 'certificates'), where('userId', '==', firebaseUser.uid)),
+    const certUnsub = onSnapshot(
+      query(collection(db, 'certificates'), where('userId', '==', user.id)),
       (snapshot) => {
-        setCertificates(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
-        certLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+        setCertificates(snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
+        certDone = true
+        maybeDone()
       },
-      (error) => {
-        console.error('[v0] Error fetching certificates:', error)
-        certLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+      (err) => {
+        console.error('[v0] certificates error:', err)
+        setError('Failed to load certificates.')
+        certDone = true
+        maybeDone()
       }
     )
 
-    // Fetch badges
-    const badgeUnsubscribe = onSnapshot(
-      query(collection(db, 'badges'), where('userId', '==', firebaseUser.uid)),
+    const badgeUnsub = onSnapshot(
+      query(collection(db, 'badges'), where('userId', '==', user.id)),
       (snapshot) => {
-        setBadges(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
-        badgesLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+        setBadges(snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
+        badgeDone = true
+        maybeDone()
       },
-      (error) => {
-        console.error('[v0] Error fetching badges:', error)
-        badgesLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+      (err) => {
+        console.error('[v0] badges error:', err)
+        badgeDone = true
+        maybeDone()
       }
     )
 
     return () => {
-      certUnsubscribe()
-      badgeUnsubscribe()
+      certUnsub()
+      badgeUnsub()
     }
-  }, [])
+  }, [authLoading, user?.id])
+
+  if (authLoading || loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
 
   return (
-    <div className="p-8 space-y-8">
-        {/* Badges Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Your Badges</h2>
-          {loading ? (
-            <p className="text-muted-foreground">Loading badges...</p>
-          ) : badges.length === 0 ? (
-            <Card className="p-6">
-              <div className="text-center">
-                <Award size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-muted-foreground">No badges earned yet</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Complete activities to earn badges
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {badges.map((badge) => (
-                <Card key={badge.id} className="p-4 text-center hover:shadow-lg transition">
-                  <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 rounded-full text-white text-2xl">
-                    {badge.icon || <Award size={32} />}
+    <DashboardPageShell title="Certificates" subtitle="Your earned badges and certificates">
+      <section className="mb-10">
+        <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Badges</h2>
+        {badges.length === 0 ? (
+          <DashboardEmptyState
+            icon={<Award className="w-12 h-12" />}
+            title="No badges yet"
+            description="Complete activities to earn badges."
+          />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {badges.map((badge) => (
+              <Card key={String(badge.id)} className="p-4 text-center border border-neutral-200">
+                <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center bg-neutral-900 rounded-full text-white">
+                  <Award size={32} />
+                </div>
+                <h3 className="font-bold text-sm">{String(badge.name ?? 'Badge')}</h3>
+                {badge.description ? (
+                  <p className="text-xs text-neutral-500 mt-1">{String(badge.description)}</p>
+                ) : null}
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Certificates</h2>
+        {certificates.length === 0 ? (
+          <DashboardEmptyState
+            icon={<Award className="w-12 h-12" />}
+            title="No certificates yet"
+            description="Complete courses and volunteer hours to earn certificates."
+          />
+        ) : (
+          <div className="space-y-4">
+            {certificates.map((cert) => (
+              <Card key={String(cert.id)} className="p-5 border border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+                  <div>
+                    <h3 className="font-bold text-lg">{String(cert.title ?? 'Certificate')}</h3>
+                    {cert.issuedBy ? (
+                      <p className="text-sm text-neutral-500 mt-1">{String(cert.issuedBy)}</p>
+                    ) : null}
+                    {cert.credentialId ? (
+                      <p className="text-xs text-neutral-600 mt-2 font-mono">ID: {String(cert.credentialId)}</p>
+                    ) : null}
                   </div>
-                  <h3 className="font-bold text-sm">{badge.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{badge.description}</p>
-                  <p className="text-xs mt-2" style={{ color: '#888888' }}>
-                    {badge.earnedAt
-                      ? new Date(badge.earnedAt).toLocaleDateString()
-                      : 'Recently'}
-                  </p>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Certificates Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Your Certificates</h2>
-          {loading ? (
-            <p className="text-muted-foreground">Loading certificates...</p>
-          ) : certificates.length === 0 ? (
-            <Card className="p-6">
-              <div className="text-center">
-                <Award size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-muted-foreground">No certificates yet</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Complete courses and volunteer hours to earn certificates
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {certificates.map((cert) => (
-                <Card key={cert.id} className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg">{cert.title}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{cert.issuedBy}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Issued:{' '}
-                        {cert.issuedDate
-                          ? new Date(cert.issuedDate).toLocaleDateString()
-                          : 'N/A'}
-                      </p>
-                      {cert.expiryDate && (
-                        <p className="text-xs text-muted-foreground">
-                          Expires:{' '}
-                          {new Date(cert.expiryDate).toLocaleDateString()}
-                        </p>
-                      )}
-                      {cert.credentialId && (
-                        <p className="text-xs text-black mt-2 font-medium">
-                          ID: {cert.credentialId}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Download certificate
-                          console.log('Download:', cert.id)
-                        }}
+                  <div className="flex gap-2">
+                    {cert.downloadUrl ? (
+                      <a
+                        href={String(cert.downloadUrl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="!bg-black !text-white px-3 py-2 rounded-lg text-sm inline-flex items-center gap-1"
                       >
-                        <Download size={16} />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Share certificate
-                          console.log('Share:', cert.id)
-                        }}
-                      >
-                        <Share2 size={16} />
-                      </Button>
-                    </div>
+                        <Download size={16} /> Download
+                      </a>
+                    ) : (
+                      <button type="button" className="!bg-white !text-black border border-gray-300 px-3 py-2 rounded-lg text-sm inline-flex items-center gap-1">
+                        <Download size={16} /> Download
+                      </button>
+                    )}
+                    <button type="button" className="!bg-white !text-black border border-gray-300 px-3 py-2 rounded-lg text-sm inline-flex items-center gap-1">
+                      <Share2 size={16} /> Share
+                    </button>
                   </div>
-
-                  {cert.description && (
-                    <p className="text-sm mt-4 text-muted-foreground">
-                      {cert.description}
-                    </p>
-                  )}
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+    </DashboardPageShell>
   )
 }

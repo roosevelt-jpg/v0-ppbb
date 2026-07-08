@@ -14,19 +14,12 @@ import {
   DashboardEmptyState,
   DashboardTabButton,
 } from '@/components/dashboard-states'
-
-type DonationRow = {
-  id: string
-  charityName?: string
-  causeName?: string
-  amount?: number
-  currency?: string
-  status?: string
-  createdAt?: unknown
-  submittedAt?: unknown
-  receiptURL?: string | null
-  partnerName?: string
-}
+import {
+  subscribeToMemberDonations,
+  parseDonationDate,
+  isDonationCompleted,
+  type DonationRow,
+} from '@/lib/member-dashboard'
 
 type CharityCase = {
   id: string
@@ -36,20 +29,6 @@ type CharityCase = {
   goalAmount?: number
   raisedAmount?: number
   amountRaised?: number
-}
-
-function parseDonationDate(row: DonationRow): string {
-  const raw = row.createdAt ?? row.submittedAt
-  if (!raw) return '—'
-  try {
-    const d =
-      typeof raw === 'object' && raw !== null && 'toDate' in raw
-        ? (raw as { toDate: () => Date }).toDate()
-        : new Date(raw as string)
-    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString()
-  } catch {
-    return '—'
-  }
 }
 
 function DonationsContent() {
@@ -67,72 +46,36 @@ function DonationsContent() {
       return
     }
 
-    const unsubs: Array<() => void> = []
-    let loadedDonations = 0
+    setLoading(true)
+    const unsub = subscribeToMemberDonations(
+      user.id,
+      (rows) => {
+        setDonations(rows)
+        setLoading(false)
+        setError(null)
+      },
+      (msg) => {
+        console.error('[v0] Donations error:', msg)
+        setError('Failed to load donations.')
+        setLoading(false)
+      }
+    )
 
-    const markDonationsLoaded = () => {
-      loadedDonations += 1
-      if (loadedDonations >= 2) setLoading(false)
+    const charityUnsub = onSnapshot(
+      query(collection(db, 'charityCases'), where('status', '==', 'active')),
+      (snapshot) => {
+        setCharityCases(snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as CharityCase)) ?? [])
+      },
+      (err) => console.error('[v0] charityCases error:', err)
+    )
+
+    return () => {
+      unsub()
+      charityUnsub()
     }
-
-    try {
-      unsubs.push(
-        onSnapshot(
-          query(collection(db, 'donations'), where('userId', '==', user.id)),
-          (snapshot) => {
-            const primary =
-              snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as DonationRow)) ?? []
-            setDonations((prev) => {
-              const merged = new Map<string, DonationRow>()
-              for (const row of [...primary, ...prev]) merged.set(row.id, row)
-              return Array.from(merged.values()).sort(
-                (a, b) => parseDonationDate(b).localeCompare(parseDonationDate(a))
-              )
-            })
-            markDonationsLoaded()
-          },
-          () => markDonationsLoaded()
-        )
-      )
-
-      unsubs.push(
-        onSnapshot(
-          query(collection(db, 'donationSubmissions'), where('userId', '==', user.id)),
-          (snapshot) => {
-            const subs =
-              snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as DonationRow)) ?? []
-            setDonations((prev) => {
-              const merged = new Map<string, DonationRow>()
-              for (const row of [...prev, ...subs]) merged.set(row.id, row)
-              return Array.from(merged.values())
-            })
-            markDonationsLoaded()
-          },
-          () => markDonationsLoaded()
-        )
-      )
-
-      unsubs.push(
-        onSnapshot(
-          query(collection(db, 'charityCases'), where('status', '==', 'active')),
-          (snapshot) => {
-            setCharityCases(snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as CharityCase)) ?? [])
-          },
-          (err) => {
-            console.error('[v0] charityCases error:', err)
-          }
-        )
-      )
-    } catch (err) {
-      console.error('[v0] Donations listener error:', err)
-      setError('Failed to load donations.')
-      setLoading(false)
-    }
-
-    return () => unsubs.forEach((u) => u())
   }, [authLoading, user?.id])
 
-  const completed = donations.filter((d) => d.status === 'completed' || d.status === 'verified')
+  const completed = donations.filter((d) => isDonationCompleted(d.status))
   const totalDonated = completed.reduce((sum, d) => sum + (Number(d.amount) || 0), 0)
   const causesSupported = new Set(completed.map((d) => d.charityName || d.causeName).filter(Boolean)).size
 
