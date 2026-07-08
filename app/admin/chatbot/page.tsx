@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import { AdminPageLayout } from '@/components/admin-page-layout'
+import { ChatbotAvatar } from '@/components/chatbot-avatar'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, updateDoc, doc, getDocs } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
@@ -143,9 +143,12 @@ export default function AdminChatbotPage() {
     <AdminPageLayout title="Chatbot Management" subtitle="Manage and reply to customer support conversations">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900">Chatbot Management</h1>
-          <p className="text-neutral-600 mt-1">Manage and reply to customer support conversations</p>
+        <div className="mb-8 flex items-start gap-4">
+          <ChatbotAvatar size={48} className="w-10 h-10 sm:w-12 sm:h-12 shrink-0" />
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900">Chatbot Management</h1>
+            <p className="text-neutral-600 mt-1 font-body">Manage and reply to customer support conversations</p>
+          </div>
         </div>
 
         {/* Stats */}
@@ -326,13 +329,7 @@ export default function AdminChatbotPage() {
               </Card>
             ) : (
               <Card className="p-12 border border-neutral-200 text-center">
-                <Image
-                  src="/icons/emirati-dress-icon.png"
-                  alt="Chatbot Assistant"
-                  width={48}
-                  height={48}
-                  style={{ margin: '0 auto 16px', opacity: 0.3 }}
-                />
+                <ChatbotAvatar size={48} className="mx-auto mb-4 opacity-30" />
                 <p className="text-neutral-500">Select a conversation to view details</p>
               </Card>
             )}

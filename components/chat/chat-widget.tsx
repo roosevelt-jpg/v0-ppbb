@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import { ChatbotAvatar } from '@/components/chatbot-avatar'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -235,13 +236,10 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 text-2xl"
-          style={{ backgroundColor: '#111111' }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#333333')}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#111111')}
-          aria-label="Open chat"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 overflow-hidden bg-white border-2 border-neutral-200 p-1"
+          aria-label="Open PB Assistant chat"
         >
-          👨🏽
+          <ChatbotAvatar size={48} className="w-full h-full" priority />
         </button>
       )}
 
@@ -250,9 +248,12 @@ export function ChatWidget() {
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-64 h-80 sm:w-80 sm:h-[430px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200 max-w-[calc(100vw-32px)]">
           {/* Header */}
           <div className="flex items-center justify-between p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
-            <div>
-              <h3 className="font-semibold text-sm sm:text-base">PB Assistant</h3>
-              <p className="text-[10px] opacity-60 font-light">By FLYN.AI</p>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <ChatbotAvatar size={36} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 p-0.5" />
+              <div className="min-w-0">
+                <h3 className="font-semibold text-sm sm:text-base truncate">PB Assistant</h3>
+                <p className="text-[10px] opacity-60 font-light">By FLYN.AI</p>
+              </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
@@ -265,8 +266,11 @@ export function ChatWidget() {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-neutral-50">
             {messages.map((message, idx) => (
-              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
-                <div className={`${message.role === 'user' ? 'max-w-[calc(100%-24px)]' : 'max-w-[calc(100%-24px)]'}`}>
+              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start items-end gap-2'} w-full`}>
+                {message.role === 'assistant' && (
+                  <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-1 hidden sm:block" />
+                )}
+                <div className={`${message.role === 'user' ? 'max-w-[calc(100%-24px)]' : 'max-w-[calc(100%-32px)] sm:max-w-[calc(100%-24px)]'}`}>
                   <div
                     className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm ${
                       message.role === 'user'
@@ -296,7 +300,8 @@ export function ChatWidget() {
               </div>
             ))}
             {loading && (
-              <div className="flex justify-start">
+              <div className="flex justify-start items-end gap-2">
+                <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-1 hidden sm:block" />
                 <div className="bg-white border border-neutral-200 px-3 sm:px-4 py-2 rounded-lg rounded-bl-none">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" />
