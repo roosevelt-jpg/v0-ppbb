@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { collection, onSnapshot, orderBy, query, where, limit } from 'firebase/firestore'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import {
   subscribeToHomepage,
@@ -53,12 +53,7 @@ export function HomeUpcomingEvents() {
 
   useEffect(() => {
     const maxFetch = Math.max(config.eventsSection.maxEventsToShow, 8)
-    const eventsQuery = query(
-      collection(db, 'events'),
-      where('status', '==', 'published'),
-      orderBy('date', 'asc'),
-      limit(maxFetch)
-    )
+    const eventsQuery = query(collection(db, 'events'), where('status', '==', 'published'))
 
     const unsub = onSnapshot(
       eventsQuery,
@@ -68,18 +63,22 @@ export function HomeUpcomingEvents() {
         const mapped = snapshot.docs
           .map((docSnap) => {
             const data = docSnap.data()
-            const date = toEventDate(data.date)
+            const date =
+              toEventDate(data.date) ||
+              toEventDate(data.startDate) ||
+              new Date()
             return {
               id: docSnap.id,
               ...data,
-              date: date || new Date(),
+              date,
             } as Event
           })
           .filter((event) => {
             const eventDate = toEventDate(event.date)
             return eventDate ? eventDate >= now : true
           })
-        setEvents(mapped)
+          .sort((a, b) => toEventDate(a.date)!.getTime() - toEventDate(b.date)!.getTime())
+        setEvents(mapped.slice(0, maxFetch))
         setEventsReady(true)
       },
       () => {

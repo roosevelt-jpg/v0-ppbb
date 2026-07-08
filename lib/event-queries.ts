@@ -20,6 +20,7 @@ import type { Event, EventRegistration, Payout, EventStatus } from '@/lib/event-
 import {
   getEventStartDate,
   mapEventDoc,
+  toEventDate,
   type NormalizedEvent,
 } from '@/lib/event-utils'
 
@@ -40,17 +41,24 @@ export function subscribeToAllEvents(
     constraints.push(where('createdBy', '==', filters.createdBy))
   }
 
-  constraints.push(orderBy('createdAt', 'desc'))
-
-  const q = query(collection(db, 'events'), ...constraints)
+  const q =
+    constraints.length > 0
+      ? query(collection(db, 'events'), ...constraints)
+      : query(collection(db, 'events'))
 
   return onSnapshot(
     q,
     (snapshot) => {
-      const events = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Event[]
+      const events = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Event[]
+      events.sort((a, b) => {
+        const aTime = toEventDate(a.createdAt)?.getTime() ?? 0
+        const bTime = toEventDate(b.createdAt)?.getTime() ?? 0
+        return bTime - aTime
+      })
       callback(events)
     },
     (error) => {
