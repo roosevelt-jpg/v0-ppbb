@@ -3,12 +3,20 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { AdminTable } from '@/components/admin-table'
 import { db } from '@/lib/firebase'
-import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
 import { uploadImageToFirebase, validateImageFile } from '@/lib/upload-utils'
-import Link from 'next/link'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { Building2 } from 'lucide-react'
 
 export default function CharityPartnersPage() {
   const [partners, setPartners] = React.useState<any[]>([])
@@ -22,19 +30,23 @@ export default function CharityPartnersPage() {
     website: '',
     paymentLink: '',
     logo: '',
+    isActive: true,
     status: 'active',
   })
 
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'charityPartners'), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      setPartners(data)
-      setLoading(false)
-    })
-
+    const unsubscribe = onSnapshot(
+      collection(db, 'charityPartners'),
+      (snapshot) => {
+        const data = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }))
+        setPartners(data)
+        setLoading(false)
+      },
+      () => setLoading(false)
+    )
     return () => unsubscribe()
   }, [])
 
@@ -43,11 +55,20 @@ export default function CharityPartnersPage() {
     if (!newPartner.name.trim()) return
     setUploadError('')
 
-    await addDoc(collection(db, 'charityPartners'), {
-      ...newPartner,
-      createdAt: serverTimestamp(),
-      active: true,
-    })
+    await addDoc(
+      collection(db, 'charityPartners'),
+      sanitizeForFirestore({
+        name: newPartner.name.trim(),
+        description: newPartner.description.trim(),
+        website: newPartner.website || null,
+        paymentLink: newPartner.paymentLink.trim(),
+        logo: newPartner.logo || null,
+        isActive: newPartner.isActive,
+        status: newPartner.isActive ? 'active' : 'inactive',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    )
 
     setNewPartner({
       name: '',
@@ -55,11 +76,12 @@ export default function CharityPartnersPage() {
       website: '',
       paymentLink: '',
       logo: '',
+      isActive: true,
       status: 'active',
     })
   }
 
-  const handleLogoUpload = async (file: File) => {
+  const handleLogoUpload = async (file: File, target: 'new' | 'edit') => {
     try {
       setUploadError('')
       setUploading(true)
@@ -68,14 +90,17 @@ export default function CharityPartnersPage() {
         setUploadError(validation.error || 'Invalid file')
         return
       }
-      const url = await uploadImageToFirebase(file, 'partner-logos', {
+      const url = await uploadImageToFirebase(file, 'charity-partner-logos', {
         preset: 'logo',
         allowSvg: true,
       })
-      setNewPartner({ ...newPartner, logo: url })
+      if (target === 'new') {
+        setNewPartner((p) => ({ ...p, logo: url }))
+      } else if (editingPartner) {
+        setEditingPartner({ ...editingPartner, logo: url })
+      }
     } catch (error: any) {
       setUploadError(error.message || 'Upload failed')
-      console.error('[v0] Logo upload error:', error)
     } finally {
       setUploading(false)
     }
@@ -86,84 +111,113 @@ export default function CharityPartnersPage() {
     await deleteDoc(doc(db, 'charityPartners', id))
   }
 
-  const handleEditPartner = (partner: any) => {
-    setEditingPartner(partner)
-  }
-
   const handleUpdatePartner = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!editingPartner.id) return
+    if (!editingPartner?.id) return
 
-    try {
-      await updateDoc(doc(db, 'charityPartners', editingPartner.id), {
+    const isActive = editingPartner.isActive !== false && editingPartner.status !== 'inactive'
+    await updateDoc(
+      doc(db, 'charityPartners', editingPartner.id),
+      sanitizeForFirestore({
         name: editingPartner.name,
-        description: editingPartner.description,
-        website: editingPartner.website,
+        description: editingPartner.description || '',
+        website: editingPartner.website || null,
         paymentLink: editingPartner.paymentLink,
-        logo: editingPartner.logo,
-        status: editingPartner.status,
+        logo: editingPartner.logo || null,
+        isActive,
+        status: isActive ? 'active' : 'inactive',
         updatedAt: serverTimestamp(),
       })
-      setEditingPartner(null)
-    } catch (error) {
-      console.error('[v0] Error updating partner:', error)
-    }
-  }
-
-  const handleCloseEditModal = () => {
+    )
     setEditingPartner(null)
   }
 
+  const toggleActive = async (partner: any) => {
+    const next = !(partner.isActive !== false && partner.status !== 'inactive')
+    await updateDoc(
+      doc(db, 'charityPartners', partner.id),
+      sanitizeForFirestore({
+        isActive: next,
+        status: next ? 'active' : 'inactive',
+        updatedAt: serverTimestamp(),
+      })
+    )
+  }
+
+  const inputClass =
+    'w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-neutral-900'
+  const btnPrimary =
+    'min-h-[44px] bg-black hover:bg-neutral-900 text-white px-4 py-2 rounded text-sm font-semibold disabled:opacity-50'
+  const btnSecondary =
+    'min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-50 px-4 py-2 rounded text-sm font-semibold'
+  const btnDanger =
+    'min-h-[44px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold'
+
+  const isPartnerActive = (p: any) => p.isActive !== false && p.status !== 'inactive'
+
   return (
-    <AdminPageLayout title="Charity Partners" subtitle="Manage and coordinate with nonprofit partners">
-      <div className="space-y-6">
-        {/* Add New Partner Form */}
-        <div className="bg-white rounded-lg p-6 shadow">
-          <h2 className="text-lg font-bold mb-4">Add New Charity Partner</h2>
+    <AdminPageLayout
+      title="Charity Partners"
+      subtitle="Partners whose payment links power the /donate flow"
+    >
+      <div className="space-y-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
+          <h2 className="text-lg mb-4" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+            Add Charity Partner
+          </h2>
           <form onSubmit={handleAddPartner} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
-              placeholder="Partner Name (e.g., Beit Al Khair)"
+              placeholder="Partner name (e.g. Beit Al Khair)"
               value={newPartner.name}
               onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })}
-              className="border rounded px-3 py-2"
+              className={inputClass}
               required
             />
             <input
               type="url"
-              placeholder="Website URL"
+              placeholder="Website URL (optional)"
               value={newPartner.website}
               onChange={(e) => setNewPartner({ ...newPartner, website: e.target.value })}
-              className="border rounded px-3 py-2"
+              className={inputClass}
             />
             <input
               type="url"
-              placeholder="Payment Link"
+              placeholder="Payment link URL *"
               value={newPartner.paymentLink}
               onChange={(e) => setNewPartner({ ...newPartner, paymentLink: e.target.value })}
-              className="border rounded px-3 py-2"
+              className={inputClass}
               required
             />
-            <div className="relative">
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
+                Logo
+              </label>
               <input
                 type="file"
-                accept="image/*"
-                onChange={(e) => e.target.files && handleLogoUpload(e.target.files[0])}
+                accept="image/*,.svg"
+                onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0], 'new')}
                 disabled={uploading}
-                className="border rounded px-3 py-2 w-full cursor-pointer"
-                placeholder="Upload Logo"
+                className={inputClass}
               />
-              {newPartner.logo && (
-                <div className="absolute right-3 top-2 text-sm text-green-600 font-medium">
-                  ✓ Uploaded
-                </div>
-              )}
+              {newPartner.logo ? (
+                <img src={newPartner.logo} alt="" className="mt-2 h-10 object-contain" />
+              ) : null}
             </div>
+            <label className="flex items-center gap-2 min-h-[44px] text-sm md:col-span-2">
+              <input
+                type="checkbox"
+                checked={newPartner.isActive}
+                onChange={(e) => setNewPartner({ ...newPartner, isActive: e.target.checked })}
+                className="w-4 h-4"
+              />
+              Active (shown in donation flow)
+            </label>
             <textarea
-              placeholder="Partner Description"
+              placeholder="Description"
               value={newPartner.description}
               onChange={(e) => setNewPartner({ ...newPartner, description: e.target.value })}
-              className="border rounded px-3 py-2 md:col-span-2"
+              className={`${inputClass} md:col-span-2`}
               rows={3}
             />
             {uploadError && (
@@ -171,125 +225,243 @@ export default function CharityPartnersPage() {
                 {uploadError}
               </div>
             )}
-            <button
-              type="submit"
-              disabled={uploading}
-              className="md:col-span-2 bg-black hover:bg-gray-800 disabled:bg-gray-400 text-white py-2 rounded font-medium"
-            >
-              {uploading ? 'Uploading...' : 'Add Partner'}
+            <button type="submit" disabled={uploading} className={`${btnPrimary} md:col-span-2`}>
+              {uploading ? 'Uploading…' : 'Add Partner'}
             </button>
           </form>
         </div>
 
-        {/* Partners List Table */}
-        <AdminTable
-          title="Charity Partners"
-          columns={['Name', 'Website', 'Payment Link', 'Status', 'Added', 'Actions']}
-          data={partners.map((partner) => ({
-            name: partner.name,
-            website: (
-              <a href={partner.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                View
-              </a>
-            ),
-            paymentLink: (
-              <a href={partner.paymentLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                Payment Link
-              </a>
-            ),
-            status: (
-              <span className={`px-2 py-1 rounded text-sm ${partner.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
-                {partner.status}
-              </span>
-            ),
-            added: formatDistanceToNow(partner.createdAt?.toDate?.() || new Date(), { addSuffix: true }),
-            actions: (
-              <div className="flex gap-2">
-                <button onClick={() => handleEditPartner(partner)} className="text-blue-600 hover:text-blue-800 font-medium">
-                  Edit
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
+          <h2 className="text-lg mb-4" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+            Partners
+          </h2>
+
+          {loading ? (
+            <div className="space-y-3 animate-pulse">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-16 bg-neutral-100 rounded" />
+              ))}
+            </div>
+          ) : partners.length === 0 ? (
+            <div className="text-center py-12">
+              <Building2 className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+              <p className="text-neutral-600">No charity partners yet</p>
+              <p className="text-sm text-neutral-500 mt-1">
+                Add Beit Al Khair or other partners so /donate can redirect to payment links.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="md:hidden space-y-3">
+                {partners.map((p) => (
+                  <div key={p.id} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex gap-3 items-center">
+                      {p.logo ? (
+                        <img src={p.logo} alt="" className="w-10 h-10 object-contain" />
+                      ) : null}
+                      <div>
+                        <p className="font-semibold">{p.name}</p>
+                        <p className="text-xs text-neutral-500">
+                          {isPartnerActive(p) ? 'Active' : 'Inactive'}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-neutral-600 line-clamp-2">{p.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className={btnSecondary}
+                        onClick={() => setEditingPartner(p)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className={btnSecondary}
+                        onClick={() => toggleActive(p)}
+                      >
+                        {isPartnerActive(p) ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button
+                        type="button"
+                        className={btnDanger}
+                        onClick={() => handleDeletePartner(p.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm min-w-[720px]">
+                  <thead>
+                    <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 border-b">
+                      <th className="py-3 pr-3">Name</th>
+                      <th className="py-3 pr-3">Payment link</th>
+                      <th className="py-3 pr-3">Active</th>
+                      <th className="py-3 pr-3">Added</th>
+                      <th className="py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {partners.map((p) => (
+                      <tr key={p.id} className="border-b border-neutral-100">
+                        <td className="py-3 pr-3">
+                          <div className="flex items-center gap-2">
+                            {p.logo ? (
+                              <img src={p.logo} alt="" className="w-8 h-8 object-contain" />
+                            ) : null}
+                            <span className="font-medium">{p.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 pr-3 max-w-[200px] truncate">
+                          {p.paymentLink ? (
+                            <a
+                              href={p.paymentLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline"
+                            >
+                              Open link
+                            </a>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td className="py-3 pr-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleActive(p)}
+                            className={`px-2 py-1 rounded text-xs font-medium min-h-[32px] ${
+                              isPartnerActive(p)
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-neutral-100 text-neutral-600'
+                            }`}
+                          >
+                            {isPartnerActive(p) ? 'Active' : 'Inactive'}
+                          </button>
+                        </td>
+                        <td className="py-3 pr-3 text-neutral-500">
+                          {formatDistanceToNow(p.createdAt?.toDate?.() || new Date(), {
+                            addSuffix: true,
+                          })}
+                        </td>
+                        <td className="py-3">
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              className="underline"
+                              onClick={() => setEditingPartner(p)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="underline text-red-600"
+                              onClick={() => handleDeletePartner(p.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {editingPartner && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-lg w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-6">
+            <h2 className="text-xl mb-4" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+              Edit Partner
+            </h2>
+            <form onSubmit={handleUpdatePartner} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                value={editingPartner.name || ''}
+                onChange={(e) => setEditingPartner({ ...editingPartner, name: e.target.value })}
+                className={inputClass}
+                required
+              />
+              <input
+                type="url"
+                placeholder="Website"
+                value={editingPartner.website || ''}
+                onChange={(e) => setEditingPartner({ ...editingPartner, website: e.target.value })}
+                className={inputClass}
+              />
+              <input
+                type="url"
+                placeholder="Payment link"
+                value={editingPartner.paymentLink || ''}
+                onChange={(e) =>
+                  setEditingPartner({ ...editingPartner, paymentLink: e.target.value })
+                }
+                className={`${inputClass} md:col-span-2`}
+                required
+              />
+              <div className="md:col-span-2">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
+                  Logo
+                </label>
+                <input
+                  type="file"
+                  accept="image/*,.svg"
+                  onChange={(e) =>
+                    e.target.files?.[0] && handleLogoUpload(e.target.files[0], 'edit')
+                  }
+                  className={inputClass}
+                />
+                {editingPartner.logo ? (
+                  <img src={editingPartner.logo} alt="" className="mt-2 h-12 object-contain" />
+                ) : null}
+              </div>
+              <label className="flex items-center gap-2 min-h-[44px] text-sm md:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={isPartnerActive(editingPartner)}
+                  onChange={(e) =>
+                    setEditingPartner({
+                      ...editingPartner,
+                      isActive: e.target.checked,
+                      status: e.target.checked ? 'active' : 'inactive',
+                    })
+                  }
+                  className="w-4 h-4"
+                />
+                Active
+              </label>
+              <textarea
+                value={editingPartner.description || ''}
+                onChange={(e) =>
+                  setEditingPartner({ ...editingPartner, description: e.target.value })
+                }
+                className={`${inputClass} md:col-span-2`}
+                rows={2}
+              />
+              <div className="md:col-span-2 flex flex-col sm:flex-row gap-2">
+                <button type="submit" className={btnPrimary}>
+                  Save
                 </button>
-                <button onClick={() => handleDeletePartner(partner.id)} className="text-red-600 hover:text-red-800 font-medium">
-                  Delete
+                <button
+                  type="button"
+                  className={btnSecondary}
+                  onClick={() => setEditingPartner(null)}
+                >
+                  Cancel
                 </button>
               </div>
-            ),
-          }))}
-          onEdit={() => {}}
-          onDelete={handleDeletePartner}
-          loading={loading}
-        />
-
-        {/* Edit Partner Modal */}
-        {editingPartner && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
-              <h2 className="text-lg font-bold mb-4">Edit Charity Partner</h2>
-              <form onSubmit={handleUpdatePartner} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Partner Name"
-                  value={editingPartner.name}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, name: e.target.value })}
-                  className="border rounded px-3 py-2"
-                  required
-                />
-                <input
-                  type="url"
-                  placeholder="Website URL"
-                  value={editingPartner.website}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, website: e.target.value })}
-                  className="border rounded px-3 py-2"
-                />
-                <input
-                  type="url"
-                  placeholder="Payment Link - Update here for new links"
-                  value={editingPartner.paymentLink}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, paymentLink: e.target.value })}
-                  className="border rounded px-3 py-2 md:col-span-2"
-                  required
-                />
-                <input
-                  type="url"
-                  placeholder="Logo URL"
-                  value={editingPartner.logo}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, logo: e.target.value })}
-                  className="border rounded px-3 py-2"
-                />
-                <select
-                  value={editingPartner.status}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, status: e.target.value })}
-                  className="border rounded px-3 py-2"
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <textarea
-                  placeholder="Partner Description"
-                  value={editingPartner.description}
-                  onChange={(e) => setEditingPartner({ ...editingPartner, description: e.target.value })}
-                  className="border rounded px-3 py-2 md:col-span-2"
-                  rows={2}
-                />
-                <div className="md:col-span-2 flex gap-2">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-medium"
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCloseEditModal}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded font-medium"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AdminPageLayout>
   )
 }

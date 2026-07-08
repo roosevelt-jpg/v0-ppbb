@@ -97,7 +97,10 @@ export async function isAdminUser(userId: string): Promise<boolean> {
     const db = getFirestore(app)
     const adminRef = db.collection('adminUsers').doc(userId)
     const adminSnap = await adminRef.get()
-    return adminSnap.exists
+    if (adminSnap.exists) return true
+    const userSnap = await db.collection('users').doc(userId).get()
+    const role = userSnap.data()?.role
+    return role === 'admin' || role === 'super_admin'
   } catch (error) {
     console.error('[v0] Admin check failed:', error)
     return false

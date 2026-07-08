@@ -19,7 +19,6 @@ import {
   Flag,
   Mail,
   HandHeart,
-  Target,
   Plug,
   Image,
   Play,
@@ -63,7 +62,6 @@ const adminMenuItems = [
   // Charity & Support
   { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert, group: 'Charity' },
   { label: 'Donations', href: '/admin/donations', icon: DollarSign, group: 'Charity' },
-  { label: 'Donation Causes', href: '/admin/causes', icon: Target, group: 'Charity' },
   { label: 'Charity Partners', href: '/admin/charity-partners', icon: HandHeart, group: 'Charity' },
   { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },
   { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: HandHeart, group: 'Charity' },
@@ -88,6 +86,7 @@ const adminMenuItems = [
   { label: 'Events Page', href: '/admin/cms/events', icon: FileText, group: 'CMS' },
   { label: 'Marketplace Page', href: '/admin/cms/marketplace', icon: FileText, group: 'CMS' },
   { label: 'Partners Page', href: '/admin/cms/partners', icon: FileText, group: 'CMS' },
+  { label: 'Donations Page', href: '/admin/cms/donations', icon: FileText, group: 'CMS' },
   { label: 'Testimonials', href: '/admin/cms/testimonials', icon: Image, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
   { label: 'Partners & Logos', href: '/admin/partners', icon: Image, group: 'CMS' },

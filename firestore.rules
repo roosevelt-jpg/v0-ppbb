@@ -8,7 +8,11 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isAuth() && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin');
+      return isAuth() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
+        || exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))
+      );
     }
     
     function isSuperAdmin() {
@@ -123,10 +127,54 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Donation causes - Public read, admin write
+    // Donation causes - Public read, admin write (legacy; prefer charityCases)
     match /causes/{causeId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+    // Canonical public donation causes (Part 7A/7B)
+    match /charityCases/{caseId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Charity payment partners used by /donate flow
+    match /charityPartners/{partnerId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Payment proof submissions from /donate-confirm
+    match /donationSubmissions/{submissionId} {
+      allow read: if isAuth() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if isAuth()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status in ['pending', 'pending_verification'];
+      allow update, delete: if isAdmin();
+    }
+
+    // Beneficiary support requests — metadata readable by admins via client;
+    // sensitive document URLs must only be served via /api/admin/beneficiary-requests
+    // for welfare | founder | coordinator (enforced in API, not field-level rules).
+    match /beneficiaryRequests/{requestId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth()
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid
+            && resource.data.status in ['draft', 'pending']);
+      allow delete: if isAdmin();
+    }
+
+    match /beneficiaryConsents/{consentId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
     }
 
     // Sponsors - Public read, admin write

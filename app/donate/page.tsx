@@ -6,383 +6,466 @@ import { Footer } from '@/components/footer'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import Link from 'next/link'
-import { Heart, ArrowRight, CheckCircle } from 'lucide-react'
+import { Heart, ArrowRight, CheckCircle, HandHeart } from 'lucide-react'
+import {
+  subscribeToDonationsConfig,
+  DonationsPlatformConfig,
+  DEFAULT_DONATIONS_CONFIG,
+} from '@/lib/donations-config'
+import {
+  CharityCase,
+  normalizeCharityCase,
+  truncateAtWord,
+  progressPercent,
+} from '@/lib/charity-cases'
+
+interface CharityPartner {
+  id: string
+  name: string
+  description?: string
+  paymentLink?: string
+  logo?: string
+  status?: string
+  isActive?: boolean
+}
+
+function partnerIsActive(p: CharityPartner): boolean {
+  if (p.isActive === false) return false
+  if (p.status && p.status !== 'active') return false
+  return true
+}
 
 export default function DonationPage() {
-  const [causes, setCauses] = useState<any[]>([])
-  const [partners, setPartners] = useState<any[]>([])
-  const [selectedCause, setSelectedCause] = useState<any>(null)
+  const [causes, setCauses] = useState<CharityCase[]>([])
+  const [partners, setPartners] = useState<CharityPartner[]>([])
+  const [donationsConfig, setDonationsConfig] =
+    useState<DonationsPlatformConfig>(DEFAULT_DONATIONS_CONFIG)
+  const [selectedCause, setSelectedCause] = useState<CharityCase | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let dataLoaded = false
     let causesLoaded = false
     let partnersLoaded = false
+    let configLoaded = false
 
-    const checkAndSetLoading = () => {
-      if (causesLoaded && partnersLoaded) {
-        setLoading(false)
-        dataLoaded = true
-      }
+    const checkDone = () => {
+      if (causesLoaded && partnersLoaded && configLoaded) setLoading(false)
     }
 
-    // Fetch active causes
-    const unsubscribeCauses = onSnapshot(
+    // Canonical: charityCases. Legacy: causes (merge so older admin publishes still appear).
+    let fromCases: CharityCase[] = []
+    let fromLegacy: CharityCase[] = []
+    let casesSnapDone = false
+    let legacySnapDone = false
+
+    const mergeAndSet = () => {
+      if (!casesSnapDone || !legacySnapDone) return
+      const byId = new Map<string, CharityCase>()
+      for (const c of fromLegacy) byId.set(c.id, c)
+      for (const c of fromCases) byId.set(c.id, c) // charityCases wins on id collision
+      setCauses(Array.from(byId.values()))
+      causesLoaded = true
+      checkDone()
+    }
+
+    const unsubCases = onSnapshot(
+      query(collection(db, 'charityCases'), where('status', '==', 'active')),
+      (snapshot) => {
+        fromCases = snapshot.docs.map((d) =>
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>)
+        )
+        casesSnapDone = true
+        mergeAndSet()
+      },
+      (error) => {
+        console.error('[donate] charityCases snapshot error:', error)
+        casesSnapDone = true
+        mergeAndSet()
+      }
+    )
+
+    const unsubLegacy = onSnapshot(
       query(collection(db, 'causes'), where('status', '==', 'active')),
       (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        setCauses(data)
-        causesLoaded = true
-        checkAndSetLoading()
+        fromLegacy = snapshot.docs.map((d) =>
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>)
+        )
+        legacySnapDone = true
+        mergeAndSet()
       },
       (error) => {
-        console.error('[v0] Error loading causes:', error)
-        causesLoaded = true
-        checkAndSetLoading()
+        console.error('[donate] legacy causes snapshot error:', error)
+        legacySnapDone = true
+        mergeAndSet()
       }
     )
 
-    // Fetch active charity partners
-    const unsubscribePartners = onSnapshot(
-      query(collection(db, 'charityPartners'), where('status', '==', 'active')),
+    const unsubPartners = onSnapshot(
+      collection(db, 'charityPartners'),
       (snapshot) => {
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
+        const data = snapshot.docs
+          .map((d) => ({ id: d.id, ...(d.data() as Omit<CharityPartner, 'id'>) }))
+          .filter(partnerIsActive)
         setPartners(data)
         partnersLoaded = true
-        checkAndSetLoading()
+        checkDone()
       },
       (error) => {
-        console.error('[v0] Error loading partners:', error)
+        console.error('[donate] charityPartners snapshot error:', error)
         partnersLoaded = true
-        checkAndSetLoading()
+        checkDone()
       }
     )
 
-    // Fallback timeout to prevent infinite loading
-    const timeout = setTimeout(() => {
-      if (!dataLoaded) {
-        console.warn('[v0] Loading timeout - forcing page to show')
-        setLoading(false)
-      }
-    }, 5000)
+    const unsubConfig = subscribeToDonationsConfig((cfg) => {
+      setDonationsConfig(cfg)
+      configLoaded = true
+      checkDone()
+    })
+
+    const timeout = setTimeout(() => setLoading(false), 6000)
 
     return () => {
-      unsubscribeCauses()
-      unsubscribePartners()
+      unsubCases()
+      unsubLegacy()
+      unsubPartners()
+      unsubConfig()
       clearTimeout(timeout)
     }
   }, [])
 
+  const resolvePaymentLink = (cause: CharityCase, partner?: CharityPartner | null) => {
+    if (partner?.paymentLink) return partner.paymentLink
+    if (cause.partnerId) {
+      const assigned = partners.find((p) => p.id === cause.partnerId)
+      if (assigned?.paymentLink) return assigned.paymentLink
+    }
+    return donationsConfig.beitAlKhairURL || ''
+  }
+
+  const buildConfirmHref = (cause: CharityCase, partner?: CharityPartner | null) => {
+    const paymentLink = resolvePaymentLink(cause, partner)
+    const params = new URLSearchParams({
+      cause: cause.id,
+      causeName: cause.title,
+      causeDescription: cause.description.slice(0, 500),
+      paymentLink,
+    })
+    if (partner) {
+      params.set('partner', partner.id)
+      params.set('partnerName', partner.name)
+    } else if (donationsConfig.beitAlKhairURL) {
+      params.set('partnerName', 'Beit Al Khair')
+    }
+    return `/donate-confirm?${params.toString()}`
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-neutral-50">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500">Loading donation options...</p>
+        <div className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto w-full space-y-8 animate-pulse">
+            <div className="h-10 bg-neutral-200 rounded w-2/3 mx-auto" />
+            <div className="h-4 bg-neutral-200 rounded w-full max-w-xl mx-auto" />
+            <div className="h-32 bg-neutral-200 rounded-lg" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-80 bg-neutral-200 rounded-lg" />
+              ))}
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
     )
   }
 
+  const assignedPartner = selectedCause?.partnerId
+    ? partners.find((p) => p.id === selectedCause.partnerId)
+    : null
+  const fallbackUrl = donationsConfig.beitAlKhairURL
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-neutral-50 via-white to-neutral-100">
       <Navbar />
-      <div className="flex-1 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex-1 py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto w-full">
-          {/* Header */}
-          <div className="text-center mb-12 w-full">
-          <h1 className="text-4xl font-bold mb-4">Make a Difference</h1>
-          <p className="text-lg text-gray-600 w-full mx-auto leading-relaxed px-4 sm:px-0">
-            Passive Blessings acts as a community mobilizer and awareness partner. Funds are collected through official
-            charitable partners including Beit Al Khair, ensuring transparency and direct impact.
-          </p>
-        </div>
+          <div className="text-center mb-10 sm:mb-12 w-full">
+            <p
+              className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-3"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              {donationsConfig.pageEyebrow}
+            </p>
+            <h1
+              className="text-3xl sm:text-4xl lg:text-5xl font-normal mb-4 text-neutral-900"
+              style={{ fontFamily: 'Cormorant Garamond, serif' }}
+            >
+              {donationsConfig.pageHeadline}
+            </h1>
+            <p
+              className="text-base sm:text-lg text-neutral-600 w-full mx-auto leading-relaxed max-w-2xl px-1"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              {donationsConfig.pageBody}
+            </p>
+          </div>
 
-        {/* Partnership Statement */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-12 border-l-4 border-blue-500">
-          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
-            <CheckCircle className="w-6 h-6 text-blue-500" />
-            In Partnership with Approved Charitable Entities
-          </h2>
-          <p className="text-gray-700 mb-4">
-            Passive Blessings operates as a trusted community platform connecting donors with verified charitable
-            partners. Your donation is managed through these official organizations, ensuring:
-          </p>
-          <ul className="space-y-2 text-gray-700">
-            <li className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">✓</span>
-              <span>Complete transparency in fund collection and distribution</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">✓</span>
-              <span>Verified charitable organizations with regulatory approval</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">✓</span>
-              <span>Real-time impact tracking and community engagement</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-blue-500 mt-1">✓</span>
-              <span>Tax-compliant donation receipts for all contributions</span>
-            </li>
-          </ul>
-        </div>
+          <div className="bg-white rounded-lg shadow-sm p-5 sm:p-8 mb-10 sm:mb-12 border-l-4 border-neutral-900">
+            <h2
+              className="text-xl sm:text-2xl mb-3 flex items-center gap-2 text-neutral-900"
+              style={{ fontFamily: 'Cormorant Garamond, serif' }}
+            >
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+              {donationsConfig.legalPartnershipTitle}
+            </h2>
+            <p
+              className="text-neutral-700 leading-relaxed"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              {donationsConfig.legalPartnershipBody}
+            </p>
+          </div>
 
-        {/* Causes Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-6">Choose a Cause</h2>
+          <div className="mb-12">
+            <h2
+              className="text-2xl sm:text-3xl mb-6 text-neutral-900"
+              style={{ fontFamily: 'Cormorant Garamond, serif' }}
+            >
+              Choose a Cause
+            </h2>
 
-          {causes.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No active causes at the moment</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {causes.map((cause) => {
-                const progress = (cause.currentAmount || 0) / (cause.targetAmount || 1)
-                const progressPercent = Math.min(Math.round(progress * 100), 100)
-
-                return (
-                  <div
-                    key={cause.id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => setSelectedCause(cause)}
-                  >
-                    {cause.image && (
-                      <img src={cause.image} alt={cause.name} className="w-full h-48 object-cover" />
-                    )}
-                    <div className="p-5">
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-                        {cause.category}
-                      </span>
-                      <h3 className="text-lg font-bold mb-2">{cause.name}</h3>
-                      <p className="text-gray-600 text-sm mb-4">{cause.description}</p>
-
-                      {/* Show assigned partner badge */}
-                      {cause.partnerId && (
-                        <div className="mb-3">
-                          {partners
-                            .filter((p) => p.id === cause.partnerId)
-                            .map((partner) => (
-                              <p key={partner.id} className="text-xs text-gray-700 mb-3">
-                                <span className="font-semibold">Partner:</span> {partner.name}
-                              </p>
-                            ))}
+            {causes.length === 0 ? (
+              <div className="text-center py-14 px-4 bg-white rounded-lg border border-neutral-200">
+                <HandHeart className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+                <p
+                  className="text-neutral-600 mb-2"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  No active causes at the moment
+                </p>
+                <p className="text-sm text-neutral-500 mb-6">
+                  When an admin publishes a cause, it will appear here instantly.
+                </p>
+                <Link
+                  href="/contact"
+                  className="inline-flex min-h-[44px] items-center justify-center px-5 bg-black text-white text-sm font-medium rounded"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  Contact us about giving
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {causes.map((cause) => {
+                  const pct = progressPercent(cause.amountRaised, cause.targetAmount)
+                  return (
+                    <div
+                      key={cause.id}
+                      className="bg-white rounded-lg shadow-sm overflow-hidden border border-neutral-100 flex flex-col"
+                    >
+                      {cause.bannerImage ? (
+                        <img
+                          src={cause.bannerImage}
+                          alt={cause.title}
+                          className="w-full h-44 sm:h-48 object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-44 sm:h-48 bg-neutral-100 flex items-center justify-center">
+                          <Heart className="w-10 h-10 text-neutral-300" />
                         </div>
                       )}
+                      <div className="p-4 sm:p-5 flex flex-col flex-1">
+                        <span
+                          className="inline-block self-start bg-neutral-100 text-neutral-800 text-[10px] tracking-wider uppercase font-semibold px-2.5 py-1 rounded mb-2"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                        >
+                          {cause.category}
+                        </span>
+                        <h3
+                          className="text-lg sm:text-xl mb-2 text-neutral-900"
+                          style={{ fontFamily: 'Cormorant Garamond, serif' }}
+                        >
+                          {cause.title}
+                        </h3>
+                        <p
+                          className="text-neutral-600 text-sm mb-4 flex-1"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                        >
+                          {truncateAtWord(cause.description)}
+                        </p>
 
-                      {/* Progress Bar */}
-                      <div className="mb-3">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="font-semibold">AED {(cause.currentAmount || 0).toLocaleString()}</span>
-                          <span className="text-gray-600">AED {(cause.targetAmount || 0).toLocaleString()}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="mb-4">
                           <div
-                            className="bg-blue-500 h-2 rounded-full transition-all"
-                            style={{ width: `${progressPercent}%` }}
-                          />
+                            className="flex justify-between text-sm mb-1"
+                            style={{ fontFamily: 'Inter, sans-serif' }}
+                          >
+                            <span className="font-semibold">
+                              AED {cause.amountRaised.toLocaleString()}
+                            </span>
+                            <span className="text-neutral-500">
+                              AED {cause.targetAmount.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="w-full bg-neutral-200 rounded-full h-2">
+                            <div
+                              className="bg-neutral-900 h-2 rounded-full transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-neutral-500 mt-1">{pct}% funded</p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{progressPercent}% funded</p>
-                      </div>
 
-                      <button
-                        onClick={() => setSelectedCause(cause)}
-                        className="w-full bg-black hover:bg-neutral-900 text-white py-2 rounded font-semibold flex items-center justify-center gap-2"
-                      >
-                        Donate <ArrowRight className="w-4 h-4" />
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCause(cause)}
+                          className="w-full min-h-[44px] bg-black hover:bg-neutral-900 text-white py-2.5 rounded font-semibold flex items-center justify-center gap-2 text-sm"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                        >
+                          Donate Now <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {selectedCause && (
+            <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 overflow-y-auto">
+              <div className="bg-white rounded-t-2xl sm:rounded-lg shadow-xl max-w-2xl w-full max-h-[92vh] overflow-y-auto">
+                <div className="p-5 sm:p-6 border-b border-neutral-100">
+                  <h2
+                    className="text-xl sm:text-2xl flex items-center gap-2 text-neutral-900"
+                    style={{ fontFamily: 'Cormorant Garamond, serif' }}
+                  >
+                    <Heart className="w-5 h-5 text-red-500 shrink-0" />
+                    Donate to: {selectedCause.title}
+                  </h2>
+                  <p
+                    className="text-neutral-600 mt-2 text-sm sm:text-base"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {selectedCause.description}
+                  </p>
+                </div>
+
+                <div className="p-5 sm:p-6 space-y-5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <div>
+                    <h3 className="text-base font-semibold mb-2">Select payment partner</h3>
+                    <p className="text-neutral-600 text-sm mb-4">
+                      You will enter your amount, then be redirected to an official partner to
+                      complete payment. Afterward, return here to upload proof.
+                    </p>
+
+                    {assignedPartner ? (
+                      <Link
+                        href={buildConfirmHref(selectedCause, assignedPartner)}
+                        className="block border-2 border-neutral-900 rounded-lg p-4 hover:bg-neutral-50 transition-all min-h-[44px]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h4 className="font-bold">{assignedPartner.name}</h4>
+                            <p className="text-sm text-neutral-600 mt-1">
+                              {assignedPartner.description}
+                            </p>
+                            <span className="inline-block mt-2 text-xs bg-black text-white px-2 py-1 rounded">
+                              Primary partner for this cause
+                            </span>
+                          </div>
+                          <ArrowRight className="w-5 h-5 shrink-0" />
+                        </div>
+                      </Link>
+                    ) : partners.length > 0 ? (
+                      <div className="space-y-3">
+                        {partners.map((partner) => (
+                          <Link
+                            key={partner.id}
+                            href={buildConfirmHref(selectedCause, partner)}
+                            className="block border border-neutral-200 rounded-lg p-4 hover:border-neutral-900 hover:bg-neutral-50 transition-all min-h-[44px]"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <h4 className="font-bold">{partner.name}</h4>
+                                <p className="text-sm text-neutral-600">{partner.description}</p>
+                              </div>
+                              <ArrowRight className="w-5 h-5 shrink-0" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : fallbackUrl ? (
+                      <Link
+                        href={buildConfirmHref(selectedCause, null)}
+                        className="block border-2 border-neutral-900 rounded-lg p-4 hover:bg-neutral-50 transition-all min-h-[44px]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h4 className="font-bold">Beit Al Khair</h4>
+                            <p className="text-sm text-neutral-600 mt-1">
+                              You will be redirected to our official payment partner.
+                            </p>
+                          </div>
+                          <ArrowRight className="w-5 h-5 shrink-0" />
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="bg-amber-50 border border-amber-200 rounded p-4">
+                        <p className="text-amber-900 font-semibold mb-1">Payment link not configured</p>
+                        <p className="text-amber-800 text-sm">
+                          Please ask an admin to set a charity partner payment link or the Beit Al
+                          Khair URL in CMS → Donations.
+                        </p>
+                      </div>
+                    )}
+
+                    {assignedPartner && partners.filter((p) => p.id !== assignedPartner.id).length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-semibold text-neutral-600">Alternatives</p>
+                        {partners
+                          .filter((p) => p.id !== assignedPartner.id)
+                          .map((partner) => (
+                            <Link
+                              key={partner.id}
+                              href={buildConfirmHref(selectedCause, partner)}
+                              className="block border rounded-lg p-3 hover:bg-neutral-50 min-h-[44px]"
+                            >
+                              <div className="flex justify-between items-center gap-2">
+                                <span className="font-medium text-sm">{partner.name}</span>
+                                <ArrowRight className="w-4 h-4" />
+                              </div>
+                            </Link>
+                          ))}
+                      </div>
+                    )}
                   </div>
-                )
-              })}
+                </div>
+
+                <div className="p-5 sm:p-6 border-t bg-neutral-50">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCause(null)}
+                    className="w-full min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-100 py-2.5 rounded font-semibold text-sm"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-        </div>
 
-        {/* Donation Modal / Details */}
-        {selectedCause && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
-              <div className="p-6 border-b">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Heart className="w-6 h-6 text-red-500" />
-                  Donate to: {selectedCause.name}
-                </h2>
-                <p className="text-gray-600 mt-2">{selectedCause.description}</p>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Charity Partners */}
-                <div>
-                  <h3 className="text-lg font-bold mb-3">Select Payment Method</h3>
-                  <p className="text-gray-600 mb-4">
-                    You will be redirected to our official partner for secure payment processing. After completing your
-                    donation, you&apos;ll be able to track it in your dashboard and receive a tax receipt.
-                  </p>
-
-                  {partners.length === 0 ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
-                      <p className="text-yellow-900 font-semibold mb-2">Payment Partners Coming Soon</p>
-                      <p className="text-yellow-800 text-sm">
-                        We&apos;re setting up payment partners for this cause. Please check back soon or contact us for
-                        alternative donation methods.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Show assigned partner if exists */}
-                      {selectedCause.partnerId ? (
-                        <>
-                          <p className="text-sm font-semibold mb-3">Recommended Partner for this Cause:</p>
-                          {partners
-                            .filter((p) => p.id === selectedCause.partnerId)
-                            .map((partner) => (
-                              <a
-                                key={partner.id}
-                                href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                                className="block border-2 border-blue-500 rounded-lg p-4 hover:bg-blue-50 transition-all bg-blue-50"
-                              >
-                                <div className="flex items-start justify-between">
-                                  <div>
-                                    <h4 className="font-bold">{partner.name}</h4>
-                                    <p className="text-sm text-gray-600">{partner.description}</p>
-                                    <span className="inline-block mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
-                                      Primary Partner for this Cause
-                                    </span>
-                                  </div>
-                                  <ArrowRight className="w-5 h-5 text-blue-600" />
-                                </div>
-                              </a>
-                            ))}
-
-                          {/* Show other partners as alternatives */}
-                          {partners.filter((p) => p.id !== selectedCause.partnerId).length > 0 && (
-                            <div className="mt-4">
-                              <p className="text-sm font-semibold mb-2 text-gray-600">Alternative Partners:</p>
-                              <div className="space-y-2">
-                                {partners
-                                  .filter((p) => p.id !== selectedCause.partnerId)
-                                  .map((partner) => (
-                                    <a
-                                      key={partner.id}
-                                      href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                                      className="block border rounded-lg p-3 hover:bg-gray-50 hover:border-gray-400 transition-all"
-                                    >
-                                      <div className="flex items-start justify-between">
-                                        <div>
-                                          <h4 className="font-semibold">{partner.name}</h4>
-                                          <p className="text-xs text-gray-600">{partner.description}</p>
-                                        </div>
-                                        <ArrowRight className="w-4 h-4 text-gray-600" />
-                                      </div>
-                                    </a>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        // If no partner assigned, show all partners
-                        <div className="space-y-3">
-                          {partners.map((partner) => (
-                            <a
-                              key={partner.id}
-                              href={`/donate-confirm?partner=${partner.id}&cause=${selectedCause.id}&partnerName=${encodeURIComponent(partner.name)}&paymentLink=${encodeURIComponent(partner.paymentLink)}&causeName=${encodeURIComponent(selectedCause.name)}`}
-                              className="block border rounded-lg p-4 hover:bg-blue-50 hover:border-blue-500 transition-all"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h4 className="font-bold">{partner.name}</h4>
-                                  <p className="text-sm text-gray-600">{partner.description}</p>
-                                </div>
-                                <ArrowRight className="w-5 h-5 text-blue-600" />
-                              </div>
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Info about process */}
-                <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                  <h4 className="font-bold text-blue-900 mb-2">How it Works:</h4>
-                  <ol className="text-sm text-blue-900 space-y-1 list-decimal list-inside">
-                    <li>Select a partner and you&apos;ll be redirected to complete payment</li>
-                    <li>Return to your dashboard to upload payment proof</li>
-                    <li>Our team verifies your submission within 24 hours</li>
-                    <li>Your donation is recorded and you receive a tax receipt</li>
-                  </ol>
-                </div>
-              </div>
-
-              <div className="p-6 border-t bg-gray-50">
-                <button
-                  onClick={() => setSelectedCause(null)}
-                  className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 py-2 rounded font-semibold"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/dashboard/charity-requests"
+              className="inline-flex min-h-[44px] items-center text-sm text-neutral-600 underline underline-offset-4 hover:text-neutral-900"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Request charity support
+            </Link>
           </div>
-        )}
-
-        {/* FAQ Section */}
-        <div className="mt-16 bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-lg mb-2">Is my donation secure?</h3>
-              <p className="text-gray-700">
-                Yes. All donations are processed through verified, regulated charitable partners. Passive Blessings does
-                not handle funds directly, ensuring maximum transparency and security.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">When will my donation be recorded?</h3>
-              <p className="text-gray-700">
-                After you complete payment with our partner, return to your dashboard to upload proof. Our verification
-                team processes submissions within 24 hours. Once verified, your donation is recorded immediately.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">What payment methods are accepted?</h3>
-              <p className="text-gray-700">
-                Payment methods depend on the selected charitable partner. Each partner offers multiple secure payment
-                options including credit cards, bank transfers, and digital wallets.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Can I track my donation&apos;s impact?</h3>
-              <p className="text-gray-700">
-                Absolutely. Your member dashboard shows all your donations, impact metrics, and links to detailed reports
-                on how your contribution helped the cause.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg mb-2">Will I receive a tax receipt?</h3>
-              <p className="text-gray-700">
-                Yes. Tax-compliant receipts are generated automatically for all verified donations and are available in
-                your dashboard for download and filing.
-              </p>
-            </div>
-          </div>
-        </div>
         </div>
       </div>
       <Footer />

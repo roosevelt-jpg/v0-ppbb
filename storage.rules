@@ -1,0 +1,87 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isWelfareAdmin() {
+      return isAuth()
+        && firestore.exists(/databases/(default)/documents/adminUsers/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/adminUsers/$(request.auth.uid)).data.adminRole in [
+          'welfare', 'founder', 'coordinator', 'founder_admin', 'manager'
+        ];
+    }
+
+    // Sensitive beneficiary documents — read ONLY for welfare-tier roles.
+    // Part 7C uploads should use these prefixes. Tokenized download URLs must
+    // never be shown to standard admins (API redacts); rules block auth-based
+    // Storage SDK reads for non-welfare roles.
+    match /beneficiary-docs/{allPaths=**} {
+      allow read: if isWelfareAdmin();
+      allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
+    }
+    match /beneficiaryRequests/{allPaths=**} {
+      allow read: if isWelfareAdmin();
+      allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
+    }
+    match /beneficiary-support/{allPaths=**} {
+      allow read: if isWelfareAdmin();
+      allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
+    }
+    match /beneficiary-documents/{allPaths=**} {
+      allow read: if isWelfareAdmin();
+      allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
+    }
+
+    // All other CMS / donate media (explicit folders used by the app)
+    match /charity-cases/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /causes/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /charity-partner-logos/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 5 * 1024 * 1024;
+    }
+    match /partner-logos/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 5 * 1024 * 1024;
+    }
+    match /donation-proofs/{allPaths=**} {
+      allow read: if isAuth();
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /partners/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /about/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /homepage/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /uploads/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /events/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
+    }
+    match /marketplace/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+    match /businesses/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuth() && request.resource.size < 10 * 1024 * 1024;
+    }
+  }
+}
