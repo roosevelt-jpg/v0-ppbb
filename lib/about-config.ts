@@ -41,9 +41,18 @@ export interface AboutTeamSection {
   headline: string
 }
 
+export interface AboutMissionVision {
+  missionHeadline: string
+  missionBody: string
+  visionHeadline: string
+  visionBody: string
+  imageURL: string | null
+}
+
 export interface AboutConfig {
   hero: AboutHero
   story: AboutStory
+  missionVision: AboutMissionVision
   values: AboutValues
   team: AboutTeamSection
 }
@@ -64,6 +73,15 @@ export const DEFAULT_ABOUT: AboutConfig = {
     ],
     pullQuote:
       'We are not building an organisation. We are building a way of life. Another day Another Blessing',
+  },
+  missionVision: {
+    missionHeadline: 'Our Mission',
+    missionBody:
+      'Our mission is to build a thriving community platform that empowers individuals, businesses, and organizations to make a meaningful impact through collective action.',
+    visionHeadline: 'Our Vision',
+    visionBody:
+      'A world where compassion, collaboration, and charitable action drive sustainable community development.',
+    imageURL: null,
   },
   values: {
     eyebrow: 'WHAT MAKES US DIFFERENT',
@@ -197,6 +215,34 @@ function mergeValues(data: unknown): AboutValues {
   }
 }
 
+function mergeMissionVision(data: unknown): AboutMissionVision {
+  const d = (data || {}) as Partial<AboutMissionVision>
+  return {
+    missionHeadline:
+      typeof d.missionHeadline === 'string'
+        ? d.missionHeadline
+        : DEFAULT_ABOUT.missionVision.missionHeadline,
+    missionBody:
+      typeof d.missionBody === 'string'
+        ? d.missionBody
+        : DEFAULT_ABOUT.missionVision.missionBody,
+    visionHeadline:
+      typeof d.visionHeadline === 'string'
+        ? d.visionHeadline
+        : DEFAULT_ABOUT.missionVision.visionHeadline,
+    visionBody:
+      typeof d.visionBody === 'string'
+        ? d.visionBody
+        : DEFAULT_ABOUT.missionVision.visionBody,
+    imageURL:
+      typeof d.imageURL === 'string'
+        ? d.imageURL
+        : d.imageURL === null
+          ? null
+          : DEFAULT_ABOUT.missionVision.imageURL,
+  }
+}
+
 function mergeTeam(data: unknown): AboutTeamSection {
   const d = (data || {}) as Partial<AboutTeamSection>
   return {
@@ -210,6 +256,7 @@ function mergeAbout(data: Record<string, unknown> | undefined): AboutConfig {
   return {
     hero: mergeHero(data.hero),
     story: mergeStory(data.story),
+    missionVision: mergeMissionVision(data.missionVision),
     values: mergeValues(data.values),
     team: mergeTeam(data.team),
   }

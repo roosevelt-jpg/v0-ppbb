@@ -9,73 +9,85 @@ export interface TeamMember {
   title: string
   photoURL: string | null
   bio: string | null
+  email: string | null
+  whatsappNumber: string | null
+  linkedinURL: string | null
   isActive: boolean
   order: number
 }
 
-export const DEFAULT_TEAM_MEMBERS: Omit<TeamMember, 'id'>[] = [
+type SeedMember = Omit<TeamMember, 'id'>
+
+const emptyContacts = {
+  photoURL: null as string | null,
+  bio: null as string | null,
+  email: null as string | null,
+  whatsappNumber: null as string | null,
+  linkedinURL: null as string | null,
+  isActive: true,
+}
+
+export const DEFAULT_TEAM_MEMBERS: SeedMember[] = [
   {
     name: 'Yusef Bouattoura',
     title: 'Founder & Chief Executive Officer',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 0,
   },
   {
     name: 'Dontai Anton',
     title: 'Chief Operating Officer',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 1,
   },
   {
     name: 'Maimuna Rashid',
     title: 'Director of Strategy & Partnerships',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 2,
   },
   {
     name: 'Arwa Abboud',
     title: 'Director of Community Programs (Sisters)',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 3,
   },
   {
     name: 'Rhys Marshall',
     title: 'Director of Community Programs (Brothers)',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 4,
   },
   {
     name: 'Abbey Potts',
     title: 'Director of Spiritual Growth & Personal Development',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 5,
   },
   {
     name: 'Dounia H',
     title: 'Director of Admin, Finance & Compliance',
-    photoURL: null,
-    bio: null,
-    isActive: true,
+    ...emptyContacts,
     order: 6,
   },
 ]
 
+function optionalString(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
 function mapTeamMemberDoc(id: string, data: Record<string, unknown>): TeamMember {
   const legacyPublished = data.status === 'published'
   const isActive =
-    data.isActive === true || (data.isActive === undefined && (legacyPublished || data.status == null))
+    data.isActive === true ||
+    (data.isActive === undefined && (legacyPublished || data.status == null))
+
+  const social =
+    data.socialLinks && typeof data.socialLinks === 'object'
+      ? (data.socialLinks as Record<string, unknown>)
+      : data.social && typeof data.social === 'object'
+        ? (data.social as Record<string, unknown>)
+        : {}
 
   return {
     id,
@@ -87,14 +99,17 @@ function mapTeamMemberDoc(id: string, data: Record<string, unknown>): TeamMember
           ? data.role
           : '',
     photoURL:
-      typeof data.photoURL === 'string'
-        ? data.photoURL
-        : typeof data.imageUrl === 'string'
-          ? data.imageUrl
-          : typeof data.image === 'string'
-            ? data.image
-            : null,
-    bio: typeof data.bio === 'string' ? data.bio : null,
+      optionalString(data.photoURL) ||
+      optionalString(data.imageUrl) ||
+      optionalString(data.image),
+    bio: optionalString(data.bio),
+    email: optionalString(data.email) || optionalString(social.email),
+    whatsappNumber:
+      optionalString(data.whatsappNumber) || optionalString(data.whatsapp),
+    linkedinURL:
+      optionalString(data.linkedinURL) ||
+      optionalString(data.linkedin) ||
+      optionalString(social.linkedin),
     isActive,
     order: typeof data.order === 'number' ? data.order : 0,
   }
@@ -105,6 +120,12 @@ export function getTeamInitials(name: string): string {
   if (parts.length === 0) return '?'
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+}
+
+/** Normalize phone digits for wa.me links (keeps country code digits only). */
+export function buildWhatsAppHref(whatsappNumber: string): string {
+  const digits = whatsappNumber.replace(/\D/g, '')
+  return digits ? `https://wa.me/${digits}` : ''
 }
 
 export function subscribeToActiveTeamMembers(

@@ -5,6 +5,7 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { AboutHero } from '@/components/about/about-hero'
 import { AboutStory } from '@/components/about/about-story'
+import { AboutMissionVision } from '@/components/about/about-mission-vision'
 import { AboutValues } from '@/components/about/about-values'
 import { AboutTeam } from '@/components/about/about-team'
 
@@ -14,6 +15,7 @@ export default function AboutPage() {
       <Navbar />
       <AboutHero />
       <AboutStory />
+      <AboutMissionVision />
       <AboutValues />
       <AboutTeam />
       <Footer />

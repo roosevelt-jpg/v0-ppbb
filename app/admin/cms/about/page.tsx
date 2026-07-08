@@ -17,7 +17,7 @@ import { uploadImageToFirebase } from '@/lib/upload-utils'
 export default function AdminCmsAboutPage() {
   const [config, setConfig] = useState<AboutConfig>(DEFAULT_ABOUT)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState<'founder' | 'missionVision' | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => subscribeToAbout(setConfig), [])
@@ -45,7 +45,7 @@ export default function AdminCmsAboutPage() {
   }
 
   const handleFounderImageUpload = async (file: File) => {
-    setUploading(true)
+    setUploading('founder')
     try {
       const url = await uploadImageToFirebase(file, 'about/founder', { preset: 'content' })
       setConfig((p) => ({ ...p, story: { ...p.story, founderImageURL: url } }))
@@ -55,7 +55,25 @@ export default function AdminCmsAboutPage() {
         text: error instanceof Error ? error.message : 'Image upload failed',
       })
     } finally {
-      setUploading(false)
+      setUploading(null)
+    }
+  }
+
+  const handleMissionVisionImageUpload = async (file: File) => {
+    setUploading('missionVision')
+    try {
+      const url = await uploadImageToFirebase(file, 'about/mission-vision', { preset: 'content' })
+      setConfig((p) => ({
+        ...p,
+        missionVision: { ...p.missionVision, imageURL: url },
+      }))
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Image upload failed',
+      })
+    } finally {
+      setUploading(null)
     }
   }
 
@@ -138,7 +156,7 @@ export default function AdminCmsAboutPage() {
           <div>
             <h1 className="font-headline text-3xl font-bold text-neutral-900">About Page</h1>
             <p className="text-sm text-neutral-600 mt-1">
-              Edit hero, story, and values (3A–3C). Team members are managed at{' '}
+              Edit hero, story, mission/vision, and values. Team members are managed at{' '}
               <a href="/admin/team" className="underline font-medium">
                 /admin/team
               </a>
@@ -245,12 +263,12 @@ export default function AdminCmsAboutPage() {
               <label className="block text-sm font-medium mb-1">Founder image</label>
               <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px]">
                 <Upload className="w-4 h-4" />
-                {uploading ? 'Uploading…' : 'Upload image'}
+                {uploading === 'founder' ? 'Uploading…' : 'Upload image'}
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  disabled={uploading}
+                  disabled={uploading !== null}
                   onChange={(e) =>
                     e.target.files?.[0] && void handleFounderImageUpload(e.target.files[0])
                   }
@@ -302,6 +320,108 @@ export default function AdminCmsAboutPage() {
                 }
                 className="w-full min-h-20"
               />
+            </div>
+          </div>
+        </Card>
+
+        {/* Mission / Vision (About-only; separate from homepage Mission) */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Mission / Vision</h2>
+          <p className="text-sm text-neutral-600">
+            About-page Mission &amp; Vision block — separate from the homepage Mission section.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Mission headline</label>
+              <input
+                type="text"
+                value={config.missionVision.missionHeadline}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    missionVision: { ...p.missionVision, missionHeadline: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Vision headline</label>
+              <input
+                type="text"
+                value={config.missionVision.visionHeadline}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    missionVision: { ...p.missionVision, visionHeadline: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Mission body</label>
+              <textarea
+                value={config.missionVision.missionBody}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    missionVision: { ...p.missionVision, missionBody: e.target.value },
+                  }))
+                }
+                className="w-full min-h-24"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Vision body</label>
+              <textarea
+                value={config.missionVision.visionBody}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    missionVision: { ...p.missionVision, visionBody: e.target.value },
+                  }))
+                }
+                className="w-full min-h-24"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Section image</label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px]">
+                <Upload className="w-4 h-4" />
+                {uploading === 'missionVision' ? 'Uploading…' : 'Upload image'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading !== null}
+                  onChange={(e) =>
+                    e.target.files?.[0] &&
+                    void handleMissionVisionImageUpload(e.target.files[0])
+                  }
+                />
+              </label>
+              {config.missionVision.imageURL && (
+                <img
+                  src={config.missionVision.imageURL}
+                  alt=""
+                  className="mt-2 h-28 rounded object-cover"
+                />
+              )}
+              {config.missionVision.imageURL && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setConfig((p) => ({
+                      ...p,
+                      missionVision: { ...p.missionVision, imageURL: null },
+                    }))
+                  }
+                  className="mt-2 block text-xs text-red-600 underline"
+                >
+                  Remove image
+                </button>
+              )}
             </div>
           </div>
         </Card>

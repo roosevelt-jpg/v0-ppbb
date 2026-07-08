@@ -43,6 +43,9 @@ export default function AdminTeamPage() {
     title: '',
     photoURL: '',
     bio: '',
+    email: '',
+    whatsappNumber: '',
+    linkedinURL: '',
     isActive: true,
   })
 
@@ -55,7 +58,16 @@ export default function AdminTeamPage() {
 
   const resetForm = () => {
     setEditingId(null)
-    setForm({ name: '', title: '', photoURL: '', bio: '', isActive: true })
+    setForm({
+      name: '',
+      title: '',
+      photoURL: '',
+      bio: '',
+      email: '',
+      whatsappNumber: '',
+      linkedinURL: '',
+      isActive: true,
+    })
   }
 
   const handlePhotoUpload = async (file: File, target: 'form' | string) => {
@@ -83,23 +95,26 @@ export default function AdminTeamPage() {
     }
 
     try {
+      const payload = {
+        name: form.name.trim(),
+        title: form.title.trim(),
+        photoURL: form.photoURL || null,
+        bio: form.bio.trim() || null,
+        email: form.email.trim() || null,
+        whatsappNumber: form.whatsappNumber.trim() || null,
+        linkedinURL: form.linkedinURL.trim() || null,
+        isActive: form.isActive,
+      }
+
       if (editingId) {
         await updateDoc(doc(db, 'teamMembers', editingId), {
-          name: form.name.trim(),
-          title: form.title.trim(),
-          photoURL: form.photoURL || null,
-          bio: form.bio.trim() || null,
-          isActive: form.isActive,
+          ...payload,
           updatedAt: serverTimestamp(),
         })
         showMessage('success', 'Team member updated.')
       } else {
         await addDoc(collection(db, 'teamMembers'), {
-          name: form.name.trim(),
-          title: form.title.trim(),
-          photoURL: form.photoURL || null,
-          bio: form.bio.trim() || null,
-          isActive: form.isActive,
+          ...payload,
           order: members.length,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -119,6 +134,9 @@ export default function AdminTeamPage() {
       title: member.title,
       photoURL: member.photoURL || '',
       bio: member.bio || '',
+      email: member.email || '',
+      whatsappNumber: member.whatsappNumber || '',
+      linkedinURL: member.linkedinURL || '',
       isActive: member.isActive,
     })
   }
@@ -272,6 +290,37 @@ export default function AdminTeamPage() {
                   value={form.bio}
                   onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))}
                   className="w-full min-h-20"
+                  placeholder="Short paragraph shown on the About page"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Email (optional)</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  className="w-full"
+                  placeholder="name@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">WhatsApp number (optional)</label>
+                <input
+                  type="text"
+                  value={form.whatsappNumber}
+                  onChange={(e) => setForm((p) => ({ ...p, whatsappNumber: e.target.value }))}
+                  className="w-full"
+                  placeholder="e.g. +61412345678 (used for wa.me link)"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">LinkedIn URL (optional)</label>
+                <input
+                  type="url"
+                  value={form.linkedinURL}
+                  onChange={(e) => setForm((p) => ({ ...p, linkedinURL: e.target.value }))}
+                  className="w-full"
+                  placeholder="https://linkedin.com/in/…"
                 />
               </div>
               <div>
