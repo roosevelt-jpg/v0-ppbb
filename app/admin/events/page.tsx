@@ -1,41 +1,87 @@
 'use client'
 
 export const dynamic = 'force-dynamic'
-import React from 'react'
+import React, { Suspense } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { format } from 'date-fns'
 import { Plus, Trash2, Edit2, CheckCircle, AlertCircle, XCircle } from 'lucide-react'
 import type { Event, EventStatus } from '@/lib/event-types'
-import { subscribeToAllEvents, deleteEvent, updateEvent } from '@/lib/event-queries'
+import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
+import { toEventDate } from '@/lib/event-utils'
 
 type TabType = 'all' | 'pending_approval' | 'draft' | 'published' | 'changes_requested' | 'rejected' | 'cancelled' | 'completed'
 
+const TAB_OPTIONS: TabType[] = [
+  'all',
+  'pending_approval',
+  'draft',
+  'published',
+  'changes_requested',
+  'rejected',
+  'cancelled',
+  'completed',
+]
+
+function isValidTab(value: string | null): value is TabType {
+  return !!value && TAB_OPTIONS.includes(value as TabType)
+}
+
 export default function EventsPage() {
+  return (
+    <Suspense
+      fallback={
+        <AdminPageLayout title="Events">
+          <div className="flex items-center justify-center py-12">
+            <p className="text-gray-500">Loading events...</p>
+          </div>
+        </AdminPageLayout>
+      }
+    >
+      <EventsPageContent />
+    </Suspense>
+  )
+}
+
+function EventsPageContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [events, setEvents] = React.useState<Event[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [activeTab, setActiveTab] = React.useState<TabType>('pending_approval')
+  const [activeTab, setActiveTab] = React.useState<TabType>(() => {
+    const tab = searchParams.get('tab')
+    return isValidTab(tab) ? tab : 'all'
+  })
+
+  React.useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (isValidTab(tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
 
   React.useEffect(() => {
     setLoading(true)
-    const status = activeTab === 'all' ? undefined : (activeTab as EventStatus)
-    const unsubscribe = subscribeToAllEvents(
-      (data) => {
-        setEvents(data)
-        setLoading(false)
-      },
-      { status }
-    )
+    const unsubscribe = subscribeToAllEvents((data) => {
+      setEvents(data)
+      setLoading(false)
+    })
     return () => unsubscribe()
-  }, [activeTab])
+  }, [])
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab)
+    router.replace(tab === 'all' ? '/admin/events' : `/admin/events?tab=${tab}`, { scroll: false })
+  }
 
   const getEventsByStatus = (status: TabType): Event[] => {
     if (status === 'all') return events
-    return events.filter(e => e.status === status)
+    return events.filter((e) => e.status === status)
   }
 
   const filteredEvents = getEventsByStatus(activeTab)
-  const pendingCount = events.filter(e => e.status === 'pending_approval').length
+  const pendingCount = events.filter((e) => e.status === 'pending_approval').length
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this event?')) return
@@ -98,7 +144,7 @@ export default function EventsPage() {
           <h2 className="text-2xl font-bold text-black">Events</h2>
           <Link
             href="/admin/events/create"
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 transition-colors"
           >
             <Plus size={20} />
             Create Event
@@ -117,11 +163,12 @@ export default function EventsPage() {
             return (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 ${
+                type="button"
+                onClick={() => handleTabChange(tab)}
+                className={`px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 rounded-lg ${
                   activeTab === tab
-                    ? 'bg-black text-white border-b-2 border-black'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-black text-white'
+                    : 'bg-black text-white opacity-70 hover:opacity-100'
                 }`}
               >
                 {tab === 'pending_approval' && pendingCount > 0 && (
@@ -175,10 +222,16 @@ export default function EventsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
-                      {format(new Date(event.startDate), 'MMM dd, yyyy')}
+                      {(() => {
+                        const date = toEventDate(event.startDate)
+                        return date ? format(date, 'MMM dd, yyyy') : '-'
+                      })()}
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
-                      {event.submittedAt ? format(new Date(event.submittedAt), 'MMM dd, yyyy') : '-'}
+                      {(() => {
+                        const date = toEventDate(event.submittedAt)
+                        return date ? format(date, 'MMM dd, yyyy') : '-'
+                      })()}
                     </td>
                     <td className="px-6 py-3 text-sm">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 ${getStatusBadgeColor(event.status)}`}>
