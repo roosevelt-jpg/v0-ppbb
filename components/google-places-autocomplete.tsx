@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
+import { loadGoogleMapsPlacesApi } from '@/lib/google-maps-loader'
 
 interface PlacePrediction {
   placeId: string
@@ -48,79 +49,42 @@ export default function GooglePlacesAutocomplete({
   const mapRef = useRef<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Load Google Maps API on mount
   useEffect(() => {
-    const loadGoogleMapsAPI = async () => {
-      // Check if already loaded
-      if (window.google?.maps?.places?.AutocompleteService) {
-        console.log('[v0] Google Maps API already loaded')
-        autocompleteService.current = new window.google.maps.places.AutocompleteService()
-        const dummyDiv = document.createElement('div')
-        mapRef.current = new window.google.maps.Map(dummyDiv)
-        placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
-        setApiReady(true)
-        return
+    let cancelled = false
+
+    const initPlacesServices = () => {
+      if (!window.google?.maps?.places) {
+        return false
       }
 
-      // First try environment variable, then fetch from integrations API
-      let apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
-      
-      if (!apiKey) {
-        try {
-          console.log('[v0] Fetching Google Maps API key from integrations...')
-          const res = await fetch('/api/admin/integrations/googleMaps')
-          if (res.ok) {
-            const data = await res.json()
-            apiKey = data.data?.credentials?.apiKey
-            console.log('[v0] API key fetched from integrations:', apiKey ? 'Success' : 'Empty')
-          } else {
-            console.warn('[v0] Integration endpoint returned:', res.status, 'Response:', await res.text())
-          }
-        } catch (error) {
-          console.warn('[v0] Failed to fetch Google Maps API key from integrations:', error)
-          setError('Failed to load integrations')
-        }
-      } else {
-        console.log('[v0] Using environment variable API key')
-      }
-
-      if (!apiKey) {
-        const msg = 'Google Places API key not configured. Please configure it in Admin > Integrations > Google Maps API'
-        console.warn('[v0]', msg)
-        setError(msg)
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => {
-        console.log('[v0] Google Maps script loaded successfully')
-        if (window.google?.maps?.places) {
-          try {
-            autocompleteService.current = new window.google.maps.places.AutocompleteService()
-            const dummyDiv = document.createElement('div')
-            mapRef.current = new window.google.maps.Map(dummyDiv)
-            placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
-            setApiReady(true)
-            setError(null)
-            console.log('[v0] Google Places services initialized')
-          } catch (err) {
-            console.error('[v0] Error initializing Places services:', err)
-            setError('Failed to initialize Places services')
-          }
-        }
-      }
-      script.onerror = () => {
-        const msg = 'Failed to load Google Maps API script'
-        console.error('[v0]', msg)
-        setError(msg)
-      }
-      document.head.appendChild(script)
+      autocompleteService.current = new window.google.maps.places.AutocompleteService()
+      const dummyDiv = document.createElement('div')
+      mapRef.current = new window.google.maps.Map(dummyDiv)
+      placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
+      return true
     }
 
-    loadGoogleMapsAPI()
+    loadGoogleMapsPlacesApi()
+      .then(() => {
+        if (cancelled) return
+
+        if (initPlacesServices()) {
+          setApiReady(true)
+          setError(null)
+        } else {
+          setError('Failed to initialize Places services')
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return
+        const msg = err instanceof Error ? err.message : 'Failed to load Google Maps API'
+        console.warn('[v0]', msg)
+        setError(msg)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const fetchPlacePredictions = (searchTerm: string) => {
