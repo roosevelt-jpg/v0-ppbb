@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "deploy:firestore-rules": "firebase deploy --only firestore:rules",
     "postinstall": "node scripts/patch-next-themes-react19.mjs"
   },
   "dependencies": {
