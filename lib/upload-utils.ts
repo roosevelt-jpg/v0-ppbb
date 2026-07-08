@@ -59,6 +59,26 @@ export async function uploadImageToFirebase(
   return json.url as string
 }
 
+/**
+ * Uploads any file (image, video, etc.) to Firebase Storage via the server
+ * upload route. Only the returned URL should be stored in Firestore.
+ */
+export async function uploadFileToFirebase(file: File, folder: string): Promise<string> {
+  if (!file) {
+    throw new Error('No file selected')
+  }
+
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('folder', folder)
+  const res = await fetch('/api/upload', { method: 'POST', body: fd })
+  const json = await res.json()
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || 'File upload failed')
+  }
+  return json.url as string
+}
+
 export function validateImageFile(
   file: File,
   options: { allowSvg?: boolean; preset?: CmsImagePreset } = {}

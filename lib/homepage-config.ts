@@ -61,11 +61,78 @@ export interface HomepageMission {
   imageURL: string | null
 }
 
+export interface HomepagePillarItem {
+  number: string
+  title: string
+  description: string
+  imageURL: string
+  ctaLabel: string
+  ctaHref: string
+}
+
+export interface HomepagePillars {
+  eyebrow: string
+  headline: string
+  items: HomepagePillarItem[]
+}
+
+export interface HomepageEventsSection {
+  heading: string
+  subheading: string
+  maxEventsToShow: number
+  ctaLabel: string
+  ctaHref: string
+}
+
+export interface HomepageBannerButton {
+  label: string
+  href: string
+  style: HeroButtonStyle
+}
+
+export interface HomepageDonationBanner {
+  eyebrow: string
+  headline: string
+  body: string
+  backgroundColor: string
+  textColor: string
+  buttons: HomepageBannerButton[]
+}
+
+export interface HomepageSocialYoutube {
+  isEnabled: boolean
+  channelId: string | null
+  apiKey: string | null
+  maxVideos: number
+  heading: string
+}
+
+export interface HomepageSocialInstagram {
+  isEnabled: boolean
+  accessToken: string | null
+  maxPosts: number
+  heading: string
+}
+
+export interface HomepageSocialFeeds {
+  youtube: HomepageSocialYoutube
+  instagram: HomepageSocialInstagram
+}
+
+export interface HomepageTestimonialsSection {
+  heading: string
+}
+
 export interface HomepageConfig {
   hero: HomepageHero
   stats: HomepageStats
   marquee: HomepageMarquee
   mission: HomepageMission
+  pillars: HomepagePillars
+  eventsSection: HomepageEventsSection
+  donationBanner: HomepageDonationBanner
+  socialFeeds: HomepageSocialFeeds
+  testimonials: HomepageTestimonialsSection
 }
 
 export const DEFAULT_HOMEPAGE: HomepageConfig = {
@@ -104,6 +171,97 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
     headlineItalicWord: 'community',
     body: 'Passive Blessings exists to turn intention into action. Six interconnected pillars — community, charity, enterprise, spirituality, partnerships and merchandise — make giving and growing a way of life, not an annual gesture.',
     imageURL: null,
+  },
+  pillars: {
+    eyebrow: 'SIX PILLARS',
+    headline: 'How we move.',
+    items: [
+      {
+        number: '01',
+        title: 'Events & Community',
+        description: 'Sisters, brothers, mixed and family gatherings — every week.',
+        imageURL: '',
+        ctaLabel: 'EXPLORE ↗',
+        ctaHref: '/events',
+      },
+      {
+        number: '02',
+        title: 'Charity & Welfare',
+        description: '2,000 weekly meals, Umrah sponsorship, orphan support and more.',
+        imageURL: '',
+        ctaLabel: 'EXPLORE ↗',
+        ctaHref: '/donate',
+      },
+      {
+        number: '03',
+        title: 'Enterprise & Marketplace',
+        description: 'A directory and marketplace for member-owned businesses.',
+        imageURL: '',
+        ctaLabel: 'EXPLORE ↗',
+        ctaHref: '/marketplace',
+      },
+      {
+        number: '04',
+        title: 'Spiritual & Personal Growth',
+        description: 'Weekly sessions, revert support, articles and recordings.',
+        imageURL: '',
+        ctaLabel: 'EXPLORE ↗',
+        ctaHref: '/events?category=spiritual_workshop',
+      },
+      {
+        number: '05',
+        title: 'Partnerships',
+        description: 'Government, corporate and grassroots collaborations.',
+        imageURL: '',
+        ctaLabel: 'EXPLORE ↗',
+        ctaHref: '/partners',
+      },
+      {
+        number: '06',
+        title: 'Merchandise',
+        description: 'Purpose-driven products. Every purchase fuels a cause.',
+        imageURL: '',
+        ctaLabel: 'EXPLORE ↗',
+        ctaHref: '/shop',
+      },
+    ],
+  },
+  eventsSection: {
+    heading: 'Upcoming Events',
+    subheading: 'Join our community and participate in meaningful events',
+    maxEventsToShow: 6,
+    ctaLabel: 'View All Events →',
+    ctaHref: '/events',
+  },
+  donationBanner: {
+    eyebrow: 'GET INVOLVED',
+    headline: 'Charity is the door. Community is the home.',
+    body: 'Whether you donate, volunteer or simply show up — every blessing compounds. Pick how you want to begin.',
+    backgroundColor: '#1a1a1a',
+    textColor: '#ffffff',
+    buttons: [
+      { label: 'Volunteer', href: '/volunteer', style: 'primary' },
+      { label: 'Donate', href: '/donate', style: 'secondary' },
+      { label: 'Contact us →', href: '/partners', style: 'text' },
+    ],
+  },
+  socialFeeds: {
+    youtube: {
+      isEnabled: false,
+      channelId: null,
+      apiKey: null,
+      maxVideos: 6,
+      heading: 'Watch Our Story',
+    },
+    instagram: {
+      isEnabled: false,
+      accessToken: null,
+      maxPosts: 9,
+      heading: 'Follow Along',
+    },
+  },
+  testimonials: {
+    heading: 'Success Stories',
   },
 }
 
@@ -207,6 +365,118 @@ function mergeMission(data: unknown): HomepageMission {
   }
 }
 
+function mergePillarItem(item: Partial<HomepagePillarItem>, fallback: HomepagePillarItem): HomepagePillarItem {
+  return {
+    number: typeof item.number === 'string' ? item.number : fallback.number,
+    title: typeof item.title === 'string' ? item.title : fallback.title,
+    description: typeof item.description === 'string' ? item.description : fallback.description,
+    imageURL: typeof item.imageURL === 'string' ? item.imageURL : fallback.imageURL,
+    ctaLabel: typeof item.ctaLabel === 'string' ? item.ctaLabel : fallback.ctaLabel,
+    ctaHref: typeof item.ctaHref === 'string' ? item.ctaHref : fallback.ctaHref,
+  }
+}
+
+function mergePillars(data: unknown): HomepagePillars {
+  const d = (data || {}) as Partial<HomepagePillars>
+  const defaults = DEFAULT_HOMEPAGE.pillars.items
+  const items = Array.isArray(d.items)
+    ? d.items
+        .filter((item) => item && typeof item.title === 'string')
+        .map((item, i) => mergePillarItem(item, defaults[i] || defaults[0]))
+    : defaults
+
+  return {
+    eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : DEFAULT_HOMEPAGE.pillars.eyebrow,
+    headline: typeof d.headline === 'string' ? d.headline : DEFAULT_HOMEPAGE.pillars.headline,
+    items: items.length > 0 ? items : defaults,
+  }
+}
+
+function mergeEventsSection(data: unknown): HomepageEventsSection {
+  const d = (data || {}) as Partial<HomepageEventsSection>
+  const max =
+    typeof d.maxEventsToShow === 'number' && d.maxEventsToShow >= 3 && d.maxEventsToShow <= 8
+      ? d.maxEventsToShow
+      : DEFAULT_HOMEPAGE.eventsSection.maxEventsToShow
+
+  return {
+    heading: typeof d.heading === 'string' ? d.heading : DEFAULT_HOMEPAGE.eventsSection.heading,
+    subheading:
+      typeof d.subheading === 'string' ? d.subheading : DEFAULT_HOMEPAGE.eventsSection.subheading,
+    maxEventsToShow: max,
+    ctaLabel: typeof d.ctaLabel === 'string' ? d.ctaLabel : DEFAULT_HOMEPAGE.eventsSection.ctaLabel,
+    ctaHref: typeof d.ctaHref === 'string' ? d.ctaHref : DEFAULT_HOMEPAGE.eventsSection.ctaHref,
+  }
+}
+
+function mergeBannerButtons(buttons: unknown): HomepageBannerButton[] {
+  if (!Array.isArray(buttons)) return DEFAULT_HOMEPAGE.donationBanner.buttons
+  const merged = buttons
+    .filter((b) => b && typeof b.label === 'string' && typeof b.href === 'string')
+    .map((b) => ({
+      label: b.label,
+      href: b.href,
+      style: (['primary', 'secondary', 'text'].includes(b.style as string)
+        ? b.style
+        : 'primary') as HeroButtonStyle,
+    }))
+  return merged.length > 0 ? merged : DEFAULT_HOMEPAGE.donationBanner.buttons
+}
+
+function mergeDonationBanner(data: unknown): HomepageDonationBanner {
+  const d = (data || {}) as Partial<HomepageDonationBanner>
+  return {
+    eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : DEFAULT_HOMEPAGE.donationBanner.eyebrow,
+    headline: typeof d.headline === 'string' ? d.headline : DEFAULT_HOMEPAGE.donationBanner.headline,
+    body: typeof d.body === 'string' ? d.body : DEFAULT_HOMEPAGE.donationBanner.body,
+    backgroundColor:
+      typeof d.backgroundColor === 'string'
+        ? d.backgroundColor
+        : DEFAULT_HOMEPAGE.donationBanner.backgroundColor,
+    textColor:
+      typeof d.textColor === 'string' ? d.textColor : DEFAULT_HOMEPAGE.donationBanner.textColor,
+    buttons: mergeBannerButtons(d.buttons),
+  }
+}
+
+function mergeSocialFeeds(data: unknown): HomepageSocialFeeds {
+  const d = (data || {}) as Partial<HomepageSocialFeeds>
+  const yt = (d.youtube || {}) as Partial<HomepageSocialYoutube>
+  const ig = (d.instagram || {}) as Partial<HomepageSocialInstagram>
+
+  return {
+    youtube: {
+      isEnabled: yt.isEnabled === true,
+      channelId: typeof yt.channelId === 'string' ? yt.channelId : null,
+      apiKey: typeof yt.apiKey === 'string' ? yt.apiKey : null,
+      maxVideos:
+        typeof yt.maxVideos === 'number' && yt.maxVideos > 0
+          ? yt.maxVideos
+          : DEFAULT_HOMEPAGE.socialFeeds.youtube.maxVideos,
+      heading:
+        typeof yt.heading === 'string' ? yt.heading : DEFAULT_HOMEPAGE.socialFeeds.youtube.heading,
+    },
+    instagram: {
+      isEnabled: ig.isEnabled === true,
+      accessToken: typeof ig.accessToken === 'string' ? ig.accessToken : null,
+      maxPosts:
+        typeof ig.maxPosts === 'number' && ig.maxPosts > 0
+          ? ig.maxPosts
+          : DEFAULT_HOMEPAGE.socialFeeds.instagram.maxPosts,
+      heading:
+        typeof ig.heading === 'string' ? ig.heading : DEFAULT_HOMEPAGE.socialFeeds.instagram.heading,
+    },
+  }
+}
+
+function mergeTestimonialsSection(data: unknown): HomepageTestimonialsSection {
+  const d = (data || {}) as Partial<HomepageTestimonialsSection>
+  return {
+    heading:
+      typeof d.heading === 'string' ? d.heading : DEFAULT_HOMEPAGE.testimonials.heading,
+  }
+}
+
 function mergeHomepage(data: Record<string, unknown> | undefined): HomepageConfig {
   if (!data) return DEFAULT_HOMEPAGE
   return {
@@ -214,6 +484,11 @@ function mergeHomepage(data: Record<string, unknown> | undefined): HomepageConfi
     stats: mergeStats(data.stats),
     marquee: mergeMarquee(data.marquee),
     mission: mergeMission(data.mission),
+    pillars: mergePillars(data.pillars),
+    eventsSection: mergeEventsSection(data.eventsSection),
+    donationBanner: mergeDonationBanner(data.donationBanner),
+    socialFeeds: mergeSocialFeeds(data.socialFeeds),
+    testimonials: mergeTestimonialsSection(data.testimonials),
   }
 }
 

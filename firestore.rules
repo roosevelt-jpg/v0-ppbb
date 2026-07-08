@@ -85,6 +85,24 @@ service cloud.firestore {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
+
+    // Platform CMS config - Public read, admin write
+    match /platformConfig/{document=**} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Partner logos (marquee) - Public read, admin write
+    match /partners/{partnerId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Testimonials - Public read, admin write
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
     
     // Events - Public read of published events, authenticated create/update/delete
     match /events/{eventId} {

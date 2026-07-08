@@ -13,6 +13,8 @@ import {
   HeroButtonStyle,
   HeroImage,
   HeroTransitionType,
+  HomepagePillarItem,
+  HomepageBannerButton,
 } from '@/lib/homepage-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 
@@ -151,6 +153,71 @@ export default function AdminCmsHomepagePage() {
     })
   }
 
+  const handlePillarImageUpload = async (index: number, file: File) => {
+    setUploading(`pillar-${index}`)
+    try {
+      const url = await uploadHomepageImage(file, 'homepage/pillars')
+      setConfig((p) => {
+        const items = [...p.pillars.items]
+        items[index] = { ...items[index], imageURL: url }
+        return { ...p, pillars: { ...p.pillars, items } }
+      })
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Image upload failed',
+      })
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const updatePillar = (index: number, field: keyof HomepagePillarItem, value: string) => {
+    setConfig((p) => {
+      const items = [...p.pillars.items]
+      items[index] = { ...items[index], [field]: value }
+      return { ...p, pillars: { ...p.pillars, items } }
+    })
+  }
+
+  const movePillar = (index: number, direction: 'up' | 'down') => {
+    setConfig((p) => {
+      const items = [...p.pillars.items]
+      const swap = direction === 'up' ? index - 1 : index + 1
+      if (swap < 0 || swap >= items.length) return p
+      ;[items[index], items[swap]] = [items[swap], items[index]]
+      return { ...p, pillars: { ...p.pillars, items } }
+    })
+  }
+
+  const updateBannerButton = (index: number, field: keyof HomepageBannerButton, value: string) => {
+    setConfig((p) => {
+      const buttons = [...p.donationBanner.buttons]
+      buttons[index] = { ...buttons[index], [field]: value }
+      return { ...p, donationBanner: { ...p.donationBanner, buttons } }
+    })
+  }
+
+  const addBannerButton = () => {
+    setConfig((p) => ({
+      ...p,
+      donationBanner: {
+        ...p.donationBanner,
+        buttons: [...p.donationBanner.buttons, { label: 'New button', href: '/', style: 'primary' }],
+      },
+    }))
+  }
+
+  const removeBannerButton = (index: number) => {
+    setConfig((p) => ({
+      ...p,
+      donationBanner: {
+        ...p.donationBanner,
+        buttons: p.donationBanner.buttons.filter((_, i) => i !== index),
+      },
+    }))
+  }
+
   return (
     <AdminPageLayout title="Homepage CMS">
       <div className="space-y-6">
@@ -158,7 +225,7 @@ export default function AdminCmsHomepagePage() {
           <div>
             <h1 className="font-headline text-3xl font-bold text-neutral-900">Homepage</h1>
             <p className="text-sm text-neutral-600 mt-1">
-              Edit hero, stats, marquee settings, and mission (sections 2A–2D). Live sync via Firestore.
+              Edit all homepage sections (2A–2I). Live sync via Firestore.
             </p>
           </div>
           <Button
@@ -589,6 +656,564 @@ export default function AdminCmsHomepagePage() {
                 className="w-full min-h-28"
               />
             </div>
+          </div>
+        </Card>
+
+        {/* 2E Pillars */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Six Pillars (2E)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Eyebrow</label>
+              <input
+                type="text"
+                value={config.pillars.eyebrow}
+                onChange={(e) =>
+                  setConfig((p) => ({ ...p, pillars: { ...p.pillars, eyebrow: e.target.value } }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Headline</label>
+              <input
+                type="text"
+                value={config.pillars.headline}
+                onChange={(e) =>
+                  setConfig((p) => ({ ...p, pillars: { ...p.pillars, headline: e.target.value } }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {config.pillars.items.map((pillar, i) => (
+              <div key={i} className="p-3 border rounded-lg space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold">Pillar {pillar.number || i + 1}</span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => movePillar(i, 'up')}
+                      disabled={i === 0}
+                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded disabled:opacity-40"
+                      aria-label="Move up"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => movePillar(i, 'down')}
+                      disabled={i === config.pillars.items.length - 1}
+                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded disabled:opacity-40"
+                      aria-label="Move down"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium">Number</label>
+                    <input
+                      type="text"
+                      value={pillar.number}
+                      onChange={(e) => updatePillar(i, 'number', e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">Title</label>
+                    <input
+                      type="text"
+                      value={pillar.title}
+                      onChange={(e) => updatePillar(i, 'title', e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium">Description</label>
+                    <textarea
+                      value={pillar.description}
+                      onChange={(e) => updatePillar(i, 'description', e.target.value)}
+                      className="w-full min-h-16"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">CTA label</label>
+                    <input
+                      type="text"
+                      value={pillar.ctaLabel}
+                      onChange={(e) => updatePillar(i, 'ctaLabel', e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium">CTA href</label>
+                    <input
+                      type="text"
+                      value={pillar.ctaHref}
+                      onChange={(e) => updatePillar(i, 'ctaHref', e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium">Image</label>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
+                      <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
+                        <Upload className="w-4 h-4" />
+                        {uploading === `pillar-${i}` ? 'Uploading…' : 'Upload image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) =>
+                            e.target.files?.[0] && void handlePillarImageUpload(i, e.target.files[0])
+                          }
+                        />
+                      </label>
+                      {pillar.imageURL && (
+                        <img src={pillar.imageURL} alt="" className="h-16 w-24 object-cover rounded border" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* 2F Events section */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Upcoming Events (2F)</h2>
+          <p className="text-sm text-neutral-600">
+            Event cards are loaded from the <code className="text-xs">events</code> collection (published,
+            future dates). Configure section labels here.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Heading</label>
+              <input
+                type="text"
+                value={config.eventsSection.heading}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    eventsSection: { ...p.eventsSection, heading: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Subheading</label>
+              <input
+                type="text"
+                value={config.eventsSection.subheading}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    eventsSection: { ...p.eventsSection, subheading: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Max events to show</label>
+              <input
+                type="number"
+                min={3}
+                max={8}
+                value={config.eventsSection.maxEventsToShow}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    eventsSection: {
+                      ...p.eventsSection,
+                      maxEventsToShow: parseInt(e.target.value, 10) || 6,
+                    },
+                  }))
+                }
+                className="w-full sm:max-w-[20rem]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">CTA label</label>
+              <input
+                type="text"
+                value={config.eventsSection.ctaLabel}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    eventsSection: { ...p.eventsSection, ctaLabel: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">CTA href</label>
+              <input
+                type="text"
+                value={config.eventsSection.ctaHref}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    eventsSection: { ...p.eventsSection, ctaHref: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* 2G Donation banner */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Donation + Volunteer Banner (2G)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Eyebrow</label>
+              <input
+                type="text"
+                value={config.donationBanner.eyebrow}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    donationBanner: { ...p.donationBanner, eyebrow: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Headline</label>
+              <input
+                type="text"
+                value={config.donationBanner.headline}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    donationBanner: { ...p.donationBanner, headline: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1">Body</label>
+              <textarea
+                value={config.donationBanner.body}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    donationBanner: { ...p.donationBanner, body: e.target.value },
+                  }))
+                }
+                className="w-full min-h-20"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Background color</label>
+              <input
+                type="text"
+                value={config.donationBanner.backgroundColor}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    donationBanner: { ...p.donationBanner, backgroundColor: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Text color</label>
+              <input
+                type="text"
+                value={config.donationBanner.textColor}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    donationBanner: { ...p.donationBanner, textColor: e.target.value },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-sm">Buttons</h3>
+              <Button type="button" onClick={addBannerButton} className="bg-black text-white hover:bg-gray-800 text-xs">
+                <Plus className="w-3 h-3 mr-1" /> Add
+              </Button>
+            </div>
+            {config.donationBanner.buttons.map((btn, i) => (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end p-3 border rounded-lg">
+                <div className="md:col-span-4">
+                  <label className="text-xs font-medium">Label</label>
+                  <input
+                    type="text"
+                    value={btn.label}
+                    onChange={(e) => updateBannerButton(i, 'label', e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="text-xs font-medium">Href</label>
+                  <input
+                    type="text"
+                    value={btn.href}
+                    onChange={(e) => updateBannerButton(i, 'href', e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="text-xs font-medium">Style</label>
+                  <select
+                    value={btn.style}
+                    onChange={(e) => updateBannerButton(i, 'style', e.target.value as HeroButtonStyle)}
+                    className="w-full"
+                  >
+                    <option value="primary">Primary</option>
+                    <option value="secondary">Secondary</option>
+                    <option value="text">Text</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <button
+                    type="button"
+                    onClick={() => removeBannerButton(i)}
+                    className="flex items-center justify-center min-h-[44px] w-full p-2 bg-red-600 text-white rounded"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* 2H Social feeds */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Social Feeds (2H)</h2>
+          <p className="text-sm text-neutral-600">
+            Toggle feeds on when API credentials are ready. Disabled feeds show a placeholder on the homepage.
+          </p>
+
+          <div className="space-y-4 p-4 border rounded-lg">
+            <h3 className="font-semibold text-sm">YouTube</h3>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.socialFeeds.youtube.isEnabled}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    socialFeeds: {
+                      ...p.socialFeeds,
+                      youtube: { ...p.socialFeeds.youtube, isEnabled: e.target.checked },
+                    },
+                  }))
+                }
+              />
+              Enable YouTube feed
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium">Heading</label>
+                <input
+                  type="text"
+                  value={config.socialFeeds.youtube.heading}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        youtube: { ...p.socialFeeds.youtube, heading: e.target.value },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium">Max videos</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={config.socialFeeds.youtube.maxVideos}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        youtube: {
+                          ...p.socialFeeds.youtube,
+                          maxVideos: parseInt(e.target.value, 10) || 6,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium">Channel ID</label>
+                <input
+                  type="text"
+                  value={config.socialFeeds.youtube.channelId || ''}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        youtube: {
+                          ...p.socialFeeds.youtube,
+                          channelId: e.target.value || null,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                  placeholder="Optional — for future API wiring"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium">API key</label>
+                <input
+                  type="password"
+                  value={config.socialFeeds.youtube.apiKey || ''}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        youtube: {
+                          ...p.socialFeeds.youtube,
+                          apiKey: e.target.value || null,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                  placeholder="Optional — stored in Firestore"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 p-4 border rounded-lg">
+            <h3 className="font-semibold text-sm">Instagram</h3>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.socialFeeds.instagram.isEnabled}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    socialFeeds: {
+                      ...p.socialFeeds,
+                      instagram: { ...p.socialFeeds.instagram, isEnabled: e.target.checked },
+                    },
+                  }))
+                }
+              />
+              Enable Instagram feed
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium">Heading</label>
+                <input
+                  type="text"
+                  value={config.socialFeeds.instagram.heading}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        instagram: { ...p.socialFeeds.instagram, heading: e.target.value },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium">Max posts</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={12}
+                  value={config.socialFeeds.instagram.maxPosts}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        instagram: {
+                          ...p.socialFeeds.instagram,
+                          maxPosts: parseInt(e.target.value, 10) || 9,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-xs font-medium">Access token</label>
+                <input
+                  type="password"
+                  value={config.socialFeeds.instagram.accessToken || ''}
+                  onChange={(e) =>
+                    setConfig((p) => ({
+                      ...p,
+                      socialFeeds: {
+                        ...p.socialFeeds,
+                        instagram: {
+                          ...p.socialFeeds.instagram,
+                          accessToken: e.target.value || null,
+                        },
+                      },
+                    }))
+                  }
+                  className="w-full"
+                  placeholder="Optional — for future API wiring"
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* 2I Testimonials heading */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Testimonials (2I)</h2>
+          <p className="text-sm text-neutral-600">
+            Testimonial content is managed at{' '}
+            <a href="/admin/cms/testimonials" className="underline font-medium">
+              /admin/cms/testimonials
+            </a>
+            . Set the section heading here.
+          </p>
+          <div>
+            <label className="block text-sm font-medium mb-1">Section heading</label>
+            <input
+              type="text"
+              value={config.testimonials.heading}
+              onChange={(e) =>
+                setConfig((p) => ({
+                  ...p,
+                  testimonials: { ...p.testimonials, heading: e.target.value },
+                }))
+              }
+              className="w-full sm:max-w-[20rem]"
+            />
           </div>
         </Card>
       </div>
