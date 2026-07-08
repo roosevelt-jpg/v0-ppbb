@@ -113,7 +113,6 @@ const adminMenuItems = [
   { label: 'Location Config', href: '/admin/location-config', icon: Shield, group: 'Configuration' },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug, group: 'Configuration' },
   { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: BarChart3, group: 'Configuration' },
-  { label: 'Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'Configuration' },
 ]
 
 export function AdminSidebar() {
