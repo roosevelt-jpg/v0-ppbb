@@ -52,7 +52,7 @@ export default function PricingManagementPage() {
         setLoading(false)
       },
       (error) => {
-        console.error('[v0] Error fetching pricing plans:', error)
+        console.error('[v0] pricingPlans onSnapshot permission error:', error)
         setLoading(false)
       }
     )
