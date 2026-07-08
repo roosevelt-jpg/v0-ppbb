@@ -12,7 +12,7 @@ import { YouTubeConfig } from '@/lib/types'
 
 function SocialSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-[#f7f6f2] animate-pulse overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] animate-pulse overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto space-y-8">
         <div className="h-8 w-48 bg-neutral-200 rounded" />
         <div className="h-40 bg-neutral-200 rounded-lg" />
@@ -31,7 +31,7 @@ function PlaceholderBlock({
   message: string
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#e4e1da] p-8 sm:p-12 text-center min-w-0">
+    <div className="bg-white rounded-xl border border-[#e4e1da] p-6 sm:p-8 text-center min-w-0">
       <Icon className="h-10 w-10 text-neutral-400 mx-auto mb-4" />
       <h3 className="font-headline text-xl sm:text-2xl font-bold mb-2 break-words">{heading}</h3>
       <p className="font-body text-sm text-muted-foreground break-words">{message}</p>
@@ -90,8 +90,8 @@ export function HomeSocialFeeds() {
 
   if (!showYoutube && !showInstagram) {
     return (
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-[#f7f6f2] overflow-x-hidden">
-        <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] overflow-x-hidden">
+        <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <PlaceholderBlock
             icon={Play}
             heading={socialFeeds.youtube.heading}
@@ -110,11 +110,11 @@ export function HomeSocialFeeds() {
   const youtubeVideos = youtubeConfig?.videos.slice(0, socialFeeds.youtube.maxVideos) || []
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-[#f7f6f2] overflow-x-hidden">
-      <div className="max-w-[72rem] mx-auto w-full min-w-0 space-y-12">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] overflow-x-hidden">
+      <div className="max-w-[72rem] mx-auto w-full min-w-0 space-y-8">
         {showYoutube && (
           <div className="min-w-0">
-            <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-6 break-words">
+            <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4 break-words">
               {socialFeeds.youtube.heading}
             </h2>
             {youtubeVideos.length > 0 ? (

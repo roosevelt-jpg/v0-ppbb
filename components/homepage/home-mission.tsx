@@ -10,8 +10,8 @@ import {
 
 function MissionSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 animate-pulse">
-      <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-pulse">
+      <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-4">
           <div className="h-3 w-32 bg-neutral-200 rounded" />
           <div className="h-12 w-full bg-neutral-200 rounded" />
@@ -41,11 +41,11 @@ export function HomeMission() {
   const headlineParts = splitMissionHeadline(mission.headline, mission.headlineItalicWord)
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-background overflow-x-hidden">
-      <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-background overflow-x-hidden">
+      <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
         <div className="min-w-0">
-          <p className="eyebrow text-muted-foreground mb-4 break-words">{mission.eyebrow}</p>
-          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold leading-snug mb-6 text-foreground break-words">
+          <p className="eyebrow text-muted-foreground mb-2 break-words">{mission.eyebrow}</p>
+          <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold leading-snug mb-4 text-foreground break-words">
             {headlineParts ? (
               <>
                 {headlineParts.before}

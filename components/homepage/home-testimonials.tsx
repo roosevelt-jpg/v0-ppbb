@@ -11,7 +11,7 @@ import { subscribeToActiveTestimonials, Testimonial } from '@/lib/testimonials'
 
 function TestimonialsSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 animate-pulse overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 animate-pulse overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
         <div className="h-10 w-64 bg-neutral-200 rounded mx-auto mb-10" />
         <div className="h-48 bg-neutral-200 rounded-xl" />
@@ -41,7 +41,7 @@ function TestimonialSlide({ item }: { item: Testimonial }) {
   }
 
   return (
-    <blockquote className="bg-white rounded-xl border border-[#e4e1da] p-6 sm:p-8 min-w-0 h-full flex flex-col">
+    <blockquote className="bg-white rounded-xl border border-[#e4e1da] p-5 sm:p-6 min-w-0 h-full flex flex-col">
       <Quote className="h-6 w-6 text-neutral-300 mb-4 flex-shrink-0" />
       <p className="font-body text-sm sm:text-base text-[#333333] italic leading-relaxed mb-6 flex-1 break-words">
         {item.quote}
@@ -94,9 +94,9 @@ export function HomeTestimonials() {
   const canNext = index < testimonials.length - 1
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
-        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 break-words">
+        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-5 sm:mb-6 md:mb-7 break-words">
           {config.testimonials.heading}
         </h2>
 

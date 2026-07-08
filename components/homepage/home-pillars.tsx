@@ -10,10 +10,10 @@ import {
 
 function PillarsSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2] animate-pulse overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-[#f7f6f2] animate-pulse overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
-        <div className="h-3 w-32 bg-neutral-200 rounded mx-auto mb-4" />
-        <div className="h-10 w-64 bg-neutral-200 rounded mx-auto mb-10" />
+        <div className="h-3 w-32 bg-neutral-200 rounded mx-auto mb-2" />
+        <div className="h-10 w-64 bg-neutral-200 rounded mx-auto mb-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden">
@@ -48,14 +48,14 @@ export function HomePillars() {
   const { pillars } = config
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2] overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-[#f7f6f2] overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
-        <p className="eyebrow text-muted-foreground text-center mb-3 break-words">{pillars.eyebrow}</p>
-        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 break-words">
+        <p className="eyebrow text-muted-foreground text-center mb-2 break-words">{pillars.eyebrow}</p>
+        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-5 sm:mb-6 md:mb-7 break-words">
           {pillars.headline}
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {pillars.items.map((pillar, idx) => (
             <article
               key={`${pillar.number}-${idx}`}
@@ -72,10 +72,10 @@ export function HomePillars() {
                   <span className="text-xs text-muted-foreground px-4 text-center">Pillar image</span>
                 </div>
               )}
-              <div className="p-4 sm:p-5 flex flex-col flex-1 min-w-0">
-                <span className="eyebrow text-muted-foreground text-[0.65rem] mb-2">{pillar.number}</span>
-                <h3 className="font-headline text-lg sm:text-xl font-bold mb-2 break-words">{pillar.title}</h3>
-                <p className="font-body text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4 flex-1 break-words">
+              <div className="p-3 sm:p-4 flex flex-col flex-1 min-w-0">
+                <span className="eyebrow text-muted-foreground text-[0.65rem] mb-1">{pillar.number}</span>
+                <h3 className="font-headline text-lg sm:text-xl font-bold mb-1.5 break-words">{pillar.title}</h3>
+                <p className="font-body text-xs sm:text-sm text-muted-foreground leading-snug mb-3 flex-1 break-words">
                   {pillar.description}
                 </p>
                 <Link

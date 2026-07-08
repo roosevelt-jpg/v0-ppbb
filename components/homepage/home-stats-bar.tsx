@@ -145,9 +145,9 @@ export function HomeStatsBar() {
   const items = config.stats.items.slice(0, 4)
 
   return (
-    <section ref={sectionRef} id="impact" className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12 md:py-16 bg-background border-y border-border/40 overflow-x-hidden">
+    <section ref={sectionRef} id="impact" className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-background border-y border-border/40 overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {items.map((item, index) => {
             const displayValue =
               config.stats.displayMode === 'live'

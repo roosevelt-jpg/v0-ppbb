@@ -45,7 +45,7 @@ function BannerButton({ button, textColor }: { button: HomepageBannerButton; tex
 
 function BannerSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 animate-pulse overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-pulse overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto bg-neutral-800 rounded-2xl h-64" />
     </section>
   )
@@ -68,19 +68,19 @@ export function HomeDonationBanner() {
   const { donationBanner } = config
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 overflow-x-hidden">
       <div
-        className="max-w-[72rem] mx-auto w-full min-w-0 rounded-2xl px-6 sm:px-10 py-10 sm:py-14 text-center"
+        className="max-w-[72rem] mx-auto w-full min-w-0 rounded-2xl px-5 sm:px-8 py-8 sm:py-10 text-center"
         style={{
           backgroundColor: donationBanner.backgroundColor,
           color: donationBanner.textColor,
         }}
       >
-        <p className="eyebrow mb-4 opacity-80 break-words">{donationBanner.eyebrow}</p>
-        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold mb-4 break-words">
+        <p className="eyebrow mb-2 opacity-80 break-words">{donationBanner.eyebrow}</p>
+        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold mb-3 break-words">
           {donationBanner.headline}
         </h2>
-        <p className="font-body text-sm sm:text-base max-w-[42rem] mx-auto mb-8 opacity-90 leading-relaxed break-words">
+        <p className="font-body text-sm sm:text-base max-w-[42rem] mx-auto mb-5 opacity-90 leading-snug break-words">
           {donationBanner.body}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">

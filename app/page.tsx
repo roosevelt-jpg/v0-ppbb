@@ -82,9 +82,9 @@ export default function HomePage() {
 
       {/* ACTIVE CAUSES - Mobile First */}
       {causes.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-[#f7f6f2]">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-[#f7f6f2]">
           <div className="max-w-[72rem] mx-auto w-full min-w-0">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-10 md:mb-12 font-headline">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-5 sm:mb-6 md:mb-7 font-headline">
               Active Causes
             </h2>
 
@@ -131,9 +131,9 @@ export default function HomePage() {
 
       {/* SPONSORS & PARTNERS - Mobile First */}
       {sponsors.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
           <div className="max-w-[72rem] mx-auto w-full min-w-0">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-headline">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-7 md:mb-8 font-headline">
               Our Partners & Sponsors
             </h2>
 
@@ -158,7 +158,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="text-center mt-10 sm:mt-12">
+            <div className="text-center mt-6 sm:mt-8">
               <Link href="/dashboard/sponsor-profile">
                 <Button size="lg" className="bg-[#111111] hover:bg-[#333333] text-white">
                   Become a Partner
@@ -172,9 +172,9 @@ export default function HomePage() {
 
       {/* NEWS - Mobile First */}
       {news.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-[#f7f6f2]">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-[#f7f6f2]">
           <div className="max-w-[72rem] mx-auto w-full min-w-0">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-10 sm:mb-12 md:mb-16 font-headline">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-7 md:mb-8 font-headline">
               Latest News
             </h2>
 

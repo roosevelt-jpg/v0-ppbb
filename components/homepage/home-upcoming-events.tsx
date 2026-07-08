@@ -16,7 +16,7 @@ import type { Event } from '@/lib/types'
 
 function EventsSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-[#f7f6f2] animate-pulse overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-gradient-to-b from-white to-[#f7f6f2] animate-pulse overflow-x-hidden">
       <div className="max-w-[80rem] mx-auto w-full min-w-0">
         <div className="h-8 w-56 bg-neutral-200 rounded mb-3" />
         <div className="h-4 w-80 bg-neutral-200 rounded mb-10" />
@@ -101,9 +101,9 @@ export function HomeUpcomingEvents() {
   const { eventsSection } = config
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-[#f7f6f2] overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-gradient-to-b from-white to-[#f7f6f2] overflow-x-hidden">
       <div className="max-w-[80rem] mx-auto w-full min-w-0">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10 md:mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6 md:mb-7">
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#111111] flex-shrink-0" />
@@ -127,13 +127,13 @@ export function HomeUpcomingEvents() {
         </div>
 
         {displayEvents.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {displayEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-8">
             <Calendar className="h-12 w-12 text-[#e4e1da] mx-auto mb-4" />
             <p className="font-body text-base sm:text-lg text-[#888888] font-medium break-words">
               Events coming soon. Check back shortly.
@@ -142,7 +142,7 @@ export function HomeUpcomingEvents() {
         )}
 
         {displayEvents.length >= 4 && (
-          <div className="text-center mt-8 sm:mt-10">
+          <div className="text-center mt-6 sm:mt-7">
             <Link href={eventsSection.ctaHref}>
               <Button
                 variant="outline"

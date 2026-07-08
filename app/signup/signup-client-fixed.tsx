@@ -691,7 +691,7 @@ export default function SignupClient() {
         </div>
 
         {/* Right Info Column */}
-        <div style={{ display: 'none', width: '380px', backgroundColor: '#f7f6f2', padding: '2rem', '@media (min-width: 1024px)': { display: 'flex' }, flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="hidden lg:flex lg:flex-col lg:justify-center lg:w-[380px] flex-shrink-0 bg-[#f7f6f2] p-8">
           <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Why join Passive Blessings?</h3>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
