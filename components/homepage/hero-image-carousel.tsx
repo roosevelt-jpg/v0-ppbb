@@ -5,17 +5,21 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { HeroImage, HeroSlider, splitImageCaption } from '@/lib/homepage-config'
 
 /**
- * Mobile: portrait 4:5 frame when stacked above copy.
- * Desktop (lg+): stretches to match the text column height via grid items-stretch.
+ * Mobile/tablet: landscape frame when stacked above copy.
+ * Desktop (lg+): fills the wider right column and stretches to text-column height.
  */
 const FRAME_CLASS =
-  'relative w-full h-full min-h-0 overflow-hidden rounded-2xl bg-neutral-100 aspect-[4/5] lg:aspect-auto'
+  'relative w-full h-full min-h-0 overflow-hidden rounded-2xl bg-neutral-100 aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[min(52vw,28rem)]'
 
-function HeroCaption({ caption }: { caption: string }) {
+function HeroCaption({ caption, reserveDots }: { caption: string; reserveDots?: boolean }) {
   if (!caption.trim()) return null
   const parts = splitImageCaption(caption)
   return (
-    <p className="absolute bottom-0 left-0 right-0 z-10 px-4 py-3 text-xs sm:text-sm break-words bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+    <p
+      className={`absolute bottom-0 left-0 right-0 z-10 px-4 py-3 text-xs sm:text-sm break-words bg-gradient-to-t from-black/70 via-black/40 to-transparent ${
+        reserveDots ? 'pb-7 sm:pb-8' : ''
+      }`}
+    >
       <span className="eyebrow text-[0.65rem] sm:text-xs text-white/90">{parts.prefix}</span>
       {parts.italic && (
         <>
@@ -138,25 +142,25 @@ export function HeroImageCarousel({
         <ChevronRight className="w-5 h-5" />
       </button>
 
-      <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center gap-1.5">
+      <div className="absolute bottom-2 sm:bottom-3 left-0 right-0 z-20 flex justify-center items-center gap-1 sm:gap-1.5 pointer-events-none">
         {images.map((img, i) => (
           <button
             key={img.id}
             type="button"
             onClick={() => goTo(i)}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="pointer-events-auto p-1.5 sm:p-2 flex items-center justify-center min-h-[32px] min-w-[32px] sm:min-h-[36px] sm:min-w-[36px]"
             aria-label={`Go to slide ${i + 1}`}
           >
             <span
               className={`block rounded-full transition-all ${
-                i === index ? 'h-2 w-6 bg-white' : 'h-2 w-2 bg-white/50 hover:bg-white/80'
+                i === index ? 'h-1.5 w-4 sm:w-5 bg-white' : 'h-1.5 w-1.5 bg-white/55 hover:bg-white/80'
               }`}
             />
           </button>
         ))}
       </div>
 
-      <HeroCaption caption={current.caption || ''} />
+      <HeroCaption caption={current.caption || ''} reserveDots />
     </div>
   )
 }

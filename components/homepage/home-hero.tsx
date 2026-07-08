@@ -42,8 +42,8 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
 function HeroSkeleton() {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-      <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 lg:items-stretch animate-pulse">
-        <div className="order-2 lg:order-1 space-y-4">
+      <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 lg:items-stretch animate-pulse">
+        <div className="order-2 lg:order-1 lg:col-span-5 space-y-4">
           <div className="h-3 w-48 bg-neutral-200 rounded" />
           <div className="h-10 w-full max-w-md bg-neutral-200 rounded" />
           <div className="h-20 w-full bg-neutral-200 rounded" />
@@ -52,7 +52,7 @@ function HeroSkeleton() {
             <div className="h-10 w-24 bg-neutral-200 rounded" />
           </div>
         </div>
-        <div className="order-1 lg:order-2 aspect-[4/5] lg:aspect-auto lg:h-full bg-neutral-200 rounded-2xl min-h-0" />
+        <div className="order-1 lg:order-2 lg:col-span-7 aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:h-full bg-neutral-200 rounded-2xl min-h-0" />
       </div>
     </section>
   )
@@ -76,10 +76,10 @@ export function HomeHero() {
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10 bg-background overflow-x-hidden">
-      <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 lg:items-stretch">
-        <div className="order-2 lg:order-1 min-w-0 flex flex-col lg:h-full">
+      <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 lg:items-stretch">
+        <div className="order-2 lg:order-1 lg:col-span-5 min-w-0 flex flex-col lg:h-full">
           <p className="eyebrow text-muted-foreground mb-2 break-words">{hero.eyebrow}</p>
-          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 text-foreground break-words">
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-foreground break-words max-w-[36rem]">
             {hero.headline}
           </h1>
           <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed mb-5 w-full max-w-[36rem] break-words">
@@ -92,7 +92,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        <div className="order-1 lg:order-2 min-w-0 w-full flex flex-col lg:h-full lg:min-h-0">
+        <div className="order-1 lg:order-2 lg:col-span-7 min-w-0 w-full flex flex-col lg:h-full lg:min-h-0">
           <HeroImageCarousel images={hero.images} slider={hero.slider} />
         </div>
       </div>

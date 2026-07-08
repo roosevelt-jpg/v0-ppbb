@@ -125,8 +125,8 @@ export async function processImageFile(
 export const CMS_IMAGE_PRESETS = {
   /** Hero, mission, and other large CMS imagery */
   content: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024 },
-  /** Homepage hero column — portrait 4:5 center-crop matches the stretched hero frame */
-  hero: { maxDimension: 1600, maxBytes: 5 * 1024 * 1024, aspectRatio: 4 / 5 },
+  /** Homepage hero column — landscape 4:3 center-crop matches the hero frame */
+  hero: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 4 / 3 },
   /** Partner / logo thumbnails */
   logo: { maxDimension: 500, maxBytes: 2 * 1024 * 1024 },
 } as const
