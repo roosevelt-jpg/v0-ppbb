@@ -457,14 +457,17 @@ export default function DonationPage() {
             </div>
           )}
 
-          <div className="mt-12 text-center">
+          <div className="mt-12 text-center space-y-3">
             <Link
-              href="/dashboard/charity-requests"
-              className="inline-flex min-h-[44px] items-center text-sm text-neutral-600 underline underline-offset-4 hover:text-neutral-900"
+              href="/dashboard/charity-requests?apply=1"
+              className="inline-flex min-h-[44px] items-center justify-center px-6 bg-black text-white text-sm font-semibold rounded hover:bg-neutral-900"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              Request charity support
+              Request Charity Support
             </Link>
+            <p className="text-xs text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Confidential applications are reviewed by our welfare team
+            </p>
           </div>
         </div>
       </div>

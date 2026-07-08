@@ -46,12 +46,19 @@ export async function POST(req: Request) {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').substring(0, 50)
     const path = `beneficiary-documents/${requestId}/${documentType}/${timestamp}-${fileHash}-${sanitizedFileName}`
 
-    const result = await uploadBufferToPath(buffer, file.type, path, {
-      documentType,
-      requestId,
-      originalFileName: file.name,
-      uploadedAt: new Date().toISOString(),
-    })
+    const result = await uploadBufferToPath(
+      buffer,
+      file.type,
+      path,
+      {
+        documentType,
+        requestId,
+        originalFileName: file.name,
+        uploadedAt: new Date().toISOString(),
+        sensitivity: 'restricted',
+      },
+      { makePublic: false, signedUrlDays: 365 }
+    )
 
     return NextResponse.json({
       success: true,

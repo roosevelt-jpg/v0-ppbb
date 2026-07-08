@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access-server'
 import { canAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
+import { getSignedReadUrl } from '@/lib/storage-server'
 
 const SENSITIVE_KEYS = [
   'emiratesIdUrl',
@@ -10,6 +11,12 @@ const SENSITIVE_KEYS = [
   'salaryCertificateUrl',
   'bankStatementUrl',
   'supportingDocumentUrls',
+  'emiratesIdStoragePath',
+  'passportStoragePath',
+  'visaStoragePath',
+  'salaryCertificateStoragePath',
+  'bankStatementStoragePath',
+  'supportingDocumentPaths',
   'emiratesId',
   'passport',
   'visa',
@@ -17,6 +24,14 @@ const SENSITIVE_KEYS = [
   'bankStatement',
   'supportingDocuments',
 ] as const
+
+const DOC_KEY_TO_PATH: Record<string, string> = {
+  emiratesIdUrl: 'emiratesIdStoragePath',
+  passportUrl: 'passportStoragePath',
+  visaUrl: 'visaStoragePath',
+  salaryCertificateUrl: 'salaryCertificateStoragePath',
+  bankStatementUrl: 'bankStatementStoragePath',
+}
 
 async function requireAdminAuth(request: NextRequest) {
   const authHeader = request.headers.get('authorization') || ''
@@ -70,7 +85,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
       }
       const data = snap.data() || {}
-      const url = resolveDocumentUrl(data, documentKey)
+      const url = await resolveDocumentUrl(data, documentKey)
       if (!url) {
         return NextResponse.json({ success: false, error: 'Document not found' }, { status: 404 })
       }
@@ -173,15 +188,33 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-function resolveDocumentUrl(data: Record<string, unknown>, key: string): string | null {
-  // Flat URL fields
+async function resolveDocumentUrl(
+  data: Record<string, unknown>,
+  key: string
+): Promise<string | null> {
+  const pathField = DOC_KEY_TO_PATH[key]
+  const storagePath = pathField && typeof data[pathField] === 'string' ? String(data[pathField]) : ''
+  if (storagePath) {
+    try {
+      return await getSignedReadUrl(storagePath, 1)
+    } catch (err) {
+      console.error('[beneficiary-requests] signed URL failed:', err)
+    }
+  }
+
   if (typeof data[key] === 'string' && (data[key] as string).startsWith('http')) {
     return data[key] as string
   }
-  // Nested metadata shapes
   const nested = data[key]
   if (nested && typeof nested === 'object') {
     const n = nested as Record<string, unknown>
+    if (typeof n.storagePath === 'string') {
+      try {
+        return await getSignedReadUrl(String(n.storagePath), 1)
+      } catch {
+        /* fall through */
+      }
+    }
     if (typeof n.url === 'string') return n.url
     if (typeof n.downloadURL === 'string') return n.downloadURL
   }
@@ -194,18 +227,24 @@ function redactRequest(
   canViewDocs: boolean
 ): Record<string, unknown> {
   const out: Record<string, unknown> = { id, ...data }
-  if (canViewDocs) {
+  // Never send long-lived signed URLs in list payloads — welfare opens via ?document=
+  delete out.emiratesIdUrl
+  delete out.passportUrl
+  delete out.visaUrl
+  delete out.salaryCertificateUrl
+  delete out.bankStatementUrl
+  delete out.supportingDocumentUrls
+
+  if (!canViewDocs) {
+    for (const key of SENSITIVE_KEYS) {
+      if (key in out) delete out[key]
+    }
     out.hasSensitiveDocuments = hasAnySensitive(data)
+    out.sensitiveDocumentsRedacted = true
     return out
   }
 
-  for (const key of SENSITIVE_KEYS) {
-    if (key in out) {
-      delete out[key]
-    }
-  }
   out.hasSensitiveDocuments = hasAnySensitive(data)
-  out.sensitiveDocumentsRedacted = true
   return out
 }
 

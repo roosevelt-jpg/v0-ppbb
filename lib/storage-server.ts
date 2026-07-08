@@ -54,7 +54,8 @@ export async function uploadBufferToPath(
   buffer: Buffer,
   mimeType: string,
   path: string,
-  customMetadata: Record<string, string> = {}
+  customMetadata: Record<string, string> = {},
+  options: { makePublic?: boolean; signedUrlDays?: number } = {}
 ): Promise<UploadResult> {
   if (!buffer.length) {
     throw new Error('Empty file')
@@ -62,18 +63,47 @@ export async function uploadBufferToPath(
   const bucket = getAdminBucket()
   const cleanPath = path.replace(/^\/+/, '')
   const file = bucket.file(cleanPath)
+  const makePublic = options.makePublic === true
   await file.save(buffer, {
     contentType: mimeType,
     resumable: false,
-    metadata: { cacheControl: 'private, max-age=3600', metadata: customMetadata },
+    metadata: {
+      cacheControl: makePublic ? 'public, max-age=31536000' : 'private, max-age=3600',
+      metadata: customMetadata,
+    },
   })
-  await file.makePublic()
+
+  let url: string
+  if (makePublic) {
+    await file.makePublic()
+    url = `https://storage.googleapis.com/${bucket.name}/${cleanPath}`
+  } else {
+    // Private object — temporary signed URL for authorized app/API consumers only.
+    // Do not use for public CMS assets. Firestore should not expose this to unrelated users.
+    const days = options.signedUrlDays ?? 365
+    const [signed] = await file.getSignedUrl({
+      action: 'read',
+      expires: Date.now() + days * 24 * 60 * 60 * 1000,
+    })
+    url = signed
+  }
+
   return {
-    url: `https://storage.googleapis.com/${bucket.name}/${cleanPath}`,
+    url,
     path: cleanPath,
     contentType: mimeType,
     size: buffer.length,
   }
+}
+
+/** Mint a fresh signed URL for a private Storage object (Admin SDK only). */
+export async function getSignedReadUrl(path: string, days = 7): Promise<string> {
+  const file = getAdminBucket().file(path.replace(/^\/+/, ''))
+  const [signed] = await file.getSignedUrl({
+    action: 'read',
+    expires: Date.now() + days * 24 * 60 * 60 * 1000,
+  })
+  return signed
 }
 
 /**

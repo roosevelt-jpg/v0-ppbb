@@ -78,7 +78,7 @@ export function Footer() {
     { label: 'Marketplace', href: '/marketplace' },
     { label: 'Partners', href: '/partners' },
     { label: 'Contact', href: '/contact' },
-    { label: 'Charity Support Request', href: '/dashboard/charity-requests' },
+    { label: 'Charity Support Request', href: '/dashboard/charity-requests?apply=1' },
     { label: 'FAQ', href: '/faq' },
   ]
 
