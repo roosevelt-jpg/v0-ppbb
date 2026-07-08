@@ -5,24 +5,8 @@
 
 import nodemailer from 'nodemailer'
 import { SiteSettings } from './types'
-import { getFirestore } from 'firebase-admin/firestore'
-import { getApps, cert, initializeApp } from 'firebase-admin/app'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { mergeGlobalSettings } from '@/lib/global-settings'
-
-/**
- * Get admin Firestore instance for loading integrations
- */
-function getAdminDb() {
-  const app = getApps().length > 0 ? getApps()[0] : initializeApp({
-    credential: cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    } as any),
-  })
-  return getFirestore(app)
-}
 
 /**
  * Load Gmail SMTP credentials from integrations collection

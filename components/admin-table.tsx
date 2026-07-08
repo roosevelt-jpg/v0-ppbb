@@ -4,7 +4,6 @@ import React from 'react'
 import { BUTTON_ICON_DANGER, BUTTON_ICON_PRIMARY, BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
 import { Plus, Search, Download, Pencil, Trash2 } from 'lucide-react'
-import { AdminTableScroll } from '@/components/admin-table'
 
 interface Column {
   key: string
