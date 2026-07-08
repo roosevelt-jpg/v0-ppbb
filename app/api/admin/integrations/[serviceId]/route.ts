@@ -10,6 +10,7 @@ import {
   isAdminUser,
   hasInvitePermissionServer,
 } from '@/lib/admin-access-server'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
 const MOCK_USER_ID = 'dev-user-001'
 
@@ -71,6 +72,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (credentials) {
       try {
         const integration = await saveIntegrationServer(MOCK_USER_ID, serviceId, credentials)
+        await auditAdminApiAction(request, authResult.uid, {
+          actionType: 'update',
+          action: `Updated integration credentials: ${serviceId}`,
+          entityType: 'integration',
+          entityId: serviceId,
+          entityName: serviceId,
+          status: 'success',
+        })
         return NextResponse.json({ success: true, integration })
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -82,6 +91,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (status && ['active', 'inactive', 'error', 'pending'].includes(status)) {
       try {
         await updateIntegrationStatusServer(MOCK_USER_ID, serviceId, status)
+        await auditAdminApiAction(request, authResult.uid, {
+          actionType: 'update',
+          action: `Set integration status to ${status}: ${serviceId}`,
+          entityType: 'integration',
+          entityId: serviceId,
+          entityName: serviceId,
+          status: 'success',
+        })
         return NextResponse.json({ success: true })
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
@@ -110,6 +127,14 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     try {
       await deleteIntegrationServer(MOCK_USER_ID, serviceId)
+      await auditAdminApiAction(request, authResult.uid, {
+        actionType: 'delete',
+        action: `Deleted integration: ${serviceId}`,
+        entityType: 'integration',
+        entityId: serviceId,
+        entityName: serviceId,
+        status: 'success',
+      })
       return NextResponse.json({ success: true, message: 'Integration deleted' })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)

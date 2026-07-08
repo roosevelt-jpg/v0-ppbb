@@ -30,9 +30,11 @@ import {
 } from '@/lib/testimonials'
 import { useAuth } from '@/lib/auth-context'
 import { uploadFileToFirebase, uploadImageToFirebase } from '@/lib/upload-utils'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function AdminCmsTestimonialsPage() {
   const { user } = useAuth()
+  const audit = useAdminAudit()
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [uploading, setUploading] = useState<string | null>(null)
@@ -94,7 +96,7 @@ export default function AdminCmsTestimonialsPage() {
     }
 
     try {
-      await addDoc(collection(db, 'testimonials'), {
+      const ref = await addDoc(collection(db, 'testimonials'), {
         type: form.type,
         name: form.name.trim(),
         role: form.role.trim() || null,
@@ -105,6 +107,14 @@ export default function AdminCmsTestimonialsPage() {
         order: testimonials.length,
         createdAt: serverTimestamp(),
         addedBy: user?.id || 'admin',
+      })
+      audit({
+        actionType: 'create',
+        action: `Added testimonial: ${form.name}`,
+        entityType: 'content',
+        entityId: ref.id,
+        entityName: form.name,
+        status: 'success',
       })
       setForm({
         type: 'text',
@@ -124,6 +134,14 @@ export default function AdminCmsTestimonialsPage() {
   const toggleActive = async (item: Testimonial) => {
     try {
       await updateDoc(doc(db, 'testimonials', item.id), { isActive: !item.isActive })
+      audit({
+        actionType: 'update',
+        action: `${item.isActive ? 'Deactivated' : 'Activated'} testimonial: ${item.name}`,
+        entityType: 'content',
+        entityId: item.id,
+        entityName: item.name,
+        status: 'success',
+      })
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Update failed')
     }
@@ -133,6 +151,13 @@ export default function AdminCmsTestimonialsPage() {
     if (!confirm('Delete this testimonial?')) return
     try {
       await deleteDoc(doc(db, 'testimonials', id))
+      audit({
+        actionType: 'delete',
+        action: `Deleted testimonial: ${id}`,
+        entityType: 'content',
+        entityId: id,
+        status: 'success',
+      })
       showMessage('success', 'Testimonial deleted.')
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Delete failed')
@@ -149,6 +174,12 @@ export default function AdminCmsTestimonialsPage() {
         updateDoc(doc(db, 'testimonials', a.id), { order: b.order }),
         updateDoc(doc(db, 'testimonials', b.id), { order: a.order }),
       ])
+      audit({
+        actionType: 'update',
+        action: `Reordered testimonials: ${a.name} / ${b.name}`,
+        entityType: 'content',
+        status: 'success',
+      })
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Reorder failed')
     }

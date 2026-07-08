@@ -3,6 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access-server'
 import { canAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
 import { getSignedReadUrl } from '@/lib/storage-server'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
 const SENSITIVE_KEYS = [
   'emiratesIdUrl',
@@ -175,6 +176,16 @@ export async function PATCH(request: NextRequest) {
         reviewNotes: notes || null,
         updatedAt: new Date(),
       })
+
+    const actionType = action === 'accept' ? 'approve' : action === 'reject' ? 'reject' : 'update'
+    await auditAdminApiAction(request, admin.uid, {
+      actionType,
+      action: `Beneficiary request ${action}: ${id}`,
+      entityType: 'beneficiary',
+      entityId: id,
+      status: 'success',
+      details: notes || '',
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

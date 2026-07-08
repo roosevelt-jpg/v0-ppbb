@@ -3,6 +3,8 @@ import type { Firestore } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { ensureBusinessReferralCode } from '@/lib/referral-code-server'
+import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
+import type { AuditActionType } from '@/lib/audit-log-shared'
 
 type BusinessAction =
   | 'approve'
@@ -98,6 +100,42 @@ async function deactivateRelatedListings(db: Firestore, businessId: string) {
   return touched
 }
 
+function businessActionType(action: BusinessAction | 'update'): AuditActionType {
+  if (action === 'delete') return 'delete'
+  if (action === 'approve') return 'approve'
+  if (action === 'suspend') return 'reject'
+  return 'update'
+}
+
+async function auditBusinessMutation(
+  request: NextRequest,
+  adminUid: string | null,
+  opts: {
+    action: BusinessAction | 'update'
+    businessId: string
+    businessName: string
+    details?: string
+  }
+) {
+  if (!adminUid) return
+  const actionType = businessActionType(opts.action)
+  const verb =
+    opts.action === 'set_referral_percent'
+      ? 'Updated referral percent for'
+      : opts.action === 'update'
+        ? 'Updated'
+        : `${opts.action}d`
+  await auditAdminApiAction(request, adminUid, {
+    actionType,
+    action: `Business ${verb}: ${opts.businessName}`,
+    entityType: 'business',
+    entityId: opts.businessId,
+    entityName: opts.businessName,
+    status: 'success',
+    details: opts.details || '',
+  })
+}
+
 export async function GET(request: NextRequest) {
   try {
     const status = request.nextUrl.searchParams.get('status')
@@ -167,6 +205,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const body = await request.json()
     const { id, ...updateData } = body
 
@@ -175,6 +214,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const db = getAdminDb()
+    const existingSnap = await db.collection('businesses').doc(id).get()
+    const existingName =
+      existingSnap.exists
+        ? asString((existingSnap.data() as Record<string, unknown>).name) ||
+          asString((existingSnap.data() as Record<string, unknown>).businessName) ||
+          'Business'
+        : 'Business'
+
     const payload = sanitizeForFirestore({
       ...updateData,
       updatedAt: new Date(),
@@ -182,6 +229,13 @@ export async function PUT(request: NextRequest) {
 
     await db.collection('businesses').doc(id).set(payload, { merge: true })
     const updated = await db.collection('businesses').doc(id).get()
+
+    await auditBusinessMutation(request, adminUid, {
+      action: 'update',
+      businessId: id,
+      businessName: existingName,
+      details: 'Full business record update',
+    })
 
     return NextResponse.json({
       success: true,
@@ -196,6 +250,7 @@ export async function PUT(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const body = await request.json()
     const { id, action } = body as { id?: string; action?: BusinessAction }
 
@@ -212,11 +267,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     const existing = snap.data() as Record<string, unknown>
+    const businessName =
+      asString(existing.name) || asString(existing.businessName) || 'Business'
     const now = new Date()
 
     if (action === 'delete') {
       const related = await deactivateRelatedListings(db, id)
       await ref.delete()
+      await auditBusinessMutation(request, adminUid, {
+        action: 'delete',
+        businessId: id,
+        businessName,
+        details: `Soft-deactivated ${related} related listing(s)`,
+      })
       return NextResponse.json({
         success: true,
         message: `Business deleted. Soft-deactivated ${related} related offer/job doc(s).`,
@@ -241,6 +304,12 @@ export async function PATCH(request: NextRequest) {
         { merge: true }
       )
       const updated = await ref.get()
+      await auditBusinessMutation(request, adminUid, {
+        action: 'set_referral_percent',
+        businessId: id,
+        businessName,
+        details: `Referral contribution set to ${percent}%`,
+      })
       return NextResponse.json({
         success: true,
         message: 'Referral contribution percent updated',
@@ -307,6 +376,12 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updated = await ref.get()
+
+    await auditBusinessMutation(request, adminUid, {
+      action,
+      businessId: id,
+      businessName,
+    })
 
     return NextResponse.json({
       success: true,

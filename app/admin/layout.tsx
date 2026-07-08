@@ -11,6 +11,7 @@ import { LanguageSelector } from '@/components/language-selector'
 import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import { LogOut } from 'lucide-react'
 import { logoutUser } from '@/lib/auth'
+import { recordAdminAuditFromUser } from '@/lib/admin-audit'
 
 export default function AdminLayout({
   children,
@@ -85,7 +86,27 @@ export default function AdminLayout({
     // Or we're still loading and waiting for auth check
   }, [user, firebaseUser, loading, router, isPublicAdminPage, pathname])
 
+  // Audit: log significant admin page views (one per route change)
+  useEffect(() => {
+    if (isPublicAdminPage || loading || !user || !hasAdminAccess(user) || !pathname?.startsWith('/admin')) return
+    recordAdminAuditFromUser(user, {
+      actionType: 'page_view',
+      action: `Viewed ${pathname}`,
+      entityType: 'page',
+      route: pathname,
+      status: 'success',
+    })
+  }, [pathname, user?.id, isPublicAdminPage, loading])
+
   const handleLogout = async () => {
+    if (user) {
+      await recordAdminAuditFromUser(user, {
+        actionType: 'logout',
+        action: 'Admin logout',
+        entityType: 'auth',
+        status: 'success',
+      })
+    }
     await logoutUser()
     router.push('/admin/login')
   }

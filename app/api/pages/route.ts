@@ -1,6 +1,40 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { auditFromApiRequest } from '@/lib/audit-log-server'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+
+type AuditActor = {
+  adminId: string
+  adminEmail: string
+  adminName: string
+  adminRole: string
+}
+
+async function auditPageMutation(
+  request: Request,
+  actor: AuditActor | undefined,
+  opts: {
+    actionType: 'create' | 'update' | 'delete'
+    pageId: string
+    pageTitle: string
+  }
+) {
+  if (!actor?.adminId) return
+  await auditFromApiRequest(request, {
+    adminId: actor.adminId,
+    adminEmail: actor.adminEmail || 'unknown',
+    adminName: actor.adminName || 'Unknown',
+    adminRole: formatAdminRoleLabel(actor.adminRole || 'admin'),
+    actionType: opts.actionType,
+    action: `${opts.actionType === 'create' ? 'Created' : opts.actionType === 'update' ? 'Updated' : 'Deleted'} CMS page: ${opts.pageTitle}`,
+    entityType: 'content',
+    entityId: opts.pageId,
+    entityName: opts.pageTitle,
+    route: '/admin/pages',
+    status: 'success',
+  })
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -82,7 +116,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const db = getAdminDb()
-    const { action, payload } = await request.json()
+    const { action, payload, audit } = (await request.json()) as {
+      action: string
+      payload: Record<string, unknown>
+      audit?: AuditActor
+    }
     const pagesRef = db.collection('pages')
     const now = new Date()
 
@@ -90,17 +128,36 @@ export async function POST(request: Request) {
       const ref = await pagesRef.add(
         sanitizeForFirestore({ ...payload, createdAt: now, updatedAt: now })
       )
+      const title = String(payload.title || payload.slug || 'Untitled')
+      await auditPageMutation(request, audit, {
+        actionType: 'create',
+        pageId: ref.id,
+        pageTitle: title,
+      })
       return NextResponse.json({ success: true, id: ref.id })
     }
 
     if (action === 'update') {
       const { id, ...updates } = payload
-      await pagesRef.doc(id).set(sanitizeForFirestore({ ...updates, updatedAt: now }), { merge: true })
+      const pageId = String(id)
+      await pagesRef.doc(pageId).set(sanitizeForFirestore({ ...updates, updatedAt: now }), { merge: true })
+      const title = String(updates.title || updates.slug || pageId)
+      await auditPageMutation(request, audit, {
+        actionType: 'update',
+        pageId,
+        pageTitle: title,
+      })
       return NextResponse.json({ success: true })
     }
 
     if (action === 'delete') {
-      await pagesRef.doc(payload.id).set(sanitizeForFirestore({ status: 'deleted', updatedAt: now }), { merge: true })
+      const pageId = String(payload.id)
+      await pagesRef.doc(pageId).set(sanitizeForFirestore({ status: 'deleted', updatedAt: now }), { merge: true })
+      await auditPageMutation(request, audit, {
+        actionType: 'delete',
+        pageId,
+        pageTitle: pageId,
+      })
       return NextResponse.json({ success: true })
     }
 

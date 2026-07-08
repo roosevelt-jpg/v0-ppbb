@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
@@ -89,6 +90,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (ops > 0) await batch.commit()
+
+    await auditAdminApiAction(request, adminUid, {
+      actionType: 'update',
+      action: `Marked ${marked} referral contribution(s) as paid`,
+      entityType: 'business',
+      entityId: businessId,
+      entityName: businessId,
+      status: 'success',
+      details: `${marked} referral(s) updated to paid`,
+    })
 
     return NextResponse.json({ success: true, marked })
   } catch (error) {

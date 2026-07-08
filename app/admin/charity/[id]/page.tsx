@@ -7,8 +7,10 @@ import { db } from '@/lib/firebase'
 import { ArrowLeft, Heart, CheckCircle, AlertCircle, DollarSign, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function CharityCaseDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const charityId = params.id as string
@@ -58,6 +60,13 @@ export default function CharityCaseDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'charity', charityId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated charity case: ${charityId}`,
+        entityType: 'beneficiary',
+        entityId: charityId,
+        status: 'success',
+      })
       setSuccess('Charity case updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {

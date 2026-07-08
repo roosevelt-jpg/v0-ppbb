@@ -33,6 +33,7 @@ import {
 import { useAuth } from '@/lib/auth-context'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 const PARTNER_TYPES: { value: PartnerType; label: string }[] = [
   { value: 'sponsor', label: 'Sponsor' },
@@ -73,6 +74,7 @@ function extFromFile(file: File): string {
 
 export default function AdminPartnersLogosPage() {
   const { user } = useAuth()
+  const audit = useAdminAudit()
   const [partners, setPartners] = useState<Partner[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -163,6 +165,14 @@ export default function AdminPartnersLogosPage() {
             updatedAt: serverTimestamp(),
           })
         )
+        audit({
+          actionType: 'update',
+          action: `Updated partner: ${form.name}`,
+          entityType: 'content',
+          entityId: editingId,
+          entityName: form.name,
+          status: 'success',
+        })
         showMessage('success', 'Partner updated.')
       } else {
         const ref = await addDoc(
@@ -184,6 +194,14 @@ export default function AdminPartnersLogosPage() {
           setUploading(false)
           await updateDoc(doc(db, 'partners', ref.id), sanitizeForFirestore({ logoURL }))
         }
+        audit({
+          actionType: 'create',
+          action: `Created partner: ${form.name}`,
+          entityType: 'content',
+          entityId: ref.id,
+          entityName: form.name,
+          status: 'success',
+        })
         showMessage('success', 'Partner added.')
       }
       closeModal()
@@ -219,6 +237,14 @@ export default function AdminPartnersLogosPage() {
         )
         added++
       }
+      if (added > 0) {
+        audit({
+          actionType: 'create',
+          action: `Seeded ${added} default partner(s)`,
+          entityType: 'content',
+          status: 'success',
+        })
+      }
       showMessage(
         'success',
         added > 0 ? `Seeded ${added} partner names.` : 'All default partners already exist.'
@@ -232,11 +258,28 @@ export default function AdminPartnersLogosPage() {
 
   const toggleActive = async (partner: Partner) => {
     await updateDoc(doc(db, 'partners', partner.id), { isActive: !partner.isActive })
+    audit({
+      actionType: 'update',
+      action: `${partner.isActive ? 'Deactivated' : 'Activated'} partner: ${partner.name}`,
+      entityType: 'content',
+      entityId: partner.id,
+      entityName: partner.name,
+      status: 'success',
+    })
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this partner?')) return
+    const partner = partners.find((p) => p.id === id)
     await deleteDoc(doc(db, 'partners', id))
+    audit({
+      actionType: 'delete',
+      action: `Deleted partner: ${partner?.name || id}`,
+      entityType: 'content',
+      entityId: id,
+      entityName: partner?.name,
+      status: 'success',
+    })
   }
 
   const persistOrder = async (ordered: Partner[]) => {
@@ -245,6 +288,12 @@ export default function AdminPartnersLogosPage() {
       batch.update(doc(db, 'partners', p.id), { order: index })
     })
     await batch.commit()
+    audit({
+      actionType: 'update',
+      action: `Reordered ${ordered.length} partner(s)`,
+      entityType: 'content',
+      status: 'success',
+    })
   }
 
   const onDragStart = (index: number) => setDragIndex(index)

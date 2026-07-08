@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,6 +45,7 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const body = await request.json()
 
     if (!body.googleMapsApiKey || !body.googlePlacesApiKey) {
@@ -73,6 +75,18 @@ export async function POST(request: Request) {
 
     const db = getAdminDb()
     await db.collection(COLLECTION).doc(DOC_ID).set(payload, { merge: true })
+
+    if (adminUid) {
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: 'Updated location configuration',
+        entityType: 'settings',
+        entityId: DOC_ID,
+        entityName: 'Location Config',
+        status: 'success',
+        details: `Country: ${payload.defaultCountry}; Auto-detect: ${payload.enableAutoDetect}`,
+      })
+    }
 
     return NextResponse.json({ success: true, data: payload })
   } catch (error) {

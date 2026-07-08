@@ -34,6 +34,7 @@ import {
   Handshake,
   Store,
 } from 'lucide-react'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export const SPONSOR_TYPES = [
   'Gold Sponsor',
@@ -194,6 +195,7 @@ function downloadCsv(rows: CrmRow[]) {
  * Merges sponsors/ (external) + businesses where isSponsor == true.
  */
 export default function SponsorsCrmPage() {
+  const audit = useAdminAudit()
   const [sponsorRows, setSponsorRows] = React.useState<CrmRow[]>([])
   const [businessRows, setBusinessRows] = React.useState<CrmRow[]>([])
   const [events, setEvents] = React.useState<{ id: string; title: string }[]>([])
@@ -348,6 +350,14 @@ export default function SponsorsCrmPage() {
             updatedAt: serverTimestamp(),
           })
         )
+        audit({
+          actionType: 'update',
+          action: `Updated business sponsor: ${form.name}`,
+          entityType: 'business',
+          entityId: editing.id,
+          entityName: form.name,
+          status: 'success',
+        })
       } else if (editing?.source === 'sponsors') {
         await updateDoc(
           doc(db, 'sponsors', editing.id),
@@ -365,8 +375,16 @@ export default function SponsorsCrmPage() {
             updatedAt: serverTimestamp(),
           })
         )
+        audit({
+          actionType: 'update',
+          action: `Updated sponsor: ${form.name}`,
+          entityType: 'content',
+          entityId: editing.id,
+          entityName: form.name,
+          status: 'success',
+        })
       } else {
-        await addDoc(
+        const ref = await addDoc(
           collection(db, 'sponsors'),
           sanitizeForFirestore({
             name: form.name.trim(),
@@ -383,6 +401,14 @@ export default function SponsorsCrmPage() {
             createdAt: serverTimestamp(),
           })
         )
+        audit({
+          actionType: 'create',
+          action: `Created sponsor: ${form.name}`,
+          entityType: 'content',
+          entityId: ref.id,
+          entityName: form.name,
+          status: 'success',
+        })
       }
       setMessage({ type: 'success', text: editing ? 'Sponsor updated.' : 'Sponsor added.' })
       setModalOpen(false)
@@ -408,11 +434,27 @@ export default function SponsorsCrmPage() {
           updatedAt: serverTimestamp(),
         })
       )
+      audit({
+        actionType: 'update',
+        action: `Removed sponsor flag from business: ${row.name}`,
+        entityType: 'business',
+        entityId: row.id,
+        entityName: row.name,
+        status: 'success',
+      })
       setMessage({ type: 'success', text: 'Business unmarked as sponsor.' })
       return
     }
     if (!confirm('Delete this external sponsor?')) return
     await deleteDoc(doc(db, 'sponsors', row.id))
+    audit({
+      actionType: 'delete',
+      action: `Deleted sponsor: ${row.name}`,
+      entityType: 'content',
+      entityId: row.id,
+      entityName: row.name,
+      status: 'success',
+    })
     setMessage({ type: 'success', text: 'Sponsor deleted.' })
   }
 
@@ -427,6 +469,13 @@ export default function SponsorsCrmPage() {
           updatedAt: serverTimestamp(),
         })
       )
+      audit({
+        actionType: 'update',
+        action: `Marked business as sponsor: ${flagBusinessId}`,
+        entityType: 'business',
+        entityId: flagBusinessId,
+        status: 'success',
+      })
       setMessage({ type: 'success', text: 'Business marked as platform sponsor.' })
       setFlagBusinessId('')
     } catch (err) {

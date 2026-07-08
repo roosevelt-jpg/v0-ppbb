@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save } from 'lucide-react'
 
 interface EditSponsorModalProps {
@@ -14,6 +15,7 @@ interface EditSponsorModalProps {
 }
 
 export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSponsorModalProps) {
+  const audit = useAdminAudit()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(sponsor || {})
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -35,6 +37,14 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
       })
       
       await updateDocument('sponsors', sponsor.id, formData)
+      audit({
+        actionType: 'update',
+        action: `Updated sponsor: ${formData.name || sponsor.id}`,
+        entityType: 'content',
+        entityId: sponsor.id,
+        entityName: formData.name,
+        status: 'success',
+      })
       
       console.log('[v0] Sponsor saved successfully:', {
         sponsorId: sponsor.id,
@@ -57,6 +67,14 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
     setDeleteLoading(true)
     try {
       await deleteDocument('sponsors', sponsor.id)
+      audit({
+        actionType: 'delete',
+        action: `Deleted sponsor: ${sponsor?.name || sponsor.id}`,
+        entityType: 'content',
+        entityId: sponsor.id,
+        entityName: sponsor?.name,
+        status: 'success',
+      })
       onClose()
       onSuccess?.()
     } catch (error) {

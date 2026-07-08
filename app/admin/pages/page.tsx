@@ -5,6 +5,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { getAllPages, createPage, updatePage, deletePage } from '@/lib/admin'
 import { Page } from '@/lib/types'
+import { useAuth } from '@/lib/auth-context'
 import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import {
   BUTTON_PRIMARY,
@@ -67,6 +68,7 @@ function buildPagePayload(page: Page) {
 }
 
 export default function AdminPages() {
+  const { user } = useAuth()
   const [pages, setPages] = React.useState<Page[]>([])
   const [loading, setLoading] = React.useState(true)
   const [editingPage, setEditingPage] = React.useState<Page | null>(null)
@@ -157,12 +159,12 @@ export default function AdminPages() {
     try {
       const payload = buildPagePayload(editingPage)
       if (isCreating) {
-        const newPageId = await createPage(payload)
+        const newPageId = await createPage(payload, user || undefined)
         if (newPageId) {
           setPages([...pages, { ...editingPage, ...payload, id: newPageId }])
         }
       } else {
-        await updatePage(editingPage.id, payload)
+        await updatePage(editingPage.id, payload, user || undefined)
         setPages(pages.map((p) => (p.id === editingPage.id ? { ...editingPage, ...payload } : p)))
       }
       setEditingPage(null)
@@ -177,7 +179,7 @@ export default function AdminPages() {
     if (!confirm('Are you sure you want to delete this page?')) return
 
     try {
-      await deletePage(pageId)
+      await deletePage(pageId, user || undefined)
       setPages(pages.filter((p) => p.id !== pageId))
     } catch (error) {
       console.error('[v0] Error deleting page:', error)

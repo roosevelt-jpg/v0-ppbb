@@ -5,6 +5,7 @@ import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { db } from '@/lib/firebase'
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Loader2 } from 'lucide-react'
 
 interface EditCharityModalProps {
@@ -15,6 +16,7 @@ interface EditCharityModalProps {
 }
 
 export function EditCharityModal({ open, onOpenChange, charity, onSuccess }: EditCharityModalProps) {
+  const audit = useAdminAudit()
   const [formData, setFormData] = useState(charity || {})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -51,6 +53,15 @@ export function EditCharityModal({ open, onOpenChange, charity, onSuccess }: Edi
         updatedAt: new Date(),
       })
 
+      audit({
+        actionType: 'update',
+        action: `Updated charity request: ${formData.title || formData.id}`,
+        entityType: 'beneficiary',
+        entityId: formData.id,
+        entityName: formData.title,
+        status: 'success',
+      })
+
       onOpenChange(false)
       onSuccess?.()
     } catch (err) {
@@ -69,6 +80,14 @@ export function EditCharityModal({ open, onOpenChange, charity, onSuccess }: Edi
 
     try {
       await deleteDoc(doc(db, 'charityRequests', formData.id))
+      audit({
+        actionType: 'delete',
+        action: `Deleted charity request: ${formData.title || formData.id}`,
+        entityType: 'beneficiary',
+        entityId: formData.id,
+        entityName: formData.title,
+        status: 'success',
+      })
       onOpenChange(false)
       onSuccess?.()
     } catch (err) {

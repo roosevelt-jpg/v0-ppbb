@@ -18,6 +18,7 @@ import { AdminUserCell } from '@/components/admin-user-cell'
 import { AdminSelect } from '@/components/admin-select'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { PricingPlan } from '@/lib/pricing-types'
 import {
   countMembersForPlan,
@@ -30,6 +31,7 @@ import { isExpiringsoon } from '@/lib/membership-utils'
 type MembershipFilter = 'all' | 'expiring' | string
 
 export default function MembershipPage() {
+  const audit = useAdminAudit()
   const [members, setMembers] = React.useState<Record<string, unknown>[]>([])
   const [plans, setPlans] = React.useState<PricingPlan[]>([])
   const [loadingMembers, setLoadingMembers] = React.useState(true)
@@ -96,6 +98,14 @@ export default function MembershipPage() {
         membershipPlanName: plan?.name ?? planId,
         upgradedAt: new Date(),
       })
+      audit({
+        actionType: 'update',
+        action: `Updated membership tier for member ${memberId}`,
+        entityType: 'member',
+        entityId: memberId,
+        entityName: plan?.name,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error upgrading tier:', error)
     }
@@ -119,6 +129,15 @@ export default function MembershipPage() {
         })
       })
       await batch.commit()
+
+      audit({
+        actionType: 'update',
+        action: `Bulk membership tier update for ${selectedMembers.size} member(s)`,
+        entityType: 'member',
+        entityName: plan?.name,
+        status: 'success',
+        details: `Plan: ${plan?.name || bulkTierTarget}`,
+      })
 
       setSelectedMembers(new Set())
       setBulkTierTarget('')

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Users, MessageSquare, Trash2, Edit, Plus, X, CheckCircle, AlertCircle } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 interface Group {
   id: string
@@ -36,6 +37,7 @@ const GROUP_TYPES = [
 ]
 
 export default function GroupsAdminPage() {
+  const audit = useAdminAudit()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -95,10 +97,17 @@ export default function GroupsAdminPage() {
           isPublic: formData.isPublic,
           requiresApproval: formData.requiresApproval,
         })
+        audit({
+          actionType: 'update',
+          action: `Updated group: ${formData.name}`,
+          entityType: 'content',
+          entityId: editingGroup.id,
+          entityName: formData.name,
+          status: 'success',
+        })
         setMessage({ type: 'success', text: 'Group updated successfully' })
       } else {
-        // Create new group
-        await addDoc(collection(db, 'groups'), {
+        const ref = await addDoc(collection(db, 'groups'), {
           ...formData,
           createdBy: 'admin',
           createdAt: Timestamp.now(),
@@ -106,6 +115,14 @@ export default function GroupsAdminPage() {
           postCount: 0,
           isActive: true,
           bannedMembers: [],
+        })
+        audit({
+          actionType: 'create',
+          action: `Created group: ${formData.name}`,
+          entityType: 'content',
+          entityId: ref.id,
+          entityName: formData.name,
+          status: 'success',
         })
         setMessage({ type: 'success', text: 'Group created successfully' })
       }
@@ -146,6 +163,13 @@ export default function GroupsAdminPage() {
   const handleToggleActive = async (groupId: string, isActive: boolean) => {
     try {
       await updateDoc(doc(db, 'groups', groupId), { isActive: !isActive })
+      audit({
+        actionType: 'update',
+        action: `${!isActive ? 'Activated' : 'Deactivated'} group: ${groupId}`,
+        entityType: 'content',
+        entityId: groupId,
+        status: 'success',
+      })
       setMessage({ type: 'success', text: `Group ${!isActive ? 'activated' : 'deactivated'}` })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
@@ -158,6 +182,14 @@ export default function GroupsAdminPage() {
     if (!confirm(`Are you sure you want to delete "${groupName}"? This action cannot be undone.`)) return
     try {
       await deleteDoc(doc(db, 'groups', groupId))
+      audit({
+        actionType: 'delete',
+        action: `Deleted group: ${groupName}`,
+        entityType: 'content',
+        entityId: groupId,
+        entityName: groupName,
+        status: 'success',
+      })
       setMessage({ type: 'success', text: 'Group deleted successfully' })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {

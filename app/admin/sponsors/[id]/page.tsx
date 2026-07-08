@@ -7,8 +7,10 @@ import { db } from '@/lib/firebase'
 import { ArrowLeft, Award, CheckCircle, AlertCircle, Mail, Phone } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function SponsorDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const sponsorId = params.id as string
@@ -58,6 +60,13 @@ export default function SponsorDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'sponsors', sponsorId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated sponsor: ${sponsorId}`,
+        entityType: 'content',
+        entityId: sponsorId,
+        status: 'success',
+      })
       setSuccess('Sponsor updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {

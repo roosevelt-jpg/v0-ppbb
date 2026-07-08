@@ -1,121 +1,105 @@
-import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, limit } from 'firebase/firestore'
-import { initializeApp, getApps } from 'firebase/app'
+'use client'
 
-export interface AuditLog {
-  id?: string
-  timestamp: number
-  adminId: string
-  adminEmail: string
-  action: string
-  entityType: 'admin' | 'integration' | 'settings' | 'webhook' | 'alert'
-  entityId?: string
-  entityName?: string
-  changes?: Record<string, { before: any; after: any }>
-  status: 'success' | 'failed'
-  ipAddress?: string
-  userAgent?: string
-  details?: string
-}
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, orderBy, query, limit } from 'firebase/firestore'
+import type { User } from '@/lib/types'
+import { getUserDisplayName } from '@/lib/user-profile'
+import {
+  type AdminAuditLogEntry,
+  type AuditLogInput,
+  formatAdminRoleLabel,
+} from '@/lib/audit-log-shared'
 
-const app = getApps().length > 0 ? getApps()[0] : initializeApp({
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-})
+export type AuditLog = AdminAuditLogEntry & { id: string }
 
-const db = getFirestore(app)
-
-/**
- * Log an admin action to the audit trail
- */
-export async function logAdminAction(log: AuditLog): Promise<string | null> {
+/** Non-blocking client → server audit write (IP captured server-side). */
+export async function recordAdminAudit(input: AuditLogInput): Promise<void> {
   try {
-    const docRef = await addDoc(collection(db, 'auditLogs'), {
-      ...log,
-      timestamp: Date.now(),
+    await fetch('/api/admin/audit-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      keepalive: true,
     })
-    return docRef.id
   } catch (error) {
-    console.error('[v0] Error logging audit:', error)
-    return null
+    console.warn('[v0] recordAdminAudit failed (non-blocking):', error)
   }
 }
 
-/**
- * Get all audit logs for a specific admin
- */
-export async function getAdminAuditLogs(adminId: string, limitCount: number = 50) {
+export function recordAdminAuditFromUser(
+  user: Pick<User, 'id' | 'email' | 'firstName' | 'lastName' | 'role'> & { name?: string },
+  input: Omit<
+    AuditLogInput,
+    'adminId' | 'adminEmail' | 'adminName' | 'adminRole'
+  >
+): void {
+  void recordAdminAudit({
+    adminId: user.id || 'unknown',
+    adminEmail: user.email || 'unknown',
+    adminName: getUserDisplayName(user),
+    adminRole: formatAdminRoleLabel(user.role || 'admin'),
+    ...input,
+  })
+}
+
+/** Live subscription — most recent first */
+export function subscribeToAllAuditLogs(
+  onUpdate: (logs: AuditLog[]) => void,
+  maxEntries = 500
+): () => void {
   try {
-    const q = query(
-      collection(db, 'auditLogs'),
-      where('adminId', '==', adminId),
-      orderBy('timestamp', 'desc'),
-      limit(limitCount)
+    const q = query(collection(db, 'auditLogs'), orderBy('timestamp', 'desc'), limit(maxEntries))
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const logs = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as Omit<AdminAuditLogEntry, 'id'>),
+        })) as AuditLog[]
+        onUpdate(logs)
+      },
+      (error) => {
+        console.error('[v0] subscribeToAllAuditLogs error:', error)
+        onUpdate([])
+      }
     )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLog & { id: string }))
   } catch (error) {
-    console.error('[v0] Error fetching admin audit logs:', error)
-    return []
+    console.error('[v0] subscribeToAllAuditLogs setup error:', error)
+    return () => {}
   }
 }
 
-/**
- * Get all audit logs (for super admin overview)
- */
-export async function getAllAuditLogs(limitCount: number = 100) {
-  try {
-    const q = query(
-      collection(db, 'auditLogs'),
-      orderBy('timestamp', 'desc'),
-      limit(limitCount)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLog & { id: string }))
-  } catch (error) {
-    console.error('[v0] Error fetching all audit logs:', error)
-    return []
-  }
+/** @deprecated Use recordAdminAudit — client Firestore writes are disabled by rules */
+export async function logAdminAction(_log: AuditLogInput): Promise<string | null> {
+  await recordAdminAudit(_log)
+  return null
 }
 
-/**
- * Get audit logs for a specific entity
- */
-export async function getEntityAuditLogs(entityType: string, entityId: string) {
-  try {
-    const q = query(
-      collection(db, 'auditLogs'),
-      where('entityType', '==', entityType),
-      where('entityId', '==', entityId),
-      orderBy('timestamp', 'desc'),
-      limit(50)
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLog & { id: string }))
-  } catch (error) {
-    console.error('[v0] Error fetching entity audit logs:', error)
-    return []
-  }
+/** @deprecated Use subscribeToAllAuditLogs */
+export async function getAllAuditLogs(limitCount = 100): Promise<AuditLog[]> {
+  return new Promise((resolve) => {
+    const unsub = subscribeToAllAuditLogs((logs) => {
+      unsub()
+      resolve(logs.slice(0, limitCount))
+    })
+    setTimeout(() => {
+      unsub()
+      resolve([])
+    }, 5000)
+  })
 }
 
-/**
- * Get audit logs for a date range
- */
-export async function getAuditLogsByDateRange(startTime: number, endTime: number) {
-  try {
-    const q = query(
-      collection(db, 'auditLogs'),
-      where('timestamp', '>=', startTime),
-      where('timestamp', '<=', endTime),
-      orderBy('timestamp', 'desc')
-    )
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLog & { id: string }))
-  } catch (error) {
-    console.error('[v0] Error fetching date range audit logs:', error)
-    return []
-  }
+export async function getAdminAuditLogs(adminId: string, limitCount = 50): Promise<AuditLog[]> {
+  const all = await getAllAuditLogs(500)
+  return all.filter((l) => l.adminId === adminId).slice(0, limitCount)
+}
+
+export async function getEntityAuditLogs(entityType: string, entityId: string): Promise<AuditLog[]> {
+  const all = await getAllAuditLogs(500)
+  return all.filter((l) => l.entityType === entityType && l.entityId === entityId).slice(0, 50)
+}
+
+export async function getAuditLogsByDateRange(startTime: number, endTime: number): Promise<AuditLog[]> {
+  const all = await getAllAuditLogs(500)
+  return all.filter((l) => l.timestamp >= startTime && l.timestamp <= endTime)
 }

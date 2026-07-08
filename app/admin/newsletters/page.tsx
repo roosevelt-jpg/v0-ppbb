@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Send, Clock, CheckCircle, Trash2, Edit2, Eye } from 'lucide-react'
 import { Newsletter, NewsletterTemplate } from '@/lib/types'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 const NEWSLETTER_TEMPLATES: NewsletterTemplate[] = [
   {
@@ -105,6 +106,7 @@ const NEWSLETTER_TEMPLATES: NewsletterTemplate[] = [
 ]
 
 export default function AdminNewslettersPage() {
+  const audit = useAdminAudit()
   const [newsletters, setNewsletters] = useState<Newsletter[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<string>('template-1')
   const [subject, setSubject] = useState('')
@@ -158,7 +160,7 @@ export default function AdminNewslettersPage() {
       const template = NEWSLETTER_TEMPLATES.find(t => t.id === selectedTemplate)
       const scheduledTime = sendOption === 'schedule' ? new Date(scheduleDate) : null
 
-      await addDoc(collection(db, 'newsletters'), {
+      const ref = await addDoc(collection(db, 'newsletters'), {
         title: subject,
         subject,
         content,
@@ -172,6 +174,14 @@ export default function AdminNewslettersPage() {
         createdBy: 'admin',
         createdAt: new Date(),
         updatedAt: new Date(),
+      })
+      audit({
+        actionType: 'create',
+        action: `${sendOption === 'now' ? 'Sent' : 'Scheduled'} newsletter: ${subject}`,
+        entityType: 'content',
+        entityId: ref.id,
+        entityName: subject,
+        status: 'success',
       })
 
       setSuccessMessage(`Newsletter ${sendOption === 'now' ? 'sent' : 'scheduled'} successfully!`)
@@ -194,7 +204,16 @@ export default function AdminNewslettersPage() {
   const handleDeleteNewsletter = async (id: string) => {
     if (confirm('Are you sure you want to delete this newsletter?')) {
       try {
+        const item = newsletters.find((n) => n.id === id)
         await deleteDoc(doc(db, 'newsletters', id))
+        audit({
+          actionType: 'delete',
+          action: `Deleted newsletter: ${item?.subject || item?.title || id}`,
+          entityType: 'content',
+          entityId: id,
+          entityName: item?.subject || item?.title,
+          status: 'success',
+        })
       } catch (error) {
         console.error('[v0] Error deleting newsletter:', error)
         alert('Error deleting newsletter')

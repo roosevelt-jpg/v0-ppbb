@@ -5,6 +5,7 @@ import { getMessaging } from 'firebase-admin/messaging'
 import { getApps } from 'firebase-admin/app'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
@@ -195,6 +196,14 @@ export async function PATCH(request: NextRequest) {
         flagged: false,
       })
       await notifyBusinessListingLive(businessId, title, id)
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'approve',
+        action: `Approved opportunity: ${title}`,
+        entityType: 'event',
+        entityId: id,
+        entityName: title,
+        status: 'success',
+      })
       return NextResponse.json({ success: true, status: 'published' })
     }
 
@@ -203,6 +212,14 @@ export async function PATCH(request: NextRequest) {
         status: 'closed',
         closedAt: Timestamp.now(),
         closedBy: adminUid,
+      })
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: `Closed opportunity: ${title}`,
+        entityType: 'event',
+        entityId: id,
+        entityName: title,
+        status: 'success',
       })
       return NextResponse.json({ success: true, status: 'closed' })
     }
@@ -213,6 +230,14 @@ export async function PATCH(request: NextRequest) {
         flagged: nextFlagged,
         flaggedAt: nextFlagged ? Timestamp.now() : FieldValue.delete(),
         flaggedBy: nextFlagged ? adminUid : FieldValue.delete(),
+      })
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: nextFlagged ? `Flagged opportunity: ${title}` : `Removed flag from opportunity: ${title}`,
+        entityType: 'event',
+        entityId: id,
+        entityName: title,
+        status: 'success',
       })
       return NextResponse.json({ success: true, flagged: nextFlagged })
     }
@@ -235,6 +260,14 @@ export async function PATCH(request: NextRequest) {
       }
 
       await syncJobAndOpportunity(id, allowed)
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: `Updated opportunity: ${title}`,
+        entityType: 'event',
+        entityId: id,
+        entityName: title,
+        status: 'success',
+      })
       return NextResponse.json({ success: true })
     }
 
@@ -258,10 +291,25 @@ export async function DELETE(request: NextRequest) {
     }
 
     const db = getAdminDb()
+    const jobsSnap = await db.collection('jobs').doc(id).get()
+    const title =
+      jobsSnap.exists
+        ? String((jobsSnap.data() as Record<string, unknown>).title || 'Opportunity')
+        : 'Opportunity'
+
     const batch = db.batch()
     batch.delete(db.collection('jobs').doc(id))
     batch.delete(db.collection('businessOpportunities').doc(id))
     await batch.commit()
+
+    await auditAdminApiAction(request, adminUid, {
+      actionType: 'delete',
+      action: `Deleted opportunity: ${title}`,
+      entityType: 'event',
+      entityId: id,
+      entityName: title,
+      status: 'success',
+    })
 
     return NextResponse.json({ success: true, deletedBy: adminUid })
   } catch (error) {

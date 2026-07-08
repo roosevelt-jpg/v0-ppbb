@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get('authorization') || ''
@@ -71,10 +72,15 @@ export async function POST(request: NextRequest) {
           updatedAt: FieldValue.serverTimestamp(),
         })
       )
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'reject',
+        action: `Rejected donation submission ${submissionId}`,
+        entityType: 'donation',
+        entityId: submissionId,
+        status: 'success',
+        details: reason || '',
+      })
       return NextResponse.json({ success: true })
-    }
-
-    if (action === 'request_info' || action === 'request_resubmission') {
       const snap = await submissionRef.get()
       const data = snap.data() || {}
       const userId = data.userId ? String(data.userId) : ''
@@ -98,10 +104,15 @@ export async function POST(request: NextRequest) {
         'Donation proof — resubmission requested',
         note
       )
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: `Donation submission ${action}: ${submissionId}`,
+        entityType: 'donation',
+        entityId: submissionId,
+        status: 'success',
+        details: note,
+      })
       return NextResponse.json({ success: true })
-    }
-
-    if (action === 'verify') {
       await db.runTransaction(async (tx) => {
         // All reads must complete before any writes (Firestore transaction rule)
         const snap = await tx.get(submissionRef)
@@ -170,6 +181,14 @@ export async function POST(request: NextRequest) {
       } catch {
         /* receipt is best-effort */
       }
+
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'approve',
+        action: `Verified donation submission ${submissionId}`,
+        entityType: 'donation',
+        entityId: submissionId,
+        status: 'success',
+      })
 
       return NextResponse.json({ success: true })
     }

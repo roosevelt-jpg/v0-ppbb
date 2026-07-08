@@ -9,11 +9,14 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument } from '@/lib/admin-queries'
+import { useAuth } from '@/lib/auth-context'
+import { getUserDisplayName } from '@/lib/user-profile'
 import { Check, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export default function ApprovalsPage() {
+  const { user } = useAuth()
   const [pendingItems, setPendingItems] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(false)
   const [selectedItem, setSelectedItem] = useState<any>(null)
@@ -48,10 +51,27 @@ export default function ApprovalsPage() {
 
     setActionLoading(true)
     try {
-      await updateDocument(selectedItem.collection, selectedItem.id, {
-        status: 'approved',
-        approvedAt: new Date(),
-      })
+      await updateDocument(
+        selectedItem.collection,
+        selectedItem.id,
+        {
+          status: 'approved',
+          approvedAt: new Date(),
+        },
+        user
+          ? {
+              adminId: user.id,
+              adminEmail: user.email,
+              adminName: getUserDisplayName(user),
+              adminRole: user.role,
+              actionType: 'approve',
+              action: `Approved ${selectedItem.type}: ${selectedItem.title || selectedItem.id}`,
+              entityType: selectedItem.type || 'other',
+              entityId: selectedItem.id,
+              entityName: selectedItem.title || selectedItem.id,
+            }
+          : undefined
+      )
       setDetailsOpen(false)
       setSelectedItem(null)
     } catch (error) {
@@ -66,10 +86,27 @@ export default function ApprovalsPage() {
 
     setActionLoading(true)
     try {
-      await updateDocument(selectedItem.collection, selectedItem.id, {
-        status: 'rejected',
-        rejectedAt: new Date(),
-      })
+      await updateDocument(
+        selectedItem.collection,
+        selectedItem.id,
+        {
+          status: 'rejected',
+          rejectedAt: new Date(),
+        },
+        user
+          ? {
+              adminId: user.id,
+              adminEmail: user.email,
+              adminName: getUserDisplayName(user),
+              adminRole: user.role,
+              actionType: 'reject',
+              action: `Rejected ${selectedItem.type}: ${selectedItem.title || selectedItem.id}`,
+              entityType: selectedItem.type || 'other',
+              entityId: selectedItem.id,
+              entityName: selectedItem.title || selectedItem.id,
+            }
+          : undefined
+      )
       setDetailsOpen(false)
       setSelectedItem(null)
     } catch (error) {

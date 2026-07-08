@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Send, Check, X, Search, Filter, Archive, AlertCircle } from 'lucide-react'
 import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 interface Conversation {
   id: string
@@ -31,6 +32,7 @@ interface Conversation {
 }
 
 export default function AdminChatbotPage() {
+  const audit = useAdminAudit()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConvId, setSelectedConvId] = useState<string>('')
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null)
@@ -95,6 +97,14 @@ export default function AdminChatbotPage() {
         status: 'resolved',
         updatedAt: new Date(),
       })
+      audit({
+        actionType: 'update',
+        action: `Resolved chatbot conversation: ${selectedConv.title || selectedConv.id}`,
+        entityType: 'content',
+        entityId: selectedConv.id,
+        entityName: selectedConv.title,
+        status: 'success',
+      })
 
       setReplyText('')
     } catch (error) {
@@ -109,6 +119,13 @@ export default function AdminChatbotPage() {
       await updateDoc(doc(db, 'conversations', convId), {
         status: newStatus,
         updatedAt: new Date(),
+      })
+      audit({
+        actionType: 'update',
+        action: `Set conversation status to ${newStatus}: ${convId}`,
+        entityType: 'content',
+        entityId: convId,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error updating status:', error)

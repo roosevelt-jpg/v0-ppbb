@@ -23,6 +23,7 @@ import {
   progressPercent,
   CharityCaseStatus,
 } from '@/lib/charity-cases'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 interface PartnerOption {
   id: string
@@ -40,6 +41,7 @@ const emptyForm = {
 }
 
 export default function CharityCasesPage() {
+  const audit = useAdminAudit()
   const [cases, setCases] = React.useState<CharityCase[]>([])
   const [partners, setPartners] = React.useState<PartnerOption[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -98,7 +100,7 @@ export default function CharityCasesPage() {
         })
       }
 
-      await addDoc(
+      const ref = await addDoc(
         collection(db, 'charityCases'),
         sanitizeForFirestore({
           title: form.title.trim(),
@@ -113,6 +115,14 @@ export default function CharityCasesPage() {
           updatedAt: serverTimestamp(),
         })
       )
+      audit({
+        actionType: 'create',
+        action: `Created charity cause: ${form.title}`,
+        entityType: 'beneficiary',
+        entityId: ref.id,
+        entityName: form.title,
+        status: 'success',
+      })
 
       setForm(emptyForm)
       setBannerFile(null)
@@ -150,6 +160,14 @@ export default function CharityCasesPage() {
           updatedAt: serverTimestamp(),
         })
       )
+      audit({
+        actionType: 'update',
+        action: `Updated charity cause: ${editing.title}`,
+        entityType: 'beneficiary',
+        entityId: editing.id,
+        entityName: editing.title,
+        status: 'success',
+      })
       setEditing(null)
       setEditBannerFile(null)
     } catch (err) {
@@ -161,15 +179,33 @@ export default function CharityCasesPage() {
   }
 
   const setStatus = async (id: string, status: CharityCaseStatus) => {
+    const item = cases.find((c) => c.id === id)
     await updateDoc(
       doc(db, 'charityCases', id),
       sanitizeForFirestore({ status, updatedAt: serverTimestamp() })
     )
+    audit({
+      actionType: status === 'active' ? 'approve' : 'update',
+      action: `Set charity cause status to ${status}: ${item?.title || id}`,
+      entityType: 'beneficiary',
+      entityId: id,
+      entityName: item?.title,
+      status: 'success',
+    })
   }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Permanently delete this cause?')) return
+    const item = cases.find((c) => c.id === id)
     await deleteDoc(doc(db, 'charityCases', id))
+    audit({
+      actionType: 'delete',
+      action: `Deleted charity cause: ${item?.title || id}`,
+      entityType: 'beneficiary',
+      entityId: id,
+      entityName: item?.title,
+      status: 'success',
+    })
   }
 
   const inputClass =

@@ -7,8 +7,10 @@ import { db } from '@/lib/firebase'
 import { ArrowLeft, Building, CheckCircle, AlertCircle, Mail, Phone, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function BusinessDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const businessId = params.id as string
@@ -58,6 +60,13 @@ export default function BusinessDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'businesses', businessId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated business: ${businessId}`,
+        entityType: 'business',
+        entityId: businessId,
+        status: 'success',
+      })
       setSuccess('Business updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {

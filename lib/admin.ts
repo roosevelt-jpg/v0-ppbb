@@ -2,6 +2,27 @@ import { db } from '@/lib/firebase'
 import { SiteSettings, Page, AuditLog } from '@/lib/types'
 import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore'
 import { mergeGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/global-settings'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+import { getUserDisplayName } from '@/lib/user-profile'
+
+export type PageAuditActor = {
+  id: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  name?: string
+  role?: string
+}
+
+function buildPageAuditPayload(actor?: PageAuditActor) {
+  if (!actor?.id) return undefined
+  return {
+    adminId: actor.id,
+    adminEmail: actor.email || 'unknown',
+    adminName: getUserDisplayName(actor),
+    adminRole: formatAdminRoleLabel(actor.role || 'admin'),
+  }
+}
 
 const SITE_SETTINGS_ID = 'default'
 
@@ -114,12 +135,15 @@ export async function getAllPages(includePublished: boolean = false): Promise<Pa
   }
 }
 
-export async function createPage(pageData: Omit<Page, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
+export async function createPage(
+  pageData: Omit<Page, 'id' | 'createdAt' | 'updatedAt'>,
+  actor?: PageAuditActor
+): Promise<string | null> {
   try {
     const res = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', payload: pageData }),
+      body: JSON.stringify({ action: 'create', payload: pageData, audit: buildPageAuditPayload(actor) }),
     })
     const json = await res.json()
     return json.success ? (json.id as string) : null
@@ -129,12 +153,20 @@ export async function createPage(pageData: Omit<Page, 'id' | 'createdAt' | 'upda
   }
 }
 
-export async function updatePage(pageId: string, updates: Partial<Page>): Promise<boolean> {
+export async function updatePage(
+  pageId: string,
+  updates: Partial<Page>,
+  actor?: PageAuditActor
+): Promise<boolean> {
   try {
     const res = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'update', payload: { id: pageId, ...updates } }),
+      body: JSON.stringify({
+        action: 'update',
+        payload: { id: pageId, ...updates },
+        audit: buildPageAuditPayload(actor),
+      }),
     })
     const json = await res.json()
     return !!json.success
@@ -144,12 +176,16 @@ export async function updatePage(pageId: string, updates: Partial<Page>): Promis
   }
 }
 
-export async function deletePage(pageId: string): Promise<boolean> {
+export async function deletePage(pageId: string, actor?: PageAuditActor): Promise<boolean> {
   try {
     const res = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', payload: { id: pageId } }),
+      body: JSON.stringify({
+        action: 'delete',
+        payload: { id: pageId },
+        audit: buildPageAuditPayload(actor),
+      }),
     })
     const json = await res.json()
     return !!json.success

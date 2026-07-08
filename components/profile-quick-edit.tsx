@@ -17,6 +17,7 @@ import {
   splitFullName,
 } from '@/lib/user-profile'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 interface ProfileQuickEditProps {
   open: boolean
@@ -25,6 +26,7 @@ interface ProfileQuickEditProps {
 
 export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) {
   const { user, firebaseUser } = useAuth()
+  const audit = useAdminAudit()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -89,6 +91,15 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
       })
 
       await updateDoc(doc(db, 'users', uid), firestoreUpdates)
+
+      audit({
+        actionType: 'update',
+        action: 'Updated admin profile',
+        entityType: 'admin',
+        entityId: uid,
+        entityName: fullName.trim(),
+        status: 'success',
+      })
 
       const authUpdates: { displayName?: string; photoURL?: string } = {}
       if (fullName.trim()) authUpdates.displayName = fullName.trim()

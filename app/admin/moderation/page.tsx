@@ -10,10 +10,12 @@ import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { BUTTON_PRIMARY, BUTTON_DANGER, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
 export default function ModerationPage() {
+  const audit = useAdminAudit()
   const [reports, setReports] = React.useState<any[]>([])
   const [flaggedUsers, setFlaggedUsers] = React.useState<any[]>([])
   const [flaggedContent, setFlaggedContent] = React.useState<any[]>([])
@@ -125,6 +127,13 @@ export default function ModerationPage() {
         resolvedAt: new Date(),
         resolvedBy: 'admin'
       })
+      audit({
+        actionType: 'approve',
+        action: `Approved community report: ${reportId}`,
+        entityType: 'content',
+        entityId: reportId,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error approving report:', error)
     }
@@ -136,6 +145,13 @@ export default function ModerationPage() {
         status: 'rejected',
         resolvedAt: new Date(),
         resolvedBy: 'admin'
+      })
+      audit({
+        actionType: 'reject',
+        action: `Rejected community report: ${reportId}`,
+        entityType: 'content',
+        entityId: reportId,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error rejecting report:', error)
@@ -149,6 +165,13 @@ export default function ModerationPage() {
         deletedAt: new Date(),
         deletedBy: 'admin'
       })
+      audit({
+        actionType: 'delete',
+        action: `Deleted flagged post: ${contentId}`,
+        entityType: 'content',
+        entityId: contentId,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error deleting content:', error)
     }
@@ -160,6 +183,14 @@ export default function ModerationPage() {
         active: false,
         bannedAt: new Date(),
         bannedReason: 'Community violation'
+      })
+      audit({
+        actionType: 'update',
+        action: `Banned user: ${userId}`,
+        entityType: 'member',
+        entityId: userId,
+        status: 'success',
+        details: 'Community violation',
       })
     } catch (error) {
       console.error('[v0] Error banning user:', error)
@@ -180,6 +211,13 @@ export default function ModerationPage() {
         })
       })
       await batch.commit()
+      audit({
+        actionType: bulkAction === 'approve' ? 'approve' : bulkAction === 'reject' ? 'reject' : 'delete',
+        action: `Bulk ${bulkAction} on ${selectedReports.size} community report(s)`,
+        entityType: 'content',
+        status: 'success',
+        details: `Report IDs: ${Array.from(selectedReports).join(', ')}`,
+      })
       setSelectedReports(new Set())
       setBulkAction(null)
     } catch (error) {
@@ -206,6 +244,13 @@ export default function ModerationPage() {
         deletedAt: new Date(),
         deletedBy: 'admin'
       })
+      audit({
+        actionType: 'delete',
+        action: `Deleted community message: ${messageId}`,
+        entityType: 'content',
+        entityId: messageId,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error deleting community message:', error)
     }
@@ -217,6 +262,13 @@ export default function ModerationPage() {
       await updateDoc(doc(db, 'community_messages', messageId), {
         moderationStatus: 'approved',
         isFlagged: false
+      })
+      audit({
+        actionType: 'approve',
+        action: `Approved community message: ${messageId}`,
+        entityType: 'content',
+        entityId: messageId,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error approving community message:', error)
@@ -245,6 +297,13 @@ export default function ModerationPage() {
         })
       }
       
+      audit({
+        actionType: 'update',
+        action: `Added banned word: ${word}`,
+        entityType: 'settings',
+        status: 'success',
+      })
+
       setBannedWords(updatedWords)
       setNewBannedWord('')
     } catch (error) {
@@ -266,6 +325,13 @@ export default function ModerationPage() {
         })
       }
       
+      audit({
+        actionType: 'update',
+        action: `Removed banned word: ${wordToRemove}`,
+        entityType: 'settings',
+        status: 'success',
+      })
+
       setBannedWords(updatedWords)
     } catch (error) {
       console.error('[v0] Error removing banned word:', error)

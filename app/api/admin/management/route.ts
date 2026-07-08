@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getUserDisplayName, getUserProfilePictureURL, getUserInitials } from '@/lib/user-profile'
+import { auditFromApiRequest } from '@/lib/audit-log-server'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 import crypto from 'crypto'
 
 const db = getAdminDb()
@@ -225,6 +228,23 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      if (invitedByUserId) {
+        const inviterSnap = await db.collection('users').doc(invitedByUserId).get()
+        const inviter = inviterSnap.data() as Record<string, unknown> | undefined
+        await auditFromApiRequest(request, {
+          adminId: invitedByUserId,
+          adminEmail: String(inviter?.email || 'unknown'),
+          adminName: getUserDisplayName(inviter as Parameters<typeof getUserDisplayName>[0]),
+          adminRole: formatAdminRoleLabel(String(inviter?.role || 'admin')),
+          actionType: 'create',
+          action: `Generated admin invitation for ${adminEmail}`,
+          entityType: 'admin',
+          entityName: adminName,
+          status: 'success',
+          details: `Role: ${role}; Code sent: ${!!sendEmail}`,
+        })
+      }
+
       return NextResponse.json({
         success: true,
         data: { id: docRef.id, ...accessCodeData },
@@ -270,6 +290,20 @@ export async function POST(request: NextRequest) {
 
       const docRef = await db.collection('admin-users').add(adminData)
 
+      await auditFromApiRequest(request, {
+        adminId: email,
+        adminEmail: email,
+        adminName: name || email,
+        adminRole: formatAdminRoleLabel(role),
+        actionType: 'create',
+        action: `Admin account created via access code: ${email}`,
+        entityType: 'admin',
+        entityId: docRef.id,
+        entityName: name || email,
+        status: 'success',
+        details: `Role: ${role}`,
+      })
+
       return NextResponse.json({
         success: true,
         data: { id: docRef.id, ...adminData },
@@ -297,6 +331,7 @@ export async function POST(request: NextRequest) {
 // Update admin user
 export async function PUT(request: NextRequest) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const body = await request.json()
     const { id, ...updateData } = body
 
@@ -313,6 +348,18 @@ export async function PUT(request: NextRequest) {
 
     await db.collection('admin-users').doc(id).update(updateData)
 
+    if (adminUid) {
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: `Updated admin user: ${updateData.email || updateData.name || id}`,
+        entityType: 'admin',
+        entityId: id,
+        entityName: String(updateData.name || updateData.email || id),
+        status: 'success',
+        details: updateData.role ? `Role: ${updateData.role}` : '',
+      })
+    }
+
     return NextResponse.json({ success: true, message: 'Admin user updated' })
   } catch (error) {
     console.error('[v0] Admin update error:', error)
@@ -323,6 +370,7 @@ export async function PUT(request: NextRequest) {
 // Delete admin user
 export async function DELETE(request: NextRequest) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -330,7 +378,22 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
     }
 
+    const snap = await db.collection('admin-users').doc(id).get()
+    const data = snap.data() as Record<string, unknown> | undefined
+    const label = String(data?.name || data?.email || id)
+
     await db.collection('admin-users').doc(id).delete()
+
+    if (adminUid) {
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'delete',
+        action: `Deleted admin user: ${label}`,
+        entityType: 'admin',
+        entityId: id,
+        entityName: label,
+        status: 'success',
+      })
+    }
 
     return NextResponse.json({ success: true, message: 'Admin user deleted' })
   } catch (error) {

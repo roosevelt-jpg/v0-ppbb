@@ -5,6 +5,7 @@ import {
   isAdminUser,
   hasInvitePermissionServer,
 } from '@/lib/admin-access-server'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
 const MOCK_USER_ID = 'dev-user-001'
 
@@ -76,6 +77,15 @@ export async function POST(request: NextRequest) {
 
     const integration = await saveIntegrationServer(MOCK_USER_ID, serviceId, credentials)
     console.log('[v0] Integration saved successfully')
+
+    await auditAdminApiAction(request, authResult.uid, {
+      actionType: 'update',
+      action: `Saved integration: ${serviceId}`,
+      entityType: 'integration',
+      entityId: serviceId,
+      entityName: serviceId,
+      status: 'success',
+    })
 
     return NextResponse.json({
       success: true,

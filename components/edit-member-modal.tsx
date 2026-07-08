@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save } from 'lucide-react'
 
 interface EditMemberModalProps {
@@ -14,6 +15,7 @@ interface EditMemberModalProps {
 }
 
 export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditMemberModalProps) {
+  const audit = useAdminAudit()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(member || {})
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -22,6 +24,14 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
     setLoading(true)
     try {
       await updateDocument('users', member.id, formData)
+      audit({
+        actionType: 'update',
+        action: `Updated member: ${member?.name || member.id}`,
+        entityType: 'member',
+        entityId: member.id,
+        entityName: member?.name || formData?.name,
+        status: 'success',
+      })
       onOpenChange(false)
       onSuccess?.()
     } catch (error) {
@@ -37,6 +47,14 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
     setDeleteLoading(true)
     try {
       await deleteDocument('users', member.id)
+      audit({
+        actionType: 'delete',
+        action: `Deleted member: ${member?.name || member.id}`,
+        entityType: 'member',
+        entityId: member.id,
+        entityName: member?.name,
+        status: 'success',
+      })
       onOpenChange(false)
       onSuccess?.()
     } catch (error) {

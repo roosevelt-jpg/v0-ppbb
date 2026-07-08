@@ -17,8 +17,10 @@ import { formatDistanceToNow } from 'date-fns'
 import { uploadImageToFirebase, validateImageFile } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Building2 } from 'lucide-react'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function CharityPartnersPage() {
+  const audit = useAdminAudit()
   const [partners, setPartners] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [editingPartner, setEditingPartner] = React.useState<any>(null)
@@ -55,7 +57,7 @@ export default function CharityPartnersPage() {
     if (!newPartner.name.trim()) return
     setUploadError('')
 
-    await addDoc(
+    const ref = await addDoc(
       collection(db, 'charityPartners'),
       sanitizeForFirestore({
         name: newPartner.name.trim(),
@@ -69,6 +71,14 @@ export default function CharityPartnersPage() {
         updatedAt: serverTimestamp(),
       })
     )
+    audit({
+      actionType: 'create',
+      action: `Created charity partner: ${newPartner.name}`,
+      entityType: 'content',
+      entityId: ref.id,
+      entityName: newPartner.name,
+      status: 'success',
+    })
 
     setNewPartner({
       name: '',
@@ -108,7 +118,16 @@ export default function CharityPartnersPage() {
 
   const handleDeletePartner = async (id: string) => {
     if (!confirm('Delete this charity partner?')) return
+    const partner = partners.find((p) => p.id === id)
     await deleteDoc(doc(db, 'charityPartners', id))
+    audit({
+      actionType: 'delete',
+      action: `Deleted charity partner: ${partner?.name || id}`,
+      entityType: 'content',
+      entityId: id,
+      entityName: partner?.name,
+      status: 'success',
+    })
   }
 
   const handleUpdatePartner = async (e: React.FormEvent) => {
@@ -129,6 +148,14 @@ export default function CharityPartnersPage() {
         updatedAt: serverTimestamp(),
       })
     )
+    audit({
+      actionType: 'update',
+      action: `Updated charity partner: ${editingPartner.name}`,
+      entityType: 'content',
+      entityId: editingPartner.id,
+      entityName: editingPartner.name,
+      status: 'success',
+    })
     setEditingPartner(null)
   }
 
@@ -142,6 +169,14 @@ export default function CharityPartnersPage() {
         updatedAt: serverTimestamp(),
       })
     )
+    audit({
+      actionType: 'update',
+      action: `${next ? 'Activated' : 'Deactivated'} charity partner: ${partner.name}`,
+      entityType: 'content',
+      entityId: partner.id,
+      entityName: partner.name,
+      status: 'success',
+    })
   }
 
   const inputClass =

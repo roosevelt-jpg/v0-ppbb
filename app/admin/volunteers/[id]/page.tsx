@@ -8,8 +8,10 @@ import { AlertCircle, CheckCircle, ArrowLeft, Clock, MapPin } from 'lucide-react
 import { Card } from '@/components/ui/card'
 import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function VolunteerDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const volunteerId = params.id as string
@@ -73,6 +75,13 @@ export default function VolunteerDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'users', volunteerId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated volunteer: ${volunteerId}`,
+        entityType: 'member',
+        entityId: volunteerId,
+        status: 'success',
+      })
       setSuccess('Volunteer updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {

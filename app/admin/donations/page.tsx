@@ -10,8 +10,11 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
 import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 import { Plus } from 'lucide-react'
+import { useAuth } from '@/lib/auth-context'
+import { getUserDisplayName } from '@/lib/user-profile'
 
 export default function DonationsPage() {
+  const { user } = useAuth()
   const [donations, setDonations] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [selectedDonation, setSelectedDonation] = React.useState<any>(null)
@@ -144,7 +147,24 @@ export default function DonationsPage() {
             if (confirm('Are you sure you want to delete this donation record?')) {
               try {
                 const { updateDocument } = await import('@/lib/admin-queries')
-                await updateDocument('donations', item.id, { status: 'cancelled', updatedAt: new Date() })
+                await updateDocument(
+                  'donations',
+                  item.id,
+                  { status: 'cancelled', updatedAt: new Date() },
+                  user
+                    ? {
+                        adminId: user.id,
+                        adminEmail: user.email,
+                        adminName: getUserDisplayName(user),
+                        adminRole: user.role,
+                        actionType: 'delete',
+                        action: `Cancelled donation: ${item.id}`,
+                        entityType: 'donation',
+                        entityId: item.id,
+                        entityName: item.donorName,
+                      }
+                    : undefined
+                )
               } catch (error) {
                 console.error('[v0] Error deleting donation:', error)
                 alert('Failed to delete donation')

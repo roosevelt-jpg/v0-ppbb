@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { getAllAuditLogs, AuditLog } from '@/lib/admin-audit'
+import { subscribeToAllAuditLogs, type AuditLog } from '@/lib/admin-audit'
 import { ShieldCheck, AlertTriangle, Lock, Clock, TrendingUp } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -13,26 +13,15 @@ export default function SecurityCenterPage() {
   const [securityScore, setSecurityScore] = useState(0)
 
   useEffect(() => {
-    loadSecurityData()
-  }, [])
-
-  async function loadSecurityData() {
-    setLoading(true)
-    try {
-      const logs = await getAllAuditLogs(100)
+    const unsub = subscribeToAllAuditLogs((logs) => {
       setAuditLogs(logs)
-      
-      // Calculate security score based on failed operations
-      const failedOps = logs.filter(l => l.status === 'failed').length
-      const failureRate = (failedOps / logs.length) * 100
-      const score = Math.max(0, Math.min(100, 100 - failureRate * 2))
-      setSecurityScore(score)
-    } catch (error) {
-      console.error('[v0] Error loading security data:', error)
-    } finally {
+      const failedOps = logs.filter((l) => l.status === 'failed').length
+      const failureRate = logs.length > 0 ? (failedOps / logs.length) * 100 : 0
+      setSecurityScore(Math.max(0, Math.min(100, 100 - failureRate * 2)))
       setLoading(false)
-    }
-  }
+    })
+    return () => unsub()
+  }, [])
 
   // Get security events for the last 24 hours
   const last24h = Date.now() - (24 * 60 * 60 * 1000)

@@ -7,8 +7,10 @@ import { db } from '@/lib/firebase'
 import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, User, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function DonationDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const donationId = params.id as string
@@ -58,6 +60,13 @@ export default function DonationDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'donations', donationId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated donation: ${donationId}`,
+        entityType: 'donation',
+        entityId: donationId,
+        status: 'success',
+      })
       setSuccess('Donation updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {

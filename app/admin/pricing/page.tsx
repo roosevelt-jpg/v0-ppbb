@@ -13,6 +13,7 @@ import { getPlanIncludedItems } from '@/lib/pricing-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,7 @@ const EMPTY_FORM: Partial<PricingPlan> = {
 }
 
 export default function PricingManagementPage() {
+  const audit = useAdminAudit()
   const [plans, setPlans] = React.useState<PricingPlan[]>([])
   const [loading, setLoading] = React.useState(true)
   const [editingId, setEditingId] = React.useState<string | null>(null)
@@ -115,10 +117,26 @@ export default function PricingManagementPage() {
 
       if (editingId) {
         await updateDoc(doc(db, 'pricingPlans', editingId), payload)
+        audit({
+          actionType: 'update',
+          action: `Updated pricing plan: ${formData.name}`,
+          entityType: 'pricing',
+          entityId: editingId,
+          entityName: formData.name,
+          status: 'success',
+        })
       } else {
-        await addDoc(collection(db, 'pricingPlans'), {
+        const ref = await addDoc(collection(db, 'pricingPlans'), {
           ...payload,
           createdAt: serverTimestamp(),
+        })
+        audit({
+          actionType: 'create',
+          action: `Created pricing plan: ${formData.name}`,
+          entityType: 'pricing',
+          entityId: ref.id,
+          entityName: formData.name,
+          status: 'success',
         })
       }
 
@@ -145,9 +163,18 @@ export default function PricingManagementPage() {
   }
 
   const handleDeletePlan = async (planId: string) => {
+    const plan = plans.find((p) => p.id === planId)
     if (confirm('Are you sure you want to delete this plan?')) {
       try {
         await deleteDoc(doc(db, 'pricingPlans', planId))
+        audit({
+          actionType: 'delete',
+          action: `Deleted pricing plan: ${plan?.name || planId}`,
+          entityType: 'pricing',
+          entityId: planId,
+          entityName: plan?.name || planId,
+          status: 'success',
+        })
         alert('Plan deleted successfully!')
       } catch (error) {
         console.error('[v0] Error deleting plan:', error)

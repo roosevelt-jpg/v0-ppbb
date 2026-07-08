@@ -21,6 +21,12 @@ import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admi
 import { profileFromBusiness } from '@/lib/admin-profile-view'
 import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 
+import { auth } from '@/lib/firebase'
+
+async function getAdminToken(): Promise<string | null> {
+  return (await auth.currentUser?.getIdToken()) || null
+}
+
 type BusinessRow = {
   id: string
   name: string
@@ -104,9 +110,13 @@ export default function BusinessesPage() {
     setActingId(id)
     setMessage(null)
     try {
+      const token = await getAdminToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers.Authorization = `Bearer ${token}`
+
       const res = await fetch('/api/admin/businesses', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ id, action, ...extra }),
       })
       const json = await res.json()

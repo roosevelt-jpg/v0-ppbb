@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/auth-context'
 import { loginUser, logoutUser } from '@/lib/auth'
 import { hasAdminAccess } from '@/lib/roles'
 import { auth } from '@/lib/firebase'
+import { recordAdminAudit } from '@/lib/admin-audit'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
 
 function AdminLoginForm() {
   const router = useRouter()
@@ -36,6 +38,17 @@ function AdminLoginForm() {
       const { user: profile, error: loginError } = await loginUser(email.trim(), password)
 
       if (loginError) {
+        void recordAdminAudit({
+          adminId: 'unauthenticated',
+          adminEmail: email.trim().toLowerCase(),
+          adminName: email.trim(),
+          adminRole: 'unknown',
+          actionType: 'login_failed',
+          action: 'Admin login failed',
+          entityType: 'auth',
+          status: 'failed',
+          failureReason: loginError,
+        })
         setError(loginError)
         setLoading(false)
         return
@@ -48,6 +61,17 @@ function AdminLoginForm() {
       }
 
       if (!hasAdminAccess(profile)) {
+        void recordAdminAudit({
+          adminId: profile.id || 'unknown',
+          adminEmail: profile.email || email,
+          adminName: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || email,
+          adminRole: formatAdminRoleLabel(profile.role || 'unknown'),
+          actionType: 'login_failed',
+          action: 'Admin login denied — not an admin account',
+          entityType: 'auth',
+          status: 'failed',
+          failureReason: 'Account lacks admin access',
+        })
         await logoutUser()
         setError('This account does not have admin access. Use the member login at /login instead.')
         setLoading(false)
@@ -61,9 +85,32 @@ function AdminLoginForm() {
         return
       }
 
+      void recordAdminAudit({
+        adminId: profile.id,
+        adminEmail: profile.email || email,
+        adminName: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.email || email,
+        adminRole: formatAdminRoleLabel(profile.role || 'admin'),
+        actionType: 'login',
+        action: 'Admin login successful',
+        entityType: 'auth',
+        status: 'success',
+        route: safeReturnUrl,
+      })
+
       router.replace(safeReturnUrl)
     } catch (err) {
       console.error('[v0] Admin login error:', err)
+      void recordAdminAudit({
+        adminId: 'unauthenticated',
+        adminEmail: email.trim().toLowerCase(),
+        adminName: email.trim(),
+        adminRole: 'unknown',
+        actionType: 'login_failed',
+        action: 'Admin login error',
+        entityType: 'auth',
+        status: 'failed',
+        failureReason: err instanceof Error ? err.message : 'Unexpected error',
+      })
       setError('An unexpected error occurred. Please try again.')
       setLoading(false)
     }

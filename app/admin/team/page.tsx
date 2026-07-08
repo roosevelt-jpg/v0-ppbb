@@ -30,8 +30,10 @@ import {
   TeamMember,
 } from '@/lib/team-members'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function AdminTeamPage() {
+  const audit = useAdminAudit()
   const [members, setMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -78,6 +80,13 @@ export default function AdminTeamPage() {
         setForm((prev) => ({ ...prev, photoURL: url }))
       } else {
         await updateDoc(doc(db, 'teamMembers', target), { photoURL: url })
+        audit({
+          actionType: 'update',
+          action: `Updated team member photo: ${target}`,
+          entityType: 'content',
+          entityId: target,
+          status: 'success',
+        })
         showMessage('success', 'Photo updated.')
       }
     } catch (error: unknown) {
@@ -111,13 +120,29 @@ export default function AdminTeamPage() {
           ...payload,
           updatedAt: serverTimestamp(),
         })
+        audit({
+          actionType: 'update',
+          action: `Updated team member: ${form.name}`,
+          entityType: 'content',
+          entityId: editingId,
+          entityName: form.name,
+          status: 'success',
+        })
         showMessage('success', 'Team member updated.')
       } else {
-        await addDoc(collection(db, 'teamMembers'), {
+        const ref = await addDoc(collection(db, 'teamMembers'), {
           ...payload,
           order: members.length,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+        })
+        audit({
+          actionType: 'create',
+          action: `Added team member: ${form.name}`,
+          entityType: 'content',
+          entityId: ref.id,
+          entityName: form.name,
+          status: 'success',
         })
         showMessage('success', 'Team member added.')
       }
@@ -158,6 +183,14 @@ export default function AdminTeamPage() {
         })
         added++
       }
+      if (added > 0) {
+        audit({
+          actionType: 'create',
+          action: `Seeded ${added} default team member(s)`,
+          entityType: 'content',
+          status: 'success',
+        })
+      }
       showMessage(
         'success',
         added > 0 ? `Seeded ${added} team members.` : 'All default team members already exist.'
@@ -175,6 +208,14 @@ export default function AdminTeamPage() {
         isActive: !member.isActive,
         updatedAt: serverTimestamp(),
       })
+      audit({
+        actionType: 'update',
+        action: `${member.isActive ? 'Deactivated' : 'Activated'} team member: ${member.name}`,
+        entityType: 'content',
+        entityId: member.id,
+        entityName: member.name,
+        status: 'success',
+      })
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Update failed')
     }
@@ -184,6 +225,13 @@ export default function AdminTeamPage() {
     if (!confirm('Delete this team member?')) return
     try {
       await deleteDoc(doc(db, 'teamMembers', id))
+      audit({
+        actionType: 'delete',
+        action: `Deleted team member: ${id}`,
+        entityType: 'content',
+        entityId: id,
+        status: 'success',
+      })
       if (editingId === id) resetForm()
       showMessage('success', 'Team member deleted.')
     } catch (error: unknown) {
@@ -201,6 +249,12 @@ export default function AdminTeamPage() {
         updateDoc(doc(db, 'teamMembers', a.id), { order: b.order }),
         updateDoc(doc(db, 'teamMembers', b.id), { order: a.order }),
       ])
+      audit({
+        actionType: 'update',
+        action: `Reordered team members: ${a.name} / ${b.name}`,
+        entityType: 'content',
+        status: 'success',
+      })
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Reorder failed')
     }
