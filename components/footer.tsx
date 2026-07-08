@@ -76,6 +76,7 @@ export function Footer() {
     { label: 'Impact & Transparency', href: '/transparency' },
     { label: 'Events', href: '/events' },
     { label: 'Marketplace', href: '/marketplace' },
+    { label: 'Shop', href: '/shop' },
     { label: 'Partners', href: '/partners' },
     { label: 'Contact', href: '/contact' },
     { label: 'Charity Support Request', href: '/dashboard/charity-requests?apply=1' },

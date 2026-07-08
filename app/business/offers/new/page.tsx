@@ -18,13 +18,15 @@ export default function NewOffer() {
     type: 'product',
     description: '',
     category: '',
+    variant: '',
     price: 0,
     discountPercentage: 0,
     originalPrice: 0,
     validUntil: '',
     targetAudience: 'members',
     memberBenefit: 0,
-    status: 'active' as const,
+    // 'published' shows on /shop when category is Merchandise; 'active' for marketplace
+    status: 'active' as 'active' | 'published' | 'archived',
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -129,22 +131,55 @@ export default function NewOffer() {
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Category *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
                   required
-                  placeholder="e.g., Design, Consulting"
                   style={{
                     width: '100%',
                     padding: '12px 16px',
                     border: '1px solid #e4e1da',
                     borderRadius: '8px',
                     color: '#111111',
+                    minHeight: '44px',
                   }}
-                />
+                >
+                  <option value="">Select category</option>
+                  <option value="merchandise">Merchandise (shows on /shop when Published)</option>
+                  <option value="product">Product</option>
+                  <option value="service">Service</option>
+                  <option value="discount">Discount</option>
+                  <option value="books">Books</option>
+                  <option value="courses">Courses</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
+            </div>
+
+            {/* Variant — used on /shop merch cards (colour / size) */}
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Variant (colour / size)
+              </label>
+              <input
+                type="text"
+                name="variant"
+                value={formData.variant}
+                onChange={handleChange}
+                placeholder="e.g., CREAM / BRONZE"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  color: '#111111',
+                  minHeight: '44px',
+                }}
+              />
+              <p style={{ color: '#888888', fontSize: '12px', marginTop: '6px' }}>
+                Displayed on the public Shop page for Merchandise offers.
+              </p>
             </div>
 
             {/* Description */}
@@ -277,6 +312,35 @@ export default function NewOffer() {
                   color: '#111111',
                 }}
               />
+            </div>
+
+            {/* Status — Published + Merchandise appears on /shop */}
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Status *
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  color: '#111111',
+                  minHeight: '44px',
+                }}
+              >
+                <option value="active">Active (marketplace)</option>
+                <option value="published">Published (required for /shop merch)</option>
+                <option value="archived">Archived</option>
+              </select>
+              {formData.category === 'merchandise' && formData.status !== 'published' ? (
+                <p style={{ color: '#b45309', fontSize: '12px', marginTop: '6px' }}>
+                  Tip: set status to Published so this merch appears on the public Shop page.
+                </p>
+              ) : null}
             </div>
 
             {/* Buttons */}

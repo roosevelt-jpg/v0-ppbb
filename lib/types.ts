@@ -969,6 +969,8 @@ export interface BusinessOffer {
   type: 'product' | 'service' | 'discount'
   description: string
   category: string
+  /** Colour / size line shown on /shop for merchandise */
+  variant?: string
   price?: number
   discountPercentage?: number
   originalPrice?: number
@@ -977,7 +979,8 @@ export interface BusinessOffer {
   validUntil?: Date
   targetAudience?: 'members' | 'volunteers' | 'public'
   memberBenefit?: number
-  status: 'active' | 'archived'
+  /** published = eligible for /shop merch grid when category is merchandise */
+  status: 'active' | 'archived' | 'published'
   views: number
   conversions: number
   createdAt: Date

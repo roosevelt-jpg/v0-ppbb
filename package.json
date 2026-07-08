@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "deploy:firestore-rules": "firebase deploy --only firestore:rules",
     "seed:businesses": "node --env-file=.env.local scripts/seed-businesses.mjs",
+    "seed:shop": "node --env-file=.env.local scripts/seed-shop-merch.mjs",
     "postinstall": "node scripts/patch-next-themes-react19.mjs"
   },
   "dependencies": {

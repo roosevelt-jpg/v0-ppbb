@@ -138,6 +138,24 @@ export async function createOffer(
     (typeof data.memberBenefit === 'number' && data.memberBenefit > 0) ||
     (typeof data.discountPercentage === 'number' && data.discountPercentage > 0)
 
+  const categoryRaw = String(data.category || data.type || '').trim()
+  const categoryNormalized =
+    categoryRaw.toLowerCase() === 'merchandise' || categoryRaw.toLowerCase() === 'merch'
+      ? 'merchandise'
+      : categoryRaw
+
+  // Canonical shop published status; keep legacy "active" for marketplace directory
+  const statusRaw = String((data as { status?: string }).status || 'active')
+  const offerStatus =
+    statusRaw === 'published' || statusRaw === 'active' || statusRaw === 'archived'
+      ? statusRaw
+      : 'active'
+
+  const variant =
+    typeof (data as { variant?: string }).variant === 'string'
+      ? String((data as { variant?: string }).variant).trim()
+      : ''
+
   await setDoc(
     doc(db, 'offers', id),
     sanitizeForFirestore({
@@ -146,11 +164,13 @@ export async function createOffer(
       businessName,
       title: data.title,
       description: data.description || '',
-      category: data.category || data.type || '',
+      category: categoryNormalized,
       type: data.type || 'product',
-      status: data.status || 'active',
+      status: offerStatus,
       price: data.price,
       originalPrice: data.originalPrice,
+      currency: 'AED',
+      variant: variant || null,
       imageURL,
       images: imageURL ? [imageURL] : [],
       isMemberDiscount,
