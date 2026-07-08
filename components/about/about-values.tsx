@@ -17,7 +17,7 @@ export function AboutValues() {
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] animate-pulse overflow-x-hidden">
         <div className="max-w-[72rem] mx-auto space-y-6">
           <div className="h-8 w-64 bg-neutral-200 rounded mx-auto" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-32 bg-neutral-200 rounded-lg" />
             ))}
@@ -37,7 +37,7 @@ export function AboutValues() {
           {values.headline}
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-10 sm:mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-10 sm:mb-12">
           {values.differentiators.map((item, i) => (
             <div
               key={`${item.number}-${i}`}

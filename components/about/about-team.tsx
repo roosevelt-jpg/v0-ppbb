@@ -37,11 +37,11 @@ function TeamContactLinks({ member }: { member: TeamMember }) {
   if (!hasEmail && !hasWhatsApp && !hasLinkedIn) return null
 
   return (
-    <div className="flex items-center gap-2 mt-3 flex-wrap">
+    <div className="flex items-center gap-2 mt-3 lg:mt-auto flex-wrap">
       {hasEmail && (
         <a
           href={`mailto:${member.email}`}
-          className="inline-flex items-center justify-center min-h-[36px] min-w-[36px] rounded-full border border-[#e4e1da] text-muted-foreground hover:text-foreground hover:border-neutral-400 transition-colors"
+          className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full border border-[#e4e1da] text-muted-foreground hover:text-foreground hover:border-neutral-400 transition-colors"
           aria-label={`Email ${member.name}`}
         >
           <Mail className="w-4 h-4" />
@@ -52,7 +52,7 @@ function TeamContactLinks({ member }: { member: TeamMember }) {
           href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center min-h-[36px] min-w-[36px] rounded-full border border-[#e4e1da] text-muted-foreground hover:text-foreground hover:border-neutral-400 transition-colors"
+          className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full border border-[#e4e1da] text-muted-foreground hover:text-foreground hover:border-neutral-400 transition-colors"
           aria-label={`WhatsApp ${member.name}`}
         >
           <WhatsAppIcon className="w-4 h-4" />
@@ -63,7 +63,7 @@ function TeamContactLinks({ member }: { member: TeamMember }) {
           href={member.linkedinURL!}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center min-h-[36px] min-w-[36px] rounded-full border border-[#e4e1da] text-muted-foreground hover:text-foreground hover:border-neutral-400 transition-colors"
+          className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full border border-[#e4e1da] text-muted-foreground hover:text-foreground hover:border-neutral-400 transition-colors"
           aria-label={`LinkedIn ${member.name}`}
         >
           <LinkedInIcon className="w-4 h-4" />
@@ -91,17 +91,19 @@ function TeamCard({ member }: { member: TeamMember }) {
           </div>
         )}
       </div>
-      <div className="p-4 sm:p-5 flex flex-col flex-1">
+      <div className="p-4 sm:p-5 flex flex-col flex-1 min-h-0">
         <h3 className="font-headline text-lg sm:text-xl font-bold text-foreground break-words mb-1">
           {member.name}
         </h3>
         <p className="eyebrow text-[0.65rem] sm:text-xs text-muted-foreground break-words leading-snug">
           {member.title}
         </p>
-        {member.bio && (
+        {member.bio ? (
           <p className="mt-3 font-body text-sm text-muted-foreground leading-relaxed break-words">
             {member.bio}
           </p>
+        ) : (
+          <div className="flex-1" />
         )}
         <TeamContactLinks member={member} />
       </div>
@@ -155,7 +157,7 @@ export function AboutTeam() {
             <p className="text-sm text-muted-foreground">No team members to display yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {members.map((member) => (
               <TeamCard key={member.id} member={member} />
             ))}

@@ -43,7 +43,7 @@ export function AboutMissionVision() {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-[#f7f6f2] overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 lg:items-stretch">
-        <div className="min-w-0 flex flex-col gap-8 sm:gap-10 order-2 lg:order-1">
+        <div className="min-w-0 flex flex-col gap-8 sm:gap-10 order-2 lg:order-1 lg:h-full lg:justify-center">
           <div>
             <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words">
               {missionVision.missionHeadline}
@@ -72,7 +72,7 @@ export function AboutMissionVision() {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center border border-neutral-200">
-                <p className="text-sm text-muted-foreground px-6 text-center">
+                <p className="text-sm text-muted-foreground px-6 text-center break-words">
                   Mission / Vision image — upload from Admin → CMS → About
                 </p>
               </div>
