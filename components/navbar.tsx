@@ -87,9 +87,9 @@ export function Navbar() {
 
   return (
     <nav className="w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
-      {/* Desktop Navigation */}
+      {/* Desktop Navigation — min height fits 84px logo + vertical padding */}
       <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 lg:gap-8 min-h-[84px]">
           <div className="flex-shrink-0">
             <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
@@ -116,8 +116,8 @@ export function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
-        <SiteLogo background="dark" variant="navbar" href="/" className="max-w-[42vw]" />
+      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2 min-h-[58px]">
+        <SiteLogo background="dark" variant="navbar" href="/" />
         <div className="flex items-center gap-2">
           <LanguageSwitcherWithFlags />
           <ThemeToggle />

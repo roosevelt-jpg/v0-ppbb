@@ -8,8 +8,16 @@ import { DEFAULT_GLOBAL_SETTINGS } from '@/lib/global-settings'
 
 export type SiteLogoBackground = 'light' | 'dark'
 
-/** Context-specific sizing — navbar is taller; sidebar/footer stay compact */
-export type SiteLogoVariant = 'navbar' | 'sidebar' | 'footer' | 'custom'
+/** Canonical brand logo box — 190×84 at md+; scaled on mobile (375px) */
+export const LOGO_BOX_WIDTH_PX = 190
+export const LOGO_BOX_HEIGHT_PX = 84
+/** Mobile: ~68% scale so logo fits beside hamburger + controls at 375px */
+export const LOGO_BOX_MOBILE_WIDTH_PX = 130
+export const LOGO_BOX_MOBILE_HEIGHT_PX = Math.round(
+  (LOGO_BOX_MOBILE_WIDTH_PX * LOGO_BOX_HEIGHT_PX) / LOGO_BOX_WIDTH_PX
+) // 58px — preserves 190:84 aspect ratio
+
+export type SiteLogoVariant = 'primary' | 'navbar' | 'sidebar' | 'footer' | 'custom'
 
 interface SiteLogoProps {
   /** Background the logo sits on — dark navbar/footer use `dark`, white sidebars use `light` */
@@ -21,25 +29,20 @@ interface SiteLogoProps {
   heightClass?: string
   /** Used when variant is `custom` */
   maxWidth?: number | string
+  /** `primary` (and legacy navbar/sidebar/footer aliases) use the 190×84 box */
   variant?: SiteLogoVariant
   /** When false, render image only (wrap in your own Link) */
   linked?: boolean
   onClick?: () => void
 }
 
-const VARIANT_CLASSES: Record<Exclude<SiteLogoVariant, 'custom'>, { wrapper: string; img: string }> = {
-  navbar: {
-    wrapper: 'inline-flex items-center shrink-0 leading-none max-w-[min(48vw,220px)] sm:max-w-[min(40vw,260px)] md:max-w-none',
-    img: 'block h-9 w-auto max-h-9 sm:h-10 sm:max-h-10 md:h-12 md:max-h-12 lg:h-14 lg:max-h-14 object-contain object-left',
-  },
-  sidebar: {
-    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[140px]',
-    img: 'block w-full max-w-[140px] max-h-14 h-auto object-contain',
-  },
-  footer: {
-    wrapper: 'inline-flex items-center shrink-0 leading-none',
-    img: 'block w-auto max-w-[140px] max-h-12 h-auto object-contain',
-  },
+function usesPrimaryBox(variant: SiteLogoVariant): boolean {
+  return variant === 'primary' || variant === 'navbar' || variant === 'sidebar' || variant === 'footer'
+}
+
+function objectPositionForVariant(variant: SiteLogoVariant): React.CSSProperties['objectPosition'] {
+  if (variant === 'navbar') return 'left center'
+  return 'center'
 }
 
 export function SiteLogo({
@@ -49,7 +52,7 @@ export function SiteLogo({
   className = '',
   heightClass = 'h-8',
   maxWidth,
-  variant = 'custom',
+  variant = 'primary',
   linked = true,
   onClick,
 }: SiteLogoProps) {
@@ -57,39 +60,54 @@ export function SiteLogo({
   const src = getLogoForBackground(background, logos)
   const label = alt || DEFAULT_GLOBAL_SETTINGS.platformName
 
-  const preset = variant !== 'custom' ? VARIANT_CLASSES[variant] : null
-  const imgClass = preset
-    ? `${preset.img} ${className}`.trim()
-    : `block w-auto object-contain ${heightClass} ${className}`.trim()
+  const isPrimary = usesPrimaryBox(variant)
 
-  const imgStyle =
-    variant === 'custom' && maxWidth
-      ? { maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth }
-      : undefined
-
-  const img = (
+  const box = isPrimary ? (
+    <span
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden w-[130px] h-[58px] md:w-[190px] md:h-[84px] ${className}`.trim()}
+      aria-hidden
+    >
+      <img
+        src={src}
+        alt={label}
+        width={LOGO_BOX_WIDTH_PX}
+        height={LOGO_BOX_HEIGHT_PX}
+        className="block w-full h-full object-contain"
+        style={{ objectPosition: objectPositionForVariant(variant) }}
+        decoding="async"
+      />
+    </span>
+  ) : (
     <img
       src={src}
       alt={label}
-      className={imgClass}
-      style={imgStyle}
+      className={`block w-auto object-contain ${heightClass} ${className}`.trim()}
+      style={
+        maxWidth
+          ? { maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth }
+          : undefined
+      }
       decoding="async"
     />
   )
 
-  const wrapperClass = preset?.wrapper ?? 'inline-flex shrink-0 leading-none items-center'
+  const wrapperClass = 'inline-flex shrink-0 leading-none items-center'
 
-  const content = onClick ? (
-    <button type="button" onClick={onClick} className={wrapperClass}>
-      {img}
-    </button>
-  ) : linked && href ? (
-    <Link href={href} className={wrapperClass}>
-      {img}
-    </Link>
-  ) : (
-    <span className={wrapperClass}>{img}</span>
-  )
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={wrapperClass}>
+        {box}
+      </button>
+    )
+  }
 
-  return content
+  if (linked && href) {
+    return (
+      <Link href={href} className={wrapperClass}>
+        {box}
+      </Link>
+    )
+  }
+
+  return <span className={wrapperClass}>{box}</span>
 }

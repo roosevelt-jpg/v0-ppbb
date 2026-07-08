@@ -154,7 +154,7 @@ export default function AdminSetup() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
-            <SiteLogo background="light" href="/" heightClass="h-20" linked />
+            <SiteLogo background="light" variant="primary" href="/" linked />
           </div>
           <p style={{ fontSize: '16px', color: '#666' }}>Admin Dashboard Setup</p>
         </div>

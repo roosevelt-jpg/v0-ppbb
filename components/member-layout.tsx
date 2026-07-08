@@ -61,7 +61,7 @@ export function MemberSidebar({
         }`}
       >
         {/* Logo and Close Button */}
-        <div className="px-4 py-3 border-b border-border flex flex-col items-center justify-center relative">
+        <div className="px-4 py-4 border-b border-border flex flex-col items-center justify-center relative">
           <SiteLogo background="light" variant="sidebar" href="/dashboard" />
           <button onClick={() => setOpen(false)} className="md:hidden absolute top-4 right-4">
             <X className="h-6 w-6" />

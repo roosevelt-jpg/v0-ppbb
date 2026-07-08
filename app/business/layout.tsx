@@ -86,8 +86,8 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full min-h-screen flex-col bg-white">
       {/* Header with Logo */}
-      <div className="border-b border-neutral-200 p-6">
-        <SiteLogo background="light" href="/business/dashboard" heightClass="h-16 w-16" maxWidth={64} />
+      <div className="border-b border-neutral-200 px-4 py-4 flex items-center justify-center">
+        <SiteLogo background="light" variant="sidebar" href="/business/dashboard" />
       </div>
 
       {/* Navigation */}
