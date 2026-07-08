@@ -85,10 +85,30 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // Partner logos (marquee) - Public read, admin write
+    // Partner logos (marquee + /partners grid) - Public read, admin write
     match /partners/{partnerId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+    // Partners page "Get in touch" submissions — Admin SDK writes via API;
+    // keep client create for sanitize path; admin-only read
+    match /contactSubmissions/{submissionId} {
+      allow read: if isAdmin();
+      allow create: if true
+        && request.resource.data.keys().hasAll(['name', 'email', 'subject', 'message', 'submittedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.email is string
+        && request.resource.data.subject is string
+        && request.resource.data.message is string;
+      allow update, delete: if isAdmin();
+    }
+
+    // Legacy contact messages (older contact form /admin/contact-requests)
+    match /contact-messages/{messageId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Testimonials - Public read, admin write

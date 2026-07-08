@@ -33,7 +33,10 @@ export default function ContactRequestsPage() {
     try {
       setLoading(true)
       setError('')
-      const url = filter === 'all' ? '/api/contact' : `/api/contact?status=${filter}`
+      const url =
+        filter === 'all'
+          ? '/api/contact?source=legacy'
+          : `/api/contact?source=legacy&status=${filter}`
       const res = await fetch(url, { cache: 'no-store' })
       const json = await res.json()
 

@@ -8,6 +8,7 @@ import { SocialMediaLinks } from '@/components/social-media-links'
 import { db } from '@/lib/firebase'
 import { collection, getDocs } from 'firebase/firestore'
 import { subscribeToGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/platform-config'
+import { PARTNERS_CONTACT_SUBJECTS } from '@/components/partners/get-in-touch-form'
 
 interface ContactFormData {
   name: string
@@ -264,13 +265,11 @@ export function ContactPageClient() {
                       required
                     >
                       <option value="">Select a subject</option>
-                      <option value="general">General inquiry</option>
-                      <option value="donation">Donation support</option>
-                      <option value="volunteer">Volunteer opportunity</option>
-                      <option value="partnership">Partnership inquiry</option>
-                      <option value="event">Event booking</option>
-                      <option value="support">Customer support</option>
-                      <option value="other">Other</option>
+                      {PARTNERS_CONTACT_SUBJECTS.map((subject) => (
+                        <option key={subject} value={subject}>
+                          {subject}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

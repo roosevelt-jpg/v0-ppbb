@@ -75,6 +75,7 @@ const adminMenuItems = [
 
   // Communication & Support
   { label: 'Contact Requests', href: '/admin/contact-requests', icon: Mail, group: 'Communication' },
+  { label: 'Contact Submissions', href: '/admin/contact-submissions', icon: Mail, group: 'Communication' },
   { label: 'Newsletters', href: '/admin/newsletters', icon: Mail, group: 'Communication' },
   { label: 'Moderation', href: '/admin/moderation', icon: Flag, group: 'Communication' },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap, group: 'Communication' },

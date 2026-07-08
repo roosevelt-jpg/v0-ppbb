@@ -1,16 +1,38 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
 import {
   subscribeToPartnersConfig,
   DEFAULT_PARTNERS_CONFIG,
   PartnersPlatformConfig,
 } from '@/lib/partners-page-config'
+import { PartnersLogosGrid } from '@/components/partners/partners-logos-grid'
+import { GetInTouchForm } from '@/components/partners/get-in-touch-form'
+
+export const INQUIRY_CATEGORIES = [
+  {
+    id: 'partnerships',
+    label: 'Partnerships',
+    url: 'https://tinyurl.com/partnerpb26',
+  },
+  {
+    id: 'sponsorship',
+    label: 'Sponsorship',
+    url: 'https://tinyurl.com/partnerpb26',
+  },
+  {
+    id: 'charity-support',
+    label: 'Seeking Charity Support',
+    url: 'https://tinyurl.com/pbcharitysupport',
+  },
+] as const
+
+export type InquiryCategoryId = (typeof INQUIRY_CATEGORIES)[number]['id']
 
 export function PartnersPageCopy() {
   const [config, setConfig] = useState<PartnersPlatformConfig>(DEFAULT_PARTNERS_CONFIG)
   const [ready, setReady] = useState(false)
+  const [inquiryCategory, setInquiryCategory] = useState<InquiryCategoryId>('partnerships')
 
   useEffect(
     () =>
@@ -40,7 +62,11 @@ export function PartnersPageCopy() {
   }
 
   const pc = config.pageConfig
-  const deckHref = pc.sponsorshipDeckPDFUrl || '#inquiry'
+  const selected = INQUIRY_CATEGORIES.find((c) => c.id === inquiryCategory) || INQUIRY_CATEGORIES[0]
+
+  const openInquiry = () => {
+    window.open(selected.url, '_blank', 'noopener,noreferrer')
+  }
 
   return (
     <div className="space-y-12 sm:space-y-16 md:space-y-20 min-w-0">
@@ -75,7 +101,7 @@ export function PartnersPageCopy() {
           </a>
         ) : (
           <a
-            href={deckHref}
+            href="#inquiry"
             className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
           >
             {pc.sponsorshipDeckCTA}
@@ -103,7 +129,7 @@ export function PartnersPageCopy() {
         </div>
       </section>
 
-      {/* Inquiry — CTA only for 6B; form wiring is 6D */}
+      {/* Inquiry with category → external form */}
       <section id="inquiry" className="min-w-0 scroll-mt-24">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.inquiryEyebrow}</p>
         <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words max-w-[36rem]">
@@ -112,24 +138,44 @@ export function PartnersPageCopy() {
         <p className="font-body text-base text-muted-foreground leading-relaxed mb-6 max-w-[42rem] break-words">
           {pc.inquiryBody}
         </p>
-        <Link
-          href="/contact"
-          className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
-        >
-          {pc.inquiryCTA}
-        </Link>
+
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 max-w-xl">
+          <div className="flex-1 min-w-0 w-full">
+            <label htmlFor="inquiry-category" className="block text-sm font-medium mb-1 font-body">
+              Inquiry category
+            </label>
+            <select
+              id="inquiry-category"
+              value={inquiryCategory}
+              onChange={(e) => setInquiryCategory(e.target.value as InquiryCategoryId)}
+              className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              {INQUIRY_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={openInquiry}
+            className="w-full sm:w-auto min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors shrink-0"
+          >
+            {pc.inquiryCTA}
+          </button>
+        </div>
       </section>
 
-      {/* Trusted by — labels only; logos grid is 6C */}
-      <section className="min-w-0 border-t border-[#e4e1da] pt-10 sm:pt-12">
-        <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.trustedByLabel}</p>
-        <h2 className="font-headline text-xl sm:text-2xl font-bold text-foreground mb-2 break-words">
-          {pc.trustedBySubLabel}
-        </h2>
-        <p className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed max-w-[42rem] break-words">
-          {pc.trustedByDescription}
-        </p>
-      </section>
+      {/* Trusted by — same partners/ collection as homepage marquee */}
+      <PartnersLogosGrid
+        eyebrow={pc.trustedByLabel}
+        headline={pc.trustedBySubLabel}
+        description={pc.trustedByDescription}
+      />
+
+      {/* Get in touch form at bottom */}
+      <GetInTouchForm />
     </div>
   )
 }
