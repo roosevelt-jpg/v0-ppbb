@@ -19,7 +19,7 @@ export default function AdminLayout({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, loading } = useAuth()
+  const { user, firebaseUser, loading } = useAuth()
   const [currentDateTime, setCurrentDateTime] = useState<string>('')
 
   // Check if this is the setup page
@@ -56,15 +56,19 @@ export default function AdminLayout({
     // Only redirect if NOT loading and user doesn't have proper access
     // Don't redirect WHILE loading - allow the loading state to show
     if (!loading) {
-      // Auth check is complete
+      // Not signed in — send to login, not the invite-only setup flow
+      if (!firebaseUser) {
+        const returnUrl = encodeURIComponent(pathname || '/admin')
+        router.push(`/login?returnUrl=${returnUrl}`)
+        return
+      }
+
+      // Signed in but Firestore profile missing (do not send to account creation)
       if (!user) {
-        // Not authenticated - redirect to admin setup for 3-step login
-        router.push('/admin/setup')
         return
       }
 
       if (!hasAdminAccess(user)) {
-        // User is authenticated but not an admin or super admin
         router.push('/dashboard')
         return
       }
@@ -77,7 +81,7 @@ export default function AdminLayout({
     
     // User is authenticated and is an admin or super admin - allow access
     // Or we're still loading and waiting for auth check
-  }, [user, loading, router, isSetupPage, pathname])
+  }, [user, firebaseUser, loading, router, isSetupPage, pathname])
 
   const handleLogout = async () => {
     await logoutUser()
@@ -100,13 +104,49 @@ export default function AdminLayout({
     )
   }
 
-  // Show access denied if not admin or super admin (only after loading complete)
-  if (!loading && !isSetupPage && (!user || !hasAdminAccess(user) || !canAccessAdminPath(user, pathname))) {
+  // Signed in but profile doc unavailable
+  if (!loading && !isSetupPage && firebaseUser && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center max-w-md px-4">
+          <p className="text-red-500 font-semibold text-lg">Profile not found</p>
+          <p className="text-muted-foreground mt-2">
+            Your account is signed in but no user profile was found. Contact support — do not create a new account.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Authenticated non-admin only (never show this for signed-out visitors)
+  if (!loading && !isSetupPage && user && !hasAdminAccess(user)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <p className="text-red-500 font-semibold text-lg">Access Denied</p>
           <p className="text-muted-foreground mt-2">Admin role required to access this area.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Scoped admin blocked from this specific route (redirect runs in useEffect)
+  if (!loading && !isSetupPage && user && hasAdminAccess(user) && !canAccessAdminPath(user, pathname)) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <p className="text-muted-foreground">Redirecting…</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Still resolving auth
+  if (!loading && !isSetupPage && !firebaseUser) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <p className="text-muted-foreground">Redirecting to sign in…</p>
         </div>
       </div>
     )

@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { auth, db } from '@/lib/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import Link from 'next/link'
 import { SiteLogo } from '@/components/site-logo'
+import { useAuth } from '@/lib/auth-context'
+import { hasAdminAccess } from '@/lib/roles'
 
 interface InviteData {
   id: string
@@ -18,6 +20,7 @@ interface InviteData {
 
 export default function AdminSetup() {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [accessCode, setAccessCode] = useState('')
   const [inviteData, setInviteData] = useState<InviteData | null>(null)
@@ -27,6 +30,15 @@ export default function AdminSetup() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isEmergencyCode, setIsEmergencyCode] = useState(false)
+
+  // Existing admins should sign in — setup is invite-only for new accounts
+  useEffect(() => {
+    if (!authLoading && user && hasAdminAccess(user)) {
+      router.replace('/admin')
+    }
+  }, [authLoading, user, router])
+
+  const loginHref = `/login?returnUrl=${encodeURIComponent('/admin')}`
 
   const handleAccessCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -153,7 +165,7 @@ export default function AdminSetup() {
       console.error('[v0] Account creation error:', err)
       const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
       if (code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists. Sign in instead.')
+        setError('An account with this email already exists.')
       } else {
         setError('Failed to create account. Please try again.')
       }
@@ -251,6 +263,13 @@ export default function AdminSetup() {
                 >
                   {loading ? 'Verifying...' : 'Continue'}
                 </button>
+
+                <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                  Already have an admin account?{' '}
+                  <Link href={loginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                    Sign in here
+                  </Link>
+                </p>
               </form>
             </div>
           )}
@@ -331,6 +350,13 @@ export default function AdminSetup() {
                 {error && (
                   <div style={{ padding: '15px', backgroundColor: '#fee', border: '1px solid #fcc', borderRadius: '8px', color: '#c00', fontSize: '14px' }}>
                     {error}
+                    {error.includes('already exists') && (
+                      <p style={{ marginTop: '10px' }}>
+                        <Link href={loginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                          Sign in with your existing password →
+                        </Link>
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -353,6 +379,14 @@ export default function AdminSetup() {
                 >
                   {loading ? 'Creating account...' : 'Create Account'}
                 </button>
+
+                <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                  Already have an admin account?{' '}
+                  <Link href={loginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                    Sign in here
+                  </Link>
+                  {' '}(do not create a new account)
+                </p>
               </form>
             </div>
           )}
