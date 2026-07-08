@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { BusinessOffersSection } from '@/components/business-offers-section'
+import { MarketplacePageCopy } from '@/components/marketplace/marketplace-page-copy'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import Link from 'next/link'
@@ -77,18 +78,15 @@ export default function MarketplacePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden">
       <Navbar />
       <div className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="mb-12">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-4">Community Marketplace</h1>
-            <p className="text-lg text-gray-600">
-              Discover products and services from community members. Support local businesses and grow together.
-            </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 w-full min-w-0">
+          <div className="mb-10 sm:mb-12 md:mb-16">
+            <MarketplacePageCopy />
           </div>
 
-          {/* Search */}
+          {/* Search — listing logic unchanged (Part 5B) */}
           <div className="mb-8 relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input

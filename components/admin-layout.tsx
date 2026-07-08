@@ -85,6 +85,7 @@ const adminMenuItems = [
   { label: 'Homepage', href: '/admin/cms/homepage', icon: FileText, group: 'CMS' },
   { label: 'About', href: '/admin/cms/about', icon: FileText, group: 'CMS' },
   { label: 'Events Page', href: '/admin/cms/events', icon: FileText, group: 'CMS' },
+  { label: 'Marketplace Page', href: '/admin/cms/marketplace', icon: FileText, group: 'CMS' },
   { label: 'Testimonials', href: '/admin/cms/testimonials', icon: Image, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
   { label: 'Partners & Logos', href: '/admin/partners', icon: Image, group: 'CMS' },
