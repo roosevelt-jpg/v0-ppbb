@@ -40,6 +40,7 @@ export async function uploadImageToFirebase(
     allowSvg,
     maxDimension: options.maxDimension,
     maxBytes: options.maxBytes,
+    aspectRatio: options.aspectRatio,
   })
 
   if (prepared.size > UPLOAD_MAX_BYTES) {

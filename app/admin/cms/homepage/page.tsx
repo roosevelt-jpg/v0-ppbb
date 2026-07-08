@@ -18,8 +18,8 @@ import {
 } from '@/lib/homepage-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 
-async function uploadHomepageImage(file: File, folder: string): Promise<string> {
-  return uploadImageToFirebase(file, folder, { preset: 'content' })
+async function uploadHomepageImage(file: File, folder: string, preset: 'content' | 'hero' = 'content'): Promise<string> {
+  return uploadImageToFirebase(file, folder, { preset })
 }
 
 export default function AdminCmsHomepagePage() {
@@ -57,7 +57,7 @@ export default function AdminCmsHomepagePage() {
     try {
       const added: HeroImage[] = []
       for (const file of Array.from(files)) {
-        const url = await uploadHomepageImage(file, 'homepage/hero')
+        const url = await uploadHomepageImage(file, 'homepage/hero', 'hero')
         added.push({
           id: `hero-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           imageURL: url,

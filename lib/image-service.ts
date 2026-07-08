@@ -125,6 +125,8 @@ export async function processImageFile(
 export const CMS_IMAGE_PRESETS = {
   /** Hero, mission, and other large CMS imagery */
   content: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024 },
+  /** Homepage hero column — portrait 4:5 center-crop matches the stretched hero frame */
+  hero: { maxDimension: 1600, maxBytes: 5 * 1024 * 1024, aspectRatio: 4 / 5 },
   /** Partner / logo thumbnails */
   logo: { maxDimension: 500, maxBytes: 2 * 1024 * 1024 },
 } as const
@@ -136,12 +138,15 @@ export interface CompressImageOptions {
   maxBytes?: number
   allowSvg?: boolean
   preset?: CmsImagePreset
+  /** Target width ÷ height; when set, image is center-cropped (cover) before resize */
+  aspectRatio?: number
 }
 
 function resolveCompressOptions(
   presetOrOptions: CmsImagePreset | CompressImageOptions
 ): Required<Pick<CompressImageOptions, 'maxDimension' | 'maxBytes'>> & {
   allowSvg: boolean
+  aspectRatio?: number
 } {
   if (typeof presetOrOptions === 'string') {
     const defaults = CMS_IMAGE_PRESETS[presetOrOptions]
@@ -149,6 +154,7 @@ function resolveCompressOptions(
       maxDimension: defaults.maxDimension,
       maxBytes: defaults.maxBytes,
       allowSvg: presetOrOptions === 'logo',
+      aspectRatio: 'aspectRatio' in defaults ? defaults.aspectRatio : undefined,
     }
   }
 
@@ -160,7 +166,47 @@ function resolveCompressOptions(
     maxDimension: presetOrOptions.maxDimension ?? presetDefaults.maxDimension,
     maxBytes: presetOrOptions.maxBytes ?? presetDefaults.maxBytes,
     allowSvg: presetOrOptions.allowSvg ?? presetOrOptions.preset === 'logo',
+    aspectRatio:
+      presetOrOptions.aspectRatio ??
+      ('aspectRatio' in presetDefaults ? presetDefaults.aspectRatio : undefined),
   }
+}
+
+/** Center-crop source rect to match target aspect ratio (width / height). */
+function getCoverCropRect(
+  srcW: number,
+  srcH: number,
+  targetAspect: number
+): { sx: number; sy: number; sw: number; sh: number } {
+  const srcAspect = srcW / srcH
+  let sw: number
+  let sh: number
+  if (srcAspect > targetAspect) {
+    sh = srcH
+    sw = srcH * targetAspect
+  } else {
+    sw = srcW
+    sh = srcW / targetAspect
+  }
+  return {
+    sx: (srcW - sw) / 2,
+    sy: (srcH - sh) / 2,
+    sw,
+    sh,
+  }
+}
+
+function outputDimensionsForAspect(
+  aspectRatio: number,
+  maxDimension: number
+): { width: number; height: number } {
+  let height = maxDimension
+  let width = Math.round(height * aspectRatio)
+  if (width > maxDimension) {
+    width = maxDimension
+    height = Math.round(width / aspectRatio)
+  }
+  return { width, height }
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality: number): Promise<Blob> {
@@ -192,7 +238,7 @@ export async function compressImageToFile(
     throw new Error('compressImageToFile must run in the browser')
   }
 
-  const { maxDimension, maxBytes, allowSvg } = resolveCompressOptions(presetOrOptions)
+  const { maxDimension, maxBytes, allowSvg, aspectRatio } = resolveCompressOptions(presetOrOptions)
 
   if (file.type === 'image/svg+xml') {
     if (!allowSvg) {
@@ -210,28 +256,25 @@ export async function compressImageToFile(
     throw new Error('File must be an image (JPEG, PNG, WebP, GIF, or SVG for logos).')
   }
 
-  if (file.size <= maxBytes && file.type !== 'image/gif') {
-    const objectUrl = URL.createObjectURL(file)
-    try {
-      const img = await loadImageElement(objectUrl)
-      if (img.naturalWidth <= maxDimension && img.naturalHeight <= maxDimension) {
-        return file
-      }
-    } finally {
-      URL.revokeObjectURL(objectUrl)
-    }
-  }
-
   const objectUrl = URL.createObjectURL(file)
   try {
     const img = await loadImageElement(objectUrl)
+
     let targetWidth = img.naturalWidth
     let targetHeight = img.naturalHeight
+    let crop: { sx: number; sy: number; sw: number; sh: number } | null = null
 
-    if (targetWidth > maxDimension || targetHeight > maxDimension) {
+    if (aspectRatio && aspectRatio > 0) {
+      crop = getCoverCropRect(img.naturalWidth, img.naturalHeight, aspectRatio)
+      const sized = outputDimensionsForAspect(aspectRatio, maxDimension)
+      targetWidth = sized.width
+      targetHeight = sized.height
+    } else if (targetWidth > maxDimension || targetHeight > maxDimension) {
       const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
       targetWidth = Math.round(targetWidth * scale)
       targetHeight = Math.round(targetHeight * scale)
+    } else if (file.size <= maxBytes && file.type !== 'image/gif') {
+      return file
     }
 
     const canvas = document.createElement('canvas')
@@ -245,7 +288,11 @@ export async function compressImageToFile(
       ctx.fillRect(0, 0, w, h)
       ctx.imageSmoothingEnabled = true
       ctx.imageSmoothingQuality = 'high'
-      ctx.drawImage(img, 0, 0, w, h)
+      if (crop) {
+        ctx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, w, h)
+      } else {
+        ctx.drawImage(img, 0, 0, w, h)
+      }
     }
 
     draw(targetWidth, targetHeight)
@@ -267,6 +314,14 @@ export async function compressImageToFile(
     while (blob.size > maxBytes && (targetWidth > 320 || targetHeight > 320)) {
       targetWidth = Math.round(targetWidth * 0.85)
       targetHeight = Math.round(targetHeight * 0.85)
+      if (aspectRatio && aspectRatio > 0) {
+        const sized = outputDimensionsForAspect(
+          aspectRatio,
+          Math.max(targetWidth, targetHeight)
+        )
+        targetWidth = sized.width
+        targetHeight = sized.height
+      }
       draw(targetWidth, targetHeight)
       blob = await canvasToBlob(canvas, outputMime, quality)
     }
