@@ -318,7 +318,8 @@ export default function AdminPartnersLogosPage() {
                           type="button"
                           onClick={() => movePartner(index, 'up')}
                           disabled={index === 0}
-                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded bg-white shadow-none"
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                          aria-label="Move up"
                         >
                           <ChevronUp className="w-4 h-4" />
                         </button>
@@ -326,7 +327,8 @@ export default function AdminPartnersLogosPage() {
                           type="button"
                           onClick={() => movePartner(index, 'down')}
                           disabled={index === partners.length - 1}
-                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded bg-white shadow-none"
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                          aria-label="Move down"
                         >
                           <ChevronDown className="w-4 h-4" />
                         </button>

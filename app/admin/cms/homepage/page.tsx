@@ -411,7 +411,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'up')}
                         disabled={i === 0}
-                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
+                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
                         aria-label="Move up"
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -420,7 +420,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'down')}
                         disabled={i === config.hero.images.length - 1}
-                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
+                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
                         aria-label="Move down"
                       >
                         <ChevronDown className="w-4 h-4" />
@@ -697,7 +697,7 @@ export default function AdminCmsHomepagePage() {
                       type="button"
                       onClick={() => movePillar(i, 'up')}
                       disabled={i === 0}
-                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded disabled:opacity-40"
+                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
                       aria-label="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -706,7 +706,7 @@ export default function AdminCmsHomepagePage() {
                       type="button"
                       onClick={() => movePillar(i, 'down')}
                       disabled={i === config.pillars.items.length - 1}
-                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded disabled:opacity-40"
+                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
                       aria-label="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />

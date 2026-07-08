@@ -217,7 +217,7 @@ export default function AdminCmsNavigationPage() {
                     type="button"
                     onClick={() => moveLink(index, 'up')}
                     disabled={index === 0}
-                    className="p-2 bg-white border border-neutral-300 text-neutral-900 shadow-none min-h-0"
+                    className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
                     aria-label="Move up"
                   >
                     <ChevronUp className="w-4 h-4" />
@@ -226,7 +226,7 @@ export default function AdminCmsNavigationPage() {
                     type="button"
                     onClick={() => moveLink(index, 'down')}
                     disabled={index === config.links.length - 1}
-                    className="p-2 bg-white border border-neutral-300 text-neutral-900 shadow-none min-h-0"
+                    className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
                     aria-label="Move down"
                   >
                     <ChevronDown className="w-4 h-4" />
