@@ -1,5 +1,16 @@
 // User roles and types
-export type UserRole = 'member' | 'volunteer' | 'business' | 'admin' | 'sponsor' | 'super_admin'
+export type UserRole =
+  | 'member'
+  | 'volunteer'
+  | 'business'
+  | 'admin'
+  | 'sponsor'
+  | 'super_admin'
+  | 'welfare'
+  | 'founder'
+  | 'coordinator'
+  | 'founder_admin'
+  | 'manager'
 
 // Admin role permissions
 export type AdminRole = 'founder_admin' | 'manager' | 'moderator' | 'analyst'

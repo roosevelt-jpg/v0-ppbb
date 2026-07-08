@@ -84,6 +84,19 @@ export const SENSITIVE_DOC_ROLES = new Set([
   'manager', // maps to welfare/coordinator operational access
 ])
 
+export const WELFARE_INVITE_ROLE_OPTIONS = [
+  { value: 'welfare', label: 'Welfare', description: 'Review beneficiary requests and sensitive documents' },
+  { value: 'founder', label: 'Founder', description: 'Founder-level beneficiary and welfare access' },
+  { value: 'coordinator', label: 'Coordinator', description: 'Coordinate welfare cases and document review' },
+  { value: 'founder_admin', label: 'Founder Admin', description: 'Full admin access including sensitive documents' },
+  { value: 'manager', label: 'Manager', description: 'Operational manager with welfare document access' },
+] as const
+
+export function isWelfareOperationalRole(role: unknown): boolean {
+  if (typeof role !== 'string') return false
+  return SENSITIVE_DOC_ROLES.has(role.toLowerCase())
+}
+
 export function canAccessSensitiveBeneficiaryDocs(adminRole: unknown): boolean {
   if (typeof adminRole !== 'string') return false
   return SENSITIVE_DOC_ROLES.has(adminRole.toLowerCase())

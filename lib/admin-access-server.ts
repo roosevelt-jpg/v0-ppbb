@@ -6,6 +6,8 @@ import {
   hasInvitePermission,
   type InvitePermissionId,
 } from '@/lib/admin-invite-permissions'
+import { isWelfareOperationalRole } from '@/lib/charity-cases'
+import type { User } from '@/lib/types'
 
 // Initialize Firebase Admin SDK
 let adminApp: any = null
@@ -103,9 +105,16 @@ export async function isAdminUser(userId: string): Promise<boolean> {
     const adminRef = db.collection('adminUsers').doc(userId)
     const adminSnap = await adminRef.get()
     if (adminSnap.exists) return true
+    const legacyAdminRef = db.collection('admin-users').doc(userId)
+    const legacyAdminSnap = await legacyAdminRef.get()
+    if (legacyAdminSnap.exists) return true
     const userSnap = await db.collection('users').doc(userId).get()
     const role = userSnap.data()?.role
-    return role === 'admin' || role === 'super_admin'
+    return (
+      role === 'admin' ||
+      role === 'super_admin' ||
+      isWelfareOperationalRole(role)
+    )
   } catch (error) {
     console.error('[v0] Admin check failed:', error)
     return false
@@ -149,9 +158,15 @@ export async function canAccessAdminPathServer(userId: string, pathname: string)
   const data = await getUserProfileData(userId)
   if (!data) return false
   const role = data.role as string
-  if (role !== 'admin' && role !== 'super_admin') return false
+  if (
+    role !== 'admin' &&
+    role !== 'super_admin' &&
+    !isWelfareOperationalRole(role)
+  ) {
+    return false
+  }
   return canAccessAdminPath(
-    { role: role as 'admin' | 'super_admin', permissions: data.permissions as string[] },
+    { role: role as User['role'], permissions: data.permissions as string[] },
     pathname
   )
 }
@@ -206,13 +221,39 @@ export async function grantIntegrationPermission(userId: string): Promise<boolea
 /**
  * Server-side only: Get admin user data
  */
-export async function getAdminUserData(userId: string): Promise<any> {
+export async function getAdminUserData(userId: string): Promise<Record<string, unknown> | null> {
   try {
     const app = getAdminApp()
     const db = getFirestore(app)
-    const adminRef = db.collection('adminUsers').doc(userId)
-    const adminSnap = await adminRef.get()
-    return adminSnap.exists ? adminSnap.data() : null
+    const [adminSnap, legacyAdminSnap, userSnap] = await Promise.all([
+      db.collection('adminUsers').doc(userId).get(),
+      db.collection('admin-users').doc(userId).get(),
+      db.collection('users').doc(userId).get(),
+    ])
+
+    if (!adminSnap.exists && !legacyAdminSnap.exists && !userSnap.exists) {
+      return null
+    }
+
+    const adminData = adminSnap.exists ? adminSnap.data() : {}
+    const legacyAdminData = legacyAdminSnap.exists ? legacyAdminSnap.data() : {}
+    const userData = userSnap.exists ? userSnap.data() : {}
+
+    const role =
+      adminData?.adminRole ||
+      adminData?.role ||
+      legacyAdminData?.adminRole ||
+      legacyAdminData?.role ||
+      userData?.adminRole ||
+      userData?.role
+
+    return {
+      ...userData,
+      ...legacyAdminData,
+      ...adminData,
+      role,
+      adminRole: role,
+    }
   } catch (error) {
     console.error('[v0] Get admin user failed:', error)
     return null

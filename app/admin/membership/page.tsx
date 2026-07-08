@@ -11,11 +11,11 @@ import {
   writeBatch,
   query,
   orderBy,
-  where,
 } from 'firebase/firestore'
 import { Users, AlertCircle, CheckCircle, Download } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { AdminSelect } from '@/components/admin-select'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 import { PricingPlan } from '@/lib/pricing-types'
@@ -62,11 +62,7 @@ export default function MembershipPage() {
   }, [])
 
   React.useEffect(() => {
-    const q = query(
-      collection(db, 'pricingPlans'),
-      where('active', '==', true),
-      orderBy('order', 'asc')
-    )
+    const q = query(collection(db, 'pricingPlans'), orderBy('order', 'asc'))
 
     const unsubscribe = onSnapshot(
       q,
@@ -75,7 +71,8 @@ export default function MembershipPage() {
           id: docSnap.id,
           ...docSnap.data(),
         })) as PricingPlan[]
-        setPlans(plansData)
+        const activePlans = plansData.filter((plan) => plan.active !== false)
+        setPlans(activePlans.length > 0 ? activePlans : plansData)
         setLoadingPlans(false)
       },
       (error) => {
@@ -90,6 +87,7 @@ export default function MembershipPage() {
   const loading = loadingMembers || loadingPlans
 
   const handleUpgradeTier = async (memberId: string, planId: string) => {
+    if (!planId) return
     try {
       const plan = plans.find((p) => p.id === planId)
       await updateDoc(doc(db, 'users', memberId), {
@@ -225,8 +223,19 @@ export default function MembershipPage() {
 
   const getMemberPlanSelectValue = (member: Record<string, unknown>) => {
     const assigned = getMemberAssignedPlan(member, plans)
-    return assigned?.id || String(member.membershipTier || plans[0]?.id || '')
+    return assigned?.id || ''
   }
+
+  const tierSelectOptions = React.useMemo(
+    () => [
+      { value: '', label: 'Select tier…' },
+      ...plans.map((plan) => ({
+        value: plan.id,
+        label: plan.active === false ? `${plan.name} (Inactive)` : plan.name,
+      })),
+    ],
+    [plans]
+  )
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-neutral-50 space-y-6 lg:space-y-8 min-w-0">
@@ -514,18 +523,20 @@ export default function MembershipPage() {
                             )
                           : '-'}
                       </td>
-                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                        <select
-                          onChange={(e) => handleUpgradeTier(String(member.id), e.target.value)}
-                          value={getMemberPlanSelectValue(member)}
-                          className="text-sm px-3 py-1.5 border border-neutral-200 rounded-lg hover:border-neutral-400 cursor-pointer bg-white font-body min-w-[120px]"
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap min-w-[10rem]">
+                        <div
+                          className="relative z-20"
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
                         >
-                          {plans.map((plan) => (
-                            <option key={plan.id} value={plan.id}>
-                              {plan.name}
-                            </option>
-                          ))}
-                        </select>
+                          <AdminSelect
+                            value={getMemberPlanSelectValue(member)}
+                            onChange={(planId) => handleUpgradeTier(String(member.id), planId)}
+                            options={tierSelectOptions}
+                            aria-label={`Assign membership tier for ${member.firstName || 'member'}`}
+                            className="min-w-[10rem]"
+                          />
+                        </div>
                       </td>
                     </tr>
                   )

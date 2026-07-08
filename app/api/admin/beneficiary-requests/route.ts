@@ -40,15 +40,10 @@ async function requireAdminAuth(request: NextRequest) {
   const uid = await verifyIdToken(token)
   if (!uid) return null
   const isAdmin = await isAdminUser(uid)
-  if (!isAdmin) {
-    // Also allow users.role admin/super_admin (legacy)
-    const db = getAdminDb()
-    const userSnap = await db.collection('users').doc(uid).get()
-    const role = userSnap.data()?.role
-    if (role !== 'admin' && role !== 'super_admin') return null
-  }
+  if (!isAdmin) return null
   const adminData = await getAdminUserData(uid)
-  return { uid, adminRole: adminData?.adminRole || adminData?.role || 'admin' }
+  const adminRole = String(adminData?.adminRole || adminData?.role || 'admin')
+  return { uid, adminRole }
 }
 
 /**

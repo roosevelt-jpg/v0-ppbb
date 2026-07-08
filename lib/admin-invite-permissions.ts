@@ -1,4 +1,5 @@
 import type { User } from '@/lib/types'
+import { isWelfareOperationalRole } from '@/lib/charity-cases'
 
 /** Permission IDs used on /admin/management invitation form */
 export type InvitePermissionId =
@@ -9,6 +10,7 @@ export type InvitePermissionId =
   | 'view_reports'
   | 'manage_content'
   | 'manage_integrations'
+  | 'manage_beneficiary'
   | 'full_access'
 
 /** Admin routes gated by each invite permission */
@@ -28,6 +30,7 @@ export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
     '/admin/youtube-config',
   ],
   manage_integrations: ['/admin/integrations'],
+  manage_beneficiary: ['/admin/beneficiary-requests', '/admin/charity', '/admin/donation-verification'],
   manage_members: [
     '/admin/members',
     '/admin/membership',
@@ -44,6 +47,12 @@ export function getEffectiveInvitePermissions(
   role?: string
 ): string[] {
   if (role === 'super_admin') return ['full_access']
+  if (role === 'founder_admin' || role === 'manager') {
+    if (!permissions?.length) return ['full_access']
+  }
+  if (role === 'welfare' || role === 'founder' || role === 'coordinator') {
+    if (!permissions?.length) return ['manage_beneficiary']
+  }
   if (!permissions?.length) return ['full_access']
   return permissions
 }
@@ -66,7 +75,22 @@ export function canAccessAdminPath(
   if (user.role === 'super_admin') return true
 
   const path = pathname.split('?')[0]
-  if (path === '/admin/setup') return true
+  if (path === '/admin/setup' || path === '/admin/login') return true
+
+  if (isWelfareOperationalRole(user.role)) {
+    const welfarePaths = [
+      '/admin',
+      '/admin/beneficiary-requests',
+      '/admin/charity',
+      '/admin/donation-verification',
+    ]
+    if (user.role === 'founder_admin' || user.role === 'manager') {
+      // Broader operational access for founder_admin / manager invites
+      const effective = getEffectiveInvitePermissions(user.permissions, user.role)
+      if (effective.includes('full_access')) return true
+    }
+    return welfarePaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
+  }
 
   const effective = getEffectiveInvitePermissions(user.permissions, user.role)
   if (effective.includes('full_access')) return true

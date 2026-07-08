@@ -22,11 +22,15 @@ export function useAdminPopover() {
       }
     }
 
-    document.addEventListener('mousedown', handlePointerDown)
-    document.addEventListener('touchstart', handlePointerDown)
-    document.addEventListener('keydown', handleKeyDown)
+    // Defer so the same click that opened the popover does not immediately close it
+    const timer = window.setTimeout(() => {
+      document.addEventListener('mousedown', handlePointerDown)
+      document.addEventListener('touchstart', handlePointerDown)
+      document.addEventListener('keydown', handleKeyDown)
+    }, 0)
 
     return () => {
+      window.clearTimeout(timer)
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('touchstart', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)

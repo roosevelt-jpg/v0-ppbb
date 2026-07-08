@@ -1,4 +1,15 @@
 import type { User, UserRole } from '@/lib/types'
+import { isWelfareOperationalRole } from '@/lib/charity-cases'
+
+const ADMIN_PANEL_ROLES: UserRole[] = [
+  'admin',
+  'super_admin',
+  'welfare',
+  'founder',
+  'coordinator',
+  'founder_admin',
+  'manager',
+]
 
 /**
  * Returns all roles a user holds, combining the primary `role` field with the
@@ -46,7 +57,15 @@ export function hasAdminAccess(
   user: Pick<User, 'role' | 'roles'> | null | undefined
 ): boolean {
   const roles = getUserRoles(user)
-  return roles.includes('admin') || roles.includes('super_admin')
+  return roles.some((role) => ADMIN_PANEL_ROLES.includes(role))
+}
+
+/** Whether the user is a welfare-tier operational admin (beneficiary docs). */
+export function hasWelfareAdminAccess(
+  user: Pick<User, 'role' | 'roles'> | null | undefined
+): boolean {
+  const roles = getUserRoles(user)
+  return roles.some((role) => isWelfareOperationalRole(role))
 }
 
 /** Basic members/volunteers without business or admin roles. */

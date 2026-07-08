@@ -44,7 +44,14 @@ export function AdminSelect({
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((prev) => !prev)}
+        onMouseDown={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen((prev) => !prev)
+        }}
         className={`${SELECT_STYLE} ${FIELD_TRIGGER_RESET} w-full flex items-center justify-between gap-2 text-left`}
       >
         <span className="truncate">{selected?.label ?? 'Select...'}</span>
@@ -55,7 +62,8 @@ export function AdminSelect({
         <ul
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-[min(60vh,240px)] overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+          onMouseDown={(e) => e.stopPropagation()}
+          className="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] max-h-[min(60vh,240px)] overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
         >
           {options.map((option) => {
             const isSelected = option.value === value

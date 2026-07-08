@@ -7,6 +7,7 @@ import { Copy, Trash2, Plus, Eye, EyeOff } from 'lucide-react'
 import { format } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { WELFARE_INVITE_ROLE_OPTIONS, isWelfareOperationalRole } from '@/lib/charity-cases'
 
 export default function AdminManagementPage() {
   const [activeTab, setActiveTab] = React.useState<'access-codes' | 'admins'>('access-codes')
@@ -20,6 +21,12 @@ export default function AdminManagementPage() {
   const [adminRole, setAdminRole] = React.useState('admin')
   const [selectedPermissions, setSelectedPermissions] = React.useState<string[]>([])
 
+  const INVITE_ROLE_OPTIONS = [
+    { value: 'admin', label: 'Admin', description: 'Standard admin with configurable permissions' },
+    { value: 'super_admin', label: 'Super Admin', description: 'Full unrestricted admin access' },
+    ...WELFARE_INVITE_ROLE_OPTIONS,
+  ]
+
   // Available permissions for admins
   const ADMIN_PERMISSIONS = [
     { id: 'manage_members', label: 'Manage Members', description: 'Add, edit, and remove members' },
@@ -29,7 +36,22 @@ export default function AdminManagementPage() {
     { id: 'view_reports', label: 'View Reports', description: 'Access analytics and reporting dashboard' },
     { id: 'manage_content', label: 'Manage Content', description: 'Edit pages, FAQs, and content' },
     { id: 'manage_integrations', label: 'Manage Integrations', description: 'Configure external services' },
+    {
+      id: 'manage_beneficiary',
+      label: 'Manage Beneficiary Requests',
+      description: 'Review welfare applications and sensitive documents',
+    },
   ]
+
+  React.useEffect(() => {
+    if (adminRole === 'welfare' || adminRole === 'founder' || adminRole === 'coordinator') {
+      setSelectedPermissions(['manage_beneficiary'])
+      return
+    }
+    if (adminRole === 'founder_admin' || adminRole === 'manager') {
+      setSelectedPermissions([])
+    }
+  }, [adminRole])
 
   React.useEffect(() => {
     loadData()
@@ -220,9 +242,20 @@ export default function AdminManagementPage() {
                     onChange={(e) => setAdminRole(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   >
-                    <option value="admin">Admin</option>
-                    <option value="super_admin">Super Admin</option>
+                    {INVITE_ROLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {INVITE_ROLE_OPTIONS.find((option) => option.value === adminRole)?.description}
+                  </p>
+                  {isWelfareOperationalRole(adminRole) && (
+                    <p className="text-xs text-amber-700 mt-1">
+                      Welfare-tier roles can access beneficiary requests and sensitive documents when invited with this role.
+                    </p>
+                  )}
                 </div>
 
                 {/* Permissions Selector */}
