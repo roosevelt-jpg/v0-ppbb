@@ -22,8 +22,10 @@ export default function AdminLayout({
   const { user, firebaseUser, loading } = useAuth()
   const [currentDateTime, setCurrentDateTime] = useState<string>('')
 
-  // Check if this is the setup page
+  // Public admin auth pages — no dashboard shell or route guard
   const isSetupPage = pathname === '/admin/setup'
+  const isLoginPage = pathname === '/admin/login'
+  const isPublicAdminPage = isSetupPage || isLoginPage
 
   // Update date and time
   useEffect(() => {
@@ -48,18 +50,18 @@ export default function AdminLayout({
   }, [])
 
   useEffect(() => {
-    // Skip auth check for setup page
-    if (isSetupPage) {
+    // Skip auth check for invite setup and admin login pages
+    if (isPublicAdminPage) {
       return
     }
 
     // Only redirect if NOT loading and user doesn't have proper access
     // Don't redirect WHILE loading - allow the loading state to show
     if (!loading) {
-      // Not signed in — send to login, not the invite-only setup flow
+      // Not signed in — admin-specific login (never generic /login)
       if (!firebaseUser) {
         const returnUrl = encodeURIComponent(pathname || '/admin')
-        router.push(`/login?returnUrl=${returnUrl}`)
+        router.push(`/admin/login?returnUrl=${returnUrl}`)
         return
       }
 
@@ -81,18 +83,18 @@ export default function AdminLayout({
     
     // User is authenticated and is an admin or super admin - allow access
     // Or we're still loading and waiting for auth check
-  }, [user, firebaseUser, loading, router, isSetupPage, pathname])
+  }, [user, firebaseUser, loading, router, isPublicAdminPage, pathname])
 
   const handleLogout = async () => {
     await logoutUser()
-    router.push('/login')
+    router.push('/admin/login')
   }
 
   // Get user's first name or display email as fallback
   const displayName = user && 'firstName' in user ? user.firstName || (user as any).email : (user as any)?.email || 'Admin'
 
   // Wait for Firebase Auth + Firestore profile before any admin route guard runs
-  if (loading && !isSetupPage) {
+  if (loading && !isPublicAdminPage) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -103,7 +105,6 @@ export default function AdminLayout({
     )
   }
 
-  // Show loading state ONLY on setup page during initial auth check
   if (loading && isSetupPage) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -116,7 +117,7 @@ export default function AdminLayout({
   }
 
   // Signed in but profile doc unavailable
-  if (!loading && !isSetupPage && firebaseUser && !user) {
+  if (!loading && !isPublicAdminPage && firebaseUser && !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center max-w-md px-4">
@@ -130,7 +131,7 @@ export default function AdminLayout({
   }
 
   // Authenticated non-admin only (never show this for signed-out visitors)
-  if (!loading && !isSetupPage && user && !hasAdminAccess(user)) {
+  if (!loading && !isPublicAdminPage && user && !hasAdminAccess(user)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -142,7 +143,7 @@ export default function AdminLayout({
   }
 
   // Scoped admin blocked from this specific route (redirect runs in useEffect)
-  if (!loading && !isSetupPage && user && hasAdminAccess(user) && !canAccessAdminPath(user, pathname)) {
+  if (!loading && !isPublicAdminPage && user && hasAdminAccess(user) && !canAccessAdminPath(user, pathname)) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -153,18 +154,17 @@ export default function AdminLayout({
   }
 
   // Still resolving auth
-  if (!loading && !isSetupPage && !firebaseUser) {
+  if (!loading && !isPublicAdminPage && !firebaseUser) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
-          <p className="text-muted-foreground">Redirecting to sign in…</p>
+          <p className="text-muted-foreground">Redirecting to admin sign in…</p>
         </div>
       </div>
     )
   }
 
-  // For setup page, render without sidebar
-  if (isSetupPage) {
+  if (isPublicAdminPage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-muted">
         {children}

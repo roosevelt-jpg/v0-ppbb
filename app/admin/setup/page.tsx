@@ -38,7 +38,7 @@ export default function AdminSetup() {
     }
   }, [authLoading, user, router])
 
-  const loginHref = `/login?returnUrl=${encodeURIComponent('/admin')}`
+  const adminLoginHref = `/admin/login?returnUrl=${encodeURIComponent('/admin')}`
 
   const handleAccessCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -266,7 +266,7 @@ export default function AdminSetup() {
 
                 <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
                   Already have an admin account?{' '}
-                  <Link href={loginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                  <Link href={adminLoginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
                     Sign in here
                   </Link>
                 </p>
@@ -352,7 +352,7 @@ export default function AdminSetup() {
                     {error}
                     {error.includes('already exists') && (
                       <p style={{ marginTop: '10px' }}>
-                        <Link href={loginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                        <Link href={adminLoginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
                           Sign in with your existing password →
                         </Link>
                       </p>
@@ -382,7 +382,7 @@ export default function AdminSetup() {
 
                 <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
                   Already have an admin account?{' '}
-                  <Link href={loginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                  <Link href={adminLoginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
                     Sign in here
                   </Link>
                   {' '}(do not create a new account)
