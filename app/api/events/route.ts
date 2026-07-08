@@ -45,12 +45,18 @@ export async function POST(request: NextRequest) {
     const db = getAdminDb()
 
     // Validate required fields
-    if (!body.title || !body.startDate || !body.locationName) {
+    const locationName = body.locationName || body.location
+    const startDate = body.startDate || body.date
+    if (!body.title || !startDate || !locationName) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields: title, startDate, or locationName' },
         { status: 400 }
       )
     }
+
+    const status = body.status || 'draft'
+    const isPublished = status === 'published'
+    const createdByRole = body.createdByRole || 'admin'
 
     const eventData = {
       title: body.title,
@@ -63,26 +69,26 @@ export async function POST(request: NextRequest) {
       speakers: body.speakers || [],
       agenda: body.agenda || [],
 
-      locationName: body.locationName,
-      locationAddress: body.locationAddress,
-      locationPlaceId: body.locationPlaceId,
-      locationLat: body.locationLat || 0,
-      locationLng: body.locationLng || 0,
+      locationName: body.locationName || body.location || '',
+      locationAddress: body.locationAddress || body.locationName || body.location || '',
+      locationPlaceId: body.locationPlaceId || body.locationData?.placeId || '',
+      locationLat: body.locationLat ?? body.locationData?.lat ?? 0,
+      locationLng: body.locationLng ?? body.locationData?.lng ?? 0,
 
-      startDate: new Date(body.startDate),
-      endDate: new Date(body.endDate || body.startDate),
+      startDate: new Date(body.startDate || body.date),
+      endDate: new Date(body.endDate || body.startDate || body.date),
       timezone: body.timezone || 'Asia/Dubai',
 
-      pricingType: body.pricingType || 'free',
-      price: body.price || null,
+      pricingType: body.pricingType || (body.isPaid ? 'paid_by_pb' : 'free'),
+      price: body.price ?? null,
       currency: body.currency || 'AED',
-      revenueModel: body.revenueModel || null,
+      revenueModel: body.revenueModel || (body.isPaid ? 'pb_full' : null),
       pbCommissionPercent: body.pbCommissionPercent || null,
       businessPayoutPercent: body.businessPayoutPercent || null,
       pbCommissionOverride: body.pbCommissionOverride || false,
       paymentGateway: body.paymentGateway || null,
 
-      bannerURL: body.bannerURL || '',
+      bannerURL: body.bannerURL || body.bannerImageUrl || body.bannerImage || '',
       maxAttendees: body.maxAttendees || null,
       currentAttendees: 0,
 
@@ -93,16 +99,16 @@ export async function POST(request: NextRequest) {
       payoutReference: null,
       payoutDate: null,
 
-      status: body.status || 'draft',
-      publishedAt: null,
+      status,
+      publishedAt: isPublished ? Timestamp.now() : null,
       cancelledAt: null,
       cancelReason: null,
 
       createdBy: body.createdBy || 'admin',
-      createdByRole: body.createdByRole || 'admin',
+      createdByRole,
       submittedAt: null,
-      approvedBy: null,
-      approvedAt: null,
+      approvedBy: isPublished && createdByRole === 'admin' ? body.createdBy || 'admin' : null,
+      approvedAt: isPublished && createdByRole === 'admin' ? Timestamp.now() : null,
       approvalNotes: null,
       lastEditedBy: null,
       lastEditedAt: null,

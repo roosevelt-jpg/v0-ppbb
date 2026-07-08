@@ -2,12 +2,14 @@
 
 export const dynamic = 'force-dynamic'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Upload, ArrowLeft, Loader2, X, MapPin, Users } from 'lucide-react'
+import { Upload, ArrowLeft, Loader2, X, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
-import type { LocationData, EventTag, GenderRestriction } from '@/lib/types'
+import { useAuth } from '@/lib/auth-context'
+import { buildEventApiPayload } from '@/lib/build-event-payload'
+import type { EventTag, GenderRestriction } from '@/lib/types'
 
 interface EventFormData {
   title: string
@@ -15,21 +17,25 @@ interface EventFormData {
   date: string
   startTime: string
   endTime: string
-  location: string
-  locationData?: LocationData
-  bannerImageUrl: string
+  locationName: string
+  locationAddress: string
+  locationPlaceId: string
+  locationLat: number
+  locationLng: number
+  bannerURL: string
   isPaid: boolean
   price: number
   currency: string
   paymentGateway?: 'stripe' | 'paypal' | 'ziina'
   maxAttendees?: number
   status: 'draft' | 'published'
-  genderRestriction?: GenderRestriction
-  tags?: EventTag[]
+  genderRestriction: GenderRestriction
+  tags: EventTag[]
 }
 
 export default function CreateEventPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [saving, setSaving] = useState(false)
   const [imagePreview, setImagePreview] = useState<string>('')
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -41,13 +47,16 @@ export default function CreateEventPage() {
     date: new Date().toISOString().split('T')[0],
     startTime: '09:00',
     endTime: '17:00',
-    location: '',
-    locationData: undefined,
-    bannerImageUrl: '',
+    locationName: '',
+    locationAddress: '',
+    locationPlaceId: '',
+    locationLat: 0,
+    locationLng: 0,
+    bannerURL: '',
     isPaid: false,
     price: 0,
     currency: 'AED',
-    paymentGateway: 'stripe', // Initialize with default value
+    paymentGateway: 'stripe',
     maxAttendees: undefined,
     status: 'draft',
     genderRestriction: 'mixed',
@@ -65,7 +74,7 @@ export default function CreateEventPage() {
   }
 
   const handleUploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return formData.bannerImageUrl
+    if (!imageFile) return formData.bannerURL
     try {
       const fd = new FormData()
       fd.append('file', imageFile)
@@ -95,22 +104,30 @@ export default function CreateEventPage() {
       if (!formData.date?.trim()) {
         throw new Error('Event date is required')
       }
-      if (!formData.location?.trim()) {
+      if (!formData.locationName?.trim()) {
         throw new Error('Event location is required')
       }
+      if (formData.isPaid && (!formData.price || formData.price <= 0)) {
+        throw new Error('Paid events require a ticket price greater than 0')
+      }
 
-      // Validate date format
       const dateObj = new Date(formData.date)
       if (isNaN(dateObj.getTime())) {
         throw new Error('Please select a valid date')
       }
 
-      let imageUrl = formData.bannerImageUrl
+      let bannerURL = formData.bannerURL
       if (imageFile) {
-        imageUrl = await handleUploadImage()
+        bannerURL = (await handleUploadImage()) || ''
       }
 
-      const payload = { ...formData, bannerImageUrl: imageUrl, status }
+      const payload = buildEventApiPayload({
+        ...formData,
+        bannerURL,
+        status,
+        createdBy: user?.id || user?.email || 'admin',
+        createdByRole: 'admin',
+      })
 
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -119,11 +136,11 @@ export default function CreateEventPage() {
       })
 
       const json = await res.json()
-      if (json.success) {
-        router.push('/admin/events')
-      } else {
-        setError(json.error || 'Failed to save event')
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to save event')
       }
+
+      router.push('/admin/events')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error saving event')
     } finally {
@@ -131,16 +148,8 @@ export default function CreateEventPage() {
     }
   }
 
-  const handleChange = (field: string, value: any) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.')
-      setFormData(prev => ({
-        ...prev,
-        [parent]: { ...prev[parent as keyof typeof prev], [child]: value }
-      }))
-    } else {
-      setFormData(prev => ({ ...prev, [field]: value }))
-    }
+  const handleChange = (field: keyof EventFormData, value: EventFormData[keyof EventFormData]) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   return (
@@ -230,30 +239,36 @@ export default function CreateEventPage() {
               <p className="text-sm text-gray-600">Start typing to get real-time location suggestions powered by Google Maps</p>
 
               <GooglePlacesAutocomplete
-                value={formData.location}
-                onChange={(place) => {
-                  setFormData(prev => ({
+                value={formData.locationName}
+                onTextChange={(text) => {
+                  setFormData((prev) => ({
                     ...prev,
-                    location: place.mainText,
-                    locationData: {
-                      placeId: place.placeId,
-                      address: `${place.mainText}${place.secondaryText ? ', ' + place.secondaryText : ''}`,
-                      lat: place.lat || 0,
-                      lng: place.lng || 0,
-                      city: place.secondaryText,
-                    }
+                    locationName: text,
+                    locationAddress: text,
+                  }))
+                }}
+                onChange={(place) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    locationName: place.mainText,
+                    locationAddress: place.mainText,
+                    locationPlaceId: place.placeId,
+                    locationLat: place.lat || 0,
+                    locationLng: place.lng || 0,
                   }))
                 }}
                 countryRestrictions={['AE']}
               />
-              
-              {formData.locationData && (
+
+              {formData.locationName && (
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
                   <MapPin size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <p className="font-medium text-blue-900">{formData.locationData.address}</p>
-                    {formData.locationData.lat && formData.locationData.lng && (
-                      <p className="text-blue-700 text-xs">Coordinates: {formData.locationData.lat.toFixed(4)}, {formData.locationData.lng.toFixed(4)}</p>
+                    <p className="font-medium text-blue-900">{formData.locationAddress || formData.locationName}</p>
+                    {formData.locationLat !== 0 && formData.locationLng !== 0 && (
+                      <p className="text-blue-700 text-xs">
+                        Coordinates: {formData.locationLat.toFixed(4)}, {formData.locationLng.toFixed(4)}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -332,12 +347,11 @@ export default function CreateEventPage() {
                     <label key={tag} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                       <input
                         type="checkbox"
-                        checked={formData.tags?.includes(tag) || false}
+                        checked={formData.tags.includes(tag)}
                         onChange={(e) => {
-                          const currentTags = formData.tags || []
-                          const newTags = e.target.checked 
-                            ? [...currentTags, tag]
-                            : currentTags.filter(t => t !== tag)
+                          const newTags = e.target.checked
+                            ? [...formData.tags, tag]
+                            : formData.tags.filter((t) => t !== tag)
                           handleChange('tags', newTags)
                         }}
                         className="w-4 h-4"
@@ -370,7 +384,7 @@ export default function CreateEventPage() {
                     <input
                       type="number"
                       value={formData.price}
-                      onChange={(e) => handleChange('price', parseFloat(e.target.value))}
+                      onChange={(e) => handleChange('price', Number(e.target.value) || 0)}
                       placeholder="0.00"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     />
