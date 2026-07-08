@@ -95,12 +95,56 @@ export const createGmailTransporter = (emailConfig?: SiteSettings['emailConfig']
 export interface AdminInviteDetails {
   adminName: string
   adminEmail: string
-  role: 'admin' | 'super_admin'
+  role: string
   permissions: string[]
   accessCode: string
   expiresAt: Date
   setupUrl: string
   fromName?: string
+  invitedBy?: {
+    name: string
+    roleLabel: string
+    profilePictureURL?: string | null
+    initials: string
+  }
+}
+
+function formatInviteRoleLabel(role: string): string {
+  const labels: Record<string, string> = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    founder_admin: 'Founder Admin',
+    manager: 'Manager',
+    welfare: 'Welfare',
+    founder: 'Founder',
+    coordinator: 'Coordinator',
+    moderator: 'Moderator',
+  }
+  return labels[role] || role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+function buildInviterSignatureHtml(invitedBy: NonNullable<AdminInviteDetails['invitedBy']>): string {
+  const avatarCell = invitedBy.profilePictureURL
+    ? `<img src="${invitedBy.profilePictureURL}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #e0dfd9;" />`
+    : `<div style="width:48px;height:48px;border-radius:50%;background-color:#111111;color:#ffffff;text-align:center;line-height:48px;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;">${invitedBy.initials}</div>`
+
+  return `
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:24px;border-top:1px solid #e0dfd9;padding-top:20px;">
+      <tr>
+        <td width="60" valign="top" style="padding-right:12px;">
+          ${avatarCell}
+        </td>
+        <td valign="top" style="font-family:Arial,'Segoe UI',sans-serif;">
+          <p style="margin:0 0 4px 0;font-size:15px;font-weight:bold;color:#111111;">
+            Invited by ${invitedBy.name}, ${invitedBy.roleLabel} at Passive Blessings
+          </p>
+          <p style="margin:0;font-size:13px;color:#666666;line-height:1.5;">
+            If you have questions about this invitation, reply to this email or contact your inviter directly.
+          </p>
+        </td>
+      </tr>
+    </table>
+  `
 }
 
 /** Dark logo for light email backgrounds — reads platformConfig/globalSettings.logoUrlDark */
@@ -130,7 +174,7 @@ export const sendAdminInviteEmail = async (
   }
 
   const logoUrl = await getEmailBrandLogoUrl()
-  const roleLabel = details.role === 'super_admin' ? 'Super Admin' : 'Admin'
+  const roleLabel = formatInviteRoleLabel(details.role)
   const permissionsText = details.permissions.length > 0
     ? details.permissions.map(p => `• ${p}`).join('<br>')
     : '• Full system access'
@@ -150,8 +194,8 @@ export const sendAdminInviteEmail = async (
           .card { background: #f7f6f2; border: 1px solid #e0dfd9; border-radius: 8px; padding: 20px; margin: 20px 0; }
           .role-badge { display: inline-block; background: #000; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; margin: 10px 0; }
           .access-code { background: #fff; border: 2px solid #000; padding: 20px; margin: 15px 0; border-radius: 6px; text-align: center; }
-          .code-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-          .code-value { font-size: 36px; font-family: 'Courier New', monospace; letter-spacing: 4px; color: #000; font-weight: bold; }
+          .code-label { font-size: 12px; color: #666666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+          .code-value { font-size: 36px; font-family: 'Courier New', monospace; letter-spacing: 4px; color: #111111; font-weight: bold; }
           .permissions { background: #fff; border-left: 4px solid #000; padding: 15px; margin: 15px 0; }
           .permissions h4 { margin: 0 0 10px 0; color: #000; }
           .permissions-list { font-size: 14px; color: #555; line-height: 1.8; }
@@ -170,7 +214,7 @@ export const sendAdminInviteEmail = async (
         <div class="container">
           <!-- Header -->
           <div class="header">
-            <img src="${logoUrl}" alt="Passive Blessings" style="max-width: 180px; height: auto; margin-bottom: 10px;">
+            <img src="${logoUrl}" alt="Passive Blessings" width="180" style="display:block;max-width:180px;height:auto;margin:0 auto 10px auto;border:0;">
             <div class="subtitle">Admin Portal</div>
           </div>
 
@@ -183,7 +227,7 @@ export const sendAdminInviteEmail = async (
           <!-- Role & Permissions -->
           <div class="card">
             <p><strong>Your Role:</strong></p>
-            <div class="role-badge">${roleLabel}</div>
+            <div class="role-badge" style="display:inline-block;background-color:#111111;color:#ffffff;padding:6px 12px;border-radius:4px;font-weight:bold;margin:10px 0;">${roleLabel}</div>
             
             <div class="permissions">
               <h4>Permissions:</h4>
@@ -196,9 +240,9 @@ export const sendAdminInviteEmail = async (
           <!-- Access Code -->
           <div class="card">
             <p><strong>Your Access Code:</strong></p>
-            <div class="access-code">
-              <div class="code-label">Use this code to complete setup</div>
-              <div class="code-value">${details.accessCode}</div>
+            <div class="access-code" style="background-color:#ffffff;border:2px solid #111111;padding:20px;margin:15px 0;border-radius:6px;text-align:center;">
+              <div class="code-label" style="font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Use this code to complete setup</div>
+              <div class="code-value" style="font-size:36px;font-family:'Courier New',monospace;letter-spacing:4px;color:#111111;font-weight:bold;">${details.accessCode}</div>
             </div>
           </div>
 
@@ -207,29 +251,39 @@ export const sendAdminInviteEmail = async (
             <p><strong>How to Setup Your Account:</strong></p>
             
             <div class="step">
-              <span class="step-number">1</span>
+              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">1</span>
               <strong>Visit the Setup Page</strong><br>
-              <a href="${details.setupUrl}" class="button">Go to Setup</a>
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
+                <tr>
+                  <td align="left" bgcolor="#111111" style="border-radius:6px;background-color:#111111;">
+                    <a href="${details.setupUrl}" target="_blank" style="display:inline-block;padding:12px 24px;font-family:Arial,'Segoe UI',sans-serif;font-size:16px;font-weight:bold;color:#ffffff !important;text-decoration:none;border-radius:6px;background-color:#111111;mso-padding-alt:12px 24px;">
+                      <span style="color:#ffffff !important;">Go to Setup</span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </div>
 
             <div class="step">
-              <span class="step-number">2</span>
+              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">2</span>
               <strong>Enter Your Access Code</strong><br>
               Paste the access code shown above on Step 1 of the setup form.
             </div>
 
             <div class="step">
-              <span class="step-number">3</span>
+              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">3</span>
               <strong>Complete Your Profile</strong><br>
               Enter your name and create a secure password for your account.
             </div>
 
             <div class="step">
-              <span class="step-number">4</span>
+              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">4</span>
               <strong>Access the Admin Dashboard</strong><br>
               Once setup is complete, you'll be able to access the full admin portal.
             </div>
           </div>
+
+          ${details.invitedBy ? buildInviterSignatureHtml(details.invitedBy) : ''}
 
           <!-- Important Info -->
           <div class="warning">

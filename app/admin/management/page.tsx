@@ -8,8 +8,10 @@ import { format } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { WELFARE_INVITE_ROLE_OPTIONS, isWelfareOperationalRole } from '@/lib/charity-cases'
+import { useAuth } from '@/lib/auth-context'
 
 export default function AdminManagementPage() {
+  const { firebaseUser } = useAuth()
   const [activeTab, setActiveTab] = React.useState<'access-codes' | 'admins'>('access-codes')
   const [admins, setAdmins] = React.useState<any[]>([])
   const [codes, setCodes] = React.useState<any[]>([])
@@ -111,6 +113,7 @@ export default function AdminManagementPage() {
           permissions: permissionsToSend,
           sendEmail: true,
           expiresAt: expiresAt.toISOString(),
+          invitedByUserId: firebaseUser?.uid || '',
         }),
       })
       const json = await res.json()

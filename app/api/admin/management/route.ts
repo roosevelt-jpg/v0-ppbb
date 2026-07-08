@@ -1,8 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { getUserDisplayName, getUserProfilePictureURL, getUserInitials } from '@/lib/user-profile'
 import crypto from 'crypto'
 
 const db = getAdminDb()
+
+function formatInviteRoleLabel(role: string): string {
+  const labels: Record<string, string> = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    founder_admin: 'Founder Admin',
+    manager: 'Manager',
+    welfare: 'Welfare',
+    founder: 'Founder',
+    coordinator: 'Coordinator',
+    moderator: 'Moderator',
+  }
+  return labels[role] || role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+async function loadInviterProfile(userId: string) {
+  if (!userId?.trim()) return null
+  const userSnap = await db.collection('users').doc(userId.trim()).get()
+  if (!userSnap.exists) return null
+  const data = userSnap.data() as Record<string, unknown>
+  const role = typeof data.role === 'string' ? data.role : 'admin'
+  return {
+    name: getUserDisplayName(data as Parameters<typeof getUserDisplayName>[0]),
+    roleLabel: formatInviteRoleLabel(role),
+    profilePictureURL: getUserProfilePictureURL(data as Parameters<typeof getUserProfilePictureURL>[0]),
+    initials: getUserInitials(data as Parameters<typeof getUserInitials>[0]),
+  }
+}
 
 // Generate a random access code
 function generateAccessCode(): string {
@@ -92,7 +121,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (action === 'generate-access-code') {
-      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr } = data
+      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr, invitedByUserId } = data
       
       console.log('[v0] Processing generate-access-code with:', {
         adminName,
@@ -128,7 +157,7 @@ export async function POST(request: NextRequest) {
         createdAt: new Date(),
         expiresAt,
         sendEmail: !!sendEmail,
-        createdBy: 'management-api',
+        createdBy: invitedByUserId || 'management-api',
       }
 
       console.log('[v0] Saving access code to Firestore:', {
@@ -159,6 +188,7 @@ export async function POST(request: NextRequest) {
       if (sendEmail) {
         console.log('[v0] Triggering email send to:', adminEmail)
         try {
+          const invitedBy = invitedByUserId ? await loadInviterProfile(invitedByUserId) : null
           const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/api/email/send-admin-invite`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -169,6 +199,7 @@ export async function POST(request: NextRequest) {
               role,
               expiresAt: expiresAt.toISOString(),
               permissions: accessCodeData.permissions,
+              invitedBy,
             }),
           })
           
