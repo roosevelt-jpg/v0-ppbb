@@ -85,11 +85,13 @@ function StatCell({
   }
 
   return (
-    <div className="flex flex-col items-center text-center px-2">
-      <div className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold text-foreground mb-2">
+    <div className="flex flex-col items-center text-center px-1 sm:px-2 min-w-0">
+      <div className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2 break-words max-w-full">
         {shown}
       </div>
-      <p className="eyebrow text-muted-foreground text-[0.65rem] sm:text-xs">{item.label}</p>
+      <p className="eyebrow text-muted-foreground text-[0.6rem] sm:text-xs break-words max-w-full leading-snug">
+        {item.label}
+      </p>
     </div>
   )
 }
@@ -143,9 +145,9 @@ export function HomeStatsBar() {
   const items = config.stats.items.slice(0, 4)
 
   return (
-    <section ref={sectionRef} id="impact" className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-background border-y border-border/40">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+    <section ref={sectionRef} id="impact" className="w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-12 md:py-16 bg-background border-y border-border/40 overflow-x-hidden">
+      <div className="max-w-[72rem] mx-auto w-full min-w-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-10">
           {items.map((item, index) => {
             const displayValue =
               config.stats.displayMode === 'live'

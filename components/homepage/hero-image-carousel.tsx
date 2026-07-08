@@ -8,7 +8,7 @@ function HeroCaption({ caption }: { caption: string }) {
   if (!caption.trim()) return null
   const parts = splitImageCaption(caption)
   return (
-    <p className="caption-mixed mt-3 text-xs sm:text-sm text-muted-foreground">
+    <p className="caption-mixed mt-3 text-xs sm:text-sm text-muted-foreground break-words">
       <span className="eyebrow text-[0.65rem] sm:text-xs">{parts.prefix}</span>
       {parts.italic && (
         <>
@@ -118,7 +118,7 @@ export function HeroImageCarousel({
         <button
           type="button"
           onClick={() => goTo(index - 1)}
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
           aria-label="Previous slide"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -126,7 +126,7 @@ export function HeroImageCarousel({
         <button
           type="button"
           onClick={() => goTo(index + 1)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
           aria-label="Next slide"
         >
           <ChevronRight className="w-5 h-5" />
@@ -138,11 +138,15 @@ export function HeroImageCarousel({
               key={img.id}
               type="button"
               onClick={() => goTo(i)}
-              className={`h-2 rounded-full transition-all ${
-                i === index ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
-              }`}
+              className={`min-h-[44px] min-w-[44px] flex items-center justify-center`}
               aria-label={`Go to slide ${i + 1}`}
-            />
+            >
+              <span
+                className={`block rounded-full transition-all ${
+                  i === index ? 'h-2 w-6 bg-white' : 'h-2 w-2 bg-white/50 hover:bg-white/80'
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>

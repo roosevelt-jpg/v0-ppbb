@@ -16,7 +16,7 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
     return (
       <Link
         href={button.href}
-        className={`${base} px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800`}
+        className={`${base} px-5 py-3 min-h-[44px] bg-black text-white rounded-lg hover:bg-gray-800`}
       >
         {button.label}
       </Link>
@@ -26,14 +26,14 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
     return (
       <Link
         href={button.href}
-        className={`${base} px-5 py-2.5 bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50`}
+        className={`${base} px-5 py-3 min-h-[44px] bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50`}
       >
         {button.label}
       </Link>
     )
   }
   return (
-    <Link href={button.href} className={`${base} text-black underline underline-offset-4 hover:text-gray-700`}>
+    <Link href={button.href} className={`${base} py-3 min-h-[44px] text-black underline underline-offset-4 hover:text-gray-700`}>
       {button.label}
     </Link>
   )
@@ -42,7 +42,7 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
 function HeroSkeleton() {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-10 md:py-16">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center animate-pulse">
+      <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center animate-pulse">
         <div className="space-y-4">
           <div className="h-3 w-48 bg-neutral-200 rounded" />
           <div className="h-10 w-full max-w-md bg-neutral-200 rounded" />
@@ -75,14 +75,14 @@ export function HomeHero() {
   const { hero } = config
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-10 md:py-16 bg-background">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        <div className="order-2 lg:order-1">
-          <p className="eyebrow text-muted-foreground mb-4">{hero.eyebrow}</p>
-          <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-6 text-foreground">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-10 md:py-16 bg-background overflow-x-hidden">
+      <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="order-2 lg:order-1 min-w-0">
+          <p className="eyebrow text-muted-foreground mb-4 break-words">{hero.eyebrow}</p>
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-foreground break-words">
             {hero.headline}
           </h1>
-          <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 max-w-xl">
+          <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 w-full max-w-[36rem] break-words">
             {hero.body}
           </p>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
@@ -92,7 +92,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        <div className="order-1 lg:order-2 relative">
+        <div className="order-1 lg:order-2 relative min-w-0 w-full">
           <HeroImageCarousel images={hero.images} slider={hero.slider} />
         </div>
       </div>

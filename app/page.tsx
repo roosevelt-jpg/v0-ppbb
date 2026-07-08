@@ -105,7 +105,7 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="w-full bg-background text-foreground">
+    <div className="w-full bg-background text-foreground overflow-x-hidden">
       <Navbar />
 
       <HomeHero />

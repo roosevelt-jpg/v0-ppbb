@@ -163,7 +163,7 @@ export function AdminSidebar() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+                      className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg transition-colors text-xs"
                       style={{
                         backgroundColor: isActive ? '#111111' : 'transparent',
                         color: isActive ? '#f7f6f2' : '#333333',
@@ -183,7 +183,7 @@ export function AdminSidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 p-3 rounded-lg transition-colors"
+        className="lg:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center min-h-[48px] min-w-[48px] p-3 rounded-lg transition-colors"
         style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
         aria-label="Toggle menu"
       >
@@ -235,7 +235,7 @@ export function AdminSidebar() {
                           key={item.href}
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+                          className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg transition-colors text-xs"
                           style={{
                             backgroundColor: isActive ? '#111111' : 'transparent',
                             color: isActive ? '#f7f6f2' : '#333333',

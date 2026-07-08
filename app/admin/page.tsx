@@ -1,54 +1,39 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 
 export default function AdminDashboard() {
   return (
-    <div style={{ minHeight: '100vh', padding: '40px', backgroundColor: '#f9fafb' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '10px' }}>Admin Dashboard</h1>
-      <p style={{ fontSize: '14px', color: '#666', marginBottom: '40px' }}>Welcome to the Passive Blessings admin panel</p>
-      
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '20px',
-        marginBottom: '40px'
-      }}>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '8px' }}>FAQ Management</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#111' }}>Manage FAQs</p>
-          <a href="/admin/faq" style={{ marginTop: '16px', display: 'inline-block', color: '#0066cc', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Go to FAQs →</a>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '8px' }}>Forms Management</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#111' }}>Manage Forms</p>
-          <a href="/admin/forms" style={{ marginTop: '16px', display: 'inline-block', color: '#0066cc', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Go to Forms →</a>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '8px' }}>Pages Management</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#111' }}>Manage Pages</p>
-          <a href="/admin/pages" style={{ marginTop: '16px', display: 'inline-block', color: '#0066cc', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Go to Pages →</a>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '8px' }}>Events Management</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#111' }}>Manage Events</p>
-          <a href="/admin/events" style={{ marginTop: '16px', display: 'inline-block', color: '#0066cc', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Go to Events →</a>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '8px' }}>Donations</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#111' }}>Manage Donations</p>
-          <a href="/admin/donations" style={{ marginTop: '16px', display: 'inline-block', color: '#0066cc', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Go to Donations →</a>
-        </div>
-        
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '500', color: '#666', marginBottom: '8px' }}>Settings</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#111' }}>Admin Settings</p>
-          <a href="/admin/settings" style={{ marginTop: '16px', display: 'inline-block', color: '#0066cc', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Go to Settings →</a>
-        </div>
+    <div className="w-full min-w-0">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-neutral-900">Admin Dashboard</h1>
+      <p className="text-sm text-neutral-600 mb-6 sm:mb-10">
+        Welcome to the Passive Blessings admin panel
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
+        {[
+          { title: 'FAQ Management', label: 'Manage FAQs', href: '/admin/faq' },
+          { title: 'Forms Management', label: 'Manage Forms', href: '/admin/forms' },
+          { title: 'Pages Management', label: 'Manage Pages', href: '/admin/pages' },
+          { title: 'Events Management', label: 'Manage Events', href: '/admin/events' },
+          { title: 'Donations', label: 'Manage Donations', href: '/admin/donations' },
+          { title: 'Settings', label: 'Admin Settings', href: '/admin/settings' },
+        ].map((card) => (
+          <div
+            key={card.href}
+            className="bg-white p-4 sm:p-6 rounded-lg border border-neutral-200 min-w-0"
+          >
+            <h3 className="text-sm font-medium text-neutral-600 mb-2">{card.title}</h3>
+            <p className="text-xl sm:text-2xl font-bold text-neutral-900 break-words">{card.label}</p>
+            <Link
+              href={card.href}
+              className="inline-flex items-center mt-4 min-h-[44px] text-sm font-medium text-blue-600 hover:underline"
+            >
+              Go to {card.title.replace(' Management', '').replace('Admin ', '')} →
+            </Link>
+          </div>
+        ))}
       </div>
     </div>
   )

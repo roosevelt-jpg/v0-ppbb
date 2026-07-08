@@ -165,7 +165,7 @@ export default function AdminCmsHomepagePage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="bg-black text-white hover:bg-gray-800"
+            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving…' : 'Save homepage'}
@@ -190,7 +190,7 @@ export default function AdminCmsHomepagePage() {
         )}
 
         {/* 2A Hero */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Hero (2A)</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -339,12 +339,12 @@ export default function AdminCmsHomepagePage() {
                         className="w-full"
                       />
                     </div>
-                    <div className="md:col-span-3 flex gap-1 justify-end">
+                    <div className="md:col-span-3 flex flex-wrap gap-2 justify-start md:justify-end">
                       <button
                         type="button"
                         onClick={() => moveHeroImage(i, 'up')}
                         disabled={i === 0}
-                        className="p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
+                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
                         aria-label="Move up"
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -353,7 +353,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'down')}
                         disabled={i === config.hero.images.length - 1}
-                        className="p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
+                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded hover:bg-neutral-50 disabled:opacity-40"
                         aria-label="Move down"
                       >
                         <ChevronDown className="w-4 h-4" />
@@ -361,7 +361,7 @@ export default function AdminCmsHomepagePage() {
                       <button
                         type="button"
                         onClick={() => removeHeroImage(img.id)}
-                        className="p-2 bg-red-600 text-white rounded"
+                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 bg-red-600 text-white rounded"
                         aria-label="Remove image"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -427,7 +427,7 @@ export default function AdminCmsHomepagePage() {
         </Card>
 
         {/* 2B Stats */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Stats bar (2B)</h2>
           <div>
             <label className="block text-sm font-medium mb-1">Display mode</label>
@@ -439,7 +439,7 @@ export default function AdminCmsHomepagePage() {
                   stats: { ...p.stats, displayMode: e.target.value as 'static' | 'live' },
                 }))
               }
-              className="w-full max-w-xs"
+              className="w-full sm:max-w-[20rem]"
             >
               <option value="static">Static (override numbers)</option>
               <option value="live">Live (Firestore counts)</option>
@@ -472,7 +472,7 @@ export default function AdminCmsHomepagePage() {
         </Card>
 
         {/* 2C Marquee settings */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Partners marquee (2C)</h2>
           <p className="text-sm text-neutral-600">
             Partner logos are managed at{' '}
@@ -524,7 +524,7 @@ export default function AdminCmsHomepagePage() {
         </Card>
 
         {/* 2D Mission */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Mission (2D)</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">

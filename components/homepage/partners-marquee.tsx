@@ -52,8 +52,8 @@ export function PartnersMarquee() {
 
   if (!ready) {
     return (
-      <section className="w-full py-10 bg-[#f7f6f2] overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 animate-pulse flex gap-12">
+      <section className="w-full py-10 bg-[#f7f6f2] overflow-x-hidden">
+        <div className="w-full px-4 animate-pulse flex gap-12 overflow-hidden">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-12 w-28 bg-neutral-200 rounded flex-shrink-0" />
           ))}
@@ -69,8 +69,8 @@ export function PartnersMarquee() {
   const loop = [...partners, ...partners]
 
   return (
-    <section className="w-full py-10 sm:py-12 bg-[#f7f6f2] overflow-hidden" aria-label="Partners">
-      <div className="overflow-hidden">
+    <section className="w-full py-10 sm:py-12 bg-[#f7f6f2] overflow-x-hidden" aria-label="Partners">
+      <div className="w-full overflow-hidden">
         <div
           className="partners-marquee-track flex items-center"
           style={

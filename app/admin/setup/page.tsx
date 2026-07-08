@@ -172,8 +172,9 @@ export default function AdminSetup() {
           backgroundColor: '#fff',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          padding: '40px',
-          border: '1px solid #e0e0e0'
+          padding: 'clamp(20px, 5vw, 40px)',
+          border: '1px solid #e0e0e0',
+          boxSizing: 'border-box',
         }}>
           {/* Step 1: Access Code */}
           {step === 1 && (
@@ -223,7 +224,8 @@ export default function AdminSetup() {
                   disabled={loading}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '14px 12px',
+                    minHeight: '44px',
                     fontSize: '16px',
                     fontWeight: '600',
                     backgroundColor: '#000',
@@ -373,7 +375,8 @@ export default function AdminSetup() {
                   disabled={loading}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '14px 12px',
+                    minHeight: '44px',
                     fontSize: '16px',
                     fontWeight: '600',
                     backgroundColor: '#000',

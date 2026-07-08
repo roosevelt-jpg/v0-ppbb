@@ -196,7 +196,7 @@ export default function AdminPartnersLogosPage() {
           </Button>
         </div>
 
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Add partner</h2>
           <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -270,14 +270,14 @@ export default function AdminPartnersLogosPage() {
           </form>
         </Card>
 
-        <Card className="p-6 overflow-x-auto">
+        <Card className="p-4 sm:p-6 overflow-x-auto">
           <h2 className="font-headline text-xl font-bold mb-4">All partners</h2>
           {loading ? (
             <p className="text-sm text-neutral-500">Loading…</p>
           ) : partners.length === 0 ? (
             <p className="text-sm text-neutral-500">No partners yet. Seed defaults or add one above.</p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b text-left text-neutral-500">
                   <th className="py-2 pr-4">Logo</th>
@@ -318,7 +318,7 @@ export default function AdminPartnersLogosPage() {
                           type="button"
                           onClick={() => movePartner(index, 'up')}
                           disabled={index === 0}
-                          className="p-1.5 border rounded bg-white shadow-none min-h-0"
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded bg-white shadow-none"
                         >
                           <ChevronUp className="w-4 h-4" />
                         </button>
@@ -326,14 +326,14 @@ export default function AdminPartnersLogosPage() {
                           type="button"
                           onClick={() => movePartner(index, 'down')}
                           disabled={index === partners.length - 1}
-                          className="p-1.5 border rounded bg-white shadow-none min-h-0"
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded bg-white shadow-none"
                         >
                           <ChevronDown className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(partner.id)}
-                          className="p-1.5 bg-red-600 text-white rounded shadow-none min-h-0"
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 bg-red-600 text-white rounded shadow-none"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

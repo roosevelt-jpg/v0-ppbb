@@ -116,41 +116,43 @@ export default function AdminLayout({
   // For other admin pages, render with sidebar
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
       <AdminSidebar />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 border-b flex items-center justify-between px-6" style={{ borderColor: '#e4e1da' }}>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col">
-              <h2 className="text-lg font-semibold text-foreground">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <header
+          className="min-h-16 border-b flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-0"
+          style={{ borderColor: '#e4e1da' }}
+        >
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+            <div className="flex flex-col min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-foreground truncate">
                 {displayName}
               </h2>
-              <p className="text-xs text-muted-foreground">{currentDateTime}</p>
+              <p className="text-xs text-muted-foreground hidden sm:block truncate">{currentDateTime}</p>
             </div>
-            <span className="px-3 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#f0ede8', color: '#666' }}>
+            <span
+              className="hidden md:inline-flex px-3 py-1 text-xs font-medium rounded-full flex-shrink-0"
+              style={{ backgroundColor: '#f0ede8', color: '#666' }}
+            >
               {user?.role === 'super_admin' ? 'Super Admin' : 'Admin'}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <LanguageSelector />
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-black text-white hover:bg-gray-800 transition"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 min-h-[44px] rounded-lg text-sm font-medium bg-black text-white hover:bg-gray-800 transition"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-background">
-          <div className="p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-[80rem] mx-auto w-full min-w-0">
             {children}
           </div>
         </main>
