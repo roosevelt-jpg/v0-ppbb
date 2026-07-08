@@ -1,0 +1,201 @@
+'use client'
+
+import { db } from '@/lib/firebase'
+import { doc, onSnapshot } from 'firebase/firestore'
+
+export interface PartnersTrack {
+  title: string
+  description: string
+}
+
+export interface PartnersPageConfig {
+  eyebrow: string
+  headline: string
+  body: string
+  sponsorshipDeckEyebrow: string
+  sponsorshipDeckHeadline: string
+  sponsorshipDeckBody: string
+  sponsorshipDeckCTA: string
+  sponsorshipDeckPDFUrl: string
+  tracksEyebrow: string
+  tracksHeadline: string
+  tracks: PartnersTrack[]
+  inquiryEyebrow: string
+  inquiryHeadline: string
+  inquiryBody: string
+  inquiryCTA: string
+  trustedByLabel: string
+  trustedBySubLabel: string
+  trustedByDescription: string
+}
+
+export interface PartnersPlatformConfig {
+  pageConfig: PartnersPageConfig
+}
+
+export const DEFAULT_PARTNERS_PAGE_CONFIG: PartnersPageConfig = {
+  eyebrow: 'PILLAR 05 — PARTNERSHIPS & COLLABORATIONS',
+  headline: 'Build alongside us.',
+  body: 'From governmental programmes to corporate sponsorships to grassroots collaborations — every partnership multiplies what we can do.',
+  sponsorshipDeckEyebrow: 'SPONSORSHIP DECK',
+  sponsorshipDeckHeadline: 'For brands ready to do more.',
+  sponsorshipDeckBody:
+    'Our sponsorship deck details every tier — from event sponsorships to year-long ecosystem partnerships. Download to share with your team.',
+  sponsorshipDeckCTA: 'Request the deck',
+  sponsorshipDeckPDFUrl: '',
+  tracksEyebrow: 'THREE TRACKS',
+  tracksHeadline: 'How we work together.',
+  tracks: [
+    {
+      title: 'Government',
+      description:
+        'Aligned programmes with public sector bodies, civic initiatives and humanitarian channels.',
+    },
+    {
+      title: 'Corporate',
+      description:
+        'CSR, employee volunteering, event sponsorship and brand-aligned partnerships.',
+    },
+    {
+      title: 'Grassroots',
+      description:
+        'Community-to-community collaborations with mosques, schools and local non-profits.',
+    },
+  ],
+  inquiryEyebrow: 'INQUIRY',
+  inquiryHeadline: 'Tell us what you have in mind.',
+  inquiryBody: 'Brief us on your vision and our partnerships team will respond within 48 hours.',
+  inquiryCTA: 'Start a conversation',
+  trustedByLabel: 'TRUSTED BY',
+  trustedBySubLabel: 'Previous sponsors & partners.',
+  trustedByDescription:
+    'A selection of organisations that have supported, sponsored or collaborated with Passive Blessings.',
+}
+
+export const DEFAULT_PARTNERS_CONFIG: PartnersPlatformConfig = {
+  pageConfig: DEFAULT_PARTNERS_PAGE_CONFIG,
+}
+
+function mergeTracks(data: unknown): PartnersTrack[] {
+  if (!Array.isArray(data)) return DEFAULT_PARTNERS_PAGE_CONFIG.tracks
+  const merged = data
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => {
+      const t = item as Partial<PartnersTrack>
+      return {
+        title: typeof t.title === 'string' ? t.title : '',
+        description: typeof t.description === 'string' ? t.description : '',
+      }
+    })
+    .filter((t) => t.title.trim().length > 0 || t.description.trim().length > 0)
+  return merged.length > 0 ? merged : DEFAULT_PARTNERS_PAGE_CONFIG.tracks
+}
+
+function mergePageConfig(data: unknown): PartnersPageConfig {
+  const d = (data || {}) as Partial<PartnersPageConfig>
+  const defaults = DEFAULT_PARTNERS_PAGE_CONFIG
+  return {
+    eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : defaults.eyebrow,
+    headline: typeof d.headline === 'string' ? d.headline : defaults.headline,
+    body: typeof d.body === 'string' ? d.body : defaults.body,
+    sponsorshipDeckEyebrow:
+      typeof d.sponsorshipDeckEyebrow === 'string'
+        ? d.sponsorshipDeckEyebrow
+        : defaults.sponsorshipDeckEyebrow,
+    sponsorshipDeckHeadline:
+      typeof d.sponsorshipDeckHeadline === 'string'
+        ? d.sponsorshipDeckHeadline
+        : defaults.sponsorshipDeckHeadline,
+    sponsorshipDeckBody:
+      typeof d.sponsorshipDeckBody === 'string'
+        ? d.sponsorshipDeckBody
+        : defaults.sponsorshipDeckBody,
+    sponsorshipDeckCTA:
+      typeof d.sponsorshipDeckCTA === 'string'
+        ? d.sponsorshipDeckCTA
+        : defaults.sponsorshipDeckCTA,
+    sponsorshipDeckPDFUrl:
+      typeof d.sponsorshipDeckPDFUrl === 'string'
+        ? d.sponsorshipDeckPDFUrl
+        : defaults.sponsorshipDeckPDFUrl,
+    tracksEyebrow:
+      typeof d.tracksEyebrow === 'string' ? d.tracksEyebrow : defaults.tracksEyebrow,
+    tracksHeadline:
+      typeof d.tracksHeadline === 'string' ? d.tracksHeadline : defaults.tracksHeadline,
+    tracks: mergeTracks(d.tracks),
+    inquiryEyebrow:
+      typeof d.inquiryEyebrow === 'string' ? d.inquiryEyebrow : defaults.inquiryEyebrow,
+    inquiryHeadline:
+      typeof d.inquiryHeadline === 'string' ? d.inquiryHeadline : defaults.inquiryHeadline,
+    inquiryBody: typeof d.inquiryBody === 'string' ? d.inquiryBody : defaults.inquiryBody,
+    inquiryCTA: typeof d.inquiryCTA === 'string' ? d.inquiryCTA : defaults.inquiryCTA,
+    trustedByLabel:
+      typeof d.trustedByLabel === 'string' ? d.trustedByLabel : defaults.trustedByLabel,
+    trustedBySubLabel:
+      typeof d.trustedBySubLabel === 'string'
+        ? d.trustedBySubLabel
+        : defaults.trustedBySubLabel,
+    trustedByDescription:
+      typeof d.trustedByDescription === 'string'
+        ? d.trustedByDescription
+        : defaults.trustedByDescription,
+  }
+}
+
+export function mergePartnersConfig(
+  data: Record<string, unknown> | undefined
+): PartnersPlatformConfig {
+  if (!data) return DEFAULT_PARTNERS_CONFIG
+  return {
+    pageConfig: mergePageConfig(data.pageConfig),
+  }
+}
+
+async function fetchPartnersConfigFromApi(): Promise<Record<string, unknown> | undefined> {
+  try {
+    const res = await fetch('/api/platform-config/partners', { cache: 'no-store' })
+    const json = await res.json()
+    if (json.success && json.data) return json.data as Record<string, unknown>
+  } catch (error) {
+    console.error('[partners-config] API config fetch failed:', error)
+  }
+  return undefined
+}
+
+export function subscribeToPartnersConfig(
+  callback: (config: PartnersPlatformConfig) => void
+): () => void {
+  let cancelled = false
+
+  const apply = (data: Record<string, unknown> | undefined) => {
+    if (!cancelled) callback(mergePartnersConfig(data))
+  }
+
+  const loadFallback = async () => {
+    const data = await fetchPartnersConfigFromApi()
+    if (data) apply(data)
+    else if (!cancelled) callback(DEFAULT_PARTNERS_CONFIG)
+  }
+
+  try {
+    const docRef = doc(db, 'platformConfig', 'partners')
+    const unsub = onSnapshot(
+      docRef,
+      (snapshot) => apply(snapshot.exists() ? snapshot.data() : undefined),
+      (error) => {
+        console.error('[partners-config] Firestore listener failed:', error)
+        void loadFallback()
+      }
+    )
+    return () => {
+      cancelled = true
+      unsub()
+    }
+  } catch (error) {
+    console.error('[partners-config] subscribe failed:', error)
+    void loadFallback()
+    return () => {
+      cancelled = true
+    }
+  }
+}
