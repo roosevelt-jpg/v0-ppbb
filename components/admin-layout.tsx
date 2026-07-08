@@ -55,7 +55,7 @@ import {
   MessageSquare,
   CalendarCog,
   Landmark,
-  Youtube,
+  Video,
   MapPin,
   PieChart,
 } from 'lucide-react'
@@ -137,7 +137,7 @@ const adminMenuItems = [
   { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield, group: 'Content' },
 
   // Assets & Media
-  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Youtube, group: 'Assets' },
+  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Video, group: 'Assets' },
 
   // Configuration
   { label: 'Location Config', href: '/admin/location-config', icon: MapPin, group: 'Configuration' },
