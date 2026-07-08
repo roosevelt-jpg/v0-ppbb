@@ -2,10 +2,37 @@ import type { BusinessProfile, User } from '@/lib/types'
 
 type ProfileUser = Pick<
   User | BusinessProfile,
-  'firstName' | 'lastName' | 'email' | 'phone' | 'profilePictureURL' | 'avatarUrl' | 'avatar'
+  'firstName' | 'lastName' | 'email' | 'phone' | 'whatsappNumber' | 'profilePictureURL' | 'avatarUrl' | 'avatar'
 > & {
   name?: string
   profilePicture?: string
+}
+
+/** Best available phone from user document (phone, then WhatsApp) */
+export function getUserPhone(user: ProfileUser | null | undefined): string | null {
+  if (!user) return null
+  const phone = typeof user.phone === 'string' ? user.phone.trim() : ''
+  if (phone) return phone
+  const whatsapp =
+    typeof user.whatsappNumber === 'string' ? user.whatsappNumber.trim() : ''
+  if (whatsapp) return whatsapp
+  return null
+}
+
+/** Admin table / profile placeholder when no phone on file */
+export function formatUserPhoneDisplay(
+  user: ProfileUser | null | undefined,
+  placeholder = 'Not provided'
+): string {
+  return getUserPhone(user) || placeholder
+}
+
+/** Phone from a business listing or generic record */
+export function formatRecordPhoneDisplay(
+  value: unknown,
+  placeholder = 'Not provided'
+): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : placeholder
 }
 
 /** Display name from Firestore user fields */

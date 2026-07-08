@@ -19,22 +19,29 @@ export async function GET(request: NextRequest) {
         snapshot.docs.map(async (docSnap) => {
           const data = docSnap.data()
           let profilePictureURL = ''
+          let phone = typeof data.phone === 'string' ? data.phone : ''
           if (typeof data.profilePictureURL === 'string') {
             profilePictureURL = data.profilePictureURL
-          } else {
-            const userSnap = await db.collection('users').doc(docSnap.id).get()
-            if (userSnap.exists) {
-              const u = userSnap.data() as Record<string, unknown>
-              profilePictureURL =
-                (typeof u.profilePictureURL === 'string' && u.profilePictureURL) ||
-                (typeof u.avatarUrl === 'string' && u.avatarUrl) ||
-                ''
-            }
+          }
+          const userSnap = await db.collection('users').doc(docSnap.id).get()
+          if (userSnap.exists) {
+            const u = userSnap.data() as Record<string, unknown>
+            profilePictureURL =
+              (typeof u.profilePictureURL === 'string' && u.profilePictureURL) ||
+              profilePictureURL ||
+              (typeof u.avatarUrl === 'string' && u.avatarUrl) ||
+              ''
+            phone =
+              (typeof u.phone === 'string' && u.phone) ||
+              phone ||
+              (typeof u.whatsappNumber === 'string' && u.whatsappNumber) ||
+              ''
           }
           return {
             id: docSnap.id,
             ...data,
             profilePictureURL,
+            phone,
             createdAt: data.createdAt?.toDate?.() || data.createdAt,
             lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
           }

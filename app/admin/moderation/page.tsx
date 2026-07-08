@@ -8,6 +8,7 @@ import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy,
 import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquare, TrendingUp, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 
 type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
@@ -472,6 +473,10 @@ export default function ModerationPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <AdminUserCell user={user} />
+                      <p className="text-sm text-neutral-600 mt-1 break-all">{user.email || 'Not provided'}</p>
+                      <p className="text-sm text-neutral-600">
+                        Phone: {formatUserPhoneDisplay(user)}
+                      </p>
                       <p className="text-xs text-neutral-500 mt-2">Flags: {user.flags || 0}</p>
                     </div>
                     <button

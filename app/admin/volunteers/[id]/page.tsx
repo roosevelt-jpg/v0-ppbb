@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'fireb
 import { db } from '@/lib/firebase'
 import { AlertCircle, CheckCircle, ArrowLeft, Clock, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
 
 export default function VolunteerDetailPage() {
   const params = useParams()
@@ -127,6 +128,11 @@ export default function VolunteerDetailPage() {
             {success}
           </div>
         )}
+
+        {/* Profile summary */}
+        <Card className="p-6 border border-neutral-200">
+          <AdminUserProfileSummary user={volunteer} />
+        </Card>
 
         {/* Main Info Card */}
         <Card className="p-6 border border-neutral-200">

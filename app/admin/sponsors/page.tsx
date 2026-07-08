@@ -18,6 +18,7 @@ import {
 } from 'firebase/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { formatRecordPhoneDisplay } from '@/lib/user-profile'
 import {
   Plus,
   Pencil,
@@ -54,6 +55,7 @@ type CrmRow = {
   status: string
   isRecurring: boolean
   email?: string
+  phone?: string
   websiteURL?: string
   eventId?: string
   raw: Record<string, unknown>
@@ -117,6 +119,7 @@ function normalizeSponsorDoc(id: string, data: Record<string, unknown>): CrmRow 
     status: String(data.status || 'active'),
     isRecurring: data.isRecurring === true,
     email: typeof data.email === 'string' ? data.email : undefined,
+    phone: typeof data.phone === 'string' ? data.phone : undefined,
     websiteURL: typeof data.websiteURL === 'string' ? data.websiteURL : undefined,
     eventId: typeof data.eventId === 'string' ? data.eventId : undefined,
     raw: data,
@@ -137,6 +140,7 @@ function normalizeBusinessSponsor(id: string, data: Record<string, unknown>): Cr
     status: data.isActive === false ? 'inactive' : 'active',
     isRecurring: data.isRecurringSponsor === true || data.isRecurring === true,
     email: typeof data.email === 'string' ? data.email : undefined,
+    phone: typeof data.phone === 'string' ? data.phone : undefined,
     websiteURL: typeof data.website === 'string' ? data.website : undefined,
     eventId: typeof data.sponsorEventId === 'string' ? data.sponsorEventId : undefined,
     raw: data,
@@ -585,6 +589,9 @@ export default function SponsorsCrmPage() {
                       <p className="text-xs text-neutral-500">
                         {row.contribution || '—'} · {row.campaign || 'No campaign'} · {row.status}
                       </p>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        {row.email || 'No email'} · Phone: {formatRecordPhoneDisplay(row.phone)}
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -615,6 +622,8 @@ export default function SponsorsCrmPage() {
                 <thead>
                   <tr className="border-b text-left text-neutral-500 text-xs uppercase tracking-wider">
                     <th className="py-3 px-3">Business/Sponsor Name</th>
+                    <th className="py-3 px-3">Email</th>
+                    <th className="py-3 px-3">Phone</th>
                     <th className="py-3 px-3">Type</th>
                     <th className="py-3 px-3">Logo</th>
                     <th className="py-3 px-3">Contribution</th>
@@ -632,6 +641,12 @@ export default function SponsorsCrmPage() {
                           {row.source === 'businesses' ? 'Platform business' : 'External'}
                           {row.isRecurring ? ' · Recurring' : ''}
                         </div>
+                      </td>
+                      <td className="py-3 px-3 text-neutral-600 break-all">
+                        {row.email || '—'}
+                      </td>
+                      <td className="py-3 px-3 text-neutral-600 whitespace-nowrap">
+                        {formatRecordPhoneDisplay(row.phone)}
                       </td>
                       <td className="py-3 px-3">{row.type}</td>
                       <td className="py-3 px-3">

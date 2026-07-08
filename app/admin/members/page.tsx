@@ -5,6 +5,7 @@ import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Search } from 'lucide-react'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 
 export default function AdminMembersPage() {
   const [members, setMembers] = React.useState<any[]>([])
@@ -124,12 +125,13 @@ export default function AdminMembersPage() {
             <p className="text-gray-500">No members found matching your filters.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+            <table className="w-full min-w-[880px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Volunteer Hours</th>
@@ -144,6 +146,9 @@ export default function AdminMembersPage() {
                         <AdminUserCell user={member} />
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600 hidden md:table-cell">{member.email}</td>
+                    <td className="px-6 py-3 text-sm text-gray-600 whitespace-nowrap">
+                      {formatUserPhoneDisplay(member)}
+                    </td>
                     <td className="px-6 py-3 text-sm">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
                         {member.role || member.userType || 'member'}

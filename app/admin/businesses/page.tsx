@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatRecordPhoneDisplay } from '@/lib/user-profile'
 
 type BusinessRow = {
   id: string
@@ -31,6 +32,7 @@ type BusinessRow = {
   referralCode?: string | null
   referralContributionPercent?: number | null
   ownerProfilePictureURL?: string | null
+  phone?: string
   createdAt: string | Date | null
 }
 
@@ -264,6 +266,9 @@ export default function BusinessesPage() {
                         ) : (
                           [biz.category, biz.ownerName, biz.email].filter(Boolean).join(' · ')
                         )}
+                      </p>
+                      <p className="font-body text-xs text-neutral-500">
+                        Phone: {formatRecordPhoneDisplay(biz.phone)}
                       </p>
                       <p className="font-body text-xs text-neutral-500">ID: {biz.id}</p>
                       {biz.isApproved && biz.referralCode ? (

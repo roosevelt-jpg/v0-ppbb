@@ -5,6 +5,7 @@ import React from 'react'
 import { AdminTable } from '@/components/admin-table'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
@@ -51,8 +52,18 @@ export default function VolunteersPage() {
     {
       key: 'email',
       label: 'Email',
-      width: '250px',
-      render: (value: any) => <span style={{ color: '#888888' }}>{value}</span>,
+      width: '220px',
+      render: (value: unknown) => (
+        <span style={{ color: '#888888' }}>{String(value || '—')}</span>
+      ),
+    },
+    {
+      key: 'phone',
+      label: 'Phone',
+      width: '150px',
+      render: (_: unknown, row: Record<string, unknown>) => (
+        <span style={{ color: '#888888' }}>{formatUserPhoneDisplay(row as Parameters<typeof formatUserPhoneDisplay>[0])}</span>
+      ),
     },
     {
       key: 'location',

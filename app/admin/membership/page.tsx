@@ -7,6 +7,7 @@ import { collection, getDocs, query, where, updateDoc, doc, writeBatch, onSnapsh
 import { Crown, Gift, Zap, TrendingUp, Users, AlertCircle, CheckCircle, Download, Filter } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 
 export default function MembershipPage() {
   const [members, setMembers] = React.useState<any[]>([])
@@ -326,6 +327,7 @@ export default function MembershipPage() {
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Member</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Email</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Tier</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Joined</th>
@@ -335,11 +337,11 @@ export default function MembershipPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-neutral-600">Loading members...</td>
+                    <td colSpan={8} className="px-6 py-8 text-center text-neutral-600">Loading members...</td>
                   </tr>
                 ) : filteredAndSearchedMembers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-neutral-600">No members found</td>
+                    <td colSpan={8} className="px-6 py-8 text-center text-neutral-600">No members found</td>
                   </tr>
                 ) : (
                   filteredAndSearchedMembers.map(member => (
@@ -356,6 +358,9 @@ export default function MembershipPage() {
                         <AdminUserCell user={member} />
                       </td>
                       <td className="px-6 py-4 text-sm text-neutral-600">{member.email}</td>
+                      <td className="px-6 py-4 text-sm text-neutral-600 whitespace-nowrap">
+                        {formatUserPhoneDisplay(member)}
+                      </td>
                       <td className="px-6 py-4">
                         <span className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${
                           member.membershipTier === 'gold' ? 'bg-yellow-100 text-yellow-700' :

@@ -6,6 +6,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Copy, Trash2, Plus, Eye, EyeOff } from 'lucide-react'
 import { format } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 
 export default function AdminManagementPage() {
   const [activeTab, setActiveTab] = React.useState<'access-codes' | 'admins'>('access-codes')
@@ -328,6 +329,7 @@ export default function AdminManagementPage() {
                     <tr>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Admin</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Email</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Phone</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Role</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Created</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Actions</th>
@@ -344,6 +346,9 @@ export default function AdminManagementPage() {
                           />
                         </td>
                         <td className="px-6 py-3 text-gray-600">{admin.email}</td>
+                        <td className="px-6 py-3 text-gray-600 whitespace-nowrap">
+                          {formatUserPhoneDisplay(admin)}
+                        </td>
                         <td className="px-6 py-3">
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
                             {admin.role}

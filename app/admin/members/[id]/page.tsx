@@ -6,6 +6,8 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
+import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 
 export default function AdminMemberDetailPage() {
   const params = useParams()
@@ -100,9 +102,13 @@ export default function AdminMemberDetailPage() {
         <ArrowLeft size={18} /> Back to Members
       </button>
 
-      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', color: '#111' }}>
-        {member.firstName} {member.lastName}
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem', color: '#111' }}>
+        Member profile
       </h1>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <AdminUserProfileSummary user={member} />
+      </div>
 
       {error && (
         <div style={{ padding: '1rem', marginBottom: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
@@ -170,8 +176,14 @@ export default function AdminMemberDetailPage() {
           <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#111', textTransform: 'uppercase' }}>Contact Information</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
+              <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Email</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500, wordBreak: 'break-all' }}>
+                {member.email || 'Not provided'}
+              </p>
+            </div>
+            <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Phone</p>
-              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{member.phone || 'Not provided'}</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{formatUserPhoneDisplay(member)}</p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>WhatsApp</p>
