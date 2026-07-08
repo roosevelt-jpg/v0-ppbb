@@ -1,61 +1,190 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-import React from 'react'
-import Link from 'next/link'
+import React, { useEffect, useState } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { format } from 'date-fns'
-import { Plus, Trash2, Edit2, Eye } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import {
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  AlertCircle,
+  CheckCircle2,
+  Upload,
+  Sparkles,
+} from 'lucide-react'
+import { db } from '@/lib/firebase'
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  updateDoc,
+  serverTimestamp,
+} from 'firebase/firestore'
+import {
+  DEFAULT_TEAM_MEMBERS,
+  getTeamInitials,
+  subscribeToAllTeamMembers,
+  TeamMember,
+} from '@/lib/team-members'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 export default function AdminTeamPage() {
-  const [members, setMembers] = React.useState<any[]>([])
-  const [loading, setLoading] = React.useState(true)
+  const [members, setMembers] = useState<TeamMember[]>([])
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [uploading, setUploading] = useState<string | null>(null)
+  const [seeding, setSeeding] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    name: '',
+    title: '',
+    photoURL: '',
+    bio: '',
+    isActive: true,
+  })
 
-  React.useEffect(() => {
-    loadMembers()
-  }, [])
+  useEffect(() => subscribeToAllTeamMembers(setMembers), [])
+  useEffect(() => {
+    setLoading(false)
+  }, [members])
 
-  const loadMembers = async () => {
+  const showMessage = (type: 'success' | 'error', text: string) => setMessage({ type, text })
+
+  const resetForm = () => {
+    setEditingId(null)
+    setForm({ name: '', title: '', photoURL: '', bio: '', isActive: true })
+  }
+
+  const handlePhotoUpload = async (file: File, target: 'form' | string) => {
+    setUploading(target === 'form' ? 'form' : target)
     try {
-      const res = await fetch('/api/team', { cache: 'no-store' })
-      const json = await res.json()
-      if (json.success) {
-        setMembers(json.data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0)))
+      const url = await uploadImageToFirebase(file, 'team/photos', { preset: 'content' })
+      if (target === 'form') {
+        setForm((prev) => ({ ...prev, photoURL: url }))
+      } else {
+        await updateDoc(doc(db, 'teamMembers', target), { photoURL: url })
+        showMessage('success', 'Photo updated.')
       }
-    } catch (error) {
-      console.error('[v0] Error fetching team members:', error)
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Upload failed')
     } finally {
-      setLoading(false)
+      setUploading(null)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure?')) return
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim() || !form.title.trim()) {
+      showMessage('error', 'Name and title are required.')
+      return
+    }
+
     try {
-      const res = await fetch(`/api/team?id=${id}`, { method: 'DELETE' })
-      const json = await res.json()
-      if (json.success) {
-        setMembers(members.filter(m => m.id !== id))
+      if (editingId) {
+        await updateDoc(doc(db, 'teamMembers', editingId), {
+          name: form.name.trim(),
+          title: form.title.trim(),
+          photoURL: form.photoURL || null,
+          bio: form.bio.trim() || null,
+          isActive: form.isActive,
+          updatedAt: serverTimestamp(),
+        })
+        showMessage('success', 'Team member updated.')
+      } else {
+        await addDoc(collection(db, 'teamMembers'), {
+          name: form.name.trim(),
+          title: form.title.trim(),
+          photoURL: form.photoURL || null,
+          bio: form.bio.trim() || null,
+          isActive: form.isActive,
+          order: members.length,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        })
+        showMessage('success', 'Team member added.')
       }
-    } catch (error) {
-      console.error('[v0] Error deleting member:', error)
+      resetForm()
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Failed to save')
     }
   }
 
-  const handlePublish = async (id: string, currentStatus: string) => {
+  const startEdit = (member: TeamMember) => {
+    setEditingId(member.id)
+    setForm({
+      name: member.name,
+      title: member.title,
+      photoURL: member.photoURL || '',
+      bio: member.bio || '',
+      isActive: member.isActive,
+    })
+  }
+
+  const handleSeedDefaults = async () => {
+    setSeeding(true)
+    setMessage(null)
     try {
-      const newStatus = currentStatus === 'published' ? 'draft' : 'published'
-      const res = await fetch('/api/team', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus }),
+      const existing = new Set(members.map((m) => m.name.toLowerCase()))
+      let order = members.length
+      let added = 0
+      for (const member of DEFAULT_TEAM_MEMBERS) {
+        if (existing.has(member.name.toLowerCase())) continue
+        await addDoc(collection(db, 'teamMembers'), {
+          ...member,
+          order: order++,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        })
+        added++
+      }
+      showMessage(
+        'success',
+        added > 0 ? `Seeded ${added} team members.` : 'All default team members already exist.'
+      )
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Seed failed')
+    } finally {
+      setSeeding(false)
+    }
+  }
+
+  const toggleActive = async (member: TeamMember) => {
+    try {
+      await updateDoc(doc(db, 'teamMembers', member.id), {
+        isActive: !member.isActive,
+        updatedAt: serverTimestamp(),
       })
-      const json = await res.json()
-      if (json.success) {
-        loadMembers()
-      }
-    } catch (error) {
-      console.error('[v0] Error updating member:', error)
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Update failed')
+    }
+  }
+
+  const removeMember = async (id: string) => {
+    if (!confirm('Delete this team member?')) return
+    try {
+      await deleteDoc(doc(db, 'teamMembers', id))
+      if (editingId === id) resetForm()
+      showMessage('success', 'Team member deleted.')
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Delete failed')
+    }
+  }
+
+  const moveMember = async (index: number, direction: 'up' | 'down') => {
+    const swap = direction === 'up' ? index - 1 : index + 1
+    if (swap < 0 || swap >= members.length) return
+    const a = members[index]
+    const b = members[swap]
+    try {
+      await Promise.all([
+        updateDoc(doc(db, 'teamMembers', a.id), { order: b.order }),
+        updateDoc(doc(db, 'teamMembers', b.id), { order: a.order }),
+      ])
+    } catch (error: unknown) {
+      showMessage('error', error instanceof Error ? error.message : 'Reorder failed')
     }
   }
 
@@ -63,7 +192,7 @@ export default function AdminTeamPage() {
     return (
       <AdminPageLayout title="Team Members">
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500">Loading team members...</p>
+          <p className="text-neutral-500">Loading team members…</p>
         </div>
       </AdminPageLayout>
     )
@@ -71,87 +200,242 @@ export default function AdminTeamPage() {
 
   return (
     <AdminPageLayout title="Team Members">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black">All Team Members</h2>
-          <Link
-            href="/admin/team/create"
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
+      <div className="space-y-6 w-full min-w-0">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="font-headline text-3xl font-bold text-neutral-900">Team (About)</h1>
+            <p className="text-sm text-neutral-600 mt-1">
+              Manage leadership profiles shown on the About page. Section labels are edited at{' '}
+              <a href="/admin/cms/about" className="underline font-medium">
+                /admin/cms/about
+              </a>
+              .
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => void handleSeedDefaults()}
+            disabled={seeding}
+            className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
           >
-            <Plus size={20} />
-            Add Team Member
-          </Link>
+            <Sparkles className="w-4 h-4 mr-2" />
+            {seeding ? 'Seeding…' : 'Seed 7 default members'}
+          </Button>
         </div>
 
-        {members.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">No team members found. Add your first team member!</p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {members.map((member: any) => (
-              <div key={member.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <div className="flex gap-6">
-                  {member.imageUrl && (
-                    <img
-                      src={member.imageUrl}
-                      alt={member.name}
-                      className="w-24 h-24 rounded-full object-cover"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-black">{member.name}</h3>
-                    <p className="text-sm text-gray-600 font-medium">{member.role}</p>
-                    <p className="text-sm text-gray-700 mt-2">{member.bio}</p>
-                    {member.socialLinks && (
-                      <div className="flex gap-3 mt-3 text-sm">
-                        {member.socialLinks.email && (
-                          <a href={`mailto:${member.socialLinks.email}`} className="text-blue-600 hover:underline">Email</a>
-                        )}
-                        {member.socialLinks.linkedin && (
-                          <a href={member.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">LinkedIn</a>
-                        )}
-                        {member.socialLinks.twitter && (
-                          <a href={member.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Twitter</a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2 flex-col">
-                    <span className={`px-2 py-1 rounded text-xs font-medium w-fit ${
-                      member.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {member.status === 'published' ? 'Published' : 'Draft'}
-                    </span>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/admin/team/${member.id}`}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                        title="Edit"
-                      >
-                        <Edit2 size={16} />
-                      </Link>
-                      <button
-                        onClick={() => handlePublish(member.id, member.status)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded"
-                        title="Toggle Publish"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(member.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {message && (
+          <div
+            className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4" />
+            ) : (
+              <AlertCircle className="w-4 h-4" />
+            )}
+            {message.text}
           </div>
         )}
+
+        <Card className="p-4 sm:p-6">
+          <h2 className="font-headline text-xl font-bold mb-4">
+            {editingId ? 'Edit team member' : 'Add team member'}
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Name</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  className="w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Title</label>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                  className="w-full"
+                  required
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Bio (optional)</label>
+                <textarea
+                  value={form.bio}
+                  onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))}
+                  className="w-full min-h-20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Photo</label>
+                <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px]">
+                  <Upload className="w-4 h-4" />
+                  {uploading === 'form' ? 'Uploading…' : 'Upload photo'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) =>
+                      e.target.files?.[0] && void handlePhotoUpload(e.target.files[0], 'form')
+                    }
+                  />
+                </label>
+                <div className="mt-2 flex items-center gap-3">
+                  {form.photoURL ? (
+                    <img
+                      src={form.photoURL}
+                      alt=""
+                      className="h-16 w-16 rounded-full object-cover border"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-neutral-200 flex items-center justify-center text-sm font-bold text-neutral-600">
+                      {getTeamInitials(form.name || 'NA')}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 text-sm cursor-pointer min-h-[44px]">
+                  <input
+                    type="checkbox"
+                    checked={form.isActive}
+                    onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
+                  />
+                  Active on About page
+                </label>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" className="bg-black text-white hover:bg-gray-800 min-h-[44px]">
+                <Plus className="w-4 h-4 mr-2" />
+                {editingId ? 'Save changes' : 'Add member'}
+              </Button>
+              {editingId && (
+                <Button
+                  type="button"
+                  onClick={resetForm}
+                  className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 min-h-[44px]"
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </form>
+        </Card>
+
+        <Card className="p-4 sm:p-6 overflow-x-auto">
+          <h2 className="font-headline text-xl font-bold mb-4">All team members</h2>
+          {members.length === 0 ? (
+            <p className="text-sm text-neutral-500">
+              No team members yet. Seed defaults or add one above.
+            </p>
+          ) : (
+            <table className="w-full min-w-[720px] text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="py-2 pr-3">Photo</th>
+                  <th className="py-2 pr-3">Name</th>
+                  <th className="py-2 pr-3">Title</th>
+                  <th className="py-2 pr-3">Active</th>
+                  <th className="py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((member, i) => (
+                  <tr key={member.id} className="border-b">
+                    <td className="py-3 pr-3">
+                      <div className="flex items-center gap-2">
+                        {member.photoURL ? (
+                          <img
+                            src={member.photoURL}
+                            alt=""
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-600">
+                            {getTeamInitials(member.name)}
+                          </div>
+                        )}
+                        <label className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded cursor-pointer hover:bg-neutral-50">
+                          <Upload className="w-4 h-4" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) =>
+                              e.target.files?.[0] &&
+                              void handlePhotoUpload(e.target.files[0], member.id)
+                            }
+                          />
+                        </label>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-3 font-medium">{member.name}</td>
+                    <td className="py-3 pr-3">{member.title}</td>
+                    <td className="py-3 pr-3">
+                      <button
+                        type="button"
+                        onClick={() => void toggleActive(member)}
+                        className={`px-3 py-2 rounded text-xs font-medium min-h-[44px] ${
+                          member.isActive
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-neutral-100 text-neutral-600'
+                        }`}
+                      >
+                        {member.isActive ? 'Active' : 'Hidden'}
+                      </button>
+                    </td>
+                    <td className="py-3">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void moveMember(i, 'up')}
+                          disabled={i === 0}
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                          aria-label="Move up"
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void moveMember(i, 'down')}
+                          disabled={i === members.length - 1}
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                          aria-label="Move down"
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                        <Button
+                          type="button"
+                          onClick={() => startEdit(member)}
+                          className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 min-h-[44px] text-xs"
+                        >
+                          Edit
+                        </Button>
+                        <button
+                          type="button"
+                          onClick={() => void removeMember(member.id)}
+                          className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 bg-red-600 text-white rounded"
+                          aria-label="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
       </div>
     </AdminPageLayout>
   )

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
-const ALLOWED_SECTIONS = new Set(['navigation', 'globalSettings', 'fonts', 'homepage'])
+const ALLOWED_SECTIONS = new Set(['navigation', 'globalSettings', 'fonts', 'homepage', 'about'])
 
 export async function GET(
   _request: NextRequest,

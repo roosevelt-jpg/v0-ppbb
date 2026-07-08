@@ -97,6 +97,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Team members (About page) - Public read, admin write
+    match /teamMembers/{memberId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // Donation causes - Public read, admin write
     match /causes/{causeId} {
       allow read: if true;
