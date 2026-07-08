@@ -11,29 +11,38 @@ import { Newsletter } from '@/lib/types'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 import { NEWSLETTER_TEMPLATE_OPTIONS } from '@/lib/newsletter-template-options'
 import {
+  BUTTON_BASE,
   BUTTON_PRIMARY,
   BUTTON_SECONDARY,
   BUTTON_DANGER,
   BUTTON_SMALL,
-  FILTER_PILL_ACTIVE,
-  FILTER_PILL_INACTIVE,
   INPUT_STYLE,
   TEXTAREA_STYLE,
   TEXT_HEADING,
   TEXT_LABEL,
   CARD_BASE,
 } from '@/lib/admin-design-system'
+import { AdminTableScroll } from '@/components/admin-table'
 import { format } from 'date-fns'
 
 type AiField = 'subject' | 'content' | 'subtitle' | 'seoTitle' | 'metaDescription' | 'ctaText'
+
+/** Template selector cards — allow wrapped text (FILTER_PILL_* uses whitespace-nowrap). */
+const TEMPLATE_CARD_BASE = `${BUTTON_BASE} flex flex-col items-stretch justify-start gap-1.5 p-4 min-h-[5.5rem] h-full w-full min-w-0 max-w-full text-left rounded-lg border whitespace-normal shadow-none overflow-hidden`
+
+function templateCardClass(selected: boolean): string {
+  return selected
+    ? `${TEMPLATE_CARD_BASE} bg-black text-white border-black hover:bg-neutral-800 active:bg-neutral-900`
+    : `${TEMPLATE_CARD_BASE} bg-white text-black border-black hover:bg-neutral-50 active:bg-neutral-100`
+}
 
 function NewslettersSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
       <div className="h-10 bg-neutral-200 rounded-lg w-48" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-20 bg-neutral-200 rounded-lg" />
+          <div key={i} className="h-[5.5rem] bg-neutral-200 rounded-lg" />
         ))}
       </div>
       <div className="h-64 bg-neutral-200 rounded-lg" />
@@ -348,12 +357,12 @@ export default function AdminNewslettersPage() {
 
   return (
     <AdminPageLayout>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 min-w-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
           <div>
             <h1 className={TEXT_HEADING}>Newsletters</h1>
-            <p className="text-neutral-600 mt-2 text-sm md:text-base">
+            <p className="text-neutral-600 mt-2 text-sm md:text-base break-words">
               Create and send email campaigns to registered members, volunteers, businesses, and sponsors
             </p>
           </div>
@@ -384,42 +393,43 @@ export default function AdminNewslettersPage() {
           <>
             {/* Create Form */}
             {showForm && (
-              <Card className={`${CARD_BASE} mb-8`}>
+              <Card className={`${CARD_BASE} mb-8 min-w-0 overflow-hidden`}>
                 <h2 className="font-headline text-xl md:text-2xl font-bold text-neutral-900 mb-6">
                   Create New Newsletter
                 </h2>
 
                 {/* Template Selection */}
-                <div className="mb-6">
+                <div className="mb-6 min-w-0">
                   <label className={`${TEXT_LABEL} block mb-3`}>
                     <span className="font-eyebrow text-xs uppercase tracking-wider text-neutral-500">
                       Template
                     </span>
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0 auto-rows-fr [&>*]:min-w-0">
                     {NEWSLETTER_TEMPLATE_OPTIONS.map((template) => (
                       <button
                         key={template.id}
                         type="button"
                         onClick={() => setSelectedTemplate(template.id)}
-                        className={
-                          selectedTemplate === template.id
-                            ? `${FILTER_PILL_ACTIVE} flex flex-col items-start p-4 min-h-[44px] text-left w-full`
-                            : `${FILTER_PILL_INACTIVE} flex flex-col items-start p-4 min-h-[44px] text-left w-full`
-                        }
+                        className={templateCardClass(selectedTemplate === template.id)}
+                        aria-pressed={selectedTemplate === template.id}
                       >
-                        <div className="font-medium text-sm">{template.title}</div>
-                        <div className="text-xs mt-1 opacity-80">{template.description}</div>
+                        <span className="block font-medium text-sm w-full min-w-0 break-words leading-snug">
+                          {template.title}
+                        </span>
+                        <span className="block text-xs w-full min-w-0 break-words leading-relaxed opacity-80">
+                          {template.description}
+                        </span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <form onSubmit={handleSendNewsletter} className="space-y-5">
+                <form onSubmit={handleSendNewsletter} className="space-y-5 min-w-0">
                   {/* Subject */}
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <label className={TEXT_LABEL}>Subject Line</label>
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                      <label className={`${TEXT_LABEL} min-w-0 shrink`}>Subject Line</label>
                       <AiAssistButton field="subject" label="subject" onGenerate={openAiModal} disabled={loading} />
                     </div>
                     <input
@@ -432,9 +442,9 @@ export default function AdminNewslettersPage() {
                   </div>
 
                   {/* Subtitle */}
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <label className={TEXT_LABEL}>Subtitle (optional)</label>
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                      <label className={`${TEXT_LABEL} min-w-0 shrink`}>Subtitle (optional)</label>
                       <AiAssistButton field="subtitle" label="subtitle" onGenerate={openAiModal} disabled={loading} />
                     </div>
                     <input
@@ -447,9 +457,9 @@ export default function AdminNewslettersPage() {
                   </div>
 
                   {/* Content */}
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <label className={TEXT_LABEL}>Content</label>
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                      <label className={`${TEXT_LABEL} min-w-0 shrink`}>Content</label>
                       <AiAssistButton field="content" label="content" onGenerate={openAiModal} disabled={loading} />
                     </div>
                     <textarea
@@ -462,10 +472,10 @@ export default function AdminNewslettersPage() {
                   </div>
 
                   {/* SEO fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <label className={TEXT_LABEL}>SEO Title (optional)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                    <div className="min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                        <label className={`${TEXT_LABEL} min-w-0 shrink`}>SEO Title (optional)</label>
                         <AiAssistButton field="seoTitle" label="SEO title" onGenerate={openAiModal} disabled={loading} />
                       </div>
                       <input
@@ -476,9 +486,9 @@ export default function AdminNewslettersPage() {
                         className={INPUT_STYLE}
                       />
                     </div>
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <label className={TEXT_LABEL}>Meta Description (optional)</label>
+                    <div className="min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                        <label className={`${TEXT_LABEL} min-w-0 shrink`}>Meta Description (optional)</label>
                         <AiAssistButton
                           field="metaDescription"
                           label="meta description"
@@ -497,10 +507,10 @@ export default function AdminNewslettersPage() {
                   </div>
 
                   {/* CTA */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <label className={TEXT_LABEL}>CTA Button Text (optional)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                    <div className="min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                        <label className={`${TEXT_LABEL} min-w-0 shrink`}>CTA Button Text (optional)</label>
                         <AiAssistButton field="ctaText" label="CTA text" onGenerate={openAiModal} disabled={loading} />
                       </div>
                       <input
@@ -511,7 +521,7 @@ export default function AdminNewslettersPage() {
                         className={INPUT_STYLE}
                       />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <label className={`${TEXT_LABEL} block mb-2`}>CTA Link URL (optional)</label>
                       <input
                         type="url"
@@ -566,7 +576,7 @@ export default function AdminNewslettersPage() {
                     {recipientLoading ? (
                       <div className="h-4 bg-neutral-200 rounded w-2/3 animate-pulse" />
                     ) : (
-                      <p className="text-sm text-neutral-800">
+                      <p className="text-sm text-neutral-800 break-words">
                         This newsletter will be sent to{' '}
                         <strong>{recipientCount.toLocaleString()}</strong> registered users (excluding
                         unsubscribed).
@@ -628,7 +638,7 @@ export default function AdminNewslettersPage() {
                   <p className="text-neutral-600 text-sm">No newsletters sent yet.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-neutral-200">
+                <AdminTableScroll className="rounded-lg border border-neutral-200">
                   <table className="w-full text-sm min-w-[600px]">
                     <thead className="bg-neutral-50 border-b border-neutral-200">
                       <tr>
@@ -642,7 +652,9 @@ export default function AdminNewslettersPage() {
                     <tbody>
                       {sentHistory.map((nl) => (
                         <tr key={nl.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                          <td className="px-4 py-3 font-medium text-neutral-900">{nl.subject || nl.title}</td>
+                          <td className="px-4 py-3 font-medium text-neutral-900 max-w-[200px] sm:max-w-none break-words">
+                            {nl.subject || nl.title}
+                          </td>
                           <td className="px-4 py-3 text-neutral-600 whitespace-nowrap">
                             {nl.sentAt ? format(nl.sentAt, 'MMM d, yyyy h:mm a') : '—'}
                           </td>
@@ -677,7 +689,7 @@ export default function AdminNewslettersPage() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </AdminTableScroll>
               )}
             </div>
 
@@ -728,7 +740,7 @@ export default function AdminNewslettersPage() {
       {/* Preview Modal */}
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl">
+          <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl min-w-0 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
               <h3 className="font-headline text-lg font-bold">Email Preview</h3>
               <button
@@ -764,7 +776,7 @@ export default function AdminNewslettersPage() {
       {/* AI Assist Modal */}
       {aiModalOpen && aiField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg w-full max-w-lg shadow-xl">
+          <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col shadow-xl min-w-0 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
               <h3 className="font-headline text-lg font-bold flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
@@ -778,7 +790,7 @@ export default function AdminNewslettersPage() {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
               <div>
                 <label className={`${TEXT_LABEL} block mb-2`}>What should this {aiField} be about?</label>
                 <textarea
@@ -790,9 +802,9 @@ export default function AdminNewslettersPage() {
                 />
               </div>
               {aiSuggestion && (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 min-w-0 overflow-hidden">
                   <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2 font-eyebrow">Suggestion</p>
-                  <p className="text-sm text-neutral-800 whitespace-pre-wrap">{aiSuggestion}</p>
+                  <p className="text-sm text-neutral-800 whitespace-pre-wrap break-words">{aiSuggestion}</p>
                 </div>
               )}
             </div>
