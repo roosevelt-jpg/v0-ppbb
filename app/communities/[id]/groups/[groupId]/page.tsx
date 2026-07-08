@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { useAuth } from '@/lib/auth-context'
-import { canApproveGroupMembers } from '@/lib/roles'
+import { canApproveGroupMembers, hasAdminAccess } from '@/lib/roles'
 import { ChevronLeft, Send, Upload, Download, FileText, Play, Smile, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
 import { db } from '@/lib/firebase'
@@ -77,10 +77,11 @@ export default function GroupChatPage() {
   const [showPending, setShowPending] = React.useState(true)
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
-  // Chat-page approval UI: group creator only when requiresApproval is on.
-  // Admins continue to use their separate all-groups admin approval UI.
+  // Pending approval UI: group creator OR platform admin (API already enforces the same).
   const isGroupCreator = Boolean(user?.id && group?.createdBy && user.id === group.createdBy)
-  const showPendingPanel = isGroupCreator && group?.requiresApproval === true
+  const showPendingPanel =
+    Boolean(group?.requiresApproval) &&
+    (isGroupCreator || hasAdminAccess(user))
 
   // Check membership and load group
   React.useEffect(() => {
@@ -146,7 +147,7 @@ export default function GroupChatPage() {
 
   const loadPendingMembers = React.useCallback(async () => {
     if (!user || !group?.requiresApproval) return
-    if (user.id !== group.createdBy) return
+    if (!canApproveGroupMembers(user, group.createdBy)) return
 
     setPendingLoading(true)
     try {
