@@ -74,3 +74,52 @@ export function canApproveGroupMembers(
   if (hasBusinessAccess(user) && groupCreatedBy && user.id === groupCreatedBy) return true
   return false
 }
+
+/**
+ * Part 10A — member dashboard paths a basic member may open.
+ * Everything else under /dashboard must redirect (not only hide in the sidebar).
+ */
+export const MEMBER_DASHBOARD_ALLOWED_PREFIXES = [
+  '/dashboard',
+  '/dashboard/events',
+  '/dashboard/donations',
+  '/dashboard/volunteering',
+  '/dashboard/charity',
+  '/dashboard/charity-requests',
+  '/dashboard/opportunities',
+  '/dashboard/marketplace',
+  '/dashboard/orders',
+  '/dashboard/messages',
+  '/dashboard/learning',
+  '/dashboard/certificates',
+  '/dashboard/membership',
+  '/dashboard/settings',
+  '/dashboard/profile',
+] as const
+
+/** Business-portal paths that require hasBusinessAccess (excluding signup). */
+export const BUSINESS_PORTAL_PREFIX = '/business'
+
+export function isMemberDashboardPathAllowed(pathname: string | null | undefined): boolean {
+  if (!pathname) return false
+  const path = pathname.split('?')[0]
+  if (path === '/dashboard') return true
+  return MEMBER_DASHBOARD_ALLOWED_PREFIXES.some(
+    (prefix) => prefix !== '/dashboard' && (path === prefix || path.startsWith(prefix + '/'))
+  )
+}
+
+/** True when the path is a business portal feature (not signup / join). */
+export function isBusinessPortalFeaturePath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false
+  const path = pathname.split('?')[0]
+  if (!path.startsWith('/business')) return false
+  if (path === '/business/signup') return false
+  return true
+}
+
+/** Paths that must never appear for basic members (admin-only surfaces). */
+export const ADMIN_ONLY_PATH_PREFIXES = [
+  '/admin',
+  '/dashboard/recordings',
+] as const

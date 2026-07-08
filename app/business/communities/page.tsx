@@ -16,6 +16,13 @@ export default function BusinessCommunitiesPage() {
   const router = useRouter()
   const [communities, setCommunities] = React.useState<Community[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [showApprovalsHint, setShowApprovalsHint] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShowApprovalsHint(window.location.search.includes('focus=approvals'))
+    }
+  }, [])
 
   React.useEffect(() => {
     if (!user || !hasBusinessAccess(user)) {
@@ -56,7 +63,26 @@ export default function BusinessCommunitiesPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
             <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Communities</h1>
-            <p style={{ color: '#888888', marginTop: '4px' }}>Manage your business communities and groups</p>
+            <p style={{ color: '#888888', marginTop: '4px' }}>
+              Manage your business communities and groups
+            </p>
+            {showApprovalsHint ? (
+              <p
+                style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fcd34d',
+                  borderRadius: '8px',
+                  color: '#92400e',
+                  fontSize: '14px',
+                  maxWidth: '560px',
+                }}
+              >
+                Open a community, then a group you created, to approve or reject pending members.
+                The Pending Members panel appears for group creators and platform admins.
+              </p>
+            ) : null}
           </div>
           <button
             onClick={() => router.push('/business/communities/create')}

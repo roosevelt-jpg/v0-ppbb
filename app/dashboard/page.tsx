@@ -157,9 +157,9 @@ export default function DashboardPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
             {[
               { label: 'Browse Events', href: '/dashboard/events' },
-              { label: 'Find Opportunities', href: '/dashboard/community' },
-              { label: 'Make Donation', href: '/dashboard/donations' },
-              { label: 'Edit Profile', href: '/dashboard/profile' },
+              { label: 'Find Opportunities', href: '/dashboard/opportunities' },
+              { label: 'Active Causes', href: '/dashboard/charity' },
+              { label: 'Apply for Support', href: '/dashboard/charity-requests?apply=1' },
             ].map(({ label, href }) => (
               <Link key={label} href={href}>
                 <button style={{

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { hasAdminAccess } from '@/lib/roles'
 import { AdminSidebar } from '@/components/admin-layout'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSelector } from '@/components/language-selector'
@@ -60,7 +61,7 @@ export default function AdminLayout({
         return
       }
 
-      if (user.role !== 'admin' && user.role !== 'super_admin') {
+      if (!hasAdminAccess(user)) {
         // User is authenticated but not an admin or super admin
         router.push('/dashboard')
         return
@@ -93,7 +94,7 @@ export default function AdminLayout({
   }
 
   // Show access denied if not admin or super admin (only after loading complete)
-  if (!loading && !isSetupPage && (!user || (user.role !== 'admin' && user.role !== 'super_admin'))) {
+  if (!loading && !isSetupPage && (!user || !hasAdminAccess(user))) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">

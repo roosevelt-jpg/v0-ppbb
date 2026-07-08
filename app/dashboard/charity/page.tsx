@@ -1,0 +1,153 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import {
+  CharityCase,
+  normalizeCharityCase,
+  progressPercent,
+  truncateAtWord,
+} from '@/lib/charity-cases'
+import { ArrowRight, Heart, HandHeart } from 'lucide-react'
+
+/**
+ * Part 10A — Active charity causes for members (charityCases status == active).
+ * Donate Now continues the Part 7A /donate flow.
+ */
+export default function MemberCharityCausesPage() {
+  const [causes, setCauses] = useState<CharityCase[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const q = query(collection(db, 'charityCases'), where('status', '==', 'active'))
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setCauses(
+          snap.docs.map((d) =>
+            normalizeCharityCase(d.id, d.data() as Record<string, unknown>)
+          )
+        )
+        setLoading(false)
+      },
+      () => setLoading(false)
+    )
+    return () => unsub()
+  }, [])
+
+  return (
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-6xl mx-auto w-full">
+      <div className="mb-8">
+        <p
+          className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-2"
+          style={{ fontFamily: 'Inter, sans-serif' }}
+        >
+          Charity
+        </p>
+        <h1
+          className="text-3xl sm:text-4xl text-neutral-900"
+          style={{ fontFamily: 'Cormorant Garamond, serif' }}
+        >
+          Active Causes
+        </h1>
+        <p className="text-sm text-neutral-600 mt-2 max-w-xl" style={{ fontFamily: 'Inter, sans-serif' }}>
+          Support verified causes. You will complete payment through our charitable partners.
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-72 bg-neutral-100 rounded-lg" />
+          ))}
+        </div>
+      ) : causes.length === 0 ? (
+        <div
+          className="text-center py-14 px-4 bg-white border border-neutral-200 rounded-lg"
+          style={{ fontFamily: 'Inter, sans-serif' }}
+        >
+          <HandHeart className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+          <p className="text-neutral-700 mb-1">No active causes right now</p>
+          <p className="text-sm text-neutral-500 mb-6">
+            Check back soon, or apply for support if you need help.
+          </p>
+          <Link
+            href="/dashboard/charity-requests?apply=1"
+            className="inline-flex min-h-[44px] items-center justify-center px-5 bg-black text-white text-sm font-semibold rounded"
+          >
+            Apply for Support
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {causes.map((cause) => {
+            const pct = progressPercent(cause.amountRaised, cause.targetAmount)
+            return (
+              <article
+                key={cause.id}
+                className="bg-white border border-neutral-100 rounded-lg overflow-hidden flex flex-col"
+              >
+                {cause.bannerImage ? (
+                  <img
+                    src={cause.bannerImage}
+                    alt={cause.title}
+                    className="w-full h-40 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-neutral-100 flex items-center justify-center">
+                    <Heart className="w-8 h-8 text-neutral-300" />
+                  </div>
+                )}
+                <div className="p-4 flex flex-col flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <span className="text-[10px] uppercase tracking-wider text-neutral-500 mb-1">
+                    {cause.category}
+                  </span>
+                  <h2
+                    className="text-lg text-neutral-900 mb-2"
+                    style={{ fontFamily: 'Cormorant Garamond, serif' }}
+                  >
+                    {cause.title}
+                  </h2>
+                  <p className="text-sm text-neutral-600 mb-4 flex-1">
+                    {truncateAtWord(cause.description)}
+                  </p>
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>AED {cause.amountRaised.toLocaleString()}</span>
+                      <span className="text-neutral-500">
+                        AED {cause.targetAmount.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="w-full bg-neutral-200 h-1.5 rounded-full">
+                      <div
+                        className="bg-neutral-900 h-1.5 rounded-full"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                  <Link
+                    href={`/donate?cause=${encodeURIComponent(cause.id)}`}
+                    className="w-full min-h-[44px] inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-900 text-white text-sm font-semibold rounded"
+                  >
+                    Donate Now <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="mt-10 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <Link
+          href="/dashboard/charity-requests?apply=1"
+          className="inline-flex min-h-[44px] items-center text-sm underline underline-offset-4 text-neutral-700"
+        >
+          Need support? Apply for Charity Support
+        </Link>
+      </div>
+    </div>
+  )
+}

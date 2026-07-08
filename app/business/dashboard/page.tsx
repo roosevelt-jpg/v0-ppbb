@@ -391,23 +391,43 @@ export default function BusinessDashboard() {
               </Button>
             </div>
             <p style={{ color: '#888888', fontSize: '14px', marginBottom: '16px' }}>
-              Build communities and groups for your business
+              Build communities and groups for your business. Approve pending joins for groups you
+              created from the group page.
             </p>
-            <button
-              onClick={() => router.push('/business/communities')}
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: '#111111',
-                color: '#ffffff',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: 600,
-              }}
-              className="hover:bg-black transition-colors"
-            >
-              View All Communities
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => router.push('/business/communities')}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  minHeight: '44px',
+                }}
+                className="hover:bg-black transition-colors"
+              >
+                View All Communities
+              </button>
+              <button
+                onClick={() => router.push('/business/communities?focus=approvals')}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  border: '1px solid #e4e1da',
+                  minHeight: '44px',
+                }}
+              >
+                Manage group member approvals
+              </button>
+            </div>
           </Card>
         </div>
 

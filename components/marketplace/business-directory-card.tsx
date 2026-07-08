@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Briefcase, Percent, ShoppingBag, Store } from 'lucide-react'
 import type { DirectoryBusinessCardData } from '@/lib/marketplace-directory'
+import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 interface BusinessDirectoryCardProps {
   business: DirectoryBusinessCardData
@@ -131,12 +132,13 @@ export function BusinessDirectoryEmptyState() {
         Approved community businesses will appear here. List your business to join the
         directory.
       </p>
-      <Link
+      <BusinessFeatureLink
+        featureLabel="List your business"
         href="/join?type=business"
         className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
       >
-        Become a member
-      </Link>
+        List your business
+      </BusinessFeatureLink>
     </div>
   )
 }

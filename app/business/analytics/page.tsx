@@ -48,7 +48,7 @@ export default function Analytics() {
             Business Analytics
           </h1>
           <p style={{ color: '#888888', marginTop: '8px' }}>
-            Track your performance and growth metrics
+            Your listings only — events, jobs, offers, and leads for this business account
           </p>
         </div>
       </div>

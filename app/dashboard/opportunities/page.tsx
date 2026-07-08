@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { getMemberApplications } from '@/lib/business-queries'
 import { JobApplication } from '@/lib/types'
 import { Building2, Clock, AlertCircle } from 'lucide-react'
+import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-secondary text-secondary-foreground',
@@ -43,11 +44,20 @@ export default function DashboardOpportunitiesPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Opportunities</h1>
-        <p className="text-muted-foreground">
-          Browse and apply to jobs, internships, and gigs from community businesses.
-        </p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Opportunities</h1>
+          <p className="text-muted-foreground">
+            Browse and apply to jobs, internships, and gigs from community businesses.
+          </p>
+        </div>
+        <BusinessFeatureLink
+          featureLabel="Post a Job"
+          href="/business/opportunities/new"
+          className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50"
+        >
+          Post a Job
+        </BusinessFeatureLink>
       </div>
 
       {/* Tabs */}

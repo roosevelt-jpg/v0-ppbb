@@ -7,13 +7,15 @@ import { LogOut, LayoutDashboard, Calendar, Heart, Users, Settings, Menu, X, Bri
 import { auth } from '@/lib/firebase'
 import { logoutUser } from '@/lib/auth'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Button } from '@/components/ui/button'
+import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
 
+/** Part 10A — ONLY these items for basic members. No admin/security/recordings. */
 const memberMenuItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Events', href: '/dashboard/events', icon: Calendar },
   { label: 'My Donations', href: '/dashboard/donations', icon: Heart },
   { label: 'Volunteering', href: '/dashboard/volunteering', icon: Briefcase },
+  { label: 'Active Causes', href: '/dashboard/charity', icon: Heart },
   { label: 'Charity Requests', href: '/dashboard/charity-requests', icon: HelpCircle },
   { label: 'Opportunities', href: '/dashboard/opportunities', icon: Users },
   { label: 'Marketplace', href: '/dashboard/marketplace', icon: ShoppingBag },
@@ -150,11 +152,12 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+        <BusinessPortalSwitcher />
         <ThemeToggle />
         <button
           onClick={handleLogout}
-          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2"
+          className="min-h-[44px] px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition flex items-center gap-2"
         >
           <LogOut className="h-4 w-4" />
           Sign out

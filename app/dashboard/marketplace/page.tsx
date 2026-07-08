@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BusinessOffersSection } from '@/components/business-offers-section'
 import { ShoppingCart, Star } from 'lucide-react'
+import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 export default function MarketplacePage() {
   const [products, setProducts] = useState<any[]>([])
@@ -75,7 +76,16 @@ export default function MarketplacePage() {
         </div>
 
         {/* Products Grid */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-3 space-y-4">
+          <div className="flex justify-end">
+            <BusinessFeatureLink
+              featureLabel="List Your Business"
+              href="/join?type=business"
+              className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50"
+            >
+              List Your Business
+            </BusinessFeatureLink>
+          </div>
           <div className="grid grid-cols-1 gap-4">
             {loading ? (
               <p className="text-muted-foreground">Loading products...</p>

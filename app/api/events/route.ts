@@ -87,14 +87,34 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const db = getAdminDb()
+    const { verifyIdToken } = await import('@/lib/admin-access-server')
+    const { hasBusinessAccessServer, hasAdminAccessServer } = await import('@/lib/roles-server')
 
-    const createdByRole = body.createdByRole || 'admin'
-    if (createdByRole === 'member') {
+    const authHeader = request.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authorization required to create events' },
+        { status: 401 }
+      )
+    }
+
+    const uid = await verifyIdToken(token)
+    if (!uid) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userSnap = await db.collection('users').doc(uid).get()
+    const userRoleData = (userSnap.data() as { role?: string; roles?: string[] }) || null
+
+    if (!hasAdminAccessServer(userRoleData) && !hasBusinessAccessServer(userRoleData)) {
       return NextResponse.json(
         { success: false, error: 'Members cannot create events' },
         { status: 403 }
       )
     }
+
+    const createdByRole = hasAdminAccessServer(userRoleData) ? 'admin' : 'business'
 
     const locationName = body.locationName || body.location
     const startDate = body.startDate || body.date
@@ -166,10 +186,10 @@ export async function POST(request: NextRequest) {
       cancelledAt: null,
       cancelReason: null,
 
-      createdBy: body.createdBy || 'admin',
+      createdBy: uid,
       createdByRole,
       submittedAt: isPending ? Timestamp.now() : null,
-      approvedBy: isPublished && !isBusiness ? body.createdBy || 'admin' : null,
+      approvedBy: isPublished && !isBusiness ? uid : null,
       approvedAt: isPublished && !isBusiness ? Timestamp.now() : null,
       approvalNotes: null,
       lastEditedBy: null,

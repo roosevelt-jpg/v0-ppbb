@@ -243,9 +243,15 @@ function CreateEventForm() {
         createdByRole: 'admin',
       })
 
+      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken()
+      const authHeaders: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      }
+
       const res = await fetch('/api/events', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(payload),
       })
 

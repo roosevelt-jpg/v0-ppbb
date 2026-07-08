@@ -4,6 +4,7 @@ import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
+import { BusinessPortalAccessDenied } from '@/components/business-feature-gate'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -163,11 +164,10 @@ export default function BusinessLayout({
     if (loading || isSignupRoute) return
     if (!user) {
       router.push('/login')
-    } else if (!canAccess) {
-      // Logged in but no business account yet — business signup / upgrade
-      router.push('/join?type=business')
     }
-  }, [user, loading, canAccess, router, isSignupRoute])
+    // Basic members stay on this layout briefly so BusinessPortalAccessDenied can show the upgrade modal.
+    // Do NOT auto-redirect to /join — Part 10C requires the modal first.
+  }, [user, loading, router, isSignupRoute])
 
   if (isSignupRoute) {
     return <>{children}</>
@@ -181,12 +181,16 @@ export default function BusinessLayout({
     )
   }
 
-  if (!user || !canAccess) {
+  if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
-        <p className="text-neutral-500">Redirecting...</p>
+        <p className="text-neutral-500">Redirecting to login…</p>
       </div>
     )
+  }
+
+  if (!canAccess) {
+    return <BusinessPortalAccessDenied />
   }
 
   return (

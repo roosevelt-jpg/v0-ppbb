@@ -42,6 +42,15 @@ export default function DonationPage() {
     useState<DonationsPlatformConfig>(DEFAULT_DONATIONS_CONFIG)
   const [selectedCause, setSelectedCause] = useState<CharityCase | null>(null)
   const [loading, setLoading] = useState(true)
+  const [causeFromQuery, setCauseFromQuery] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      setCauseFromQuery(new URLSearchParams(window.location.search).get('cause'))
+    } catch {
+      setCauseFromQuery(null)
+    }
+  }, [])
 
   useEffect(() => {
     let causesLoaded = false
@@ -133,6 +142,12 @@ export default function DonationPage() {
       clearTimeout(timeout)
     }
   }, [])
+
+  useEffect(() => {
+    if (!causeFromQuery || causes.length === 0 || selectedCause) return
+    const match = causes.find((c) => c.id === causeFromQuery)
+    if (match) setSelectedCause(match)
+  }, [causeFromQuery, causes, selectedCause])
 
   const resolvePaymentLink = (cause: CharityCase, partner?: CharityPartner | null) => {
     if (partner?.paymentLink) return partner.paymentLink

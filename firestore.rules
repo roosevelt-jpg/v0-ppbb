@@ -28,7 +28,9 @@ service cloud.firestore {
     }
     
     function isBusiness(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'business';
+      let u = get(/databases/$(database)/documents/users/$(userId)).data;
+      return u.role == 'business'
+        || u.get('roles', []).hasAny(['business']);
     }
     
     function isOwnBusiness(businessId) {
