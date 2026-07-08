@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Instagram, Youtube } from 'lucide-react'
+import { Camera, Play } from 'lucide-react'
 import {
   subscribeToHomepage,
   DEFAULT_HOMEPAGE,
@@ -93,12 +93,12 @@ export function HomeSocialFeeds() {
       <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 bg-[#f7f6f2] overflow-x-hidden">
         <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PlaceholderBlock
-            icon={Youtube}
+            icon={Play}
             heading={socialFeeds.youtube.heading}
             message="Coming soon — social feeds will appear here."
           />
           <PlaceholderBlock
-            icon={Instagram}
+            icon={Camera}
             heading={socialFeeds.instagram.heading}
             message="Coming soon — social feeds will appear here."
           />
@@ -121,7 +121,7 @@ export function HomeSocialFeeds() {
               <YouTubeWidget videos={youtubeVideos} isLoading={youtubeLoading} />
             ) : (
               <PlaceholderBlock
-                icon={Youtube}
+                icon={Play}
                 heading={socialFeeds.youtube.heading}
                 message={
                   youtubeLoading
@@ -135,7 +135,7 @@ export function HomeSocialFeeds() {
 
         {showInstagram && (
           <PlaceholderBlock
-            icon={Instagram}
+            icon={Camera}
             heading={socialFeeds.instagram.heading}
             message="Coming soon — Instagram feed will appear here once credentials are configured."
           />
