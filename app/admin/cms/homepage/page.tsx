@@ -220,7 +220,7 @@ export default function AdminCmsHomepagePage() {
 
   return (
     <AdminPageLayout title="Homepage CMS">
-      <div className="space-y-6">
+      <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="font-headline text-3xl font-bold text-neutral-900">Homepage</h1>

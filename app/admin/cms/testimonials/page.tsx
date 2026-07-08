@@ -156,7 +156,7 @@ export default function AdminCmsTestimonialsPage() {
 
   return (
     <AdminPageLayout title="Testimonials CMS">
-      <div className="space-y-6">
+      <div className="space-y-6 w-full min-w-0">
         <div>
           <h1 className="font-headline text-3xl font-bold text-neutral-900">Testimonials</h1>
           <p className="text-sm text-neutral-600 mt-1">
@@ -314,7 +314,7 @@ export default function AdminCmsTestimonialsPage() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(item)}
-                        className={`px-2 py-1 rounded text-xs font-medium min-h-[32px] ${
+                        className={`px-3 py-2 rounded text-xs font-medium min-h-[44px] min-w-[44px] ${
                           item.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'
                         }`}
                       >

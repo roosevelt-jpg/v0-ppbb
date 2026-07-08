@@ -100,16 +100,39 @@ export function HomeTestimonials() {
           {config.testimonials.heading}
         </h2>
 
-        <div className="relative">
-          <TestimonialSlide item={current} />
+        <div className="relative min-w-0">
+          <div className="sm:px-12 md:px-14">
+            <TestimonialSlide item={current} />
+          </div>
 
           {testimonials.length > 1 && (
             <>
+              <div className="flex sm:hidden justify-center gap-4 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIndex((i) => Math.max(0, i - 1))}
+                  disabled={!canPrev}
+                  className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
+                  aria-label="Previous testimonial"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIndex((i) => Math.min(testimonials.length - 1, i + 1))}
+                  disabled={!canNext}
+                  className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
+                  aria-label="Next testimonial"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => setIndex((i) => Math.max(0, i - 1))}
                 disabled={!canPrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
+                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -118,7 +141,7 @@ export function HomeTestimonials() {
                 type="button"
                 onClick={() => setIndex((i) => Math.min(testimonials.length - 1, i + 1))}
                 disabled={!canNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
+                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
                 aria-label="Next testimonial"
               >
                 <ChevronRight className="h-5 w-5" />
