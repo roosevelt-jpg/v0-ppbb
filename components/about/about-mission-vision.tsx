@@ -3,6 +3,10 @@
 import React, { useEffect, useState } from 'react'
 import { subscribeToAbout, DEFAULT_ABOUT, AboutConfig } from '@/lib/about-config'
 
+/** Mobile: landscape frame when stacked; desktop: stretches to match text column height */
+const MISSION_VISION_IMAGE_FRAME =
+  'relative w-full h-full min-h-0 overflow-hidden rounded-2xl aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto'
+
 function MissionVisionSkeleton() {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-pulse overflow-x-hidden">
@@ -13,7 +17,7 @@ function MissionVisionSkeleton() {
           <div className="h-6 w-40 bg-neutral-200 rounded" />
           <div className="h-20 w-full bg-neutral-200 rounded" />
         </div>
-        <div className="aspect-[4/3] bg-neutral-200 rounded-2xl" />
+        <div className="aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-full bg-neutral-200 rounded-2xl min-h-0" />
       </div>
     </section>
   )
@@ -59,7 +63,7 @@ export function AboutMissionVision() {
         </div>
 
         <div className="min-w-0 w-full flex flex-col lg:h-full lg:min-h-0 order-1 lg:order-2">
-          <div className="relative w-full h-full min-h-0 overflow-hidden rounded-2xl aspect-[4/3] lg:aspect-auto bg-neutral-100">
+          <div className={MISSION_VISION_IMAGE_FRAME + ' bg-neutral-100'}>
             {missionVision.imageURL ? (
               <img
                 src={missionVision.imageURL}

@@ -22,6 +22,17 @@ export default function AdminCmsAboutPage() {
 
   useEffect(() => subscribeToAbout(setConfig), [])
 
+  const persistConfig = async (nextConfig: AboutConfig) => {
+    const res = await fetch('/api/platform-config/about', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nextConfig),
+    })
+    const json = await res.json()
+    if (!json.success) throw new Error(json.error || 'Save failed')
+    return nextConfig
+  }
+
   const handleSave = async () => {
     setSaving(true)
     setMessage(null)
@@ -46,34 +57,81 @@ export default function AdminCmsAboutPage() {
 
   const handleFounderImageUpload = async (file: File) => {
     setUploading('founder')
+    setMessage(null)
     try {
-      const url = await uploadImageToFirebase(file, 'about/founder', { preset: 'content' })
-      setConfig((p) => ({ ...p, story: { ...p.story, founderImageURL: url } }))
+      const url = await uploadImageToFirebase(file, 'about/founder', { preset: 'founder' })
+      const nextConfig: AboutConfig = {
+        ...config,
+        story: { ...config.story, founderImageURL: url },
+      }
+      setConfig(nextConfig)
+      await persistConfig(nextConfig)
+      setMessage({ type: 'success', text: 'Founder image uploaded and saved.' })
     } catch (error: unknown) {
       setMessage({
         type: 'error',
-        text: error instanceof Error ? error.message : 'Image upload failed',
+        text: error instanceof Error ? error.message : 'Founder image upload failed',
       })
     } finally {
       setUploading(null)
     }
   }
 
-  const handleMissionVisionImageUpload = async (file: File) => {
-    setUploading('missionVision')
+  const handleRemoveFounderImage = async () => {
+    setMessage(null)
     try {
-      const url = await uploadImageToFirebase(file, 'about/mission-vision', { preset: 'content' })
-      setConfig((p) => ({
-        ...p,
-        missionVision: { ...p.missionVision, imageURL: url },
-      }))
+      const nextConfig: AboutConfig = {
+        ...config,
+        story: { ...config.story, founderImageURL: null },
+      }
+      setConfig(nextConfig)
+      await persistConfig(nextConfig)
+      setMessage({ type: 'success', text: 'Founder image removed.' })
     } catch (error: unknown) {
       setMessage({
         type: 'error',
-        text: error instanceof Error ? error.message : 'Image upload failed',
+        text: error instanceof Error ? error.message : 'Failed to remove founder image',
+      })
+    }
+  }
+
+  const handleMissionVisionImageUpload = async (file: File) => {
+    setUploading('missionVision')
+    setMessage(null)
+    try {
+      const url = await uploadImageToFirebase(file, 'about/mission-vision', { preset: 'hero' })
+      const nextConfig: AboutConfig = {
+        ...config,
+        missionVision: { ...config.missionVision, imageURL: url },
+      }
+      setConfig(nextConfig)
+      await persistConfig(nextConfig)
+      setMessage({ type: 'success', text: 'Mission / Vision image uploaded and saved.' })
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Mission / Vision image upload failed',
       })
     } finally {
       setUploading(null)
+    }
+  }
+
+  const handleRemoveMissionVisionImage = async () => {
+    setMessage(null)
+    try {
+      const nextConfig: AboutConfig = {
+        ...config,
+        missionVision: { ...config.missionVision, imageURL: null },
+      }
+      setConfig(nextConfig)
+      await persistConfig(nextConfig)
+      setMessage({ type: 'success', text: 'Mission / Vision image removed.' })
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Failed to remove Mission / Vision image',
+      })
     }
   }
 
@@ -261,26 +319,52 @@ export default function AdminCmsAboutPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Founder image</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px]">
-                <Upload className="w-4 h-4" />
-                {uploading === 'founder' ? 'Uploading…' : 'Upload image'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploading !== null}
-                  onChange={(e) =>
-                    e.target.files?.[0] && void handleFounderImageUpload(e.target.files[0])
-                  }
-                />
-              </label>
-              {config.story.founderImageURL && (
-                <img
-                  src={config.story.founderImageURL}
-                  alt=""
-                  className="mt-2 h-28 rounded object-cover"
-                />
-              )}
+              <p className="text-xs text-neutral-500 mb-3">
+                Portrait orientation (3:4). Shown in the Story section on the public About page.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                <div className="w-full max-w-[12rem] shrink-0">
+                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 aspect-[3/4] bg-neutral-50">
+                    {config.story.founderImageURL ? (
+                      <img
+                        src={config.story.founderImageURL}
+                        alt={config.story.founderImageAlt || 'Founder preview'}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500">
+                        No image yet
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit">
+                    <Upload className="w-4 h-4" />
+                    {uploading === 'founder' ? 'Uploading…' : 'Upload founder image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      disabled={uploading !== null}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        e.target.value = ''
+                        if (file) void handleFounderImageUpload(file)
+                      }}
+                    />
+                  </label>
+                  {config.story.founderImageURL && (
+                    <button
+                      type="button"
+                      onClick={() => void handleRemoveFounderImage()}
+                      className="text-xs text-red-600 underline text-left min-h-[44px]"
+                    >
+                      Remove image
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="md:col-span-2 space-y-3">
               <div className="flex items-center justify-between">
@@ -387,41 +471,52 @@ export default function AdminCmsAboutPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Section image</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px]">
-                <Upload className="w-4 h-4" />
-                {uploading === 'missionVision' ? 'Uploading…' : 'Upload image'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploading !== null}
-                  onChange={(e) =>
-                    e.target.files?.[0] &&
-                    void handleMissionVisionImageUpload(e.target.files[0])
-                  }
-                />
-              </label>
-              {config.missionVision.imageURL && (
-                <img
-                  src={config.missionVision.imageURL}
-                  alt=""
-                  className="mt-2 h-28 rounded object-cover"
-                />
-              )}
-              {config.missionVision.imageURL && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setConfig((p) => ({
-                      ...p,
-                      missionVision: { ...p.missionVision, imageURL: null },
-                    }))
-                  }
-                  className="mt-2 block text-xs text-red-600 underline"
-                >
-                  Remove image
-                </button>
-              )}
+              <p className="text-xs text-neutral-500 mb-3">
+                Landscape orientation (4:3). Shown beside Mission &amp; Vision copy on the public About page.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                <div className="w-full max-w-[24rem] shrink-0">
+                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 aspect-[4/3] bg-neutral-50">
+                    {config.missionVision.imageURL ? (
+                      <img
+                        src={config.missionVision.imageURL}
+                        alt="Mission / Vision preview"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500">
+                        No image yet
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit">
+                    <Upload className="w-4 h-4" />
+                    {uploading === 'missionVision' ? 'Uploading…' : 'Upload section image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      disabled={uploading !== null}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        e.target.value = ''
+                        if (file) void handleMissionVisionImageUpload(file)
+                      }}
+                    />
+                  </label>
+                  {config.missionVision.imageURL && (
+                    <button
+                      type="button"
+                      onClick={() => void handleRemoveMissionVisionImage()}
+                      className="text-xs text-red-600 underline text-left min-h-[44px]"
+                    >
+                      Remove image
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </Card>
