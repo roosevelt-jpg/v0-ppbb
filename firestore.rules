@@ -324,6 +324,19 @@ service cloud.firestore {
       allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
     }
 
+    // Canonical job applications (member applies → business reviews; admin monitors monthly count)
+    match /jobApplications/{applicationId} {
+      allow read: if isAuth() && (
+        isAdmin()
+        || resource.data.applicantId == request.auth.uid
+        || resource.data.businessId == request.auth.uid
+      );
+      allow create: if isAuth() && request.resource.data.applicantId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
     // Legacy business portal offers — public read for marketplace directory
     match /businessOffers/{offerId} {
       allow read: if true;

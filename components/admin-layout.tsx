@@ -26,6 +26,7 @@ import {
   Lock,
   HelpCircle,
   Menu,
+  Briefcase,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -55,6 +56,7 @@ const adminMenuItems = [
   // Community & Events
   { label: 'Community', href: '/admin/communities', icon: Users, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
+  { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
   { label: 'Workshops', href: '/admin/workshops', icon: Calendar, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
 
