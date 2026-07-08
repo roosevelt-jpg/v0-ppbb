@@ -33,6 +33,7 @@ export const DEFAULT_NAVIGATION: NavigationConfig = {
     { label: 'Marketplace', href: '/marketplace', order: 3, isVisible: true },
     { label: 'Opportunities', href: '/opportunities', order: 4, isVisible: true },
     { label: 'Partners', href: '/partners', order: 5, isVisible: true },
+    { label: 'Contact', href: '/contact', order: 6, isVisible: true },
   ],
   ctaButton: { label: 'Join now', href: '/join' },
   signInLabel: 'Sign in',
@@ -47,32 +48,21 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   phone: '+971 50 000 0000',
 }
 
-function normalizeNavLink(link: NavLink, index: number): NavLink {
-  let href = link.href
-  let label = link.label
-  // Part 6A: Contact → Partners (legacy Firestore nav entries)
-  if (href === '/contact' || label.trim().toLowerCase() === 'contact') {
-    href = '/partners'
-    label = 'Partners'
-  }
-  return {
-    label,
-    href,
-    order: typeof link.order === 'number' ? link.order : index,
-    isVisible: link.isVisible !== false,
-  }
-}
-
 function mergeNavigation(data: Record<string, unknown> | undefined): NavigationConfig {
   if (!data) return DEFAULT_NAVIGATION
   const rawLinks = Array.isArray(data.links)
     ? (data.links as NavLink[])
         .filter((l) => l && typeof l.label === 'string' && typeof l.href === 'string')
-        .map((l, i) => normalizeNavLink(l, i))
+        .map((l, i) => ({
+          label: l.label,
+          href: l.href,
+          order: typeof l.order === 'number' ? l.order : i,
+          isVisible: l.isVisible !== false,
+        }))
         .sort((a, b) => a.order - b.order)
     : DEFAULT_NAVIGATION.links
 
-  // Dedupe Partners if both Contact+Partners existed in legacy config
+  // Dedupe by href so CMS cannot accidentally list the same page twice
   const seen = new Set<string>()
   const links = rawLinks.filter((l) => {
     const key = l.href.toLowerCase()

@@ -5,6 +5,7 @@
     "events": "Events",
     "marketplace": "Marketplace",
     "partners": "Partners",
+    "contact": "Contact",
     "signIn": "Sign in"
   },
   "navigation": {
@@ -15,6 +16,7 @@
     "events": "Events",
     "marketplace": "Marketplace",
     "partners": "Partners",
+    "contact": "Contact",
     "dashboard": "Dashboard",
     "admin": "Admin"
   },
@@ -65,8 +67,8 @@
     "subtitle": "Build alongside Passive Blessings through government, corporate, and grassroots collaborations"
   },
   "contact": {
-    "title": "Partners",
-    "subtitle": "Build alongside Passive Blessings through government, corporate, and grassroots collaborations",
+    "title": "Contact",
+    "subtitle": "Get in touch with the Passive Blessings team",
     "email": "Email",
     "phone": "Phone",
     "address": "Address",

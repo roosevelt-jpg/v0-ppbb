@@ -113,7 +113,7 @@ export function PartnersPageCopy() {
           {pc.inquiryBody}
         </p>
         <Link
-          href="#inquiry"
+          href="/contact"
           className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
         >
           {pc.inquiryCTA}

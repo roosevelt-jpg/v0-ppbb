@@ -183,7 +183,7 @@ export default function UAEDataProtectionPage() {
             Have questions about how we handle your data?
           </p>
           <Link
-            href="/partners"
+            href="/contact"
             style={{
               display: 'inline-block',
               backgroundColor: '#111111',

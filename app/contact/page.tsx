@@ -1,6 +1,12 @@
-import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
+import { ContactPageClient } from './contact-page-client'
 
-/** Legacy /contact bookmarks → Partners page (Part 6A). */
-export default function ContactRedirectPage() {
-  redirect('/partners')
+export const metadata: Metadata = {
+  title: 'Contact',
+  description:
+    'Get in touch with Passive Blessings — questions, support, volunteer and partnership inquiries.',
+}
+
+export default function ContactPage() {
+  return <ContactPageClient />
 }
