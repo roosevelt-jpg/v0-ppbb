@@ -197,6 +197,76 @@ service cloud.firestore {
         allow update: if isAdmin() || (isBusiness(get(/databases/$(database)/documents/opportunities/$(opportunityId)).data.businessId) && request.auth.uid == get(/databases/$(database)/documents/opportunities/$(opportunityId)).data.businessId);
       }
     }
+
+    // Business directory profiles — public read for approved+active; owner/admin write
+    match /businesses/{businessId} {
+      allow read: if resource.data.isApproved == true && resource.data.isActive == true
+        || isAdmin()
+        || (isAuth() && (
+          resource.data.userId == request.auth.uid
+          || resource.data.ownerId == request.auth.uid
+          || businessId == request.auth.uid
+        ));
+      allow create: if isAuth() && (
+        isAdmin()
+        || request.resource.data.userId == request.auth.uid
+        || request.resource.data.ownerId == request.auth.uid
+        || businessId == request.auth.uid
+      );
+      allow update, delete: if isAdmin() || (isAuth() && (
+        resource.data.userId == request.auth.uid
+        || resource.data.ownerId == request.auth.uid
+        || businessId == request.auth.uid
+      ));
+    }
+
+    // Marketplace offers (directory sales / discounts) — public read; owner/admin write
+    match /offers/{offerId} {
+      allow read: if true;
+      allow create: if isAuth() && (
+        isAdmin()
+        || request.resource.data.businessId == request.auth.uid
+        || isBusiness(request.auth.uid)
+      );
+      allow update, delete: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+    }
+
+    // Jobs listings — public read for directory counts/profile; owner/admin write
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if isAuth() && (
+        isAdmin()
+        || request.resource.data.businessId == request.auth.uid
+        || isBusiness(request.auth.uid)
+      );
+      allow update, delete: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+    }
+
+    // Legacy business portal offers — public read for marketplace directory
+    match /businessOffers/{offerId} {
+      allow read: if true;
+      allow create: if isAuth() && (
+        isAdmin()
+        || request.resource.data.businessId == request.auth.uid
+        || isBusiness(request.auth.uid)
+      );
+      allow update, delete: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+    }
+
+    // Legacy business portal opportunities/jobs — public read for directory
+    match /businessOpportunities/{opportunityId} {
+      allow read: if true;
+      allow create: if isAuth() && (
+        isAdmin()
+        || request.resource.data.businessId == request.auth.uid
+        || isBusiness(request.auth.uid)
+      );
+      allow update, delete: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+    }
     
     // Donations - Authenticated read, own write
     match /donations/{donationId} {
