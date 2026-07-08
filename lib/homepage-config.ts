@@ -266,23 +266,42 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
 }
 
 function mergeHeroImages(data: Partial<HomepageHero>): HeroImage[] {
+  const resolveUrl = (img: Record<string, unknown>): string => {
+    if (typeof img.imageURL === 'string' && img.imageURL.length > 0) return img.imageURL
+    if (typeof img.url === 'string' && img.url.length > 0) return img.url
+    if (typeof img.imageUrl === 'string' && img.imageUrl.length > 0) return img.imageUrl
+    return ''
+  }
+
   const fromArray = Array.isArray(data.images)
     ? data.images
-        .filter((img) => img && typeof img.imageURL === 'string' && img.imageURL.length > 0)
-        .map((img, i) => ({
-          id: typeof img.id === 'string' && img.id ? img.id : `hero-img-${i}`,
-          imageURL: img.imageURL,
-          caption: typeof img.caption === 'string' ? img.caption : '',
-        }))
+        .map((img, i) => {
+          const raw = (img || {}) as Record<string, unknown>
+          const imageURL = resolveUrl(raw)
+          if (!imageURL) return null
+          return {
+            id: typeof raw.id === 'string' && raw.id ? raw.id : `hero-img-${i}`,
+            imageURL,
+            caption: typeof raw.caption === 'string' ? raw.caption : '',
+          }
+        })
+        .filter((img): img is HeroImage => img !== null)
     : []
 
   if (fromArray.length > 0) return fromArray
 
-  if (typeof data.imageURL === 'string' && data.imageURL) {
+  const legacyUrl =
+    typeof data.imageURL === 'string' && data.imageURL
+      ? data.imageURL
+      : typeof (data as Record<string, unknown>).imageUrl === 'string'
+        ? ((data as Record<string, unknown>).imageUrl as string)
+        : ''
+
+  if (legacyUrl) {
     return [
       {
         id: 'legacy-hero-0',
-        imageURL: data.imageURL,
+        imageURL: legacyUrl,
         caption: typeof data.imageCaption === 'string' ? data.imageCaption : '',
       },
     ]
@@ -352,7 +371,16 @@ function mergeMarquee(data: unknown): HomepageMarquee {
 }
 
 function mergeMission(data: unknown): HomepageMission {
-  const d = (data || {}) as Partial<HomepageMission>
+  const d = (data || {}) as Partial<HomepageMission> & { imageUrl?: string }
+  const imageURL =
+    typeof d.imageURL === 'string'
+      ? d.imageURL
+      : typeof d.imageUrl === 'string'
+        ? d.imageUrl
+        : d.imageURL === null
+          ? null
+          : DEFAULT_HOMEPAGE.mission.imageURL
+
   return {
     eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : DEFAULT_HOMEPAGE.mission.eyebrow,
     headline: typeof d.headline === 'string' ? d.headline : DEFAULT_HOMEPAGE.mission.headline,
@@ -361,7 +389,7 @@ function mergeMission(data: unknown): HomepageMission {
         ? d.headlineItalicWord
         : DEFAULT_HOMEPAGE.mission.headlineItalicWord,
     body: typeof d.body === 'string' ? d.body : DEFAULT_HOMEPAGE.mission.body,
-    imageURL: typeof d.imageURL === 'string' ? d.imageURL : d.imageURL === null ? null : DEFAULT_HOMEPAGE.mission.imageURL,
+    imageURL,
   }
 }
 
@@ -492,19 +520,54 @@ function mergeHomepage(data: Record<string, unknown> | undefined): HomepageConfi
   }
 }
 
+async function fetchHomepageFromApi(): Promise<Record<string, unknown> | undefined> {
+  try {
+    const res = await fetch('/api/platform-config/homepage', { cache: 'no-store' })
+    const json = await res.json()
+    if (json.success && json.data) {
+      return json.data as Record<string, unknown>
+    }
+  } catch (error) {
+    console.error('[homepage] API config fetch failed:', error)
+  }
+  return undefined
+}
+
 export function subscribeToHomepage(callback: (config: HomepageConfig) => void): () => void {
+  let cancelled = false
+
+  const apply = (data: Record<string, unknown> | undefined) => {
+    if (!cancelled) callback(mergeHomepage(data))
+  }
+
+  const loadFallback = async () => {
+    const data = await fetchHomepageFromApi()
+    if (data) apply(data)
+    else if (!cancelled) callback(DEFAULT_HOMEPAGE)
+  }
+
   try {
     const docRef = doc(db, 'platformConfig', 'homepage')
-    return onSnapshot(
+    const unsub = onSnapshot(
       docRef,
       (snapshot) => {
-        callback(mergeHomepage(snapshot.exists() ? snapshot.data() : undefined))
+        apply(snapshot.exists() ? snapshot.data() : undefined)
       },
-      () => callback(DEFAULT_HOMEPAGE)
+      (error) => {
+        console.error('[homepage] Firestore listener denied or failed:', error)
+        void loadFallback()
+      }
     )
-  } catch {
-    callback(DEFAULT_HOMEPAGE)
-    return () => {}
+    return () => {
+      cancelled = true
+      unsub()
+    }
+  } catch (error) {
+    console.error('[homepage] Firestore subscribe failed:', error)
+    void loadFallback()
+    return () => {
+      cancelled = true
+    }
   }
 }
 
