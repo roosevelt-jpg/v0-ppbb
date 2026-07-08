@@ -69,6 +69,9 @@ export default function Analytics() {
                     <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
                       {stats?.opportunitiesPosted || 0}
                     </p>
+                    <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>
+                      {stats?.pendingOpportunities || 0} pending approval
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -80,6 +83,9 @@ export default function Analytics() {
                     <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
                       {stats?.offersPosted || 0}
                     </p>
+                    <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>
+                      {stats?.pendingOffers || 0} pending approval
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -87,9 +93,12 @@ export default function Analytics() {
                 <div className="flex items-center gap-4">
                   <Users style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
                   <div>
-                    <p style={{ color: '#888888', fontSize: '14px' }}>Leads Generated</p>
+                    <p style={{ color: '#888888', fontSize: '14px' }}>Your Events</p>
                     <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                      {stats?.leadsGenerated || 0}
+                      {stats?.ownEvents || 0}
+                    </p>
+                    <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>
+                      {stats?.ownPublishedEvents || 0} published
                     </p>
                   </div>
                 </div>
@@ -98,9 +107,12 @@ export default function Analytics() {
                 <div className="flex items-center gap-4">
                   <TrendingUp style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
                   <div>
-                    <p style={{ color: '#888888', fontSize: '14px' }}>Conversion Rate</p>
+                    <p style={{ color: '#888888', fontSize: '14px' }}>Leads (yours)</p>
                     <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                      {Math.round(stats?.conversionRate || 0)}%
+                      {stats?.leadsGenerated || 0}
+                    </p>
+                    <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>
+                      {Math.round(stats?.conversionRate || 0)}% conversion
                     </p>
                   </div>
                 </div>

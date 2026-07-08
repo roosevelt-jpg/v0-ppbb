@@ -8,6 +8,7 @@ import { getPagesByMenuLocation } from '@/lib/admin'
 import { Mail, Heart, Users, Share2, MessageSquare, Briefcase } from 'lucide-react'
 import { Page } from '@/lib/types'
 import { SocialMediaLinks } from '@/components/social-media-links'
+import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 interface Stats {
   members: number
@@ -22,6 +23,8 @@ interface SocialLinks {
   instagram?: string
   linkedin?: string
 }
+
+const BUSINESS_GATE_LABELS = new Set(['Start Business', 'Host Event', 'List Your Business', 'Post a Job'])
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -89,8 +92,8 @@ export function Footer() {
     { label: 'Workshops', href: '/workshops' },
     { label: 'Recordings', href: '/recordings' },
     { label: 'Donate', href: '/donate' },
-    { label: 'Start Business', href: '/signup' },
-    { label: 'Host Event', href: '/signup' },
+    { label: 'Start Business', href: '/join?type=business' },
+    { label: 'Host Event', href: '/business/events/new' },
   ]
 
   const defaultLegal = [
@@ -178,13 +181,34 @@ export function Footer() {
               Get Involved
             </h3>
             <ul className="space-y-2">
-              {getInvolvedToDisplay.map((link, idx) => (
-                <li key={`${link.href}-${idx}`}>
-                  <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              {getInvolvedToDisplay.map((link, idx) => {
+                const gate =
+                  BUSINESS_GATE_LABELS.has(link.label) ||
+                  link.href.includes('/join?type=business') ||
+                  link.href.startsWith('/business/')
+                return (
+                  <li key={`${link.href}-${idx}`}>
+                    {gate ? (
+                      <BusinessFeatureLink
+                        featureLabel={link.label}
+                        href={link.href}
+                        className="text-sm hover:text-white transition-colors text-left"
+                        style={{ color: '#888888' }}
+                      >
+                        {link.label}
+                      </BusinessFeatureLink>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm hover:text-white transition-colors"
+                        style={{ color: '#888888' }}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           </div>
 

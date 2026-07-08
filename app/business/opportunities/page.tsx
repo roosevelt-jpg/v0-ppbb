@@ -53,8 +53,13 @@ export default function BusinessOpportunities() {
   }
 
   const handleStatusChange = async (id: string, newStatus: string) => {
+    // Business cannot self-publish; only admin may set open/published
+    if (newStatus === 'open' || newStatus === 'published' || newStatus === 'active') {
+      alert('Jobs go live only after admin approval.')
+      return
+    }
     try {
-      await updateOpportunity(id, { status: newStatus as any })
+      await updateOpportunity(id, { status: newStatus as BusinessOpportunity['status'] })
     } catch (error) {
       console.error('[v0] Error updating status:', error)
       alert('Error updating status')
@@ -142,7 +147,20 @@ export default function BusinessOpportunities() {
                       </div>
                       <div>
                         <p style={{ color: '#888888', fontSize: '12px' }}>Status</p>
-                        <p style={{ color: '#111111', fontWeight: 600 }}>{opp.status}</p>
+                        <p
+                          style={{
+                            color:
+                              opp.status === 'pending_approval'
+                                ? '#b45309'
+                                : opp.status === 'open'
+                                  ? '#15803d'
+                                  : '#111111',
+                            fontWeight: 600,
+                            textTransform: 'capitalize',
+                          }}
+                        >
+                          {String(opp.status || '').replace(/_/g, ' ')}
+                        </p>
                       </div>
                     </div>
                   </div>

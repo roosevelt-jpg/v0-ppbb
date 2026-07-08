@@ -7,7 +7,7 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { createOffer } from '@/lib/business-queries'
+import { auth } from '@/lib/firebase'
 
 export default function NewOffer() {
   const { user } = useAuth()
@@ -25,8 +25,6 @@ export default function NewOffer() {
     validUntil: '',
     targetAudience: 'members',
     memberBenefit: 0,
-    // 'published' shows on /shop when category is Merchandise; 'active' for marketplace
-    status: 'active' as 'active' | 'published' | 'archived',
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -43,14 +41,29 @@ export default function NewOffer() {
 
     try {
       setIsSaving(true)
-      const validUntil = formData.validUntil ? new Date(formData.validUntil) : undefined
-      await createOffer(user.id, user.businessProfile?.businessName || 'Unknown', {
-        ...formData,
-        validUntil,
-        views: 0,
-        conversions: 0,
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) {
+        alert('Please sign in again to post an offer.')
+        return
+      }
+      const res = await fetch('/api/business/offers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          businessName: user.businessProfile?.businessName || 'Unknown',
+          validUntil: formData.validUntil || undefined,
+        }),
       })
-      alert('Offer posted successfully!')
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        alert(json.error || 'Error posting offer. Please try again.')
+        return
+      }
+      alert('Offer submitted for admin approval. It will appear publicly once approved.')
       router.push('/business/offers')
     } catch (error) {
       console.error('[v0] Error posting offer:', error)
@@ -69,11 +82,18 @@ export default function NewOffer() {
       {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
         <div className="max-w-2xl mx-auto">
-          <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
+          <h1
+            style={{
+              color: '#111111',
+              fontSize: '32px',
+              fontWeight: 700,
+              fontFamily: 'Cormorant Garamond, serif',
+            }}
+          >
             Post New Offer
           </h1>
-          <p style={{ color: '#888888', marginTop: '8px' }}>
-            Share a product, service, or discount
+          <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
+            Share a product, service, or discount — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
@@ -314,33 +334,20 @@ export default function NewOffer() {
               />
             </div>
 
-            {/* Status — Published + Merchandise appears on /shop */}
-            <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Status *
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  color: '#111111',
-                  minHeight: '44px',
-                }}
+            <div
+              className="rounded-lg border border-amber-200 bg-amber-50 p-4"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              <p
+                className="text-xs uppercase tracking-[0.15em] text-amber-800 mb-1"
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                <option value="active">Active (marketplace)</option>
-                <option value="published">Published (required for /shop merch)</option>
-                <option value="archived">Archived</option>
-              </select>
-              {formData.category === 'merchandise' && formData.status !== 'published' ? (
-                <p style={{ color: '#b45309', fontSize: '12px', marginTop: '6px' }}>
-                  Tip: set status to Published so this merch appears on the public Shop page.
-                </p>
-              ) : null}
+                Approval
+              </p>
+              <p style={{ color: '#111111', fontSize: '14px' }}>
+                Offers are submitted as <strong>pending approval</strong>. They appear on the
+                marketplace or shop only after an admin publishes them.
+              </p>
             </div>
 
             {/* Buttons */}

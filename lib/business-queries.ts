@@ -32,6 +32,10 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 // BUSINESS OPPORTUNITIES QUERIES
 
+/**
+ * Business posts always start as pending_approval (admin must publish).
+ * Prefer POST /api/business/opportunities (Admin SDK + role check) from UI.
+ */
 export async function createOpportunity(
   businessId: string,
   businessName: string,
@@ -39,15 +43,21 @@ export async function createOpportunity(
 ): Promise<BusinessOpportunity> {
   const id = doc(collection(db, 'businessOpportunities')).id
   const now = Timestamp.now()
+  // Enforce approval gate — ignore client-supplied live statuses
+  const status: BusinessOpportunity['status'] =
+    data.status === 'closed' || data.status === 'filled' || data.status === 'archived'
+      ? data.status
+      : 'pending_approval'
   const opportunity: BusinessOpportunity = {
     id,
     businessId,
     businessName,
     ...data,
+    status,
     createdAt: now.toDate(),
     updatedAt: now.toDate(),
   }
-  await setDoc(doc(db, 'businessOpportunities', id), opportunity)
+  await setDoc(doc(db, 'businessOpportunities', id), sanitizeForFirestore(opportunity as unknown as Record<string, unknown>))
 
   // Dual-write CMS canonical jobs collection (directory counts / profile)
   await setDoc(
@@ -60,7 +70,7 @@ export async function createOpportunity(
       description: data.description || '',
       category: data.category || data.type || '',
       jobType: data.type || '',
-      status: data.status || 'open',
+      status,
       createdAt: now.toDate(),
       updatedAt: now.toDate(),
     })
@@ -98,18 +108,45 @@ export async function updateOpportunity(
   opportunityId: string,
   data: Partial<BusinessOpportunity>
 ) {
-  await updateDoc(doc(db, 'businessOpportunities', opportunityId), {
+  const now = Timestamp.now()
+  const payload = sanitizeForFirestore({
     ...data,
-    updatedAt: Timestamp.now(),
-  })
+    updatedAt: now,
+  } as Record<string, unknown>)
+  await updateDoc(doc(db, 'businessOpportunities', opportunityId), payload)
+  // Keep canonical jobs in sync when status/title change
+  if (data.status !== undefined || data.title !== undefined || data.description !== undefined) {
+    try {
+      await updateDoc(
+        doc(db, 'jobs', opportunityId),
+        sanitizeForFirestore({
+          ...(data.status !== undefined ? { status: data.status } : {}),
+          ...(data.title !== undefined ? { title: data.title } : {}),
+          ...(data.description !== undefined ? { description: data.description } : {}),
+          updatedAt: now,
+        })
+      )
+    } catch {
+      // jobs dual-write may not exist for older records
+    }
+  }
 }
 
 export async function deleteOpportunity(opportunityId: string) {
   await deleteDoc(doc(db, 'businessOpportunities', opportunityId))
+  try {
+    await deleteDoc(doc(db, 'jobs', opportunityId))
+  } catch {
+    /* ignore */
+  }
 }
 
 // BUSINESS OFFERS QUERIES
 
+/**
+ * Business offers always start as pending_approval (admin must publish).
+ * Prefer POST /api/business/offers (Admin SDK + role check) from UI.
+ */
 export async function createOffer(
   businessId: string,
   businessName: string,
@@ -117,15 +154,19 @@ export async function createOffer(
 ): Promise<BusinessOffer> {
   const id = doc(collection(db, 'businessOffers')).id
   const now = Timestamp.now()
+  // Enforce approval gate — ignore client-supplied live statuses
+  const offerStatus: BusinessOffer['status'] =
+    data.status === 'archived' ? 'archived' : 'pending_approval'
   const offer: BusinessOffer = {
     id,
     businessId,
     businessName,
     ...data,
+    status: offerStatus,
     createdAt: now.toDate(),
     updatedAt: now.toDate(),
   }
-  await setDoc(doc(db, 'businessOffers', id), offer)
+  await setDoc(doc(db, 'businessOffers', id), sanitizeForFirestore(offer as unknown as Record<string, unknown>))
 
   // Dual-write CMS canonical offers collection (directory counts / profile)
   const imageURL =
@@ -143,13 +184,6 @@ export async function createOffer(
     categoryRaw.toLowerCase() === 'merchandise' || categoryRaw.toLowerCase() === 'merch'
       ? 'merchandise'
       : categoryRaw
-
-  // Canonical shop published status; keep legacy "active" for marketplace directory
-  const statusRaw = String((data as { status?: string }).status || 'active')
-  const offerStatus =
-    statusRaw === 'published' || statusRaw === 'active' || statusRaw === 'archived'
-      ? statusRaw
-      : 'active'
 
   const variant =
     typeof (data as { variant?: string }).variant === 'string'
@@ -226,14 +260,36 @@ export function subscribeToBusinessOffers(
 }
 
 export async function updateOffer(offerId: string, data: Partial<BusinessOffer>) {
-  await updateDoc(doc(db, 'businessOffers', offerId), {
+  const now = Timestamp.now()
+  const payload = sanitizeForFirestore({
     ...data,
-    updatedAt: Timestamp.now(),
-  })
+    updatedAt: now,
+  } as Record<string, unknown>)
+  await updateDoc(doc(db, 'businessOffers', offerId), payload)
+  if (data.status !== undefined || data.title !== undefined || data.description !== undefined) {
+    try {
+      await updateDoc(
+        doc(db, 'offers', offerId),
+        sanitizeForFirestore({
+          ...(data.status !== undefined ? { status: data.status } : {}),
+          ...(data.title !== undefined ? { title: data.title } : {}),
+          ...(data.description !== undefined ? { description: data.description } : {}),
+          updatedAt: now,
+        })
+      )
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export async function deleteOffer(offerId: string) {
   await deleteDoc(doc(db, 'businessOffers', offerId))
+  try {
+    await deleteDoc(doc(db, 'offers', offerId))
+  } catch {
+    /* ignore */
+  }
 }
 
 // BUSINESS LEADS QUERIES
@@ -669,10 +725,36 @@ export async function getBusinessDashboardStats(businessId: string) {
   const conversionRate = leads.length > 0 ? (convertedLeads / leads.length) * 100 : 0
   const averageRating = ratings.length > 0 ? ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length : 0
 
+  // Own events only (createdBy == businessId) — never platform-wide
+  let ownEvents = 0
+  let ownPublishedEvents = 0
+  try {
+    const eventsSnap = await getDocs(
+      query(collection(db, 'events'), where('createdBy', '==', businessId), limit(200))
+    )
+    ownEvents = eventsSnap.size
+    ownPublishedEvents = eventsSnap.docs.filter((d) => d.data().status === 'published').length
+  } catch {
+    /* index or permission — leave zeros */
+  }
+
+  let ownGroups = 0
+  try {
+    const communities = await getBusinessCommunities(businessId)
+    ownGroups = communities.length
+  } catch {
+    /* leave zero */
+  }
+
   return {
     opportunitiesPosted: opportunities.length,
     openOpportunities: opportunities.filter((o) => o.status === 'open').length,
+    pendingOpportunities: opportunities.filter((o) => o.status === 'pending_approval').length,
     offersPosted: offers.length,
+    pendingOffers: offers.filter((o) => o.status === 'pending_approval').length,
+    ownEvents,
+    ownPublishedEvents,
+    ownCommunities: ownGroups,
     leadsGenerated: leads.length,
     convertedLeads,
     conversionRate,

@@ -151,13 +151,16 @@ export default function GroupChatPage() {
 
     setPendingLoading(true)
     try {
+      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken()
       const params = new URLSearchParams({
         communityId,
         groupId,
         joinStatus: 'pending',
         requesterId: user.id,
       })
-      const res = await fetch(`/api/groups/members?${params.toString()}`)
+      const res = await fetch(`/api/groups/members?${params.toString()}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       const json = await res.json()
       if (json.success) {
         setPendingMembers(json.data || [])
@@ -183,9 +186,13 @@ export default function GroupChatPage() {
     if (!user) return
     setActingMemberId(memberDocId)
     try {
+      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken()
       const res = await fetch('/api/groups/members', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           communityId,
           groupId,

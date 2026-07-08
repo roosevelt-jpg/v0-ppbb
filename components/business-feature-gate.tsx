@@ -13,6 +13,7 @@ type BusinessFeatureButtonProps = {
   featureLabel: string
   href: string
   className?: string
+  style?: React.CSSProperties
   children: React.ReactNode
   /** When true, always navigate (business/admin). When member, open upgrade modal. */
 }
@@ -25,6 +26,7 @@ export function BusinessFeatureLink({
   featureLabel,
   href,
   className,
+  style,
   children,
 }: BusinessFeatureButtonProps) {
   const { user } = useAuth()
@@ -46,7 +48,7 @@ export function BusinessFeatureLink({
 
   return (
     <>
-      <button type="button" onClick={handleClick} className={className}>
+      <button type="button" onClick={handleClick} className={className} style={style}>
         {children}
       </button>
       {modal}

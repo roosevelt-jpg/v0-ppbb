@@ -134,6 +134,22 @@ export default function BusinessOffers() {
                     <span style={{ color: '#888888' }}>Views: {offer.views}</span>
                     <span style={{ color: '#888888' }}>Conversions: {offer.conversions}</span>
                   </div>
+                  <p
+                    style={{
+                      marginTop: '8px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color:
+                        offer.status === 'pending_approval'
+                          ? '#b45309'
+                          : offer.status === 'published' || offer.status === 'active'
+                            ? '#15803d'
+                            : '#888888',
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {String(offer.status || '').replace(/_/g, ' ')}
+                  </p>
                 </div>
                 <div className="flex gap-2 mt-4">
                   <Button

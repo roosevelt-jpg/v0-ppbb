@@ -936,7 +936,8 @@ export interface BusinessOpportunity {
   views?: number
   applications: number
   applicants: string[]
-  status: 'open' | 'closed' | 'filled' | 'archived'
+  /** pending_approval until admin publishes; then open/closed/filled/archived */
+  status: 'pending_approval' | 'open' | 'closed' | 'filled' | 'archived' | 'rejected'
   createdAt: Date
   updatedAt: Date
 }
@@ -979,8 +980,12 @@ export interface BusinessOffer {
   validUntil?: Date
   targetAudience?: 'members' | 'volunteers' | 'public'
   memberBenefit?: number
-  /** published = eligible for /shop merch grid when category is merchandise */
-  status: 'active' | 'archived' | 'published'
+  /**
+   * pending_approval until admin publishes.
+   * published = eligible for /shop merch when category is merchandise;
+   * active = marketplace directory.
+   */
+  status: 'pending_approval' | 'active' | 'archived' | 'published' | 'rejected'
   views: number
   conversions: number
   createdAt: Date

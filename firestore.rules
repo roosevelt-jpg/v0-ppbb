@@ -290,52 +290,52 @@ service cloud.firestore {
       ));
     }
 
+    // Part 10B: business creates start as pending_approval; only admin may publish to live statuses
+    function isLiveListingStatus(status) {
+      return status in ['open', 'published', 'active'];
+    }
+    function businessCreatePendingOnly() {
+      return isAuth()
+        && isBusiness(request.auth.uid)
+        && request.resource.data.businessId == request.auth.uid
+        && request.resource.data.status == 'pending_approval';
+    }
+    // Owner may edit but cannot self-publish (change status into a live value)
+    function businessOwnerUpdateNoSelfPublish() {
+      return isAuth()
+        && resource.data.businessId == request.auth.uid
+        && (
+          !('status' in request.resource.data.diff(resource.data).affectedKeys())
+          || !isLiveListingStatus(request.resource.data.status)
+        );
+    }
+
     // Marketplace offers (directory sales / discounts) — public read; owner/admin write
     match /offers/{offerId} {
       allow read: if true;
-      allow create: if isAuth() && (
-        isAdmin()
-        || request.resource.data.businessId == request.auth.uid
-        || isBusiness(request.auth.uid)
-      );
-      allow update, delete: if isAdmin()
-        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAdmin() || businessCreatePendingOnly();
+      allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
     }
 
     // Jobs listings — public read for directory counts/profile; owner/admin write
     match /jobs/{jobId} {
       allow read: if true;
-      allow create: if isAuth() && (
-        isAdmin()
-        || request.resource.data.businessId == request.auth.uid
-        || isBusiness(request.auth.uid)
-      );
-      allow update, delete: if isAdmin()
-        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAdmin() || businessCreatePendingOnly();
+      allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
     }
 
     // Legacy business portal offers — public read for marketplace directory
     match /businessOffers/{offerId} {
       allow read: if true;
-      allow create: if isAuth() && (
-        isAdmin()
-        || request.resource.data.businessId == request.auth.uid
-        || isBusiness(request.auth.uid)
-      );
-      allow update, delete: if isAdmin()
-        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAdmin() || businessCreatePendingOnly();
+      allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
     }
 
     // Legacy business portal opportunities/jobs — public read for directory
     match /businessOpportunities/{opportunityId} {
       allow read: if true;
-      allow create: if isAuth() && (
-        isAdmin()
-        || request.resource.data.businessId == request.auth.uid
-        || isBusiness(request.auth.uid)
-      );
-      allow update, delete: if isAdmin()
-        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAdmin() || businessCreatePendingOnly();
+      allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
     }
     
     // Donations - Authenticated read, own write

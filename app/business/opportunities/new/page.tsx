@@ -7,7 +7,7 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { createOpportunity } from '@/lib/business-queries'
+import { auth } from '@/lib/firebase'
 
 export default function NewOpportunity() {
   const { user } = useAuth()
@@ -24,7 +24,6 @@ export default function NewOpportunity() {
     hoursPerWeek: 0,
     requirements: '',
     benefits: '',
-    status: 'open' as const,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -43,14 +42,30 @@ export default function NewOpportunity() {
 
     try {
       setIsSaving(true)
-      await createOpportunity(user.id, user.businessProfile?.businessName || 'Unknown', {
-        ...formData,
-        applications: 0,
-        applicants: [],
-        requirements: formData.requirements.split('\n').filter((r) => r.trim()),
-        benefits: formData.benefits.split('\n').filter((b) => b.trim()),
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) {
+        alert('Please sign in again to post a job.')
+        return
+      }
+      const res = await fetch('/api/business/opportunities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          businessName: user.businessProfile?.businessName || 'Unknown',
+          requirements: formData.requirements.split('\n').filter((r) => r.trim()),
+          benefits: formData.benefits.split('\n').filter((b) => b.trim()),
+        }),
       })
-      alert('Opportunity posted successfully!')
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        alert(json.error || 'Error posting opportunity. Please try again.')
+        return
+      }
+      alert('Job submitted for admin approval. It will appear publicly once approved.')
       router.push('/business/opportunities')
     } catch (error) {
       console.error('[v0] Error posting opportunity:', error)
@@ -69,11 +84,13 @@ export default function NewOpportunity() {
       {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
         <div className="max-w-2xl mx-auto">
-          <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
+          <h1
+            style={{ color: '#111111', fontSize: '32px', fontWeight: 700, fontFamily: 'Cormorant Garamond, serif' }}
+          >
             Post New Opportunity
           </h1>
-          <p style={{ color: '#888888', marginTop: '8px' }}>
-            Share a job, internship, or gig with our community
+          <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
+            Share a job, internship, or gig — submitted for admin approval before it goes live
           </p>
         </div>
       </div>

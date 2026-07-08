@@ -206,11 +206,15 @@ export function normalizeDirectoryJob(
 
 export function isActiveOffer(offer: DirectoryOffer): boolean {
   const status = offer.status
+  if (status === 'pending_approval' || status === 'rejected' || status === 'archived') return false
   return status === 'active' || status === 'available' || status === 'published' || status === 'open'
 }
 
 export function isActiveJob(job: DirectoryJob): boolean {
   const status = job.status
+  if (status === 'pending_approval' || status === 'rejected' || status === 'closed' || status === 'archived') {
+    return false
+  }
   return status === 'open' || status === 'published' || status === 'active'
 }
 

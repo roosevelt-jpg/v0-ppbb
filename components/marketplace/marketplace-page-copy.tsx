@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
 import {
   subscribeToMarketplaceConfig,
   DEFAULT_MARKETPLACE_CONFIG,
   MarketplacePlatformConfig,
 } from '@/lib/marketplace-config'
+import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 export function MarketplacePageCopy() {
   const [config, setConfig] = useState<MarketplacePlatformConfig>(DEFAULT_MARKETPLACE_CONFIG)
@@ -63,12 +63,13 @@ export function MarketplacePageCopy() {
             {pc.membershipBody}
           </p>
           {pc.membershipCTA && pc.membershipCTAHref && (
-            <Link
+            <BusinessFeatureLink
+              featureLabel={pc.membershipCTA}
               href={pc.membershipCTAHref}
               className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
             >
               {pc.membershipCTA}
-            </Link>
+            </BusinessFeatureLink>
           )}
         </div>
         <div className="order-1 lg:order-2 min-w-0">

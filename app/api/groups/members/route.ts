@@ -3,6 +3,8 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+import { verifyIdToken } from '@/lib/admin-access-server'
+import { hasAdminAccessServer } from '@/lib/roles-server'
 
 async function notifyUser(
   userId: string,
@@ -25,17 +27,11 @@ async function notifyUser(
   }
 }
 
-async function isAdminUser(userId: string): Promise<boolean> {
-  if (!userId) return false
-  try {
-    const db = getAdminDb()
-    const snap = await db.collection('users').doc(userId).get()
-    if (!snap.exists) return false
-    const role = snap.data()?.role
-    return role === 'admin' || role === 'super_admin'
-  } catch {
-    return false
-  }
+async function resolveActingUid(request: NextRequest): Promise<string | null> {
+  const authHeader = request.headers.get('authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) return null
+  return verifyIdToken(token)
 }
 
 export async function GET(request: NextRequest) {
@@ -43,13 +39,29 @@ export async function GET(request: NextRequest) {
     const communityId = request.nextUrl.searchParams.get('communityId')
     const groupId = request.nextUrl.searchParams.get('groupId')
     const joinStatus = request.nextUrl.searchParams.get('joinStatus') || 'pending'
-    const requesterId = request.nextUrl.searchParams.get('requesterId')
 
     if (!communityId || !groupId) {
       return NextResponse.json(
         { success: false, error: 'communityId and groupId required' },
         { status: 400 }
       )
+    }
+
+    const uid = await resolveActingUid(request)
+    // Legacy fallback: requesterId query param (must match token when both present)
+    const requesterIdParam = request.nextUrl.searchParams.get('requesterId')
+    const requesterId = uid || requesterIdParam
+
+    if (!requesterId) {
+      return NextResponse.json(
+        { success: false, error: 'Authorization required' },
+        { status: 401 }
+      )
+    }
+
+    // If Bearer present, never trust a mismatched requesterId
+    if (uid && requesterIdParam && requesterIdParam !== uid) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
     }
 
     const db = getAdminDb()
@@ -60,15 +72,8 @@ export async function GET(request: NextRequest) {
     }
 
     const groupData = groupSnap.data()!
-
-    if (!requesterId) {
-      return NextResponse.json(
-        { success: false, error: 'requesterId is required' },
-        { status: 400 }
-      )
-    }
-
-    const admin = await isAdminUser(requesterId)
+    const userSnap = await db.collection('users').doc(requesterId).get()
+    const admin = hasAdminAccessServer(userSnap.data() || {})
     const isOwner = groupData.createdBy === requesterId
     if (!admin && !isOwner) {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
@@ -94,7 +99,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
-    const { communityId, groupId, memberDocId, joinStatus, approvedBy } = body
+    const { communityId, groupId, memberDocId, joinStatus } = body
 
     if (!communityId || !groupId || !memberDocId || !joinStatus) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
@@ -104,11 +109,19 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid joinStatus' }, { status: 400 })
     }
 
+    const uid = await resolveActingUid(request)
+    // Prefer verified token; fall back to body.approvedBy only if no token (legacy clients)
+    const approvedBy: string | null = uid || (typeof body.approvedBy === 'string' ? body.approvedBy : null)
+
     if (!approvedBy) {
       return NextResponse.json(
-        { success: false, error: 'approvedBy (acting user id) is required' },
-        { status: 400 }
+        { success: false, error: 'Authorization required' },
+        { status: 401 }
       )
+    }
+
+    if (uid && body.approvedBy && body.approvedBy !== uid) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
     }
 
     const db = getAdminDb()
@@ -120,7 +133,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     const groupData = groupSnap.data()!
-    const admin = await isAdminUser(approvedBy)
+    const userSnap = await db.collection('users').doc(approvedBy).get()
+    const admin = hasAdminAccessServer(userSnap.data() || {})
     const isOwner = groupData.createdBy === approvedBy
 
     if (!admin && !isOwner) {
