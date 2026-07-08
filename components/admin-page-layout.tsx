@@ -8,9 +8,12 @@ interface AdminPageLayoutProps {
   children: React.ReactNode
 }
 
+/**
+ * Shared admin CMS/page shell. Must stay full readable width — parents in
+ * app/admin/layout.tsx already constrain to max-w-[80rem]; this wrapper
+ * ensures children can grow (min-w-0) and never collapse into a flex stub.
+ */
 export function AdminPageLayout({ children }: AdminPageLayoutProps) {
-  // Simply pass through children without adding extra layout elements
-  // The sidebar and header are provided by /app/admin/layout.tsx
-  return <>{children}</>
+  return <div className="w-full min-w-0">{children}</div>
 }
 

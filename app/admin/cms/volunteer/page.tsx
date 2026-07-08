@@ -131,7 +131,7 @@ export default function AdminCmsVolunteerPage() {
   if (!ready) {
     return (
       <AdminPageLayout title="Volunteer Config" subtitle="Loading…">
-        <div className="max-w-3xl space-y-4 animate-pulse">
+        <div className="w-full min-w-0 max-w-3xl space-y-4 animate-pulse">
           <div className="h-8 w-48 bg-neutral-200 rounded" />
           <div className="h-24 w-full bg-neutral-100 rounded" />
           <div className="h-24 w-full bg-neutral-100 rounded" />

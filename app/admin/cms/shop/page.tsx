@@ -87,7 +87,7 @@ export default function AdminCmsShopPage() {
       title="Shop Page CMS"
       subtitle="Headline, body, and donate-via-purchase banner for /shop"
     >
-      <div className="max-w-3xl space-y-6">
+      <div className="w-full min-w-0 max-w-3xl space-y-6">
         {message && (
           <div
             className={`flex items-start gap-2 rounded p-3 text-sm ${

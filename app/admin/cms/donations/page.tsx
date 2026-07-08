@@ -73,7 +73,7 @@ export default function AdminCmsDonationsPage() {
       title="Donations Page CMS"
       subtitle="Beit Al Khair payment URL and legal partnership copy for /donate"
     >
-      <div className="max-w-3xl space-y-6">
+      <div className="w-full min-w-0 max-w-3xl space-y-6">
         {message && (
           <div
             className={`flex items-start gap-2 rounded p-3 text-sm ${
