@@ -15,7 +15,7 @@ import {
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 async function uploadHomepageImage(file: File, folder: string): Promise<string> {
-  return uploadImageToFirebase(file, folder)
+  return uploadImageToFirebase(file, folder, { preset: 'content' })
 }
 
 export default function AdminCmsHomepagePage() {
@@ -305,9 +305,9 @@ export default function AdminCmsHomepagePage() {
             </a>
             . Configure animation here.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg">
-            <div>
-              <label className="block text-sm font-medium mb-1">Speed (seconds per loop)</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl">
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <label className="text-sm font-medium leading-snug">Speed (seconds per loop)</label>
               <input
                 type="number"
                 min={10}
@@ -322,8 +322,8 @@ export default function AdminCmsHomepagePage() {
                 className="w-full"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Gap (px between logos)</label>
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <label className="text-sm font-medium leading-snug">Gap (px between logos)</label>
               <input
                 type="number"
                 min={16}

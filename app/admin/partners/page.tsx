@@ -31,6 +31,7 @@ import {
   subscribeToAllPartners,
 } from '@/lib/partners'
 import { useAuth } from '@/lib/auth-context'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 const PARTNER_TYPES: PartnerType[] = [
   'sponsor',
@@ -40,22 +41,6 @@ const PARTNER_TYPES: PartnerType[] = [
   'corporate',
   'grassroots',
 ]
-
-async function uploadPartnerLogo(file: File): Promise<string> {
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
-  if (!validTypes.includes(file.type)) {
-    throw new Error('Logo must be PNG, SVG, or WebP')
-  }
-  if (file.size > 5 * 1024 * 1024) throw new Error('File must be under 5MB')
-
-  const fd = new FormData()
-  fd.append('file', file)
-  fd.append('folder', 'partners/logos')
-  const res = await fetch('/api/upload', { method: 'POST', body: fd })
-  const json = await res.json()
-  if (!res.ok || !json.success) throw new Error(json.error || 'Upload failed')
-  return json.url as string
-}
 
 export default function AdminPartnersLogosPage() {
   const { user } = useAuth()
@@ -83,7 +68,10 @@ export default function AdminPartnersLogosPage() {
   const handleLogoUpload = async (file: File) => {
     try {
       setUploading(true)
-      const url = await uploadPartnerLogo(file)
+      const url = await uploadImageToFirebase(file, 'partners/logos', {
+        preset: 'logo',
+        allowSvg: true,
+      })
       setForm((prev) => ({ ...prev, logoURL: url }))
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Upload failed')

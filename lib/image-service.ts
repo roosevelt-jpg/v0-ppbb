@@ -122,6 +122,170 @@ export async function processImageFile(
   }
 }
 
+export const CMS_IMAGE_PRESETS = {
+  /** Hero, mission, and other large CMS imagery */
+  content: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024 },
+  /** Partner / logo thumbnails */
+  logo: { maxDimension: 500, maxBytes: 2 * 1024 * 1024 },
+} as const
+
+export type CmsImagePreset = keyof typeof CMS_IMAGE_PRESETS
+
+export interface CompressImageOptions {
+  maxDimension?: number
+  maxBytes?: number
+  allowSvg?: boolean
+  preset?: CmsImagePreset
+}
+
+function resolveCompressOptions(
+  presetOrOptions: CmsImagePreset | CompressImageOptions
+): Required<Pick<CompressImageOptions, 'maxDimension' | 'maxBytes'>> & {
+  allowSvg: boolean
+} {
+  if (typeof presetOrOptions === 'string') {
+    const defaults = CMS_IMAGE_PRESETS[presetOrOptions]
+    return {
+      maxDimension: defaults.maxDimension,
+      maxBytes: defaults.maxBytes,
+      allowSvg: presetOrOptions === 'logo',
+    }
+  }
+
+  const presetDefaults = presetOrOptions.preset
+    ? CMS_IMAGE_PRESETS[presetOrOptions.preset]
+    : CMS_IMAGE_PRESETS.content
+
+  return {
+    maxDimension: presetOrOptions.maxDimension ?? presetDefaults.maxDimension,
+    maxBytes: presetOrOptions.maxBytes ?? presetDefaults.maxBytes,
+    allowSvg: presetOrOptions.allowSvg ?? presetOrOptions.preset === 'logo',
+  }
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, mime: string, quality: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('Failed to encode image'))),
+      mime,
+      quality
+    )
+  })
+}
+
+function replaceFileExtension(name: string, ext: string): string {
+  const base = name.replace(/\.[^.]+$/, '') || 'image'
+  return `${base}.${ext}`
+}
+
+const RASTER_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+
+/**
+ * Resize and compress an image in the browser before upload.
+ * SVG files are passed through unchanged when allowSvg is true.
+ */
+export async function compressImageToFile(
+  file: File,
+  presetOrOptions: CmsImagePreset | CompressImageOptions = 'content'
+): Promise<File> {
+  if (typeof document === 'undefined') {
+    throw new Error('compressImageToFile must run in the browser')
+  }
+
+  const { maxDimension, maxBytes, allowSvg } = resolveCompressOptions(presetOrOptions)
+
+  if (file.type === 'image/svg+xml') {
+    if (!allowSvg) {
+      throw new Error('SVG is not supported for this upload. Use PNG, WebP, or JPEG.')
+    }
+    if (file.size > maxBytes) {
+      throw new Error(
+        `SVG is still too large after limits (${(maxBytes / (1024 * 1024)).toFixed(1)}MB max).`
+      )
+    }
+    return file
+  }
+
+  if (!RASTER_IMAGE_TYPES.has(file.type)) {
+    throw new Error('File must be an image (JPEG, PNG, WebP, GIF, or SVG for logos).')
+  }
+
+  if (file.size <= maxBytes && file.type !== 'image/gif') {
+    const objectUrl = URL.createObjectURL(file)
+    try {
+      const img = await loadImageElement(objectUrl)
+      if (img.naturalWidth <= maxDimension && img.naturalHeight <= maxDimension) {
+        return file
+      }
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }
+
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const img = await loadImageElement(objectUrl)
+    let targetWidth = img.naturalWidth
+    let targetHeight = img.naturalHeight
+
+    if (targetWidth > maxDimension || targetHeight > maxDimension) {
+      const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
+      targetWidth = Math.round(targetWidth * scale)
+      targetHeight = Math.round(targetHeight * scale)
+    }
+
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas is not supported in this browser')
+
+    const draw = (w: number, h: number) => {
+      canvas.width = w
+      canvas.height = h
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, w, h)
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
+      ctx.drawImage(img, 0, 0, w, h)
+    }
+
+    draw(targetWidth, targetHeight)
+
+    let outputMime: 'image/webp' | 'image/jpeg' = 'image/webp'
+    let ext = 'webp'
+    let quality = 0.88
+    let blob = await canvasToBlob(canvas, outputMime, quality).catch(async () => {
+      outputMime = 'image/jpeg'
+      ext = 'jpg'
+      return canvasToBlob(canvas, outputMime, quality)
+    })
+
+    while (blob.size > maxBytes && quality > 0.4) {
+      quality -= 0.08
+      blob = await canvasToBlob(canvas, outputMime, quality)
+    }
+
+    while (blob.size > maxBytes && (targetWidth > 320 || targetHeight > 320)) {
+      targetWidth = Math.round(targetWidth * 0.85)
+      targetHeight = Math.round(targetHeight * 0.85)
+      draw(targetWidth, targetHeight)
+      blob = await canvasToBlob(canvas, outputMime, quality)
+    }
+
+    if (blob.size > maxBytes) {
+      throw new Error(
+        'Image is still too large after compression. Try a smaller or simpler image.'
+      )
+    }
+
+    return new File([blob], replaceFileExtension(file.name, ext), {
+      type: outputMime,
+      lastModified: Date.now(),
+    })
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 export interface OptimizedImage {
   url: string
   srcSet: string
