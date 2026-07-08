@@ -17,6 +17,11 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { Event, EventRegistration, Payout, EventStatus } from '@/lib/event-types'
+import {
+  getEventStartDate,
+  mapEventDoc,
+  type NormalizedEvent,
+} from '@/lib/event-utils'
 
 // ─────────────────────────────────────────────────────────────────
 // EVENTS QUERIES
@@ -50,6 +55,27 @@ export function subscribeToAllEvents(
     },
     (error) => {
       console.error('[v0] Error subscribing to events:', error)
+      callback([])
+    }
+  )
+}
+
+/** Public events page — published events only, sorted by start date client-side. */
+export function subscribeToPublishedEvents(
+  callback: (events: NormalizedEvent[]) => void
+): () => void {
+  const q = query(collection(db, 'events'), where('status', '==', 'published'))
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const events = snapshot.docs
+        .map((d) => mapEventDoc(d.id, d.data()))
+        .sort((a, b) => getEventStartDate(a).getTime() - getEventStartDate(b).getTime())
+      callback(events)
+    },
+    (error) => {
+      console.error('[v0] Error subscribing to published events:', error)
       callback([])
     }
   )
