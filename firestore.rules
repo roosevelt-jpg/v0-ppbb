@@ -269,6 +269,7 @@ service cloud.firestore {
     }
 
     // Business directory profiles — public read for approved+active; owner/admin write
+    // Public read also allows referralCode validation for attribution cookies (Part 13C)
     match /businesses/{businessId} {
       allow read: if resource.data.isApproved == true && resource.data.isActive == true
         || isAdmin()
@@ -288,6 +289,13 @@ service cloud.firestore {
         || resource.data.ownerId == request.auth.uid
         || businessId == request.auth.uid
       ));
+    }
+
+    // Referral conversions (Part 13C batch 2) — Admin SDK only for now; no client writes
+    match /referrals/{referralId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create, update, delete: if false;
     }
 
     // Part 10B: business creates start as pending_approval; only admin may publish to live statuses

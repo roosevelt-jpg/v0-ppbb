@@ -27,6 +27,8 @@ type BusinessRow = {
   isVerified: boolean
   featured: boolean
   status: string
+  referralCode?: string | null
+  referralContributionPercent?: number | null
   createdAt: string | Date | null
 }
 
@@ -68,7 +70,15 @@ export default function BusinessesPage() {
 
   const runAction = async (
     id: string,
-    action: 'approve' | 'verify' | 'suspend' | 'feature' | 'unfeature' | 'delete'
+    action:
+      | 'approve'
+      | 'verify'
+      | 'suspend'
+      | 'feature'
+      | 'unfeature'
+      | 'delete'
+      | 'set_referral_percent',
+    extra?: Record<string, unknown>
   ) => {
     if (action === 'delete') {
       const ok = window.confirm(
@@ -83,7 +93,7 @@ export default function BusinessesPage() {
       const res = await fetch('/api/admin/businesses', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action }),
+        body: JSON.stringify({ id, action, ...extra }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Action failed')
@@ -100,6 +110,24 @@ export default function BusinessesPage() {
     } finally {
       setActingId(null)
     }
+  }
+
+  const editReferralPercent = (biz: BusinessRow) => {
+    const current =
+      typeof biz.referralContributionPercent === 'number'
+        ? String(biz.referralContributionPercent)
+        : '10'
+    const input = window.prompt(
+      `Referral contribution % for ${biz.name} (0–100). Current: ${current}`,
+      current
+    )
+    if (input === null) return
+    const percent = Number(input)
+    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+      setMessage({ type: 'error', text: 'Enter a number between 0 and 100.' })
+      return
+    }
+    void runAction(biz.id, 'set_referral_percent', { referralContributionPercent: percent })
   }
 
   const tabs: { id: FilterTab; label: string }[] = [
@@ -224,6 +252,17 @@ export default function BusinessesPage() {
                         {[biz.category, biz.ownerName, biz.email].filter(Boolean).join(' · ')}
                       </p>
                       <p className="font-body text-xs text-neutral-500">ID: {biz.id}</p>
+                      {biz.isApproved && biz.referralCode ? (
+                        <p className="font-body text-xs text-neutral-600">
+                          Referral code:{' '}
+                          <span className="font-mono text-neutral-900">{biz.referralCode}</span>
+                          {' · '}
+                          Rate:{' '}
+                          {typeof biz.referralContributionPercent === 'number'
+                            ? `${biz.referralContributionPercent}%`
+                            : 'default'}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="flex flex-wrap gap-2 shrink-0">
@@ -238,6 +277,16 @@ export default function BusinessesPage() {
                           Approve
                         </Button>
                       )}
+                      {biz.isApproved ? (
+                        <Button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => editReferralPercent(biz)}
+                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        >
+                          Referral %
+                        </Button>
+                      ) : null}
                       <Button
                         type="button"
                         disabled={busy || biz.isVerified}

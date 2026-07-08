@@ -10,15 +10,24 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
   GlobalSettings,
 } from '@/lib/platform-config'
+import {
+  subscribeToReferralsConfig,
+  DEFAULT_REFERRALS_CONFIG,
+  ReferralsPlatformConfig,
+} from '@/lib/referral-config'
 
 export default function AdminCmsGlobalSettingsPage() {
   const [settings, setSettings] = useState<GlobalSettings>(DEFAULT_GLOBAL_SETTINGS)
+  const [referrals, setReferrals] = useState<ReferralsPlatformConfig>(DEFAULT_REFERRALS_CONFIG)
   const [saving, setSaving] = useState(false)
+  const [savingReferrals, setSavingReferrals] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     return subscribeToGlobalSettings(setSettings)
   }, [])
+
+  useEffect(() => subscribeToReferralsConfig(setReferrals), [])
 
   const handleChange = (field: keyof GlobalSettings, value: string) => {
     setSettings((prev) => ({ ...prev, [field]: value }))
@@ -43,6 +52,28 @@ export default function AdminCmsGlobalSettingsPage() {
       })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSaveReferrals = async () => {
+    setSavingReferrals(true)
+    setMessage(null)
+    try {
+      const res = await fetch('/api/platform-config/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(referrals),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Save failed')
+      setMessage({ type: 'success', text: 'Referral platform defaults saved.' })
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Failed to save referrals config',
+      })
+    } finally {
+      setSavingReferrals(false)
     }
   }
 
@@ -126,6 +157,67 @@ export default function AdminCmsGlobalSettingsPage() {
               />
             </div>
           </div>
+        </Card>
+
+        <Card className="p-4 sm:p-6 space-y-4">
+          <div>
+            <p
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Referrals
+            </p>
+            <h2 className="font-headline text-xl font-bold text-neutral-900">
+              Business referral defaults
+            </h2>
+            <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Stored in platformConfig/referrals. New businesses inherit the default contribution %
+              when approved; cookie attribution uses the window below.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Default contribution %</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={referrals.defaultContributionPercent}
+                onChange={(e) =>
+                  setReferrals((p) => ({
+                    ...p,
+                    defaultContributionPercent: Number(e.target.value) || 0,
+                  }))
+                }
+                className="w-full min-h-[44px] border border-neutral-300 rounded px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Attribution window (days)</label>
+              <input
+                type="number"
+                min={1}
+                max={365}
+                value={referrals.attributionWindowDays}
+                onChange={(e) =>
+                  setReferrals((p) => ({
+                    ...p,
+                    attributionWindowDays: Number(e.target.value) || 30,
+                  }))
+                }
+                className="w-full min-h-[44px] border border-neutral-300 rounded px-3 py-2"
+              />
+            </div>
+          </div>
+          <Button
+            type="button"
+            onClick={handleSaveReferrals}
+            disabled={savingReferrals}
+            className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {savingReferrals ? 'Saving…' : 'Save referral defaults'}
+          </Button>
         </Card>
 
         <div className="flex justify-end">

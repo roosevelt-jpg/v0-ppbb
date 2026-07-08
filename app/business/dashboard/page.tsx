@@ -20,6 +20,7 @@ import {
   Calendar,
   UserCheck,
 } from 'lucide-react'
+import { BusinessReferralLinkCard } from '@/components/business-referral-link-card'
 
 interface DashboardStats {
   opportunitiesPosted: number
@@ -472,6 +473,8 @@ export default function BusinessDashboard() {
             onClick={() => router.push('/business/payments')}
           />
         </div>
+
+        <BusinessReferralLinkCard />
 
         {/* Quick Actions */}
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>

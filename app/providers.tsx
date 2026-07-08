@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { PolicyInitializer } from '@/components/policy-initializer'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ReferralAttributionCapture } from '@/components/referral-attribution-capture'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -29,6 +30,7 @@ export function Providers({ children }: ProvidersProps) {
       <AuthProvider>
         <NextIntlClientProvider locale={locale}>
           <PolicyInitializer />
+          <ReferralAttributionCapture />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>

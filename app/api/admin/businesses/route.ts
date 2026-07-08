@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import type { Firestore } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { ensureBusinessReferralCode } from '@/lib/referral-code-server'
 
-type BusinessAction = 'approve' | 'verify' | 'suspend' | 'feature' | 'unfeature' | 'delete'
+type BusinessAction =
+  | 'approve'
+  | 'verify'
+  | 'suspend'
+  | 'feature'
+  | 'unfeature'
+  | 'delete'
+  | 'set_referral_percent'
 
 function asDate(value: unknown): Date | null {
   if (!value) return null
@@ -48,6 +56,11 @@ function mapBusinessDoc(id: string, data: Record<string, unknown>) {
     isVerified: data.isVerified === true,
     featured: data.featured === true,
     status: asString(data.status) || (isApproved ? 'approved' : 'pending_review'),
+    referralCode: asString(data.referralCode) || null,
+    referralContributionPercent:
+      typeof data.referralContributionPercent === 'number'
+        ? data.referralContributionPercent
+        : null,
     createdAt: asDate(data.createdAt),
     updatedAt: asDate(data.updatedAt),
   }
@@ -176,6 +189,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Business not found' }, { status: 404 })
     }
 
+    const existing = snap.data() as Record<string, unknown>
     const now = new Date()
 
     if (action === 'delete') {
@@ -185,6 +199,30 @@ export async function PATCH(request: NextRequest) {
         success: true,
         message: `Business deleted. Soft-deactivated ${related} related offer/job doc(s).`,
         relatedDeactivated: related,
+      })
+    }
+
+    if (action === 'set_referral_percent') {
+      const raw = body.referralContributionPercent
+      const percent = typeof raw === 'number' ? raw : Number(raw)
+      if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+        return NextResponse.json(
+          { success: false, error: 'referralContributionPercent must be 0–100' },
+          { status: 400 }
+        )
+      }
+      await ref.set(
+        sanitizeForFirestore({
+          referralContributionPercent: percent,
+          updatedAt: now,
+        }),
+        { merge: true }
+      )
+      const updated = await ref.get()
+      return NextResponse.json({
+        success: true,
+        message: 'Referral contribution percent updated',
+        data: mapBusinessDoc(updated.id, updated.data() as Record<string, unknown>),
       })
     }
 
@@ -233,6 +271,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     await ref.set(sanitizeForFirestore(patch), { merge: true })
+
+    // Part 13C step 1 — generate unique referral code on approval if missing
+    if (action === 'approve') {
+      const name =
+        asString(existing.name) || asString(existing.businessName) || 'Business'
+      await ensureBusinessReferralCode(
+        db,
+        id,
+        name,
+        asString(existing.referralCode) || null
+      )
+    }
+
     const updated = await ref.get()
 
     return NextResponse.json({
