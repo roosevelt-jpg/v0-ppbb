@@ -2,8 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
-import { loadGoogleMapsPlacesApi } from '@/lib/google-maps-loader'
-import { getSharedPlacesService } from '@/lib/google-places-service'
 
 interface PlacePrediction {
   placeId: string
@@ -21,23 +19,6 @@ interface GooglePlacesAutocompleteProps {
   placeholder?: string
 }
 
-declare global {
-  interface Window {
-    google?: {
-      maps: {
-        places: {
-          AutocompleteService: new () => {
-            getPlacePredictions: (
-              request: Record<string, unknown>,
-              callback: (predictions: any[] | null, status: string) => void
-            ) => void
-          }
-        }
-      }
-    }
-  }
-}
-
 export default function GooglePlacesAutocomplete({
   value,
   onChange,
@@ -50,38 +31,17 @@ export default function GooglePlacesAutocomplete({
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [apiReady, setApiReady] = useState(false)
-  const autocompleteService = useRef<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestIdRef = useRef(0)
 
   useEffect(() => {
     setInput(value)
   }, [value])
 
   useEffect(() => {
-    let cancelled = false
-
-    loadGoogleMapsPlacesApi()
-      .then(() => {
-        if (cancelled || !window.google?.maps?.places) {
-          if (!cancelled) setError('Failed to initialize Places services')
-          return
-        }
-
-        autocompleteService.current = new window.google.maps.places.AutocompleteService()
-        getSharedPlacesService()
-        setApiReady(true)
-        setError(null)
-      })
-      .catch((err) => {
-        if (cancelled) return
-        const msg = err instanceof Error ? err.message : 'Failed to load Google Maps API'
-        console.warn('[v0]', msg)
-        setError(msg)
-      })
-
     return () => {
-      cancelled = true
+      if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [])
 
@@ -103,85 +63,81 @@ export default function GooglePlacesAutocomplete({
     })
   }
 
-  const fetchPlacePredictions = (searchTerm: string) => {
-    if (!searchTerm.trim()) {
+  const fetchPlacePredictions = async (searchTerm: string) => {
+    const trimmed = searchTerm.trim()
+    if (!trimmed) {
       setPredictions([])
       return
     }
 
-    if (!autocompleteService.current) {
-      setError('Google Places service not initialized')
-      setPredictions([])
-      return
-    }
-
+    const requestId = ++requestIdRef.current
     setLoading(true)
 
-    autocompleteService.current.getPlacePredictions(
-      {
-        input: searchTerm,
-        componentRestrictions:
-          countryRestrictions.length > 0 ? { country: countryRestrictions } : undefined,
-      },
-      (results: any[] | null, status: string) => {
-        if (status !== 'OK' && status !== 'ZERO_RESULTS') {
-          setError(
-            status === 'REQUEST_DENIED'
-              ? 'Google API key not authorized for Places API'
-              : `Location service: ${status}`
-          )
-          setPredictions([])
-          setLoading(false)
-          return
-        }
+    try {
+      const params = new URLSearchParams({ input: trimmed })
+      if (countryRestrictions.length > 0) {
+        params.set('countries', countryRestrictions.join(','))
+      }
 
-        if (!results || results.length === 0) {
-          setPredictions([])
-          setError(null)
-          setLoading(false)
-          return
-        }
+      const res = await fetch(`/api/places/autocomplete?${params.toString()}`)
+      const data = await res.json()
 
-        setPredictions(
-          results.map((prediction) => ({
-            placeId: prediction.place_id,
-            mainText: prediction.structured_formatting?.main_text || prediction.description,
-            secondaryText: prediction.structured_formatting?.secondary_text,
-          }))
-        )
+      if (requestId !== requestIdRef.current) return
+
+      if (!data.success) {
+        setError(data.error || 'Location suggestions are unavailable')
+        setPredictions([])
         setIsOpen(true)
-        setError(null)
+        return
+      }
+
+      setPredictions(data.predictions || [])
+      setIsOpen(true)
+      setError(null)
+    } catch {
+      if (requestId !== requestIdRef.current) return
+      setError('Location suggestions are unavailable')
+      setPredictions([])
+      setIsOpen(true)
+    } finally {
+      if (requestId === requestIdRef.current) {
         setLoading(false)
       }
-    )
+    }
   }
 
-  const getPlaceDetails = (prediction: PlacePrediction) => {
+  const schedulePredictions = (searchTerm: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      fetchPlacePredictions(searchTerm)
+    }, 250)
+  }
+
+  const getPlaceDetails = async (prediction: PlacePrediction) => {
+    if (prediction.placeId.startsWith('manual-')) {
+      onChange(prediction)
+      return
+    }
+
     try {
-      const placesService = getSharedPlacesService()
-      placesService.getDetails(
-        { placeId: prediction.placeId, fields: ['geometry', 'formatted_address', 'address_components'] },
-        (place: any, status: string) => {
-          if (status !== 'OK' || !place?.geometry) {
-            onChange({
-              ...prediction,
-              mainText: formatPlaceLabel(prediction),
-            })
-            return
-          }
+      const res = await fetch(`/api/places/details?placeId=${encodeURIComponent(prediction.placeId)}`)
+      const data = await res.json()
 
-          const city = place.address_components?.find((c: any) => c.types.includes('locality'))
-            ?.long_name
+      if (!data.success || !data.place) {
+        onChange({
+          ...prediction,
+          mainText: formatPlaceLabel(prediction),
+        })
+        return
+      }
 
-          onChange({
-            placeId: prediction.placeId,
-            mainText: formatPlaceLabel(prediction),
-            secondaryText: city || prediction.secondaryText,
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-          })
-        }
-      )
+      onChange({
+        placeId: prediction.placeId,
+        mainText: data.place.formattedAddress || formatPlaceLabel(prediction),
+        secondaryText: data.place.city || prediction.secondaryText,
+        lat: data.place.lat,
+        lng: data.place.lng,
+      })
     } catch {
       onChange({
         ...prediction,
@@ -196,13 +152,7 @@ export default function GooglePlacesAutocomplete({
     setPredictions([])
     setIsOpen(false)
     onTextChange?.(label)
-
-    if (prediction.placeId.startsWith('manual-')) {
-      onChange(prediction)
-      return
-    }
-
-    getPlaceDetails(prediction)
+    void getPlaceDetails(prediction)
   }
 
   const handleManualEntry = () => {
@@ -224,12 +174,11 @@ export default function GooglePlacesAutocomplete({
     onTextChange?.(nextValue)
 
     if (nextValue.trim()) {
-      if (apiReady && autocompleteService.current) {
-        fetchPlacePredictions(nextValue)
-      }
+      schedulePredictions(nextValue)
     } else {
       setPredictions([])
       setIsOpen(false)
+      setError(null)
     }
   }
 
@@ -246,6 +195,7 @@ export default function GooglePlacesAutocomplete({
     setInput('')
     setPredictions([])
     setIsOpen(false)
+    setError(null)
     onTextChange?.('')
     onChange({
       placeId: '',
@@ -260,8 +210,8 @@ export default function GooglePlacesAutocomplete({
   return (
     <div className="relative w-full">
       {error && (
-        <div className="mb-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
+        <div className="mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          {error}. You can still type a location and continue.
         </div>
       )}
 
@@ -275,12 +225,9 @@ export default function GooglePlacesAutocomplete({
           onBlur={handleBlur}
           onFocus={() => input && setIsOpen(true)}
           placeholder={placeholder}
-          disabled={!apiReady}
-          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
-            !apiReady ? 'bg-gray-100 cursor-not-allowed border-gray-300' : 'border-gray-300'
-          }`}
+          className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent border-gray-300"
         />
-        {input && apiReady && (
+        {input && (
           <button
             type="button"
             onClick={handleClear}
@@ -291,7 +238,7 @@ export default function GooglePlacesAutocomplete({
         )}
       </div>
 
-      {isOpen && apiReady && (
+      {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
           {loading && (
             <div className="p-4 text-center text-gray-500">
