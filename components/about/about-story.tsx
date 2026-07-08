@@ -3,9 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import { subscribeToAbout, DEFAULT_ABOUT, AboutConfig } from '@/lib/about-config'
 
-/** Mobile: portrait frame; desktop: stretches to match text column height */
+/** Portrait frame at every breakpoint — never switches to landscape on desktop */
 const FOUNDER_IMAGE_FRAME =
-  'relative w-full h-full min-h-0 overflow-hidden rounded-2xl aspect-[3/4] lg:aspect-auto'
+  'relative w-full overflow-hidden rounded-2xl aspect-[3/4] bg-neutral-100'
+
+const FOUNDER_IMAGE_COLUMN =
+  'min-w-0 w-full max-w-[14rem] sm:max-w-[18rem] md:max-w-[20rem] lg:max-w-[22rem] mx-auto lg:mx-0 order-1'
 
 export function AboutStory() {
   const [config, setConfig] = useState<AboutConfig>(DEFAULT_ABOUT)
@@ -19,9 +22,9 @@ export function AboutStory() {
   if (!ready) {
     return (
       <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-pulse overflow-x-hidden">
-        <div className="max-w-[72rem] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="aspect-[3/4] max-w-[20rem] mx-auto lg:max-w-none lg:mx-0 bg-neutral-200 rounded-2xl" />
-          <div className="space-y-4">
+        <div className="max-w-[72rem] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-start">
+          <div className={`${FOUNDER_IMAGE_COLUMN} aspect-[3/4] bg-neutral-200 rounded-2xl`} />
+          <div className="space-y-4 order-2">
             <div className="h-3 w-28 bg-neutral-200 rounded" />
             <div className="h-24 w-full bg-neutral-200 rounded" />
           </div>
@@ -34,9 +37,9 @@ export function AboutStory() {
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-background overflow-x-hidden">
-      <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 lg:items-stretch">
-        <div className="min-w-0 w-full flex flex-col lg:h-full lg:min-h-0 order-1 max-w-[20rem] mx-auto lg:max-w-none lg:mx-0">
-          <div className={FOUNDER_IMAGE_FRAME + ' bg-neutral-100'}>
+      <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 lg:items-start">
+        <div className={FOUNDER_IMAGE_COLUMN}>
+          <div className={FOUNDER_IMAGE_FRAME}>
             {story.founderImageURL ? (
               <img
                 src={story.founderImageURL}

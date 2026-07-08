@@ -323,7 +323,10 @@ export default function AdminCmsAboutPage() {
                 Portrait orientation (3:4). Shown in the Story section on the public About page.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
-                <div className="w-full max-w-[12rem] shrink-0">
+                <div className="w-full max-w-[14rem] sm:max-w-[16rem] shrink-0">
+                  <p className="text-[0.65rem] text-neutral-400 mb-1 text-center sm:text-left">
+                    Portrait preview (3:4)
+                  </p>
                   <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 aspect-[3/4] bg-neutral-50">
                     {config.story.founderImageURL ? (
                       <img
