@@ -67,6 +67,8 @@ import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import { logoutUser } from '@/lib/auth'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { useAuth } from '@/lib/auth-context'
+import { filterAdminMenuByPermissions } from '@/lib/admin-invite-permissions'
 
 const adminMenuItems = [
   // Dashboard & System
@@ -150,7 +152,13 @@ const adminMenuItems = [
 export function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { user } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+
+  const visibleMenuItems = React.useMemo(
+    () => filterAdminMenuByPermissions(adminMenuItems, user),
+    [user]
+  )
 
   const handleLogout = async () => {
     await logoutUser()
@@ -158,7 +166,7 @@ export function AdminSidebar() {
   }
 
   // Group items by category
-  const groupedItems = adminMenuItems.reduce((acc, item) => {
+  const groupedItems = visibleMenuItems.reduce((acc, item) => {
     const group = item.group || 'Other'
     if (!acc[group]) {
       acc[group] = []

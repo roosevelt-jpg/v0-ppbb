@@ -1,12 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllIntegrationHealthServer } from '@/lib/integrations/handlers-server'
 import { getAllServices } from '@/lib/integrations/services'
+import {
+  verifyIdToken,
+  isAdminUser,
+  hasInvitePermissionServer,
+} from '@/lib/admin-access-server'
 
-// Temporary: Use mock userId for development until Firebase Admin SDK is properly configured
 const MOCK_USER_ID = 'dev-user-001'
+
+async function requireManageIntegrations(
+  request: NextRequest
+): Promise<{ uid: string } | NextResponse> {
+  const authHeader = request.headers.get('authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const uid = await verifyIdToken(token)
+  if (!uid) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const isAdmin = await isAdminUser(uid)
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  const allowed = await hasInvitePermissionServer(uid, 'manage_integrations')
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Forbidden: manage_integrations permission required' },
+      { status: 403 }
+    )
+  }
+  return { uid }
+}
 
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await requireManageIntegrations(request)
+    if (authResult instanceof NextResponse) return authResult
+
     const allServices = getAllServices()
 
     try {

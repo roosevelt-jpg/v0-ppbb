@@ -135,9 +135,8 @@ export default function AdminManagementPage() {
   const handleDeleteAdmin = async (id: string) => {
     if (!confirm('Are you sure?')) return
     try {
-      const res = await fetch('/api/admin/management', {
+      const res = await fetch(`/api/admin/management?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
       })
       const json = await res.json()
       if (json.success) {
@@ -267,7 +266,7 @@ export default function AdminManagementPage() {
 
             <div>
               <h3 className="font-bold text-gray-900 mb-3">Generated Access Codes</h3>
-              <p className="text-sm text-gray-600 mb-4">Active access codes ready to be used</p>
+              <p className="text-sm text-gray-600 mb-4">All generated access codes (used and unused)</p>
             </div>
 
             {codes.length === 0 ? (
@@ -302,9 +301,9 @@ export default function AdminManagementPage() {
                       </div>
                     </div>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      code.used ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
+                      code.used || code.isUsed ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
                     }`}>
-                      {code.used ? 'Used' : 'Unused'}
+                      {code.used || code.isUsed ? 'Used' : 'Unused'}
                     </span>
                   </div>
                 ))}

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasAdminAccess } from '@/lib/roles'
+import { canAccessAdminPath } from '@/lib/admin-invite-permissions'
 import { AdminSidebar } from '@/components/admin-layout'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSelector } from '@/components/language-selector'
@@ -67,11 +68,16 @@ export default function AdminLayout({
         router.push('/dashboard')
         return
       }
+
+      if (!canAccessAdminPath(user, pathname)) {
+        router.push('/admin')
+        return
+      }
     }
     
     // User is authenticated and is an admin or super admin - allow access
     // Or we're still loading and waiting for auth check
-  }, [user, loading, router, isSetupPage])
+  }, [user, loading, router, isSetupPage, pathname])
 
   const handleLogout = async () => {
     await logoutUser()
@@ -95,7 +101,7 @@ export default function AdminLayout({
   }
 
   // Show access denied if not admin or super admin (only after loading complete)
-  if (!loading && !isSetupPage && (!user || !hasAdminAccess(user))) {
+  if (!loading && !isSetupPage && (!user || !hasAdminAccess(user) || !canAccessAdminPath(user, pathname))) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">

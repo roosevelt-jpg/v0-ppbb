@@ -51,16 +51,24 @@ export async function GET(request: NextRequest) {
     }
 
     if (query === 'access-codes') {
-      const snapshot = await db.collection('admin-access-codes').where('used', '==', false).get()
-      const codes = snapshot.docs.map(doc => {
-        const data = doc.data()
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt,
-          expiresAt: data.expiresAt?.toDate?.() || data.expiresAt,
-        }
-      })
+      const snapshot = await db.collection('adminAccessCodes').get()
+      const codes = snapshot.docs
+        .map((docSnap) => {
+          const data = docSnap.data()
+          const isUsed = data.isUsed === true || data.used === true || data.status === 'used'
+          return {
+            id: docSnap.id,
+            ...data,
+            used: isUsed,
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            expiresAt: data.expiresAt?.toDate?.() || data.expiresAt,
+          }
+        })
+        .sort((a, b) => {
+          const aTime = new Date(a.createdAt).getTime()
+          const bTime = new Date(b.createdAt).getTime()
+          return bTime - aTime
+        })
       return NextResponse.json({ success: true, data: codes })
     }
 
@@ -109,26 +117,30 @@ export async function POST(request: NextRequest) {
         code,
         adminName,
         adminEmail,
+        adminRole: role,
         role,
         permissions: permissions || ['full_access'],
+        isUsed: false,
         used: false,
+        status: 'active',
         usedBy: null,
         usedAt: null,
         createdAt: new Date(),
         expiresAt,
         sendEmail: !!sendEmail,
+        createdBy: 'management-api',
       }
 
       console.log('[v0] Saving access code to Firestore:', {
         code,
         permissions: accessCodeData.permissions,
         expiresAt,
-        collectionName: 'admin-access-codes',
+        collectionName: 'adminAccessCodes',
       })
 
       let docRef
       try {
-        docRef = await db.collection('admin-access-codes').add(accessCodeData)
+        docRef = await db.collection('adminAccessCodes').add(accessCodeData)
         console.log('[v0] Access code saved successfully:', {
           docId: docRef.id,
           code,
@@ -137,7 +149,7 @@ export async function POST(request: NextRequest) {
       } catch (dbError) {
         console.error('[v0] Firestore write error:', {
           error: dbError instanceof Error ? dbError.message : String(dbError),
-          collection: 'admin-access-codes',
+          collection: 'adminAccessCodes',
           dataSize: JSON.stringify(accessCodeData).length,
         })
         throw dbError
@@ -196,9 +208,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
       }
 
-      // Mark access code as used
-      await db.collection('admin-access-codes').doc(accessCodeId).update({
+      const codeRef = db.collection('adminAccessCodes').doc(accessCodeId)
+      const codeSnap = await codeRef.get()
+      const codeData = codeSnap.exists ? codeSnap.data() : null
+      const invitePermissions = Array.isArray(codeData?.permissions)
+        ? codeData.permissions
+        : getRolePermissions(role)
+
+      await codeRef.update({
+        isUsed: true,
         used: true,
+        status: 'used',
         usedBy: email,
         usedAt: new Date(),
       })
@@ -208,7 +228,7 @@ export async function POST(request: NextRequest) {
         email,
         name,
         role, // 'super_admin' | 'admin' | 'moderator'
-        permissions: getRolePermissions(role),
+        permissions: invitePermissions,
         avatarUrl: '', // User uploads this after signup
         bio: '',
         status: 'active',

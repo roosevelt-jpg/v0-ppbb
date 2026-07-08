@@ -7,6 +7,8 @@ import nodemailer from 'nodemailer'
 import { SiteSettings } from './types'
 import { getFirestore } from 'firebase-admin/firestore'
 import { getApps, cert, initializeApp } from 'firebase-admin/app'
+import { getAdminDb } from '@/lib/firebase-admin'
+import { mergeGlobalSettings } from '@/lib/global-settings'
 
 /**
  * Get admin Firestore instance for loading integrations
@@ -101,6 +103,23 @@ export interface AdminInviteDetails {
   fromName?: string
 }
 
+/** Dark logo for light email backgrounds — reads platformConfig/globalSettings.logoUrlDark */
+export async function getEmailBrandLogoUrl(): Promise<string> {
+  try {
+    const db = getAdminDb()
+    const snap = await db.collection('platformConfig').doc('globalSettings').get()
+    const settings = mergeGlobalSettings(snap.data() as Record<string, unknown> | undefined)
+    if (settings.logoUrlDark) return settings.logoUrlDark
+  } catch (error) {
+    console.warn(
+      '[v0] Failed to load email logo from Firestore:',
+      error instanceof Error ? error.message : String(error)
+    )
+  }
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+  return `${site}/images/pb-logo-black.png`
+}
+
 export const sendAdminInviteEmail = async (
   transporter: ReturnType<typeof createGmailTransporter>,
   gmailEmail: string,
@@ -110,6 +129,7 @@ export const sendAdminInviteEmail = async (
     throw new Error('Gmail transporter not available')
   }
 
+  const logoUrl = await getEmailBrandLogoUrl()
   const roleLabel = details.role === 'super_admin' ? 'Super Admin' : 'Admin'
   const permissionsText = details.permissions.length > 0
     ? details.permissions.map(p => `• ${p}`).join('<br>')
@@ -150,7 +170,7 @@ export const sendAdminInviteEmail = async (
         <div class="container">
           <!-- Header -->
           <div class="header">
-            <img src="https://test.myflynai.com/pb-logo-black.png" alt="Passive Blessings" style="max-width: 180px; height: auto; margin-bottom: 10px;">
+            <img src="${logoUrl}" alt="Passive Blessings" style="max-width: 180px; height: auto; margin-bottom: 10px;">
             <div class="subtitle">Admin Portal</div>
           </div>
 

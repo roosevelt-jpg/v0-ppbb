@@ -1,18 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveIntegrationServer, getAllIntegrationsServer } from '@/lib/integrations/handlers-server'
+import {
+  verifyIdToken,
+  isAdminUser,
+  hasInvitePermissionServer,
+} from '@/lib/admin-access-server'
 
 const MOCK_USER_ID = 'dev-user-001'
+
+async function requireManageIntegrations(
+  request: NextRequest
+): Promise<{ uid: string } | NextResponse> {
+  const authHeader = request.headers.get('authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const uid = await verifyIdToken(token)
+  if (!uid) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const isAdmin = await isAdminUser(uid)
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  const allowed = await hasInvitePermissionServer(uid, 'manage_integrations')
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Forbidden: manage_integrations permission required' },
+      { status: 403 }
+    )
+  }
+  return { uid }
+}
 
 export async function GET(request: NextRequest) {
   try {
     console.log('[v0] GET /api/admin/integrations')
-    const userId = MOCK_USER_ID
+    const authResult = await requireManageIntegrations(request)
+    if (authResult instanceof NextResponse) return authResult
 
-    const integrations = await getAllIntegrationsServer(userId)
+    const integrations = await getAllIntegrationsServer(MOCK_USER_ID)
     return NextResponse.json({
       data: integrations,
       message: 'Integrations retrieved successfully',
-      count: integrations.length
+      count: integrations.length,
     })
   } catch (error) {
     console.error('[v0] GET error:', error instanceof Error ? error.message : String(error))
@@ -27,6 +59,9 @@ export async function POST(request: NextRequest) {
   try {
     console.log('[v0] POST /api/admin/integrations')
 
+    const authResult = await requireManageIntegrations(request)
+    if (authResult instanceof NextResponse) return authResult
+
     const body = await request.json()
     const { serviceId, credentials } = body
 
@@ -38,10 +73,8 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[v0] POST: Saving integration', serviceId)
-    const userId = MOCK_USER_ID
 
-    // Let the error propagate — don't silently swallow Firestore failures
-    const integration = await saveIntegrationServer(userId, serviceId, credentials)
+    const integration = await saveIntegrationServer(MOCK_USER_ID, serviceId, credentials)
     console.log('[v0] Integration saved successfully')
 
     return NextResponse.json({
@@ -52,15 +85,12 @@ export async function POST(request: NextRequest) {
         serviceId: integration.serviceId,
         status: integration.status,
         createdAt: integration.createdAt,
-        updatedAt: integration.updatedAt
-      }
+        updatedAt: integration.updatedAt,
+      },
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error('[v0] POST error:', errorMessage)
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }

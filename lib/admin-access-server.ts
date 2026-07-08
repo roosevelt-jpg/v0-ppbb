@@ -1,6 +1,11 @@
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 import { initializeApp, getApps, cert } from 'firebase-admin/app'
+import {
+  canAccessAdminPath,
+  hasInvitePermission,
+  type InvitePermissionId,
+} from '@/lib/admin-invite-permissions'
 
 // Initialize Firebase Admin SDK
 let adminApp: any = null
@@ -105,6 +110,50 @@ export async function isAdminUser(userId: string): Promise<boolean> {
     console.error('[v0] Admin check failed:', error)
     return false
   }
+}
+
+/**
+ * Server-side only: Get user profile from users collection
+ */
+export async function getUserProfileData(userId: string): Promise<Record<string, unknown> | null> {
+  try {
+    const app = getAdminApp()
+    const db = getFirestore(app)
+    const userSnap = await db.collection('users').doc(userId).get()
+    return userSnap.exists ? (userSnap.data() as Record<string, unknown>) : null
+  } catch (error) {
+    console.error('[v0] Get user profile failed:', error)
+    return null
+  }
+}
+
+/**
+ * Server-side invite permission check (users/{uid}.permissions from invitation flow)
+ */
+export async function hasInvitePermissionServer(
+  userId: string,
+  permission: InvitePermissionId
+): Promise<boolean> {
+  const data = await getUserProfileData(userId)
+  if (!data) return false
+  return hasInvitePermission(
+    { role: data.role as string, permissions: data.permissions as string[] },
+    permission
+  )
+}
+
+/**
+ * Server-side route access for scoped admin permissions
+ */
+export async function canAccessAdminPathServer(userId: string, pathname: string): Promise<boolean> {
+  const data = await getUserProfileData(userId)
+  if (!data) return false
+  const role = data.role as string
+  if (role !== 'admin' && role !== 'super_admin') return false
+  return canAccessAdminPath(
+    { role: role as 'admin' | 'super_admin', permissions: data.permissions as string[] },
+    pathname
+  )
 }
 
 /**
