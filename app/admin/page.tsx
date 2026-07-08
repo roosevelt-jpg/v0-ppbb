@@ -18,7 +18,7 @@ export default function AdminDashboard() {
           { title: 'Pages Management', label: 'Manage Pages', href: '/admin/pages' },
           { title: 'Events Management', label: 'Manage Events', href: '/admin/events' },
           { title: 'Donations', label: 'Manage Donations', href: '/admin/donations' },
-          { title: 'Settings', label: 'Admin Settings', href: '/admin/settings' },
+          { title: 'Settings', label: 'Admin Settings', href: '/admin/cms/global-settings' },
         ].map((card) => (
           <div
             key={card.href}

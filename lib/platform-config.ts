@@ -2,6 +2,15 @@
 
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
+import {
+  DEFAULT_GLOBAL_SETTINGS,
+  mergeGlobalSettings,
+  type GlobalSettings,
+  type GlobalSocialLinks,
+} from '@/lib/global-settings'
+
+export type { GlobalSettings, GlobalSocialLinks }
+export { DEFAULT_GLOBAL_SETTINGS, mergeGlobalSettings }
 
 export interface NavLink {
   label: string
@@ -15,14 +24,6 @@ export interface NavigationConfig {
   ctaButton: { label: string; href: string }
   signInLabel: string
   whatsappLink?: string
-}
-
-export interface GlobalSettings {
-  whatsappLink: string
-  platformName: string
-  contactEmail: string
-  address: string
-  phone: string
 }
 
 export const DEFAULT_NAVIGATION: NavigationConfig = {
@@ -40,14 +41,6 @@ export const DEFAULT_NAVIGATION: NavigationConfig = {
   whatsappLink: '',
 }
 
-export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
-  whatsappLink: '',
-  platformName: 'Passive Blessings',
-  contactEmail: 'contact@passiveblessings.org',
-  address: 'Dubai, UAE',
-  phone: '+971 50 000 0000',
-}
-
 function mergeNavigation(data: Record<string, unknown> | undefined): NavigationConfig {
   if (!data) return DEFAULT_NAVIGATION
   const rawLinks = Array.isArray(data.links)
@@ -62,7 +55,6 @@ function mergeNavigation(data: Record<string, unknown> | undefined): NavigationC
         .sort((a, b) => a.order - b.order)
     : DEFAULT_NAVIGATION.links
 
-  // Dedupe by href so CMS cannot accidentally list the same page twice
   const seen = new Set<string>()
   const links = rawLinks.filter((l) => {
     const key = l.href.toLowerCase()
@@ -79,17 +71,6 @@ function mergeNavigation(data: Record<string, unknown> | undefined): NavigationC
     },
     signInLabel: typeof data.signInLabel === 'string' ? data.signInLabel : DEFAULT_NAVIGATION.signInLabel,
     whatsappLink: typeof data.whatsappLink === 'string' ? data.whatsappLink : DEFAULT_NAVIGATION.whatsappLink,
-  }
-}
-
-function mergeGlobalSettings(data: Record<string, unknown> | undefined): GlobalSettings {
-  if (!data) return DEFAULT_GLOBAL_SETTINGS
-  return {
-    whatsappLink: typeof data.whatsappLink === 'string' ? data.whatsappLink : DEFAULT_GLOBAL_SETTINGS.whatsappLink,
-    platformName: typeof data.platformName === 'string' ? data.platformName : DEFAULT_GLOBAL_SETTINGS.platformName,
-    contactEmail: typeof data.contactEmail === 'string' ? data.contactEmail : DEFAULT_GLOBAL_SETTINGS.contactEmail,
-    address: typeof data.address === 'string' ? data.address : DEFAULT_GLOBAL_SETTINGS.address,
-    phone: typeof data.phone === 'string' ? data.phone : DEFAULT_GLOBAL_SETTINGS.phone,
   }
 }
 

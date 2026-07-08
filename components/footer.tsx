@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { db } from '@/lib/firebase'
-import { collection, getDocs } from 'firebase/firestore'
 import { getPagesByMenuLocation } from '@/lib/admin'
-import { Mail, Heart, Users, Share2, MessageSquare, Briefcase } from 'lucide-react'
 import { Page } from '@/lib/types'
 import { SocialMediaLinks } from '@/components/social-media-links'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
+import {
+  subscribeToGlobalSettings,
+  DEFAULT_GLOBAL_SETTINGS,
+  type GlobalSocialLinks,
+} from '@/lib/platform-config'
 
 interface Stats {
   members: number
@@ -17,60 +19,50 @@ interface Stats {
   donationsTracked: string
 }
 
-interface SocialLinks {
-  facebook?: string
-  twitter?: string
-  instagram?: string
-  linkedin?: string
-}
-
 const BUSINESS_GATE_LABELS = new Set(['Start Business', 'Host Event', 'List Your Business', 'Post a Job'])
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
-  const [stats, setStats] = useState<Stats>({
+  const [stats] = useState<Stats>({
     members: 3412,
     volunteerHours: 8940,
     businessPartners: 87,
     donationsTracked: 'AED 92K',
   })
-  const [socialLinks, setSocialLinks] = useState<SocialLinks>({})
-  
+  const [socialLinks, setSocialLinks] = useState<GlobalSocialLinks>(
+    DEFAULT_GLOBAL_SETTINGS.socialLinks
+  )
+  const [footerBlurb, setFooterBlurb] = useState(DEFAULT_GLOBAL_SETTINGS.siteDescription)
+  const [logoUrl, setLogoUrl] = useState(DEFAULT_GLOBAL_SETTINGS.logoUrlDark)
+
   const [quickLinks, setQuickLinks] = useState<Page[]>([])
   const [getInvolvedLinks, setGetInvolvedLinks] = useState<Page[]>([])
   const [legalLinks, setLegalLinks] = useState<Page[]>([])
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch social links from settings
-        const settingsSnapshot = await getDocs(collection(db, 'settings'))
-        settingsSnapshot.forEach(doc => {
-          const data = doc.data()
-          console.log('[v0] Footer - Settings data:', data)
-          
-          const socialData = data.socialLinks || data.social || {}
-          console.log('[v0] Footer - Social links:', socialData)
-          setSocialLinks(socialData)
-        })
+    return subscribeToGlobalSettings((s) => {
+      setSocialLinks(s.socialLinks || {})
+      setFooterBlurb(s.siteDescription || DEFAULT_GLOBAL_SETTINGS.siteDescription)
+      setLogoUrl(s.logoUrlDark || s.logoUrlLight || '')
+    })
+  }, [])
 
-        // Fetch menu pages by location
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
         const [quickLinksPages, getInvolvedPages, legalPages] = await Promise.all([
           getPagesByMenuLocation('footer-quicklinks'),
           getPagesByMenuLocation('footer-getinvolved'),
           getPagesByMenuLocation('footer-legal'),
         ])
-
         setQuickLinks(quickLinksPages)
         setGetInvolvedLinks(getInvolvedPages)
         setLegalLinks(legalPages)
-      } catch (error) {
-        // Silently fail - use default links
-        // Permission errors are expected for unauthenticated users
+      } catch {
+        // Permission errors expected for some users — defaults remain
       }
     }
-
-    fetchData()
+    void fetchMenus()
   }, [])
 
   // Default links if no pages configured
@@ -149,13 +141,16 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
-            <img 
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-1IbVvpWYxxNsdvH8MfdFG37gnBEPOv.png" 
-              alt="Passive Blessings" 
+            <img
+              src={
+                logoUrl ||
+                'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-1IbVvpWYxxNsdvH8MfdFG37gnBEPOv.png'
+              }
+              alt="Passive Blessings"
               style={{ width: '140px', height: 'auto' }}
             />
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
-              Building community through compassion and collective action.
+              {footerBlurb}
             </p>
           </div>
 

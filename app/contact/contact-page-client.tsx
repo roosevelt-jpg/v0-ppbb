@@ -5,9 +5,11 @@ import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { SocialMediaLinks } from '@/components/social-media-links'
-import { db } from '@/lib/firebase'
-import { collection, getDocs } from 'firebase/firestore'
-import { subscribeToGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/platform-config'
+import {
+  subscribeToGlobalSettings,
+  DEFAULT_GLOBAL_SETTINGS,
+  type GlobalSocialLinks,
+} from '@/lib/platform-config'
 import { PARTNERS_CONTACT_SUBJECTS } from '@/components/partners/get-in-touch-form'
 
 interface ContactFormData {
@@ -22,12 +24,7 @@ interface ContactInfo {
   email: string
   phone: string
   address: string
-  socialLinks: {
-    facebook?: string
-    twitter?: string
-    instagram?: string
-    linkedin?: string
-  }
+  socialLinks: GlobalSocialLinks
 }
 
 export function ContactPageClient() {
@@ -49,35 +46,14 @@ export function ContactPageClient() {
   })
 
   useEffect(() => {
-    const unsub = subscribeToGlobalSettings((s) => {
-      setContactInfo((prev) => ({
-        ...prev,
-        email: s.contactEmail || prev.email,
-        phone: s.phone || prev.phone,
-        address: s.address || prev.address,
-      }))
+    return subscribeToGlobalSettings((s) => {
+      setContactInfo({
+        email: s.contactEmail || DEFAULT_GLOBAL_SETTINGS.contactEmail,
+        phone: s.phone || DEFAULT_GLOBAL_SETTINGS.phone,
+        address: s.address || DEFAULT_GLOBAL_SETTINGS.address,
+        socialLinks: s.socialLinks || {},
+      })
     })
-    return unsub
-  }, [])
-
-  useEffect(() => {
-    const fetchContactInfo = async () => {
-      try {
-        const settingsSnapshot = await getDocs(collection(db, 'settings'))
-        settingsSnapshot.forEach((docSnap) => {
-          const data = docSnap.data()
-          setContactInfo((prev) => ({
-            email: data.email || data.contact?.email || prev.email,
-            phone: data.phone || data.contact?.phone || prev.phone,
-            address: data.address || data.contact?.address || prev.address,
-            socialLinks: data.socialLinks || data.social || prev.socialLinks,
-          }))
-        })
-      } catch (err) {
-        console.error('[v0] Error fetching contact info:', err)
-      }
-    }
-    void fetchContactInfo()
   }, [])
 
   const handleChange = (
