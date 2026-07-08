@@ -91,6 +91,7 @@ export default function DonateConfirmContent() {
           userId: currentUser.uid,
           donorName: currentUser.displayName || currentUser.email || 'Anonymous',
           donorEmail: currentUser.email || '',
+          donorPhone: currentUser.phoneNumber || null,
           amount: parseFloat(formData.amount),
           referenceNumber: formData.referenceNumber.trim(),
           proofImage: proofImageUrl,

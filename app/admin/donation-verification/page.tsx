@@ -21,7 +21,12 @@ type Submission = {
   rejectionReason?: string
 }
 
-const PENDING_STATUSES = new Set(['pending', 'pending_verification', 'more_info_requested'])
+const PENDING_STATUSES = new Set([
+  'pending',
+  'pending_verification',
+  'more_info_requested',
+  'resubmission_requested',
+])
 
 async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser

@@ -67,6 +67,10 @@ const adminMenuItems = [
   { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },
   { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: HandHeart, group: 'Charity' },
 
+  // Finance
+  { label: 'Donation Tracking', href: '/admin/finance/donations', icon: DollarSign, group: 'Finance' },
+  { label: 'Event Finance', href: '/admin/finance/events', icon: Calendar, group: 'Finance' },
+
   // Memberships & Commerce
   { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },
   { label: 'Pricing Plans', href: '/admin/pricing', icon: DollarSign, group: 'Memberships' },
@@ -131,7 +135,20 @@ export function AdminSidebar() {
   }, {} as Record<string, typeof adminMenuItems>)
 
   // Sort groups in order of appearance
-  const groupOrder = ['Dashboard', 'Security', 'Users', 'Community', 'Charity', 'Memberships', 'Communication', 'Content', 'CMS', 'Assets', 'Configuration']
+  const groupOrder = [
+    'Dashboard',
+    'Security',
+    'Users',
+    'Community',
+    'Charity',
+    'Finance',
+    'Memberships',
+    'Communication',
+    'Content',
+    'CMS',
+    'Assets',
+    'Configuration',
+  ]
   const sortedGroups = groupOrder.filter(g => groupedItems[g])
 
   return (

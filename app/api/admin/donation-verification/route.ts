@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { submissionId, action, reason, message } = body as {
       submissionId?: string
-      action?: 'verify' | 'reject' | 'request_info'
+      action?: 'verify' | 'reject' | 'request_info' | 'request_resubmission'
       reason?: string
       message?: string
     }
@@ -43,6 +43,24 @@ export async function POST(request: NextRequest) {
     const db = getAdminDb()
     const submissionRef = db.collection('donationSubmissions').doc(submissionId)
 
+    async function notifyDonor(userId: string, title: string, bodyText: string) {
+      if (!userId) return
+      try {
+        await db.collection('users').doc(userId).collection('notifications').add(
+          sanitizeForFirestore({
+            type: 'donation_resubmission',
+            title,
+            message: bodyText,
+            submissionId,
+            read: false,
+            createdAt: FieldValue.serverTimestamp(),
+          })
+        )
+      } catch (err) {
+        console.warn('[donation-verification] donor notify failed:', err)
+      }
+    }
+
     if (action === 'reject') {
       await submissionRef.update(
         sanitizeForFirestore({
@@ -56,15 +74,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    if (action === 'request_info') {
+    if (action === 'request_info' || action === 'request_resubmission') {
+      const snap = await submissionRef.get()
+      const data = snap.data() || {}
+      const userId = data.userId ? String(data.userId) : ''
+      const note =
+        message || reason || 'Please resubmit your donation proof with clearer information.'
+
       await submissionRef.update(
         sanitizeForFirestore({
-          status: 'more_info_requested',
-          infoRequestMessage: message || reason || 'Please provide additional information',
+          // Part 13A uses resubmission_requested; Part 7B also treats more_info_* as pending
+          status:
+            action === 'request_resubmission' ? 'resubmission_requested' : 'more_info_requested',
+          infoRequestMessage: note,
           infoRequestedAt: FieldValue.serverTimestamp(),
           infoRequestedBy: adminUid,
           updatedAt: FieldValue.serverTimestamp(),
         })
+      )
+
+      await notifyDonor(
+        userId,
+        'Donation proof — resubmission requested',
+        note
       )
       return NextResponse.json({ success: true })
     }
@@ -97,7 +129,8 @@ export async function POST(request: NextRequest) {
         tx.update(
           submissionRef,
           sanitizeForFirestore({
-            status: 'confirmed',
+            // Part 13A canonical status; Part 7B UI already accepts "verified"
+            status: 'verified',
             verifiedAt: FieldValue.serverTimestamp(),
             verifiedBy: adminUid,
             updatedAt: FieldValue.serverTimestamp(),
