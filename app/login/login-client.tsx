@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser, loginWithGoogle, loginWithFacebook } from '@/lib/auth'
+import { auth } from '@/lib/firebase'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
 import { AlertCircle, Check } from 'lucide-react'
@@ -104,14 +105,18 @@ export default function LoginPage() {
     }
 
     if (user) {
-      logActivity(user.id, user.email, 'SIGNIN', 'Successfully signed in', { 
-        userId: user.id,
+      const userId = user.id || auth.currentUser?.uid || 'guest'
+      logActivity(userId, user.email || email, 'SIGNIN', 'Successfully signed in', { 
         userRole: user.role,
         rememberMe,
         timestamp: new Date().toISOString()
       })
 
+      setLoading(false)
       routeAfterLogin(user)
+    } else {
+      setError('Sign in succeeded but no user profile was returned.')
+      setLoading(false)
     }
   }
 
@@ -128,8 +133,8 @@ export default function LoginPage() {
     }
 
     if (user) {
-      logActivity(user.id, user.email, 'SIGNIN_GOOGLE', 'Signed in with Google', { 
-        userId: user.id,
+      const userId = user.id || auth.currentUser?.uid || 'guest'
+      logActivity(userId, user.email || '', 'SIGNIN_GOOGLE', 'Signed in with Google', { 
         timestamp: new Date().toISOString()
       })
 
@@ -150,8 +155,8 @@ export default function LoginPage() {
     }
 
     if (user) {
-      logActivity(user.id, user.email, 'SIGNIN_FACEBOOK', 'Signed in with Facebook', { 
-        userId: user.id,
+      const userId = user.id || auth.currentUser?.uid || 'guest'
+      logActivity(userId, user.email || '', 'SIGNIN_FACEBOOK', 'Signed in with Facebook', { 
         timestamp: new Date().toISOString()
       })
 

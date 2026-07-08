@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(currentUser)
 
       if (currentUser) {
+        setLoading(true)
         unsubscribeProfile = onSnapshot(
           doc(db, 'users', currentUser.uid),
           (snap) => {

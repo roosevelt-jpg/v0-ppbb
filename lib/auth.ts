@@ -84,11 +84,17 @@ export async function loginUser(
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const firebaseUser = userCredential.user
 
+    // Ensure the auth token is attached before Firestore reads (avoids permission-denied races)
+    await firebaseUser.getIdToken()
+
     // Fetch user profile from Firestore
     const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
 
     if (userDocSnap.exists()) {
-      return { user: userDocSnap.data() as User, error: null }
+      return {
+        user: { id: firebaseUser.uid, ...userDocSnap.data() } as User,
+        error: null,
+      }
     }
 
     // Auto-create user profile on first login if it doesn't exist
@@ -131,7 +137,7 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
 
     if (userDocSnap.exists()) {
-      return { user: userDocSnap.data() as User, error: null }
+      return { user: { id: firebaseUser.uid, ...userDocSnap.data() } as User, error: null }
     }
 
     // Create new user profile for first-time Google sign-in
@@ -174,7 +180,7 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
 
     if (userDocSnap.exists()) {
-      return { user: userDocSnap.data() as User, error: null }
+      return { user: { id: firebaseUser.uid, ...userDocSnap.data() } as User, error: null }
     }
 
     // Create new user profile for first-time Facebook sign-in

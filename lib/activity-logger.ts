@@ -14,14 +14,34 @@ export interface ActivityLog {
   createdAt: Timestamp
 }
 
-export async function logActivity(userId: string, userEmail: string, actionType: ActivityLog['actionType'], action: string, details: Record<string, any> = {}) {
+function sanitizeDetails(details: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(details).filter(([, value]) => value !== undefined && value !== null)
+  )
+}
+
+export async function logActivity(
+  userId: string,
+  userEmail: string,
+  actionType: ActivityLog['actionType'],
+  action: string,
+  details: Record<string, unknown> = {}
+) {
+  const resolvedUserId = typeof userId === 'string' && userId.trim() ? userId.trim() : ''
+  const resolvedEmail = typeof userEmail === 'string' && userEmail.trim() ? userEmail.trim() : 'unknown'
+
+  if (!resolvedUserId) {
+    console.warn('[v0] Skipping activity log — userId is missing', { actionType, action })
+    return null
+  }
+
   try {
     const activityLog: Omit<ActivityLog, 'id'> = {
-      userId,
-      userEmail,
+      userId: resolvedUserId,
+      userEmail: resolvedEmail,
       action,
       actionType,
-      details,
+      details: sanitizeDetails(details),
       timestamp: Timestamp.now(),
       createdAt: Timestamp.now(),
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
@@ -40,7 +60,9 @@ export async function logActivity(userId: string, userEmail: string, actionType:
     console.log('[v0] Activity logged:', actionType, '- Doc ID:', docRef.id)
     return docRef.id
   } catch (error) {
+    // Non-blocking — login/signup must not fail because activityLogs rules reject client writes
     console.error('[v0] Error logging activity:', error)
+    return null
   }
 }
 
