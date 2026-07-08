@@ -211,7 +211,23 @@ export async function PUT(request: NextRequest) {
     }
     const existing = existingSnap.data()!
 
-    const updates: Record<string, unknown> = { ...rawUpdates }
+    // Never overwrite immutable create metadata via update
+    const {
+      createdAt: _createdAt,
+      createdBy: _createdBy,
+      createdByRole: _createdByRole,
+      id: _ignoredId,
+      ...safeUpdates
+    } = rawUpdates as Record<string, unknown>
+
+    const updates: Record<string, unknown> = { ...safeUpdates }
+
+    if (updates.startDate && typeof updates.startDate === 'string') {
+      updates.startDate = new Date(updates.startDate)
+    }
+    if (updates.endDate && typeof updates.endDate === 'string') {
+      updates.endDate = new Date(updates.endDate)
+    }
 
     if (updates.status === 'published' && !updates.pbCommissionPercent) {
       try {

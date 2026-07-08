@@ -86,21 +86,22 @@ function padTime(hours: number, minutes: number): string {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
+function formatLocalDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function extractDateParts(value: unknown): { date: string; time: string } {
-  if (!value) {
-    return { date: new Date().toISOString().split('T')[0], time: '09:00' }
-  }
+  const fallback = { date: formatLocalDate(new Date()), time: '09:00' }
+  if (!value) return fallback
   const d =
     value instanceof Date
       ? value
       : typeof value === 'object' && value !== null && 'toDate' in value
         ? (value as { toDate: () => Date }).toDate()
         : new Date(value as string)
-  if (Number.isNaN(d.getTime())) {
-    return { date: new Date().toISOString().split('T')[0], time: '09:00' }
-  }
+  if (Number.isNaN(d.getTime())) return fallback
   return {
-    date: d.toISOString().split('T')[0],
+    date: formatLocalDate(d),
     time: padTime(d.getHours(), d.getMinutes()),
   }
 }

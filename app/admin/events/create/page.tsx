@@ -190,25 +190,18 @@ function CreateEventForm() {
         bannerURL = (await handleUploadImage()) || ''
       }
 
-      const resolvedStatus: EventStatus =
-        status === 'preserve'
-          ? existingStatus && existingStatus !== 'changes_requested'
-            ? existingStatus
-            : 'draft'
-          : status
-
       if (isEditing && eventId) {
+        // Preserve existing status unless admin explicitly chooses draft or published
+        const statusToSave: EventStatus =
+          status === 'preserve'
+            ? existingStatus || 'draft'
+            : status
+
         const updatePayload = buildEventUpdatePayload({
           ...formData,
           bannerURL,
-          status: resolvedStatus === 'published' ? 'published' : 'draft',
+          status: statusToSave === 'published' ? 'published' : 'draft',
         })
-
-        // Keep non-draft/published statuses unless admin explicitly drafts or publishes
-        const statusToSave =
-          status === 'preserve' && existingStatus
-            ? existingStatus
-            : resolvedStatus
 
         const res = await fetch('/api/events', {
           method: 'PUT',
@@ -232,17 +225,20 @@ function CreateEventForm() {
             ? 'published'
             : statusToSave === 'pending_approval'
               ? 'pending_approval'
-              : statusToSave === 'draft'
-                ? 'draft'
-                : 'all'
+              : statusToSave === 'changes_requested'
+                ? 'changes_requested'
+                : statusToSave === 'draft'
+                  ? 'draft'
+                  : 'all'
         router.push(`/admin/events?tab=${tab}`)
         return
       }
 
+      const createStatus: 'draft' | 'published' = status === 'published' ? 'published' : 'draft'
       const payload = buildEventApiPayload({
         ...formData,
         bannerURL,
-        status: resolvedStatus === 'published' ? 'published' : 'draft',
+        status: createStatus,
         createdBy: user?.id || user?.email || 'admin',
         createdByRole: 'admin',
       })
@@ -259,7 +255,7 @@ function CreateEventForm() {
       }
 
       router.push(
-        resolvedStatus === 'published' ? '/admin/events?tab=published' : '/admin/events?tab=draft'
+        createStatus === 'published' ? '/admin/events?tab=published' : '/admin/events?tab=draft'
       )
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error saving event')
