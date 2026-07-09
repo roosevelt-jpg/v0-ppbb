@@ -123,8 +123,7 @@ export default function BusinessOpportunities() {
             <Button
               type="button"
               onClick={() => router.push('/business/opportunities/applicants')}
-              variant="outline"
-              className="min-h-[44px] w-full sm:w-auto"
+              className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white hover:bg-neutral-800"
             >
               <Eye className="w-4 h-4 mr-2" />
               View Applicants
@@ -147,7 +146,11 @@ export default function BusinessOpportunities() {
         ) : loadError ? (
           <Card className="p-8 text-center border-[#e4e1da]">
             <p className="text-neutral-500 mb-4">{loadError}</p>
-            <Button type="button" onClick={() => window.location.reload()}>
+            <Button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="min-h-[44px] bg-neutral-900 text-white hover:bg-neutral-800"
+            >
               Retry
             </Button>
           </Card>
