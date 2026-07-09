@@ -517,6 +517,17 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
       allow create: if false;
     }
+
+    // AI chatbot conversations — owner read/write; admin full access (/admin/chatbot onSnapshot)
+    match /conversations/{conversationId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth()
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
     
     // Default deny all other requests
     match /{document=**} {

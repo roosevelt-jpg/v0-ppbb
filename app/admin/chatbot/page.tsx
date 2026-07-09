@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Send, Check, X, Search, Filter, Archive, AlertCircle } from 'lucide-react'
 import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { useAuth } from '@/lib/auth-context'
 
 interface Conversation {
   id: string
@@ -33,6 +34,7 @@ interface Conversation {
 
 export default function AdminChatbotPage() {
   const audit = useAdminAudit()
+  const { user, firebaseUser } = useAuth()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConvId, setSelectedConvId] = useState<string>('')
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null)
@@ -44,28 +46,55 @@ export default function AdminChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'conversations'), snapshot => {
-      const convs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        lastMessageAt: doc.data().lastMessageAt?.toDate?.() || new Date(),
-        messages: (doc.data().messages || []).map((m: any) => ({
-          ...m,
-          timestamp: m.timestamp?.toDate?.() || new Date(),
-        })),
-      })) as Conversation[]
+    if (!user || !firebaseUser) return
 
-      setConversations(convs)
-      setLoading(false)
+    let unsubscribe: (() => void) | undefined
+    let cancelled = false
 
-      if (convs.length > 0 && !selectedConvId) {
-        setSelectedConvId(convs[0].id)
+    const subscribe = async () => {
+      try {
+        await firebaseUser.getIdToken(true)
+        if (cancelled) return
+
+        unsubscribe = onSnapshot(
+          collection(db, 'conversations'),
+          snapshot => {
+            const convs = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+              lastMessageAt: doc.data().lastMessageAt?.toDate?.() || new Date(),
+              messages: (doc.data().messages || []).map((m: any) => ({
+                ...m,
+                timestamp: m.timestamp?.toDate?.() || new Date(),
+              })),
+            })) as Conversation[]
+
+            setConversations(convs)
+            setLoading(false)
+
+            if (convs.length > 0 && !selectedConvId) {
+              setSelectedConvId(convs[0].id)
+            }
+          },
+          error => {
+            console.error('[v0] conversations onSnapshot permission error:', error)
+            setLoading(false)
+          }
+        )
+      } catch (error) {
+        console.error('[v0] Error preparing conversations subscription:', error)
+        setLoading(false)
       }
-    })
+    }
 
-    return () => unsubscribe()
-  }, [])
+    void subscribe()
+
+    return () => {
+      cancelled = true
+      unsubscribe?.()
+    }
+  }, [user?.id, firebaseUser])
 
   useEffect(() => {
     if (selectedConvId) {
