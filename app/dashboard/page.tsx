@@ -15,7 +15,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore'
-import { Calendar, Heart, Briefcase, Clock, ArrowRight, Bell, X } from 'lucide-react'
+import { Calendar, Heart, Briefcase, Clock, ArrowRight, Bell, X, Crown } from 'lucide-react'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -49,6 +49,7 @@ export default function DashboardPage() {
   const [notifications, setNotifications] = React.useState<MemberNotification[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [membershipLabel, setMembershipLabel] = React.useState<string>('View plans')
 
   React.useEffect(() => {
     if (authLoading) return
@@ -108,6 +109,19 @@ export default function DashboardPage() {
           profileResult.status === 'fulfilled' && profileResult.value?.exists()
             ? Number(profileResult.value.data()?.volunteeredHours) || 0
             : Number(member.volunteeredHours) || 0
+
+        if (profileResult.status === 'fulfilled' && profileResult.value?.exists()) {
+          const profileData = profileResult.value.data()
+          const planName = profileData?.membershipPlanName
+          const tier = profileData?.membershipTier
+          if (typeof planName === 'string' && planName.trim()) {
+            setMembershipLabel(planName)
+          } else if (typeof tier === 'string' && tier.trim() && tier !== 'standard') {
+            setMembershipLabel(tier)
+          } else {
+            setMembershipLabel('View plans')
+          }
+        }
 
         setUpcomingEvents(futureEvents)
         setApplications(
@@ -171,6 +185,7 @@ export default function DashboardPage() {
     { label: 'Make Donation', href: '/donate' },
     { label: 'View Certificates', href: '/dashboard/certificates' },
     { label: 'Learning Resources', href: '/dashboard/learning' },
+    { label: 'Membership Plans', href: '/dashboard/membership' },
     { label: 'My Communities', href: '/dashboard/community' },
     { label: 'Settings', href: '/dashboard/settings' },
   ]
@@ -186,6 +201,7 @@ export default function DashboardPage() {
           { label: 'My Applications', value: stats.applications, icon: Briefcase, href: '/dashboard/opportunities' },
           { label: 'Total Donated', value: `AED ${stats.donations.toLocaleString()}`, icon: Heart, href: '/dashboard/donations' },
           { label: 'Volunteer Hours', value: stats.volunteerHours, icon: Clock, href: '/dashboard/volunteering' },
+          { label: 'Membership', value: membershipLabel, icon: Crown, href: '/dashboard/membership' },
         ].map((card) => {
           const Icon = card.icon
           return (

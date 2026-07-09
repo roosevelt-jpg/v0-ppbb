@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { db } from '@/lib/firebase'
-import { doc, getDoc, collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
+import { doc, getDoc, collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Check, Crown, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
-import { getPlanIncludedItems } from '@/lib/pricing-utils'
+import { getMemberAssignedPlan, getPlanIncludedItems, memberMatchesPlan } from '@/lib/pricing-utils'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -36,9 +36,11 @@ export default function MembershipPage() {
       .catch((err) => console.error('[v0] profile error:', err))
 
     const unsub = onSnapshot(
-      query(collection(db, 'pricingPlans'), where('active', '==', true), orderBy('order', 'asc')),
+      query(collection(db, 'pricingPlans'), where('active', '==', true)),
       (snapshot) => {
-        setPlans((snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as PricingPlan)) ?? []))
+        const activePlans = (snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() } as PricingPlan)) ?? [])
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        setPlans(activePlans)
         setLoading(false)
       },
       (err) => {
@@ -73,27 +75,47 @@ export default function MembershipPage() {
   if (authLoading || loading) return <DashboardSkeleton />
   if (error) return <DashboardErrorState message={error} />
 
-  const currentTier = String(profile?.membershipTier ?? user?.membershipTier ?? '')
+  const memberRecord = {
+    ...(profile ?? {}),
+    id: user?.id,
+    membershipTier: profile?.membershipTier ?? user?.membershipTier,
+    membershipPlanId: profile?.membershipPlanId,
+    membershipPlanName: profile?.membershipPlanName,
+  }
+  const assignedPlan = getMemberAssignedPlan(memberRecord, plans)
+  const activePlanName =
+    assignedPlan?.name ||
+    (typeof profile?.membershipPlanName === 'string' ? profile.membershipPlanName : null) ||
+    (typeof memberRecord.membershipTier === 'string' && memberRecord.membershipTier !== 'standard'
+      ? memberRecord.membershipTier
+      : null)
   const renewDate = profile?.membershipRenewDate
     ? new Date(profile.membershipRenewDate as string).toLocaleDateString()
     : '—'
 
   return (
     <DashboardPageShell title="Membership" subtitle="Your plan and available upgrades">
-      {currentTier ? (
+      {activePlanName ? (
         <Card className="p-5 mb-8 border border-neutral-200 bg-neutral-50">
           <div className="flex items-center gap-4">
             <Crown className="w-8 h-8 text-neutral-900" />
             <div>
-              <h3 className="font-semibold capitalize">{currentTier} Plan Active</h3>
+              <h3 className="font-semibold">{activePlanName} Plan Active</h3>
               <p className="text-sm text-neutral-600">Renews on {renewDate}</p>
             </div>
           </div>
         </Card>
       ) : null}
 
+      {plans.length === 0 ? (
+        <Card className="p-6 border border-neutral-200 text-sm text-neutral-600">
+          No membership plans are available yet. Check back soon or contact support.
+        </Card>
+      ) : (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {plans.map((plan) => (
+        {plans.map((plan) => {
+          const isCurrentPlan = memberMatchesPlan(memberRecord, plan)
+          return (
           <Card key={plan.id} className="p-6 border-2 border-neutral-200 flex flex-col">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-2xl">{plan.icon}</span>
@@ -117,9 +139,9 @@ export default function MembershipPage() {
             <button
               type="button"
               onClick={() => handleCheckout(plan)}
-              disabled={checkingOut === plan.id || currentTier === plan.name}
+              disabled={checkingOut === plan.id || isCurrentPlan}
               className={`w-full py-2.5 rounded-lg text-sm font-semibold ${
-                currentTier === plan.name
+                isCurrentPlan
                   ? '!bg-white !text-black border border-gray-300'
                   : '!bg-black !text-white'
               } disabled:opacity-50`}
@@ -128,15 +150,17 @@ export default function MembershipPage() {
                 <span className="inline-flex items-center gap-2 justify-center">
                   <Loader2 className="w-4 h-4 animate-spin" /> Processing...
                 </span>
-              ) : currentTier === plan.name ? (
+              ) : isCurrentPlan ? (
                 'Current Plan'
               ) : (
                 'Subscribe Now'
               )}
             </button>
           </Card>
-        ))}
+          )
+        })}
       </div>
+      )}
     </DashboardPageShell>
   )
 }
