@@ -278,8 +278,8 @@ export default function BusinessDashboard() {
               Pending admin approval
             </h2>
             <p className="font-body text-sm text-neutral-700">
-              Your marketplace directory listing is under review. You can prepare offers and jobs
-              after approval — they appear on your public profile once your business is live.
+              Your marketplace directory listing is under review. You can still draft jobs and offers
+              now — they go live on your public profile once admin approves your business.
             </p>
           </div>
         )}
@@ -309,8 +309,7 @@ export default function BusinessDashboard() {
           <Button
             type="button"
             onClick={() => router.push('/business/opportunities/new')}
-            disabled={listingReady && !canPostListings}
-            className="bg-black text-white hover:bg-gray-800 min-h-[44px] disabled:opacity-50 font-body"
+            className="bg-black text-white hover:bg-gray-800 min-h-[44px] font-body"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Post a Job
@@ -318,8 +317,7 @@ export default function BusinessDashboard() {
           <Button
             type="button"
             onClick={() => router.push('/business/offers/new')}
-            disabled={listingReady && !canPostListings}
-            className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px] disabled:opacity-50 font-body"
+            className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px] font-body"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Post an Offer

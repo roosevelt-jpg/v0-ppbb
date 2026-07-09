@@ -1,13 +1,16 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { db } from '@/lib/firebase'
 import { collection, addDoc } from 'firebase/firestore'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { EUDataProtectionPolicy } from '@/lib/types'
 import { AlertCircle, X } from 'lucide-react'
+import { isDashboardRoute } from '@/lib/dashboard-routes'
 
 export function EUDataProtectionPopup() {
+  const pathname = usePathname()
   const [policy, setPolicy] = useState<EUDataProtectionPolicy | null>(null)
   const [showPopup, setShowPopup] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -110,7 +113,7 @@ export function EUDataProtectionPopup() {
     window.location.href = '/'
   }
 
-  if (loading || !policy || !showPopup) {
+  if (loading || !policy || !showPopup || isDashboardRoute(pathname)) {
     return null
   }
 

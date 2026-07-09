@@ -94,17 +94,29 @@ export async function getBusinessOpportunities(businessId: string) {
 
 export function subscribeToBusinessOpportunities(
   businessId: string,
-  callback: (opportunities: BusinessOpportunity[]) => void
+  callback: (opportunities: BusinessOpportunity[]) => void,
+  onError?: (error: Error) => void
 ) {
   const q = query(
     collection(db, 'businessOpportunities'),
     where('businessId', '==', businessId),
     orderBy('createdAt', 'desc')
   )
-  return onSnapshot(q, (snapshot) => {
-    const opportunities = snapshot.docs.map((doc) => doc.data() as BusinessOpportunity)
-    callback(opportunities)
-  })
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const opportunities = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as BusinessOpportunity[]
+      callback(opportunities)
+    },
+    (error) => {
+      console.error('[v0] Error in subscribeToBusinessOpportunities:', error)
+      onError?.(error)
+      callback([])
+    }
+  )
 }
 
 export async function updateOpportunity(
@@ -249,17 +261,29 @@ export async function getAllActiveOffers(): Promise<BusinessOffer[]> {
 
 export function subscribeToBusinessOffers(
   businessId: string,
-  callback: (offers: BusinessOffer[]) => void
+  callback: (offers: BusinessOffer[]) => void,
+  onError?: (error: Error) => void
 ) {
   const q = query(
     collection(db, 'businessOffers'),
     where('businessId', '==', businessId),
     orderBy('createdAt', 'desc')
   )
-  return onSnapshot(q, (snapshot) => {
-    const offers = snapshot.docs.map((doc) => doc.data() as BusinessOffer)
-    callback(offers)
-  })
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const offers = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as BusinessOffer[]
+      callback(offers)
+    },
+    (error) => {
+      console.error('[v0] Error in subscribeToBusinessOffers:', error)
+      onError?.(error)
+      callback([])
+    }
+  )
 }
 
 export async function updateOffer(offerId: string, data: Partial<BusinessOffer>) {

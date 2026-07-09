@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { getBusinessApplications, updateApplicationStatus } from '@/lib/business-queries'
@@ -30,6 +30,8 @@ const STATUS_STYLES: Record<JobApplication['status'], { bg: string; color: strin
 export default function BusinessApplicants() {
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const opportunityIdFilter = searchParams.get('opportunityId')
   const [applications, setApplications] = React.useState<JobApplication[]>([])
   const [loading, setLoading] = React.useState(true)
   const [filter, setFilter] = React.useState<'all' | JobApplication['status']>('all')
@@ -37,7 +39,7 @@ export default function BusinessApplicants() {
   React.useEffect(() => {
     if (!user) return
     if (!hasBusinessAccess(user)) {
-      router.push('/signup')
+      router.push('/login')
       return
     }
     loadApplications()
@@ -74,8 +76,14 @@ export default function BusinessApplicants() {
 
   const filtered =
     filter === 'all'
-      ? applications
-      : applications.filter((a) => a.status === filter)
+      ? applications.filter((a) =>
+          opportunityIdFilter ? a.opportunityId === opportunityIdFilter : true
+        )
+      : applications.filter(
+          (a) =>
+            a.status === filter &&
+            (opportunityIdFilter ? a.opportunityId === opportunityIdFilter : true)
+        )
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>

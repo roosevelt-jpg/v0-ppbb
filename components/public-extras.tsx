@@ -2,17 +2,12 @@
 
 import { usePathname } from 'next/navigation'
 import { WhatsAppButton } from '@/components/whatsapp-button'
-
-const HIDDEN_PREFIXES = ['/dashboard', '/admin', '/business', '/sponsor']
+import { isDashboardRoute } from '@/lib/dashboard-routes'
 
 export function PublicExtras() {
   const pathname = usePathname()
 
-  const isPublicPage = !HIDDEN_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  )
-
-  if (!isPublicPage) return null
+  if (isDashboardRoute(pathname)) return null
 
   return <WhatsAppButton />
 }

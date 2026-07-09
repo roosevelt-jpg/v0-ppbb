@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
+import { isDashboardRoute } from '@/lib/dashboard-routes'
+import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -17,6 +19,7 @@ interface Message {
 }
 
 export function ChatWidget() {
+  const pathname = usePathname()
   const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -228,6 +231,10 @@ export function ChatWidget() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (isDashboardRoute(pathname)) {
+    return null
   }
 
   return (
