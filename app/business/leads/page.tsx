@@ -72,10 +72,19 @@ export default function LeadsPage() {
     }
     setLoading(true)
     setError(null)
-    const unsub = subscribeToBusinessLeads(user.id, (data) => {
-      setLeads(data)
-      setLoading(false)
-    })
+    const unsub = subscribeToBusinessLeads(
+      user.id,
+      (data) => {
+        setLeads(data)
+        setLoading(false)
+        setError(null)
+      },
+      (err) => {
+        console.error('[v0] Leads subscription error:', err)
+        setError('Unable to load leads. Please refresh or try again shortly.')
+        setLoading(false)
+      }
+    )
     return () => unsub()
   }, [user, router])
 
