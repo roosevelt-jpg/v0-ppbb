@@ -87,11 +87,14 @@ export const adminMenuItems = [
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
   { label: 'Sponsors', href: '/admin/sponsors', icon: Award, group: 'Users' },
   { label: 'Businesses', href: '/admin/businesses', icon: Building, group: 'Users' },
+  { label: 'Vendor Applications', href: '/admin/vendor-applications', icon: ClipboardCheck, group: 'Users' },
 
   // Community & Events
   { label: 'Community', href: '/admin/communities', icon: UsersRound, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
   { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
+  { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },
+  { label: 'Partnerships', href: '/admin/partnerships', icon: Handshake, group: 'Community' },
   { label: 'Workshops', href: '/admin/workshops', icon: Presentation, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
 
@@ -106,6 +109,7 @@ export const adminMenuItems = [
   { label: 'Donation Tracking', href: '/admin/finance/donations', icon: Receipt, group: 'Finance' },
   { label: 'Event Finance', href: '/admin/finance/events', icon: Wallet, group: 'Finance' },
   { label: 'Business Referrals', href: '/admin/finance/referrals', icon: Share2, group: 'Finance' },
+  { label: 'Referrals Overview', href: '/admin/referrals', icon: Share2, group: 'Finance' },
 
   // Memberships & Commerce
   { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },

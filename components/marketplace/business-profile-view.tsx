@@ -2,8 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Briefcase, Phone, Tag } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Briefcase, MessageCircle, Phone, Tag, UserPlus } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import { auth } from '@/lib/firebase'
 import {
   isActiveJob,
   isActiveOffer,
@@ -14,22 +16,27 @@ import {
   type DirectoryJob,
   type DirectoryOffer,
 } from '@/lib/marketplace-directory'
+import { subscribeToActiveBusinessDiscounts, type BusinessDiscount } from '@/lib/business-discounts'
 
 interface BusinessProfileViewProps {
   businessId: string
 }
 
 export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
+  const router = useRouter()
   const { user, firebaseUser, loading: authLoading } = useAuth()
   const isLoggedInMember = Boolean(firebaseUser || user)
 
   const [business, setBusiness] = useState<DirectoryBusiness | null>(null)
   const [offers, setOffers] = useState<DirectoryOffer[]>([])
   const [jobs, setJobs] = useState<DirectoryJob[]>([])
+  const [discounts, setDiscounts] = useState<BusinessDiscount[]>([])
   const [businessReady, setBusinessReady] = useState(false)
   const [offersReady, setOffersReady] = useState(false)
   const [jobsReady, setJobsReady] = useState(false)
+  const [discountsReady, setDiscountsReady] = useState(false)
   const [notFound, setNotFound] = useState(false)
+  const [leadTracked, setLeadTracked] = useState(false)
 
   useEffect(
     () =>
@@ -59,12 +66,59 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     [businessId]
   )
 
+  useEffect(
+    () =>
+      subscribeToActiveBusinessDiscounts(businessId, (data) => {
+        setDiscounts(data)
+        setDiscountsReady(true)
+      }),
+    [businessId]
+  )
+
+  useEffect(() => {
+    if (!firebaseUser || leadTracked || !businessId) return
+    void (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (!token) return
+        await fetch('/api/business/leads/track', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ businessId, sourceType: 'profile_view' }),
+        })
+        setLeadTracked(true)
+      } catch {
+        /* non-blocking */
+      }
+    })()
+  }, [firebaseUser, businessId, leadTracked])
+
+  const handleConnect = () => {
+    if (!isLoggedInMember) {
+      router.push(`/login?returnUrl=/directory/${businessId}`)
+      return
+    }
+    router.push(`/dashboard/messages?to=${businessId}`)
+  }
+
+  const handleMessage = () => {
+    if (!isLoggedInMember) {
+      router.push(`/login?returnUrl=/directory/${businessId}`)
+      return
+    }
+    router.push(`/dashboard/messages?to=${businessId}`)
+  }
+
   const activeOffers = useMemo(() => offers.filter(isActiveOffer), [offers])
   const activeJobs = useMemo(() => jobs.filter(isActiveJob), [jobs])
   const memberDiscounts = useMemo(
     () => activeOffers.filter((o) => o.isMemberDiscount),
     [activeOffers]
   )
+  const hasMemberDiscounts = memberDiscounts.length > 0 || discounts.length > 0
   const salesOffers = useMemo(
     () =>
       activeOffers.filter(
@@ -90,7 +144,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     activeOffers.find((o) => o.phone)?.phone ||
     ''
 
-  const loading = !businessReady || !offersReady || !jobsReady
+  const loading = !businessReady || !offersReady || !jobsReady || !discountsReady
 
   if (loading) {
     return (
@@ -211,6 +265,22 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
 
       {/* CTAs */}
       <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={handleConnect}
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+        >
+          <UserPlus className="w-4 h-4" />
+          {isLoggedInMember ? 'Connect' : 'Sign in to Connect'}
+        </button>
+        <button
+          type="button"
+          onClick={handleMessage}
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-white text-black border border-[#e4e1da] rounded-lg font-body text-sm font-semibold hover:bg-neutral-50"
+        >
+          <MessageCircle className="w-4 h-4" />
+          Message
+        </button>
         {salesOffers.length > 0 && (
           primaryPhone ? (
             <a
@@ -262,7 +332,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       )}
 
       {/* Member discounts — logged-in only */}
-      {!authLoading && isLoggedInMember && memberDiscounts.length > 0 && (
+      {!authLoading && isLoggedInMember && hasMemberDiscounts && (
         <section className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-4 sm:p-6">
           <p className="eyebrow text-emerald-800 mb-2">MEMBER DISCOUNTS</p>
           <h2 className="font-headline text-2xl font-bold text-foreground mb-4">
@@ -282,11 +352,23 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                 )}
               </li>
             ))}
+            {discounts.map((d) => (
+              <li key={d.id} className="font-body text-sm sm:text-base text-foreground">
+                <span className="font-semibold">{d.title}</span>
+                <span className="text-emerald-800 ml-2">
+                  {d.discountType === 'fixed' ? `${d.currency || 'AED'} ${d.discountValue}` : `${d.discountValue}%`} off
+                </span>
+                {d.discountCode && (
+                  <span className="ml-2 text-xs font-mono bg-white px-2 py-0.5 rounded border">{d.discountCode}</span>
+                )}
+                {d.description && <p className="text-muted-foreground mt-0.5">{d.description}</p>}
+              </li>
+            ))}
           </ul>
         </section>
       )}
 
-      {!authLoading && !isLoggedInMember && memberDiscounts.length > 0 && (
+      {!authLoading && !isLoggedInMember && hasMemberDiscounts && (
         <section className="rounded-lg border border-[#e4e1da] bg-[#f7f6f2] p-4 sm:p-6">
           <p className="eyebrow text-muted-foreground mb-2">MEMBER DISCOUNTS</p>
           <h2 className="font-headline text-xl font-bold text-foreground mb-2">
@@ -393,7 +475,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                     )}
                   </div>
                   <Link
-                    href={`/opportunities?businessId=${businessId}`}
+                    href={`/opportunities/${job.id}`}
                     className="inline-flex shrink-0 items-center justify-center min-h-[44px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
                   >
                     Apply

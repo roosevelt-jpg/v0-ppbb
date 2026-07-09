@@ -61,9 +61,12 @@ export interface DirectoryOffer {
   imageURL: string
   images: string[]
   isMemberDiscount: boolean
+  isMemberOnly?: boolean
+  genderRestriction?: string
   memberBenefit?: number
   discountPercentage?: number
   phone?: string
+  isAvailable?: boolean
 }
 
 export interface DirectoryJob {
@@ -182,10 +185,17 @@ export function normalizeDirectoryOffer(
     imageURL: images[0] || '',
     images,
     isMemberDiscount,
+    isMemberOnly: isTruthyFlag(data.isMemberOnly) || data.targetAudience === 'members',
+    genderRestriction:
+      asString(data.genderRestriction) ||
+      asString(data.gender) ||
+      (data.audienceGender as string | undefined) ||
+      '',
     memberBenefit,
     discountPercentage:
       typeof data.discountPercentage === 'number' ? data.discountPercentage : memberBenefit,
     phone: asString(data.phone),
+    isAvailable: data.isAvailable !== false,
   }
 }
 
@@ -207,6 +217,8 @@ export function normalizeDirectoryJob(
 export function isActiveOffer(offer: DirectoryOffer): boolean {
   const status = offer.status
   if (status === 'pending_approval' || status === 'rejected' || status === 'archived') return false
+  if (status === 'draft') return false
+  if (offer.isAvailable === false) return false
   return status === 'active' || status === 'available' || status === 'published' || status === 'open'
 }
 

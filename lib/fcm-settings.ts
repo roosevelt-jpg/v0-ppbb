@@ -5,6 +5,7 @@ export interface FCMSettings {
   newEventNotification: boolean
   newsletterNotification: boolean
   newGroupJoinedNotification: boolean
+  businessAlertsNotification: boolean
 }
 
 export const DEFAULT_FCM_SETTINGS: FCMSettings = {
@@ -14,4 +15,5 @@ export const DEFAULT_FCM_SETTINGS: FCMSettings = {
   newEventNotification: true,
   newsletterNotification: true,
   newGroupJoinedNotification: true,
+  businessAlertsNotification: true,
 }

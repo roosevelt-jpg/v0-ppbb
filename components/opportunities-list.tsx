@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Search, MapPin, Briefcase, Clock, Building2 } from 'lucide-react'
 import { BusinessOpportunity } from '@/lib/types'
 import {
@@ -42,6 +43,8 @@ function truncateLines(text: string, maxLines = 2): string {
 }
 
 export function OpportunitiesList() {
+  const searchParams = useSearchParams()
+  const businessIdFilter = searchParams.get('businessId') || ''
   const { user } = useAuth()
   const [opportunities, setOpportunities] = useState<BusinessOpportunity[]>([])
   const [appliedIds, setAppliedIds] = useState<string[]>([])
@@ -51,6 +54,7 @@ export function OpportunitiesList() {
   const [typeFilter, setTypeFilter] = useState('all')
   const [selected, setSelected] = useState<BusinessOpportunity | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(12)
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300)
@@ -79,11 +83,12 @@ export function OpportunitiesList() {
   const filtered = useMemo(() => {
     const term = debouncedSearch.toLowerCase()
     return opportunities.filter((o) => {
+      const matchesBusiness = !businessIdFilter || o.businessId === businessIdFilter
       const matchesType = matchesOpportunityFilter(o, typeFilter)
       const matchesSearch = !term || opportunitySearchHaystack(o).includes(term)
-      return matchesType && matchesSearch
+      return matchesBusiness && matchesType && matchesSearch
     })
-  }, [opportunities, debouncedSearch, typeFilter])
+  }, [opportunities, debouncedSearch, typeFilter, businessIdFilter])
 
   const handleApplyClick = (opp: BusinessOpportunity) => {
     setSelected(opp)
@@ -144,8 +149,9 @@ export function OpportunitiesList() {
           <p className="text-muted-foreground">No open opportunities right now. Check back soon.</p>
         </div>
       ) : (
+        <>
         <div className="grid gap-6 lg:grid-cols-2">
-          {filtered.map((opp) => {
+          {filtered.slice(0, visibleCount).map((opp) => {
             const roleType = getRoleType(opp)
             const companyName = opp.companyName || opp.businessName
             const daysLeft = daysUntilDeadline(opp)
@@ -279,6 +285,18 @@ export function OpportunitiesList() {
             )
           })}
         </div>
+        {visibleCount < filtered.length && (
+          <div className="text-center mt-8">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + 12)}
+              className="min-h-[44px] px-6 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-50"
+            >
+              Load More
+            </button>
+          </div>
+        )}
+        </>
       )}
 
       <OpportunityApplyModal

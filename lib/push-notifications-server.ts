@@ -12,6 +12,9 @@ export type PushNotificationType =
   | 'group_message'
   | 'event_created'
   | 'newsletter'
+  | 'job_application'
+  | 'marketplace_purchase'
+  | 'offer_approved'
   | 'test'
 
 function fcmTypeEnabled(settings: FCMSettings, type: PushNotificationType): boolean {
@@ -27,6 +30,10 @@ function fcmTypeEnabled(settings: FCMSettings, type: PushNotificationType): bool
       return settings.newEventNotification !== false
     case 'newsletter':
       return settings.newsletterNotification !== false
+    case 'job_application':
+    case 'marketplace_purchase':
+    case 'offer_approved':
+      return settings.businessAlertsNotification !== false
     case 'test':
       return true
     default:

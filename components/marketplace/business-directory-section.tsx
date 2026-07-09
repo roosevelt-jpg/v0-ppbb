@@ -64,7 +64,7 @@ export function BusinessDirectorySection() {
   )
 
   return (
-    <section className="min-w-0 space-y-6 sm:space-y-8">
+    <section id="directory" className="min-w-0 space-y-6 sm:space-y-8">
       <div>
         <p className="eyebrow text-muted-foreground mb-2">DIRECTORY</p>
         <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">

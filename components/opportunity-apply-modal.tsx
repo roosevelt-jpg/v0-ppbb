@@ -5,6 +5,7 @@ import { X, Loader2, Upload } from 'lucide-react'
 import { BusinessOpportunity } from '@/lib/types'
 import { applyToOpportunity } from '@/lib/business-queries'
 import { useAuth } from '@/lib/auth-context'
+import { auth } from '@/lib/firebase'
 import { hasBusinessAccess } from '@/lib/roles'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
 
@@ -97,6 +98,27 @@ export function OpportunityApplyModal({
         coverLetter,
         resumeUrl
       )
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (token && opportunity.businessId) {
+          void fetch('/api/notifications/business-event', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              businessId: opportunity.businessId,
+              type: 'job_application',
+              title: 'New job application',
+              message: `${fullName} applied for "${opportunity.title}"`,
+              clickAction: '/business/opportunities/applicants',
+            }),
+          })
+        }
+      } catch {
+        /* non-blocking */
+      }
       setCoverLetter('')
       setResumeUrl('')
       onApplied()

@@ -1,178 +1,156 @@
 'use client'
+
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
+import {
+  subscribeToBusinessOpportunities,
+  subscribeToBusinessOffers,
+  subscribeToBusinessLeads,
+  getBusinessDashboardStats,
+} from '@/lib/business-queries'
+import type { BusinessOpportunity, BusinessOffer, BusinessLead } from '@/lib/types'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { getBusinessDashboardStats } from '@/lib/business-queries'
-import { BarChart3, TrendingUp, Users } from 'lucide-react'
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 
 export default function Analytics() {
   const { user } = useAuth()
   const router = useRouter()
+  const [stats, setStats] = React.useState<Awaited<ReturnType<typeof getBusinessDashboardStats>> | null>(null)
+  const [jobs, setJobs] = React.useState<BusinessOpportunity[]>([])
+  const [offers, setOffers] = React.useState<BusinessOffer[]>([])
+  const [leads, setLeads] = React.useState<BusinessLead[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
-  const [stats, setStats] = React.useState<Awaited<
-    ReturnType<typeof getBusinessDashboardStats>
-  > | null>(null)
 
   React.useEffect(() => {
     if (!user || !hasBusinessAccess(user)) {
       router.push('/login')
       return
     }
-
-    setLoading(true)
-    setError(null)
-    void getBusinessDashboardStats(user.id)
-      .then((dashboardStats) => {
-        setStats(dashboardStats)
-      })
-      .catch((err) => {
-        console.error('[v0] Error fetching analytics:', err)
-        setError('Unable to load analytics. Deploy Firestore rules/indexes if this persists.')
-      })
-      .finally(() => setLoading(false))
+    void getBusinessDashboardStats(user.id).then(setStats)
+    const unsubs = [
+      subscribeToBusinessOpportunities(user.id, setJobs),
+      subscribeToBusinessOffers(user.id, setOffers),
+      subscribeToBusinessLeads(user.id, setLeads, () => {}, () => setLoading(false)),
+    ]
+    setLoading(false)
+    return () => unsubs.forEach((u) => u())
   }, [user, router])
 
-  if (!user || !hasBusinessAccess(user)) {
-    return <div className="text-center py-8">Access Denied</div>
-  }
+  const profileViews = React.useMemo(() => {
+    const map = new Map<string, number>()
+    leads.filter((l) => (l.sourceType || l.leadSource) === 'profile_view').forEach((l) => {
+      const d = l.createdAt instanceof Date ? l.createdAt : new Date(String(l.createdAt || 0))
+      const key = d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+      map.set(key, (map.get(key) || 0) + 1)
+    })
+    return Array.from(map.entries()).map(([date, views]) => ({ date, views })).slice(-14)
+  }, [leads])
+
+  const leadsBySource = React.useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const l of leads) {
+      const s = l.sourceType || l.leadSource || 'direct'
+      counts[s] = (counts[s] || 0) + 1
+    }
+    return Object.entries(counts).map(([source, count]) => ({ source, count }))
+  }, [leads])
+
+  if (!user || !hasBusinessAccess(user)) return <div className="text-center py-8">Access Denied</div>
 
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-8">
-        {loading ? (
-          <div className="text-center py-8 text-neutral-500">Loading analytics...</div>
-        ) : error ? (
-          <Card className="p-8 text-center border-[#e4e1da] bg-white text-neutral-900">
-            <p className="text-neutral-500 mb-4">{error}</p>
-            <Button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="min-h-[44px] bg-neutral-900 text-white hover:bg-neutral-800"
-            >
-              Retry
-            </Button>
-          </Card>
-        ) : (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
-                <div className="flex items-center gap-4">
-                  <BarChart3 className="w-8 h-8 text-neutral-900 opacity-30" />
-                  <div>
-                    <p className="text-neutral-500 text-sm">Opportunities Posted</p>
-                    <p className="text-neutral-900 text-2xl font-semibold">
-                      {stats?.opportunitiesPosted || 0}
-                    </p>
-                    <p className="text-neutral-500 text-xs mt-1">
-                      {stats?.pendingOpportunities || 0} pending approval
-                    </p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
-                <div className="flex items-center gap-4">
-                  <BarChart3 className="w-8 h-8 text-neutral-900 opacity-30" />
-                  <div>
-                    <p className="text-neutral-500 text-sm">Offers Posted</p>
-                    <p className="text-neutral-900 text-2xl font-semibold">
-                      {stats?.offersPosted || 0}
-                    </p>
-                    <p className="text-neutral-500 text-xs mt-1">
-                      {stats?.pendingOffers || 0} pending approval
-                    </p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
-                <div className="flex items-center gap-4">
-                  <Users className="w-8 h-8 text-neutral-900 opacity-30" />
-                  <div>
-                    <p className="text-neutral-500 text-sm">Your Events</p>
-                    <p className="text-neutral-900 text-2xl font-semibold">
-                      {stats?.ownEvents || 0}
-                    </p>
-                    <p className="text-neutral-500 text-xs mt-1">
-                      {stats?.ownPublishedEvents || 0} published
-                    </p>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
-                <div className="flex items-center gap-4">
-                  <TrendingUp className="w-8 h-8 text-neutral-900 opacity-30" />
-                  <div>
-                    <p className="text-neutral-500 text-sm">Leads (yours)</p>
-                    <p className="text-neutral-900 text-2xl font-semibold">
-                      {stats?.leadsGenerated || 0}
-                    </p>
-                    <p className="text-neutral-500 text-xs mt-1">
-                      {Math.round(stats?.conversionRate || 0)}% conversion
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Performance Overview</h3>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Open Opportunities</p>
-                  <p className="text-neutral-900 font-semibold mt-2 text-lg">
-                    {stats?.openOpportunities || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Converted Leads</p>
-                  <p className="text-neutral-900 font-semibold mt-2 text-lg">
-                    {stats?.convertedLeads || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Active Partnerships</p>
-                  <p className="text-neutral-900 font-semibold mt-2 text-lg">
-                    {stats?.partnerships || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Business Rating</p>
-                  <p className="text-neutral-900 font-semibold mt-2 text-lg">
-                    {(stats?.averageRating || 0).toFixed(1)}/5
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Financial Summary</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Referral Earnings</p>
-                  <p className="text-neutral-900 font-semibold mt-2 text-xl">
-                    AED {stats?.referralEarnings || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Pending Commission</p>
-                  <p className="text-red-600 font-semibold mt-2 text-xl">
-                    AED {stats?.pendingCommission || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-neutral-500 text-xs uppercase">Completed Payments</p>
-                  <p className="text-neutral-900 font-semibold mt-2 text-xl">
-                    {stats?.completedPayments || 0}/{stats?.totalPayments || 0}
-                  </p>
-                </div>
-              </div>
-            </Card>
+    <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
+      {loading ? (
+        <p className="text-neutral-500">Loading analytics…</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Jobs posted</p><p className="text-2xl font-bold">{stats?.opportunitiesPosted || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Offers posted</p><p className="text-2xl font-bold">{stats?.offersPosted || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Total leads</p><p className="text-2xl font-bold">{stats?.leadsGenerated || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Referral earnings</p><p className="text-2xl font-bold">AED {stats?.referralEarnings || 0}</p></Card>
           </div>
-        )}
+
+          <Card className="p-6 border-[#e4e1da]">
+            <h3 className="font-semibold mb-4">Profile views (from leads)</h3>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={profileViews.length ? profileViews : [{ date: '—', views: 0 }]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="views" stroke="#111" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card className="p-6 border-[#e4e1da]">
+            <h3 className="font-semibold mb-4">Job board performance</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] text-sm">
+                <thead><tr className="border-b"><th className="text-left py-2">Job</th><th className="text-left py-2">Applications</th><th className="text-left py-2">Status</th></tr></thead>
+                <tbody>
+                  {jobs.slice(0, 10).map((j) => (
+                    <tr key={j.id} className="border-b border-neutral-100">
+                      <td className="py-2">{j.title}</td>
+                      <td className="py-2">{j.applications || 0}</td>
+                      <td className="py-2 capitalize">{j.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card className="p-6 border-[#e4e1da]">
+            <h3 className="font-semibold mb-4">Marketplace performance</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] text-sm">
+                <thead><tr className="border-b"><th className="text-left py-2">Offer</th><th className="text-left py-2">Views</th><th className="text-left py-2">Purchases</th></tr></thead>
+                <tbody>
+                  {offers.slice(0, 10).map((o) => (
+                    <tr key={o.id} className="border-b border-neutral-100">
+                      <td className="py-2">{o.title}</td>
+                      <td className="py-2">{o.views || 0}</td>
+                      <td className="py-2">{o.conversions || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <Card className="p-6 border-[#e4e1da]">
+            <h3 className="font-semibold mb-4">Leads by source</h3>
+            <div className="h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={leadsBySource.length ? leadsBySource : [{ source: 'none', count: 0 }]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="source" tick={{ fontSize: 10 }} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#111" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </>
+      )}
     </div>
   )
 }

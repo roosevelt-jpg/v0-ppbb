@@ -230,6 +230,10 @@ export function mapNotificationTypeToPreference(
       return 'communityUpdates'
     case 'event_created':
       return 'eventReminders'
+    case 'job_application':
+    case 'marketplace_purchase':
+    case 'offer_approved':
+      return 'systemAlerts'
     default:
       return 'systemAlerts'
   }

@@ -21,6 +21,7 @@ import {
   UserCheck,
 } from 'lucide-react'
 import { BusinessReferralLinkCard } from '@/components/business-referral-link-card'
+import { BusinessDashboardHomeSections } from '@/components/business/business-dashboard-home-sections'
 
 interface DashboardStats {
   opportunitiesPosted: number
@@ -460,6 +461,8 @@ export default function BusinessDashboard() {
         </div>
 
         <BusinessReferralLinkCard />
+
+        <BusinessDashboardHomeSections businessId={user.id} />
 
         {/* Quick Actions */}
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>

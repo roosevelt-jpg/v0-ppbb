@@ -1114,6 +1114,17 @@ export async function applyToOpportunity(
   }
   await setDoc(doc(db, 'jobApplications', id), application)
 
+  try {
+    await setDoc(doc(db, 'jobs', opportunity.id, 'applications', id), {
+      ...application,
+      jobId: opportunity.id,
+      createdAt: now,
+      updatedAt: now,
+    })
+  } catch {
+    /* jobs mirror optional */
+  }
+
   // Increment the opportunity's application count and track applicant id.
   const oppRef = doc(db, 'businessOpportunities', opportunity.id)
   const applicants = Array.isArray(opportunity.applicants) ? [...opportunity.applicants] : []
@@ -1125,6 +1136,19 @@ export async function applyToOpportunity(
     applications: applicants.length,
     updatedAt: now.toDate(),
   })
+
+  try {
+    const jobsRef = doc(db, 'jobs', opportunity.id)
+    const jobsSnap = await getDoc(jobsRef)
+    if (jobsSnap.exists()) {
+      await updateDoc(jobsRef, {
+        applicationCount: applicants.length,
+        updatedAt: now,
+      })
+    }
+  } catch {
+    // Legacy-only opportunity without jobs mirror
+  }
 
   return application
 }

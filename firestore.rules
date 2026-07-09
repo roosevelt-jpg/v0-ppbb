@@ -457,6 +457,13 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() || businessCreatePendingOnly();
       allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
+
+      match /purchases/{purchaseId} {
+        allow read: if isAdmin()
+          || (isAuth() && resource.data.buyerId == request.auth.uid);
+        allow create: if isAuth() && request.resource.data.buyerId == request.auth.uid;
+        allow update, delete: if isAdmin();
+      }
     }
 
     // Jobs listings — public read for directory counts/profile; owner/admin write
@@ -464,6 +471,18 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() || businessCreatePendingOnly();
       allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
+
+      match /applications/{applicationId} {
+        allow read: if isAuth() && (
+          isAdmin()
+          || resource.data.applicantId == request.auth.uid
+          || get(/databases/$(database)/documents/jobs/$(jobId)).data.businessId == request.auth.uid
+        );
+        allow create: if isAuth() && request.resource.data.applicantId == request.auth.uid;
+        allow update: if isAdmin()
+          || (isAuth() && get(/databases/$(database)/documents/jobs/$(jobId)).data.businessId == request.auth.uid);
+        allow delete: if isAdmin();
+      }
     }
 
     // Canonical job applications (member applies → business reviews; admin monitors monthly count)
@@ -491,6 +510,24 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() || businessCreatePendingOnly();
       allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
+    }
+
+    match /discounts/{discountId} {
+      allow read: if true;
+      allow create: if isAdmin() || businessCreatePendingOnly();
+      allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
+    }
+
+    match /vendorApplications/{applicationId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    match /leads/{leadId} {
+      allow read: if isAuth() && (isAdmin() || resource.data.businessId == request.auth.uid);
+      allow create: if isAuth() || isAdmin();
+      allow update, delete: if isAdmin() || (isAuth() && resource.data.businessId == request.auth.uid);
     }
     
     // Donations - Authenticated read, own write (donorId or userId)
@@ -545,6 +582,11 @@ service cloud.firestore {
     
     // Community Statistics - Public read, service account write
     match /communityStats/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /platformStats/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }

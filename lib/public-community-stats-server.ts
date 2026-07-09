@@ -67,12 +67,16 @@ export async function computePublicCommunityStats(): Promise<CommunityStats> {
 /** Persist snapshot for public Firestore readers (communityStats/public). */
 export async function cachePublicCommunityStats(stats: CommunityStats): Promise<void> {
   const db = getAdminDb()
-  await db.collection('communityStats').doc('public').set(
-    {
-      ...stats,
-      updatedAt: Timestamp.now(),
-      source: 'live',
-    },
-    { merge: true }
-  )
+  const payload = {
+    ...stats,
+    communityMembers: stats.totalMembers,
+    volunteerHours: stats.volunteerHours,
+    businessPartners: stats.businessPartners,
+    donationsTracked: stats.totalDonations,
+    currency: 'AED',
+    updatedAt: Timestamp.now(),
+    source: 'live',
+  }
+  await db.collection('communityStats').doc('public').set(payload, { merge: true })
+  await db.collection('platformStats').doc('public').set(payload, { merge: true })
 }
