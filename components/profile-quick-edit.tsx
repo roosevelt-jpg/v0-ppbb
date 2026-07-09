@@ -270,8 +270,8 @@ export function ProfileMenuButton({ className = '', compact = false }: ProfileMe
         type="button"
         data-dashboard-control
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-0.5 rounded-full bg-transparent hover:ring-2 hover:ring-neutral-300 dark:hover:ring-neutral-600 transition ${
-          compact ? 'p-0.5 min-h-[32px]' : 'p-1 min-h-[44px] min-w-[44px] justify-center'
+        className={`inline-flex items-center rounded-full bg-transparent hover:ring-2 hover:ring-neutral-300 dark:hover:ring-neutral-600 transition ${
+          compact ? 'p-0 min-h-[28px] gap-0' : 'p-1 min-h-[44px] min-w-[44px] justify-center gap-0.5'
         } ${className}`}
         aria-label="Edit profile"
         aria-haspopup="dialog"
@@ -279,7 +279,9 @@ export function ProfileMenuButton({ className = '', compact = false }: ProfileMe
         title="Edit profile — view email and account details"
       >
         <UserAvatar user={user} size={compact ? 'xs' : 'sm'} />
-        <ChevronDown className={`${compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-neutral-500 shrink-0`} aria-hidden />
+        {!compact ? (
+          <ChevronDown className="h-3.5 w-3.5 text-neutral-500 shrink-0" aria-hidden />
+        ) : null}
       </button>
       <ProfileQuickEdit open={open} onOpenChange={setOpen} />
     </>

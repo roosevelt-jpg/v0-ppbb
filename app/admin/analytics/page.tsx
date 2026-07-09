@@ -10,6 +10,9 @@ import { collection, onSnapshot, query } from 'firebase/firestore'
 import { BarChart as BarIcon, TrendingUp, LineChart as LineIcon, PieChart as PieIcon } from 'lucide-react'
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
+const CHART_BLACK = '#111111'
+const CHART_PALETTE = [CHART_BLACK, '#374151', '#6b7280', '#9ca3af']
+
 interface Analytics {
   totalMembers: number
   totalVolunteers: number
@@ -176,7 +179,7 @@ export default function AnalyticsPage() {
               <YAxis stroke="#888888" />
               <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }} />
               <Legend />
-              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} name="Members" />
+              <Line type="monotone" dataKey="value" stroke={CHART_BLACK} strokeWidth={2} dot={{ fill: CHART_BLACK }} name="Members" />
             </LineChart>
           </ResponsiveContainer>
         </Card>
@@ -197,7 +200,7 @@ export default function AnalyticsPage() {
               <YAxis stroke="#888888" />
               <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }} />
               <Legend />
-              <Bar dataKey="amount" fill="#10b981" name="Donations (AED)" />
+              <Bar dataKey="amount" fill={CHART_BLACK} name="Donations (AED)" />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -224,13 +227,8 @@ export default function AnalyticsPage() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {[
-                    { value: '#3b82f6' },
-                    { value: '#10b981' },
-                    { value: '#f59e0b' },
-                    { value: '#ef4444' },
-                  ].map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.value} />
+                  {CHART_PALETTE.map((color, index) => (
+                    <Cell key={`cell-${index}`} fill={color} />
                   ))}
                 </Pie>
                 <Tooltip />

@@ -5,9 +5,9 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { AdminTableScroll } from '@/components/admin-table'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
-import { collection, getDocs, query, where } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { Download, Calendar, TrendingUp, BarChart3, X } from 'lucide-react'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_ICON_PRIMARY, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
 
 type ReportType = 'members' | 'donations' | 'events' | 'volunteers'
 
@@ -22,6 +22,15 @@ interface ReportPayload {
 
 const VOLUNTEER_ROLES = ['volunteer', 'member+volunteer'] as const
 
+function isVolunteerUser(data: Record<string, unknown>): boolean {
+  const role = data.role
+  const userType = data.userType
+  if (role === 'volunteer' || userType === 'volunteer') return true
+  if (Array.isArray(role) && role.some((r) => String(r).toLowerCase().includes('volunteer'))) return true
+  if (typeof role === 'string' && VOLUNTEER_ROLES.includes(role as (typeof VOLUNTEER_ROLES)[number])) return true
+  return false
+}
+
 function formatReportValue(value: unknown): string {
   if (value == null || value === '') return '—'
   if (typeof value === 'object' && value !== null && 'toDate' in value) {
@@ -34,6 +43,91 @@ function formatReportValue(value: unknown): string {
   if (value instanceof Date) return value.toLocaleString()
   if (typeof value === 'number') return String(value)
   return String(value).trim() || '—'
+}
+
+async function loadReportData(reportType: ReportType): Promise<ReportPayload> {
+  switch (reportType) {
+    case 'members': {
+      const snap = await getDocs(collection(db, 'users'))
+      return {
+        type: 'Member Analytics',
+        total: snap.size,
+        details: snap.docs.map((d) => {
+          const row = d.data()
+          return {
+            id: d.id,
+            name: `${row.firstName || ''} ${row.lastName || ''}`.trim() || row.displayName || '—',
+            email: row.email || '—',
+            role: String(row.role || '—'),
+            joinedAt: formatReportValue(row.createdAt),
+            status: row.status || 'active',
+          }
+        }),
+      }
+    }
+    case 'donations': {
+      const snap = await getDocs(collection(db, 'donations'))
+      const totalAmount = snap.docs.reduce((sum, d) => sum + (Number(d.data().amount) || 0), 0)
+      return {
+        type: 'Donation Reports',
+        total: snap.size,
+        totalAmount,
+        details: snap.docs.map((d) => {
+          const row = d.data()
+          return {
+            id: d.id,
+            donor: row.donorName || row.donorEmail || 'Anonymous',
+            amount: Number(row.amount) || 0,
+            date: formatReportValue(row.createdAt),
+            status: row.status || 'completed',
+          }
+        }),
+      }
+    }
+    case 'events': {
+      const snap = await getDocs(collection(db, 'events'))
+      return {
+        type: 'Event Performance',
+        total: snap.size,
+        details: snap.docs.map((d) => {
+          const row = d.data()
+          return {
+            id: d.id,
+            name: row.name || row.title || 'Untitled',
+            date: formatReportValue(row.date || row.startDate),
+            attendees: Number(row.attendees || row.attendeeCount || 0),
+            status: row.status || 'scheduled',
+          }
+        }),
+      }
+    }
+    case 'volunteers': {
+      const snap = await getDocs(collection(db, 'users'))
+      const volunteerDocs = snap.docs.filter((d) => isVolunteerUser(d.data()))
+      return {
+        type: 'Volunteer Metrics',
+        total: volunteerDocs.length,
+        details: volunteerDocs.map((d) => {
+          const row = d.data()
+          return {
+            id: d.id,
+            name: `${row.firstName || ''} ${row.lastName || ''}`.trim() || '—',
+            email: row.email || '—',
+            hours: Number(row.volunteeredHours || row.volunteerHours || 0),
+            status: row.status || 'active',
+          }
+        }),
+      }
+    }
+    default:
+      throw new Error(`Unknown report type: ${reportType}`)
+  }
+}
+
+function exportReportPayload(data: ReportPayload) {
+  const csv = generateCSV(data.details)
+  const safeName = data.type.replace(/\s+/g, '-').toLowerCase()
+  downloadCSV(csv, `${safeName}-${new Date().toISOString().slice(0, 10)}.csv`)
 }
 
 function escapeCsvCell(value: unknown): string {
@@ -76,26 +170,25 @@ export default function ReportingPage() {
   const [selectedReport, setSelectedReport] = React.useState<ReportType | null>(null)
   const [reportData, setReportData] = React.useState<ReportPayload | null>(null)
   const [reportLoading, setReportLoading] = React.useState(false)
+  const [reportError, setReportError] = React.useState<string | null>(null)
+  const [exportingType, setExportingType] = React.useState<ReportType | null>(null)
 
   React.useEffect(() => {
     const fetchReportData = async () => {
       try {
-        const volunteerQuery = query(
-          collection(db, 'users'),
-          where('role', 'in', [...VOLUNTEER_ROLES])
-        )
-        const [membersSnap, donationsSnap, eventsSnap, volunteersSnap] = await Promise.all([
+        const [membersSnap, donationsSnap, eventsSnap] = await Promise.all([
           getDocs(collection(db, 'users')),
           getDocs(collection(db, 'donations')),
           getDocs(collection(db, 'events')),
-          getDocs(volunteerQuery),
         ])
+
+        const volunteerCount = membersSnap.docs.filter((d) => isVolunteerUser(d.data())).length
 
         setStats({
           totalMembers: membersSnap.size,
           totalDonations: donationsSnap.size,
           totalEvents: eventsSnap.size,
-          totalVolunteers: volunteersSnap.size,
+          totalVolunteers: volunteerCount,
         })
       } catch (error) {
         console.error('[v0] Error fetching report data:', error)
@@ -110,108 +203,45 @@ export default function ReportingPage() {
   const closeModal = () => {
     setReportData(null)
     setSelectedReport(null)
+    setReportError(null)
   }
 
   const handleViewReport = async (reportType: ReportType) => {
     setSelectedReport(reportType)
     setReportLoading(true)
     setReportData(null)
+    setReportError(null)
     try {
-      let data: ReportPayload | null = null
-
-      switch (reportType) {
-        case 'members': {
-          const snap = await getDocs(collection(db, 'users'))
-          data = {
-            type: 'Member Analytics',
-            total: snap.size,
-            details: snap.docs.map((d) => {
-              const row = d.data()
-              return {
-                id: d.id,
-                name: `${row.firstName || ''} ${row.lastName || ''}`.trim() || row.displayName || '—',
-                email: row.email || '—',
-                role: row.role || '—',
-                joinedAt: formatReportValue(row.createdAt),
-                status: row.status || 'active',
-              }
-            }),
-          }
-          break
-        }
-        case 'donations': {
-          const snap = await getDocs(collection(db, 'donations'))
-          const totalAmount = snap.docs.reduce((sum, d) => sum + (Number(d.data().amount) || 0), 0)
-          data = {
-            type: 'Donation Reports',
-            total: snap.size,
-            totalAmount,
-            details: snap.docs.map((d) => {
-              const row = d.data()
-              return {
-                id: d.id,
-                donor: row.donorName || row.donorEmail || 'Anonymous',
-                amount: Number(row.amount) || 0,
-                date: formatReportValue(row.createdAt),
-                status: row.status || 'completed',
-              }
-            }),
-          }
-          break
-        }
-        case 'events': {
-          const snap = await getDocs(collection(db, 'events'))
-          data = {
-            type: 'Event Performance',
-            total: snap.size,
-            details: snap.docs.map((d) => {
-              const row = d.data()
-              return {
-                id: d.id,
-                name: row.name || row.title || 'Untitled',
-                date: formatReportValue(row.date || row.startDate),
-                attendees: Number(row.attendees || row.attendeeCount || 0),
-                status: row.status || 'scheduled',
-              }
-            }),
-          }
-          break
-        }
-        case 'volunteers': {
-          const snap = await getDocs(
-            query(collection(db, 'users'), where('role', 'in', [...VOLUNTEER_ROLES]))
-          )
-          data = {
-            type: 'Volunteer Metrics',
-            total: snap.size,
-            details: snap.docs.map((d) => {
-              const row = d.data()
-              return {
-                id: d.id,
-                name: `${row.firstName || ''} ${row.lastName || ''}`.trim() || '—',
-                email: row.email || '—',
-                hours: Number(row.volunteeredHours || row.volunteerHours || 0),
-                status: row.status || 'active',
-              }
-            }),
-          }
-          break
-        }
-      }
-
+      const data = await loadReportData(reportType)
       setReportData(data)
     } catch (error) {
       console.error('[v0] Error fetching report:', error)
+      setReportError('Failed to load report data. Please try again.')
     } finally {
       setReportLoading(false)
     }
   }
 
+  const handleExportReport = async (reportType: ReportType) => {
+    setExportingType(reportType)
+    try {
+      const data = reportData && selectedReport === reportType ? reportData : await loadReportData(reportType)
+      if (!data.details.length) {
+        window.alert('No records to export for this report.')
+        return
+      }
+      exportReportPayload(data)
+    } catch (error) {
+      console.error('[v0] Error exporting report:', error)
+      window.alert('Failed to export report. Please try again.')
+    } finally {
+      setExportingType(null)
+    }
+  }
+
   const handleExport = () => {
     if (!reportData?.details?.length) return
-    const csv = generateCSV(reportData.details)
-    const safeName = reportData.type.replace(/\s+/g, '-').toLowerCase()
-    downloadCSV(csv, `${safeName}.csv`)
+    exportReportPayload(reportData)
   }
 
   const reportColumns = reportData?.details?.length ? Object.keys(reportData.details[0]) : []
@@ -268,14 +298,27 @@ export default function ReportingPage() {
               <Card key={report.title} className="p-6 border border-neutral-200">
                 <h3 className="font-semibold text-neutral-900">{report.title}</h3>
                 <p className="text-sm text-neutral-600 mt-2">{report.description}</p>
-                <button
-                  type="button"
-                  onClick={() => handleViewReport(report.type)}
-                  className={`${BUTTON_PRIMARY} mt-4 gap-2 text-sm`}
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  View Report
-                </button>
+                <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    data-dashboard-control
+                    onClick={() => void handleViewReport(report.type)}
+                    className={`${BUTTON_PRIMARY} gap-2 text-sm flex-1 justify-center`}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    View Report
+                  </button>
+                  <button
+                    type="button"
+                    data-dashboard-control
+                    onClick={() => void handleExportReport(report.type)}
+                    disabled={exportingType === report.type}
+                    className={`${BUTTON_SECONDARY} gap-2 text-sm flex-1 justify-center`}
+                  >
+                    <Download className="w-4 h-4" />
+                    {exportingType === report.type ? 'Exporting…' : 'Export CSV'}
+                  </button>
+                </div>
               </Card>
             ))}
           </div>
@@ -291,8 +334,9 @@ export default function ReportingPage() {
                 </h2>
                 <button
                   type="button"
+                  data-dashboard-control
                   onClick={closeModal}
-                  className={`${BUTTON_ICON_PRIMARY} !min-h-[44px] !min-w-[44px]`}
+                  className={`${BUTTON_ICON_PRIMARY} !min-h-[36px] !min-w-[36px]`}
                   aria-label="Close report"
                 >
                   <X className="w-4 h-4" />
@@ -362,6 +406,8 @@ export default function ReportingPage() {
                       </AdminTableScroll>
                     </div>
                   </>
+                ) : reportError ? (
+                  <p className="text-red-600">{reportError}</p>
                 ) : (
                   <p className="text-neutral-600">Failed to load report data.</p>
                 )}
@@ -370,6 +416,7 @@ export default function ReportingPage() {
               <div className="p-4 sm:p-6 border-t border-neutral-200 flex-shrink-0 flex flex-col sm:flex-row gap-3">
                 <button
                   type="button"
+                  data-dashboard-control
                   onClick={handleExport}
                   disabled={!reportData?.details?.length}
                   className={`${BUTTON_PRIMARY} flex-1 gap-2 justify-center`}
@@ -377,7 +424,7 @@ export default function ReportingPage() {
                   <Download className="w-4 h-4" />
                   Export as CSV
                 </button>
-                <button type="button" onClick={closeModal} className={`${BUTTON_SECONDARY} flex-1 justify-center`}>
+                <button type="button" data-dashboard-control onClick={closeModal} className={`${BUTTON_SECONDARY} flex-1 justify-center`}>
                   Close
                 </button>
               </div>
