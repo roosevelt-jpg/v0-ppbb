@@ -210,7 +210,8 @@ service cloud.firestore {
     match /beneficiaryRequests/{requestId} {
       allow read: if isAdmin()
         || (isAuth() && resource.data.userId == request.auth.uid);
-      allow create, update, delete: if false;
+      allow update: if isAdmin();
+      allow create, delete: if false;
     }
 
     match /beneficiaryConsents/{consentId} {

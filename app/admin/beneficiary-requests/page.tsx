@@ -1,8 +1,14 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { auth } from '@/lib/firebase'
+import { AdminDetailModal } from '@/components/admin-detail-modal'
+import { useAuth } from '@/lib/auth-context'
+import { db, auth } from '@/lib/firebase'
+import { adminApiFetch } from '@/lib/admin-api-client'
+import { canAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'
 import {
   AlertCircle,
   CheckCircle2,
@@ -12,6 +18,7 @@ import {
   FileWarning,
   Inbox,
 } from 'lucide-react'
+
 type BeneficiaryRow = {
   id: string
   fullName?: string
@@ -23,23 +30,8 @@ type BeneficiaryRow = {
   submissionDate?: string | Date | { seconds?: number; _seconds?: number }
   hasSensitiveDocuments?: boolean
   sensitiveDocumentsRedacted?: boolean
-  emiratesIdUrl?: string
-  salaryCertificateUrl?: string
-  bankStatementUrl?: string
-  passportUrl?: string
-  visaUrl?: string
   reasonCategory?: string
   phoneNumber?: string
-}
-
-async function authHeaders(): Promise<HeadersInit> {
-  const user = auth.currentUser
-  if (!user) throw new Error('Not signed in')
-  const token = await user.getIdToken()
-  return {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  }
 }
 
 function toDate(value: unknown): Date | null {
@@ -55,37 +47,77 @@ function toDate(value: unknown): Date | null {
   return null
 }
 
+function timestampMs(row: BeneficiaryRow): number {
+  return (
+    toDate(row.submissionDate)?.getTime() ||
+    toDate(row.createdAt)?.getTime() ||
+    0
+  )
+}
+
+function sortRequests(rows: BeneficiaryRow[]): BeneficiaryRow[] {
+  return [...rows].sort((a, b) => timestampMs(b) - timestampMs(a))
+}
+
+async function loadFromFirestore(): Promise<BeneficiaryRow[]> {
+  const snap = await getDocs(collection(db, 'beneficiaryRequests'))
+  return sortRequests(
+    snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<BeneficiaryRow, 'id'>) }))
+  )
+}
+
 export default function BeneficiaryRequestsAdmin() {
+  const { user } = useAuth()
   const [requests, setRequests] = useState<BeneficiaryRow[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<BeneficiaryRow | null>(null)
-  const [canViewDocs, setCanViewDocs] = useState(false)
   const [acting, setActing] = useState(false)
   const [error, setError] = useState('')
   const [filters, setFilters] = useState({ status: '', emergencyLevel: '' })
-  const [docUrls, setDocUrls] = useState<Record<string, string>>({})
+  const [usingFirestoreFallback, setUsingFirestoreFallback] = useState(false)
 
-  const load = async () => {
+  const adminRole = user?.role || user?.adminRole || 'admin'
+  const canViewDocs = canAccessSensitiveBeneficiaryDocs(adminRole)
+
+  const load = useCallback(async () => {
     setLoading(true)
     setError('')
+    setUsingFirestoreFallback(false)
     try {
-      const headers = await authHeaders()
-      const res = await fetch('/api/admin/beneficiary-requests', { headers })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error || 'Load failed')
-      setRequests(json.data || [])
-      setCanViewDocs(Boolean(json.canViewSensitiveDocuments))
+      const json = await adminApiFetch<BeneficiaryRow[]>('/api/admin/beneficiary-requests')
+      if (json.success && Array.isArray(json.data)) {
+        setRequests(sortRequests(json.data))
+        return
+      }
+
+      const rows = await loadFromFirestore()
+      setRequests(rows)
+      setUsingFirestoreFallback(true)
+      if (!json.success && json.error) {
+        setError(`Loaded from database directly. (${json.error})`)
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load')
-      setRequests([])
+      try {
+        const rows = await loadFromFirestore()
+        setRequests(rows)
+        setUsingFirestoreFallback(true)
+        setError(
+          err instanceof Error
+            ? `API unavailable — showing data from database. (${err.message})`
+            : 'API unavailable — showing data from database.'
+        )
+      } catch (fallbackErr) {
+        setError(fallbackErr instanceof Error ? fallbackErr.message : 'Failed to load')
+        setRequests([])
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    load()
-  }, [])
+    void load()
+  }, [load])
 
   const filtered = requests.filter((r) => {
     if (filters.status && r.status !== filters.status) return false
@@ -103,14 +135,30 @@ export default function BeneficiaryRequestsAdmin() {
           : action === 'accept'
             ? prompt('Acceptance notes (optional):') || ''
             : ''
-      const headers = await authHeaders()
-      const res = await fetch('/api/admin/beneficiary-requests', {
+
+      const statusMap = {
+        review: 'under_review',
+        accept: 'approved',
+        reject: 'rejected',
+      } as const
+
+      const payload = {
+        status: statusMap[action],
+        reviewedBy: auth.currentUser?.uid || null,
+        reviewDate: new Date(),
+        reviewNotes: notes || null,
+        updatedAt: new Date(),
+      }
+
+      const json = await adminApiFetch('/api/admin/beneficiary-requests', {
         method: 'PATCH',
-        headers,
         body: JSON.stringify({ id, action, notes }),
       })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error || 'Update failed')
+
+      if (!json.success) {
+        await updateDoc(doc(db, 'beneficiaryRequests', id), payload)
+      }
+
       await load()
       setSelected(null)
     } catch (err) {
@@ -123,15 +171,12 @@ export default function BeneficiaryRequestsAdmin() {
   const openSensitiveDoc = async (requestId: string, documentKey: string) => {
     if (!canViewDocs) return
     try {
-      const headers = await authHeaders()
-      const res = await fetch(
-        `/api/admin/beneficiary-requests?id=${encodeURIComponent(requestId)}&document=${encodeURIComponent(documentKey)}`,
-        { headers }
+      const json = await adminApiFetch(
+        `/api/admin/beneficiary-requests?id=${encodeURIComponent(requestId)}&document=${encodeURIComponent(documentKey)}`
       )
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error || 'Access denied')
-      setDocUrls((prev) => ({ ...prev, [documentKey]: json.url }))
-      // View only in-page — no download attribute / no new-tab for non-welfare is already gated
+      if (!json.success || !json.url) {
+        throw new Error(json.error || 'Access denied')
+      }
       window.open(json.url, '_blank', 'noopener,noreferrer')
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Cannot open document')
@@ -153,22 +198,25 @@ export default function BeneficiaryRequestsAdmin() {
     }
   }
 
-  const btnPrimary =
-    'min-h-[44px] bg-black hover:bg-neutral-900 text-white px-3 py-2 rounded text-sm font-semibold disabled:opacity-50'
-  const btnSecondary =
-    'min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-50 px-3 py-2 rounded text-sm font-semibold disabled:opacity-50'
-  const btnDanger =
-    'min-h-[44px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold disabled:opacity-50'
+  const btnPrimary = `${BUTTON_PRIMARY} min-h-[36px] px-3 py-1.5 text-sm`
+  const btnSecondary = `${BUTTON_SECONDARY} min-h-[36px] px-3 py-1.5 text-sm`
+  const btnDanger = `${BUTTON_DANGER} min-h-[36px] px-3 py-1.5 text-sm`
 
   return (
     <AdminPageLayout
       title="Beneficiary Requests"
       subtitle="Review charity support applications — sensitive documents role-gated server-side"
     >
-      <div className="space-y-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="space-y-6">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 text-sm rounded p-3">
             {error}
+          </div>
+        )}
+
+        {usingFirestoreFallback && !error && (
+          <div className="bg-neutral-50 border border-neutral-200 text-neutral-700 text-sm rounded p-3">
+            Showing requests from the database. Document viewing still requires the secure API.
           </div>
         )}
 
@@ -188,7 +236,7 @@ export default function BeneficiaryRequestsAdmin() {
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+            className="border border-neutral-300 rounded px-3 py-2 min-h-[36px] text-sm"
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
@@ -200,7 +248,7 @@ export default function BeneficiaryRequestsAdmin() {
           <select
             value={filters.emergencyLevel}
             onChange={(e) => setFilters({ ...filters, emergencyLevel: e.target.value })}
-            className="border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+            className="border border-neutral-300 rounded px-3 py-2 min-h-[36px] text-sm"
           >
             <option value="">All emergency levels</option>
             <option value="low">Low</option>
@@ -208,7 +256,7 @@ export default function BeneficiaryRequestsAdmin() {
             <option value="high">High</option>
             <option value="critical">Critical</option>
           </select>
-          <button type="button" onClick={load} className={btnSecondary}>
+          <button type="button" data-dashboard-control onClick={() => void load()} className={btnSecondary}>
             Refresh
           </button>
         </div>
@@ -230,7 +278,6 @@ export default function BeneficiaryRequestsAdmin() {
             </div>
           ) : (
             <>
-              {/* Mobile cards */}
               <div className="md:hidden space-y-3">
                 {filtered.map((r) => {
                   const when = toDate(r.submissionDate || r.createdAt)
@@ -248,11 +295,7 @@ export default function BeneficiaryRequestsAdmin() {
                         {when ? when.toLocaleDateString() : '—'}
                       </p>
                       <div className="flex flex-wrap gap-2 pt-1">
-                        <button
-                          type="button"
-                          className={btnSecondary}
-                          onClick={() => setSelected(r)}
-                        >
+                        <button type="button" className={btnSecondary} onClick={() => setSelected(r)}>
                           <Eye className="w-4 h-4 inline mr-1" />
                           Review
                         </button>
@@ -260,7 +303,7 @@ export default function BeneficiaryRequestsAdmin() {
                           type="button"
                           disabled={acting}
                           className={btnPrimary}
-                          onClick={() => runAction(r.id, 'accept')}
+                          onClick={() => void runAction(r.id, 'accept')}
                         >
                           Accept
                         </button>
@@ -268,7 +311,7 @@ export default function BeneficiaryRequestsAdmin() {
                           type="button"
                           disabled={acting}
                           className={btnDanger}
-                          onClick={() => runAction(r.id, 'reject')}
+                          onClick={() => void runAction(r.id, 'reject')}
                         >
                           Reject
                         </button>
@@ -278,7 +321,6 @@ export default function BeneficiaryRequestsAdmin() {
                 })}
               </div>
 
-              {/* Desktop table with horizontal scroll */}
               <div className="hidden md:block admin-table-scroll min-w-0">
                 <table className="w-full text-sm min-w-[700px]">
                   <thead>
@@ -299,24 +341,18 @@ export default function BeneficiaryRequestsAdmin() {
                           <td className="py-3 pr-3 font-medium">{r.fullName || r.name || '—'}</td>
                           <td className="py-3 pr-3">{r.email || '—'}</td>
                           <td className="py-3 pr-3 capitalize">{r.emergencyLevel || '—'}</td>
-                          <td className="py-3 pr-3">
-                            {when ? when.toLocaleDateString() : '—'}
-                          </td>
+                          <td className="py-3 pr-3">{when ? when.toLocaleDateString() : '—'}</td>
                           <td className="py-3 pr-3 capitalize">{r.status || '—'}</td>
                           <td className="py-3">
                             <div className="flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                className="underline"
-                                onClick={() => setSelected(r)}
-                              >
+                              <button type="button" className="underline" onClick={() => setSelected(r)}>
                                 Review
                               </button>
                               <button
                                 type="button"
-                                className="underline text-green-700"
+                                className="underline text-neutral-900"
                                 disabled={acting}
-                                onClick={() => runAction(r.id, 'accept')}
+                                onClick={() => void runAction(r.id, 'accept')}
                               >
                                 Accept
                               </button>
@@ -324,7 +360,7 @@ export default function BeneficiaryRequestsAdmin() {
                                 type="button"
                                 className="underline text-red-600"
                                 disabled={acting}
-                                onClick={() => runAction(r.id, 'reject')}
+                                onClick={() => void runAction(r.id, 'reject')}
                               >
                                 Reject
                               </button>
@@ -341,53 +377,90 @@ export default function BeneficiaryRequestsAdmin() {
         </div>
       </div>
 
-      {selected && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-lg w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6 space-y-4">
-            <h2 className="text-xl" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-              Review request
-            </h2>
+      <AdminDetailModal
+        open={Boolean(selected)}
+        onClose={() => setSelected(null)}
+        title="Review request"
+        panelClassName="sm:max-w-sm"
+        footer={
+          <>
+            <button
+              type="button"
+              disabled={acting}
+              className={`${btnSecondary} w-full sm:w-auto flex-1`}
+              onClick={() => selected && void runAction(selected.id, 'review')}
+            >
+              Mark under review
+            </button>
+            <button
+              type="button"
+              disabled={acting}
+              className={`${btnPrimary} w-full sm:w-auto flex-1`}
+              onClick={() => selected && void runAction(selected.id, 'accept')}
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              disabled={acting}
+              className={`${btnDanger} w-full sm:w-auto flex-1`}
+              onClick={() => selected && void runAction(selected.id, 'reject')}
+            >
+              Reject
+            </button>
+            <button
+              type="button"
+              className={`${btnSecondary} w-full sm:w-auto flex-1`}
+              onClick={() => setSelected(null)}
+            >
+              Close
+            </button>
+          </>
+        }
+      >
+        {selected ? (
+          <>
             <dl className="space-y-2 text-sm">
               <div>
-                <dt className="text-neutral-500">Name</dt>
+                <dt className="text-neutral-500 text-xs">Name</dt>
                 <dd className="font-medium">{selected.fullName || selected.name}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Email</dt>
+                <dt className="text-neutral-500 text-xs">Email</dt>
                 <dd>{selected.email}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Phone</dt>
+                <dt className="text-neutral-500 text-xs">Phone</dt>
                 <dd>{selected.phoneNumber || '—'}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Emergency</dt>
+                <dt className="text-neutral-500 text-xs">Emergency</dt>
                 <dd className="capitalize">{selected.emergencyLevel}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Status</dt>
+                <dt className="text-neutral-500 text-xs">Status</dt>
                 <dd className="capitalize">{selected.status}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Category</dt>
+                <dt className="text-neutral-500 text-xs">Category</dt>
                 <dd>{selected.reasonCategory || '—'}</dd>
               </div>
             </dl>
 
-            <div className="border-t pt-4">
-              <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2">
+            <div className="border-t border-neutral-200 mt-3 pt-3">
+              <p className="text-[10px] uppercase tracking-wider text-neutral-500 mb-2">
                 Sensitive documents
               </p>
               {!canViewDocs ? (
-                <div className="flex gap-2 items-start text-sm text-neutral-600 bg-neutral-50 p-3 rounded">
-                  <FileWarning className="w-5 h-5 shrink-0 text-amber-600" />
+                <div className="flex gap-2 items-start text-sm text-neutral-600 bg-neutral-50 p-2.5 rounded">
+                  <FileWarning className="w-4 h-4 shrink-0 text-amber-600" />
                   <span>
                     Documents are hidden for your role. Only welfare / founder / coordinator
                     roles can view them via the secure API.
                   </span>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {(
                     [
                       ['emiratesIdUrl', 'Emirates ID'],
@@ -400,57 +473,19 @@ export default function BeneficiaryRequestsAdmin() {
                     <button
                       key={key}
                       type="button"
-                      className={`${btnSecondary} text-left`}
-                      onClick={() => openSensitiveDoc(selected.id, key)}
+                      data-dashboard-control
+                      className={`${btnSecondary} text-left text-xs`}
+                      onClick={() => void openSensitiveDoc(selected.id, key)}
                     >
                       View {label}
-                      {docUrls[key] ? ' ✓' : ''}
                     </button>
                   ))}
-                  <p className="text-xs text-neutral-500">
-                    Files open for review only for authorized roles. Direct Storage links are not
-                    shown to standard admins.
-                  </p>
                 </div>
               )}
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <button
-                type="button"
-                disabled={acting}
-                className={btnSecondary}
-                onClick={() => runAction(selected.id, 'review')}
-              >
-                Mark under review
-              </button>
-              <button
-                type="button"
-                disabled={acting}
-                className={btnPrimary}
-                onClick={() => runAction(selected.id, 'accept')}
-              >
-                Accept
-              </button>
-              <button
-                type="button"
-                disabled={acting}
-                className={btnDanger}
-                onClick={() => runAction(selected.id, 'reject')}
-              >
-                Reject
-              </button>
-              <button
-                type="button"
-                className={btnSecondary}
-                onClick={() => setSelected(null)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </>
+        ) : null}
+      </AdminDetailModal>
     </AdminPageLayout>
   )
 }

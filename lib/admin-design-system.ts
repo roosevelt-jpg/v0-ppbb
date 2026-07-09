@@ -53,6 +53,15 @@ export const BUTTON_SUCCESS = BUTTON_PRIMARY
 export const BUTTON_SMALL = 'px-3 py-1.5 text-sm'
 export const BUTTON_LARGE = 'px-6 py-3 text-base'
 
+/** Compact admin detail modal shell (profile popups, review dialogs) */
+export const ADMIN_DETAIL_MODAL_OVERLAY =
+  'fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-2'
+export const ADMIN_DETAIL_MODAL_BACKDROP = 'absolute inset-0 bg-black/50'
+export const ADMIN_DETAIL_MODAL_PANEL =
+  'relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-[18rem] sm:max-w-xs max-h-[85vh] overflow-hidden flex flex-col'
+export const ADMIN_DETAIL_MODAL_CLOSE =
+  'shrink-0 min-h-[26px] min-w-[26px] inline-flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100'
+
 // Form styles
 export const INPUT_BASE = 'w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-base transition-all duration-200'
 export const INPUT_FOCUS = 'focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent'
