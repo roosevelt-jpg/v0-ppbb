@@ -5,6 +5,7 @@ import { auth, db } from '@/lib/firebase'
 import { doc, onSnapshot, getDoc } from 'firebase/firestore'
 import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth'
 import { User, BusinessProfile } from '@/lib/types'
+import { isAccountDeleted } from '@/lib/user-settings'
 import { requestAndRegisterFCM } from '@/lib/fcm-client'
 
 interface AuthContextType {
