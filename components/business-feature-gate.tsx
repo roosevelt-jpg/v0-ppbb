@@ -48,7 +48,12 @@ export function BusinessFeatureLink({
 
   return (
     <>
-      <button type="button" onClick={handleClick} className={className} style={style}>
+      <button
+        type="button"
+        onClick={handleClick}
+        className={`inline p-0 m-0 bg-transparent border-0 cursor-pointer font-inherit text-inherit appearance-none ${className ?? ''}`}
+        style={style}
+      >
         {children}
       </button>
       {modal}
