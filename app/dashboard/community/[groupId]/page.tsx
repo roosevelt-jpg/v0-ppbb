@@ -95,12 +95,21 @@ export default function GroupPage() {
     if (!groupId) return
 
     const unsubscribe = onSnapshot(
-      query(collection(db, 'groups', groupId, 'posts'), orderBy('isPinned', 'desc'), orderBy('createdAt', 'desc')),
+      query(collection(db, 'groups', groupId, 'posts')),
       (snapshot) => {
-        const postsData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Post[]
+        const postsData = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Post[]
+        postsData.sort((a, b) => {
+          if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
+            return Number(b.isPinned) - Number(a.isPinned)
+          }
+          const aTime = a.createdAt?.toMillis?.() ?? a.createdAt?.seconds * 1000 ?? 0
+          const bTime = b.createdAt?.toMillis?.() ?? b.createdAt?.seconds * 1000 ?? 0
+          return bTime - aTime
+        })
         setPosts(postsData)
       },
       (error) => {

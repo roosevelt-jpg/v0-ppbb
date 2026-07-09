@@ -76,6 +76,17 @@ export interface GroupComment {
 
 // Group Functions
 
+function getTimestampMillis(value: unknown): number {
+  if (!value) return 0
+  if (typeof value === 'object' && value !== null) {
+    const ts = value as { toMillis?: () => number; seconds?: number }
+    if (typeof ts.toMillis === 'function') return ts.toMillis()
+    if (typeof ts.seconds === 'number') return ts.seconds * 1000
+  }
+  if (value instanceof Date) return value.getTime()
+  return 0
+}
+
 export async function createGroup(
   groupData: Omit<Group, 'id' | 'createdAt' | 'memberCount' | 'postCount'>,
   userId: string
@@ -119,17 +130,18 @@ export async function getGroup(groupId: string) {
 
 export async function getAllGroups(pageSize = 12, startAfterDoc?: any) {
   try {
-    let q = query(collection(db, 'groups'), where('isActive', '==', true), orderBy('createdAt', 'desc'), limit(pageSize + 1))
-
-    if (startAfterDoc) {
-      q = query(collection(db, 'groups'), where('isActive', '==', true), orderBy('createdAt', 'desc'), startAfter(startAfterDoc), limit(pageSize + 1))
-    }
-
-    const snapshot = await getDocs(q)
-    const docs = snapshot.docs.map((doc) => ({
+    const snapshot = await getDocs(query(collection(db, 'groups'), where('isActive', '==', true)))
+    let docs = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     })) as any[]
+
+    docs.sort((a, b) => getTimestampMillis(b.createdAt) - getTimestampMillis(a.createdAt))
+
+    if (startAfterDoc?.id) {
+      const startIndex = docs.findIndex((d) => d.id === startAfterDoc.id)
+      if (startIndex >= 0) docs = docs.slice(startIndex + 1)
+    }
 
     const hasMore = docs.length > pageSize
     return {
@@ -145,12 +157,15 @@ export async function getAllGroups(pageSize = 12, startAfterDoc?: any) {
 
 export async function getGroupsByType(type: string) {
   try {
-    const q = query(collection(db, 'groups'), where('type', '==', type), where('isActive', '==', true), orderBy('memberCount', 'desc'))
-    const snapshot = await getDocs(q)
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as any[]
+    const snapshot = await getDocs(
+      query(collection(db, 'groups'), where('type', '==', type), where('isActive', '==', true))
+    )
+    return snapshot.docs
+      .map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .sort((a, b) => (b.memberCount ?? 0) - (a.memberCount ?? 0)) as any[]
   } catch (error) {
     console.error('[v0] Error getting groups by type:', error)
     throw error

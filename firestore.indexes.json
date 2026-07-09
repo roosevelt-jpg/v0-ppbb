@@ -315,6 +315,20 @@
       ]
     },
     {
+      "collectionGroup": "posts",
+      "queryScope": "Collection",
+      "fields": [
+        {
+          "fieldPath": "isPinned",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "groups",
       "queryScope": "Collection",
       "fields": [
