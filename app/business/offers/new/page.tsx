@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload } from 'lucide-react'
 import { RichTextEditor } from '@/components/rich-text-editor'
 
 export default function NewOffer() {

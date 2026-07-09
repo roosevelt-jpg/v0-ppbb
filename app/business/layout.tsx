@@ -202,7 +202,11 @@ export default function BusinessLayout({
 
         {/* Content — always light surface so cards stay white with black text */}
         <div className="flex-1 overflow-auto" data-dashboard-surface="light">
-          <DashboardErrorBoundary homeHref="/business/dashboard" homeLabel="Go to Business Dashboard">
+          <DashboardErrorBoundary
+            key={pathname}
+            homeHref="/business/dashboard"
+            homeLabel="Go to Business Dashboard"
+          >
             {children}
           </DashboardErrorBoundary>
         </div>
