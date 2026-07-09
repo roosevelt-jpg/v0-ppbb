@@ -267,8 +267,10 @@ export default function AdminChatbotPage() {
                     <button
                       key={conv.id}
                       onClick={() => setSelectedConvId(conv.id)}
-                      className={`w-full text-left p-3 hover:bg-neutral-50 transition border-l-2 ${
-                        selectedConvId === conv.id ? 'border-l-blue-600 bg-blue-50' : 'border-l-transparent'
+                      className={`w-full text-left p-3 transition border-l-2 shadow-none min-h-0 rounded-none font-normal ${
+                        selectedConvId === conv.id
+                          ? 'border-l-blue-600 !bg-neutral-200 !text-neutral-900'
+                          : 'border-l-transparent !bg-neutral-100 !text-neutral-900 hover:!bg-neutral-200'
                       }`}
                     >
                       <h4 className="text-sm font-medium text-neutral-900 truncate">{conv.title}</h4>
