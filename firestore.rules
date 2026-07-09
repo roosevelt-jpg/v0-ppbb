@@ -757,6 +757,19 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    // Integration usage + health alerts (admin analytics dashboard)
+    match /integrationUsage/{entryId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /integrationAlerts/{alertId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
     // Default deny all other requests
     match /{document=**} {
       allow read, write: if false;
