@@ -8,6 +8,7 @@ import { BusinessPortalAccessDenied } from '@/components/business-feature-gate'
 import Link from 'next/link'
 import { SiteLogo } from '@/components/site-logo'
 import { DashboardHeaderActions } from '@/components/dashboard-header-actions'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 import {
   BarChart3,
   Briefcase,
@@ -229,7 +230,11 @@ export default function BusinessLayout({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto">{children}</div>
+        <div className="flex-1 overflow-auto">
+          <DashboardErrorBoundary homeHref="/business/dashboard" homeLabel="Go to Business Dashboard">
+            {children}
+          </DashboardErrorBoundary>
+        </div>
       </main>
     </div>
   )

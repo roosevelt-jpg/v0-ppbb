@@ -16,15 +16,34 @@ export default function NewOpportunity() {
   const [formData, setFormData] = React.useState({
     title: '',
     type: 'job',
+    roleType: 'full_time',
+    companyName: '',
     description: '',
     category: '',
     salary: 0,
     remote: false,
+    locationCity: '',
     duration: '',
     hoursPerWeek: 0,
     requirements: '',
     benefits: '',
+    suitableFor: [] as string[],
+    genderRestriction: 'mixed' as 'male' | 'female' | 'mixed',
+    applicationProcess: 'cv_upload' as 'cv_upload' | 'external_link' | 'both',
+    applicationURL: '',
+    deadline: '',
+    posterRelation: 'employer' as 'employer' | 'connector',
+    isMemberOnly: false,
   })
+
+  React.useEffect(() => {
+    if (user?.businessProfile?.businessName) {
+      setFormData((prev) => ({
+        ...prev,
+        companyName: prev.companyName || user.businessProfile?.businessName || '',
+      }))
+    }
+  }, [user?.businessProfile?.businessName])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -36,8 +55,19 @@ export default function NewOpportunity() {
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const toggleSuitableFor = (label: string) => {
+    setFormData((prev) => {
+      const next = prev.suitableFor.includes(label)
+        ? prev.suitableFor.filter((s) => s !== label)
+        : [...prev.suitableFor, label]
+      let genderRestriction: 'male' | 'female' | 'mixed' = 'mixed'
+      if (next.includes('Women Only')) genderRestriction = 'female'
+      else if (next.includes('Men Only')) genderRestriction = 'male'
+      return { ...prev, suitableFor: next, genderRestriction }
+    })
+  }
+
+  const submitOpportunity = async (isDraft: boolean) => {
     if (!user) return
 
     try {
@@ -56,8 +86,10 @@ export default function NewOpportunity() {
         body: JSON.stringify({
           ...formData,
           businessName: user.businessProfile?.businessName || 'Unknown',
+          companyName: formData.companyName || user.businessProfile?.businessName || 'Unknown',
           requirements: formData.requirements.split('\n').filter((r) => r.trim()),
           benefits: formData.benefits.split('\n').filter((b) => b.trim()),
+          status: isDraft ? 'draft' : 'pending_approval',
         }),
       })
       const json = await res.json()
@@ -65,7 +97,11 @@ export default function NewOpportunity() {
         alert(json.error || 'Error posting opportunity. Please try again.')
         return
       }
-      alert('Job submitted for admin approval. It will appear publicly once approved.')
+      alert(
+        isDraft
+          ? 'Draft saved.'
+          : 'Job submitted for admin approval. It will appear publicly once approved.'
+      )
       router.push('/business/opportunities')
     } catch (error) {
       console.error('[v0] Error posting opportunity:', error)
@@ -73,6 +109,11 @@ export default function NewOpportunity() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submitOpportunity(false)
   }
 
   if (!user || (!hasBusinessAccess(user))) {
@@ -144,6 +185,8 @@ export default function NewOpportunity() {
                   <option value="job">Job</option>
                   <option value="internship">Internship</option>
                   <option value="gig">Gig</option>
+                  <option value="volunteer">Volunteer</option>
+                  <option value="contract">Contract</option>
                 </select>
               </div>
               <div>
@@ -167,6 +210,53 @@ export default function NewOpportunity() {
                   }}
                 />
               </div>
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Company / Organization Name
+              </label>
+              <input
+                type="text"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleChange}
+                placeholder="Your company or organization name"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Employment Type
+              </label>
+              <select
+                name="roleType"
+                value={formData.roleType}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                }}
+              >
+                <option value="full_time">Full Time</option>
+                <option value="part_time">Part Time</option>
+                <option value="freelance">Freelance</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="internship">Internship</option>
+                <option value="contract">Contract</option>
+              </select>
             </div>
 
             {/* Description */}
@@ -272,6 +362,136 @@ export default function NewOpportunity() {
               </div>
             </div>
 
+            {!formData.remote && (
+              <div>
+                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                  Location / City
+                </label>
+                <input
+                  type="text"
+                  name="locationCity"
+                  value={formData.locationCity}
+                  onChange={handleChange}
+                  placeholder="e.g. Dubai, UAE"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '1px solid #e4e1da',
+                    borderRadius: '8px',
+                    backgroundColor: '#ffffff',
+                    color: '#111111',
+                  }}
+                />
+              </div>
+            )}
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Who is this suitable for?
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {['Students', 'Graduates', 'Women Only', 'Men Only', 'Open to All'].map((label) => (
+                  <label key={label} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={formData.suitableFor.includes(label)}
+                      onChange={() => toggleSuitableFor(label)}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Application Process
+              </label>
+              <div className="flex flex-wrap gap-4 text-sm">
+                {(
+                  [
+                    ['cv_upload', 'CV Upload on Platform'],
+                    ['external_link', 'External Link'],
+                    ['both', 'Both'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <label key={value} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="applicationProcess"
+                      checked={formData.applicationProcess === value}
+                      onChange={() => setFormData((p) => ({ ...p, applicationProcess: value }))}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              {(formData.applicationProcess === 'external_link' ||
+                formData.applicationProcess === 'both') && (
+                <input
+                  type="url"
+                  name="applicationURL"
+                  value={formData.applicationURL}
+                  onChange={handleChange}
+                  placeholder="https://yourcompany.com/careers/apply"
+                  className="mt-3 w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                />
+              )}
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Application Deadline (optional)
+              </label>
+              <input
+                type="date"
+                name="deadline"
+                value={formData.deadline}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Your relation to this opportunity
+              </label>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={formData.posterRelation === 'employer'}
+                    onChange={() => setFormData((p) => ({ ...p, posterRelation: 'employer' }))}
+                  />
+                  Employer
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={formData.posterRelation === 'connector'}
+                    onChange={() => setFormData((p) => ({ ...p, posterRelation: 'connector' }))}
+                  />
+                  Connector
+                </label>
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={formData.isMemberOnly}
+                onChange={(e) => setFormData((p) => ({ ...p, isMemberOnly: e.target.checked }))}
+              />
+              Restrict to platform members only
+            </label>
+
             {/* Requirements */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
@@ -319,7 +539,7 @@ export default function NewOpportunity() {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Button
                 type="submit"
                 disabled={isSaving}
@@ -330,6 +550,19 @@ export default function NewOpportunity() {
                 }}
               >
                 {isSaving ? 'Posting...' : 'Post Opportunity'}
+              </Button>
+              <Button
+                type="button"
+                disabled={isSaving}
+                onClick={() => void submitOpportunity(true)}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                  border: '1px solid #e4e1da',
+                  padding: '12px 24px',
+                }}
+              >
+                Save as Draft
               </Button>
               <Button
                 type="button"

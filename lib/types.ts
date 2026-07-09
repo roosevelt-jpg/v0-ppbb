@@ -972,7 +972,17 @@ export interface BusinessOpportunity {
   applications: number
   applicants: string[]
   /** pending_approval until admin publishes; then open/closed/filled/archived */
-  status: 'pending_approval' | 'open' | 'closed' | 'filled' | 'archived' | 'rejected'
+  status: 'draft' | 'pending_approval' | 'open' | 'closed' | 'filled' | 'archived' | 'rejected'
+  companyName?: string
+  roleType?: string
+  locationCity?: string
+  locationType?: string
+  suitableFor?: string[]
+  genderRestriction?: 'male' | 'female' | 'mixed' | string
+  applicationProcess?: 'cv_upload' | 'external_link' | 'both' | string
+  applicationURL?: string | null
+  posterRelation?: 'employer' | 'connector' | string
+  isMemberOnly?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -1012,6 +1022,8 @@ export interface BusinessOffer {
   originalPrice?: number
   image?: UploadedImage
   imageUrl?: string
+  imageURLs?: string[]
+  isMemberOnly?: boolean
   validUntil?: Date
   targetAudience?: 'members' | 'volunteers' | 'public'
   memberBenefit?: number
@@ -1020,7 +1032,7 @@ export interface BusinessOffer {
    * published = eligible for /shop merch when category is merchandise;
    * active = marketplace directory.
    */
-  status: 'pending_approval' | 'active' | 'archived' | 'published' | 'rejected'
+  status: 'draft' | 'pending_approval' | 'active' | 'archived' | 'published' | 'rejected'
   views: number
   conversions: number
   createdAt: Date

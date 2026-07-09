@@ -5,10 +5,15 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { hasBusinessAccessServer, hasAdminAccessServer } from '@/lib/roles-server'
 
+function parseLines(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean)
+  if (typeof value === 'string') return value.split('\n').map((s) => s.trim()).filter(Boolean)
+  return []
+}
+
 /**
  * POST — create a job/opportunity for the authenticated business user.
- * Always stores status = pending_approval (admin must publish before public).
- * Basic members are rejected even if they bypass the upgrade modal.
+ * status: draft | pending_approval (default pending_approval)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -57,41 +62,55 @@ export async function POST(request: NextRequest) {
       `${userData.firstName || ''} ${userData.lastName || ''}`.trim() ||
       'Business'
 
+    const status =
+      body.status === 'draft' || body.isDraft === true ? 'draft' : 'pending_approval'
+
+    const suitableFor = parseLines(body.suitableFor)
+    let genderRestriction = body.genderRestriction || 'mixed'
+    if (suitableFor.includes('Women Only')) genderRestriction = 'female'
+    if (suitableFor.includes('Men Only')) genderRestriction = 'male'
+
     const now = Timestamp.now()
     const ref = db.collection('businessOpportunities').doc()
     const id = ref.id
 
-    const requirements = Array.isArray(body.requirements)
-      ? body.requirements
-      : typeof body.requirements === 'string'
-        ? body.requirements.split('\n').filter((r: string) => r.trim())
-        : []
-    const benefits = Array.isArray(body.benefits)
-      ? body.benefits
-      : typeof body.benefits === 'string'
-        ? body.benefits.split('\n').filter((b: string) => b.trim())
-        : []
+    const requirements = parseLines(body.requirements)
+    const benefits = parseLines(body.benefits)
 
     const opportunity = sanitizeForFirestore({
       id,
       businessId,
       businessName,
+      businessLogoUrl: userData.businessProfile?.logoURL || userData.profilePictureURL || null,
       title,
-      type: body.type || 'job',
+      type: body.type || body.roleType || 'job',
+      roleType: body.roleType || body.type || 'job',
+      companyName: body.companyName || businessName,
       description: body.description || '',
       category: body.category || '',
-      salary: typeof body.salary === 'number' ? body.salary : undefined,
+      salary: typeof body.salary === 'number' ? body.salary : null,
       remote: Boolean(body.remote),
-      duration: body.duration || '',
-      hoursPerWeek: typeof body.hoursPerWeek === 'number' ? body.hoursPerWeek : undefined,
+      locationType: body.remote ? 'remote' : body.locationType || 'onsite',
+      locationCity: body.remote ? null : body.locationCity || null,
+      locationText: body.locationCity || null,
+      duration: body.duration || null,
+      hoursPerWeek: typeof body.hoursPerWeek === 'number' ? body.hoursPerWeek : null,
       requirements,
       benefits,
+      suitableFor,
+      genderRestriction,
+      applicationProcess: body.applicationProcess || 'cv_upload',
+      applicationURL: body.applicationURL || null,
+      deadline: body.deadline ? Timestamp.fromDate(new Date(body.deadline)) : null,
+      posterRelation: body.posterRelation || 'employer',
+      isMemberOnly: Boolean(body.isMemberOnly),
       applications: 0,
       applicants: [],
-      // Forced — never trust client open/published
-      status: 'pending_approval',
+      viewCount: 0,
+      status,
       createdAt: now,
       updatedAt: now,
+      expiresAt: body.deadline ? Timestamp.fromDate(new Date(body.deadline)) : null,
     })
 
     await ref.set(opportunity)
@@ -101,17 +120,26 @@ export async function POST(request: NextRequest) {
         id,
         businessId,
         businessName,
+        companyName: body.companyName || businessName,
         title,
         description: body.description || '',
         category: body.category || body.type || '',
         jobType: body.type || 'job',
-        status: 'pending_approval',
+        roleType: body.roleType || body.type || 'job',
+        genderRestriction,
+        suitableFor,
+        isMemberOnly: Boolean(body.isMemberOnly),
+        applicationProcess: body.applicationProcess || 'cv_upload',
+        applicationURL: body.applicationURL || null,
+        locationCity: body.remote ? null : body.locationCity || null,
+        locationType: body.remote ? 'remote' : 'onsite',
+        status,
         createdAt: now,
         updatedAt: now,
       })
     )
 
-    return NextResponse.json({ success: true, data: { id, status: 'pending_approval' } })
+    return NextResponse.json({ success: true, data: { id, status } })
   } catch (error) {
     console.error('[v0] Error creating opportunity:', error)
     return NextResponse.json(

@@ -8,11 +8,15 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { Loader2, Upload, X } from 'lucide-react'
 
 export default function NewOffer() {
   const { user } = useAuth()
   const router = useRouter()
   const [isSaving, setIsSaving] = React.useState(false)
+  const [uploadingImages, setUploadingImages] = React.useState(false)
+  const [imageURLs, setImageURLs] = React.useState<string[]>([])
   const [formData, setFormData] = React.useState({
     title: '',
     type: 'product',
@@ -25,6 +29,7 @@ export default function NewOffer() {
     validUntil: '',
     targetAudience: 'members',
     memberBenefit: 0,
+    isMemberOnly: false,
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -35,8 +40,32 @@ export default function NewOffer() {
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files?.length || !user) return
+    if (imageURLs.length >= 5) {
+      alert('Maximum 5 images allowed.')
+      return
+    }
+    setUploadingImages(true)
+    try {
+      const uploaded: string[] = []
+      for (const file of Array.from(files).slice(0, 5 - imageURLs.length)) {
+        const url = await uploadImageToFirebase(file, `offers/${user.id}/images`, {
+          preset: 'content',
+          maxDimension: 1200,
+        })
+        uploaded.push(url)
+      }
+      setImageURLs((prev) => [...prev, ...uploaded].slice(0, 5))
+    } catch (err) {
+      console.error('[v0] Offer image upload error:', err)
+      alert(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setUploadingImages(false)
+    }
+  }
+
+  const submitOffer = async (isDraft: boolean) => {
     if (!user) return
 
     try {
@@ -55,7 +84,9 @@ export default function NewOffer() {
         body: JSON.stringify({
           ...formData,
           businessName: user.businessProfile?.businessName || 'Unknown',
-          validUntil: formData.validUntil || undefined,
+          imageURLs,
+          validUntil: formData.validUntil || null,
+          status: isDraft ? 'draft' : 'pending_approval',
         }),
       })
       const json = await res.json()
@@ -63,7 +94,11 @@ export default function NewOffer() {
         alert(json.error || 'Error posting offer. Please try again.')
         return
       }
-      alert('Offer submitted for admin approval. It will appear publicly once approved.')
+      alert(
+        isDraft
+          ? 'Draft saved.'
+          : 'Offer submitted for admin approval. It will appear publicly once approved.'
+      )
       router.push('/business/offers')
     } catch (error) {
       console.error('[v0] Error posting offer:', error)
@@ -71,6 +106,11 @@ export default function NewOffer() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submitOffer(false)
   }
 
   if (!user || (!hasBusinessAccess(user))) {
@@ -225,6 +265,45 @@ export default function NewOffer() {
               />
             </div>
 
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Product / Service Images (max 5)
+              </label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg cursor-pointer text-sm font-medium">
+                {uploadingImages ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                {uploadingImages ? 'Uploading…' : 'Upload images'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="sr-only"
+                  disabled={uploadingImages || imageURLs.length >= 5}
+                  onChange={(e) => void handleImageUpload(e.target.files)}
+                />
+              </label>
+              {imageURLs.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {imageURLs.map((url) => (
+                    <div key={url} className="relative">
+                      <img src={url} alt="" className="h-20 w-20 object-cover rounded-lg border" />
+                      <button
+                        type="button"
+                        onClick={() => setImageURLs((prev) => prev.filter((u) => u !== url))}
+                        className="absolute -top-1 -right-1 bg-black text-white rounded-full p-0.5"
+                        aria-label="Remove image"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Pricing */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -334,6 +413,17 @@ export default function NewOffer() {
               />
             </div>
 
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={formData.isMemberOnly}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, isMemberOnly: e.target.checked }))
+                }
+              />
+              Restrict to platform members only
+            </label>
+
             <div
               className="rounded-lg border border-amber-200 bg-amber-50 p-4"
               style={{ fontFamily: 'Inter, sans-serif' }}
@@ -351,10 +441,10 @@ export default function NewOffer() {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Button
                 type="submit"
-                disabled={isSaving}
+                disabled={isSaving || uploadingImages}
                 style={{
                   backgroundColor: '#111111',
                   color: '#ffffff',
@@ -362,6 +452,19 @@ export default function NewOffer() {
                 }}
               >
                 {isSaving ? 'Posting...' : 'Post Offer'}
+              </Button>
+              <Button
+                type="button"
+                disabled={isSaving || uploadingImages}
+                onClick={() => void submitOffer(true)}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                  border: '1px solid #e4e1da',
+                  padding: '12px 24px',
+                }}
+              >
+                Save as Draft
               </Button>
               <Button
                 type="button"

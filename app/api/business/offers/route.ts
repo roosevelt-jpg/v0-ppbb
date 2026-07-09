@@ -7,7 +7,7 @@ import { hasBusinessAccessServer, hasAdminAccessServer } from '@/lib/roles-serve
 
 /**
  * POST — create an offer for the authenticated business user.
- * Always stores status = pending_approval (admin must publish before public/shop).
+ * status: draft | pending_approval (default pending_approval)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -62,15 +62,26 @@ export async function POST(request: NextRequest) {
         ? 'merchandise'
         : categoryRaw
 
-    const imageURL =
+    const imageURLs: string[] = Array.isArray(body.imageURLs)
+      ? body.imageURLs.filter((u: unknown) => typeof u === 'string' && u.trim())
+      : []
+    const singleImage =
       (typeof body.imageUrl === 'string' && body.imageUrl) ||
       (typeof body.imageURL === 'string' && body.imageURL) ||
       ''
+    if (singleImage && !imageURLs.includes(singleImage)) {
+      imageURLs.unshift(singleImage)
+    }
+    const primaryImage = imageURLs[0] || ''
 
     const isMemberDiscount =
       body.type === 'discount' ||
+      Boolean(body.isMemberOnly) ||
       (typeof body.memberBenefit === 'number' && body.memberBenefit > 0) ||
       (typeof body.discountPercentage === 'number' && body.discountPercentage > 0)
+
+    const status =
+      body.status === 'draft' || body.isDraft === true ? 'draft' : 'pending_approval'
 
     const now = Timestamp.now()
     const ref = db.collection('businessOffers').doc()
@@ -85,15 +96,17 @@ export async function POST(request: NextRequest) {
       description: body.description || '',
       category: categoryNormalized,
       variant: typeof body.variant === 'string' ? body.variant.trim() : '',
-      price: typeof body.price === 'number' ? body.price : undefined,
+      price: typeof body.price === 'number' ? body.price : null,
       discountPercentage:
-        typeof body.discountPercentage === 'number' ? body.discountPercentage : undefined,
-      originalPrice: typeof body.originalPrice === 'number' ? body.originalPrice : undefined,
-      imageUrl: imageURL || undefined,
-      validUntil: body.validUntil ? new Date(body.validUntil) : undefined,
+        typeof body.discountPercentage === 'number' ? body.discountPercentage : null,
+      originalPrice: typeof body.originalPrice === 'number' ? body.originalPrice : null,
+      imageUrl: primaryImage || null,
+      imageURLs,
+      validUntil: body.validUntil ? Timestamp.fromDate(new Date(body.validUntil)) : null,
       targetAudience: body.targetAudience || 'members',
-      memberBenefit: typeof body.memberBenefit === 'number' ? body.memberBenefit : undefined,
-      status: 'pending_approval',
+      memberBenefit: typeof body.memberBenefit === 'number' ? body.memberBenefit : null,
+      isMemberOnly: Boolean(body.isMemberOnly),
+      status,
       views: 0,
       conversions: 0,
       createdAt: now,
@@ -111,23 +124,24 @@ export async function POST(request: NextRequest) {
         description: body.description || '',
         category: categoryNormalized,
         type: body.type || 'product',
-        status: 'pending_approval',
-        price: typeof body.price === 'number' ? body.price : undefined,
-        originalPrice: typeof body.originalPrice === 'number' ? body.originalPrice : undefined,
+        status,
+        price: typeof body.price === 'number' ? body.price : null,
+        originalPrice: typeof body.originalPrice === 'number' ? body.originalPrice : null,
         currency: 'AED',
         variant: typeof body.variant === 'string' ? body.variant.trim() || null : null,
-        imageURL,
-        images: imageURL ? [imageURL] : [],
+        imageURL: primaryImage || null,
+        images: imageURLs,
         isMemberDiscount,
-        memberBenefit: typeof body.memberBenefit === 'number' ? body.memberBenefit : undefined,
+        isMemberOnly: Boolean(body.isMemberOnly),
+        memberBenefit: typeof body.memberBenefit === 'number' ? body.memberBenefit : null,
         discountPercentage:
-          typeof body.discountPercentage === 'number' ? body.discountPercentage : undefined,
+          typeof body.discountPercentage === 'number' ? body.discountPercentage : null,
         createdAt: now,
         updatedAt: now,
       })
     )
 
-    return NextResponse.json({ success: true, data: { id, status: 'pending_approval' } })
+    return NextResponse.json({ success: true, data: { id, status } })
   } catch (error) {
     console.error('[v0] Error creating offer:', error)
     return NextResponse.json({ success: false, error: 'Failed to create offer' }, { status: 500 })

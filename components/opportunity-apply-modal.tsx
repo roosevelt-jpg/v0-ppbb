@@ -1,10 +1,28 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Upload } from 'lucide-react'
 import { BusinessOpportunity } from '@/lib/types'
 import { applyToOpportunity } from '@/lib/business-queries'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
+import { uploadFileToFirebase } from '@/lib/upload-utils'
+
+function opportunityGenderBlocksUser(
+  opportunity: BusinessOpportunity,
+  userGender?: string | null
+): string | null {
+  const restriction = (opportunity as { genderRestriction?: string }).genderRestriction
+  if (!restriction || restriction === 'mixed') return null
+  const gender = (userGender || '').toLowerCase()
+  if (restriction === 'female' || restriction === 'ladies-only') {
+    return gender === 'female' ? null : 'This opportunity is for women only.'
+  }
+  if (restriction === 'male' || restriction === 'men-only') {
+    return gender === 'male' ? null : 'This opportunity is for men only.'
+  }
+  return null
+}
 
 export function OpportunityApplyModal({
   opportunity,
@@ -20,15 +38,57 @@ export function OpportunityApplyModal({
   const { user } = useAuth()
   const [coverLetter, setCoverLetter] = useState('')
   const [resumeUrl, setResumeUrl] = useState('')
+  const [uploadingCv, setUploadingCv] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   if (!open || !opportunity) return null
 
+  const isBusiness = hasBusinessAccess(user)
+  const genderBlock = user ? opportunityGenderBlocksUser(opportunity, user.gender) : null
+  const isMemberOnly = Boolean((opportunity as { isMemberOnly?: boolean }).isMemberOnly)
+  const memberBlock =
+    isMemberOnly && user && user.role !== 'member' && !hasBusinessAccess(user)
+      ? 'This opportunity is for platform members only.'
+      : null
+  const applicationProcess = (opportunity as { applicationProcess?: string }).applicationProcess
+  const applicationURL = (opportunity as { applicationURL?: string }).applicationURL
+  const needsCv =
+    applicationProcess === 'cv_upload' ||
+    applicationProcess === 'both' ||
+    !applicationProcess
+  const externalOnly = applicationProcess === 'external_link' && applicationURL
+
+  const handleCvUpload = async (file: File) => {
+    if (!user) return
+    setUploadingCv(true)
+    setError('')
+    try {
+      const url = await uploadFileToFirebase(
+        file,
+        `applications/${opportunity.id}/${user.id}`,
+        `applications/${opportunity.id}/${user.id}/cv-${Date.now()}.${file.name.split('.').pop() || 'pdf'}`
+      )
+      setResumeUrl(url)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'CV upload failed')
+    } finally {
+      setUploadingCv(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) {
       setError('You must be signed in to apply.')
+      return
+    }
+    if (genderBlock || memberBlock) {
+      setError(genderBlock || memberBlock || 'Cannot apply.')
+      return
+    }
+    if (needsCv && !resumeUrl && !coverLetter.trim()) {
+      setError('Please upload a CV or add a cover letter.')
       return
     }
     setSubmitting(true)
@@ -52,8 +112,8 @@ export function OpportunityApplyModal({
       setResumeUrl('')
       onApplied()
       onClose()
-    } catch (err: any) {
-      setError(err?.message || 'Failed to submit application. Please try again.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit application. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -68,6 +128,7 @@ export function OpportunityApplyModal({
             <p className="text-sm text-muted-foreground">{opportunity.businessName}</p>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
             aria-label="Close"
@@ -76,56 +137,105 @@ export function OpportunityApplyModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          <div>
-            <label htmlFor="coverLetter" className="block text-sm font-medium text-foreground mb-1">
-              Cover letter / Message
-            </label>
-            <textarea
-              id="coverLetter"
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-              rows={5}
-              required
-              placeholder="Tell the business why you're a great fit..."
-              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="resumeUrl" className="block text-sm font-medium text-foreground mb-1">
-              Resume / Portfolio link <span className="text-muted-foreground">(optional)</span>
-            </label>
-            <input
-              id="resumeUrl"
-              type="url"
-              value={resumeUrl}
-              onChange={(e) => setResumeUrl(e.target.value)}
-              placeholder="https://..."
-              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-secondary transition-colors"
+        {!user ? (
+          <div className="p-6 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">Sign in to apply for this opportunity.</p>
+            <a
+              href={`/login?returnUrl=/opportunities`}
+              className="inline-flex !bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {submitting ? 'Submitting...' : 'Submit Application'}
-            </button>
+              Sign in to Apply
+            </a>
           </div>
-        </form>
+        ) : isBusiness ? (
+          <div className="p-6 text-sm text-muted-foreground">Business accounts cannot apply to jobs.</div>
+        ) : externalOnly ? (
+          <div className="p-6 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Applications are handled on the company website.
+            </p>
+            <a
+              href={applicationURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex !bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold"
+            >
+              Apply on Company Website →
+            </a>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-4 space-y-4">
+            {(genderBlock || memberBlock) && (
+              <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                {genderBlock || memberBlock}
+              </p>
+            )}
+
+            <div>
+              <label htmlFor="coverLetter" className="block text-sm font-medium text-foreground mb-1">
+                Cover letter / Message
+              </label>
+              <textarea
+                id="coverLetter"
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                rows={5}
+                placeholder="Tell the business why you're a great fit..."
+                disabled={Boolean(genderBlock || memberBlock)}
+                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+
+            {needsCv && (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  CV / Resume upload
+                </label>
+                <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg cursor-pointer text-sm">
+                  {uploadingCv ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  {uploadingCv ? 'Uploading…' : resumeUrl ? 'Replace CV' : 'Upload CV (PDF, DOC)'}
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,application/pdf"
+                    className="sr-only"
+                    disabled={uploadingCv || Boolean(genderBlock || memberBlock)}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) void handleCvUpload(f)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+                {resumeUrl && (
+                  <p className="text-xs text-green-700 mt-2">CV uploaded successfully.</p>
+                )}
+              </div>
+            )}
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting || uploadingCv || Boolean(genderBlock || memberBlock)}
+                className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+              >
+                {submitting ? 'Submitting…' : 'Submit Application'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   )

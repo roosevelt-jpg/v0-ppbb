@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Search, MapPin, Briefcase, Clock, Building2 } from 'lucide-react'
 import { BusinessOpportunity } from '@/lib/types'
 import {
@@ -153,26 +154,34 @@ export function OpportunitiesList() {
                   )}
                 </div>
 
-                {user ? (
-                  <button
-                    onClick={() => !alreadyApplied && handleApplyClick(opp)}
-                    disabled={alreadyApplied}
-                    className={`w-full py-2 font-medium rounded-lg transition-colors ${
-                      alreadyApplied
-                        ? 'bg-secondary text-muted-foreground cursor-default'
-                        : 'bg-primary text-primary-foreground hover:opacity-90'
-                    }`}
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href={`/opportunities/${opp.id}`}
+                    className="w-full py-2 font-medium rounded-lg border border-gray-300 text-center text-sm hover:bg-gray-50"
                   >
-                    {alreadyApplied ? 'Applied' : 'Apply Now'}
-                  </button>
-                ) : (
-                  <a
-                    href={`/login?returnUrl=/opportunities`}
-                    className="w-full py-2 font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors text-center block"
-                  >
-                    Sign in to Apply
-                  </a>
-                )}
+                    View Details
+                  </Link>
+                  {user ? (
+                    <button
+                      onClick={() => !alreadyApplied && handleApplyClick(opp)}
+                      disabled={alreadyApplied}
+                      className={`w-full py-2 font-medium rounded-lg transition-colors ${
+                        alreadyApplied
+                          ? 'bg-secondary text-muted-foreground cursor-default'
+                          : '!bg-black !text-white hover:opacity-90'
+                      }`}
+                    >
+                      {alreadyApplied ? 'Applied' : 'Apply Now'}
+                    </button>
+                  ) : (
+                    <a
+                      href={`/login?returnUrl=/opportunities`}
+                      className="w-full py-2 font-medium rounded-lg !bg-black !text-white hover:opacity-90 transition-colors text-center block"
+                    >
+                      Sign in to Apply
+                    </a>
+                  )}
+                </div>
               </div>
             )
           })}

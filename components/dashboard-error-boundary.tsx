@@ -5,6 +5,8 @@ import Link from 'next/link'
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
+  homeHref?: string
+  homeLabel?: string
 }
 
 interface ErrorBoundaryState {
@@ -47,10 +49,10 @@ export class DashboardErrorBoundary extends React.Component<ErrorBoundaryProps, 
               Try Again
             </button>
             <Link
-              href="/dashboard"
+              href={this.props.homeHref || '/dashboard'}
               className="inline-flex items-center !bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50"
             >
-              Go to Dashboard
+              {this.props.homeLabel || 'Go to Dashboard'}
             </Link>
           </div>
         </div>

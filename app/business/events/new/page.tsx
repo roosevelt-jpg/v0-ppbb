@@ -7,8 +7,10 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, MapPin, Upload, Loader2, Plus, X } from 'lucide-react'
 import { toEventDate } from '@/lib/event-utils'
+import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 export default function NewEventPage() {
   return (
@@ -25,6 +27,11 @@ function BusinessEventForm() {
   const eventId = searchParams.get('id')
   const isEditing = Boolean(eventId)
 
+  const EVENT_TAGS = [
+    'Free', 'Paid', 'RSVP', 'Premium', 'Member Only', 'Ladies Only', 'Men Only',
+    'Featured', 'Virtual', 'In-Person', 'Workshop', 'Conference', 'Prayer', 'Outreach', 'Fellowship',
+  ]
+
   const [formData, setFormData] = React.useState({
     title: '',
     description: '',
@@ -32,12 +39,23 @@ function BusinessEventForm() {
     genderRestriction: 'mixed',
     locationName: '',
     locationAddress: '',
+    locationPlaceId: '',
+    locationLat: 0,
+    locationLng: 0,
     startDate: '',
     endTime: '',
     pricingType: 'free',
     price: '',
     currency: 'AED',
+    timezone: 'Asia/Dubai',
+    bannerURL: '',
+    tags: [] as string[],
+    speakers: [] as { name: string; title: string; bio: string; photoURL: string; link: string }[],
+    agenda: [] as { time: string; title: string; description: string; speaker: string; durationMinutes: number }[],
+    maxAttendees: '',
   })
+
+  const [uploadingBanner, setUploadingBanner] = React.useState(false)
 
   const [saving, setSaving] = React.useState(false)
   const [loading, setLoading] = React.useState(isEditing)
@@ -85,11 +103,20 @@ function BusinessEventForm() {
           genderRestriction: event.genderRestriction || 'mixed',
           locationName: event.locationName || '',
           locationAddress: event.locationAddress || '',
+          locationPlaceId: event.locationPlaceId || '',
+          locationLat: event.locationLat ?? 0,
+          locationLng: event.locationLng ?? 0,
           startDate: startLocal,
           endTime,
           pricingType: event.pricingType === 'free' ? 'free' : 'paid_by_business',
           price: event.price != null ? String(event.price) : '',
           currency: event.currency || 'AED',
+          timezone: event.timezone || 'Asia/Dubai',
+          bannerURL: event.bannerURL || '',
+          tags: Array.isArray(event.tags) ? event.tags : [],
+          speakers: Array.isArray(event.speakers) ? event.speakers : [],
+          agenda: Array.isArray(event.agenda) ? event.agenda : [],
+          maxAttendees: event.maxAttendees != null ? String(event.maxAttendees) : '',
         })
         setApprovalNotes(event.approvalNotes || null)
         setExistingStatus(event.status || null)
@@ -117,8 +144,21 @@ function BusinessEventForm() {
         throw new Error('Please fill in all required fields')
       }
 
+      if (!formData.locationName.trim() && status === 'pending_approval') {
+        throw new Error('Please select an event location')
+      }
+
       const body = {
         ...formData,
+        locationPlaceId: formData.locationPlaceId || null,
+        locationLat: formData.locationLat || null,
+        locationLng: formData.locationLng || null,
+        bannerURL: formData.bannerURL || null,
+        tags: formData.tags || [],
+        speakers: formData.speakers || [],
+        agenda: formData.agenda || [],
+        maxAttendees: formData.maxAttendees ? Number(formData.maxAttendees) : null,
+        timezone: formData.timezone || 'Asia/Dubai',
         price: formData.pricingType === 'free' ? null : parseFloat(formData.price),
         status,
         createdBy: user?.id,
@@ -333,17 +373,88 @@ function BusinessEventForm() {
 
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+              Event Banner
+            </h2>
+            <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg cursor-pointer text-sm font-medium mb-3">
+              {uploadingBanner ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploadingBanner ? 'Uploading…' : 'Upload banner (JPG, PNG, WebP)'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={uploadingBanner}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file || !user) return
+                  setUploadingBanner(true)
+                  try {
+                    const url = await uploadImageToFirebase(file, `events/${user.id}/banner`, {
+                      preset: 'hero',
+                      maxDimension: 1920,
+                      aspectRatio: 16 / 9,
+                    })
+                    setFormData((p) => ({ ...p, bannerURL: url }))
+                  } catch (err) {
+                    setError(err instanceof Error ? err.message : 'Banner upload failed')
+                  } finally {
+                    setUploadingBanner(false)
+                    e.target.value = ''
+                  }
+                }}
+              />
+            </label>
+            {formData.bannerURL && (
+              <img
+                src={formData.bannerURL}
+                alt="Event banner preview"
+                className="w-full max-h-48 object-cover rounded-lg border"
+              />
+            )}
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+              Tags
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {EVENT_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() =>
+                    setFormData((p) => ({
+                      ...p,
+                      tags: p.tags.includes(tag)
+                        ? p.tags.filter((t) => t !== tag)
+                        : [...p.tags, tag],
+                    }))
+                  }
+                  className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                    formData.tags.includes(tag)
+                      ? '!bg-black !text-white border-black'
+                      : '!bg-white !text-black border-neutral-300'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
               Location
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
-                  Venue Name *
+                  Venue Name (optional display label)
                 </label>
                 <input
                   type="text"
                   value={formData.locationName}
                   onChange={(e) => setFormData({ ...formData, locationName: e.target.value })}
+                  placeholder="e.g. Community Hall"
                   style={{
                     width: '100%',
                     padding: '12px',
@@ -355,20 +466,39 @@ function BusinessEventForm() {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
-                  Address *
+                  Event Location *
                 </label>
-                <input
-                  type="text"
-                  value={formData.locationAddress}
-                  onChange={(e) => setFormData({ ...formData, locationAddress: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                  }}
+                <GooglePlacesAutocomplete
+                  value={formData.locationAddress || formData.locationName}
+                  countryRestrictions={['AE']}
+                  placeholder="Start typing a venue or address..."
+                  onTextChange={(text) =>
+                    setFormData((p) => ({ ...p, locationAddress: text, locationName: p.locationName || text }))
+                  }
+                  onChange={(place) =>
+                    setFormData((p) => ({
+                      ...p,
+                      locationAddress: place.mainText,
+                      locationName: p.locationName || place.mainText,
+                      locationPlaceId: place.placeId,
+                      locationLat: place.lat ?? 0,
+                      locationLng: place.lng ?? 0,
+                    }))
+                  }
                 />
+                {formData.locationAddress && (
+                  <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
+                    <MapPin size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900">{formData.locationAddress}</p>
+                      {formData.locationLat !== 0 && formData.locationLng !== 0 && (
+                        <p className="text-blue-700 text-xs">
+                          {formData.locationLat.toFixed(4)}, {formData.locationLng.toFixed(4)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -413,6 +543,157 @@ function BusinessEventForm() {
                 />
               </div>
             </div>
+            <div className="mt-4">
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                Timezone
+              </label>
+              <select
+                value={formData.timezone}
+                onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm"
+              >
+                <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                <option value="UTC">UTC</option>
+                <option value="Europe/London">Europe/London</option>
+                <option value="America/New_York">America/New_York</option>
+              </select>
+            </div>
+            <div className="mt-4">
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                Max Attendees (optional)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.maxAttendees}
+                onChange={(e) => setFormData({ ...formData, maxAttendees: e.target.value })}
+                placeholder="Leave blank for unlimited"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111111' }}>Speakers</h2>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((p) => ({
+                    ...p,
+                    speakers: [...p.speakers, { name: '', title: '', bio: '', photoURL: '', link: '' }],
+                  }))
+                }
+                className="inline-flex items-center gap-1 text-sm !bg-black !text-white px-3 py-1.5 rounded-lg"
+              >
+                <Plus className="h-4 w-4" /> Add Speaker
+              </button>
+            </div>
+            {formData.speakers.map((speaker, idx) => (
+              <div key={idx} className="border border-neutral-200 rounded-lg p-4 mb-3 space-y-2">
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((p) => ({
+                        ...p,
+                        speakers: p.speakers.filter((_, i) => i !== idx),
+                      }))
+                    }
+                    aria-label="Remove speaker"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <input
+                  placeholder="Speaker name"
+                  value={speaker.name}
+                  onChange={(e) => {
+                    const speakers = [...formData.speakers]
+                    speakers[idx] = { ...speakers[idx], name: e.target.value }
+                    setFormData((p) => ({ ...p, speakers }))
+                  }}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+                <input
+                  placeholder="Title / role"
+                  value={speaker.title}
+                  onChange={(e) => {
+                    const speakers = [...formData.speakers]
+                    speakers[idx] = { ...speakers[idx], title: e.target.value }
+                    setFormData((p) => ({ ...p, speakers }))
+                  }}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+                <textarea
+                  placeholder="Bio"
+                  value={speaker.bio}
+                  rows={2}
+                  onChange={(e) => {
+                    const speakers = [...formData.speakers]
+                    speakers[idx] = { ...speakers[idx], bio: e.target.value }
+                    setFormData((p) => ({ ...p, speakers }))
+                  }}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111111' }}>Agenda</h2>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((p) => ({
+                    ...p,
+                    agenda: [
+                      ...p.agenda,
+                      { time: '', title: '', description: '', speaker: '', durationMinutes: 30 },
+                    ],
+                  }))
+                }
+                className="inline-flex items-center gap-1 text-sm !bg-black !text-white px-3 py-1.5 rounded-lg"
+              >
+                <Plus className="h-4 w-4" /> Add Item
+              </button>
+            </div>
+            {formData.agenda.map((item, idx) => (
+              <div key={idx} className="border border-neutral-200 rounded-lg p-4 mb-3 grid gap-2 sm:grid-cols-2">
+                <input
+                  type="time"
+                  value={item.time}
+                  onChange={(e) => {
+                    const agenda = [...formData.agenda]
+                    agenda[idx] = { ...agenda[idx], time: e.target.value }
+                    setFormData((p) => ({ ...p, agenda }))
+                  }}
+                  className="px-3 py-2 border rounded-lg text-sm"
+                />
+                <input
+                  placeholder="Session title"
+                  value={item.title}
+                  onChange={(e) => {
+                    const agenda = [...formData.agenda]
+                    agenda[idx] = { ...agenda[idx], title: e.target.value }
+                    setFormData((p) => ({ ...p, agenda }))
+                  }}
+                  className="px-3 py-2 border rounded-lg text-sm"
+                />
+                <textarea
+                  placeholder="Description"
+                  value={item.description}
+                  rows={2}
+                  onChange={(e) => {
+                    const agenda = [...formData.agenda]
+                    agenda[idx] = { ...agenda[idx], description: e.target.value }
+                    setFormData((p) => ({ ...p, agenda }))
+                  }}
+                  className="sm:col-span-2 px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
+            ))}
           </div>
 
           <div>
