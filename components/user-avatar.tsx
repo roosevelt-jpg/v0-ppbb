@@ -9,13 +9,14 @@ type AvatarUser = User | BusinessProfile | null | undefined
 
 interface UserAvatarProps {
   user: AvatarUser
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   className?: string
   imageUrl?: string | null
   name?: string
 }
 
 const sizeMap = {
+  xs: { box: 'h-6 w-6', text: 'text-[10px]', icon: 'h-3 w-3' },
   sm: { box: 'h-8 w-8', text: 'text-xs', icon: 'h-4 w-4' },
   md: { box: 'h-9 w-9', text: 'text-sm', icon: 'h-5 w-5' },
   lg: { box: 'h-12 w-12', text: 'text-base', icon: 'h-6 w-6' },

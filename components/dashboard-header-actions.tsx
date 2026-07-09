@@ -23,17 +23,17 @@ export function DashboardHeaderActions({
   className = '',
 }: DashboardHeaderActionsProps) {
   return (
-    <div className={`flex items-center gap-1.5 sm:gap-2 flex-shrink-0 ${className}`}>
-      <LanguageSelector />
-      <ThemeToggle />
-      <ProfileMenuButton />
+    <div className={`flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ${className}`}>
+      <LanguageSelector compact />
+      <ThemeToggle compact />
+      <ProfileMenuButton compact />
       <button
         type="button"
         onClick={() => void onLogout()}
-        className="inline-flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] sm:min-w-0 px-2.5 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium bg-black text-white hover:bg-neutral-800 transition-colors"
+        className="inline-flex items-center justify-center gap-1 min-h-[32px] min-w-[32px] sm:min-w-0 px-2 sm:px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-medium bg-black text-white hover:bg-neutral-800 transition-colors"
         aria-label={logoutLabel}
       >
-        <LogOut className="h-4 w-4 shrink-0" aria-hidden />
+        <LogOut className="h-3 w-3 shrink-0" aria-hidden />
         <span className="hidden sm:inline">{logoutLabel}</span>
       </button>
     </div>

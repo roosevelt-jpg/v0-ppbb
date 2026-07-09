@@ -10,9 +10,11 @@ import {
 
 interface LanguageSelectorProps {
   mobile?: boolean
+  /** Smaller trigger for dashboard header toolbars */
+  compact?: boolean
 }
 
-export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
+export function LanguageSelector({ mobile = false, compact = false }: LanguageSelectorProps) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [currentLanguage, setCurrentLanguage] = useState('en')
@@ -63,7 +65,9 @@ export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
 
   const triggerClass = mobile
     ? 'w-full flex items-center gap-2 min-h-[44px] px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors'
-    : 'inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors'
+    : compact
+      ? 'inline-flex items-center justify-center min-h-[32px] min-w-[32px] rounded-md p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors'
+      : 'inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors'
 
   const panelClass = mobile
     ? 'mt-2 w-full rounded-lg border border-neutral-200 bg-white shadow-lg overflow-hidden'
@@ -79,7 +83,7 @@ export function LanguageSelector({ mobile = false }: LanguageSelectorProps) {
         aria-expanded={open}
         title="Select language"
       >
-        <Globe className="h-4 w-4 shrink-0" aria-hidden />
+        <Globe className={`${compact ? 'h-3 w-3' : 'h-4 w-4'} shrink-0`} aria-hidden />
         {mobile && <span>Language ({currentLanguage.toUpperCase()})</span>}
       </button>
 
