@@ -115,6 +115,7 @@ export const MEMBER_DASHBOARD_ALLOWED_PREFIXES = [
   '/dashboard/settings',
   '/dashboard/profile',
   '/dashboard/community',
+  '/dashboard/communities',
 ] as const
 
 /** Business-portal paths that require hasBusinessAccess (excluding signup). */

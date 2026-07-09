@@ -39,6 +39,8 @@ const memberRoutes: TitleEntry[] = [
   { href: '/dashboard/learning', title: 'Learning' },
   { href: '/dashboard/certificates', title: 'Certificates' },
   { href: '/dashboard/membership', title: 'Membership' },
+  { href: '/dashboard/communities', title: 'My Communities' },
+  { href: '/dashboard/community', title: 'Community Forum' },
   { href: '/dashboard/settings', title: 'Settings' },
 ]
 

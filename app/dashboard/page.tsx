@@ -186,7 +186,7 @@ export default function DashboardPage() {
     { label: 'View Certificates', href: '/dashboard/certificates' },
     { label: 'Learning Resources', href: '/dashboard/learning' },
     { label: 'Membership Plans', href: '/dashboard/membership' },
-    { label: 'My Communities', href: '/dashboard/community' },
+    { label: 'My Communities', href: '/dashboard/communities' },
     { label: 'Settings', href: '/dashboard/settings' },
   ]
 

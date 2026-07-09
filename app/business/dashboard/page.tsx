@@ -415,6 +415,13 @@ export default function BusinessDashboard() {
             onClick={() => router.push('/business/events')}
           />
           <StatCard
+            label="Communities"
+            value={stats?.ownCommunities || 0}
+            icon={Users}
+            subtext="Pending admin approval until live"
+            onClick={() => router.push('/business/communities')}
+          />
+          <StatCard
             label="Leads Generated"
             value={stats?.leadsGenerated || 0}
             icon={Users}
@@ -488,6 +495,13 @@ export default function BusinessDashboard() {
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Post Offer
+            </Button>
+            <Button
+              onClick={() => router.push('/business/communities/create')}
+              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Create Community
             </Button>
             <Button
               onClick={() => router.push('/business/profile')}
@@ -635,6 +649,12 @@ export default function BusinessDashboard() {
                 description: 'Connect with community members',
                 icon: Users,
                 href: '/business/marketplace',
+              },
+              {
+                label: 'Communities',
+                description: 'Create communities & manage group joins',
+                icon: UserCheck,
+                href: '/business/communities',
               },
               {
                 label: 'Payments',

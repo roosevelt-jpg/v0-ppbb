@@ -43,6 +43,7 @@ const memberMenuItems = [
   { label: 'Learning', href: '/dashboard/learning', icon: BookOpen },
   { label: 'Certificates', href: '/dashboard/certificates', icon: Award },
   { label: 'Membership', href: '/dashboard/membership', icon: Crown },
+  { label: 'My Communities', href: '/dashboard/communities', icon: Users },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
