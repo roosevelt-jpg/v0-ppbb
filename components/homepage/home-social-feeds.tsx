@@ -114,7 +114,7 @@ export function HomeSocialFeeds() {
       <div className="max-w-[72rem] mx-auto w-full min-w-0 space-y-8">
         {showYoutube && (
           <div className="min-w-0">
-            <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4 break-words">
+            <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4 break-words text-center">
               {socialFeeds.youtube.heading}
             </h2>
             {youtubeVideos.length > 0 ? (

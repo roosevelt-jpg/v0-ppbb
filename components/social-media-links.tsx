@@ -1,7 +1,17 @@
 'use client'
 
+import React from 'react'
 import Link from 'next/link'
-import { Circle, Link2, ExternalLink, MessageCircle, Music, Share2, Zap, Heart } from 'lucide-react'
+import {
+  DiscordIcon,
+  FacebookIcon,
+  InstagramIcon,
+  LinkedInIcon,
+  SnapchatIcon,
+  TikTokIcon,
+  XTwitterIcon,
+  YouTubeIcon,
+} from '@/components/social-brand-icons'
 
 interface SocialLinks {
   facebook?: string
@@ -19,9 +29,16 @@ interface SocialMediaLinksProps {
   size?: 'sm' | 'md' | 'lg'
   className?: string
   showLabels?: boolean
+  variant?: 'default' | 'footer'
 }
 
-export function SocialMediaLinks({ links, size = 'md', className = '', showLabels = false }: SocialMediaLinksProps) {
+export function SocialMediaLinks({
+  links,
+  size = 'md',
+  className = '',
+  showLabels = false,
+  variant = 'default',
+}: SocialMediaLinksProps) {
   const sizeMap = {
     sm: { icon: 'w-4 h-4', padding: 'p-2' },
     md: { icon: 'w-5 h-5', padding: 'p-2.5' },
@@ -29,46 +46,74 @@ export function SocialMediaLinks({ links, size = 'md', className = '', showLabel
   }
 
   const socialPlatforms = [
-    { key: 'facebook', label: 'Facebook', icon: Circle, color: '#1877F2', url: links.facebook },
-    { key: 'twitter', label: 'Twitter', icon: Circle, color: '#1DA1F2', url: links.twitter },
-    { key: 'instagram', label: 'Instagram', icon: Circle, color: '#E4405F', url: links.instagram },
-    { key: 'linkedin', label: 'LinkedIn', icon: Circle, color: '#0A66C2', url: links.linkedin },
-    { key: 'youtube', label: 'YouTube', icon: Circle, color: '#FF0000', url: links.youtube },
-    { key: 'discord', label: 'Discord', icon: Circle, color: '#5865F2', url: links.discord },
-    { key: 'tiktok', label: 'TikTok', icon: Circle, color: '#000000', url: links.tiktok },
-    { key: 'snapchat', label: 'Snapchat', icon: Circle, color: '#FFFC00', url: links.snapchat },
+    { key: 'facebook', label: 'Facebook', icon: FacebookIcon, url: links.facebook },
+    { key: 'twitter', label: 'X (Twitter)', icon: XTwitterIcon, url: links.twitter },
+    { key: 'instagram', label: 'Instagram', icon: InstagramIcon, url: links.instagram },
+    { key: 'linkedin', label: 'LinkedIn', icon: LinkedInIcon, url: links.linkedin },
+    { key: 'youtube', label: 'YouTube', icon: YouTubeIcon, url: links.youtube },
+    { key: 'discord', label: 'Discord', icon: DiscordIcon, url: links.discord },
+    { key: 'tiktok', label: 'TikTok', icon: TikTokIcon, url: links.tiktok },
+    { key: 'snapchat', label: 'Snapchat', icon: SnapchatIcon, url: links.snapchat },
   ]
 
-  const activePlatforms = socialPlatforms.filter(p => p.url)
+  const activePlatforms = socialPlatforms.filter((p) => p.url)
+  const isFooter = variant === 'footer'
 
   if (activePlatforms.length === 0) {
     return null
   }
 
+  const brandColors: Record<string, string> = {
+    facebook: '#1877F2',
+    twitter: '#ffffff',
+    instagram: '#E4405F',
+    linkedin: '#0A66C2',
+    youtube: '#FF0000',
+    discord: '#5865F2',
+    tiktok: '#000000',
+    snapchat: '#FFFC00',
+  }
+
   return (
     <div className={`flex flex-wrap gap-3 items-center ${className}`}>
-      {activePlatforms.map(platform => {
+      {activePlatforms.map((platform) => {
         const IconComponent = platform.icon
+        const brandColor = brandColors[platform.key] || '#111111'
         return (
           <Link
             key={platform.key}
             href={platform.url || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${sizeMap[size].padding} rounded-full transition-all hover:scale-110 flex items-center justify-center gap-2`}
-            style={{ 
-              backgroundColor: `${platform.color}20`,
-              color: platform.color,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = platform.color
-              e.currentTarget.style.color = '#ffffff'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = `${platform.color}20`
-              e.currentTarget.style.color = platform.color
-            }}
+            className={`${sizeMap[size].padding} rounded-full transition-all hover:scale-110 flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] ${
+              isFooter ? 'text-white hover:bg-white/15 bg-white/10' : ''
+            }`}
+            style={
+              isFooter
+                ? undefined
+                : {
+                    backgroundColor: `${brandColor}18`,
+                    color: brandColor,
+                  }
+            }
+            onMouseEnter={
+              isFooter
+                ? undefined
+                : (e) => {
+                    e.currentTarget.style.backgroundColor = brandColor
+                    e.currentTarget.style.color = '#ffffff'
+                  }
+            }
+            onMouseLeave={
+              isFooter
+                ? undefined
+                : (e) => {
+                    e.currentTarget.style.backgroundColor = `${brandColor}18`
+                    e.currentTarget.style.color = brandColor
+                  }
+            }
             title={platform.label}
+            aria-label={platform.label}
           >
             <IconComponent className={sizeMap[size].icon} />
             {showLabels && <span className="text-xs font-medium">{platform.label}</span>}

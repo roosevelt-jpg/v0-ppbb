@@ -239,18 +239,17 @@ export function ChatWidget() {
 
   return (
     <>
-      {/* Floating Button */}
       {!isOpen && (
         <button
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 overflow-hidden bg-white border-2 border-neutral-200 p-1"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 overflow-hidden bg-white border-2 border-neutral-600 p-1 min-h-[56px] min-w-[56px]"
           aria-label="Open PB Assistant chat"
         >
-          <ChatbotAvatar size={48} className="w-full h-full" priority />
+          <ChatbotAvatar size={56} className="w-full h-full" priority />
         </button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
         <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-64 h-80 sm:w-80 sm:h-[430px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200 max-w-[calc(100vw-32px)]">
           {/* Header */}

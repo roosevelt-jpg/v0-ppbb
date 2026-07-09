@@ -177,30 +177,28 @@ export function Footer() {
         </div>
 
         <div className="border-t pt-8" style={{ borderColor: '#333333' }}>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
-            <div className="text-xs flex flex-col sm:flex-row items-center gap-2" style={{ color: '#888888' }}>
-              <p>Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025</p>
-              <span className="hidden sm:inline">·</span>
-              <p>
-                Made with ❤️ by{' '}
-                <Link
-                  href="https://myflynai.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors font-light text-[10px] sm:text-xs opacity-60"
-                  style={{ color: '#999999' }}
-                >
-                  FLYN.AI
-                </Link>
-              </p>
-            </div>
-            <div className="flex gap-3">
-              {Object.keys(socialLinks).length > 0 ? (
-                <SocialMediaLinks links={socialLinks} size="md" />
-              ) : (
-                <p className="text-xs" style={{ color: '#666666' }}>Social links not configured</p>
-              )}
-            </div>
+          <div className="flex justify-center mb-6">
+            {Object.keys(socialLinks).length > 0 ? (
+              <SocialMediaLinks links={socialLinks} size="md" variant="footer" />
+            ) : (
+              <p className="text-xs" style={{ color: '#666666' }}>Social links not configured</p>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-2 text-xs" style={{ color: '#888888' }}>
+            <p>Copyright © {currentYear} Passive Blessings. All rights reserved. ESTD 2025</p>
+            <span className="hidden sm:inline">·</span>
+            <p>
+              Made with ❤️ by{' '}
+              <Link
+                href="https://myflynai.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors font-light text-[10px] sm:text-xs opacity-60"
+                style={{ color: '#999999' }}
+              >
+                FLYN.AI
+              </Link>
+            </p>
           </div>
         </div>
       </div>

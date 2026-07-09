@@ -46,16 +46,16 @@ export function YouTubeWidget({ videos, isLoading = false }: YouTubeWidgetProps)
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-neutral-900">Latest from Our YouTube Channel</h2>
+          <h3 className="text-xl sm:text-2xl font-bold text-neutral-900">Latest from Our YouTube Channel</h3>
           <p className="text-neutral-600 mt-2">Subscribe to stay updated with our latest content</p>
         </div>
         <a
           href={`https://www.youtube.com/channel/${videos[0]?.channelTitle}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-black hover:bg-neutral-800 text-white font-semibold rounded-lg transition-colors min-h-[44px] shrink-0 self-start sm:self-auto"
         >
           <span>Visit YouTube</span>
           <span>→</span>
