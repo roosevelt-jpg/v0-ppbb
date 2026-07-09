@@ -15,6 +15,9 @@ interface RichTextContentProps {
   className?: string
 }
 
+const baseClass =
+  'break-words [overflow-wrap:anywhere] [&_a]:underline [&_a]:break-all [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 last:[&_p]:mb-0'
+
 export function RichTextContent({ html, className = '' }: RichTextContentProps) {
   const safe = useMemo(() => {
     const trimmed = html.trim()
@@ -26,7 +29,7 @@ export function RichTextContent({ html, className = '' }: RichTextContentProps) 
 
   return (
     <div
-      className={className}
+      className={`${baseClass} ${className}`.trim()}
       dangerouslySetInnerHTML={{ __html: safe }}
     />
   )

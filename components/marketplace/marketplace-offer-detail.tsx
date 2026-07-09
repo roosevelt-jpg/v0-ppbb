@@ -157,7 +157,7 @@ export function MarketplaceOfferDetail() {
 
             <div>
               <p className="text-sm text-neutral-500 capitalize mb-1">{offer.type || offer.category}</p>
-              <h1 className="text-3xl font-bold text-foreground mb-3">{offer.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words">{offer.title}</h1>
               <p className="text-xl font-semibold mb-4">
                 {offer.price != null ? `AED ${offer.price}` : 'Contact for price'}
               </p>

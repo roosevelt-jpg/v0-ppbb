@@ -225,7 +225,48 @@ export default function AdminMarketplacePage() {
           filteredDiscounts.length === 0 ? (
             <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No discounts found.</p>
           ) : (
-            <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+            <>
+            <div className="md:hidden space-y-3">
+              {filteredDiscounts.map((row) => {
+                const isPending = (row.status || '').toLowerCase() === 'pending_approval'
+                return (
+                  <div key={row.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
+                    <p className="font-semibold text-sm break-words">{row.title}</p>
+                    <p className="text-xs text-gray-600 break-all">{row.businessId}</p>
+                    <p className="text-sm">
+                      {row.discountType === 'fixed'
+                        ? `AED ${row.discountValue ?? 0}`
+                        : `${row.discountValue ?? 0}%`}
+                      {' · '}
+                      <span className="capitalize">{(row.status || '').replace(/_/g, ' ')}</span>
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {isPending && (
+                        <button
+                          type="button"
+                          disabled={actingId === row.id}
+                          onClick={() => runDiscountAction(row.id, 'approve')}
+                          className="min-h-[44px] px-3 bg-green-600 text-white rounded text-xs font-medium disabled:opacity-50"
+                        >
+                          Approve
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        disabled={actingId === row.id}
+                        onClick={() => {
+                          if (confirm('Remove this discount?')) void runDiscountAction(row.id, 'remove')
+                        }}
+                        className="min-h-[44px] px-3 bg-red-50 text-red-700 rounded text-xs font-medium disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-x-auto">
               <table className="w-full min-w-[720px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -281,11 +322,60 @@ export default function AdminMarketplacePage() {
                 </tbody>
               </table>
             </div>
+            </>
           )
         ) : filtered.length === 0 ? (
           <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No listings found.</p>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+          <>
+          <div className="md:hidden space-y-3">
+            {filtered.map((offer) => {
+              const status = (offer.status || '').toLowerCase()
+              const isPending = status === 'pending_approval' || status === 'draft'
+              return (
+                <div key={offer.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
+                  <p className="font-semibold text-sm break-words">{offer.title}</p>
+                  <p className="text-xs text-gray-600">{offer.businessName || offer.businessId}</p>
+                  <p className="text-sm capitalize">
+                    {offer.type || offer.category} · {offer.price != null ? `AED ${offer.price}` : '—'} · {status.replace(/_/g, ' ')}
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {isPending && (
+                      <button
+                        type="button"
+                        disabled={actingId === offer.id}
+                        onClick={() => runAction(offer.id, 'approve')}
+                        className="min-h-[44px] px-3 bg-green-600 text-white rounded text-xs font-medium disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      disabled={actingId === offer.id}
+                      onClick={() => runAction(offer.id, 'feature')}
+                      className="min-h-[44px] px-3 bg-amber-100 text-amber-800 rounded text-xs font-medium disabled:opacity-50"
+                    >
+                      {offer.isFeatured ? 'Unfeature' : 'Feature'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={actingId === offer.id}
+                      onClick={() => {
+                        if (confirm('Remove this listing from the marketplace?')) {
+                          void runAction(offer.id, 'remove')
+                        }
+                      }}
+                      className="min-h-[44px] px-3 bg-red-50 text-red-700 rounded text-xs font-medium disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-x-auto">
             <table className="w-full min-w-[720px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -355,6 +445,7 @@ export default function AdminMarketplacePage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </AdminPageLayout>

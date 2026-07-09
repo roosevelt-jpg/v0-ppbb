@@ -83,7 +83,48 @@ export default function AdminVendorApplicationsPage() {
       ) : rows.length === 0 ? (
         <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No vendor applications yet.</p>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-x-auto">
+        <>
+          <div className="md:hidden space-y-3">
+            {rows.map((row) => (
+              <div key={row.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                <div>
+                  <p className="font-semibold text-sm break-words">{row.businessName}</p>
+                  <p className="text-xs text-gray-600 mt-1 line-clamp-3 break-words">{row.description}</p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                  <span>{row.businessType || '—'}</span>
+                  <span>·</span>
+                  <span>{row.submittedAt ? format(row.submittedAt, 'MMM dd, yyyy') : '—'}</span>
+                  <span>·</span>
+                  <span className="capitalize">{row.status || 'pending'}</span>
+                </div>
+                {row.documentsURL && (
+                  <a href={row.documentsURL} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline">
+                    Documents
+                  </a>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={actingId === row.id}
+                    onClick={() => setStatus(row.id, 'approve')}
+                    className="flex-1 min-h-[44px] px-3 bg-green-600 text-white rounded text-sm font-medium disabled:opacity-50"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actingId === row.id}
+                    onClick={() => setStatus(row.id, 'reject')}
+                    className="flex-1 min-h-[44px] px-3 bg-red-50 text-red-700 rounded text-sm font-medium disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-x-auto">
           <table className="w-full min-w-[720px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -135,7 +176,8 @@ export default function AdminVendorApplicationsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </AdminPageLayout>
   )

@@ -136,7 +136,7 @@ export function BusinessDashboardHomeSections({ businessId }: { businessId: stri
           <h2 className="text-lg font-semibold">Leads (last 30 days)</h2>
           <Link href="/business/leads" className="text-sm font-medium underline">View Leads</Link>
         </div>
-        <div className="grid grid-cols-3 gap-4 mb-4 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 text-center">
           <Card className="p-3 border-[#e4e1da]"><p className="text-xs text-neutral-500">Total</p><p className="text-xl font-bold">{leads.length}</p></Card>
           <Card className="p-3 border-[#e4e1da]"><p className="text-xs text-neutral-500">Converted</p><p className="text-xl font-bold">{converted}</p></Card>
           <Card className="p-3 border-[#e4e1da]"><p className="text-xs text-neutral-500">Rate</p><p className="text-xl font-bold">{conversionRate}%</p></Card>

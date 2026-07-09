@@ -54,26 +54,17 @@ export default function BusinessProfile() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-2xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
-              Business Profile
-            </h1>
-            <p style={{ color: '#888888', marginTop: '8px' }}>
-              Manage your business information
-            </p>
+    <div className="min-h-screen bg-[#faf9f7]">
+      <div className="bg-white border-b border-[#e4e1da] px-4 py-6 sm:px-6 sm:py-8">
+        <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#111111]">Business Profile</h1>
+            <p className="text-[#888888] mt-2 text-sm sm:text-base">Manage your business information</p>
           </div>
           {!isEditing && (
             <Button
               onClick={() => setIsEditing(true)}
-              style={{
-                backgroundColor: '#111111',
-                color: '#ffffff',
-              }}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto bg-[#111111] text-white hover:bg-neutral-800"
             >
               <Edit2 className="w-4 h-4" />
               Edit
@@ -82,10 +73,9 @@ export default function BusinessProfile() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
+        <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
+          <div className="flex flex-col gap-6">
             {/* Business Name */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
@@ -251,11 +241,9 @@ export default function BusinessProfile() {
         </Card>
 
         {/* Membership Info */}
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-          <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
-            Membership Information
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <Card className="bg-white border-[#e4e1da] p-4 sm:p-6 mt-6">
+          <h3 className="text-lg font-semibold text-[#111111] mb-4">Membership Information</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <p style={{ color: '#888888', fontSize: '14px' }}>Membership Tier</p>
               <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>

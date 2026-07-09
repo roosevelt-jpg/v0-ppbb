@@ -42,7 +42,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={`border border-neutral-300 rounded-lg overflow-hidden bg-white ${className}`}>
+    <div className={`border border-neutral-300 rounded-lg overflow-hidden bg-white w-full min-w-0 ${className}`}>
       <div className="flex flex-wrap gap-1 border-b border-neutral-200 bg-neutral-50 px-2 py-1.5">
         {[
           { icon: Bold, cmd: 'bold', label: 'Bold' },
@@ -58,7 +58,7 @@ export function RichTextEditor({
               exec(cmd)
               emitChange()
             }}
-            className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
+            className="min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
           >
             <Icon className="w-4 h-4" />
           </button>
@@ -71,7 +71,7 @@ export function RichTextEditor({
             exec('insertUnorderedList')
             emitChange()
           }}
-          className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
+          className="min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
         >
           <List className="w-4 h-4" />
         </button>
@@ -80,7 +80,7 @@ export function RichTextEditor({
           title="Link"
           onMouseDown={(e) => e.preventDefault()}
           onClick={addLink}
-          className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
+          className="min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
         >
           <Link2 className="w-4 h-4" />
         </button>
@@ -93,7 +93,7 @@ export function RichTextEditor({
         data-placeholder={placeholder}
         onInput={emitChange}
         onBlur={emitChange}
-        className="px-3 py-2 text-sm outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-400"
+        className="px-3 py-2 text-sm outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-400 break-words [overflow-wrap:anywhere] w-full min-w-0"
         style={{ minHeight }}
         suppressContentEditableWarning
       />

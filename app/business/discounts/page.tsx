@@ -49,7 +49,32 @@ export default function BusinessDiscountsPage() {
           <Link href="/business/discounts/create" className="text-black font-semibold underline">Create your first discount</Link>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-white border border-[#e4e1da] rounded-lg">
+        <>
+          <div className="md:hidden space-y-3">
+            {discounts.map((d) => (
+              <div key={d.id} className="bg-white border border-[#e4e1da] rounded-lg p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-semibold text-sm break-words">{d.title}</p>
+                  <button
+                    type="button"
+                    onClick={() => void deleteBusinessDiscount(d.id)}
+                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-red-600 hover:bg-red-50 rounded shrink-0"
+                    aria-label="Delete discount"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <p className="text-xs text-neutral-500 capitalize">{d.status.replace(/_/g, ' ')}</p>
+                {d.discountCode ? <p className="text-sm font-mono break-all">{d.discountCode}</p> : null}
+                <p className="text-sm">
+                  {d.discountType === 'percent' ? `${d.discountValue}%` : `${d.currency || 'AED'} ${d.discountValue}`}
+                  {' · '}
+                  {d.usageCount}{d.usageLimit != null ? ` / ${d.usageLimit}` : ''} used
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto bg-white border border-[#e4e1da] rounded-lg">
           <table className="w-full min-w-[640px]">
             <thead className="bg-neutral-50 border-b">
               <tr>
@@ -80,7 +105,8 @@ export default function BusinessDiscountsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
