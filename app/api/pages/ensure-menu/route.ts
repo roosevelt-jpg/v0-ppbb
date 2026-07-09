@@ -8,6 +8,17 @@ export const dynamic = 'force-dynamic'
 
 const BATCH_LIMIT = 400
 
+/** Legacy footer menu docs that pointed at /policies/* — retired in favor of CMS pages */
+const DEPRECATED_LEGAL_MENU_SLUGS = ['nav-privacy', 'nav-terms', 'nav-conduct']
+
+/** Always refresh menu metadata when seeds move off hardcoded /policies links */
+const FORCE_MENU_REFRESH_SLUGS = new Set([
+  'privacy-policy',
+  'terms-of-service',
+  'code-of-conduct',
+  'data-protection',
+])
+
 /**
  * Idempotent menu seed + dedupe:
  * 1. Soft-delete duplicate slug menu docs (migration race fix)
@@ -59,6 +70,24 @@ export async function GET() {
     }
     await commitBatch()
 
+    for (const slug of DEPRECATED_LEGAL_MENU_SLUGS) {
+      const legacyRef = pagesRef.doc(slug)
+      const legacySnap = await legacyRef.get()
+      if (!legacySnap.exists) continue
+      const legacy = legacySnap.data()
+      if (legacy?.status === 'deleted' && !legacy?.showInMenu) continue
+      await legacyRef.set(
+        sanitizeForFirestore({
+          status: 'deleted',
+          showInMenu: false,
+          menuLocation: 'none',
+          updatedAt: now,
+        }),
+        { merge: true }
+      )
+      removed.push({ id: slug, slug, reason: 'deprecated-legal-menu-redirect' })
+    }
+
     let created = 0
     let updated = 0
 
@@ -90,7 +119,15 @@ export async function GET() {
         created++
       } else {
         const data = existing.data()
-        if (data?.status === 'deleted' || !data?.showInMenu) {
+        const hadPolicyRedirect =
+          typeof data?.externalHref === 'string' && data.externalHref.startsWith('/policies/')
+        const shouldRefresh =
+          data?.status === 'deleted' ||
+          !data?.showInMenu ||
+          hadPolicyRedirect ||
+          FORCE_MENU_REFRESH_SLUGS.has(seed.slug)
+
+        if (shouldRefresh) {
           await docRef.set(payload, { merge: true })
           updated++
         }

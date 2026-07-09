@@ -28,10 +28,37 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
   { slug: 'nav-donate', title: 'Donate', menuLabel: 'Donate', menuLocation: 'footer-getinvolved', menuOrder: 4, showInMenu: true, status: 'published', externalHref: '/donate', content: '' },
   { slug: 'nav-start-business', title: 'Start Business', menuLabel: 'Start Business', menuLocation: 'footer-getinvolved', menuOrder: 5, showInMenu: true, status: 'published', externalHref: '/join?type=business', content: '' },
   { slug: 'nav-host-event', title: 'Host Event', menuLabel: 'Host Event', menuLocation: 'footer-getinvolved', menuOrder: 6, showInMenu: true, status: 'published', externalHref: '/business/events/new', content: '' },
-  // Footer — Legal
-  { slug: 'nav-privacy', title: 'Privacy Policy', menuLabel: 'Privacy Policy', menuLocation: 'footer-legal', menuOrder: 0, showInMenu: true, status: 'published', externalHref: '/policies/privacy-policy', content: '' },
-  { slug: 'nav-terms', title: 'Terms & Conditions', menuLabel: 'Terms & Conditions', menuLocation: 'footer-legal', menuOrder: 1, showInMenu: true, status: 'published', externalHref: '/policies/terms-of-service', content: '' },
-  { slug: 'nav-conduct', title: 'Code of Conduct', menuLabel: 'Code of Conduct', menuLocation: 'footer-legal', menuOrder: 2, showInMenu: true, status: 'published', externalHref: '/policies/code-of-conduct', content: '' },
+  // Footer — Legal (CMS pages — edit content in Admin → Pages)
+  {
+    slug: 'privacy-policy',
+    title: 'Privacy Policy',
+    menuLabel: 'Privacy Policy',
+    menuLocation: 'footer-legal',
+    menuOrder: 0,
+    showInMenu: true,
+    status: 'published',
+    content: '<p>Add your privacy policy content in Admin → Pages (CMS).</p>',
+  },
+  {
+    slug: 'terms-of-service',
+    title: 'Terms & Conditions',
+    menuLabel: 'Terms & Conditions',
+    menuLocation: 'footer-legal',
+    menuOrder: 1,
+    showInMenu: true,
+    status: 'published',
+    content: '<p>Add your terms and conditions in Admin → Pages (CMS).</p>',
+  },
+  {
+    slug: 'code-of-conduct',
+    title: 'Code of Conduct',
+    menuLabel: 'Code of Conduct',
+    menuLocation: 'footer-legal',
+    menuOrder: 2,
+    showInMenu: true,
+    status: 'published',
+    content: '<p>Add your community code of conduct in Admin → Pages (CMS).</p>',
+  },
   {
     slug: 'data-protection',
     title: 'UAE Data Protection Policy',
@@ -40,7 +67,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     menuOrder: 3,
     showInMenu: true,
     status: 'published',
-    content: '<h1>UAE Data Protection Policy</h1><p>Manage this content in Pages CMS.</p>',
+    content: '<p>Manage this content in Admin → Pages (CMS).</p>',
   },
   {
     slug: 'community-guidelines',
@@ -51,6 +78,6 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     showInMenu: true,
     status: 'published',
     headerSection: '/about',
-    content: '<h1>Community Guidelines</h1><p>Our community standards help everyone participate respectfully.</p>',
+    content: '<p>Our community standards help everyone participate respectfully.</p>',
   },
 ]

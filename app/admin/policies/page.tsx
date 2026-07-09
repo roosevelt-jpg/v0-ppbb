@@ -390,13 +390,13 @@ export default function AdminPolicies() {
                   {policy.title}
                 </p>
                 <a
-                  href={`/policies/${policy.slug}`}
+                  href={`/pages/${policy.slug === 'terms-conditions' ? 'terms-of-service' : policy.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: '#1565C0' }}
                   className="text-sm font-mono break-all hover:underline"
                 >
-                  /policies/{policy.slug}
+                  /pages/{policy.slug === 'terms-conditions' ? 'terms-of-service' : policy.slug}
                 </a>
               </div>
             ))}
