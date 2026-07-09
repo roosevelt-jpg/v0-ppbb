@@ -37,7 +37,7 @@ function formatMemberDate(value: unknown): string {
 }
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, firebaseUser, loading: authLoading } = useAuth()
   const [stats, setStats] = React.useState({
     upcomingEvents: 0,
     applications: 0,
@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   React.useEffect(() => {
     if (authLoading) return
-    if (!user?.id) {
+    if (!user?.id || !firebaseUser) {
       setLoading(false)
       return
     }
@@ -65,6 +65,9 @@ export default function DashboardPage() {
       setError(null)
 
       try {
+        await firebaseUser.getIdToken(true)
+        if (cancelled) return
+
         const member = user as User
         const now = new Date()
 
@@ -87,7 +90,9 @@ export default function DashboardPage() {
         const allEvents =
           eventsResult.status === 'fulfilled'
             ? (eventsResult.value?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
-            : []
+            : eventsResult.status === 'rejected'
+              ? (console.warn('[v0] events query failed:', eventsResult.reason), [])
+              : []
 
         const futureEvents = allEvents
           .filter((e) => {
@@ -121,9 +126,15 @@ export default function DashboardPage() {
           volunteerHours: profileHours,
         })
 
-        unsubNotifications = subscribeToMemberNotifications(user.id, (items) => {
-          if (!cancelled) setNotifications(items)
-        })
+        unsubNotifications = subscribeToMemberNotifications(
+          user.id,
+          (items) => {
+            if (!cancelled) setNotifications(items)
+          },
+          (msg) => {
+            console.warn('[v0] notifications unavailable:', msg)
+          }
+        )
       } catch (err) {
         console.error('[v0] Dashboard load error:', err)
         if (!cancelled) setError('Failed to load dashboard data.')
@@ -137,7 +148,7 @@ export default function DashboardPage() {
       cancelled = true
       unsubNotifications?.()
     }
-  }, [authLoading, user?.id, (user as User | null)?.gender])
+  }, [authLoading, user?.id, firebaseUser, (user as User | null)?.gender])
 
   const dismissNotification = async (id: string) => {
     if (!user?.id) return

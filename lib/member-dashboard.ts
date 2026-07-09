@@ -153,21 +153,58 @@ export type MemberNotification = {
 
 export function subscribeToMemberNotifications(
   userId: string,
-  onData: (items: MemberNotification[]) => void
+  onData: (items: MemberNotification[]) => void,
+  onError?: (message: string) => void
 ): Unsubscribe {
-  const q = query(
+  const ordered = query(
     collection(db, 'users', userId, 'notifications'),
     orderBy('createdAt', 'desc'),
     limit(10)
   )
-  return onSnapshot(q, (snap) => {
-    const items =
-      snap?.docs
-        ?.map((d) => ({ id: d.id, ...d.data() } as MemberNotification))
-        ?.filter((n) => !n.dismissed && !n.read)
-        ?.slice(0, 5) ?? []
-    onData(items)
-  })
+
+  let fallbackUnsub: Unsubscribe | undefined
+
+  const unsub = onSnapshot(
+    ordered,
+    (snap) => {
+      const items =
+        snap?.docs
+          ?.map((d) => ({ id: d.id, ...d.data() } as MemberNotification))
+          ?.filter((n) => !n.dismissed && !n.read)
+          ?.slice(0, 5) ?? []
+      onData(items)
+    },
+    (err) => {
+      console.warn('[v0] notifications ordered query failed, using fallback:', err)
+      const fallback = query(collection(db, 'users', userId, 'notifications'), limit(10))
+      fallbackUnsub = onSnapshot(
+        fallback,
+        (snap) => {
+          const items =
+            snap?.docs
+              ?.map((d) => ({ id: d.id, ...d.data() } as MemberNotification))
+              ?.filter((n) => !n.dismissed && !n.read)
+              ?.sort((a, b) => {
+                const aT = parseFirestoreDate(a.createdAt)?.getTime() ?? 0
+                const bT = parseFirestoreDate(b.createdAt)?.getTime() ?? 0
+                return bT - aT
+              })
+              ?.slice(0, 5) ?? []
+          onData(items)
+        },
+        (fallbackErr) => {
+          console.error('[v0] notifications fallback failed:', fallbackErr)
+          onData([])
+          onError?.(fallbackErr.message)
+        }
+      )
+    }
+  )
+
+  return () => {
+    unsub()
+    fallbackUnsub?.()
+  }
 }
 
 const MARKETPLACE_STATUSES = new Set(['active', 'published'])
