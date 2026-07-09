@@ -2,23 +2,26 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { db } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { Award, Download, Share2 } from 'lucide-react'
+import { Award, Printer } from 'lucide-react'
 import {
   DashboardPageShell,
   DashboardSkeleton,
   DashboardErrorState,
   DashboardEmptyState,
 } from '@/components/dashboard-states'
+import { CertificateDesignPreview } from '@/components/certificate-design-preview'
+import { normalizeIssuedCertificate, type IssuedCertificate } from '@/lib/certificate-templates'
 
 export default function CertificatesPage() {
   const { user, loading: authLoading } = useAuth()
-  const [certificates, setCertificates] = useState<Record<string, unknown>[]>([])
+  const [certificates, setCertificates] = useState<IssuedCertificate[]>([])
   const [badges, setBadges] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [previewId, setPreviewId] = useState<string | null>(null)
 
   useEffect(() => {
     if (authLoading) return
@@ -26,6 +29,24 @@ export default function CertificatesPage() {
       setLoading(false)
       return
     }
+
+    void (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (token) {
+          await fetch('/api/certificates/check-milestones', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: user.id }),
+          })
+        }
+      } catch {
+        /* non-blocking */
+      }
+    })()
 
     let certDone = false
     let badgeDone = false
@@ -36,7 +57,11 @@ export default function CertificatesPage() {
     const certUnsub = onSnapshot(
       query(collection(db, 'certificates'), where('userId', '==', user.id)),
       (snapshot) => {
-        setCertificates(snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
+        const rows =
+          snapshot?.docs
+            ?.map((d) => normalizeIssuedCertificate(d.id, d.data() as Record<string, unknown>))
+            .sort((a, b) => b.issuedAt.getTime() - a.issuedAt.getTime()) ?? []
+        setCertificates(rows)
         certDone = true
         maybeDone()
       },
@@ -55,8 +80,7 @@ export default function CertificatesPage() {
         badgeDone = true
         maybeDone()
       },
-      (err) => {
-        console.error('[v0] badges error:', err)
+      () => {
         badgeDone = true
         maybeDone()
       }
@@ -68,11 +92,20 @@ export default function CertificatesPage() {
     }
   }, [authLoading, user?.id])
 
+  const handlePrint = (certId: string) => {
+    setPreviewId(certId)
+    window.setTimeout(() => {
+      window.print()
+    }, 300)
+  }
+
   if (authLoading || loading) return <DashboardSkeleton />
   if (error) return <DashboardErrorState message={error} />
 
+  const previewCert = certificates.find((c) => c.id === previewId)
+
   return (
-    <DashboardPageShell title="Certificates" subtitle="Your earned badges and certificates">
+    <DashboardPageShell title="Certificates" subtitle="Milestone certificates earned through volunteer service">
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Badges</h2>
         {badges.length === 0 ? (
@@ -89,9 +122,6 @@ export default function CertificatesPage() {
                   <Award size={32} />
                 </div>
                 <h3 className="font-bold text-sm">{String(badge.name ?? 'Badge')}</h3>
-                {badge.description ? (
-                  <p className="text-xs text-neutral-500 mt-1">{String(badge.description)}</p>
-                ) : null}
               </Card>
             ))}
           </div>
@@ -104,47 +134,64 @@ export default function CertificatesPage() {
           <DashboardEmptyState
             icon={<Award className="w-12 h-12" />}
             title="No certificates yet"
-            description="Complete courses and volunteer hours to earn certificates."
+            description="Certificates are awarded automatically when you reach volunteer hour milestones. Log hours via volunteering activities."
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-8">
             {certificates.map((cert) => (
-              <Card key={String(cert.id)} className="p-5 border border-neutral-200">
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-                  <div>
-                    <h3 className="font-bold text-lg">{String(cert.title ?? 'Certificate')}</h3>
-                    {cert.issuedBy ? (
-                      <p className="text-sm text-neutral-500 mt-1">{String(cert.issuedBy)}</p>
-                    ) : null}
-                    {cert.credentialId ? (
-                      <p className="text-xs text-neutral-600 mt-2 font-mono">ID: {String(cert.credentialId)}</p>
-                    ) : null}
-                  </div>
-                  <div className="flex gap-2">
-                    {cert.downloadUrl ? (
-                      <a
-                        href={String(cert.downloadUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="!bg-black !text-white px-3 py-2 rounded-lg text-sm inline-flex items-center gap-1"
-                      >
-                        <Download size={16} /> Download
-                      </a>
-                    ) : (
-                      <button type="button" className="!bg-white !text-black border border-gray-300 px-3 py-2 rounded-lg text-sm inline-flex items-center gap-1">
-                        <Download size={16} /> Download
-                      </button>
-                    )}
-                    <button type="button" className="!bg-white !text-black border border-gray-300 px-3 py-2 rounded-lg text-sm inline-flex items-center gap-1">
-                      <Share2 size={16} /> Share
-                    </button>
-                  </div>
+              <div key={cert.id} className="space-y-4">
+                <CertificateDesignPreview
+                  id={`cert-${cert.id}`}
+                  data={{
+                    title: cert.title,
+                    subtitle: cert.subtitle,
+                    bodyText: cert.bodyText,
+                    memberName: cert.memberName,
+                    hours: cert.hoursAtIssuance,
+                    credentialId: cert.credentialId,
+                    issuedDate: cert.issuedAt.toLocaleDateString('en-GB'),
+                    accentColor: cert.accentColor,
+                    logoURL: cert.logoURL,
+                    signatories: cert.signatories,
+                  }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handlePrint(cert.id)}
+                    className="!bg-black !text-white px-4 py-2 rounded-lg text-sm inline-flex items-center gap-2"
+                  >
+                    <Printer size={16} />
+                    Print / Save PDF
+                  </button>
+                  <span className="text-xs text-neutral-500 self-center">
+                    Issued {cert.issuedAt.toLocaleDateString('en-GB')} · {cert.hoursAtIssuance} hours
+                  </span>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         )}
       </section>
+
+      {previewCert ? (
+        <div className="hidden print:block fixed inset-0 bg-white p-8 z-[9999]">
+          <CertificateDesignPreview
+            data={{
+              title: previewCert.title,
+              subtitle: previewCert.subtitle,
+              bodyText: previewCert.bodyText,
+              memberName: previewCert.memberName,
+              hours: previewCert.hoursAtIssuance,
+              credentialId: previewCert.credentialId,
+              issuedDate: previewCert.issuedAt.toLocaleDateString('en-GB'),
+              accentColor: previewCert.accentColor,
+              logoURL: previewCert.logoURL,
+              signatories: previewCert.signatories,
+            }}
+          />
+        </div>
+      ) : null}
     </DashboardPageShell>
   )
 }

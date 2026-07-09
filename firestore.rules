@@ -677,6 +677,10 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /certificateTemplates/{templateId} {
+      allow read, write: if isAdmin();
+    }
+
     match /badges/{badgeId} {
       allow read: if isAdmin()
         || (isAuth() && resource.data.userId == request.auth.uid);

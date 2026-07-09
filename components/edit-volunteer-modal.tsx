@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { auth } from '@/lib/firebase'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save, Clock, Users } from 'lucide-react'
 
@@ -31,6 +32,21 @@ export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }:
         ...formData,
         updatedAt: new Date(),
       })
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (token) {
+          await fetch('/api/certificates/check-milestones', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: volunteer.id }),
+          })
+        }
+      } catch {
+        /* certificate check is best-effort */
+      }
       audit({
         actionType: 'update',
         action: `Updated volunteer: ${volunteer.id}`,

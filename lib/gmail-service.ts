@@ -340,6 +340,65 @@ export const sendAdminInviteEmail = async (
 }
 
 /**
+ * Certificate milestone congratulations email
+ */
+export interface CertificateMilestoneEmailDetails {
+  to: string
+  memberName: string
+  subject: string
+  bodyText: string
+  certificateTitle: string
+  hours: number
+  fromName?: string
+}
+
+export async function sendCertificateMilestoneEmail(
+  transporter: ReturnType<typeof createGmailTransporter>,
+  gmailEmail: string,
+  details: CertificateMilestoneEmailDetails
+): Promise<{ success: boolean; messageId?: string }> {
+  if (!transporter) {
+    throw new Error('Email transporter not configured')
+  }
+
+  const paragraphs = details.bodyText
+    .split(/\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p style="margin:0 0 14px 0;line-height:1.6;color:#333;">${p}</p>`)
+    .join('')
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <body style="margin:0;padding:0;font-family:Georgia,serif;background:#f7f6f2;">
+        <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
+          <div style="background:#fff;border:3px solid #111;padding:32px;border-radius:4px;">
+            <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#888;">Passive Blessings</p>
+            <h1 style="margin:0 0 20px 0;font-size:24px;color:#111;">${details.certificateTitle}</h1>
+            ${paragraphs}
+            <p style="margin:20px 0 0 0;font-size:14px;color:#666;">
+              <strong>${details.hours}</strong> volunteer hours logged · View your certificate in your member dashboard.
+            </p>
+          </div>
+          <p style="margin:16px 0 0 0;font-size:11px;color:#999;text-align:center;">© ${new Date().getFullYear()} Passive Blessings</p>
+        </div>
+      </body>
+    </html>
+  `
+
+  const info = await transporter.sendMail({
+    from: `"${details.fromName || 'Passive Blessings'}" <${gmailEmail}>`,
+    to: details.to,
+    subject: details.subject,
+    html,
+    text: details.bodyText,
+  })
+
+  return { success: true, messageId: info.messageId }
+}
+
+/**
  * Verify Gmail credentials are valid
  */
 export const verifyGmailCredentials = async (

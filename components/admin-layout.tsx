@@ -137,6 +137,7 @@ export const adminMenuItems = [
   { label: 'Shop Config', href: '/admin/cms/shop', icon: ShoppingBag, group: 'CMS' },
   { label: 'Volunteer Config', href: '/admin/cms/volunteer', icon: HandHeart, group: 'CMS' },
   { label: 'Learning Resources', href: '/admin/cms/learning', icon: BookOpen, group: 'CMS' },
+  { label: 'Volunteer Certificates', href: '/admin/cms/certificates', icon: Award, group: 'CMS' },
   { label: 'Navigation', href: '/admin/cms/navigation', icon: Compass, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
   { label: 'Team Members', href: '/admin/team', icon: Users, group: 'CMS' },
