@@ -19,6 +19,7 @@ import {
   type NavigationConfig,
 } from '@/lib/platform-config'
 import { getCmsPageHref } from '@/lib/cms-page-routes'
+import { stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,12 +49,16 @@ function menuLocationFromPlacement(
 }
 
 function buildPagePayload(page: Page) {
+  const title = page.title.trim()
+  const seoTitle = page.seoTitle?.trim() || title
+  const content = stripDuplicateCmsHeadings(page.content || '', seoTitle, title)
+
   return {
     slug: page.slug.trim(),
-    title: page.title.trim(),
+    title,
     description: page.description || '',
-    content: page.content || '',
-    seoTitle: page.seoTitle || page.title,
+    content,
+    seoTitle,
     seoDescription: page.seoDescription || '',
     keywords: page.keywords || [],
     status: page.status,
@@ -303,8 +308,11 @@ export default function AdminPages() {
                   value={editingPage.content}
                   onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
                   className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 h-40 font-mono text-sm"
-                  placeholder="Enter HTML or markdown content"
+                  placeholder="Enter page body HTML (headings matching the title are hidden on the public page)"
                 />
+                <p className="text-xs text-neutral-500 mt-1">
+                  Body only — the page title above is shown automatically. Do not add a duplicate heading.
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

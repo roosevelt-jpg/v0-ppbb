@@ -3,6 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { CMS_MENU_SEEDS } from '@/lib/cms-menu-seeds'
 import { groupPagesBySlug, planMenuDedupes } from '@/lib/cms-menu-dedupe'
+import { stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,12 +95,14 @@ export async function GET() {
     for (const seed of CMS_MENU_SEEDS) {
       const docRef = pagesRef.doc(seed.slug)
       const existing = await docRef.get()
+      const seedTitle = seed.seoTitle || seed.title
+      const seedContent = stripDuplicateCmsHeadings(seed.content || '', seedTitle, seed.title)
       const payload = sanitizeForFirestore({
         slug: seed.slug,
         title: seed.title,
         description: seed.description || '',
-        content: seed.content || '',
-        seoTitle: seed.seoTitle || seed.title,
+        content: seedContent,
+        seoTitle: seedTitle,
         seoDescription: seed.seoDescription || '',
         keywords: seed.keywords || [],
         status: seed.status,
@@ -128,7 +131,19 @@ export async function GET() {
           FORCE_MENU_REFRESH_SLUGS.has(seed.slug)
 
         if (shouldRefresh) {
-          await docRef.set(payload, { merge: true })
+          const menuOnlyPayload = sanitizeForFirestore({
+            slug: seed.slug,
+            title: seed.title,
+            menuLocation: seed.menuLocation,
+            showInMenu: seed.showInMenu,
+            menuLabel: seed.menuLabel || seed.title,
+            menuOrder: seed.menuOrder ?? 0,
+            headerSection: seed.headerSection || '',
+            externalHref: seed.externalHref || '',
+            status: seed.status,
+            updatedAt: now,
+          })
+          await docRef.set(menuOnlyPayload, { merge: true })
           updated++
         }
       }

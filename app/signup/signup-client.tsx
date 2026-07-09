@@ -630,7 +630,7 @@ function SignupPageContent() {
                     {/* Terms checkbox */}
                     <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
                       <input type="checkbox" name="consentTerms" checked={formData.consentTerms} onChange={handleInputChange} style={{ width: '16px', height: '16px', cursor: 'pointer', marginTop: '0.2rem', flexShrink: 0 }} required />
-                      <span style={{ fontSize: '0.7rem', color: '#666', lineHeight: '1.3' }}>I agree to the Terms & Conditions and Privacy Policy</span>
+                      <span style={{ fontSize: '0.7rem', color: '#666', lineHeight: '1.3' }}>I agree to the <Link href="/pages/terms-of-service" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/pages/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Privacy Policy</Link></span>
                     </label>
                   </div>
                 )}

@@ -2,19 +2,9 @@ import { notFound } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
 
 export const dynamic = 'force-dynamic'
-
-/** Drop a leading &lt;h1&gt; when it repeats the page title (template already renders one). */
-function stripDuplicateHeading(content: string, title: string): string {
-  if (!content?.trim()) return content || ''
-
-  const normalizedTitle = title.trim().toLowerCase()
-  return content.replace(/^<h1[^>]*>([\s\S]*?)<\/h1>\s*/i, (match, inner: string) => {
-    const innerText = inner.replace(/<[^>]+>/g, '').trim().toLowerCase()
-    return innerText === normalizedTitle ? '' : match
-  })
-}
 
 async function getPublishedPage(slug: string) {
   const db = getAdminDb()
@@ -48,7 +38,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug: stri
   }
 
   const title = page.seoTitle || page.title
-  const bodyHtml = stripDuplicateHeading(page.content || '', title)
+  const bodyHtml = stripDuplicateCmsHeadings(page.content || '', title, page.title)
 
   return (
     <>
