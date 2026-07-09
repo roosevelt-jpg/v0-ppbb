@@ -12,7 +12,24 @@ export async function GET(request: NextRequest) {
     const db = getAdminDb()
     const searchParams = request.nextUrl.searchParams
     const query = searchParams.get('query')
+    const id = searchParams.get('id')
     const featured = searchParams.get('featured') === 'true'
+
+    if (id) {
+      const doc = await db.collection('communities').doc(id).get()
+      if (!doc.exists) {
+        return NextResponse.json({ success: false, error: 'Community not found' }, { status: 404 })
+      }
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data()?.createdAt?.toDate?.() || doc.data()?.createdAt,
+          updatedAt: doc.data()?.updatedAt?.toDate?.() || doc.data()?.updatedAt,
+        },
+      })
+    }
 
     if (query === 'featured') {
       const snapshot = await db
@@ -67,6 +84,8 @@ export async function POST(request: NextRequest) {
       tags,
       genderRestriction,
       bannerURL,
+      iconURL,
+      logoURL,
       isFeatured,
       createdBy,
       businessId,
@@ -94,6 +113,8 @@ export async function POST(request: NextRequest) {
       tags: tags || [],
       genderRestriction: normalizeGenderRestriction(genderRestriction),
       bannerURL: bannerURL || '',
+      iconURL: iconURL || logoURL || '',
+      logoURL: logoURL || iconURL || '',
       isFeatured: isFeatured || false,
       status,
       memberCount: 0,

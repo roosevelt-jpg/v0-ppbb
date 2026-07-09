@@ -16,6 +16,7 @@ import { format } from 'date-fns'
 import EmojiPicker from 'emoji-picker-react'
 import { addEmojiReaction, removeEmojiReaction, editMessage, deleteMessage, markMessageAsRead } from '@/lib/chat-utils'
 import { memberCanChat } from '@/lib/community-governance'
+import { triggerCommunityNotification } from '@/lib/community-notifications-client'
 
 interface Message {
   id: string
@@ -243,6 +244,13 @@ export default function GroupChatPage() {
         text: newMessage,
         sentAt: serverTimestamp(),
       })
+      void triggerCommunityNotification({
+        type: 'group_message',
+        communityId,
+        groupId,
+        groupName: group?.name,
+        preview: newMessage,
+      })
       setNewMessage('')
     } catch (error) {
       console.error('[v0] Error sending message:', error)
@@ -261,6 +269,9 @@ export default function GroupChatPage() {
       const fileURL = await uploadGroupFile(communityId, groupId, file)
       const fileType = getFileType(file)
 
+      const preview =
+        fileType === 'image' ? '📷 Photo' : fileType === 'video' ? '🎬 Video' : `📎 ${file.name}`
+
       await addDoc(collection(db, `communities/${communityId}/groups/${groupId}/messages`), {
         senderId: user.id,
         senderName: user.displayName || 'Anonymous',
@@ -270,6 +281,13 @@ export default function GroupChatPage() {
         sentAt: serverTimestamp(),
         reactions: [],
         readBy: [{ userId: user.id, readAt: serverTimestamp() }],
+      })
+      void triggerCommunityNotification({
+        type: 'group_message',
+        communityId,
+        groupId,
+        groupName: group?.name,
+        preview,
       })
     } catch (error) {
       console.error('[v0] Error uploading file:', error)

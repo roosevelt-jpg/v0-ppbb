@@ -6,6 +6,7 @@ import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { fetchNewsletterRecipients } from '@/lib/newsletter-recipients'
 import { loadNewsletterBrandContext, type NewsletterTemplateId } from '@/lib/newsletter-templates'
 import { sendNewsletterBulk } from '@/lib/sendgrid-newsletter'
+import { notifyNewsletterPublished } from '@/lib/push-notifications-server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -169,6 +170,13 @@ export async function POST(request: NextRequest) {
         },
         { status: 500 }
       )
+    }
+
+    const pushUserIds = recipients
+      .map((r) => r.userId)
+      .filter((id): id is string => Boolean(id))
+    if (pushUserIds.length > 0) {
+      void notifyNewsletterPublished(subject, pushUserIds).catch(console.error)
     }
 
     return NextResponse.json({

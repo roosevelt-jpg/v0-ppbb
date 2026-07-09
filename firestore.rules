@@ -254,6 +254,8 @@ service cloud.firestore {
 
     // Nested communities (groups, chat, members)
     match /communities/{communityId} {
+      allow read: if resource.data.visibility == 'public'
+        && resource.data.status == 'active';
       allow read: if isAuth();
       allow create, update, delete: if isAdmin();
 
@@ -287,11 +289,6 @@ service cloud.firestore {
         allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
         allow update, delete: if isAdmin() || resource.data.userId == request.auth.uid;
       }
-    }
-
-    match /community-groups/{document=**} {
-      allow read: if isAuth();
-      allow write: if isAdmin();
     }
 
     match /communityReports/{document=**} {
@@ -544,47 +541,6 @@ service cloud.firestore {
     match /systemHealth/{document=**} {
       allow read: if true;
       allow write: if request.auth.uid != null; // Protected by backend
-    }
-    
-    // Community Forum Collections
-    
-    // Groups - Public read, authenticated create
-    match /groups/{groupId} {
-      allow read: if true; // Public groups viewable by all
-      allow create: if isAuth(); // Any authenticated user can create
-      allow update: if isAdmin() || resource.data.createdBy == request.auth.uid;
-      allow delete: if isAdmin() || resource.data.createdBy == request.auth.uid;
-      
-      // Group members subcollection
-      match /members/{userId} {
-        allow read: if isAuth();
-        allow create: if isAuth() && isOwnUser(userId); // Can only add yourself
-        allow update: if isAdmin() || userId == request.auth.uid;
-        allow delete: if isAdmin() || userId == request.auth.uid || get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy == request.auth.uid;
-      }
-      
-      // Posts in group
-      match /posts/{postId} {
-        allow read: if isAuth(); // Group members can read
-        allow create: if isAuth(); // Group members can create
-        allow update: if isAdmin() || resource.data.userId == request.auth.uid;
-        allow delete: if isAdmin() || resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy == request.auth.uid;
-        
-        // Comments on posts
-        match /comments/{commentId} {
-          allow read: if isAuth();
-          allow create: if isAuth();
-          allow update: if isAdmin() || resource.data.userId == request.auth.uid;
-          allow delete: if isAdmin() || resource.data.userId == request.auth.uid || get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy == request.auth.uid;
-        }
-      }
-    }
-    
-    // Community Moderation Queue - Admin only
-    match /communityModeration/{document=**} {
-      allow read: if isAdmin();
-      allow create: if isAuth(); // Anyone can report content
-      allow update, delete: if isAdmin();
     }
     
     // Community Statistics - Public read, service account write

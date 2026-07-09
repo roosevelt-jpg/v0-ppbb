@@ -3,6 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+import { notifyNewEventPublished } from '@/lib/push-notifications-server'
 
 function sortEventsByCreatedAt(events: Array<Record<string, unknown> & { id: string }>) {
   return events.sort((a, b) => {
@@ -204,6 +205,10 @@ export async function POST(request: NextRequest) {
 
     const docRef = await db.collection('events').add(eventData)
 
+    if (isPublished) {
+      void notifyNewEventPublished(String(body.title || 'New event'), docRef.id).catch(console.error)
+    }
+
     return NextResponse.json({
       success: true,
       data: { id: docRef.id, ...eventData },
@@ -283,6 +288,10 @@ export async function PUT(request: NextRequest) {
 
     const title = (existing.title as string) || 'Your event'
     const createdBy = (existing.createdBy as string) || ''
+
+    if (updates.status === 'published' && existing.status !== 'published') {
+      void notifyNewEventPublished(title, id).catch(console.error)
+    }
 
     if (updates.status === 'published' && existing.status === 'pending_approval') {
       await notifyEventCreator(

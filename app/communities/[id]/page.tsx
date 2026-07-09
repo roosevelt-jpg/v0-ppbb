@@ -9,6 +9,7 @@ import { subscribeToCommunity, subscribeToCommunityGroups, joinGroup, subscribeT
 import type { Community, Group } from '@/lib/community-types'
 import { useAuth } from '@/lib/auth-context'
 import { ChevronLeft, Users, Tag, MessageCircle, Lock } from 'lucide-react'
+import { canJoinByGenderRestriction, genderRestrictionBadgeClass, genderRestrictionLabel } from '@/lib/community-governance'
 
 export default function CommunityDetailPage() {
   const router = useRouter()
@@ -207,9 +208,8 @@ export default function CommunityDetailPage() {
                 const membership = userGroups[group.id!]
                 const isMember = membership === 'active'
                 const isPending = membership === 'pending'
-                const isRestricted =
-                  group.genderRestriction !== 'mixed' &&
-                  group.genderRestriction !== user?.gender
+                const genderCheck = canJoinByGenderRestriction(group.genderRestriction, user?.gender)
+                const isRestricted = !genderCheck.allowed
 
                 return (
                   <div
@@ -237,16 +237,11 @@ export default function CommunityDetailPage() {
                       )}
                     </div>
 
-                    {/* Gender Restriction Badge */}
-                    {group.genderRestriction !== 'mixed' && (
-                      <div className={`text-xs font-medium px-3 py-1 rounded-full inline-block ${
-                        group.genderRestriction === 'male'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-pink-100 text-pink-700'
-                      }`}>
-                        {group.genderRestriction === 'male' ? 'Men Only' : 'Women Only'}
-                      </div>
-                    )}
+                    <span
+                      className={`text-xs font-medium px-3 py-1 rounded-full inline-block ${genderRestrictionBadgeClass(group.genderRestriction)}`}
+                    >
+                      {genderRestrictionLabel(group.genderRestriction)}
+                    </span>
 
                     {/* Group Stats */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
@@ -262,11 +257,12 @@ export default function CommunityDetailPage() {
                     {/* Gender Restriction Badge */}
                     {isRestricted && (
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
-                        <p className="text-amber-900 font-medium">
-                          {group.genderRestriction === 'male' ? 'Men Only Group' : 'Women Only Group'}
+                        <p className="text-amber-900 font-medium flex items-center gap-1">
+                          <Lock size={14} />
+                          {genderRestrictionLabel(group.genderRestriction)} group
                         </p>
                         <p className="text-amber-700 text-xs mt-1">
-                          This group is restricted to {group.genderRestriction === 'male' ? 'men' : 'women'} only
+                          {genderCheck.reason || 'This group has a gender restriction.'}
                         </p>
                       </div>
                     )}
@@ -278,7 +274,7 @@ export default function CommunityDetailPage() {
                         onClick={() => router.push(`/communities/${communityId}/groups/${group.id}`)}
                         className="w-full px-4 py-2 rounded-lg font-medium bg-black !text-white hover:bg-gray-900 min-h-[44px]"
                       >
-                        Join Chat
+                        Enter Group
                       </button>
                     ) : isPending ? (
                       <button

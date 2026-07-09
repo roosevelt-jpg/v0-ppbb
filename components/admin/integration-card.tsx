@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { IntegrationService, Integration } from '@/lib/integrations/types'
 import { ChevronDown, AlertCircle } from 'lucide-react'
 import IntegrationModal from './integration-modal'
+import { useAuth } from '@/lib/auth-context'
 
 interface IntegrationCardProps {
   service: IntegrationService
@@ -13,11 +14,49 @@ interface IntegrationCardProps {
 }
 
 export function IntegrationCard({ service, integration, health, onRefresh }: IntegrationCardProps) {
+  const auth = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [isConfiguring, setIsConfiguring] = useState(false)
+  const [testingFcm, setTestingFcm] = useState(false)
+  const [fcmTestResult, setFcmTestResult] = useState('')
 
   const statusColor = integration?.status === 'active' ? '#10b981' : integration?.status === 'error' ? '#ef4444' : '#888888'
   const statusLabel = integration?.status === 'active' ? 'Active' : integration?.status === 'error' ? 'Error' : 'Inactive'
+
+  const handleFcmTest = async () => {
+    if (!auth.firebaseUser) return
+    setTestingFcm(true)
+    setFcmTestResult('')
+    try {
+      const token = await auth.firebaseUser.getIdToken()
+      const res = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notification: {
+            title: 'FCM test',
+            body: 'Push notifications are working from Passive Blessings.',
+          },
+          data: { type: 'test', click_action: '/admin/integrations' },
+        }),
+      })
+      const data = await res.json()
+      if (data.sent) {
+        setFcmTestResult('Test notification sent to your device.')
+      } else if (data.skipped) {
+        setFcmTestResult(`Skipped: ${data.skipped}. Enable push in settings and ensure VAPID key is set.`)
+      } else {
+        setFcmTestResult(data.error || 'Test failed')
+      }
+    } catch {
+      setFcmTestResult('Test request failed')
+    } finally {
+      setTestingFcm(false)
+    }
+  }
 
   return (
     <>
@@ -110,7 +149,33 @@ export function IntegrationCard({ service, integration, health, onRefresh }: Int
                   )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                  {service.id === 'firebaseCloudMessaging' && integration?.status === 'active' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleFcmTest}
+                        disabled={testingFcm}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          backgroundColor: '#f0fdf4',
+                          color: '#166534',
+                          border: '1px solid #bbf7d0',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          cursor: testingFcm ? 'wait' : 'pointer',
+                        }}
+                      >
+                        {testingFcm ? 'Sending test…' : 'Send FCM test notification'}
+                      </button>
+                      {fcmTestResult ? (
+                        <p style={{ fontSize: '0.75rem', color: '#666666', margin: 0 }}>{fcmTestResult}</p>
+                      ) : null}
+                    </>
+                  )}
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     onClick={() => setIsConfiguring(true)}
                     style={{
@@ -142,6 +207,7 @@ export function IntegrationCard({ service, integration, health, onRefresh }: Int
                   >
                     Delete
                   </button>
+                  </div>
                 </div>
               </>
             ) : (

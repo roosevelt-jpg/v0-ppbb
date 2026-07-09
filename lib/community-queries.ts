@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { Community, Group, Message, GroupMember, CommunityMember } from './community-types'
+import { triggerCommunityNotification } from '@/lib/community-notifications-client'
 import {
   canJoinByGenderRestriction,
   isCommunityVisible,
@@ -433,6 +434,12 @@ export async function joinCommunity(
       memberCount: increment(1),
       updatedAt: Timestamp.now(),
     })
+
+    void triggerCommunityNotification({
+      type: 'community_joined',
+      communityId,
+      communityName: community.name,
+    })
   } catch (error) {
     console.error('[v0] Error joining community:', error)
     throw error
@@ -592,6 +599,14 @@ export async function joinGroup(
         updatedAt: Timestamp.now(),
       })
     }
+
+    void triggerCommunityNotification({
+      type: 'group_joined',
+      communityId,
+      groupId,
+      groupName: groupData.name,
+      communityName: community.name,
+    })
 
     return joinStatus
   } catch (error) {

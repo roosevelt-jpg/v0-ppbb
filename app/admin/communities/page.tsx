@@ -74,6 +74,12 @@ export default function CommunitiesPage() {
             />
           </div>
           <Link
+            href="/admin/communities/messages"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50 transition"
+          >
+            Messages
+          </Link>
+          <Link
             href="/admin/communities/approvals"
             className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-black rounded-lg hover:bg-neutral-50 transition"
           >

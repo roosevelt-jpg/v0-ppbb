@@ -33,6 +33,14 @@ export function genderRestrictionLabel(value: unknown): string {
   return GENDER_RESTRICTION_OPTIONS.find((o) => o.value === n)?.label ?? 'Mixed'
 }
 
+/** Tailwind classes for gender restriction badges on cards */
+export function genderRestrictionBadgeClass(value: unknown): string {
+  const n = normalizeGenderRestriction(value)
+  if (n === 'male') return 'bg-blue-100 text-blue-700'
+  if (n === 'female') return 'bg-pink-100 text-pink-700'
+  return 'bg-purple-100 text-purple-700'
+}
+
 /** Normalize user profile gender for eligibility checks */
 export function normalizeUserGender(value: unknown): 'male' | 'female' | 'unknown' {
   const raw = String(value || '')

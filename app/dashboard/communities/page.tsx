@@ -6,12 +6,9 @@ import { subscribeToUserCommunities } from '@/lib/community-queries'
 import type { Community } from '@/lib/community-types'
 import { useAuth } from '@/lib/auth-context'
 import { Users, Tag, ChevronRight, MessageCircle } from 'lucide-react'
-import { genderRestrictionLabel } from '@/lib/community-governance'
-import {
-  DashboardPageShell,
-  DashboardSkeleton,
-  DashboardEmptyState,
-} from '@/components/dashboard-states'
+import { genderRestrictionBadgeClass, genderRestrictionLabel } from '@/lib/community-governance'
+import { CommunityListSkeleton } from '@/components/community-list-skeleton'
+import { DashboardPageShell, DashboardEmptyState } from '@/components/dashboard-states'
 
 export default function MyCommunities() {
   const { user, loading: authLoading } = useAuth()
@@ -32,7 +29,13 @@ export default function MyCommunities() {
     return () => unsubscribe()
   }, [user])
 
-  if (authLoading || loading) return <DashboardSkeleton />
+  if (authLoading || loading) {
+    return (
+      <DashboardPageShell title="My Communities" subtitle="Loading your communities…">
+        <CommunityListSkeleton count={3} />
+      </DashboardPageShell>
+    )
+  }
 
   if (!user) {
     return (
@@ -91,8 +94,13 @@ export default function MyCommunities() {
               <div className="p-4 space-y-3">
                 <div>
                   <h3 className="font-bold text-neutral-900 text-lg line-clamp-2">{community.name}</h3>
-                  <p className="text-xs text-neutral-500 mt-1">
-                    {genderRestrictionLabel(community.genderRestriction)} · {community.groupCount || 0} groups
+                  <p className="text-xs text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+                    <span
+                      className={`px-2 py-0.5 rounded-full font-medium ${genderRestrictionBadgeClass(community.genderRestriction)}`}
+                    >
+                      {genderRestrictionLabel(community.genderRestriction)}
+                    </span>
+                    <span>{community.groupCount || 0} groups</span>
                   </p>
                 </div>
 

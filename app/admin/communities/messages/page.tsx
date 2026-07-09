@@ -49,7 +49,7 @@ export default function AdminGroupMessagesPage() {
             Recent messages across all community groups (refreshes every 15s)
           </p>
           <Link
-            href="/admin/communities/community"
+            href="/admin/communities"
             className="px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 min-h-[44px] inline-flex items-center"
           >
             Back to Community Management

@@ -7,7 +7,7 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { subscribeToBusinessCommunities } from '@/lib/business-queries'
 import { Community } from '@/lib/community-types'
-import { genderRestrictionLabel, isPendingApproval } from '@/lib/community-governance'
+import { genderRestrictionBadgeClass, genderRestrictionLabel, isPendingApproval } from '@/lib/community-governance'
 import { Plus, Trash2, Edit2 } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { deleteDoc, doc } from 'firebase/firestore'
@@ -182,7 +182,13 @@ export default function BusinessCommunitiesPage() {
                   {community.description}
                 </p>
                 <p style={{ color: '#666666', fontSize: '12px', marginBottom: '12px' }}>
-                  {genderRestrictionLabel(community.genderRestriction)} · {community.memberCount || 0} members
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full font-medium ${genderRestrictionBadgeClass(community.genderRestriction)}`}
+                  >
+                    {genderRestrictionLabel(community.genderRestriction)}
+                  </span>
+                  {' · '}
+                  {community.memberCount || 0} members · {community.groupCount || 0} groups
                 </p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                   {community.tags?.map((tag) => (
@@ -208,6 +214,15 @@ export default function BusinessCommunitiesPage() {
                   >
                     View
                   </button>
+                  {!isPendingApproval(community.status) && community.status === 'active' && (
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/business/communities/${community.id}/groups/create`)}
+                      className="flex-1 min-h-[44px] bg-white border border-neutral-300 text-neutral-900 px-4 rounded-md text-sm font-semibold hover:bg-neutral-50"
+                    >
+                      Add Group
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => router.push(`/business/communities/create?edit=${community.id}`)}

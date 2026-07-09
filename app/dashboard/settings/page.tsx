@@ -15,7 +15,7 @@ import { getUserProfilePictureURL } from '@/lib/user-profile'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { sendPasswordReset } from '@/lib/auth'
-import { requestNotificationPermission } from '@/lib/fcm-service'
+import { requestAndRegisterFCM } from '@/lib/fcm-client'
 import {
   buildLocationLabelUpdate,
   DEFAULT_NOTIFICATION_PREFERENCES,
@@ -237,7 +237,7 @@ function SettingsContent() {
       const fcmSettings = notificationPrefsToFcmSettings(merged)
 
       if (merged.pushNotifications) {
-        await requestNotificationPermission()
+        await requestAndRegisterFCM(current.uid)
       }
 
       await updateDoc(

@@ -226,7 +226,10 @@ export function mapNotificationTypeToPreference(
       return 'newsletter'
     case 'community_update':
     case 'group_joined':
+    case 'community_joined':
       return 'communityUpdates'
+    case 'event_created':
+      return 'eventReminders'
     default:
       return 'systemAlerts'
   }
