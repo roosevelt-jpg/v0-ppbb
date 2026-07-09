@@ -91,7 +91,7 @@ export function MemberSidebar({
             )
           })}
 
-
+          <BusinessPortalSwitcher variant="sidebar" onNavigate={() => setOpen(false)} />
         </nav>
 
         {/* Footer */}
@@ -148,7 +148,6 @@ export function MemberHeader({ title, subtitle, open, setOpen }: { title: string
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <BusinessPortalSwitcher />
         <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
         <button
           type="button"

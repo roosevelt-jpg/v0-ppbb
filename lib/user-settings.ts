@@ -1,4 +1,5 @@
 import type { FCMSettings } from '@/lib/fcm-settings'
+import { DEFAULT_FCM_SETTINGS } from '@/lib/fcm-settings'
 import type { LocationData, User } from '@/lib/types'
 
 export type NotificationPreferenceKey =
@@ -34,14 +35,7 @@ export const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
   showInMemberDirectory: true,
 }
 
-export const DEFAULT_FCM_SETTINGS: FCMSettings = {
-  enabled: true,
-  newCommunityNotification: true,
-  newGroupMessageNotification: true,
-  newEventNotification: true,
-  newsletterNotification: true,
-  newGroupJoinedNotification: true,
-}
+export { DEFAULT_FCM_SETTINGS }
 
 type UserLike = Partial<User> & {
   notificationPreferences?: Partial<NotificationPreferences>
