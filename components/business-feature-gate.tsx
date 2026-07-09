@@ -50,8 +50,9 @@ export function BusinessFeatureLink({
     <>
       <button
         type="button"
+        data-dashboard-control
         onClick={handleClick}
-        className={`inline p-0 m-0 bg-transparent border-0 cursor-pointer font-inherit text-inherit appearance-none ${className ?? ''}`}
+        className={`inline-block p-0 m-0 border-0 cursor-pointer font-inherit appearance-none ${className ?? ''}`}
         style={style}
       >
         {children}

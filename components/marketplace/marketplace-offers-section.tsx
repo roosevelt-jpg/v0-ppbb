@@ -116,6 +116,7 @@ export function MarketplaceOffersSection() {
             <button
               key={item.id}
               type="button"
+              data-dashboard-control
               onClick={() => {
                 setTab(item.id)
                 setVisibleCount(12)
@@ -135,6 +136,7 @@ export function MarketplaceOffersSection() {
       <div className="rounded-lg overflow-hidden border border-[#e4e1da]">
         <button
           type="button"
+          data-dashboard-control
           onClick={() => setShopOpen((v) => !v)}
           className="w-full flex items-center justify-between px-4 py-3 bg-black text-white font-semibold text-sm min-h-[44px]"
         >
@@ -208,6 +210,9 @@ export function MarketplaceOffersSection() {
                       </div>
                       <div className="p-4 space-y-2">
                         <p className="text-xs text-neutral-500 capitalize">{offer.type || offer.category}</p>
+                        {offer.businessName ? (
+                          <p className="text-xs font-medium text-neutral-600">by {offer.businessName}</p>
+                        ) : null}
                         <h3 className="font-semibold text-foreground line-clamp-2">{offer.title}</h3>
                         <p className="text-sm font-medium">
                           {offer.price != null ? `AED ${offer.price}` : 'Contact for price'}
@@ -232,8 +237,9 @@ export function MarketplaceOffersSection() {
                   <div className="text-center mt-8">
                     <button
                       type="button"
+                      data-dashboard-control
                       onClick={() => setVisibleCount((c) => c + 12)}
-                      className="min-h-[44px] px-6 py-2 bg-white border border-[#e4e1da] rounded-lg font-semibold text-sm hover:bg-neutral-50"
+                      className="min-h-[44px] px-6 py-2 bg-white border border-[#e4e1da] rounded-lg font-semibold text-sm text-[#111111] hover:bg-neutral-50"
                     >
                       Load More
                     </button>

@@ -157,6 +157,18 @@ export function MarketplaceOfferDetail() {
 
             <div>
               <p className="text-sm text-neutral-500 capitalize mb-1">{offer.type || offer.category}</p>
+              {offer.businessName ? (
+                <p className="text-sm text-neutral-600 mb-2">
+                  Listed by{' '}
+                  {offer.businessId ? (
+                    <Link href={`/directory/${offer.businessId}`} className="font-semibold text-[#111111] hover:underline">
+                      {offer.businessName}
+                    </Link>
+                  ) : (
+                    <span className="font-semibold text-[#111111]">{offer.businessName}</span>
+                  )}
+                </p>
+              ) : null}
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words">{offer.title}</h1>
               <p className="text-xl font-semibold mb-4">
                 {offer.price != null ? `AED ${offer.price}` : 'Contact for price'}

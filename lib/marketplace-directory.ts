@@ -51,6 +51,7 @@ export interface DirectoryBusiness {
 export interface DirectoryOffer {
   id: string
   businessId: string
+  businessName: string
   title: string
   description: string
   category: string
@@ -175,6 +176,7 @@ export function normalizeDirectoryOffer(
   return {
     id,
     businessId: asString(data.businessId),
+    businessName: asString(data.businessName) || asString(data.business_name),
     title: asString(data.title) || 'Untitled offer',
     description: asString(data.description),
     category: asString(data.category) || type,

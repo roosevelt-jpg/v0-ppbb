@@ -63,22 +63,10 @@ export function SocialMediaLinks({
     return null
   }
 
-  const brandColors: Record<string, string> = {
-    facebook: '#1877F2',
-    twitter: '#ffffff',
-    instagram: '#E4405F',
-    linkedin: '#0A66C2',
-    youtube: '#FF0000',
-    discord: '#5865F2',
-    tiktok: '#000000',
-    snapchat: '#FFFC00',
-  }
-
   return (
     <div className={`flex flex-wrap gap-3 items-center ${className}`}>
       {activePlatforms.map((platform) => {
         const IconComponent = platform.icon
-        const brandColor = brandColors[platform.key] || '#111111'
         return (
           <Link
             key={platform.key}
@@ -86,32 +74,10 @@ export function SocialMediaLinks({
             target="_blank"
             rel="noopener noreferrer"
             className={`${sizeMap[size].padding} rounded-full transition-all hover:scale-110 flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] ${
-              isFooter ? 'text-white hover:bg-white/15 bg-white/10' : ''
+              isFooter
+                ? 'text-white hover:bg-white/15 bg-white/10'
+                : 'bg-ink-black text-white hover:bg-charcoal'
             }`}
-            style={
-              isFooter
-                ? undefined
-                : {
-                    backgroundColor: `${brandColor}18`,
-                    color: brandColor,
-                  }
-            }
-            onMouseEnter={
-              isFooter
-                ? undefined
-                : (e) => {
-                    e.currentTarget.style.backgroundColor = brandColor
-                    e.currentTarget.style.color = '#ffffff'
-                  }
-            }
-            onMouseLeave={
-              isFooter
-                ? undefined
-                : (e) => {
-                    e.currentTarget.style.backgroundColor = `${brandColor}18`
-                    e.currentTarget.style.color = brandColor
-                  }
-            }
             title={platform.label}
             aria-label={platform.label}
           >

@@ -201,7 +201,7 @@ async function seed() {
       sanitize({
         id: offerDiscountId,
         businessId: discountBiz,
-        businessName: 'UMMAH Merch House',
+        businessName: 'Ummah Merch House',
         title: 'PB Members 20% Off Apparel',
         description: 'Exclusive member-only discount across all tees and hoodies.',
         category: 'Merchandise',
@@ -298,6 +298,106 @@ async function seed() {
       { merge: true }
     )
   console.log(`  ✓ offers/${productOfferId} → seed-biz-products-retail`)
+
+  const extraOffers = [
+    {
+      id: 'seed-offer-strategy-session',
+      businessId: 'seed-biz-featured-services',
+      businessName: 'Barakah Consulting Studio',
+      title: '90-Minute Strategy Session',
+      description: 'One-on-one roadmap session for founders launching in the UAE.',
+      category: 'Consulting',
+      type: 'consulting',
+      price: 450,
+      imageSeed: 'seed-offer-strategy',
+    },
+    {
+      id: 'seed-offer-artisan-candle',
+      businessId: 'seed-biz-products-retail',
+      businessName: 'Noor Home Goods',
+      title: 'Hand-poured Oud Candle',
+      description: 'Small-batch candle made by local artisans.',
+      category: 'Products',
+      type: 'product',
+      price: 95,
+      imageSeed: 'seed-offer-candle',
+    },
+    {
+      id: 'seed-offer-hoodie',
+      businessId: 'seed-biz-discounts-merch',
+      businessName: 'Ummah Merch House',
+      title: 'Community Hoodie — Black',
+      description: 'Premium cotton hoodie with embroidered PB mark.',
+      category: 'Merchandise',
+      type: 'product',
+      price: 120,
+      imageSeed: 'seed-offer-hoodie',
+      isMemberDiscount: true,
+      discountPercentage: 20,
+    },
+    {
+      id: 'seed-offer-social-pack',
+      businessId: 'seed-biz-services-jobs',
+      businessName: 'Amanah Digital Services',
+      title: 'Social Media Starter Pack',
+      description: '10 branded posts + 1 reel edit for community businesses.',
+      category: 'Services',
+      type: 'service',
+      price: 850,
+      imageSeed: 'seed-offer-social',
+    },
+    {
+      id: 'seed-offer-coaching-bundle',
+      businessId: 'seed-biz-featured-services',
+      businessName: 'Barakah Consulting Studio',
+      title: 'Founder Coaching Bundle (4 sessions)',
+      description: 'Monthly coaching bundle for early-stage Muslim founders.',
+      category: 'Coaching',
+      type: 'coaching',
+      price: 1600,
+      imageSeed: 'seed-offer-coaching',
+    },
+    {
+      id: 'seed-offer-quran-workshop',
+      businessId: 'seed-biz-featured-services',
+      businessName: 'Barakah Consulting Studio',
+      title: 'Family Finance Workshop',
+      description: 'Evening workshop on budgeting and sadaqah planning.',
+      category: 'Education',
+      type: 'education',
+      price: 75,
+      imageSeed: 'seed-offer-workshop',
+    },
+  ]
+
+  for (const item of extraOffers) {
+    await db
+      .collection('offers')
+      .doc(item.id)
+      .set(
+        sanitize({
+          id: item.id,
+          businessId: item.businessId,
+          businessName: item.businessName,
+          title: item.title,
+          description: item.description,
+          category: item.category,
+          type: item.type,
+          status: 'active',
+          price: item.price,
+          imageURL: PLACEHOLDER(item.imageSeed, 600, 600),
+          images: [PLACEHOLDER(item.imageSeed, 600, 600)],
+          isMemberDiscount: item.isMemberDiscount === true,
+          discountPercentage: item.discountPercentage,
+          memberBenefit: item.discountPercentage,
+          seedTag: SEED_MARKER,
+          createdAt: now,
+          updatedAt: now,
+        }),
+        { merge: true }
+      )
+    console.log(`  ✓ offers/${item.id} → ${item.businessId}`)
+  }
 
   console.log('\nDone. Seed docs use IDs starting with "seed-biz-" / "seed-offer-" / "seed-job-".')
   console.log(`Marker field: seedTag = "${SEED_MARKER}"`)
