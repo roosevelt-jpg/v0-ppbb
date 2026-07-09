@@ -1,46 +1,63 @@
 'use client'
 
 export const dynamic = 'force-dynamic'
+
 import React from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Plus, Trash2, Edit2, Users } from 'lucide-react'
+import { Plus, Trash2, Edit2, Users, ChevronLeft, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
+import { adminApiFetch } from '@/lib/admin-api-client'
+import { genderRestrictionLabel } from '@/lib/community-governance'
+
+type GroupRow = {
+  id: string
+  name: string
+  description?: string
+  type?: string
+  status?: string
+  memberCount?: number
+  genderRestriction?: string
+  requiresApproval?: boolean
+  capacity?: number | null
+}
 
 export default function CommunityGroupsPage() {
   const params = useParams()
-  const router = useRouter()
   const communityId = params.id as string
 
-  const [groups, setGroups] = React.useState<any[]>([])
+  const [groups, setGroups] = React.useState<GroupRow[]>([])
   const [loading, setLoading] = React.useState(true)
 
-  React.useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const res = await fetch(`/api/groups?communityId=${communityId}`)
-        const data = await res.json()
-        if (data.success) {
-          setGroups(data.data)
-        }
-      } catch (error) {
-        console.error('[v0] Error fetching groups:', error)
-      } finally {
-        setLoading(false)
+  const loadGroups = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/groups?communityId=${communityId}`)
+      const data = await res.json()
+      if (data.success) {
+        setGroups(data.data)
       }
+    } catch (error) {
+      console.error('[v0] Error fetching groups:', error)
+    } finally {
+      setLoading(false)
     }
-
-    fetchGroups()
   }, [communityId])
+
+  React.useEffect(() => {
+    void loadGroups()
+  }, [loadGroups])
 
   const handleDeleteGroup = async (groupId: string) => {
     if (!confirm('Delete this group? This action cannot be undone.')) return
 
     try {
-      const res = await fetch(`/api/groups/${groupId}?communityId=${communityId}`, { method: 'DELETE' })
-      const data = await res.json()
-      if (data.success) {
-        setGroups(groups.filter(g => g.id !== groupId))
+      const json = await adminApiFetch(`/api/groups/${groupId}?communityId=${communityId}`, {
+        method: 'DELETE',
+      })
+      if (json.success) {
+        setGroups((prev) => prev.filter((g) => g.id !== groupId))
+      } else {
+        alert(json.error || 'Failed to delete group')
       }
     } catch (error) {
       console.error('[v0] Error deleting group:', error)
@@ -59,13 +76,24 @@ export default function CommunityGroupsPage() {
   }
 
   return (
-    <AdminPageLayout title="Community Groups">
+    <AdminPageLayout
+      title="Community Groups"
+      subtitle="Create and manage groups — chat, members, join approval, gender rules, capacity"
+    >
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-black">Groups</h2>
+        <Link
+          href={`/admin/communities/${communityId}`}
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        >
+          <ChevronLeft size={20} />
+          Back to community
+        </Link>
+
+        <div className="flex flex-wrap justify-between items-center gap-3">
+          <h2 className="text-2xl font-bold text-black">Groups ({groups.length})</h2>
           <Link
             href={`/admin/communities/${communityId}/groups/create`}
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium min-h-[44px]"
           >
             <Plus size={20} />
             Create Group
@@ -88,25 +116,40 @@ export default function CommunityGroupsPage() {
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 flex justify-between items-center hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:shadow-md transition-shadow"
               >
-                <div className="flex-1">
-                  <h3 className="font-bold text-gray-900 text-lg">{group.name}</h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-bold text-gray-900 text-lg">{group.name}</h3>
+                    <span className="text-xs capitalize px-2 py-0.5 bg-gray-100 rounded">
+                      {group.type?.replace('-', ' ') || 'discussion'}
+                    </span>
+                    {group.status === 'pending_approval' ? (
+                      <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded">
+                        pending approval
+                      </span>
+                    ) : null}
+                  </div>
                   <p className="text-sm text-gray-600 mt-1">{group.description}</p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
                       <Users size={14} />
-                      {group.memberCount} members
+                      {group.memberCount ?? 0} members
                     </span>
-                    <span className="capitalize px-2 py-1 bg-gray-100 rounded">
-                      {group.genderRestriction === 'male' && 'Men Only'}
-                      {group.genderRestriction === 'female' && 'Women Only'}
-                      {group.genderRestriction === 'mixed' && 'All'}
-                    </span>
+                    <span>{genderRestrictionLabel(group.genderRestriction)}</span>
+                    {group.requiresApproval ? <span>Join approval on</span> : null}
+                    {group.capacity ? <span>Cap: {group.capacity}</span> : null}
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
+                  <Link
+                    href={`/communities/${communityId}/groups/${group.id}`}
+                    className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
+                    title="Open group chat"
+                  >
+                    <MessageCircle size={18} />
+                  </Link>
                   <Link
                     href={`/admin/communities/${communityId}/groups/${group.id}/edit`}
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
@@ -115,6 +158,7 @@ export default function CommunityGroupsPage() {
                     <Edit2 size={18} />
                   </Link>
                   <button
+                    type="button"
                     onClick={() => handleDeleteGroup(group.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded transition"
                     title="Delete group"

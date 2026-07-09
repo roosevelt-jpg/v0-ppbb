@@ -63,32 +63,96 @@ function normalize(id: string, data: Record<string, unknown>): BusinessDiscount 
   }
 }
 
+function isMissingFirestoreIndex(error: unknown): boolean {
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code: string }).code)
+      : ''
+  return code === 'failed-precondition'
+}
+
+function toCreatedAtMillis(value: unknown): number {
+  if (!value) return 0
+  if (value instanceof Date) return value.getTime()
+  if (value && typeof value === 'object' && 'toDate' in value) {
+    try {
+      return (value as { toDate: () => Date }).toDate().getTime()
+    } catch {
+      return 0
+    }
+  }
+  const d = new Date(String(value))
+  return Number.isNaN(d.getTime()) ? 0 : d.getTime()
+}
+
 export function subscribeToBusinessDiscounts(
   businessId: string,
-  callback: (discounts: BusinessDiscount[]) => void
+  callback: (discounts: BusinessDiscount[]) => void,
+  onError?: (error: Error) => void
 ): Unsubscribe {
-  const q = query(
-    collection(db, 'discounts'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
+  const col = collection(db, 'discounts')
+  const indexedQ = query(col, where('businessId', '==', businessId), orderBy('createdAt', 'desc'))
+  const fallbackQ = query(col, where('businessId', '==', businessId))
+
+  let fallbackUnsub: Unsubscribe | undefined
+
+  const emit = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const items = docs
+      .map((d) => normalize(d.id, d.data()))
+      .sort((a, b) => toCreatedAtMillis(b.createdAt) - toCreatedAtMillis(a.createdAt))
+    callback(items)
+  }
+
+  const unsub = onSnapshot(
+    indexedQ,
+    (snap) => emit(snap.docs),
+    (error) => {
+      if (isMissingFirestoreIndex(error)) {
+        console.warn('[discounts] index missing — using client-side sort until index builds')
+        fallbackUnsub = onSnapshot(
+          fallbackQ,
+          (snap) => emit(snap.docs),
+          (fallbackError) => {
+            console.error('[discounts] subscription failed:', fallbackError)
+            onError?.(fallbackError as Error)
+            callback([])
+          }
+        )
+        return
+      }
+      console.error('[discounts] subscription failed:', error)
+      onError?.(error as Error)
+      callback([])
+    }
   )
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => normalize(d.id, d.data() as Record<string, unknown>)))
-  })
+
+  return () => {
+    unsub()
+    fallbackUnsub?.()
+  }
 }
 
 export function subscribeToActiveBusinessDiscounts(
   businessId: string,
-  callback: (discounts: BusinessDiscount[]) => void
+  callback: (discounts: BusinessDiscount[]) => void,
+  onError?: (error: Error) => void
 ): Unsubscribe {
   const q = query(collection(db, 'discounts'), where('businessId', '==', businessId))
-  return onSnapshot(q, (snap) => {
-    callback(
-      snap.docs
-        .map((d) => normalize(d.id, d.data() as Record<string, unknown>))
-        .filter((d) => d.status === 'active')
-    )
-  })
+  return onSnapshot(
+    q,
+    (snap) => {
+      callback(
+        snap.docs
+          .map((d) => normalize(d.id, d.data() as Record<string, unknown>))
+          .filter((d) => d.status === 'active')
+      )
+    },
+    (error) => {
+      console.error('[discounts] active subscription failed:', error)
+      onError?.(error as Error)
+      callback([])
+    }
+  )
 }
 
 export async function createBusinessDiscount(

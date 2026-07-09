@@ -58,6 +58,7 @@ import {
   Video,
   MapPin,
   PieChart,
+  BookOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -135,6 +136,7 @@ export const adminMenuItems = [
   { label: 'Transparency Page', href: '/admin/cms/transparency', icon: BarChart3, group: 'CMS' },
   { label: 'Shop Config', href: '/admin/cms/shop', icon: ShoppingBag, group: 'CMS' },
   { label: 'Volunteer Config', href: '/admin/cms/volunteer', icon: HandHeart, group: 'CMS' },
+  { label: 'Learning Resources', href: '/admin/cms/learning', icon: BookOpen, group: 'CMS' },
   { label: 'Navigation', href: '/admin/cms/navigation', icon: Compass, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
   { label: 'Team Members', href: '/admin/team', icon: Users, group: 'CMS' },

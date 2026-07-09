@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       iconURL: iconURL || '',
       type: type || 'discussion',
       requiresApproval: requiresApproval === true,
+      capacity: typeof body.capacity === 'number' ? body.capacity : null,
       status: groupStatus,
       memberCount: 0,
       createdBy,

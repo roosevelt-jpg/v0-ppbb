@@ -15,6 +15,7 @@ export default function BusinessDiscountsPage() {
   const router = useRouter()
   const [discounts, setDiscounts] = React.useState<BusinessDiscount[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (user && !hasBusinessAccess(user)) router.push('/login')
@@ -22,10 +23,18 @@ export default function BusinessDiscountsPage() {
 
   React.useEffect(() => {
     if (!user?.id) return
-    const unsub = subscribeToBusinessDiscounts(user.id, (data) => {
-      setDiscounts(data)
-      setLoading(false)
-    })
+    const unsub = subscribeToBusinessDiscounts(
+      user.id,
+      (data) => {
+        setDiscounts(data)
+        setLoading(false)
+        setError(null)
+      },
+      () => {
+        setError('Could not load discounts. Please refresh or try again later.')
+        setLoading(false)
+      }
+    )
     return () => unsub()
   }, [user?.id])
 
@@ -41,7 +50,9 @@ export default function BusinessDiscountsPage() {
         </Link>
       </div>
 
-      {loading ? (
+      {error ? (
+        <p className="text-sm text-red-600">{error}</p>
+      ) : loading ? (
         <p className="text-neutral-500">Loading discounts…</p>
       ) : discounts.length === 0 ? (
         <div className="text-center py-12 border border-dashed rounded-lg">

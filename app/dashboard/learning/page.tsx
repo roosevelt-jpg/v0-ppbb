@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { BookOpen, Video, FileText, Users } from 'lucide-react'
+import { BookOpen, Video, FileText, Users, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -12,6 +13,13 @@ import {
   DashboardEmptyState,
   DashboardTabButton,
 } from '@/components/dashboard-states'
+import {
+  SPIRITUAL_CATEGORY_OPTIONS,
+  subscribeToPublishedLearningResources,
+  spiritualCategoryLabel,
+  type LearningResource,
+  type LearningResourceCategory,
+} from '@/lib/learning-resources'
 
 function parseDate(value: unknown): string {
   if (!value) return 'Date TBA'
@@ -26,35 +34,34 @@ function parseDate(value: unknown): string {
   }
 }
 
+function resourceHref(resource: LearningResource): string | null {
+  return resource.fileUrl || resource.url || null
+}
+
 export default function LearningPage() {
-  const [resources, setResources] = useState<Record<string, unknown>[]>([])
+  const [resources, setResources] = useState<LearningResource[]>([])
+  const [legacyResources, setLegacyResources] = useState<Record<string, unknown>[]>([])
   const [workshops, setWorkshops] = useState<Record<string, unknown>[]>([])
   const [filter, setFilter] = useState('all')
+  const [spiritualFilter, setSpiritualFilter] = useState<LearningResourceCategory | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const spiritualRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const unsubs: Array<() => void> = []
-    let pending = 3
+    let pending = 2
     const done = () => {
       pending -= 1
       if (pending <= 0) setLoading(false)
     }
 
-    const handleResourceSnap = (snapshot: { docs?: Array<{ id: string; data: () => Record<string, unknown> }> }) => {
-      const docs = snapshot?.docs?.map((doc) => ({ id: doc.id, ...doc.data() })) ?? []
-      setResources((prev) => {
-        const merged = new Map<string, Record<string, unknown>>()
-        for (const row of [...prev, ...docs]) merged.set(String(row.id), row)
-        return Array.from(merged.values())
-      })
-      done()
-    }
-
     unsubs.push(
-      onSnapshot(
-        query(collection(db, 'learningResources'), where('status', '==', 'published')),
-        handleResourceSnap,
+      subscribeToPublishedLearningResources(
+        (data) => {
+          setResources(data)
+          done()
+        },
         (err) => {
           console.error('[v0] learningResources error:', err)
           setError('Failed to load learning resources.')
@@ -62,17 +69,7 @@ export default function LearningPage() {
         }
       )
     )
-    unsubs.push(
-      onSnapshot(
-        query(collection(db, 'resources')),
-        handleResourceSnap,
-        (err) => {
-          console.error('[v0] resources error:', err)
-          setError('Failed to load learning resources.')
-          done()
-        }
-      )
-    )
+
     unsubs.push(
       onSnapshot(
         query(collection(db, 'workshops')),
@@ -88,11 +85,51 @@ export default function LearningPage() {
       )
     )
 
+    // Legacy resources collection (optional)
+    unsubs.push(
+      onSnapshot(query(collection(db, 'resources')), (snapshot) => {
+        setLegacyResources(snapshot?.docs?.map((doc) => ({ id: doc.id, ...doc.data() })) ?? [])
+      })
+    )
+
     return () => unsubs.forEach((u) => u())
   }, [])
 
-  const filteredResources =
-    filter === 'all' ? resources : resources.filter((r) => String(r.type ?? '').toLowerCase() === filter)
+  const generalResources = useMemo(
+    () => resources.filter((r) => r.category === 'general'),
+    [resources]
+  )
+
+  const spiritualResources = useMemo(() => {
+    if (!spiritualFilter) return []
+    return resources.filter((r) => r.category === spiritualFilter)
+  }, [resources, spiritualFilter])
+
+  const displayResources = useMemo(() => {
+    const merged = [
+      ...generalResources,
+      ...legacyResources.map((r) => ({
+        id: String(r.id),
+        title: String(r.title ?? 'Resource'),
+        description: String(r.description ?? ''),
+        category: 'general' as const,
+        type: (String(r.type ?? 'article') as LearningResource['type']),
+        url: r.url ? String(r.url) : undefined,
+        fileUrl: r.fileUrl ? String(r.fileUrl) : undefined,
+        duration: r.duration ? String(r.duration) : undefined,
+        status: 'published' as const,
+      })),
+    ]
+    if (filter === 'all') return merged
+    return merged.filter((r) => r.type === filter)
+  }, [generalResources, legacyResources, filter])
+
+  const openSpiritualSection = (category: LearningResourceCategory) => {
+    setSpiritualFilter(category)
+    window.setTimeout(() => {
+      spiritualRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -100,11 +137,61 @@ export default function LearningPage() {
         return <Video className="w-5 h-5 text-neutral-700" />
       case 'document':
         return <FileText className="w-5 h-5 text-neutral-700" />
+      case 'audio':
+        return <BookOpen className="w-5 h-5 text-neutral-700" />
       case 'workshop':
         return <Users className="w-5 h-5 text-neutral-700" />
       default:
         return <BookOpen className="w-5 h-5 text-neutral-700" />
     }
+  }
+
+  const renderResourceCards = (items: Array<LearningResource | (typeof displayResources)[number]>) => {
+    if (items.length === 0) {
+      return (
+        <DashboardEmptyState
+          title="Nothing published yet"
+          description="Your team can add content in Admin → CMS → Learning Resources."
+        />
+      )
+    }
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map((resource) => {
+          const href = resourceHref(resource as LearningResource)
+          return (
+            <Card key={String(resource.id)} className="p-5 border border-neutral-200">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-neutral-100 rounded-lg">{getIcon(String(resource.type ?? ''))}</div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-neutral-900 line-clamp-2">{String(resource.title ?? 'Resource')}</h3>
+                  <p className="text-xs text-neutral-500 capitalize">{String(resource.type ?? 'resource')}</p>
+                </div>
+              </div>
+              {resource.description ? (
+                <p className="text-sm text-neutral-600 mb-4 line-clamp-3">{String(resource.description)}</p>
+              ) : null}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-neutral-500">{String(resource.duration ?? 'Self-paced')}</span>
+                {href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="!bg-black !text-white px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1"
+                  >
+                    <ExternalLink size={12} />
+                    Open
+                  </a>
+                ) : (
+                  <span className="text-xs text-neutral-400">No link yet</span>
+                )}
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+    )
   }
 
   if (loading) return <DashboardSkeleton />
@@ -113,7 +200,7 @@ export default function LearningPage() {
   return (
     <DashboardPageShell title="Learning" subtitle="Videos, documents, and workshops for members">
       <div className="flex flex-wrap gap-2 mb-8">
-        {['all', 'video', 'document', 'workshop'].map((f) => (
+        {['all', 'video', 'document', 'article', 'audio'].map((f) => (
           <DashboardTabButton key={f} active={filter === f} onClick={() => setFilter(f)}>
             {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
           </DashboardTabButton>
@@ -122,43 +209,13 @@ export default function LearningPage() {
 
       <section className="mb-10">
         <h2 className="text-2xl font-bold mb-4 text-neutral-900">Learning Resources</h2>
-        {filteredResources.length === 0 ? (
+        {displayResources.length === 0 ? (
           <DashboardEmptyState
             title={`No ${filter === 'all' ? '' : filter + ' '}resources`}
-            description={`No ${filter === 'all' ? '' : filter + ' '}resources available yet.`}
+            description="Published resources appear here. Admins can post content under CMS → Learning Resources."
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredResources.map((resource) => (
-              <Card key={String(resource.id)} className="p-5 border border-neutral-200">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="p-2 bg-neutral-100 rounded-lg">{getIcon(String(resource.type ?? ''))}</div>
-                  <div className="min-w-0">
-                    <h3 className="font-semibold text-neutral-900 line-clamp-2">{String(resource.title ?? 'Resource')}</h3>
-                    <p className="text-xs text-neutral-500 capitalize">{String(resource.type ?? 'resource')}</p>
-                  </div>
-                </div>
-                {resource.description ? (
-                  <p className="text-sm text-neutral-600 mb-4 line-clamp-3">{String(resource.description)}</p>
-                ) : null}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-neutral-500">{String(resource.duration ?? 'Self-paced')}</span>
-                  {resource.fileUrl || resource.url ? (
-                    <a
-                      href={String(resource.fileUrl ?? resource.url)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="!bg-black !text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
-                    >
-                      View
-                    </a>
-                  ) : (
-                    <span className="text-xs text-neutral-400">Coming soon</span>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
+          renderResourceCards(displayResources)
         )}
       </section>
 
@@ -194,17 +251,17 @@ export default function LearningPage() {
                                 {String(session.title ?? `Session ${idx + 1}`)}
                               </p>
                               <p className="text-xs text-neutral-500 mt-1">{parseDate(session.date)}</p>
-                              {session.description ? (
-                                <p className="text-xs text-neutral-600 mt-1 line-clamp-2">{String(session.description)}</p>
-                              ) : null}
                             </div>
                           ))}
                         </div>
                       ) : null}
                     </div>
-                    <button type="button" className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold h-fit">
-                      Register
-                    </button>
+                    <Link
+                      href="/workshops"
+                      className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold h-fit inline-flex items-center justify-center"
+                    >
+                      View workshops
+                    </Link>
                   </div>
                 </Card>
               )
@@ -219,17 +276,31 @@ export default function LearningPage() {
           Enhance your spiritual growth through guided meditations, reflections, and community wisdom sharing.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {['Daily Meditations', 'Community Reflections', 'Wisdom Articles'].map((item) => (
+          {SPIRITUAL_CATEGORY_OPTIONS.map((item) => (
             <button
-              key={item}
+              key={item.value}
               type="button"
-              className="!bg-white !text-black border border-gray-300 rounded-lg px-4 py-3 text-sm font-semibold text-left hover:bg-neutral-50"
+              onClick={() => openSpiritualSection(item.value)}
+              className={`rounded-lg px-4 py-3 text-sm font-semibold text-left min-h-[44px] transition-colors ${
+                spiritualFilter === item.value
+                  ? '!bg-black !text-white'
+                  : '!bg-white !text-black border border-gray-300 hover:bg-neutral-50'
+              }`}
             >
-              {item}
+              {item.label}
             </button>
           ))}
         </div>
       </Card>
+
+      {spiritualFilter ? (
+        <section ref={spiritualRef} className="mt-8">
+          <h2 className="text-2xl font-bold mb-4 text-neutral-900">
+            {spiritualCategoryLabel(spiritualFilter)}
+          </h2>
+          {renderResourceCards(spiritualResources)}
+        </section>
+      ) : null}
     </DashboardPageShell>
   )
 }

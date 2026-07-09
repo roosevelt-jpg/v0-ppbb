@@ -1,9 +1,18 @@
-import type { GenderRestriction } from '@/lib/community-types'
+import type { GenderRestriction, GroupType } from '@/lib/community-types'
 
 /** Canonical gender restriction for communities & groups */
 export type NormalizedGenderRestriction = 'mixed' | 'male' | 'female'
 
 export type MemberModerationStatus = 'active' | 'suspended' | 'banned' | 'removed'
+
+export const GROUP_TYPE_OPTIONS: { value: GroupType; label: string; description: string }[] = [
+  { value: 'discussion', label: 'Discussion', description: 'General conversation and topics' },
+  { value: 'support', label: 'Support', description: 'Peer support and encouragement' },
+  { value: 'prayer', label: 'Prayer', description: 'Prayer requests and spiritual check-ins' },
+  { value: 'skill-share', label: 'Skill share', description: 'Teach, learn, and share expertise' },
+  { value: 'networking', label: 'Networking', description: 'Connect members professionally' },
+  { value: 'announcement', label: 'Announcements', description: 'Updates and official notices' },
+]
 
 export const GENDER_RESTRICTION_OPTIONS: {
   value: NormalizedGenderRestriction

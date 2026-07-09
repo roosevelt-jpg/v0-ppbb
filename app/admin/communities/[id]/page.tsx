@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { subscribeToCommunity, subscribeToCommunityGroups, deleteGroup } from '@/lib/community-queries'
 import type { Community, Group } from '@/lib/community-types'
-import { ChevronLeft, Plus, Trash2, Edit2, Users, Shield } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, Edit2, Users, Shield, Layers, MessageCircle } from 'lucide-react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { adminApiFetch } from '@/lib/admin-api-client'
@@ -147,11 +147,24 @@ export default function AdminCommunityDetailPage() {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            href={`/admin/communities/${communityId}/groups/create`}
+            href={`/admin/communities/${communityId}/groups`}
             className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+          >
+            <Layers size={18} />
+            Manage Groups
+          </Link>
+          <Link
+            href={`/admin/communities/${communityId}/groups/create`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50"
           >
             <Plus size={18} />
             Create Group
+          </Link>
+          <Link
+            href={`/communities/${communityId}`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50"
+          >
+            View public page
           </Link>
         </div>
 
@@ -163,19 +176,41 @@ export default function AdminCommunityDetailPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {groups.map((group) => (
                 <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
-                  <h3 className="font-bold text-black">{group.name}</h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-black">{group.name}</h3>
+                    <span className="text-xs capitalize px-2 py-0.5 bg-gray-100 rounded">
+                      {group.type?.replace('-', ' ') || 'discussion'}
+                    </span>
+                  </div>
                   <p className="text-sm text-gray-600">{group.description}</p>
                   <p className="text-xs text-gray-500">
                     {genderRestrictionLabel(group.genderRestriction)} · {group.memberCount} members
+                    {group.requiresApproval ? ' · approval required' : ''}
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteGroup(group.id!)}
-                    className="text-sm text-red-700 flex items-center gap-1"
-                  >
-                    <Trash2 size={14} />
-                    Delete
-                  </button>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Link
+                      href={`/admin/communities/${communityId}/groups/${group.id}/edit`}
+                      className="text-sm text-black underline flex items-center gap-1"
+                    >
+                      <Edit2 size={14} />
+                      Edit
+                    </Link>
+                    <Link
+                      href={`/communities/${communityId}/groups/${group.id}`}
+                      className="text-sm text-black underline flex items-center gap-1"
+                    >
+                      <MessageCircle size={14} />
+                      Open chat
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteGroup(group.id!)}
+                      className="text-sm text-red-700 flex items-center gap-1"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

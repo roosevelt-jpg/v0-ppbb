@@ -14,7 +14,7 @@ import {
   where,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { auth } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 
 export interface DmThread {
   id: string

@@ -5,7 +5,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
-import { Plus, Edit2, Archive, Users } from 'lucide-react'
+import { Plus, Edit2, Archive, Users, Layers } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
@@ -145,9 +145,17 @@ export default function CommunitiesPage() {
 
                   <div className="flex gap-2">
                     <Link
+                      href={`/admin/communities/${community.id}/groups`}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-900"
+                      title="Manage groups"
+                    >
+                      <Layers className="w-4 h-4" />
+                      Groups
+                    </Link>
+                    <Link
                       href={`/admin/communities/${community.id}`}
                       className="p-2 hover:bg-gray-100 rounded transition"
-                      title="Edit"
+                      title="Community details"
                     >
                       <Edit2 className="w-5 h-5 text-black" />
                     </Link>
