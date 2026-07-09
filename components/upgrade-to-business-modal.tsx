@@ -31,11 +31,11 @@ export function UpgradeToBusinessModal({
     >
       <button
         type="button"
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-transparent"
         aria-label="Close"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-[280px] p-4">
+      <div className="relative bg-white rounded-lg border border-neutral-200 w-full max-w-[280px] p-4">
         <button
           type="button"
           onClick={onClose}
