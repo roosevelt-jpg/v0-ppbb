@@ -6,9 +6,13 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { updateProfile } from 'firebase/auth'
 import { Card } from '@/components/ui/card'
 import { User } from '@/lib/types'
-import { Bell, Shield, UserX } from 'lucide-react'
+import { Bell, Shield, UserX, Upload, Loader2 } from 'lucide-react'
+import { UserAvatar } from '@/components/user-avatar'
+import { getUserProfilePictureURL } from '@/lib/user-profile'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { sendPasswordReset } from '@/lib/auth'
 import { requestNotificationPermission } from '@/lib/fcm-service'
@@ -87,6 +91,8 @@ function SettingsContent() {
   const [passwordMessage, setPasswordMessage] = React.useState<string | null>(null)
   const [passwordLoading, setPasswordLoading] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
+  const [pictureURL, setPictureURL] = React.useState('')
+  const [uploadingPhoto, setUploadingPhoto] = React.useState(false)
 
   const applyUserDoc = React.useCallback((userData: User) => {
     const profile: ProfileForm = {
@@ -104,6 +110,7 @@ function SettingsContent() {
     const privacy = mergePrivacySettings(userData.privacySettings)
 
     setUser(userData)
+    setPictureURL(getUserProfilePictureURL(userData) || '')
     setFormData(profile)
     setSavedProfile(profile)
     setNotificationPreferences(notifications)
@@ -139,6 +146,44 @@ function SettingsContent() {
 
     void fetchUser()
   }, [authLoading, authUser, applyUserDoc])
+
+  const handlePhotoUpload = async (file: File) => {
+    const current = auth.currentUser
+    if (!current || !user) return
+
+    setUploadingPhoto(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const url = await uploadImageToFirebase(file, `users/${current.uid}/profile`, {
+        preset: 'content',
+        maxDimension: 512,
+      })
+
+      await updateDoc(
+        doc(db, 'users', current.uid),
+        sanitizeForFirestore({
+          profilePictureURL: url,
+          avatarUrl: url,
+          updatedAt: new Date(),
+        })
+      )
+
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { photoURL: url })
+      }
+
+      setPictureURL(url)
+      setUser({ ...user, profilePictureURL: url, avatarUrl: url })
+      setSuccess('Profile photo updated.')
+      await refreshUser()
+    } catch (err) {
+      console.error('[v0] Profile photo upload error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to upload profile photo.')
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
 
   const handleSaveProfile = async () => {
     const current = auth.currentUser
@@ -329,6 +374,35 @@ function SettingsContent() {
 
         <Card className="p-6 border border-neutral-200 w-full">
           <h2 className="text-xl font-bold mb-6 text-neutral-900">Personal Information</h2>
+
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 pb-6 border-b border-neutral-200">
+            <UserAvatar user={user} size="lg" imageUrl={pictureURL || null} />
+            <div className="flex flex-col items-center sm:items-start gap-2 text-center sm:text-left">
+              <p className="text-sm font-medium text-neutral-900">Profile photo</p>
+              <p className="text-xs text-neutral-500 max-w-xs">
+                JPG, PNG, or WebP. Automatically resized to 512px before upload.
+              </p>
+              <label className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg border border-neutral-300 bg-white text-black text-sm font-medium cursor-pointer hover:bg-neutral-50">
+                {uploadingPhoto ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Upload className="h-4 w-4" aria-hidden />
+                )}
+                {uploadingPhoto ? 'Uploading…' : pictureURL ? 'Change photo' : 'Upload photo'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  disabled={uploadingPhoto}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) void handlePhotoUpload(file)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            </div>
+          </div>
 
           {editing ? (
             <div className="flex flex-col gap-6">
