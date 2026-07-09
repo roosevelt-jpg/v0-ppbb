@@ -9,6 +9,7 @@ import {
   hasAdminAccess,
   isMemberDashboardPathAllowed,
 } from '@/lib/roles'
+import { ContentProtection } from '@/components/content-protection'
 
 export default function DashboardLayout({
   children,
@@ -83,7 +84,9 @@ export default function DashboardLayout({
       <main className="flex-1 min-w-0 overflow-auto flex flex-col">
         <MemberHeader open={sidebarOpen} setOpen={setSidebarOpen} />
         <div className="flex-1 min-w-0 overflow-auto" data-dashboard-surface="light">
-          <DashboardErrorBoundary key={pathname}>{children}</DashboardErrorBoundary>
+          <ContentProtection>
+            <DashboardErrorBoundary key={pathname}>{children}</DashboardErrorBoundary>
+          </ContentProtection>
         </div>
       </main>
     </div>
