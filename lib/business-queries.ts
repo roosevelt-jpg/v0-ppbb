@@ -55,6 +55,38 @@ function isMissingFirestoreIndex(error: unknown): boolean {
   return code === 'failed-precondition'
 }
 
+/** Fetch business-owned docs; falls back to client sort when composite index is building. */
+async function getByBusinessId<T extends { createdAt?: unknown }>(
+  collectionName: string,
+  businessId: string
+): Promise<T[]> {
+  const col = collection(db, collectionName)
+  const mapDocs = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const items = docs.map((d) => ({ id: d.id, ...d.data() }) as T)
+    items.sort((a, b) => toCreatedAtMillis(b.createdAt) - toCreatedAtMillis(a.createdAt))
+    return items
+  }
+
+  try {
+    const snap = await getDocs(
+      query(col, where('businessId', '==', businessId), orderBy('createdAt', 'desc'))
+    )
+    return mapDocs(snap.docs)
+  } catch (error) {
+    if (isMissingFirestoreIndex(error)) {
+      try {
+        const snap = await getDocs(query(col, where('businessId', '==', businessId)))
+        return mapDocs(snap.docs)
+      } catch (fallbackError) {
+        console.warn(`[v0] ${collectionName} fetch failed:`, fallbackError)
+        return []
+      }
+    }
+    console.warn(`[v0] ${collectionName} fetch failed:`, error)
+    return []
+  }
+}
+
 /** Subscribe to business-owned docs; falls back to client sort when composite index is building. */
 function subscribeByBusinessId<T extends { createdAt?: unknown }>(
   collectionName: string,
@@ -684,17 +716,15 @@ export async function getBusinessPayments(businessId: string) {
 
 export function subscribeToBusinessPayments(
   businessId: string,
-  callback: (payments: BusinessPayment[]) => void
+  callback: (payments: BusinessPayment[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessPayments'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
+  return subscribeByBusinessId<BusinessPayment>(
+    'businessPayments',
+    businessId,
+    callback,
+    onError
   )
-  return onSnapshot(q, (snapshot) => {
-    const payments = snapshot.docs.map((doc) => doc.data() as BusinessPayment)
-    callback(payments)
-  })
 }
 
 export async function updatePayment(paymentId: string, data: Partial<BusinessPayment>) {
@@ -826,18 +856,55 @@ export async function updateAnalytics(analyticsId: string, data: Partial<Busines
 
 export function subscribeToBusinessAnalytics(
   businessId: string,
-  callback: (analytics: BusinessAnalytics[]) => void
+  callback: (analytics: BusinessAnalytics[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessAnalytics'),
+  const col = collection(db, 'businessAnalytics')
+  const indexedQ = query(
+    col,
     where('businessId', '==', businessId),
     orderBy('month', 'desc'),
     limit(12)
   )
-  return onSnapshot(q, (snapshot) => {
-    const analytics = snapshot.docs.map((doc) => doc.data() as BusinessAnalytics)
+  const fallbackQ = query(col, where('businessId', '==', businessId), limit(50))
+
+  let fallbackUnsub: (() => void) | undefined
+
+  const emit = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const analytics = docs
+      .map((d) => ({ id: d.id, ...d.data() }) as BusinessAnalytics)
+      .sort((a, b) => String(b.month || '').localeCompare(String(a.month || '')))
+      .slice(0, 12)
     callback(analytics)
-  })
+  }
+
+  const unsub = onSnapshot(
+    indexedQ,
+    (snapshot) => emit(snapshot.docs),
+    (error) => {
+      if (isMissingFirestoreIndex(error)) {
+        console.warn('[v0] businessAnalytics index missing — using client-side sort until index builds')
+        fallbackUnsub = onSnapshot(
+          fallbackQ,
+          (snapshot) => emit(snapshot.docs),
+          (fallbackError) => {
+            console.error('[v0] Error in businessAnalytics subscription:', fallbackError)
+            onError?.(fallbackError as Error)
+            callback([])
+          }
+        )
+        return
+      }
+      console.error('[v0] Error in businessAnalytics subscription:', error)
+      onError?.(error as Error)
+      callback([])
+    }
+  )
+
+  return () => {
+    unsub()
+    fallbackUnsub?.()
+  }
 }
 
 // UTILITY FUNCTIONS
@@ -852,13 +919,13 @@ export async function getBusinessDashboardStats(businessId: string) {
     referral,
     ratings,
   ] = await Promise.all([
-    getBusinessOpportunities(businessId),
-    getBusinessOffers(businessId),
-    getBusinessLeads(businessId),
-    getBusinessPartnerships(businessId),
-    getBusinessPayments(businessId),
-    getBusinessReferral(businessId),
-    getBusinessRatings(businessId),
+    getByBusinessId<BusinessOpportunity>('businessOpportunities', businessId),
+    getByBusinessId<BusinessOffer>('businessOffers', businessId),
+    getByBusinessId<BusinessLead>('businessLeads', businessId),
+    getByBusinessId<BusinessPartnership>('businessPartnerships', businessId),
+    getByBusinessId<BusinessPayment>('businessPayments', businessId),
+    getBusinessReferral(businessId).catch(() => undefined),
+    getByBusinessId<BusinessRating>('businessRatings', businessId),
   ])
 
   const convertedLeads = leads.filter((l) => l.status === 'converted').length

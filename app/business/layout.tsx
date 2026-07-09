@@ -59,12 +59,12 @@ function BusinessHeaderDate({ mobile = false }: { mobile?: boolean }) {
     }
 
     updateDateTime()
-    const interval = setInterval(updateDateTime, 60000) // Update every minute
+    const interval = setInterval(updateDateTime, 60000)
     return () => clearInterval(interval)
   }, [])
 
   return (
-    <div className={`text-sm text-neutral-600 ${mobile ? 'text-xs' : ''}`}>
+    <div className={`text-sm text-neutral-600 dark:text-neutral-300 ${mobile ? 'text-xs' : ''}`}>
       {dateTime || 'Loading...'}
     </div>
   )
@@ -81,9 +81,9 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-white">
+    <div className="flex h-full min-h-screen flex-col bg-white dark:bg-neutral-900">
       {/* Header with Logo */}
-      <div className="border-b border-neutral-200 px-4 py-4 flex items-center justify-center">
+      <div className="border-b border-neutral-200 dark:border-neutral-700 px-4 py-4 flex items-center justify-center">
         <SiteLogo background="light" variant="sidebar" href="/business/dashboard" />
       </div>
 
@@ -101,8 +101,8 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   onClick={onNavigate}
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-neutral-900 text-white'
-                      : 'text-neutral-700 hover:bg-neutral-100'
+                      ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
+                      : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800'
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -115,11 +115,11 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-neutral-200 p-4">
+      <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
         <Link
           href="/dashboard"
           onClick={onNavigate}
-          className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-100 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-200"
+          className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-100 dark:bg-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-200 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
         >
           <Users className="h-4 w-4 shrink-0" />
           Member Dashboard
@@ -183,9 +183,9 @@ export default function BusinessLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#faf9f7]">
+    <div className="flex min-h-screen bg-[#faf9f7] dark:bg-neutral-950">
       {/* Desktop Sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-neutral-200 md:block">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-neutral-200 dark:border-neutral-800 md:block">
         <BusinessSidebarContent />
       </aside>
 
@@ -198,7 +198,7 @@ export default function BusinessLayout({
         />
       )}
       <aside
-        className={`fixed left-0 top-0 z-40 h-full w-64 transform border-r border-neutral-200 transition-transform duration-300 md:hidden ${
+        className={`fixed left-0 top-0 z-40 h-full w-64 transform border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 transition-transform duration-300 md:hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -208,20 +208,21 @@ export default function BusinessLayout({
       {/* Main Content */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Desktop Header */}
-        <div className="hidden items-center justify-between border-b border-neutral-200 bg-white px-4 sm:px-6 py-3 md:flex">
+        <div className="hidden items-center justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 sm:px-6 py-3 md:flex">
           <BusinessHeaderDate />
           <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
         </div>
 
         {/* Mobile Header */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white px-4 py-3 md:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 md:hidden">
           <BusinessHeaderDate mobile />
           <div className="flex items-center gap-1.5">
             <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
             <button
               type="button"
+              data-dashboard-control
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-md text-neutral-700 hover:bg-neutral-100"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-md bg-transparent text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
               aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
             >
               {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -229,8 +230,8 @@ export default function BusinessLayout({
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto">
+        {/* Content — always light surface so cards stay white with black text */}
+        <div className="flex-1 overflow-auto" data-dashboard-surface="light">
           <DashboardErrorBoundary homeHref="/business/dashboard" homeLabel="Go to Business Dashboard">
             {children}
           </DashboardErrorBoundary>

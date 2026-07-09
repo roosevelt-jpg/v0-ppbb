@@ -1,6 +1,6 @@
-'use client'
+/** Shared light card styling for dashboard pages (works in dark mode chrome) */
+export const DASHBOARD_CARD_CLASS = 'bg-white text-neutral-900 border-[#e4e1da]'
 
-import React from 'react'
 import Link from 'next/link'
 
 /** Override global `button { bg-black text-white }` for dashboard tab/pill controls */

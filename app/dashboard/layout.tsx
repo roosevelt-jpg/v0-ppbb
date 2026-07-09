@@ -96,7 +96,7 @@ export default function DashboardLayout({
           open={sidebarOpen}
           setOpen={setSidebarOpen}
         />
-        <div className="flex-1 min-w-0 overflow-auto">
+        <div className="flex-1 min-w-0 overflow-auto" data-dashboard-surface="light">
           <DashboardErrorBoundary>{children}</DashboardErrorBoundary>
         </div>
       </main>

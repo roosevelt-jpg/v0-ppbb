@@ -221,7 +221,7 @@ export default function AdminLayout({
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background" data-dashboard-surface="light">
           <div className="p-4 sm:p-6 lg:p-8 max-w-[80rem] mx-auto w-full min-w-0">
             {children}
           </div>

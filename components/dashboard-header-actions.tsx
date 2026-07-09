@@ -29,8 +29,9 @@ export function DashboardHeaderActions({
       <ProfileMenuButton compact />
       <button
         type="button"
+        data-dashboard-control
         onClick={() => void onLogout()}
-        className="inline-flex items-center justify-center gap-1 min-h-[32px] min-w-[32px] sm:min-w-0 px-2 sm:px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-medium bg-black text-white hover:bg-neutral-800 transition-colors"
+        className="inline-flex items-center justify-center gap-1 min-h-[32px] min-w-[32px] sm:min-w-0 px-2 sm:px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-medium bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white transition-colors"
         aria-label={logoutLabel}
       >
         <LogOut className="h-3 w-3 shrink-0" aria-hidden />

@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { subscribeToBusinessPayments } from '@/lib/business-queries'
 import { BusinessPayment } from '@/lib/types'
 import { DollarSign } from 'lucide-react'
@@ -15,23 +16,34 @@ export default function Payments() {
   const router = useRouter()
   const [payments, setPayments] = React.useState<BusinessPayment[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    if (!user || (!hasBusinessAccess(user))) {
+    if (!user || !hasBusinessAccess(user)) {
       router.push('/login')
       return
     }
 
     setLoading(true)
-    const unsubscribe = subscribeToBusinessPayments(user.id, (data) => {
-      setPayments(data)
-      setLoading(false)
-    })
+    setError(null)
+    const unsubscribe = subscribeToBusinessPayments(
+      user.id,
+      (data) => {
+        setPayments(data)
+        setLoading(false)
+        setError(null)
+      },
+      (err) => {
+        console.error('[v0] Payments subscription error:', err)
+        setError('Unable to load payments. Firestore rules may need deploying — refresh after deploy.')
+        setLoading(false)
+      }
+    )
 
     return () => unsubscribe()
   }, [user, router])
 
-  if (!user || (!hasBusinessAccess(user))) {
+  if (!user || !hasBusinessAccess(user)) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
@@ -43,125 +55,104 @@ export default function Payments() {
     .reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
+    <div className="min-h-full bg-[#faf9f7]">
+      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
         <div className="max-w-6xl mx-auto">
-          <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
+          <h1 className="text-2xl sm:text-[32px] font-bold text-neutral-900">
             Payment & Subscription Management
           </h1>
-          <p style={{ color: '#888888', marginTop: '8px' }}>
+          <p className="text-neutral-500 mt-2 text-sm sm:text-base">
             Track your payments and manage subscriptions
           </p>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto p-8">
-        {/* Stats */}
+      <div className="max-w-6xl mx-auto p-4 sm:p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+          <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
             <div className="flex items-center gap-4">
-              <DollarSign style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
+              <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
               <div>
-                <p style={{ color: '#888888', fontSize: '14px' }}>Total Payments</p>
-                <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                  {payments.length}
-                </p>
+                <p className="text-neutral-500 text-sm">Total Payments</p>
+                <p className="text-neutral-900 text-2xl font-semibold">{payments.length}</p>
               </div>
             </div>
           </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+          <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
             <div className="flex items-center gap-4">
-              <DollarSign style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
+              <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
               <div>
-                <p style={{ color: '#888888', fontSize: '14px' }}>Completed</p>
-                <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                  AED {completedAmount}
-                </p>
+                <p className="text-neutral-500 text-sm">Completed</p>
+                <p className="text-neutral-900 text-2xl font-semibold">AED {completedAmount}</p>
               </div>
             </div>
           </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+          <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
             <div className="flex items-center gap-4">
-              <DollarSign style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
+              <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
               <div>
-                <p style={{ color: '#888888', fontSize: '14px' }}>Pending</p>
-                <p style={{ color: '#dc2626', fontSize: '24px', fontWeight: 600 }}>
-                  AED {pendingAmount}
-                </p>
+                <p className="text-neutral-500 text-sm">Pending</p>
+                <p className="text-red-600 text-2xl font-semibold">AED {pendingAmount}</p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Payments List */}
         {loading ? (
-          <div className="text-center py-8">Loading payments...</div>
+          <div className="text-center py-8 text-neutral-500">Loading payments...</div>
+        ) : error ? (
+          <Card className="p-8 text-center border-[#e4e1da] bg-white text-neutral-900">
+            <p className="text-neutral-500 mb-4">{error}</p>
+            <Button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="min-h-[44px] bg-neutral-900 text-white hover:bg-neutral-800"
+            >
+              Retry
+            </Button>
+          </Card>
         ) : payments.length === 0 ? (
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>
-            <p style={{ color: '#888888' }}>No payments yet</p>
+          <Card className="p-8 sm:p-12 text-center border-[#e4e1da] bg-white text-neutral-900">
+            <p className="text-neutral-500">No payments yet</p>
           </Card>
         ) : (
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-            <div className="overflow-x-auto">
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #e4e1da' }}>
-                    <th style={{ padding: '12px', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      Date
-                    </th>
-                    <th style={{ padding: '12px', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      Type
-                    </th>
-                    <th style={{ padding: '12px', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      Amount
-                    </th>
-                    <th style={{ padding: '12px', textAlign: 'left', color: '#888888', fontWeight: 600 }}>
-                      Status
-                    </th>
+          <Card className="p-4 sm:p-6 border-[#e4e1da] overflow-x-auto">
+            <table className="w-full border-collapse min-w-[480px]">
+              <thead>
+                <tr className="border-b border-[#e4e1da]">
+                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Date</th>
+                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Type</th>
+                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Amount</th>
+                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment) => (
+                  <tr key={payment.id} className="border-b border-[#e4e1da]">
+                    <td className="p-3 text-neutral-900 text-sm">
+                      {new Date(payment.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-3 text-neutral-900 text-sm">{payment.type}</td>
+                    <td className="p-3 text-neutral-900 font-semibold text-sm">
+                      AED {payment.amount}
+                    </td>
+                    <td className="p-3">
+                      <span
+                        className={`inline-block px-3 py-1 rounded text-xs capitalize ${
+                          payment.status === 'completed'
+                            ? 'bg-green-100 text-green-800'
+                            : payment.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {payment.status}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment) => (
-                    <tr key={payment.id} style={{ borderBottom: '1px solid #e4e1da' }}>
-                      <td style={{ padding: '12px', color: '#111111' }}>
-                        {new Date(payment.createdAt).toLocaleDateString()}
-                      </td>
-                      <td style={{ padding: '12px', color: '#111111' }}>
-                        {payment.type}
-                      </td>
-                      <td style={{ padding: '12px', color: '#111111', fontWeight: 600 }}>
-                        AED {payment.amount}
-                      </td>
-                      <td style={{ padding: '12px' }}>
-                        <span
-                          style={{
-                            backgroundColor:
-                              payment.status === 'completed'
-                                ? '#dcfce7'
-                                : payment.status === 'pending'
-                                  ? '#fef08a'
-                                  : '#fee2e2',
-                            color:
-                              payment.status === 'completed'
-                                ? '#166534'
-                                : payment.status === 'pending'
-                                  ? '#854d0e'
-                                  : '#991b1b',
-                            padding: '4px 12px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                          }}
-                        >
-                          {payment.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </Card>
         )}
       </div>

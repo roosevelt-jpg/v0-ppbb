@@ -374,6 +374,45 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Business payments & subscriptions
+    match /businessPayments/{paymentId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAdmin()
+        || (isAuth() && request.resource.data.businessId == request.auth.uid);
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Business support requests
+    match /businessSupportRequests/{requestId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAdmin()
+        || (isAuth() && request.resource.data.businessId == request.auth.uid);
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Business ratings
+    match /businessRatings/{ratingId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAuth();
+      allow update, delete: if isAdmin();
+    }
+
+    // Business analytics snapshots
+    match /businessAnalytics/{analyticsId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create, update: if isAdmin()
+        || (isAuth() && request.resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
     // B2B collaborations between businesses
     match /businessPartnerships/{docId} {
       allow read: if isAdmin()

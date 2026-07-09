@@ -268,8 +268,9 @@ export function ProfileMenuButton({ className = '', compact = false }: ProfileMe
     <>
       <button
         type="button"
+        data-dashboard-control
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-0.5 rounded-full hover:ring-2 hover:ring-neutral-300 transition ${
+        className={`inline-flex items-center gap-0.5 rounded-full bg-transparent hover:ring-2 hover:ring-neutral-300 dark:hover:ring-neutral-600 transition ${
           compact ? 'p-0.5 min-h-[32px]' : 'p-1 min-h-[44px] min-w-[44px] justify-center'
         } ${className}`}
         aria-label="Edit profile"

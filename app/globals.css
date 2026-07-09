@@ -233,15 +233,15 @@ input[type='checkbox'] {
     color: #ffffff;
   }
 
-  button:not([data-slot='button']) {
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]) {
     @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md font-body;
     font-size: 13px;
     /* REMOVED h-10 — let height be natural */
     min-height: 36px;
   }
 
-  button:not([data-slot='button']):disabled { @apply opacity-50 cursor-not-allowed; }
-  button:not([data-slot='button']).secondary { @apply bg-warm-white border-2 border-sand-border text-charcoal hover:bg-sand-border; }
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):disabled { @apply opacity-50 cursor-not-allowed; }
+  button:not([data-slot='button']):not([data-dashboard-control]).secondary { @apply bg-warm-white border-2 border-sand-border text-charcoal hover:bg-sand-border; }
 
   label {
     /* REMOVED uppercase and tracking — breaks form labels */
@@ -273,6 +273,48 @@ input[type='checkbox'] {
   flex: 1;
   min-width: 0;
   overflow: auto;
+}
+
+/* Dashboard page content — cards stay white/grey with black text in dark mode */
+[data-dashboard-surface='light'] {
+  background-color: #faf9f7;
+  color: #111111;
+}
+
+[data-dashboard-surface='light'] [data-slot='card'],
+[data-dashboard-surface='light'] .bg-card {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border-color: #e4e1da !important;
+}
+
+[data-dashboard-surface='light'] [data-slot='card'] .text-muted-foreground,
+[data-dashboard-surface='light'] .text-muted-foreground {
+  color: #737373 !important;
+}
+
+[data-dashboard-surface='light'] h1,
+[data-dashboard-surface='light'] h2,
+[data-dashboard-surface='light'] h3,
+[data-dashboard-surface='light'] .text-foreground,
+[data-dashboard-surface='light'] .text-card-foreground {
+  color: #111111 !important;
+}
+
+[data-dashboard-surface='light'] .text-neutral-900 {
+  color: #111111 !important;
+}
+
+[data-dashboard-surface='light'] .text-neutral-500 {
+  color: #737373 !important;
+}
+
+[data-dashboard-surface='light'] .text-neutral-600 {
+  color: #525252 !important;
+}
+
+[data-dashboard-surface='light'] .border-border {
+  border-color: #e4e1da !important;
 }
 
 /* ── Modal styles ── */
