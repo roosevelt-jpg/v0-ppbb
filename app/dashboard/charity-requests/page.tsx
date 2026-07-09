@@ -45,7 +45,7 @@ function statusMeta(status?: string) {
 }
 
 function CharityRequestsContent() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const searchParams = useSearchParams()
   const [requests, setRequests] = useState<RequestRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,7 +58,8 @@ function CharityRequestsContent() {
   }, [searchParams])
 
   useEffect(() => {
-    if (!user) {
+    if (authLoading) return
+    if (!user?.id) {
       setLoading(false)
       return
     }
@@ -67,7 +68,7 @@ function CharityRequestsContent() {
 
     const q = query(
       collection(db, 'beneficiaryRequests'),
-      where('userId', '==', user.uid),
+      where('userId', '==', user.id),
       orderBy('createdAt', 'desc')
     )
 
@@ -86,21 +87,28 @@ function CharityRequestsContent() {
         console.warn('[charity-requests] ordered query failed, using fallback:', err)
         const fallback = query(
           collection(db, 'beneficiaryRequests'),
-          where('userId', '==', user.uid)
+          where('userId', '==', user.id)
         )
-        unsubFallback = onSnapshot(fallback, (snapshot) => {
-          const rows = snapshot.docs.map((d) => ({
-            id: d.id,
-            ...(d.data() as Omit<RequestRow, 'id'>),
-          }))
-          rows.sort((a, b) => {
-            const aT = a.createdAt?.toDate?.()?.getTime() || 0
-            const bT = b.createdAt?.toDate?.()?.getTime() || 0
-            return bT - aT
-          })
-          setRequests(rows)
-          setLoading(false)
-        })
+        unsubFallback = onSnapshot(
+          fallback,
+          (snapshot) => {
+            const rows = snapshot.docs.map((d) => ({
+              id: d.id,
+              ...(d.data() as Omit<RequestRow, 'id'>),
+            }))
+            rows.sort((a, b) => {
+              const aT = a.createdAt?.toDate?.()?.getTime() || 0
+              const bT = b.createdAt?.toDate?.()?.getTime() || 0
+              return bT - aT
+            })
+            setRequests(rows)
+            setLoading(false)
+          },
+          (fallbackErr) => {
+            console.error('[charity-requests] fallback query failed:', fallbackErr)
+            setLoading(false)
+          }
+        )
       }
     )
 
@@ -108,7 +116,7 @@ function CharityRequestsContent() {
       unsubscribe()
       unsubFallback?.()
     }
-  }, [user])
+  }, [authLoading, user?.id])
 
   const btnPrimary =
     'min-h-[44px] inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-900 text-white px-4 py-2.5 rounded text-sm font-semibold'

@@ -53,11 +53,11 @@ export function OpportunitiesList() {
     return opportunities.filter((o) => {
       const matchesType = typeFilter === 'all' || o.type === typeFilter
       const term = search.toLowerCase()
+      const title = (o.title ?? '').toLowerCase()
+      const businessName = (o.businessName ?? '').toLowerCase()
+      const category = (o.category ?? '').toLowerCase()
       const matchesSearch =
-        !term ||
-        o.title.toLowerCase().includes(term) ||
-        o.businessName.toLowerCase().includes(term) ||
-        (o.category || '').toLowerCase().includes(term)
+        !term || title.includes(term) || businessName.includes(term) || category.includes(term)
       return matchesType && matchesSearch
     })
   }, [opportunities, search, typeFilter])

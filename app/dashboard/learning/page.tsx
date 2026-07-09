@@ -55,11 +55,23 @@ export default function LearningPage() {
       onSnapshot(
         query(collection(db, 'learningResources'), where('status', '==', 'published')),
         handleResourceSnap,
-        () => done()
+        (err) => {
+          console.error('[v0] learningResources error:', err)
+          setError('Failed to load learning resources.')
+          done()
+        }
       )
     )
     unsubs.push(
-      onSnapshot(query(collection(db, 'resources')), handleResourceSnap, () => done())
+      onSnapshot(
+        query(collection(db, 'resources')),
+        handleResourceSnap,
+        (err) => {
+          console.error('[v0] resources error:', err)
+          setError('Failed to load learning resources.')
+          done()
+        }
+      )
     )
     unsubs.push(
       onSnapshot(

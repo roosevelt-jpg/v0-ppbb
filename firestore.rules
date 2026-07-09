@@ -404,11 +404,22 @@ service cloud.firestore {
       allow update, delete: if isAdmin() || businessOwnerUpdateNoSelfPublish();
     }
     
-    // Donations - Authenticated read, own write
+    // Donations - Authenticated read, own write (donorId or userId)
     match /donations/{donationId} {
-      allow read: if isAuth() && (resource.data.donorId == request.auth.uid || isAdmin());
-      allow create: if isAuth() && request.resource.data.donorId == request.auth.uid;
-      allow update, delete: if isAdmin() || resource.data.donorId == request.auth.uid;
+      allow read: if isAdmin()
+        || (isAuth() && (
+          resource.data.donorId == request.auth.uid
+          || resource.data.userId == request.auth.uid
+        ));
+      allow create: if isAuth() && (
+        request.resource.data.donorId == request.auth.uid
+        || request.resource.data.userId == request.auth.uid
+      );
+      allow update, delete: if isAdmin()
+        || (isAuth() && (
+          resource.data.donorId == request.auth.uid
+          || resource.data.userId == request.auth.uid
+        ));
     }
     
     // Campaigns - Public read, admin write
@@ -534,6 +545,96 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (isAuth() && resource.data.userId == request.auth.uid);
       allow create, update, delete: if isAdmin();
+    }
+
+    // Marketplace orders — member reads own (/dashboard/orders)
+    match /orders/{orderId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // Member certificates and badges (/dashboard/certificates)
+    match /certificates/{certificateId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /badges/{badgeId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Recurring donations (/dashboard/recurring-donations)
+    match /subscriptions/{subscriptionId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Learning hub (/dashboard/learning)
+    match /learningResources/{resourceId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /resources/{resourceId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /workshops/{workshopId} {
+      allow read: if isAuth();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Community reputation leaderboard (/dashboard/community-reputation)
+    match /communityReputation/{reputationId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // AI volunteer matching (/dashboard/ai-matches)
+    match /aiMatches/{matchId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.volunteerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Volunteer leaderboard aggregates (admin + public read for rankings)
+    match /volunteerHours/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /volunteerHoursMonth/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /volunteerHoursYear/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Digital wallet (/dashboard/wallet)
+    match /digitalWallets/{walletId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
     }
     
     // Default deny all other requests

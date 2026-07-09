@@ -19,18 +19,25 @@ export default function VolunteerMatchingPage() {
 
     const q = query(collection(db, 'aiMatches'), where('volunteerId', '==', user.id))
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const matchData = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter((m: any) => m.matchScore >= filters.minScore)
-        .sort((a: any, b: any) => b.matchScore - a.matchScore)
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const matchData = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((m: any) => m.matchScore >= filters.minScore)
+          .sort((a: any, b: any) => b.matchScore - a.matchScore)
 
-      setMatches(matchData)
-      setLoading(false)
-    })
+        setMatches(matchData)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('[v0] aiMatches error:', err)
+        setLoading(false)
+      }
+    )
 
     return () => unsubscribe()
   }, [user?.id, filters.minScore])

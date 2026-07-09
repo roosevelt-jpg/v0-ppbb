@@ -173,7 +173,7 @@ export function subscribeToMemberNotifications(
 const MARKETPLACE_STATUSES = new Set(['active', 'published'])
 
 export function isMarketplaceOfferVisible(offer: BusinessOffer): boolean {
-  return MARKETPLACE_STATUSES.has(offer.status)
+  return Boolean(offer?.status && MARKETPLACE_STATUSES.has(offer.status))
 }
 
 export function filterMarketplaceOffers(
@@ -203,9 +203,14 @@ export function subscribeToMarketplaceOffers(
   return onSnapshot(
     collection(db, 'businessOffers'),
     (snap) => {
-      const rows =
-        snap?.docs?.map((d) => ({ ...(d.data() as BusinessOffer), id: d.id })) ?? []
-      onData(rows.filter(isMarketplaceOfferVisible))
+      try {
+        const rows =
+          snap?.docs?.map((d) => ({ ...(d.data() as BusinessOffer), id: d.id })) ?? []
+        onData(rows.filter(isMarketplaceOfferVisible))
+      } catch (err) {
+        console.error('[v0] marketplace snapshot parse error:', err)
+        onError?.('Failed to load marketplace.')
+      }
     },
     (err) => onError?.(err.message)
   )
