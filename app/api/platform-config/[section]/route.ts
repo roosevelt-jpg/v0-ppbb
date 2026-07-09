@@ -14,6 +14,7 @@ const ALLOWED_SECTIONS = new Set([
   'donations',
   'shop',
   'volunteer',
+  'transparency',
   'referrals',
 ])
 

@@ -115,15 +115,16 @@ export function EventsCalendar({
             <button
               key={key}
               type="button"
+              data-calendar-day
               onClick={() => onSelectDate(isSelected ? null : day)}
-              className={`relative min-h-[44px] sm:min-h-[52px] rounded-lg p-1 sm:p-1.5 text-left transition-colors ${
-                inMonth ? 'text-foreground' : 'text-muted-foreground/50'
+              className={`relative min-h-[44px] sm:min-h-[52px] rounded-lg p-1 sm:p-1.5 text-left transition-colors bg-white border border-[#e4e1da] shadow-none font-normal ${
+                inMonth ? 'text-[#111111]' : 'text-[#888888]'
               } ${
                 isSelected
-                  ? 'bg-black text-white'
+                  ? 'ring-2 ring-[#111111] bg-[#f7f6f2]'
                   : isToday
-                    ? 'bg-[#f7f6f2] ring-1 ring-black/10'
-                    : 'hover:bg-neutral-50'
+                    ? 'bg-[#f7f6f2] ring-1 ring-[#111111]'
+                    : 'hover:bg-[#f7f6f2]'
               }`}
             >
               <span className="block font-body text-xs sm:text-sm font-medium leading-none">

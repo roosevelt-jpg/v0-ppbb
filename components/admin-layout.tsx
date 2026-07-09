@@ -132,6 +132,7 @@ export const adminMenuItems = [
   { label: 'Marketplace Config', href: '/admin/cms/marketplace', icon: Store, group: 'CMS' },
   { label: 'Partners Page', href: '/admin/cms/partners', icon: Handshake, group: 'CMS' },
   { label: 'Donations Config', href: '/admin/cms/donations', icon: HeartHandshake, group: 'CMS' },
+  { label: 'Transparency Page', href: '/admin/cms/transparency', icon: BarChart3, group: 'CMS' },
   { label: 'Shop Config', href: '/admin/cms/shop', icon: ShoppingBag, group: 'CMS' },
   { label: 'Volunteer Config', href: '/admin/cms/volunteer', icon: HandHeart, group: 'CMS' },
   { label: 'Navigation', href: '/admin/cms/navigation', icon: Compass, group: 'CMS' },
