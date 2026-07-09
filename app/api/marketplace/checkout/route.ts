@@ -5,6 +5,8 @@ import {
   createPendingMarketplaceOrder,
   loadMarketplaceOffer,
 } from '@/lib/marketplace-purchase-server'
+import { persistUserReferralAttribution } from '@/lib/referral-attribution-server'
+import { getReferralCodeFromRequest } from '@/lib/referral-cookie'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +19,11 @@ export async function POST(request: NextRequest) {
     const uid = await verifyIdToken(token)
     if (!uid) {
       return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 })
+    }
+
+    const referralCode = getReferralCodeFromRequest(request)
+    if (referralCode) {
+      void persistUserReferralAttribution(uid, referralCode).catch(console.error)
     }
 
     const body = await request.json()

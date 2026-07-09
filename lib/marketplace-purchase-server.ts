@@ -2,6 +2,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { sendPushToUser } from '@/lib/push-notifications-server'
+import { recordReferralConversion } from '@/lib/referral-conversion-server'
 
 export type MarketplacePurchaseMode = 'purchase' | 'enquire'
 
@@ -130,6 +131,17 @@ export async function completeMarketplacePurchase(
         click_action: '/business/leads',
       }
     ).catch(console.error)
+  }
+
+  if (mode === 'purchase' && amount > 0) {
+    void recordReferralConversion({
+      convertedUserId: params.buyerId,
+      conversionType: 'purchase',
+      relatedDocId: orderRef.id,
+      revenueAmount: amount,
+      status: 'confirmed',
+      idempotencyKey: `purchase:${orderRef.id}`,
+    }).catch((err) => console.error('[referral] marketplace conversion:', err))
   }
 
   return { purchaseId: purchaseRef.id, orderId: orderRef.id }

@@ -22,13 +22,16 @@ import { useAdminAudit } from '@/lib/use-admin-audit'
 import { PricingPlan } from '@/lib/pricing-types'
 import {
   countMembersForPlan,
+  countUnassignedMembers,
+  formatPlanPrice,
   getMemberAssignedPlan,
   getPlanIncludedItems,
+  memberHasAssignedPlan,
   memberMatchesPlan,
 } from '@/lib/pricing-utils'
 import { isExpiringsoon } from '@/lib/membership-utils'
 
-type MembershipFilter = 'all' | 'expiring' | string
+type MembershipFilter = 'all' | 'expiring' | 'unassigned' | string
 
 export default function MembershipPage() {
   const audit = useAdminAudit()
@@ -203,10 +206,12 @@ export default function MembershipPage() {
       ? members
       : filter === 'expiring'
         ? members.filter(isMemberExpiring)
-        : members.filter((m) => {
-            const plan = plans.find((p) => p.id === filter)
-            return plan ? memberMatchesPlan(m, plan) : false
-          })
+        : filter === 'unassigned'
+          ? members.filter((m) => !memberHasAssignedPlan(m))
+          : members.filter((m) => {
+              const plan = plans.find((p) => p.id === filter)
+              return plan ? memberMatchesPlan(m, plan) : false
+            })
 
   const filteredAndSearchedMembers = filteredMembers
     .filter((m) => {
@@ -233,10 +238,12 @@ export default function MembershipPage() {
     })
 
   const activeMemberCount = members.filter((m) => m.active).length
+  const unassignedCount = countUnassignedMembers(members)
 
   const filterTabs: { key: MembershipFilter; label: string }[] = [
     { key: 'all', label: 'All Members' },
     ...plans.map((plan) => ({ key: plan.id, label: plan.name })),
+    ...(unassignedCount > 0 ? [{ key: 'unassigned' as const, label: 'Unassigned' }] : []),
     { key: 'expiring', label: 'Expiring' },
   ]
 
@@ -264,11 +271,24 @@ export default function MembershipPage() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Total Members</p>
-              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{activeMemberCount}</p>
+              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{members.length}</p>
+              <p className="text-xs text-neutral-500 mt-1 font-body">{activeMemberCount} active</p>
             </div>
             <Users className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
           </div>
         </Card>
+
+        {unassignedCount > 0 && (
+          <Card className="p-4 sm:p-6 border border-neutral-200 bg-neutral-50">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Unassigned</p>
+                <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{unassignedCount}</p>
+              </div>
+              <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
+            </div>
+          </Card>
+        )}
 
         {plans.map((plan) => {
           const count = countMembersForPlan(members, plan)
@@ -297,8 +317,8 @@ export default function MembershipPage() {
         })}
       </div>
 
-      {/* Plan detail cards */}
-      {plans.length > 0 && (
+      {/* Plan detail cards — driven by pricingPlans in Firestore */}
+      {plans.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {plans.map((plan) => {
             const count = countMembersForPlan(members, plan)
@@ -314,14 +334,20 @@ export default function MembershipPage() {
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="min-w-0">
                     <h3 className="text-lg font-headline font-bold truncate" style={{ color: accent }}>
-                      {plan.name} Tier
+                      {plan.name}
                     </h3>
                     <p className="text-sm font-medium mt-1" style={{ color: accent }}>
-                      {count} members
+                      {count} member{count === 1 ? '' : 's'} · {formatPlanPrice(plan)}
                     </p>
+                    {plan.active === false ? (
+                      <p className="text-xs text-neutral-500 mt-1 font-body">Inactive plan</p>
+                    ) : null}
                   </div>
                   <span className="text-2xl shrink-0">{plan.icon || '🎯'}</span>
                 </div>
+                {plan.description ? (
+                  <p className="text-sm text-neutral-600 font-body mb-3">{plan.description}</p>
+                ) : null}
                 <div className="space-y-2">
                   {items.length > 0 ? (
                     items.map((item, i) => (
@@ -330,13 +356,25 @@ export default function MembershipPage() {
                       </p>
                     ))
                   ) : (
-                    <p className="text-sm text-neutral-500 font-body">No features listed for this plan.</p>
+                    <p className="text-sm text-neutral-500 font-body">
+                      No features listed. Edit this plan under Pricing Plans.
+                    </p>
                   )}
                 </div>
               </Card>
             )
           })}
         </div>
+      ) : (
+        <Card className="p-6 border border-dashed border-neutral-300 bg-white">
+          <p className="text-sm text-neutral-600 font-body">
+            No pricing plans configured yet. Create plans in{' '}
+            <a href="/admin/pricing" className="underline text-neutral-900">
+              Pricing Plans
+            </a>{' '}
+            to manage membership tiers.
+          </p>
+        </Card>
       )}
 
       {/* Bulk actions */}

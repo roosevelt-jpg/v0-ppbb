@@ -8,6 +8,7 @@ import {
   isCheckoutSessionProcessed,
   markCheckoutSessionProcessed,
 } from '@/lib/stripe-webhook-marketplace'
+import { recordReferralConversion } from '@/lib/referral-conversion-server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -36,6 +37,8 @@ export async function POST(req: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as {
           id: string
+          mode?: string
+          amount_total?: number | null
           metadata?: Record<string, string>
         }
         if (session.metadata?.type === 'marketplace') {
@@ -44,6 +47,23 @@ export async function POST(req: NextRequest) {
           }
           await handleMarketplaceCheckoutCompleted(event.data.object as never)
           await markCheckoutSessionProcessed(session.id)
+        } else if (
+          session.metadata?.type === 'membership' &&
+          session.metadata.userId &&
+          session.metadata.planId
+        ) {
+          const revenueAmount =
+            typeof session.amount_total === 'number' ? session.amount_total / 100 : 0
+          if (revenueAmount > 0) {
+            void recordReferralConversion({
+              convertedUserId: session.metadata.userId,
+              conversionType: 'membership',
+              relatedDocId: session.metadata.planId,
+              revenueAmount,
+              status: 'confirmed',
+              idempotencyKey: `membership:${session.id}`,
+            }).catch((err) => console.error('[referral] membership conversion:', err))
+          }
         }
         break
       }

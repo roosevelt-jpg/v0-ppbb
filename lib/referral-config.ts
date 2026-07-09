@@ -44,7 +44,7 @@ export function subscribeToReferralsConfig(
   )
 }
 
-/** Schema-only documentation for batch 2 — do not write from this batch. */
+/** Referral conversion document written to referrals/ on paid actions. */
 export type ReferralConversionDoc = {
   businessId: string
   referralCode: string

@@ -2,7 +2,10 @@
 
 import React from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { auth } from '@/lib/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 import { REFERRAL_COOKIE_NAME, DEFAULT_REFERRALS_CONFIG } from '@/lib/referral-config'
+import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null
@@ -16,6 +19,24 @@ function setCookie(name: string, value: string, days: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax${
     secure ? '; Secure' : ''
   }`
+}
+
+async function persistAttributionForSignedInUser(code: string) {
+  const user = auth.currentUser
+  if (!user) return
+  try {
+    const token = await user.getIdToken()
+    await fetch('/api/referral/attribute', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ referralCode: code }),
+    })
+  } catch (err) {
+    console.warn('[referral] persist attribution failed:', err)
+  }
 }
 
 /**
@@ -63,6 +84,7 @@ function ReferralAttributionInner() {
               ? json.attributionWindowDays
               : DEFAULT_REFERRALS_CONFIG.attributionWindowDays
           setCookie(REFERRAL_COOKIE_NAME, code, days)
+          void persistAttributionForSignedInUser(code)
         }
       } catch (err) {
         console.warn('[referral] attribution capture failed:', err)
@@ -71,6 +93,16 @@ function ReferralAttributionInner() {
       }
     })()
   }, [searchParams, pathname, router])
+
+  // When a user signs in with an existing referral cookie, persist first-touch attribution.
+  React.useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) return
+      const code = getReferralCodeFromDocument()
+      if (code) void persistAttributionForSignedInUser(code)
+    })
+    return () => unsub()
+  }, [])
 
   return null
 }

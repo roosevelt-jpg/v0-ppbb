@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Check, Crown, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
 import { getMemberAssignedPlan, getPlanIncludedItems, memberMatchesPlan } from '@/lib/pricing-utils'
+import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -60,7 +61,12 @@ export default function MembershipPage() {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: plan.id, userId: user.id, gateway: 'stripe' }),
+        body: JSON.stringify({
+          planId: plan.id,
+          userId: user.id,
+          gateway: 'stripe',
+          referralCode: getReferralCodeFromDocument(),
+        }),
       })
       const data = await response.json()
       if (data.checkoutUrl) window.location.href = data.checkoutUrl

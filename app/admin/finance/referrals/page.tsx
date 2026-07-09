@@ -115,8 +115,6 @@ async function getIdToken(): Promise<string | null> {
 
 /**
  * Part 13C final — admin finance reporting over referrals + businesses.
- * Conversion writes (membership / purchase / event) are not wired yet;
- * UI supports all types and shows empty until real docs appear.
  */
 export default function FinanceReferralsPage() {
   const [businesses, setBusinesses] = React.useState<BusinessRow[]>([])
@@ -319,26 +317,14 @@ export default function FinanceReferralsPage() {
     })
   }, [aggregates, search])
 
-  const markPaid = async (businessId: string, businessName: string) => {
-    const agg = aggregates.find((a) => a.id === businessId)
-    if (!agg) return
-    if (agg.confirmed === 0) {
-      setMessage({
-        type: 'info',
-        text:
-          agg.pending > 0
-            ? `"Mark as Paid" only updates confirmed referrals. ${businessName} has ${agg.pending} pending and 0 confirmed. Conversion recording currently does not promote referrals to "confirmed" — that gap must be filled before payout marking works.`
-            : `No confirmed contributions for ${businessName}.`,
-      })
-      return
-    }
-    if (
-      !window.confirm(
-        `Mark ${agg.confirmed} confirmed contribution(s) for ${businessName} as paid?\n\nThis records money owed TO Passive Blessings as collected/paid.`
-      )
-    ) {
-      return
-    }
+  const runReferralAction = async (
+    businessId: string,
+    businessName: string,
+    action: 'confirm_pending' | 'mark_paid',
+    confirmMessage: string,
+    successLabel: string
+  ) => {
+    if (!window.confirm(confirmMessage)) return
 
     setActingId(businessId)
     setMessage(null)
@@ -354,7 +340,7 @@ export default function FinanceReferralsPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ action: 'mark_paid', businessId }),
+        body: JSON.stringify({ action, businessId }),
       })
       const json = await res.json()
       if (!json.success) {
@@ -364,9 +350,10 @@ export default function FinanceReferralsPage() {
         })
         return
       }
+      const count = json.confirmed ?? json.marked ?? 0
       setMessage({
         type: 'success',
-        text: `Marked ${json.marked} contribution(s) as paid for ${businessName}.`,
+        text: `${successLabel} ${count} contribution(s) for ${businessName}.`,
       })
     } catch (err) {
       setMessage({
@@ -376,6 +363,43 @@ export default function FinanceReferralsPage() {
     } finally {
       setActingId(null)
     }
+  }
+
+  const confirmPending = async (businessId: string, businessName: string) => {
+    const agg = aggregates.find((a) => a.id === businessId)
+    if (!agg || agg.pending === 0) {
+      setMessage({ type: 'info', text: `No pending referrals for ${businessName}.` })
+      return
+    }
+    await runReferralAction(
+      businessId,
+      businessName,
+      'confirm_pending',
+      `Confirm ${agg.pending} pending referral(s) for ${businessName} after verifying payment?`,
+      'Confirmed'
+    )
+  }
+
+  const markPaid = async (businessId: string, businessName: string) => {
+    const agg = aggregates.find((a) => a.id === businessId)
+    if (!agg) return
+    if (agg.confirmed === 0) {
+      setMessage({
+        type: 'info',
+        text:
+          agg.pending > 0
+            ? `"Mark as Paid" only updates confirmed referrals. ${businessName} has ${agg.pending} pending and 0 confirmed. Event registrations stay pending until payment clears; use admin confirmation when payment is verified.`
+            : `No confirmed contributions for ${businessName}.`,
+      })
+      return
+    }
+    await runReferralAction(
+      businessId,
+      businessName,
+      'mark_paid',
+      `Mark ${agg.confirmed} confirmed contribution(s) for ${businessName} as paid?\n\nThis records money owed TO Passive Blessings as collected/paid.`,
+      'Marked'
+    )
   }
 
   const StatCard = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
@@ -463,36 +487,16 @@ export default function FinanceReferralsPage() {
           </div>
         )}
 
-        {/* Pipeline gap notice — conversion recording not wired */}
-        {!loading && referrals.length === 0 && (
-          <div
-            className="flex items-start gap-2 p-3 rounded-lg text-sm bg-amber-50 text-amber-900 border border-amber-200"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-          >
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold">Conversion recording not wired yet</p>
-              <p className="mt-0.5">
-                Membership, marketplace purchase, and paid-event flows do not yet write to{' '}
-                <code className="text-xs bg-amber-100 px-1 rounded">referrals/</code>. Status also
-                never advances from <code className="text-xs bg-amber-100 px-1 rounded">pending</code>{' '}
-                to <code className="text-xs bg-amber-100 px-1 rounded">confirmed</code>, so “Mark
-                Contributions as Paid” will stay inactive until that pipeline exists.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {!loading && stats.pendingCount > 0 && stats.confirmedCount === 0 && (
+        {!loading && stats.pendingCount > 0 && stats.confirmedCount === 0 && referrals.length > 0 && (
           <div
             className="flex items-start gap-2 p-3 rounded-lg text-sm bg-amber-50 text-amber-900 border border-amber-200"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <p>
-              {stats.pendingCount} referral(s) are <strong>pending</strong> and none are{' '}
-              <strong>confirmed</strong>. Mark as Paid only updates confirmed rows — pending will not
-              be treated as confirmed.
+              {stats.pendingCount} referral(s) are <strong>pending</strong> (typically unpaid event
+              registrations). Mark as Paid only updates <strong>confirmed</strong> rows — membership
+              and marketplace purchases are recorded as confirmed automatically.
             </p>
           </div>
         )}
@@ -780,6 +784,14 @@ export default function FinanceReferralsPage() {
                         </button>
                         <button
                           type="button"
+                          disabled={actingId === a.id || a.pending === 0}
+                          onClick={() => confirmPending(a.id, a.name)}
+                          className="min-h-[44px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40"
+                        >
+                          Confirm Pending
+                        </button>
+                        <button
+                          type="button"
                           disabled={actingId === a.id || a.confirmed === 0}
                           onClick={() => markPaid(a.id, a.name)}
                           className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-semibold disabled:opacity-40"
@@ -884,6 +896,14 @@ export default function FinanceReferralsPage() {
                                   className="min-h-[40px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold"
                                 >
                                   {open ? 'Hide' : 'View Detail'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={actingId === a.id || a.pending === 0}
+                                  onClick={() => confirmPending(a.id, a.name)}
+                                  className="min-h-[40px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40"
+                                >
+                                  Confirm
                                 </button>
                                 <button
                                   type="button"
