@@ -142,6 +142,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
       onOpenChange={onOpenChange}
       title="Edit profile"
       description="Update your account details. Changes sync across the platform instantly."
+      maxWidth="400px"
       footer={
         <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
           <Button

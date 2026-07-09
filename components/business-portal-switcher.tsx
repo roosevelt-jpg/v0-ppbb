@@ -49,9 +49,9 @@ export function BusinessPortalSwitcher({
           type="button"
           onClick={handleClick}
           title={title}
-          className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors w-full text-left text-foreground hover:bg-secondary"
+          className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors w-full text-left bg-black !text-white hover:bg-neutral-900"
         >
-          <Briefcase className="h-4 w-4" />
+          <Briefcase className="h-4 w-4 shrink-0" />
           <span className="text-sm font-medium">{label}</span>
         </button>
         <UpgradeToBusinessModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />

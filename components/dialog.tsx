@@ -11,9 +11,11 @@ interface DialogProps {
   description?: string
   children: React.ReactNode
   footer?: React.ReactNode
+  /** Max width of the dialog panel (default 600px). */
+  maxWidth?: string
 }
 
-export function Dialog({ open, onOpenChange, title, description, children, footer }: DialogProps) {
+export function Dialog({ open, onOpenChange, title, description, children, footer, maxWidth = '600px' }: DialogProps) {
   if (!open) return null
 
   return (
@@ -33,7 +35,7 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         transform: 'translate(-50%, -50%)',
         zIndex: 50,
         width: '90vw',
-        maxWidth: '600px',
+        maxWidth,
         maxHeight: '90vh',
         overflowY: 'auto',
         padding: '0',
