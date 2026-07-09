@@ -150,7 +150,7 @@ export default function RecordingsPage() {
       <Navbar />
 
       {/* Hero */}
-      <section className="bg-gradient-to-r from-gray-900 to-gray-800 text-white py-16 px-4">
+      <section className="bg-[#111111] text-white py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Event Recordings</h1>
           <p className="text-gray-300 text-lg">Explore our library of recorded events, workshops, and presentations</p>
