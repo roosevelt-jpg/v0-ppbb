@@ -19,7 +19,7 @@ const businessRoutes: TitleEntry[] = [
   { href: '/business/referrals', title: 'Referrals' },
   { href: '/business/partnerships/new', title: 'Submit Partnership' },
   { href: '/business/partnerships', title: 'Partnerships' },
-  { href: '/business/marketplace', title: 'Marketplace' },
+  { href: '/business/marketplace', title: 'Network / Connections' },
   { href: '/business/payments', title: 'Payments & Subscriptions' },
   { href: '/business/analytics', title: 'Business Analytics' },
   { href: '/business/signup', title: 'Business Sign Up' },

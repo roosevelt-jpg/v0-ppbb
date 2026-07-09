@@ -24,7 +24,6 @@ import {
   DollarSign,
   Heart,
   Share2,
-  LayoutGrid,
   Menu,
   X,
   Calendar,
@@ -38,7 +37,7 @@ const businessMenuItems = [
   { label: 'Jobs & Gigs', href: '/business/opportunities', icon: Briefcase },
   { label: 'Products & Offers', href: '/business/offers', icon: ShoppingBag },
   { label: 'Member Discounts', href: '/business/discounts', icon: Tag },
-  { label: 'Marketplace', href: '/business/marketplace', icon: LayoutGrid },
+  { label: 'Network / Connections', href: '/business/marketplace', icon: Users },
   { label: 'Leads & Conversions', href: '/business/leads', icon: Zap },
   { label: 'Referrals', href: '/business/referrals', icon: Share2 },
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },
@@ -46,7 +45,6 @@ const businessMenuItems = [
   { label: 'Partnerships & Requests', href: '/business/partnerships', icon: Heart },
   { label: 'Communities', href: '/business/communities', icon: Users2 },
   { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },
-  { label: 'Network / Connections', href: '/business/marketplace', icon: Users },
 ]
 
 function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
