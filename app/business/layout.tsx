@@ -7,8 +7,13 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { BusinessPortalAccessDenied } from '@/components/business-feature-gate'
 import Link from 'next/link'
 import { SiteLogo } from '@/components/site-logo'
-import { DashboardHeaderActions } from '@/components/dashboard-header-actions'
 import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
+import { DashboardTopBar } from '@/components/dashboard-top-bar'
+import {
+  getBusinessPageTitle,
+  getWelcomeFirstName,
+} from '@/lib/dashboard-page-titles'
+import { getUserDisplayName } from '@/lib/user-profile'
 import {
   BarChart3,
   Briefcase,
@@ -41,44 +46,8 @@ const businessMenuItems = [
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },
 ]
 
-function BusinessHeaderDate({ mobile = false }: { mobile?: boolean }) {
-  const [dateTime, setDateTime] = React.useState('')
-
-  React.useEffect(() => {
-    const updateDateTime = () => {
-      const now = new Date()
-      const formatted = new Intl.DateTimeFormat('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(now)
-      setDateTime(formatted)
-    }
-
-    updateDateTime()
-    const interval = setInterval(updateDateTime, 60000)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div className={`text-sm text-neutral-600 dark:text-neutral-300 ${mobile ? 'text-xs' : ''}`}>
-      {dateTime || 'Loading...'}
-    </div>
-  )
-}
-
 function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const router = useRouter()
   const pathname = usePathname()
-  const { logout } = useAuth()
-
-  const handleLogout = async () => {
-    await logout()
-    router.push('/login')
-  }
 
   return (
     <div className="flex h-full min-h-screen flex-col bg-white dark:bg-neutral-900">
@@ -182,6 +151,21 @@ export default function BusinessLayout({
     return <BusinessPortalAccessDenied />
   }
 
+  const pageTitle = getBusinessPageTitle(pathname || '/business/dashboard')
+  const welcome = `Welcome, ${getWelcomeFirstName(getUserDisplayName(user))}!`
+
+  const mobileMenu = (
+    <button
+      type="button"
+      data-dashboard-control
+      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      className="md:hidden inline-flex items-center justify-center min-h-[32px] min-w-[32px] rounded-md bg-transparent text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+      aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+    >
+      {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+    </button>
+  )
+
   return (
     <div className="flex min-h-screen bg-[#faf9f7] dark:bg-neutral-950">
       {/* Desktop Sidebar */}
@@ -207,28 +191,13 @@ export default function BusinessLayout({
 
       {/* Main Content */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {/* Desktop Header */}
-        <div className="hidden items-center justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 sm:px-6 py-3 md:flex">
-          <BusinessHeaderDate />
-          <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
-        </div>
-
-        {/* Mobile Header */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 md:hidden">
-          <BusinessHeaderDate mobile />
-          <div className="flex items-center gap-1.5">
-            <DashboardHeaderActions onLogout={handleLogout} logoutLabel="Sign out" />
-            <button
-              type="button"
-              data-dashboard-control
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-md bg-transparent text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-              aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-            >
-              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
+        <DashboardTopBar
+          title={pageTitle}
+          welcome={welcome}
+          onLogout={handleLogout}
+          logoutLabel="Sign out"
+          trailing={mobileMenu}
+        />
 
         {/* Content — always light surface so cards stay white with black text */}
         <div className="flex-1 overflow-auto" data-dashboard-surface="light">

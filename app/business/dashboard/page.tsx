@@ -250,27 +250,7 @@ export default function BusinessDashboard() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
-      <div
-        style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da' }}
-        className="px-4 py-6 sm:px-8 sm:py-8"
-      >
-        <div className="max-w-7xl mx-auto">
-          <h1
-            className="text-2xl sm:text-[32px] font-bold text-neutral-900"
-            style={{ fontFamily: 'Cormorant Garamond, serif' }}
-          >
-            Business Dashboard
-          </h1>
-          <p className="text-neutral-500 mt-2 text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Welcome, {user.businessProfile?.businessName || user.firstName}!
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         {listingReady && listingStatus && !listingStatus.isApproved && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 sm:p-5">
             <p className="eyebrow text-amber-800 mb-1">LISTING STATUS</p>
@@ -688,6 +668,5 @@ export default function BusinessDashboard() {
           </div>
         </Card>
       </div>
-    </div>
   )
 }

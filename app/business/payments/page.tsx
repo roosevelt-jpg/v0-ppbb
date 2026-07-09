@@ -55,19 +55,7 @@ export default function Payments() {
     .reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div className="min-h-full bg-[#faf9f7]">
-      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl sm:text-[32px] font-bold text-neutral-900">
-            Payment & Subscription Management
-          </h1>
-          <p className="text-neutral-500 mt-2 text-sm sm:text-base">
-            Track your payments and manage subscriptions
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto p-4 sm:p-8">
+    <div className="max-w-6xl mx-auto p-4 sm:p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
             <div className="flex items-center gap-4">
@@ -155,7 +143,6 @@ export default function Payments() {
             </table>
           </Card>
         )}
-      </div>
     </div>
   )
 }

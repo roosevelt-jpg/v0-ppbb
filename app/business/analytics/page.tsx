@@ -43,17 +43,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-full bg-[#faf9f7]">
-      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl sm:text-[32px] font-bold text-neutral-900">Business Analytics</h1>
-          <p className="text-neutral-500 mt-2 text-sm sm:text-base">
-            Your listings only — events, jobs, offers, and leads for this business account
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto p-4 sm:p-8">
+    <div className="max-w-6xl mx-auto p-4 sm:p-8">
         {loading ? (
           <div className="text-center py-8 text-neutral-500">Loading analytics...</div>
         ) : error ? (
@@ -183,7 +173,6 @@ export default function Analytics() {
             </Card>
           </div>
         )}
-      </div>
     </div>
   )
 }

@@ -1,6 +1,9 @@
+'use client'
+
 /** Shared light card styling for dashboard pages (works in dark mode chrome) */
 export const DASHBOARD_CARD_CLASS = 'bg-white text-neutral-900 border-[#e4e1da]'
 
+import React from 'react'
 import Link from 'next/link'
 
 /** Override global `button { bg-black text-white }` for dashboard tab/pill controls */
@@ -30,26 +33,23 @@ export function DashboardTabButton({
   )
 }
 
+/** Content wrapper — page title lives in layout top bar. */
 export function DashboardPageShell({
-  title,
-  subtitle,
+  title: _title,
+  subtitle: _subtitle,
   children,
   action,
 }: {
-  title: string
+  /** @deprecated Title is shown in the layout top bar */
+  title?: string
+  /** @deprecated Subtitle is shown as welcome in the layout top bar */
   subtitle?: string
   children: React.ReactNode
   action?: React.ReactNode
 }) {
   return (
     <div className="w-full min-w-0 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-      <div className="mb-6 sm:mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 whitespace-normal">{title}</h1>
-          {subtitle ? <p className="text-sm sm:text-base text-neutral-500 mt-2">{subtitle}</p> : null}
-        </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
-      </div>
+      {action ? <div className="mb-6 flex flex-wrap justify-end gap-3">{action}</div> : null}
       {children}
     </div>
   )

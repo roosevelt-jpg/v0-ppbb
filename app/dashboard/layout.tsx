@@ -5,10 +5,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { MemberSidebar, MemberHeader } from '@/components/member-layout'
 import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
-import { User } from '@/lib/types'
 import {
   hasAdminAccess,
-  hasBusinessAccess,
   isMemberDashboardPathAllowed,
 } from '@/lib/roles'
 
@@ -79,23 +77,11 @@ export default function DashboardLayout({
     )
   }
 
-  const memberUser = user as User
-  const roleHint = hasBusinessAccess(user)
-    ? 'Business member'
-    : hasAdminAccess(user)
-      ? 'Admin'
-      : 'Active member'
-
   return (
     <div className="flex h-screen bg-background min-w-0">
       <MemberSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <main className="flex-1 min-w-0 overflow-auto flex flex-col">
-        <MemberHeader
-          title="Dashboard"
-          subtitle={`${memberUser.firstName ?? 'Member'} • ${roleHint}`}
-          open={sidebarOpen}
-          setOpen={setSidebarOpen}
-        />
+        <MemberHeader open={sidebarOpen} setOpen={setSidebarOpen} />
         <div className="flex-1 min-w-0 overflow-auto" data-dashboard-surface="light">
           <DashboardErrorBoundary>{children}</DashboardErrorBoundary>
         </div>

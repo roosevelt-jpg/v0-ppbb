@@ -108,27 +108,18 @@ export default function BusinessOffers() {
   }
 
   return (
-    <div className="min-h-full bg-[#faf9f7]">
-      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-          <div>
-            <h1 className="text-2xl sm:text-[32px] font-bold text-neutral-900">Posted Offers</h1>
-            <p className="text-neutral-500 mt-2 text-sm sm:text-base">
-              Products, services, and member discounts
-            </p>
-          </div>
-          <Button
-            type="button"
-            onClick={() => router.push('/business/offers/new')}
-            className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Post Offer
-          </Button>
-        </div>
+    <div className="max-w-6xl mx-auto p-4 sm:p-8">
+      <div className="flex justify-end mb-6">
+        <Button
+          type="button"
+          onClick={() => router.push('/business/offers/new')}
+          className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Post Offer
+        </Button>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4 sm:p-8">
         {error ? (
           <Card className="p-8 text-center border-[#e4e1da]">
             <p className="text-neutral-500 mb-4">{error}</p>
@@ -209,7 +200,6 @@ export default function BusinessOffers() {
             ))}
           </div>
         )}
-      </div>
 
       <DashboardModal
         open={isEditingModal && !!selectedOffer}

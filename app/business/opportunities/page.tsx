@@ -110,38 +110,27 @@ export default function BusinessOpportunities() {
   }
 
   return (
-    <div className="min-h-full bg-[#faf9f7]">
-      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-start sm:items-center">
-          <div>
-            <h1 className="text-2xl sm:text-[32px] font-bold text-neutral-900">Posted Opportunities</h1>
-            <p className="text-neutral-500 mt-2 text-sm sm:text-base">
-              Manage your jobs, internships, and gigs
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <Button
-              type="button"
-              onClick={() => router.push('/business/opportunities/applicants')}
-              className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white hover:bg-neutral-800"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              View Applicants
-            </Button>
-            <Button
-              type="button"
-              onClick={() => router.push('/business/opportunities/new')}
-              className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white hover:bg-neutral-800"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Post Opportunity
-            </Button>
-          </div>
-        </div>
+    <div className="max-w-6xl mx-auto p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-end items-start sm:items-center mb-6">
+        <Button
+          type="button"
+          onClick={() => router.push('/business/opportunities/applicants')}
+          className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white hover:bg-neutral-800"
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          View Applicants
+        </Button>
+        <Button
+          type="button"
+          onClick={() => router.push('/business/opportunities/new')}
+          className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white hover:bg-neutral-800"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Post Opportunity
+        </Button>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4 sm:p-8">
-        {loading ? (
+      {loading ? (
           <div className="text-center py-8 text-neutral-500">Loading opportunities...</div>
         ) : loadError ? (
           <Card className="p-8 text-center border-[#e4e1da]">
@@ -240,7 +229,6 @@ export default function BusinessOpportunities() {
             ))}
           </div>
         )}
-      </div>
 
       <DashboardModal
         open={isEditingModal && !!selectedOpp}

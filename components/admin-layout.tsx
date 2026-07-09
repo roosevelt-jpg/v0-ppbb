@@ -70,7 +70,7 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { useAuth } from '@/lib/auth-context'
 import { filterAdminMenuByPermissions } from '@/lib/admin-invite-permissions'
 
-const adminMenuItems = [
+export const adminMenuItems = [
   // Dashboard & System
   { label: 'Overview', href: '/admin', icon: BarChart3, group: 'Dashboard' },
   { label: 'System Health', href: '/admin/health', icon: Activity, group: 'Dashboard' },
