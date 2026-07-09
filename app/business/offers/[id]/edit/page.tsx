@@ -1,5 +1,7 @@
 'use client'
 
+import { RichTextEditor } from '@/components/rich-text-editor'
+
 export const dynamic = 'force-dynamic'
 
 import React, { useEffect, useState } from 'react'
@@ -54,7 +56,10 @@ export default function EditOfferPage() {
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea rows={6} value={offer.description || ''} onChange={(e) => setOffer({ ...offer, description: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+          <RichTextEditor
+            value={offer.description || ''}
+            onChange={(html) => setOffer({ ...offer, description: html })}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Price (AED)</label>

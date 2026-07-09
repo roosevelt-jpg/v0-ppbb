@@ -2,6 +2,8 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
+import { RichTextEditor } from '@/components/rich-text-editor'
+import { RichTextContent } from '@/components/rich-text-content'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
@@ -134,23 +136,20 @@ export default function BusinessProfile() {
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Description
               </label>
-              <textarea
-                name="businessDescription"
-                value={formData.businessDescription}
-                onChange={handleChange}
-                disabled={!isEditing}
-                rows={4}
-                placeholder="Describe your business..."
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                  fontFamily: 'inherit',
-                }}
-              />
+              {isEditing ? (
+                <RichTextEditor
+                  value={formData.businessDescription}
+                  onChange={(html) =>
+                    setFormData((prev) => ({ ...prev, businessDescription: html }))
+                  }
+                  placeholder="Describe your business..."
+                />
+              ) : (
+                <RichTextContent
+                  html={formData.businessDescription || 'No description yet.'}
+                  className="text-sm text-neutral-700"
+                />
+              )}
             </div>
 
             {/* Website */}

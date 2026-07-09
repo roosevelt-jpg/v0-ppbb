@@ -17,6 +17,7 @@ import {
   type DirectoryOffer,
 } from '@/lib/marketplace-directory'
 import { subscribeToActiveBusinessDiscounts, type BusinessDiscount } from '@/lib/business-discounts'
+import { RichTextContent } from '@/components/rich-text-content'
 
 interface BusinessProfileViewProps {
   businessId: string
@@ -245,9 +246,9 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       </div>
 
       {business.description && (
-        <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl break-words">
-          {business.description}
-        </p>
+        <div className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl break-words">
+          <RichTextContent html={business.description} />
+        </div>
       )}
 
       {business.services.length > 0 && (

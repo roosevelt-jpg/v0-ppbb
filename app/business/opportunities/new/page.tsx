@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
+import { RichTextEditor } from '@/components/rich-text-editor'
 
 export default function NewOpportunity() {
   const { user } = useAuth()
@@ -264,22 +265,11 @@ export default function NewOpportunity() {
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Description *
               </label>
-              <textarea
-                name="description"
+              <RichTextEditor
                 value={formData.description}
-                onChange={handleChange}
-                required
-                rows={5}
+                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
                 placeholder="Describe the opportunity in detail..."
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                  fontFamily: 'inherit',
-                }}
+                minHeight={180}
               />
             </div>
 

@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
 
 async function handleStripeCheckout(plan: any, userId: string, planId: string) {
   try {
-    const stripe = require('stripe')(STRIPE_SECRET)
+    const { getStripeClient } = await import('@/lib/get-stripe-client')
+    const stripe = await getStripeClient()
 
     // Create or get Stripe product
     let productId = plan.stripeProductId

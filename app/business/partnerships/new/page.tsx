@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { auth } from '@/lib/firebase'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
+import { RichTextEditor } from '@/components/rich-text-editor'
 import { DashboardPageShell } from '@/components/dashboard-states'
 import { ChevronLeft, Upload, Loader2 } from 'lucide-react'
 
@@ -129,12 +130,10 @@ export default function NewPartnershipRequestPage() {
 
         <div>
           <label className="block text-sm font-medium mb-1">Description *</label>
-          <textarea
-            required
-            rows={6}
+          <RichTextEditor
             value={form.description}
-            onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-            className="w-full border rounded-lg px-3 py-2 text-sm min-h-[120px]"
+            onChange={(html) => setForm((p) => ({ ...p, description: html }))}
+            minHeight={160}
           />
         </div>
 

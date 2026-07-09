@@ -9,7 +9,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
-import { Loader2, Upload, X } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+import { RichTextEditor } from '@/components/rich-text-editor'
 
 export default function NewOffer() {
   const { user } = useAuth()
@@ -247,21 +248,10 @@ export default function NewOffer() {
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Description *
               </label>
-              <textarea
-                name="description"
+              <RichTextEditor
                 value={formData.description}
-                onChange={handleChange}
-                required
-                rows={4}
+                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
                 placeholder="Describe your offer..."
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  color: '#111111',
-                  fontFamily: 'inherit',
-                }}
               />
             </div>
 

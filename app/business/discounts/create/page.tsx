@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { auth } from '@/lib/firebase'
+import { RichTextEditor } from '@/components/rich-text-editor'
 
 function generateCode() {
   return `PB${Math.random().toString(36).slice(2, 8).toUpperCase()}`
@@ -70,7 +71,10 @@ export default function CreateDiscountPage() {
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>
-          <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+          <RichTextEditor
+            value={form.description}
+            onChange={(html) => setForm({ ...form, description: html })}
+          />
         </div>
         <div className="flex gap-2">
           <input value={form.discountCode} onChange={(e) => setForm({ ...form, discountCode: e.target.value })} className="flex-1 min-h-[44px] px-3 border rounded-lg font-mono" />

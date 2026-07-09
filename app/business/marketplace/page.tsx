@@ -64,7 +64,10 @@ export default function Marketplace() {
   }, [user, router, search])
 
   const handleSendMessage = () => {
-    if (!message.trim() || !selectedMember) return
+    if (!selectedMember) return
+    if (message.trim()) {
+      sessionStorage.setItem(`dm_draft_${selectedMember.id}`, message.trim())
+    }
     router.push(`/dashboard/messages?to=${selectedMember.id}`)
   }
 

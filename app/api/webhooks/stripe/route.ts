@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe-utils'
 import { db } from '@/lib/firebase'
 import { doc, setDoc, updateDoc, Timestamp, query, collection, where, getDocs } from 'firebase/firestore'
+import {
+  constructStripeWebhookEvent,
+  handleMarketplaceCheckoutCompleted,
+  isCheckoutSessionProcessed,
+  markCheckoutSessionProcessed,
+} from '@/lib/stripe-webhook-marketplace'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -13,15 +19,34 @@ export async function POST(req: NextRequest) {
 
     let event
     try {
-      event = constructWebhookEvent(Buffer.from(body), signature)
-    } catch (err: any) {
-      console.error('[v0] Webhook signature verification failed:', err.message)
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+      event = await constructStripeWebhookEvent(Buffer.from(body), signature)
+    } catch {
+      try {
+        event = constructWebhookEvent(Buffer.from(body), signature)
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Invalid signature'
+        console.error('[v0] Webhook signature verification failed:', message)
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+      }
     }
 
     console.log('[v0] Processing webhook event:', event.type)
 
     switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as {
+          id: string
+          metadata?: Record<string, string>
+        }
+        if (session.metadata?.type === 'marketplace') {
+          if (await isCheckoutSessionProcessed(session.id)) {
+            break
+          }
+          await handleMarketplaceCheckoutCompleted(event.data.object as never)
+          await markCheckoutSessionProcessed(session.id)
+        }
+        break
+      }
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as any
