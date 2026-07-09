@@ -28,7 +28,7 @@ function formatJoined(value: AdminProfileViewData['joinedAt']): string {
 
 function statusBadgeClass(status?: string): string {
   const s = (status || 'active').toLowerCase()
-  if (s === 'active' || s === 'approved') return 'bg-green-100 text-green-800'
+  if (s === 'active' || s === 'approved') return 'bg-neutral-900 text-white'
   if (s === 'pending' || s === 'pending_approval') return 'bg-amber-100 text-amber-800'
   if (s === 'suspended' || s === 'inactive') return 'bg-red-100 text-red-800'
   return 'bg-neutral-100 text-neutral-800'

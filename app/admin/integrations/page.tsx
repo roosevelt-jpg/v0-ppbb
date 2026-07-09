@@ -11,6 +11,7 @@ export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<any[]>([])
   const [health, setHealth] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
@@ -26,6 +27,7 @@ export default function IntegrationsPage() {
     }
     
     setLoading(true)
+    setLoadError('')
     try {
       const token = await auth.firebaseUser.getIdToken()
       console.log('[v0] Got token, fetching integrations...')
@@ -52,10 +54,14 @@ export default function IntegrationsPage() {
           console.log('[v0] Integrations data:', data)
           setIntegrations(data.data || [])
         } else {
-          console.error('[v0] Integrations request failed:', integrationsRes.status)
           const errText = await integrationsRes.text()
-          console.error('[v0] Error response:', errText)
+          console.error('[v0] Integrations request failed:', integrationsRes.status, errText)
           setIntegrations([])
+          setLoadError(
+            integrationsRes.status === 403
+              ? 'Access denied loading integrations. Ensure your admin account has manage_integrations permission.'
+              : `Could not load integrations (${integrationsRes.status}). Saved credentials may still exist — try refreshing after deploy.`
+          )
         }
       } else {
         setIntegrations([])
@@ -80,6 +86,7 @@ export default function IntegrationsPage() {
       console.error('[v0] Error loading data:', error)
       setIntegrations([])
       setHealth([])
+      setLoadError(error instanceof Error ? error.message : 'Failed to load integrations')
     } finally {
       setLoading(false)
     }
@@ -95,7 +102,15 @@ export default function IntegrationsPage() {
 
   const configured = integrations.length
   const active = integrations.filter((i) => i.status === 'active').length
-  const pending = allServices.length - configured
+  const pending = Math.max(0, allServices.length - configured)
+  const lastUpdatedMs = integrations.reduce((max, row) => {
+    const raw = row.updatedAt || row.createdAt
+    const ms = raw ? new Date(raw).getTime() : 0
+    return Number.isNaN(ms) ? max : Math.max(max, ms)
+  }, 0)
+  const lastUpdatedLabel = lastUpdatedMs
+    ? new Date(lastUpdatedMs).toLocaleString()
+    : 'No configured integrations yet'
 
   return (
     <div style={{ padding: '2rem' }}>
@@ -106,6 +121,22 @@ export default function IntegrationsPage() {
         </h1>
         <p style={{ color: '#888888' }}>Manage API credentials, webhooks, and third-party services</p>
       </div>
+
+      {loadError && (
+        <div
+          style={{
+            marginBottom: '1.5rem',
+            padding: '0.75rem 1rem',
+            borderRadius: '0.5rem',
+            border: '1px solid #fecaca',
+            backgroundColor: '#fef2f2',
+            color: '#991b1b',
+            fontSize: '0.875rem',
+          }}
+        >
+          {loadError}
+        </div>
+      )}
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
@@ -137,8 +168,10 @@ export default function IntegrationsPage() {
           <p style={{ color: '#888888', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Last Updated
           </p>
-          <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111' }}>Today</p>
-          <p style={{ color: '#888888', fontSize: '0.875rem', marginTop: '0.5rem' }}>Jun 13, 2026 - 12:12 AM</p>
+          <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111' }}>
+            {lastUpdatedMs ? 'Recent' : '—'}
+          </p>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginTop: '0.5rem' }}>{lastUpdatedLabel}</p>
         </div>
       </div>
 

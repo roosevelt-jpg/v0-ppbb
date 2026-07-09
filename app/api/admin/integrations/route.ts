@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { saveIntegrationServer, getAllIntegrationsServer } from '@/lib/integrations/handlers-server'
+import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 import {
   verifyIdToken,
   isAdminUser,
@@ -7,7 +8,7 @@ import {
 } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
-const MOCK_USER_ID = 'dev-user-001'
+const MOCK_USER_ID = INTEGRATION_OWNER_USER_ID
 
 async function requireManageIntegrations(
   request: NextRequest

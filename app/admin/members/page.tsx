@@ -171,7 +171,7 @@ export default function AdminMembersPage() {
                     </td>
                     <td className="px-6 py-3 text-sm">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        member.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        member.status === 'active' ? 'bg-neutral-900 text-white' : 'bg-gray-100 text-gray-800'
                       }`}>
                         {member.status || 'active'}
                       </span>

@@ -1,6 +1,6 @@
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 
-const DEFAULT_INTEGRATION_USER_ID = 'dev-user-001'
+import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 
 export interface SendGridConfig {
   apiKey: string
@@ -22,7 +22,7 @@ export async function resolveSendGridConfig(): Promise<SendGridConfig | null> {
   }
 
   try {
-    const integration = await getIntegrationServer(DEFAULT_INTEGRATION_USER_ID, 'sendgrid')
+    const integration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'sendgrid')
     const apiKey = integration?.credentials?.apiKey
     const fromAddress = integration?.credentials?.fromAddress
     if (typeof apiKey === 'string' && apiKey.trim() && typeof fromAddress === 'string' && fromAddress.trim()) {

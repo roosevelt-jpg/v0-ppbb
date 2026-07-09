@@ -143,10 +143,13 @@ export async function hasInvitePermissionServer(
   userId: string,
   permission: InvitePermissionId
 ): Promise<boolean> {
-  const data = await getUserProfileData(userId)
+  const data = await getAdminUserData(userId)
   if (!data) return false
   return hasInvitePermission(
-    { role: data.role as string, permissions: data.permissions as string[] },
+    {
+      role: data.role as string,
+      permissions: data.permissions as string[],
+    },
     permission
   )
 }

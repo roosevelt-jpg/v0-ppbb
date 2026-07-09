@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllIntegrationHealthServer } from '@/lib/integrations/handlers-server'
 import { getAllServices } from '@/lib/integrations/services'
+import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 import {
   verifyIdToken,
   isAdminUser,
   hasInvitePermissionServer,
 } from '@/lib/admin-access-server'
 
-const MOCK_USER_ID = 'dev-user-001'
+const MOCK_USER_ID = INTEGRATION_OWNER_USER_ID
 
 async function requireManageIntegrations(
   request: NextRequest

@@ -1,8 +1,12 @@
-import { getFirestore } from 'firebase-admin/firestore'
+import { getFirestore, type Firestore } from 'firebase-admin/firestore'
 import { Integration, IntegrationHealth } from './types'
 import { encryptCredentials, decryptCredentials } from './encryption'
 import { initializeApp, cert, deleteApp } from 'firebase-admin/app'
 import { getAdminApp, getAdminDb } from '@/lib/firebase-admin'
+import {
+  INTEGRATION_OWNER_USER_ID,
+  integrationDocId,
+} from '@/lib/integrations/constants'
 
 const INTEGRATIONS_COLLECTION = 'integrations'
 const HEALTH_COLLECTION = 'integrationHealth'
@@ -149,7 +153,7 @@ export async function saveIntegrationServer(
     }
 
     const encrypted = encryptCredentials(credentials, serviceId)
-    const integrationId = `${userId}_${serviceId}`
+    const integrationId = integrationDocId(serviceId, userId)
     const db = getAdminDb()
 
     const integration: Integration = {
@@ -183,7 +187,7 @@ function toCamelCase(snake: string): string {
 
 export async function getIntegrationServer(userId: string, serviceId: string): Promise<Integration | null> {
   try {
-    const integrationId = `${userId}_${serviceId}`
+    const integrationId = integrationDocId(serviceId, userId)
     const db = getAdminDb()
     const snap = await db.collection(INTEGRATIONS_COLLECTION).doc(integrationId).get()
 
@@ -200,24 +204,121 @@ export async function getIntegrationServer(userId: string, serviceId: string): P
   }
 }
 
-export async function getAllIntegrationsServer(userId: string): Promise<Integration[]> {
+function integrationStatusRank(status: Integration['status']): number {
+  switch (status) {
+    case 'active':
+      return 4
+    case 'error':
+      return 3
+    case 'inactive':
+      return 2
+    case 'pending':
+      return 1
+    default:
+      return 0
+  }
+}
+
+function toMillis(value: unknown): number {
+  if (!value) return 0
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'string' || typeof value === 'number') {
+    const ms = new Date(value).getTime()
+    return Number.isNaN(ms) ? 0 : ms
+  }
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    try {
+      return (value as { toDate: () => Date }).toDate().getTime()
+    } catch {
+      return 0
+    }
+  }
+  return 0
+}
+
+/** Merge duplicate service rows (legacy per-admin saves) — prefer active, then newest. */
+function mergeIntegrationsByService(integrations: Integration[]): Integration[] {
+  const byService = new Map<string, Integration>()
+  for (const integration of integrations) {
+    const existing = byService.get(integration.serviceId)
+    if (!existing) {
+      byService.set(integration.serviceId, integration)
+      continue
+    }
+    const rankNew = integrationStatusRank(integration.status)
+    const rankOld = integrationStatusRank(existing.status)
+    const updatedNew = toMillis(integration.updatedAt)
+    const updatedOld = toMillis(existing.updatedAt)
+    if (rankNew > rankOld || (rankNew === rankOld && updatedNew > updatedOld)) {
+      byService.set(integration.serviceId, integration)
+    }
+  }
+  return Array.from(byService.values())
+}
+
+async function migrateToCanonicalOwner(
+  db: Firestore,
+  integration: Integration,
+  ownerUserId: string
+): Promise<void> {
+  const canonicalId = integrationDocId(integration.serviceId, ownerUserId)
+  if (integration.id === canonicalId && integration.userId === ownerUserId) return
+
+  const encrypted = encryptCredentials(integration.credentials || {}, integration.serviceId)
+  await db.collection(INTEGRATIONS_COLLECTION).doc(canonicalId).set(
+    {
+      ...integration,
+      id: canonicalId,
+      userId: ownerUserId,
+      credentials: encrypted,
+      updatedAt: new Date(),
+    },
+    { merge: true }
+  )
+}
+
+export async function getAllIntegrationsServer(
+  userId: string = INTEGRATION_OWNER_USER_ID
+): Promise<Integration[]> {
   try {
     const db = getAdminDb()
-    const snap = await db.collection(INTEGRATIONS_COLLECTION).where('userId', '==', userId).get()
+    const snap = await db.collection(INTEGRATIONS_COLLECTION).get()
 
-    const integrations = snap.docs.map((doc) => {
-      const data = doc.data() as Integration
+    const allIntegrations = snap.docs.map((docSnap) => {
+      const data = docSnap.data() as Integration
       return {
         ...data,
-        credentials: decryptCredentials(data.credentials, data.serviceId),
+        id: docSnap.id,
+        credentials: decryptCredentials(data.credentials || {}, data.serviceId),
       }
     })
 
-    // Self-heal: integrations saved before this status logic existed are stuck
-    // as 'pending' even though they have stored credentials. Promote them so
-    // the badge reflects that they're configured. Firebase is verified live
-    // (active/error); every other provider with stored credentials becomes
-    // 'active'. Persist the change so future loads are fast.
+    let integrations = mergeIntegrationsByService(allIntegrations)
+
+    // Persist canonical owner docs so future loads are stable across deploys.
+    await Promise.all(
+      integrations.map((integration) => migrateToCanonicalOwner(db, integration, userId))
+    )
+
+    // Re-read canonical set for the requested owner (fast path after migration).
+    const ownerSnap = await db
+      .collection(INTEGRATIONS_COLLECTION)
+      .where('userId', '==', userId)
+      .get()
+
+    if (ownerSnap.size > 0) {
+      integrations = ownerSnap.docs.map((docSnap) => {
+        const data = docSnap.data() as Integration
+        return {
+          ...data,
+          id: docSnap.id,
+          credentials: decryptCredentials(data.credentials || {}, data.serviceId),
+        }
+      })
+    }
+
+    // Self-heal: integrations saved before status logic existed are stuck
+    // as 'pending'/'inactive' even though they have stored credentials.
     await Promise.all(
       integrations.map(async (integration) => {
         const hasCredentials =
@@ -237,8 +338,10 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
             privateKey: integration.credentials.privateKey,
           })
           newStatus = verified ? 'active' : 'error'
-        } else if (integration.status === 'pending') {
-          // Configured non-Firebase integration that was never marked active.
+        } else if (
+          integration.status === 'pending' ||
+          integration.status === 'inactive'
+        ) {
           newStatus = 'active'
         } else {
           return
@@ -263,7 +366,7 @@ export async function getAllIntegrationsServer(userId: string): Promise<Integrat
 
 export async function deleteIntegrationServer(userId: string, serviceId: string): Promise<void> {
   try {
-    const integrationId = `${userId}_${serviceId}`
+    const integrationId = integrationDocId(serviceId, userId)
     const db = getAdminDb()
     await db.collection(INTEGRATIONS_COLLECTION).doc(integrationId).delete()
     console.log('[v0] Integration deleted (server):', integrationId)
@@ -279,7 +382,7 @@ export async function updateIntegrationStatusServer(
   status: 'active' | 'inactive' | 'error' | 'pending'
 ): Promise<void> {
   try {
-    const integrationId = `${userId}_${serviceId}`
+    const integrationId = integrationDocId(serviceId, userId)
     const db = getAdminDb()
     await db.collection(INTEGRATIONS_COLLECTION).doc(integrationId).update({
       status,

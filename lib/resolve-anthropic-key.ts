@@ -1,6 +1,6 @@
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 
-const DEFAULT_INTEGRATION_USER_ID = 'dev-user-001'
+import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 
 /** Resolve Anthropic API key: env override, then encrypted integrations store. */
 export async function resolveAnthropicApiKey(): Promise<string | null> {
@@ -10,7 +10,7 @@ export async function resolveAnthropicApiKey(): Promise<string | null> {
   }
 
   try {
-    const integration = await getIntegrationServer(DEFAULT_INTEGRATION_USER_ID, 'anthropic')
+    const integration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'anthropic')
     const apiKey = integration?.credentials?.apiKey
     if (typeof apiKey === 'string' && apiKey.trim()) {
       return apiKey.trim()
