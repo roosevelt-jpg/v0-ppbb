@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
+import {
+  mapNotificationTypeToPreference,
+  shouldNotifyUser,
+} from '@/lib/user-settings'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,11 +27,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const fcmToken = userDoc.data().fcmToken
-    const fcmSettings = userDoc.data().fcmSettings || {}
+    const userData = userDoc.data() || {}
+    const fcmToken = userData.fcmToken
+    if (typeof fcmToken !== 'string' || fcmToken.length < 10) {
+      return NextResponse.json(
+        { success: false, error: 'FCM token not found for user' },
+        { status: 404 }
+      )
+    }
 
-    // Check if notifications are enabled for this type
-    if (!fcmSettings.enabled) {
+    const prefKey = mapNotificationTypeToPreference(
+      typeof data?.type === 'string' ? data.type : undefined
+    )
+    if (!shouldNotifyUser({ ...userData, id: userId }, 'push', prefKey)) {
+      return NextResponse.json({ success: true, skipped: 'Push notifications disabled for user' })
+    }
+
+    const fcmSettings = userData.fcmSettings || {}
+    if (fcmSettings.enabled === false) {
       return NextResponse.json({ success: true, skipped: 'Notifications disabled' })
     }
 

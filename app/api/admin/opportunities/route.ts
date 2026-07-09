@@ -40,10 +40,14 @@ async function notifyBusinessListingLive(businessId: string, title: string, jobI
 
   try {
     const userSnap = await db.collection('users').doc(businessId).get()
-    const fcmToken = userSnap.data()?.fcmToken
+    const userData = userSnap.data() || {}
+    const fcmToken = userData.fcmToken
     if (typeof fcmToken !== 'string' || fcmToken.length < 10) return
 
-    const fcmSettings = userSnap.data()?.fcmSettings || {}
+    const { shouldNotifyUser } = await import('@/lib/user-settings')
+    if (!shouldNotifyUser({ ...userData, id: businessId }, 'push', 'systemAlerts')) return
+
+    const fcmSettings = userData.fcmSettings || {}
     if (fcmSettings.enabled === false) return
 
     const app = getApps()[0]

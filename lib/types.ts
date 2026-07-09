@@ -141,6 +141,7 @@ export interface User {
   roles?: UserRole[]
   phone?: string
   whatsappNumber?: string
+  bio?: string
   location?: LocationData
   profession?: string
   jobTitle?: string
@@ -187,6 +188,15 @@ export interface User {
   profileComplete: boolean
   createdAt: Date
   updatedAt: Date
+  /** Free-text location label for settings / directory display */
+  locationLabel?: string
+  notificationPreferences?: import('@/lib/user-settings').NotificationPreferences
+  privacySettings?: import('@/lib/user-settings').PrivacySettings
+  status?: 'active' | 'deleted' | 'suspended'
+  deletedAt?: Date
+  newsletterOptOut?: boolean
+  fcmToken?: string
+  fcmSettings?: import('@/lib/fcm-settings').FCMSettings
 }
 
 export interface BusinessProfile extends User {

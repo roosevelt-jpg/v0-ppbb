@@ -5,6 +5,7 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { hasAdminAccessServer } from '@/lib/roles-server'
+import { shouldNotifyUser, mapNotificationTypeToPreference } from '@/lib/user-settings'
 
 async function notifyUser(
   userId: string,
@@ -15,6 +16,11 @@ async function notifyUser(
   if (!userId) return
   try {
     const db = getAdminDb()
+    const userSnap = await db.collection('users').doc(userId).get()
+    const userData = userSnap.data() || {}
+    const pref = mapNotificationTypeToPreference(type)
+    if (!shouldNotifyUser({ ...userData, id: userId }, 'in_app', pref)) return
+
     await db.collection('users').doc(userId).collection('notifications').add({
       type,
       title,

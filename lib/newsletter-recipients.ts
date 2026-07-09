@@ -1,5 +1,6 @@
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getUnsubscribedEmails } from '@/lib/newsletter-unsubscribe'
+import { isAccountDeleted, shouldNotifyUser } from '@/lib/user-settings'
 
 export interface NewsletterRecipient {
   email: string
@@ -26,6 +27,8 @@ export async function fetchNewsletterRecipients(): Promise<NewsletterRecipient[]
     if (!email || !EMAIL_RE.test(email)) continue
     if (unsubscribed.has(email)) continue
     if (data.newsletterOptOut === true) continue
+    if (isAccountDeleted({ ...data, id: doc.id })) continue
+    if (!shouldNotifyUser({ ...data, id: doc.id }, 'email', 'newsletter')) continue
     if (seen.has(email)) continue
     seen.add(email)
     const name =

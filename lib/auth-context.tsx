@@ -1,16 +1,18 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { auth, db } from '@/lib/firebase'
-import { doc, onSnapshot } from 'firebase/firestore'
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
+import { doc, onSnapshot, getDoc } from 'firebase/firestore'
+import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth'
 import { User, BusinessProfile } from '@/lib/types'
+import { isAccountDeleted } from '@/lib/user-settings'
 
 interface AuthContextType {
   user: User | BusinessProfile | null
   firebaseUser: FirebaseUser | null
   loading: boolean
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -46,7 +48,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               doc(db, 'users', uid),
               (snap) => {
                 if (snap.exists()) {
-                  setUser({ id: snap.id, ...snap.data() } as User | BusinessProfile)
+                  const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile
+                  if (isAccountDeleted(profile)) {
+                    setUser(null)
+                    setLoading(false)
+                    void signOut(auth)
+                    return
+                  }
+                  setUser(profile)
                 } else {
                   setUser(null)
                 }
@@ -85,8 +94,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setFirebaseUser(null)
   }
 
+  const refreshUser = useCallback(async () => {
+    const current = auth.currentUser
+    if (!current) return
+    try {
+      await current.getIdToken(true)
+      const snap = await getDoc(doc(db, 'users', current.uid))
+      if (snap.exists()) {
+        const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile
+        if (!isAccountDeleted(profile)) {
+          setUser(profile)
+        }
+      }
+    } catch (error) {
+      console.error('[v0] refreshUser failed:', error)
+    }
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )
@@ -100,6 +126,7 @@ export function useAuth() {
       firebaseUser: null,
       loading: true,
       logout: async () => {},
+      refreshUser: async () => {},
     }
   }
   return context

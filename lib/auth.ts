@@ -14,6 +14,7 @@ import {
 import { doc, setDoc, getDoc, DocumentSnapshot } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { isAccountDeleted } from '@/lib/user-settings'
 
 async function fetchOwnUserProfile(firebaseUser: FirebaseUser): Promise<DocumentSnapshot> {
   const userRef = doc(db, 'users', firebaseUser.uid)
@@ -37,6 +38,22 @@ async function fetchOwnUserProfile(firebaseUser: FirebaseUser): Promise<Document
   }
 
   return getDoc(userRef)
+}
+
+async function buildLoginResult(
+  firebaseUser: FirebaseUser,
+  userDocSnap: DocumentSnapshot
+): Promise<{ user: User | null; error: string | null } | null> {
+  if (!userDocSnap.exists()) return null
+  const profile = { id: firebaseUser.uid, ...userDocSnap.data() } as User
+  if (isAccountDeleted(profile)) {
+    await signOut(auth)
+    return {
+      user: null,
+      error: 'This account has been deactivated. Contact support to restore access.',
+    }
+  }
+  return { user: profile, error: null }
 }
 
 interface RegisterUserOptions {
@@ -111,12 +128,8 @@ export async function loginUser(
 
     const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
-    if (userDocSnap.exists()) {
-      return {
-        user: { id: firebaseUser.uid, ...userDocSnap.data() } as User,
-        error: null,
-      }
-    }
+    const existing = await buildLoginResult(firebaseUser, userDocSnap)
+    if (existing) return existing
 
     // Auto-create user profile on first login if it doesn't exist
     // This handles test members or users created via Firebase console
@@ -157,9 +170,8 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     await firebaseUser.getIdToken(true)
     const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
-    if (userDocSnap.exists()) {
-      return { user: { id: firebaseUser.uid, ...userDocSnap.data() } as User, error: null }
-    }
+    const existing = await buildLoginResult(firebaseUser, userDocSnap)
+    if (existing) return existing
 
     // Create new user profile for first-time Google sign-in
     const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
@@ -200,9 +212,8 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     await firebaseUser.getIdToken(true)
     const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
-    if (userDocSnap.exists()) {
-      return { user: { id: firebaseUser.uid, ...userDocSnap.data() } as User, error: null }
-    }
+    const existing = await buildLoginResult(firebaseUser, userDocSnap)
+    if (existing) return existing
 
     // Create new user profile for first-time Facebook sign-in
     const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
