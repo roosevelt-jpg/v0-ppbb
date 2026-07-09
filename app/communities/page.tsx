@@ -65,14 +65,14 @@ export default function CommunitiesPage() {
       alert('Successfully joined the community!')
     } catch (error) {
       console.error('[v0] Error joining community:', error)
-      alert('Failed to join community')
+      alert(error instanceof Error ? error.message : 'Failed to join community')
     } finally {
       setJoining(null)
     }
   }
 
   const categories = Array.from(new Set(communities.map((c) => c.category)))
-  const genderOptions = ['all', 'mixed', 'men-only', 'ladies-only']
+  const genderOptions = ['all', 'mixed', 'male', 'female']
 
   const featuredCommunities = filtered.filter(c => c.isFeatured).slice(0, 3)
   const otherCommunities = filtered.filter(c => !c.isFeatured)

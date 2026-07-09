@@ -74,6 +74,63 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     ],
     docs: 'https://firebase.google.com/docs/web/setup',
   },
+  googleAuth: {
+    id: 'googleAuth',
+    name: 'Google Sign-In',
+    category: 'backend',
+    description: 'Continue with Google on login & signup',
+    icon: '🔐',
+    fields: [
+      {
+        name: 'webClientId',
+        label: 'OAuth Web Client ID',
+        type: 'text',
+        required: true,
+        placeholder: '123456789-abc.apps.googleusercontent.com',
+      },
+      {
+        name: 'webClientSecret',
+        label: 'OAuth Client Secret',
+        type: 'password',
+        required: false,
+        encrypt: true,
+        placeholder: 'Optional — stored for admin reference',
+      },
+      {
+        name: 'enabled',
+        label: 'Enable Google Sign-In on login page',
+        type: 'checkbox',
+        required: false,
+      },
+    ],
+    docs: 'https://firebase.google.com/docs/auth/web/google-signin',
+    help: 'Create OAuth Web credentials in Google Cloud Console, then enable Google in Firebase Authentication using the same Client ID.',
+  },
+  facebookAuth: {
+    id: 'facebookAuth',
+    name: 'Facebook Login',
+    category: 'backend',
+    description: 'Continue with Facebook on login & signup',
+    icon: '🔐',
+    fields: [
+      { name: 'appId', label: 'Facebook App ID', type: 'text', required: true, placeholder: '1234567890123456' },
+      {
+        name: 'appSecret',
+        label: 'Facebook App Secret',
+        type: 'password',
+        required: true,
+        encrypt: true,
+      },
+      {
+        name: 'enabled',
+        label: 'Enable Facebook Login on login page',
+        type: 'checkbox',
+        required: false,
+      },
+    ],
+    docs: 'https://firebase.google.com/docs/auth/web/facebook-login',
+    help: 'Add your App ID and Secret in Firebase Authentication > Sign-in method > Facebook, then save the same values here.',
+  },
   // Calendars
   googleCalendar: {
     id: 'googleCalendar',

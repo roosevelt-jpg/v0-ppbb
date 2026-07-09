@@ -165,6 +165,10 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     await setPersistence(auth, browserLocalPersistence)
     
     const provider = new GoogleAuthProvider()
+    provider.addScope('email')
+    provider.addScope('profile')
+    provider.setCustomParameters({ prompt: 'select_account' })
+
     const result = await signInWithPopup(auth, provider)
     const firebaseUser = result.user
 
@@ -197,8 +201,8 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: formatAuthError(error) }
   }
 }
 
@@ -207,6 +211,9 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     await setPersistence(auth, browserLocalPersistence)
     
     const provider = new FacebookAuthProvider()
+    provider.addScope('email')
+    provider.addScope('public_profile')
+
     const result = await signInWithPopup(auth, provider)
     const firebaseUser = result.user
 
@@ -239,17 +246,21 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: formatAuthError(error) }
   }
 }
 
 export async function sendPasswordReset(email: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    await sendPasswordResetEmail(auth, email)
+    const trimmed = email.trim()
+    if (!trimmed) {
+      return { success: false, error: 'Please enter your email address.' }
+    }
+    await sendPasswordResetEmail(auth, trimmed)
     return { success: true, error: null }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    return { success: false, error: formatAuthError(error) }
   }
 }
 

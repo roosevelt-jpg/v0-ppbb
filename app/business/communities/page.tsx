@@ -7,6 +7,7 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { subscribeToBusinessCommunities } from '@/lib/business-queries'
 import { Community } from '@/lib/community-types'
+import { genderRestrictionLabel, isPendingApproval } from '@/lib/community-governance'
 import { Plus, Trash2, Edit2 } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { deleteDoc, doc } from 'firebase/firestore'
@@ -144,8 +145,44 @@ export default function BusinessCommunitiesPage() {
                 <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
                   {community.name}
                 </h3>
+                {isPendingApproval(community.status) ? (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginBottom: '8px',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      backgroundColor: '#fffbeb',
+                      color: '#92400e',
+                      border: '1px solid #fcd34d',
+                    }}
+                  >
+                    Pending admin approval
+                  </span>
+                ) : community.status === 'archived' ? (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginBottom: '8px',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      backgroundColor: '#fef2f2',
+                      color: '#991b1b',
+                      border: '1px solid #fecaca',
+                    }}
+                  >
+                    Rejected / archived
+                  </span>
+                ) : null}
                 <p style={{ color: '#888888', fontSize: '14px', marginBottom: '12px' }}>
                   {community.description}
+                </p>
+                <p style={{ color: '#666666', fontSize: '12px', marginBottom: '12px' }}>
+                  {genderRestrictionLabel(community.genderRestriction)} · {community.memberCount || 0} members
                 </p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                   {community.tags?.map((tag) => (

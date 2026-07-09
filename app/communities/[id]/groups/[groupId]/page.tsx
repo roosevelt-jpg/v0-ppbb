@@ -15,6 +15,7 @@ import { uploadGroupFile, getFileType } from '@/lib/firebase-storage'
 import { format } from 'date-fns'
 import EmojiPicker from 'emoji-picker-react'
 import { addEmojiReaction, removeEmojiReaction, editMessage, deleteMessage, markMessageAsRead } from '@/lib/chat-utils'
+import { memberCanChat } from '@/lib/community-governance'
 
 interface Message {
   id: string
@@ -67,6 +68,8 @@ export default function GroupChatPage() {
   const [sending, setSending] = React.useState(false)
   const [uploading, setUploading] = React.useState(false)
   const [isMember, setIsMember] = React.useState(false)
+  const [canSendMessages, setCanSendMessages] = React.useState(false)
+  const [memberStatus, setMemberStatus] = React.useState<string>('active')
   const [showEmojiPicker, setShowEmojiPicker] = React.useState(false)
   const [emojiPickerFor, setEmojiPickerFor] = React.useState<string | null>(null)
   const [editingId, setEditingId] = React.useState<string | null>(null)
@@ -106,17 +109,24 @@ export default function GroupChatPage() {
         const snapshot = await getDocs(q)
 
         const memberDoc = snapshot.docs[0]?.data()
+        const status = String(memberDoc?.memberStatus || 'active')
         const isActiveMember =
-          !snapshot.empty && (memberDoc?.joinStatus === 'active' || memberDoc?.isActive !== false)
+          !snapshot.empty &&
+          (memberDoc?.joinStatus === 'active' || memberDoc?.isActive !== false) &&
+          memberCanChat(status)
 
         const ownerOrAdmin = canApproveGroupMembers(user, groupData.data?.createdBy)
         if (!isActiveMember && !ownerOrAdmin) {
           setIsMember(false)
+          setCanSendMessages(false)
+          setMemberStatus(status)
           setLoading(false)
           return
         }
 
         setIsMember(true)
+        setMemberStatus(status)
+        setCanSendMessages(isActiveMember && memberCanChat(status))
 
         const messagesRef = collection(
           db,
@@ -222,7 +232,7 @@ export default function GroupChatPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim() || !user || !isMember) return
+    if (!newMessage.trim() || !user || !canSendMessages) return
 
     setSending(true)
     try {
@@ -244,7 +254,7 @@ export default function GroupChatPage() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !user || !isMember) return
+    if (!file || !user || !canSendMessages) return
 
     setUploading(true)
     try {
@@ -652,6 +662,15 @@ export default function GroupChatPage() {
         </div>
 
         {/* Input Area */}
+        {!canSendMessages && isMember && (
+          <div className="bg-amber-50 border-t border-amber-200 px-4 py-3 text-sm text-amber-900">
+            {memberStatus === 'suspended'
+              ? 'Your membership is suspended. You can read messages but cannot send new ones.'
+              : memberStatus === 'banned'
+                ? 'You are banned from this group.'
+                : 'You cannot send messages in this group right now.'}
+          </div>
+        )}
         <form
           onSubmit={handleSendMessage}
           className="bg-white border-t border-gray-200 p-4 space-y-2"
@@ -676,7 +695,7 @@ export default function GroupChatPage() {
               <input
                 type="file"
                 onChange={handleFileUpload}
-                disabled={uploading || sending}
+                disabled={uploading || sending || !canSendMessages}
                 className="hidden"
                 accept="image/*,video/*,.pdf"
               />
@@ -685,7 +704,8 @@ export default function GroupChatPage() {
             <button
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="p-2 hover:opacity-70"
+              disabled={!canSendMessages}
+              className="p-2 hover:opacity-70 disabled:opacity-40"
             >
               <Smile size={20} className="text-gray-600" />
             </button>
@@ -694,14 +714,14 @@ export default function GroupChatPage() {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
-              disabled={sending || uploading}
+              placeholder={canSendMessages ? 'Type a message...' : 'Messaging disabled'}
+              disabled={sending || uploading || !canSendMessages}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent disabled:opacity-50"
             />
 
             <button
               type="submit"
-              disabled={sending || uploading || !newMessage.trim()}
+              disabled={sending || uploading || !newMessage.trim() || !canSendMessages}
               className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 flex items-center gap-2"
             >
               <Send size={18} />

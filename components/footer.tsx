@@ -13,6 +13,7 @@ import {
   type GlobalSocialLinks,
 } from '@/lib/platform-config'
 import { ensureMenuPagesSeeded, subscribeToMenuPages } from '@/lib/cms-menu-live'
+import { useCommunityStats } from '@/hooks/use-community-stats'
 
 interface Stats {
   members: number
@@ -35,12 +36,13 @@ function pagesToLinks(pages: Page[]): MenuLink[] {
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
-  const [stats] = useState<Stats>({
-    members: 3412,
-    volunteerHours: 8940,
-    businessPartners: 87,
-    donationsTracked: 'AED 92K',
-  })
+  const liveStats = useCommunityStats()
+  const stats: Stats = {
+    members: liveStats.totalMembers,
+    volunteerHours: liveStats.volunteerHours,
+    businessPartners: liveStats.businessPartners,
+    donationsTracked: liveStats.donationsTracked,
+  }
   const [socialLinks, setSocialLinks] = useState<GlobalSocialLinks>(
     DEFAULT_GLOBAL_SETTINGS.socialLinks
   )
@@ -78,19 +80,27 @@ export function Footer() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 pb-8" style={{ borderBottom: '1px solid #333333' }}>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.members.toLocaleString()}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>
+              {liveStats.loading ? '—' : stats.members.toLocaleString()}
+            </p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Community Members</p>
           </div>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.volunteerHours.toLocaleString()}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>
+              {liveStats.loading ? '—' : stats.volunteerHours.toLocaleString()}
+            </p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Volunteer Hours</p>
           </div>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.businessPartners}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>
+              {liveStats.loading ? '—' : stats.businessPartners}
+            </p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Business Partners</p>
           </div>
           <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>{stats.donationsTracked}</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem', color: '#ffffff' }}>
+              {liveStats.loading ? '—' : stats.donationsTracked}
+            </p>
             <p style={{ fontSize: '0.875rem', color: '#888888' }}>Donations Tracked</p>
           </div>
         </div>

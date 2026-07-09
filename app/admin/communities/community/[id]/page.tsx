@@ -6,9 +6,22 @@ import { useParams, useRouter } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { subscribeToCommunity, subscribeToCommunityGroups, createGroup, deleteGroup } from '@/lib/community-queries'
 import type { Community, Group } from '@/lib/community-types'
-import { ChevronLeft, Plus, Trash2, Edit2, Users } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, Edit2, Users, Shield } from 'lucide-react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { adminApiFetch } from '@/lib/admin-api-client'
+import { GENDER_RESTRICTION_OPTIONS, genderRestrictionLabel } from '@/lib/community-governance'
 
 const GROUP_TYPES = ['discussion', 'support', 'prayer', 'skill-share', 'networking']
+
+type CommunityMemberRow = {
+  id: string
+  userId: string
+  userName?: string
+  userEmail?: string
+  memberStatus?: string
+  role?: string
+}
 
 export default function CommunityDetailPage() {
   const router = useRouter()
@@ -23,9 +36,11 @@ export default function CommunityDetailPage() {
     name: '',
     description: '',
     type: 'discussion' as const,
-    genderRestriction: 'mixed' as const,
+    genderRestriction: 'mixed' as 'mixed' | 'male' | 'female',
     capacity: 50,
   })
+  const [members, setMembers] = React.useState<CommunityMemberRow[]>([])
+  const [moderatingId, setModeratingId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     const unsubCommunity = subscribeToCommunity(communityId, (data) => {
@@ -42,6 +57,55 @@ export default function CommunityDetailPage() {
       unsubGroups()
     }
   }, [communityId])
+
+  React.useEffect(() => {
+    const unsubMembers = onSnapshot(collection(db, 'communities', communityId, 'members'), (snap) => {
+      setMembers(
+        snap.docs.map((d) => ({
+          id: d.id,
+          userId: d.data().userId,
+          userName: d.data().userName,
+          userEmail: d.data().userEmail,
+          memberStatus: d.data().memberStatus || 'active',
+          role: d.data().role,
+        }))
+      )
+    })
+    return () => unsubMembers()
+  }, [communityId])
+
+  const handleModerateMember = async (
+    member: CommunityMemberRow,
+    action: 'suspend' | 'ban' | 'remove' | 'restore'
+  ) => {
+    const reason = action === 'restore' ? undefined : prompt(`Reason for ${action}?`) || undefined
+    if (action !== 'restore' && reason === undefined && !confirm(`Proceed with ${action} without a reason?`)) {
+      return
+    }
+
+    setModeratingId(member.id)
+    try {
+      const json = await adminApiFetch('/api/admin/community-members', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          communityId,
+          memberDocId: member.id,
+          userId: member.userId,
+          action,
+          reason,
+          suspendDays: action === 'suspend' ? 7 : undefined,
+        }),
+      })
+      if (!json.success) {
+        alert(json.error || 'Moderation action failed')
+      }
+    } catch (error) {
+      console.error('[v0] Error moderating member:', error)
+      alert('Moderation action failed')
+    } finally {
+      setModeratingId(null)
+    }
+  }
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -204,12 +268,19 @@ export default function CommunityDetailPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                   <select
                     value={groupForm.genderRestriction}
-                    onChange={(e) => setGroupForm({ ...groupForm, genderRestriction: e.target.value as any })}
+                    onChange={(e) =>
+                      setGroupForm({
+                        ...groupForm,
+                        genderRestriction: e.target.value as 'mixed' | 'male' | 'female',
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black"
                   >
-                    <option value="mixed">All genders</option>
-                    <option value="men-only">Men only</option>
-                    <option value="ladies-only">Ladies only</option>
+                    {GENDER_RESTRICTION_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -249,7 +320,9 @@ export default function CommunityDetailPage() {
                       <Users size={14} />
                       {group.memberCount} members
                     </div>
-                    <span className="text-xs text-gray-500 capitalize">{group.type}</span>
+                    <span className="text-xs text-gray-500 capitalize">
+                      {genderRestrictionLabel(group.genderRestriction)} · {group.type}
+                    </span>
                   </div>
 
                   <button
@@ -261,6 +334,77 @@ export default function CommunityDetailPage() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Members moderation */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Shield size={20} />
+            <h2 className="text-xl font-bold text-black">Members ({members.length})</h2>
+          </div>
+          <p className="text-sm text-gray-600">
+            As platform admin you can suspend, ban, or remove members who violate community guidelines.
+          </p>
+          {members.length === 0 ? (
+            <div className="text-center py-8 bg-gray-50 rounded-lg text-gray-500">No members yet.</div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
+              {members.map((member) => {
+                const status = member.memberStatus || 'active'
+                const isBusy = moderatingId === member.id
+                return (
+                  <div key={member.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
+                    <div>
+                      <p className="font-medium text-black">{member.userName || 'Member'}</p>
+                      <p className="text-sm text-gray-500">{member.userEmail}</p>
+                      <p className="text-xs text-gray-400 mt-1 capitalize">
+                        {member.role || 'member'} · {status}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {status !== 'active' ? (
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleModerateMember(member, 'restore')}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          Restore
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => handleModerateMember(member, 'suspend')}
+                            className="px-3 py-1 text-sm border border-amber-300 text-amber-800 rounded-lg hover:bg-amber-50 disabled:opacity-50"
+                          >
+                            Suspend
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => handleModerateMember(member, 'ban')}
+                            className="px-3 py-1 text-sm border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                          >
+                            Ban
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isBusy}
+                            onClick={() => handleModerateMember(member, 'remove')}
+                            className="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

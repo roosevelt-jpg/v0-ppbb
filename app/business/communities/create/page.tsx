@@ -78,6 +78,8 @@ export default function CreateCommunityPage() {
         ...formData,
         createdBy: user.id,
         businessId: user.id,
+        createdByName: user.displayName || user.firstName || 'Business owner',
+        createdByEmail: user.email || '',
         rules: formData.rules.split('\n').filter((r) => r.trim()),
       }
 
@@ -90,7 +92,11 @@ export default function CreateCommunityPage() {
       const data = await response.json()
       if (!data.success) throw new Error(data.error)
 
-      alert(isEditMode ? 'Community updated successfully!' : 'Community created successfully!')
+      alert(
+        isEditMode
+          ? 'Community updated successfully!'
+          : 'Community submitted for admin approval. You will be notified when it goes live.'
+      )
       router.push('/business/communities')
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error'

@@ -8,6 +8,7 @@ import { ChevronLeft, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { uploadGroupIcon } from '@/lib/firebase-storage'
 import { useAuth } from '@/lib/auth-context'
+import { GENDER_RESTRICTION_OPTIONS } from '@/lib/community-governance'
 
 export default function CreateGroupPage() {
   const params = useParams()
@@ -53,9 +54,13 @@ export default function CreateGroupPage() {
         iconURL = await uploadGroupIcon(communityId, `new_${Date.now()}`, icon)
       }
 
+      const token = user ? await (await import('@/lib/firebase')).auth.currentUser?.getIdToken() : null
       const res = await fetch('/api/groups', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           communityId,
           name: formData.name,
@@ -136,11 +141,7 @@ export default function CreateGroupPage() {
               Gender Restriction
             </label>
             <div className="space-y-2">
-              {[
-                { value: 'mixed', label: 'All (Mixed)' },
-                { value: 'male', label: 'Men Only' },
-                { value: 'female', label: 'Women Only' },
-              ].map((option) => (
+              {GENDER_RESTRICTION_OPTIONS.map((option) => (
                 <label key={option.value} className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="radio"
@@ -152,6 +153,7 @@ export default function CreateGroupPage() {
                     className="w-4 h-4"
                   />
                   <span className="text-gray-700">{option.label}</span>
+                  <span className="text-xs text-gray-400">({option.description})</span>
                 </label>
               ))}
             </div>

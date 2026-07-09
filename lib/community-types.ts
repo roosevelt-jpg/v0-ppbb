@@ -1,10 +1,11 @@
 import { Timestamp } from 'firebase/firestore'
 
 export type GenderRestriction = 'mixed' | 'male' | 'female'
-export type CommunityStatus = 'active' | 'inactive' | 'archived'
+export type CommunityStatus = 'active' | 'inactive' | 'archived' | 'pending_approval'
 export type CommunityVisibility = 'public' | 'private' | 'restricted'
-export type GroupType = 'discussion' | 'support' | 'prayer' | 'skill-share' | 'networking'
+export type GroupType = 'discussion' | 'support' | 'prayer' | 'skill-share' | 'networking' | 'announcement'
 export type CommunityCategory = 'general' | 'interest' | 'support' | 'events' | 'volunteer' | 'business' | 'charity'
+export type MemberModerationStatus = 'active' | 'suspended' | 'banned' | 'removed'
 
 export interface Member {
   id: string
@@ -107,6 +108,8 @@ export interface GroupMember {
   role: 'admin' | 'moderator' | 'member'
   isActive: boolean
   joinStatus?: 'pending' | 'active' | 'rejected'
+  memberStatus?: MemberModerationStatus
+  suspendedUntil?: Timestamp | Date
 }
 
 export interface CommunityMember {
@@ -120,4 +123,8 @@ export interface CommunityMember {
   joinedAt: Timestamp | Date
   role: 'admin' | 'moderator' | 'member'
   isActive: boolean
+  /** Platform admin moderation */
+  memberStatus?: MemberModerationStatus
+  suspendedUntil?: Timestamp | Date
+  moderationNotes?: string
 }

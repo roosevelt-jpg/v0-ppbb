@@ -7,6 +7,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { createCommunity, updateCommunity, subscribeToCommunity } from '@/lib/community-queries'
 import type { Community } from '@/lib/community-types'
 import { ChevronLeft } from 'lucide-react'
+import { GENDER_RESTRICTION_OPTIONS } from '@/lib/community-governance'
 
 const COMMUNITY_CATEGORIES = ['Professional', 'Hobby', 'Support', 'Charity', 'Social', 'Learning']
 const COMMON_TAGS = ['mentorship', 'networking', 'wellness', 'spirituality', 'volunteering', 'fundraising']
@@ -131,12 +132,19 @@ function CreateCommunityContent() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Gender Restriction</label>
             <select
               value={community.genderRestriction || 'mixed'}
-              onChange={(e) => setCommunity({ ...community, genderRestriction: e.target.value as any })}
+              onChange={(e) =>
+                setCommunity({
+                  ...community,
+                  genderRestriction: e.target.value as Community['genderRestriction'],
+                })
+              }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             >
-              <option value="mixed">Open to all</option>
-              <option value="men-only">Men only</option>
-              <option value="ladies-only">Ladies only</option>
+              {GENDER_RESTRICTION_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 

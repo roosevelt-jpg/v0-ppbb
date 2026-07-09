@@ -22,6 +22,11 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = React.useState(false)
   const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
   const [statsLoading, setStatsLoading] = React.useState(true)
+  const [oauthLoading, setOauthLoading] = React.useState<'google' | 'facebook' | null>(null)
+  const [authProviders, setAuthProviders] = React.useState({
+    google: { enabled: true, configured: false },
+    facebook: { enabled: true, configured: false },
+  })
 
   // Route the user after a successful login. Honor returnUrl or redirect query params first.
   const routeAfterLogin = (user: User) => {
@@ -72,6 +77,17 @@ export default function LoginPage() {
     })
     
     fetchStats()
+
+    fetch('/api/public/auth-providers', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setAuthProviders(json.data)
+        }
+      })
+      .catch(() => {
+        /* keep defaults — Firebase Console may still work */
+      })
   }, [])
 
   // Save email to localStorage when rememberMe changes
@@ -140,13 +156,19 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setError('')
-    setLoading(true)
+    if (!authProviders.google.enabled) {
+      setError(
+        'Google Sign-In is not enabled. Add credentials under Admin → Integrations → Google Sign-In, then enable it in Firebase Authentication.'
+      )
+      return
+    }
+    setOauthLoading('google')
 
     const { user, error: loginError } = await loginWithGoogle()
 
     if (loginError) {
       setError(loginError)
-      setLoading(false)
+      setOauthLoading(null)
       return
     }
 
@@ -157,18 +179,26 @@ export default function LoginPage() {
       })
 
       routeAfterLogin(user)
+    } else {
+      setOauthLoading(null)
     }
   }
 
   const handleFacebookLogin = async () => {
     setError('')
-    setLoading(true)
+    if (!authProviders.facebook.enabled) {
+      setError(
+        'Facebook Login is not enabled. Add credentials under Admin → Integrations → Facebook Login, then enable it in Firebase Authentication.'
+      )
+      return
+    }
+    setOauthLoading('facebook')
 
     const { user, error: loginError } = await loginWithFacebook()
 
     if (loginError) {
       setError(loginError)
-      setLoading(false)
+      setOauthLoading(null)
       return
     }
 
@@ -179,8 +209,12 @@ export default function LoginPage() {
       })
 
       routeAfterLogin(user)
+    } else {
+      setOauthLoading(null)
     }
   }
+
+  const socialBusy = oauthLoading !== null
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 py-4 md:py-6 bg-neutral-100">
@@ -207,19 +241,19 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={loading}
+              disabled={loading || socialBusy}
               className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
             >
-              {loading ? 'Signing in...' : 'Continue with Google'}
+              {oauthLoading === 'google' ? 'Signing in...' : 'Continue with Google'}
             </button>
 
             <button
               type="button"
               onClick={handleFacebookLogin}
-              disabled={loading}
+              disabled={loading || socialBusy}
               className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
             >
-              {loading ? 'Signing in...' : 'Continue with Facebook'}
+              {oauthLoading === 'facebook' ? 'Signing in...' : 'Continue with Facebook'}
             </button>
           </div>
 
@@ -273,7 +307,10 @@ export default function LoginPage() {
                 />
                 <span className="text-xs text-neutral-900">Remember me</span>
               </label>
-              <Link href="/forgot-password" className="text-xs text-neutral-900 hover:underline font-medium">
+              <Link
+                href={email.trim() ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : '/forgot-password'}
+                className="text-xs text-neutral-900 hover:underline font-medium"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -309,7 +346,8 @@ export default function LoginPage() {
               Your community hub <span className="italic font-light">awaits</span>
             </h2>
             <p className="text-sm text-neutral-300 mb-4 leading-relaxed">
-              Access dashboard, track hours, register events, manage donations, and connect with 3,400+ members.
+              Access dashboard, track hours, register events, manage donations, and connect with{' '}
+              {statsLoading ? 'members' : `${stats.totalMembers.toLocaleString()}+ members`}.
             </p>
 
             <div className="space-y-2">
@@ -370,7 +408,8 @@ export default function LoginPage() {
             </div>
 
             <div className="text-xs text-neutral-500 pt-2 border-t border-neutral-800">
-              TRUSTED BY 3,400+ MEMBERS • ESTD 2025 • DUBAI, UAE
+              TRUSTED BY{' '}
+              {statsLoading ? 'MEMBERS' : `${stats.totalMembers.toLocaleString()}+ MEMBERS`} • ESTD 2025 • DUBAI, UAE
             </div>
           </div>
         </div>

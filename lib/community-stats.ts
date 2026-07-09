@@ -1,5 +1,3 @@
-import { getFirestore, doc, getDoc } from 'firebase/firestore'
-
 export interface CommunityStats {
   totalMembers: number
   volunteerHours: number
@@ -7,60 +5,62 @@ export interface CommunityStats {
   totalDonations: number
 }
 
-const FALLBACK_STATS: CommunityStats = {
-  totalMembers: 3400,
-  volunteerHours: 12000,
-  businessPartners: 120,
-  totalDonations: 250000,
+const EMPTY_STATS: CommunityStats = {
+  totalMembers: 0,
+  volunteerHours: 0,
+  businessPartners: 0,
+  totalDonations: 0,
 }
 
-function parseStatNumber(value: unknown, fallback: number): number {
+function parseStatNumber(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value
   if (typeof value === 'string') {
     const digits = value.replace(/[^0-9.]/g, '')
     const parsed = Number(digits)
     if (Number.isFinite(parsed)) return parsed
   }
-  return fallback
+  return 0
+}
+
+function normalizeStats(data: Partial<CommunityStats> | null | undefined): CommunityStats {
+  if (!data) return EMPTY_STATS
+  return {
+    totalMembers: parseStatNumber(data.totalMembers),
+    volunteerHours: parseStatNumber(data.volunteerHours),
+    businessPartners: parseStatNumber(data.businessPartners),
+    totalDonations: parseStatNumber(data.totalDonations),
+  }
 }
 
 /**
- * Public community stats for login/marketing surfaces.
- * Reads only from publicly-readable collections — never queries `users` or `donations`.
+ * Live platform stats for login/marketing surfaces.
+ * Prefers /api/public/community-stats (Admin SDK aggregation), then cached communityStats/public.
  */
 export async function getCommunityStats(): Promise<CommunityStats> {
   try {
-    const db = getFirestore()
+    const res = await fetch('/api/public/community-stats', { cache: 'no-store' })
+    if (res.ok) {
+      const json = await res.json()
+      if (json.success && json.data) {
+        return normalizeStats(json.data)
+      }
+    }
+  } catch (error) {
+    console.warn('[v0] Live stats API unavailable, trying cache:', error)
+  }
 
+  try {
+    const { getFirestore, doc, getDoc } = await import('firebase/firestore')
+    const db = getFirestore()
     const communityStatsSnap = await getDoc(doc(db, 'communityStats', 'public'))
     if (communityStatsSnap.exists()) {
-      const data = communityStatsSnap.data()
-      return {
-        totalMembers: parseStatNumber(data.totalMembers, FALLBACK_STATS.totalMembers),
-        volunteerHours: parseStatNumber(data.volunteerHours, FALLBACK_STATS.volunteerHours),
-        businessPartners: parseStatNumber(data.businessPartners, FALLBACK_STATS.businessPartners),
-        totalDonations: parseStatNumber(data.totalDonations, FALLBACK_STATS.totalDonations),
-      }
+      return normalizeStats(communityStatsSnap.data() as CommunityStats)
     }
-
-    const homepageSnap = await getDoc(doc(db, 'platformConfig', 'homepage'))
-    if (homepageSnap.exists()) {
-      const statsItems = homepageSnap.data()?.stats?.items
-      if (Array.isArray(statsItems) && statsItems.length >= 4) {
-        return {
-          totalMembers: parseStatNumber(statsItems[0]?.number, FALLBACK_STATS.totalMembers),
-          volunteerHours: parseStatNumber(statsItems[1]?.number, FALLBACK_STATS.volunteerHours),
-          businessPartners: parseStatNumber(statsItems[2]?.number, FALLBACK_STATS.businessPartners),
-          totalDonations: parseStatNumber(statsItems[3]?.number, FALLBACK_STATS.totalDonations),
-        }
-      }
-    }
-
-    return FALLBACK_STATS
   } catch (error) {
-    console.error('[v0] Error fetching community stats:', error)
-    return FALLBACK_STATS
+    console.error('[v0] Error reading cached community stats:', error)
   }
+
+  return EMPTY_STATS
 }
 
 export function formatDonations(amount: number): string {
@@ -70,5 +70,5 @@ export function formatDonations(amount: number): string {
   if (amount >= 1000) {
     return `AED ${(amount / 1000).toFixed(0)}K`
   }
-  return `AED ${amount}`
+  return `AED ${Math.round(amount).toLocaleString()}`
 }

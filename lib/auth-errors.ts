@@ -21,6 +21,24 @@ export function formatAuthError(error: unknown): string {
   if (code.includes('auth/user-disabled')) {
     return 'This account has been disabled. Contact support for help.'
   }
+  if (code.includes('auth/popup-closed-by-user')) {
+    return 'Sign-in was cancelled. Please try again.'
+  }
+  if (code.includes('auth/popup-blocked')) {
+    return 'Pop-up was blocked by your browser. Allow pop-ups for this site and try again.'
+  }
+  if (code.includes('auth/operation-not-allowed')) {
+    return 'This sign-in method is not enabled yet. Ask an admin to configure it under Integrations and Firebase Authentication.'
+  }
+  if (code.includes('auth/account-exists-with-different-credential')) {
+    return 'An account already exists with this email using a different sign-in method. Try Google, Facebook, or reset your password.'
+  }
+  if (code.includes('auth/network-request-failed')) {
+    return 'Network error. Check your connection and try again.'
+  }
+  if (code.includes('auth/invalid-action-code') || code.includes('auth/expired-action-code')) {
+    return 'This reset link is invalid or has expired. Request a new password reset email.'
+  }
   if (code.includes('permission-denied') || code.includes('Missing or insufficient permissions')) {
     return 'Signed in, but your profile could not be loaded. Ask an admin to verify your account exists in Firestore, or try again in a moment.'
   }
