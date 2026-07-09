@@ -144,10 +144,11 @@ END:VCALENDAR`
             </Link>
             <button
               onClick={handleAddToCalendar}
-              className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center justify-center gap-1"
+              className="px-3 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition flex items-center justify-center min-w-[44px] min-h-[44px]"
               title="Add to calendar"
+              aria-label="Add to calendar"
             >
-              <Download size={14} />
+              <Download size={14} className="text-white" strokeWidth={2.5} />
             </button>
           </div>
         )}
