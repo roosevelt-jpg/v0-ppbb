@@ -62,7 +62,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setLoading(false)
               },
               (error) => {
-                console.error('[v0] Error subscribing to user profile:', error)
+                const code = (error as { code?: string })?.code
+                if (code === 'permission-denied') {
+                  // Retry once with getDoc after token propagation
+                  void getDoc(doc(db, 'users', uid))
+                    .then((snap) => {
+                      if (snap.exists()) {
+                        const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile
+                        if (!isAccountDeleted(profile)) setUser(profile)
+                      }
+                      setLoading(false)
+                    })
+                    .catch(() => {
+                      setUser(null)
+                      setLoading(false)
+                    })
+                  return
+                }
+                console.warn('[v0] User profile subscription error:', error)
                 setUser(null)
                 setLoading(false)
               }

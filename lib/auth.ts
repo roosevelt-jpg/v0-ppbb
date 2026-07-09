@@ -15,6 +15,7 @@ import { doc, setDoc, getDoc, DocumentSnapshot } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { isAccountDeleted } from '@/lib/user-settings'
+import { formatAuthError } from '@/lib/auth-errors'
 
 async function fetchOwnUserProfile(firebaseUser: FirebaseUser): Promise<DocumentSnapshot> {
   const userRef = doc(db, 'users', firebaseUser.uid)
@@ -154,8 +155,8 @@ export async function loginUser(
     await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: formatAuthError(error) }
   }
 }
 

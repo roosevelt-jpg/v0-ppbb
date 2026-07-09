@@ -67,7 +67,7 @@ export default function LoginPage() {
       setRememberMe(true)
     }
     
-    logActivity('guest', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
+    logActivity('', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
       timestamp: new Date().toISOString()
     })
     
@@ -88,16 +88,34 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    logActivity('guest', email, 'OTHER', 'Attempting sign in', { 
+    logActivity('', email, 'OTHER', 'Attempting sign in', { 
       timestamp: new Date().toISOString()
     })
 
     const { user, error: loginError } = await loginUser(email, password)
 
     if (loginError) {
-      setError(loginError)
-      logActivity('guest', email, 'SIGNIN_FAILED', 'Sign in failed', { 
-        error: loginError,
+      let displayError = loginError
+      try {
+        const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email.trim())}`)
+        const data = await res.json()
+        if (data.success) {
+          if (data.authExists && data.hasGoogle && !data.hasPassword) {
+            displayError =
+              'This email is registered with Google. Click Continue with Google instead of using a password.'
+          } else if (!data.authExists && data.firestoreExists) {
+            displayError =
+              'Your profile exists but Firebase sign-in is not set up for this email. Use Forgot password to create a password, or contact support.'
+          } else if (!data.authExists) {
+            displayError = 'No account found for this email. Please sign up first.'
+          }
+        }
+      } catch {
+        /* keep original error */
+      }
+      setError(displayError)
+      logActivity('', email, 'SIGNIN_FAILED', 'Sign in failed', { 
+        error: displayError,
         timestamp: new Date().toISOString()
       })
       setLoading(false)
