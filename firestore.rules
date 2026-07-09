@@ -336,11 +336,54 @@ service cloud.firestore {
       ));
     }
 
-    // Referral conversions (Part 13C batch 2) — Admin SDK only for now; no client writes
+    // Referral conversions — business reads own referrals; Admin SDK writes
     match /referrals/{referralId} {
       allow read: if isAdmin()
+        || (isAuth() && (
+          resource.data.businessId == request.auth.uid
+          || resource.data.referrerId == request.auth.uid
+        ));
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Business dashboard leads
+    match /businessLeads/{leadId} {
+      allow read: if isAdmin()
         || (isAuth() && resource.data.businessId == request.auth.uid);
-      allow create, update, delete: if false;
+      allow create: if isAuth();
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Business referral aggregate doc
+    match /businessReferrals/{docId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create, update: if isAdmin()
+        || (isAuth() && request.resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // B2B collaborations between businesses
+    match /businessPartnerships/{docId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create, update: if isAdmin()
+        || (isAuth() && request.resource.data.businessId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Partnership / sponsorship requests to admin
+    match /partnerships/{docId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.submittedBy == request.auth.uid);
+      allow create: if false;
+      allow update: if isAdmin()
+        || (isAuth()
+          && resource.data.submittedBy == request.auth.uid
+          && resource.data.status == 'pending');
+      allow delete: if isAdmin();
     }
 
     // Part 10B: business creates start as pending_approval; only admin may publish to live statuses

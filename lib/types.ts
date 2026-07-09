@@ -1049,7 +1049,11 @@ export interface BusinessLead {
   email: string
   phone?: string
   message?: string
-  leadSource: 'opportunity' | 'offer' | 'direct' | 'marketplace'
+  leadSource: 'opportunity' | 'offer' | 'direct' | 'marketplace' | 'job_view' | 'offer_view' | 'profile_view' | 'message' | 'discount_use'
+  sourceType?: 'job_view' | 'offer_view' | 'profile_view' | 'message' | 'discount_use' | string
+  value?: number
+  converted?: boolean
+  userId?: string
   status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
   notes?: string
   createdAt: Date
@@ -1090,6 +1094,38 @@ export interface BusinessPartnership {
   endDate?: Date
   createdAt: Date
   updatedAt: Date
+}
+
+/** Admin partnership / sponsorship request submitted by a business user */
+export interface PartnershipRequest {
+  id: string
+  submittedBy: string
+  submitterName: string
+  submitterEmail: string
+  type: string
+  title: string
+  description: string
+  proposedBudget?: string | null
+  attachmentURL?: string | null
+  status: 'pending' | 'under_review' | 'approved' | 'declined'
+  adminNotes?: string | null
+  submittedAt: Date
+  updatedAt: Date
+}
+
+/** Individual referral conversion record */
+export interface ReferralRecord {
+  id: string
+  referrerId: string
+  referredUserId?: string
+  referredUserName?: string
+  referredUserEmail?: string
+  status: 'pending' | 'converted' | 'failed'
+  commissionPercent?: number
+  amount?: number
+  settled?: boolean
+  referredAt: Date
+  convertedAt?: Date
 }
 
 // Community Support Requests from Businesses

@@ -5,6 +5,8 @@ import {
   BusinessLead,
   BusinessReferral,
   BusinessPartnership,
+  PartnershipRequest,
+  ReferralRecord,
   BusinessSupportRequest,
   BusinessRating,
   BusinessPayment,
@@ -29,6 +31,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { normalizeOpportunityFromJob, isOpportunityExpired } from '@/lib/opportunity-utils'
 
 // BUSINESS OPPORTUNITIES QUERIES
 
@@ -331,7 +334,7 @@ export function subscribeToBusinessLeads(
     orderBy('createdAt', 'desc')
   )
   return onSnapshot(q, (snapshot) => {
-    const leads = snapshot.docs.map((doc) => doc.data() as BusinessLead)
+    const leads = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as BusinessLead)
     callback(leads)
   })
 }
@@ -392,6 +395,36 @@ export function subscribeToReferral(
   })
 }
 
+export function subscribeToReferralRecords(
+  referrerId: string,
+  callback: (records: ReferralRecord[]) => void
+) {
+  const q = query(
+    collection(db, 'referrals'),
+    where('referrerId', '==', referrerId),
+    orderBy('referredAt', 'desc')
+  )
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const records = snapshot.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as ReferralRecord
+      )
+      callback(records)
+    },
+    () => callback([])
+  )
+}
+
+export async function updateBusinessReferralPercent(businessId: string, percent: number) {
+  await updateDoc(doc(db, 'businesses', businessId), {
+    referralContributionPercent: percent,
+    referralPercent: percent,
+    updatedAt: Timestamp.now(),
+  })
+  await createOrUpdateReferral(businessId, { referralPercentage: percent })
+}
+
 // BUSINESS PARTNERSHIPS QUERIES
 
 export async function createPartnership(
@@ -409,6 +442,34 @@ export async function createPartnership(
   }
   await setDoc(doc(db, 'businessPartnerships', id), partnership)
   return partnership
+}
+
+export function subscribeToPartnershipRequests(
+  submittedBy: string,
+  callback: (requests: PartnershipRequest[]) => void
+) {
+  const q = query(
+    collection(db, 'partnerships'),
+    where('submittedBy', '==', submittedBy),
+    orderBy('submittedAt', 'desc')
+  )
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const requests = snapshot.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as PartnershipRequest
+      )
+      callback(requests)
+    },
+    () => callback([])
+  )
+}
+
+export async function withdrawPartnershipRequest(requestId: string) {
+  await updateDoc(doc(db, 'partnerships', requestId), {
+    status: 'declined',
+    updatedAt: Timestamp.now(),
+  })
 }
 
 export async function getBusinessPartnerships(businessId: string) {
@@ -769,28 +830,107 @@ export async function getBusinessDashboardStats(businessId: string) {
 
 // PUBLIC / CROSS-BUSINESS OPPORTUNITY BROWSING
 
-// Get all open opportunities across every business (for the public jobs board
-// and the member dashboard). Sorted client-side to avoid a composite index.
+// Get all published opportunities (jobs + legacy businessOpportunities).
 export async function getAllOpenOpportunities(): Promise<BusinessOpportunity[]> {
-  const q = query(
-    collection(db, 'businessOpportunities'),
-    where('status', '==', 'open')
-  )
-  const snapshot = await getDocs(q)
-  const opportunities = snapshot.docs.map((d) => d.data() as BusinessOpportunity)
-  return opportunities.sort((a, b) => {
-    const aTime = new Date(a.createdAt as any).getTime() || 0
-    const bTime = new Date(b.createdAt as any).getTime() || 0
-    return bTime - aTime
-  })
+  const jobsQ = query(collection(db, 'jobs'), where('status', 'in', ['published', 'open']))
+  const legacyQ = query(collection(db, 'businessOpportunities'), where('status', '==', 'open'))
+
+  const [jobsSnap, legacySnap] = await Promise.all([getDocs(jobsQ), getDocs(legacyQ)])
+
+  const map = new Map<string, BusinessOpportunity>()
+  for (const d of legacySnap.docs) {
+    map.set(d.id, { id: d.id, ...d.data() } as BusinessOpportunity)
+  }
+  for (const d of jobsSnap.docs) {
+    map.set(d.id, normalizeOpportunityFromJob(d.id, d.data() as Record<string, unknown>))
+  }
+
+  return Array.from(map.values())
+    .filter((o) => !isOpportunityExpired(o))
+    .sort((a, b) => {
+      const aTime = new Date(a.createdAt as Date).getTime() || 0
+      const bTime = new Date(b.createdAt as Date).getTime() || 0
+      return bTime - aTime
+    })
+}
+
+export function subscribeToPublishedOpportunities(
+  callback: (opportunities: BusinessOpportunity[]) => void
+): () => void {
+  const mergeAndEmit = () => {
+    const map = new Map<string, BusinessOpportunity>()
+    const apply = (id: string, data: Record<string, unknown>, fromJob: boolean) => {
+      const status = String(data.status || '')
+      if (fromJob && status !== 'published' && status !== 'open') return
+      if (!fromJob && status !== 'open') return
+      const opp = fromJob
+        ? normalizeOpportunityFromJob(id, data)
+        : ({ id, ...data } as BusinessOpportunity)
+      if (!isOpportunityExpired(opp)) map.set(id, opp)
+    }
+
+    let jobsData: BusinessOpportunity[] = []
+    let legacyData: BusinessOpportunity[] = []
+
+    const emit = () => {
+      const merged = new Map<string, BusinessOpportunity>()
+      for (const o of legacyData) merged.set(o.id, o)
+      for (const o of jobsData) merged.set(o.id, o)
+      callback(
+        Array.from(merged.values()).sort((a, b) => {
+          const aT = new Date(a.createdAt as Date).getTime() || 0
+          const bT = new Date(b.createdAt as Date).getTime() || 0
+          return bT - aT
+        })
+      )
+    }
+
+    const unsubJobs = onSnapshot(
+      query(collection(db, 'jobs'), where('status', 'in', ['published', 'open'])),
+      (snap) => {
+        jobsData = snap.docs.map((d) =>
+          normalizeOpportunityFromJob(d.id, d.data() as Record<string, unknown>)
+        )
+        emit()
+      },
+      () => {
+        jobsData = []
+        emit()
+      }
+    )
+
+    const unsubLegacy = onSnapshot(
+      query(collection(db, 'businessOpportunities'), where('status', '==', 'open')),
+      (snap) => {
+        legacyData = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as BusinessOpportunity)
+        emit()
+      },
+      () => {
+        legacyData = []
+        emit()
+      }
+    )
+
+    return () => {
+      unsubJobs()
+      unsubLegacy()
+    }
+  }
+
+  return mergeAndEmit()
 }
 
 export async function getOpportunityById(
   opportunityId: string
 ): Promise<BusinessOpportunity | null> {
+  const jobRef = doc(db, 'jobs', opportunityId)
+  const jobSnap = await getDoc(jobRef)
+  if (jobSnap.exists()) {
+    return normalizeOpportunityFromJob(jobSnap.id, jobSnap.data() as Record<string, unknown>)
+  }
   const ref = doc(db, 'businessOpportunities', opportunityId)
   const snap = await getDoc(ref)
-  return snap.exists() ? (snap.data() as BusinessOpportunity) : null
+  return snap.exists() ? ({ id: snap.id, ...snap.data() } as BusinessOpportunity) : null
 }
 
 // JOB APPLICATION QUERIES
@@ -900,7 +1040,7 @@ export async function getOpportunityApplications(
     where('opportunityId', '==', opportunityId)
   )
   const snapshot = await getDocs(q)
-  return snapshot.docs.map((d) => d.data() as JobApplication)
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as JobApplication)
 }
 
 export async function updateApplicationStatus(

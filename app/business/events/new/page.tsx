@@ -10,6 +10,7 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { ChevronLeft, MapPin, Upload, Loader2, Plus, X } from 'lucide-react'
 import { toEventDate } from '@/lib/event-utils'
 import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
+import { GoogleMapPin } from '@/components/google-map-pin'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 export default function NewEventPage() {
@@ -31,6 +32,9 @@ function BusinessEventForm() {
     'Free', 'Paid', 'RSVP', 'Premium', 'Member Only', 'Ladies Only', 'Men Only',
     'Featured', 'Virtual', 'In-Person', 'Workshop', 'Conference', 'Prayer', 'Outreach', 'Fellowship',
   ]
+
+  const [bannerProgress, setBannerProgress] = React.useState(0)
+  const [speakerUploading, setSpeakerUploading] = React.useState<number | null>(null)
 
   const [formData, setFormData] = React.useState({
     title: '',
@@ -144,8 +148,8 @@ function BusinessEventForm() {
         throw new Error('Please fill in all required fields')
       }
 
-      if (!formData.locationName.trim() && status === 'pending_approval') {
-        throw new Error('Please select an event location')
+      if (!formData.locationPlaceId?.trim() && status === 'pending_approval') {
+        throw new Error('Please select a location from the suggestions')
       }
 
       const body = {
@@ -387,22 +391,34 @@ function BusinessEventForm() {
                   const file = e.target.files?.[0]
                   if (!file || !user) return
                   setUploadingBanner(true)
+                  setBannerProgress(10)
                   try {
+                    setBannerProgress(40)
                     const url = await uploadImageToFirebase(file, `events/${user.id}/banner`, {
                       preset: 'hero',
                       maxDimension: 1920,
                       aspectRatio: 16 / 9,
                     })
+                    setBannerProgress(100)
                     setFormData((p) => ({ ...p, bannerURL: url }))
                   } catch (err) {
                     setError(err instanceof Error ? err.message : 'Banner upload failed')
                   } finally {
                     setUploadingBanner(false)
+                    setTimeout(() => setBannerProgress(0), 600)
                     e.target.value = ''
                   }
                 }}
               />
             </label>
+            {uploadingBanner && bannerProgress > 0 ? (
+              <div className="w-full h-2 bg-neutral-200 rounded-full mb-3 overflow-hidden">
+                <div
+                  className="h-full bg-black transition-all duration-300"
+                  style={{ width: `${bannerProgress}%` }}
+                />
+              </div>
+            ) : null}
             {formData.bannerURL && (
               <img
                 src={formData.bannerURL}
@@ -487,16 +503,21 @@ function BusinessEventForm() {
                   }
                 />
                 {formData.locationAddress && (
-                  <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
-                    <MapPin size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium text-blue-900">{formData.locationAddress}</p>
-                      {formData.locationLat !== 0 && formData.locationLng !== 0 && (
-                        <p className="text-blue-700 text-xs">
-                          {formData.locationLat.toFixed(4)}, {formData.locationLng.toFixed(4)}
-                        </p>
-                      )}
+                  <div className="mt-2 space-y-2">
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
+                      <MapPin size={16} className="text-blue-600 shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium text-blue-900">{formData.locationAddress}</p>
+                        {formData.locationLat !== 0 && formData.locationLng !== 0 && (
+                          <p className="text-blue-700 text-xs">
+                            {formData.locationLat.toFixed(4)}, {formData.locationLng.toFixed(4)}
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    {formData.locationLat !== 0 && formData.locationLng !== 0 ? (
+                      <GoogleMapPin lat={formData.locationLat} lng={formData.locationLng} />
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -636,6 +657,55 @@ function BusinessEventForm() {
                   }}
                   className="w-full px-3 py-2 border rounded-lg text-sm"
                 />
+                <input
+                  placeholder="Speaker link (optional URL)"
+                  value={speaker.link}
+                  onChange={(e) => {
+                    const speakers = [...formData.speakers]
+                    speakers[idx] = { ...speakers[idx], link: e.target.value }
+                    setFormData((p) => ({ ...p, speakers }))
+                  }}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+                <div className="flex items-center gap-3">
+                  {speaker.photoURL ? (
+                    <img src={speaker.photoURL} alt="" className="h-12 w-12 rounded-full object-cover" />
+                  ) : null}
+                  <label className="inline-flex items-center gap-2 px-3 py-1.5 border rounded-lg text-xs cursor-pointer">
+                    {speakerUploading === idx ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Upload className="h-3 w-3" />
+                    )}
+                    Photo
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="sr-only"
+                      disabled={speakerUploading === idx}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file || !user) return
+                        setSpeakerUploading(idx)
+                        try {
+                          const url = await uploadImageToFirebase(
+                            file,
+                            `events/${user.id}/speakers`,
+                            { preset: 'avatar' }
+                          )
+                          const speakers = [...formData.speakers]
+                          speakers[idx] = { ...speakers[idx], photoURL: url }
+                          setFormData((p) => ({ ...p, speakers }))
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Photo upload failed')
+                        } finally {
+                          setSpeakerUploading(null)
+                          e.target.value = ''
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             ))}
           </div>
@@ -661,12 +731,66 @@ function BusinessEventForm() {
             </div>
             {formData.agenda.map((item, idx) => (
               <div key={idx} className="border border-neutral-200 rounded-lg p-4 mb-3 grid gap-2 sm:grid-cols-2">
+                <div className="flex items-center gap-2 sm:col-span-2">
+                  <span className="text-neutral-400 cursor-grab text-xs">⋮⋮</span>
+                  <button
+                    type="button"
+                    disabled={idx === 0}
+                    onClick={() => {
+                      const agenda = [...formData.agenda]
+                      ;[agenda[idx - 1], agenda[idx]] = [agenda[idx], agenda[idx - 1]]
+                      setFormData((p) => ({ ...p, agenda }))
+                    }}
+                    className="text-xs px-2 py-1 border rounded disabled:opacity-30"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    disabled={idx === formData.agenda.length - 1}
+                    onClick={() => {
+                      const agenda = [...formData.agenda]
+                      ;[agenda[idx], agenda[idx + 1]] = [agenda[idx + 1], agenda[idx]]
+                      setFormData((p) => ({ ...p, agenda }))
+                    }}
+                    className="text-xs px-2 py-1 border rounded disabled:opacity-30"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((p) => ({
+                        ...p,
+                        agenda: p.agenda.filter((_, i) => i !== idx),
+                      }))
+                    }
+                    className="ml-auto text-xs text-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
                 <input
                   type="time"
                   value={item.time}
                   onChange={(e) => {
                     const agenda = [...formData.agenda]
                     agenda[idx] = { ...agenda[idx], time: e.target.value }
+                    setFormData((p) => ({ ...p, agenda }))
+                  }}
+                  className="px-3 py-2 border rounded-lg text-sm"
+                />
+                <input
+                  type="number"
+                  min={1}
+                  placeholder="Duration (min)"
+                  value={item.durationMinutes}
+                  onChange={(e) => {
+                    const agenda = [...formData.agenda]
+                    agenda[idx] = {
+                      ...agenda[idx],
+                      durationMinutes: Number(e.target.value) || 0,
+                    }
                     setFormData((p) => ({ ...p, agenda }))
                   }}
                   className="px-3 py-2 border rounded-lg text-sm"
@@ -679,8 +803,26 @@ function BusinessEventForm() {
                     agenda[idx] = { ...agenda[idx], title: e.target.value }
                     setFormData((p) => ({ ...p, agenda }))
                   }}
-                  className="px-3 py-2 border rounded-lg text-sm"
+                  className="px-3 py-2 border rounded-lg text-sm sm:col-span-2"
                 />
+                <select
+                  value={item.speaker}
+                  onChange={(e) => {
+                    const agenda = [...formData.agenda]
+                    agenda[idx] = { ...agenda[idx], speaker: e.target.value }
+                    setFormData((p) => ({ ...p, agenda }))
+                  }}
+                  className="px-3 py-2 border rounded-lg text-sm"
+                >
+                  <option value="">Select speaker</option>
+                  {formData.speakers
+                    .filter((s) => s.name.trim())
+                    .map((s) => (
+                      <option key={s.name} value={s.name}>
+                        {s.name}
+                      </option>
+                    ))}
+                </select>
                 <textarea
                   placeholder="Description"
                   value={item.description}

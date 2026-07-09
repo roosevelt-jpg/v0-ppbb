@@ -396,12 +396,13 @@ export default function AdminOpportunitiesPage() {
                   className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3"
                 >
                   <div className="min-w-0">
-                    <p
-                      className="font-semibold text-neutral-900 break-words"
+                    <Link
+                      href={`/admin/opportunities/${job.id}`}
+                      className="font-semibold text-neutral-900 break-words hover:underline"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       {job.title}
-                    </p>
+                    </Link>
                     <p className="text-xs text-neutral-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {job.company} · {job.type} · {job.category}
                     </p>
@@ -439,7 +440,9 @@ export default function AdminOpportunitiesPage() {
                   {filtered.map((job) => (
                     <tr key={job.id} className="border-b border-neutral-100 align-top">
                       <td className="py-3 px-3 font-medium text-neutral-900 max-w-[180px]">
-                        <span className="line-clamp-2">{job.title}</span>
+                        <Link href={`/admin/opportunities/${job.id}`} className="line-clamp-2 hover:underline">
+                          {job.title}
+                        </Link>
                       </td>
                       <td className="py-3 px-3 max-w-[140px]">
                         <span className="line-clamp-2">{job.company}</span>

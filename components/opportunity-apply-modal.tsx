@@ -8,21 +8,10 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
 
-function opportunityGenderBlocksUser(
-  opportunity: BusinessOpportunity,
-  userGender?: string | null
-): string | null {
-  const restriction = (opportunity as { genderRestriction?: string }).genderRestriction
-  if (!restriction || restriction === 'mixed') return null
-  const gender = (userGender || '').toLowerCase()
-  if (restriction === 'female' || restriction === 'ladies-only') {
-    return gender === 'female' ? null : 'This opportunity is for women only.'
-  }
-  if (restriction === 'male' || restriction === 'men-only') {
-    return gender === 'male' ? null : 'This opportunity is for men only.'
-  }
-  return null
-}
+import {
+  opportunityGenderBlocksUser,
+  opportunityMemberBlocksUser,
+} from '@/lib/opportunity-utils'
 
 export function OpportunityApplyModal({
   opportunity,
@@ -46,13 +35,13 @@ export function OpportunityApplyModal({
 
   const isBusiness = hasBusinessAccess(user)
   const genderBlock = user ? opportunityGenderBlocksUser(opportunity, user.gender) : null
-  const isMemberOnly = Boolean((opportunity as { isMemberOnly?: boolean }).isMemberOnly)
+  const isMemberOnly = Boolean(opportunity.isMemberOnly)
   const memberBlock =
     isMemberOnly && user && user.role !== 'member' && !hasBusinessAccess(user)
       ? 'This opportunity is for platform members only.'
-      : null
-  const applicationProcess = (opportunity as { applicationProcess?: string }).applicationProcess
-  const applicationURL = (opportunity as { applicationURL?: string }).applicationURL
+      : opportunityMemberBlocksUser(opportunity, user?.role, hasBusinessAccess(user))
+  const applicationProcess = opportunity.applicationProcess
+  const applicationURL = opportunity.applicationURL
   const needsCv =
     applicationProcess === 'cv_upload' ||
     applicationProcess === 'both' ||
