@@ -3,7 +3,6 @@ import { Anthropic } from '@anthropic-ai/sdk'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { resolveAnthropicApiKey } from '@/lib/resolve-anthropic-key'
 
-const db = getAdminDb()
 
 interface FAQ {
   id: string

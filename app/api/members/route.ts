@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { isAccountDeleted } from '@/lib/user-settings'
 
-const db = getAdminDb()
 
 export async function GET(request: NextRequest) {
   try {
