@@ -59,6 +59,7 @@ import {
   MapPin,
   PieChart,
   BookOpen,
+  FolderOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -149,6 +150,7 @@ export const adminMenuItems = [
   { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield, group: 'Content' },
 
   // Assets & Media
+  { label: 'Event Assets', href: '/admin/assets', icon: FolderOpen, group: 'Assets' },
   { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Video, group: 'Assets' },
 
   // Configuration

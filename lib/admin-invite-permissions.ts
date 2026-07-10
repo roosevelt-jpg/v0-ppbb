@@ -28,6 +28,7 @@ export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
     '/admin/forms',
     '/admin/eu-data-protection',
     '/admin/youtube-config',
+    '/admin/assets',
   ],
   manage_integrations: ['/admin/integrations'],
   manage_beneficiary: ['/admin/beneficiary-requests', '/admin/charity', '/admin/donation-verification'],

@@ -19,6 +19,7 @@ import {
   HelpCircle,
   Crown,
   Package,
+  FolderOpen,
 } from 'lucide-react'
 import { logoutUser } from '@/lib/auth'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
@@ -32,6 +33,7 @@ import { useAuth } from '@/lib/auth-context'
 const memberMenuItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Events', href: '/dashboard/events', icon: Calendar },
+  { label: 'Event Assets', href: '/dashboard/assets', icon: FolderOpen },
   { label: 'My Donations', href: '/dashboard/donations', icon: Heart },
   { label: 'Volunteering', href: '/dashboard/volunteering', icon: Briefcase },
   { label: 'Active Causes', href: '/dashboard/charity', icon: Heart },

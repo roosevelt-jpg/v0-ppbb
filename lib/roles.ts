@@ -111,6 +111,7 @@ export const MEMBER_DASHBOARD_ALLOWED_PREFIXES = [
   '/dashboard/messages',
   '/dashboard/learning',
   '/dashboard/certificates',
+  '/dashboard/assets',
   '/dashboard/membership',
   '/dashboard/settings',
   '/dashboard/profile',

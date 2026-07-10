@@ -30,6 +30,7 @@ import {
   Calendar,
   Users2,
   Tag,
+  FolderOpen,
 } from 'lucide-react'
 
 const businessMenuItems = [
@@ -43,6 +44,7 @@ const businessMenuItems = [
   { label: 'Referrals', href: '/business/referrals', icon: Share2 },
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },
   { label: 'Networking Events', href: '/business/events', icon: Calendar },
+  { label: 'Event Assets', href: '/business/assets', icon: FolderOpen },
   { label: 'Partnerships & Requests', href: '/business/partnerships', icon: Heart },
   { label: 'Communities', href: '/business/communities', icon: Users2 },
   { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },

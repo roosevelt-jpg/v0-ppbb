@@ -48,6 +48,8 @@ const ENCRYPTED_FIELDS: Record<string, Set<string>> = {
   twilio: new Set(['authToken']),
   googleMaps: new Set(['apiKey']),
   cloudStorage: new Set(['secretAccessKey']),
+  googleCloudStorage: new Set(['serviceAccountJson']),
+  googleDrive: new Set(['serviceAccountJson']),
   youtubeApi: new Set(['apiKey']),
   googleAnalytics: new Set(['serviceAccountKey']),
   customWebhook: new Set(['secret']),

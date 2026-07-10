@@ -774,6 +774,17 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Event asset library (admin manages; members/business read via API)
+    match /assetFolders/{folderId} {
+      allow read: if isAuth() && resource.data.status == 'published';
+      allow write: if isAdmin();
+    }
+
+    match /assetFiles/{fileId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
     // Default deny all other requests
     match /{document=**} {
       allow read, write: if false;
