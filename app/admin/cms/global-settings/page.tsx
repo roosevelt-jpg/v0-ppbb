@@ -64,7 +64,10 @@ export default function AdminCmsGlobalSettingsPage() {
         { preset: 'logo' }
       )
       handleChange(variant === 'light' ? 'logoUrlLight' : 'logoUrlDark', url)
-      setMessage({ type: 'success', text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded.` })
+      setMessage({
+        type: 'success',
+        text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded (solid background removed). Remember to Save.`,
+      })
     } catch (error: unknown) {
       setMessage({
         type: 'error',
@@ -255,26 +258,36 @@ export default function AdminCmsGlobalSettingsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(['light', 'dark'] as const).map((variant) => {
               const url = variant === 'light' ? settings.logoUrlLight : settings.logoUrlDark
+              // Light artwork = for dark header/footer; dark artwork = for light sidebars
+              const previewBg = variant === 'light' ? 'bg-black' : 'bg-neutral-100'
               return (
                 <div key={variant} className="border border-dashed border-neutral-300 rounded-lg p-4">
                   <label className="block text-sm font-medium mb-2">
-                    Logo ({variant === 'light' ? 'Light' : 'Dark'})
+                    Logo ({variant === 'light' ? 'for dark backgrounds' : 'for light backgrounds'})
                   </label>
                   {url ? (
-                    <img
-                      src={url}
-                      alt={`${variant} logo`}
-                      className="h-16 w-auto max-w-full object-contain mb-3 mx-auto"
-                    />
+                    <div
+                      className={`mb-3 flex h-20 items-center justify-center rounded ${previewBg}`}
+                    >
+                      <img
+                        src={url}
+                        alt={`${variant} logo`}
+                        className="h-16 w-auto max-w-full object-contain bg-transparent"
+                      />
+                    </div>
                   ) : (
                     <p className="text-xs text-neutral-400 mb-3 text-center">No logo yet</p>
                   )}
+                  <p className="text-xs text-neutral-500 mb-2">
+                    Any format (PNG, JPG, WebP, SVG). White/solid backgrounds are removed
+                    automatically so the logo stays transparent on black headers and footers.
+                  </p>
                   <label className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
                     <Upload className="w-4 h-4" />
                     {uploading === variant ? 'Uploading…' : url ? 'Change logo' : 'Upload logo'}
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
                       className="hidden"
                       disabled={!!uploading}
                       onChange={(e) => {

@@ -72,8 +72,8 @@ export function SiteLogo({
         alt={label}
         width={LOGO_BOX_WIDTH_PX}
         height={LOGO_BOX_HEIGHT_PX}
-        className="block w-full h-full object-contain"
-        style={{ objectPosition: objectPositionForVariant(variant) }}
+        className="block w-full h-full object-contain bg-transparent"
+        style={{ objectPosition: objectPositionForVariant(variant), backgroundColor: 'transparent' }}
         decoding="async"
       />
     </span>

@@ -328,6 +328,7 @@ function cropCanvasToBounds(source: HTMLCanvasElement, bounds: TrimBounds, margi
   const outCtx = out.getContext('2d')
   if (!outCtx) return source
 
+  outCtx.clearRect(0, 0, out.width, out.height)
   outCtx.drawImage(
     source,
     bounds.left,
@@ -340,6 +341,132 @@ function cropCanvasToBounds(source: HTMLCanvasElement, bounds: TrimBounds, margi
     bounds.height
   )
   return out
+}
+
+function colorDistance(
+  r1: number,
+  g1: number,
+  b1: number,
+  r2: number,
+  g2: number,
+  b2: number
+): number {
+  return Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2)
+}
+
+function isNearWhite(r: number, g: number, b: number, a: number, threshold = 240): boolean {
+  if (a < 8) return true
+  return r >= threshold && g >= threshold && b >= threshold
+}
+
+function isNearBlack(r: number, g: number, b: number, a: number, threshold = 18): boolean {
+  if (a < 8) return true
+  return r <= threshold && g <= threshold && b <= threshold
+}
+
+/**
+ * Remove solid white (or solid black) backgrounds from logo uploads so the
+ * artwork sits cleanly on dark headers/footers and light sidebars.
+ * Uses edge flood-fill so interior logo colors are preserved.
+ */
+function knockoutSolidBackground(imageData: ImageData): ImageData {
+  const { width, height, data } = imageData
+  if (width === 0 || height === 0) return imageData
+
+  const corners = [
+    0,
+    (width - 1) * 4,
+    (height - 1) * width * 4,
+    ((height - 1) * width + (width - 1)) * 4,
+  ].map((i) => ({
+    r: data[i],
+    g: data[i + 1],
+    b: data[i + 2],
+    a: data[i + 3],
+  }))
+
+  const whiteCorners = corners.filter((c) => isNearWhite(c.r, c.g, c.b, c.a)).length
+  const blackCorners = corners.filter((c) => isNearBlack(c.r, c.g, c.b, c.a)).length
+
+  // Prefer knocking out white — that's what breaks black header/footer.
+  let mode: 'white' | 'black' | null = null
+  if (whiteCorners >= 2) mode = 'white'
+  else if (blackCorners >= 3) mode = 'black'
+  if (!mode) return imageData
+
+  const matchesBg = (i: number) => {
+    const r = data[i]
+    const g = data[i + 1]
+    const b = data[i + 2]
+    const a = data[i + 3]
+    if (mode === 'white') {
+      // Soft edge: near-white or already transparent
+      return a < 12 || isNearWhite(r, g, b, a, 232) || colorDistance(r, g, b, 255, 255, 255) <= 36
+    }
+    return a < 12 || isNearBlack(r, g, b, a, 28) || colorDistance(r, g, b, 0, 0, 0) <= 36
+  }
+
+  const visited = new Uint8Array(width * height)
+  const queue: number[] = []
+
+  const enqueue = (x: number, y: number) => {
+    if (x < 0 || y < 0 || x >= width || y >= height) return
+    const idx = y * width + x
+    if (visited[idx]) return
+    const i = idx * 4
+    if (!matchesBg(i)) return
+    visited[idx] = 1
+    queue.push(idx)
+  }
+
+  // Seed from every edge pixel that looks like the solid background.
+  for (let x = 0; x < width; x++) {
+    enqueue(x, 0)
+    enqueue(x, height - 1)
+  }
+  for (let y = 0; y < height; y++) {
+    enqueue(0, y)
+    enqueue(width - 1, y)
+  }
+
+  while (queue.length > 0) {
+    const idx = queue.pop()!
+    const x = idx % width
+    const y = (idx / width) | 0
+    const i = idx * 4
+    data[i + 3] = 0 // transparent
+    enqueue(x + 1, y)
+    enqueue(x - 1, y)
+    enqueue(x, y + 1)
+    enqueue(x, y - 1)
+  }
+
+  // Second pass: clear remaining near-white (or near-black) islands that are
+  // almost certainly leftover backdrop (not connected to edges but still bg).
+  // Only clear pixels that are extremely close to pure white/black to avoid
+  // eating logo highlights.
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue
+    const r = data[i]
+    const g = data[i + 1]
+    const b = data[i + 2]
+    if (mode === 'white' && r >= 250 && g >= 250 && b >= 250) {
+      data[i + 3] = 0
+    } else if (mode === 'black' && r <= 6 && g <= 6 && b <= 6) {
+      data[i + 3] = 0
+    }
+  }
+
+  return imageData
+}
+
+function removeLogoBackground(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return canvas
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  knockoutSolidBackground(imageData)
+  ctx.putImageData(imageData, 0, 0)
+  return canvas
 }
 
 /** Crop canvas to opaque content, optionally adding a tiny inner margin. */
@@ -372,13 +499,45 @@ function scaleCanvas(source: HTMLCanvasElement, targetWidth: number, targetHeigh
   out.height = targetHeight
   const ctx = out.getContext('2d')
   if (!ctx) return source
+  ctx.clearRect(0, 0, targetWidth, targetHeight)
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(source, 0, 0, targetWidth, targetHeight)
   return out
 }
 
-/** Logo pipeline: trim transparent padding, preserve alpha, export PNG. */
+/**
+ * Strip common solid-fill backdrop rects from SVG logos so they stay
+ * transparent on black headers/footers.
+ */
+function stripSvgSolidBackground(svgText: string): string {
+  return svgText
+    .replace(/<rect\b[^>]*?(?:fill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))["'][^>]*?)\/>/gi, '')
+    .replace(/<rect\b[^>]*?(?:fill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))["'][^>]*?>\s*<\/rect>/gi, '')
+    .replace(/\sfill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white)["']/gi, (match, offset, full) => {
+      // Only strip fill on root <svg> if present — keep fills on paths.
+      const before = full.slice(Math.max(0, offset - 80), offset)
+      if (/<svg\b[^>]*$/.test(before)) return ' fill="none"'
+      return match
+    })
+}
+
+async function prepareSvgLogoFile(file: File, maxBytes: number): Promise<File> {
+  const text = await file.text()
+  const cleaned = stripSvgSolidBackground(text)
+  const blob = new Blob([cleaned], { type: 'image/svg+xml' })
+  if (blob.size > maxBytes) {
+    throw new Error(
+      `SVG is still too large after limits (${(maxBytes / (1024 * 1024)).toFixed(1)}MB max).`
+    )
+  }
+  return new File([blob], replaceFileExtension(file.name, 'svg'), {
+    type: 'image/svg+xml',
+    lastModified: Date.now(),
+  })
+}
+
+/** Logo pipeline: knock out solid bg, trim padding, preserve alpha, export PNG. */
 async function compressLogoToFile(file: File, maxDimension: number, maxBytes: number): Promise<File> {
   const objectUrl = URL.createObjectURL(file)
   try {
@@ -387,11 +546,14 @@ async function compressLogoToFile(file: File, maxDimension: number, maxBytes: nu
     const stage = document.createElement('canvas')
     stage.width = img.naturalWidth
     stage.height = img.naturalHeight
-    const stageCtx = stage.getContext('2d')
+    const stageCtx = stage.getContext('2d', { willReadFrequently: true })
     if (!stageCtx) throw new Error('Canvas is not supported in this browser')
 
     stageCtx.clearRect(0, 0, stage.width, stage.height)
     stageCtx.drawImage(img, 0, 0)
+
+    // Always remove solid white/black backdrop before trim/export.
+    removeLogoBackground(stage)
 
     let trimmed = trimCanvasToOpaqueContent(stage, 1)
 
@@ -446,6 +608,10 @@ export async function compressImageToFile(
   if (file.type === 'image/svg+xml') {
     if (!allowSvg) {
       throw new Error('SVG is not supported for this upload. Use PNG, WebP, or JPEG.')
+    }
+    // Logo SVGs: strip solid white backdrop rects so they work on black headers.
+    if (trimTransparent || presetOrOptions === 'logo' || (typeof presetOrOptions !== 'string' && presetOrOptions.preset === 'logo')) {
+      return prepareSvgLogoFile(file, maxBytes)
     }
     if (file.size > maxBytes) {
       throw new Error(
