@@ -3,7 +3,9 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
+import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function requireAdmin(request: NextRequest) {
@@ -15,6 +17,58 @@ async function requireAdmin(request: NextRequest) {
   return uid
 }
 
+const PENDING_STATUSES = ['pending_approval', 'pending'] as const
+
+async function loadPendingCommunities() {
+  const db = getAdminDb()
+  const byId = new Map<string, Record<string, unknown>>()
+
+  for (const status of PENDING_STATUSES) {
+    try {
+      const snap = await db.collection('communities').where('status', '==', status).limit(200).get()
+      for (const d of snap.docs) {
+        byId.set(
+          d.id,
+          serializeFirestoreDoc(d.id, {
+            type: 'community',
+            ...(d.data() as Record<string, unknown>),
+          }) as Record<string, unknown>
+        )
+      }
+    } catch (error) {
+      console.warn(`[community-approvals] communities status=${status} query failed:`, error)
+    }
+  }
+
+  return Array.from(byId.values())
+}
+
+async function loadPendingGroups() {
+  const db = getAdminDb()
+  const groups: Record<string, unknown>[] = []
+
+  for (const status of PENDING_STATUSES) {
+    try {
+      const snap = await db.collectionGroup('groups').where('status', '==', status).limit(200).get()
+      for (const d of snap.docs) {
+        const communityId = d.ref.parent.parent?.id || ''
+        groups.push(
+          serializeFirestoreDoc(d.id, {
+            type: 'group',
+            communityId,
+            ...(d.data() as Record<string, unknown>),
+          }) as Record<string, unknown>
+        )
+      }
+    } catch (error) {
+      // Missing COLLECTION_GROUP index must not block community approvals.
+      console.warn(`[community-approvals] groups status=${status} query failed:`, error)
+    }
+  }
+
+  return groups
+}
+
 /** GET pending communities & groups awaiting admin approval */
 export async function GET(request: NextRequest) {
   try {
@@ -23,37 +77,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const db = getAdminDb()
-    const [communitySnap, groupSnap] = await Promise.all([
-      db.collection('communities').where('status', '==', 'pending_approval').get(),
-      db.collectionGroup('groups').where('status', '==', 'pending_approval').get(),
+    const [communities, groups] = await Promise.all([
+      loadPendingCommunities(),
+      loadPendingGroups(),
     ])
-
-    const communities = communitySnap.docs.map((d) => ({
-      id: d.id,
-      type: 'community' as const,
-      ...d.data(),
-      createdAt: d.data().createdAt?.toDate?.()?.toISOString?.() ?? d.data().createdAt,
-    }))
-
-    const groups = groupSnap.docs.map((d) => {
-      const communityId = d.ref.parent.parent?.id
-      return {
-        id: d.id,
-        communityId,
-        type: 'group' as const,
-        ...d.data(),
-        createdAt: d.data().createdAt?.toDate?.()?.toISOString?.() ?? d.data().createdAt,
-      }
-    })
 
     return NextResponse.json({
       success: true,
-      data: { communities, groups, total: communities.length + groups.length },
+      data: {
+        communities,
+        groups,
+        total: communities.length + groups.length,
+      },
     })
   } catch (error) {
     console.error('[community-approvals GET]', error)
-    return NextResponse.json({ success: false, error: 'Failed to load approvals' }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to load approvals',
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -85,31 +130,40 @@ export async function PATCH(request: NextRequest) {
     const nextStatus = action === 'approve' ? 'active' : 'archived'
 
     if (type === 'community') {
-      await db.collection('communities').doc(id).update({
-        status: nextStatus,
-        approvalReason: reason || null,
-        approvedBy: uid,
-        approvedAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        ...(action === 'reject' ? { rejectionReason: reason || 'Rejected by admin' } : {}),
-      })
-    } else {
-      if (!communityId) {
-        return NextResponse.json({ success: false, error: 'communityId required for groups' }, { status: 400 })
-      }
-      await db
-        .collection('communities')
-        .doc(communityId)
-        .collection('groups')
-        .doc(id)
-        .update({
+      await db.collection('communities').doc(id).set(
+        {
           status: nextStatus,
           approvalReason: reason || null,
           approvedBy: uid,
           approvedAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
           ...(action === 'reject' ? { rejectionReason: reason || 'Rejected by admin' } : {}),
-        })
+        },
+        { merge: true }
+      )
+    } else {
+      if (!communityId) {
+        return NextResponse.json(
+          { success: false, error: 'communityId required for groups' },
+          { status: 400 }
+        )
+      }
+      await db
+        .collection('communities')
+        .doc(communityId)
+        .collection('groups')
+        .doc(id)
+        .set(
+          {
+            status: nextStatus,
+            approvalReason: reason || null,
+            approvedBy: uid,
+            approvedAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+            ...(action === 'reject' ? { rejectionReason: reason || 'Rejected by admin' } : {}),
+          },
+          { merge: true }
+        )
     }
 
     await auditAdminApiAction(request, uid, {
@@ -124,6 +178,12 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[community-approvals PATCH]', error)
-    return NextResponse.json({ success: false, error: 'Approval action failed' }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Approval action failed',
+      },
+      { status: 500 }
+    )
   }
 }

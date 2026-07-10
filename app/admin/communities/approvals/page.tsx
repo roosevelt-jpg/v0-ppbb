@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { auth } from '@/lib/firebase'
+import { useAuth } from '@/lib/auth-context'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import { genderRestrictionLabel } from '@/lib/community-governance'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 import Link from 'next/link'
 import { ChevronLeft, Users, MessageSquare } from 'lucide-react'
 
@@ -29,6 +30,7 @@ type PendingGroup = {
 }
 
 export default function CommunityApprovalsPage() {
+  const { firebaseUser } = useAuth()
   const [communities, setCommunities] = useState<PendingCommunity[]>([])
   const [groups, setGroups] = useState<PendingGroup[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,16 +38,18 @@ export default function CommunityApprovalsPage() {
   const [error, setError] = useState('')
 
   const load = useCallback(async () => {
+    if (!firebaseUser) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError('')
     try {
-      const user = auth.currentUser
-      if (!user) throw new Error('Not signed in')
-      const token = await user.getIdToken()
-      const res = await fetch('/api/admin/community-approvals', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const json = await res.json()
+      const json = await adminApiFetch<{
+        communities: PendingCommunity[]
+        groups: PendingGroup[]
+        total: number
+      }>('/api/admin/community-approvals')
       if (!json.success) throw new Error(json.error || 'Failed to load')
       setCommunities(json.data?.communities || [])
       setGroups(json.data?.groups || [])
@@ -54,7 +58,7 @@ export default function CommunityApprovalsPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [firebaseUser])
 
   useEffect(() => {
     void load()
@@ -68,22 +72,14 @@ export default function CommunityApprovalsPage() {
   ) => {
     setActing(`${type}-${id}-${action}`)
     try {
-      const user = auth.currentUser
-      if (!user) throw new Error('Not signed in')
       const reason =
         action === 'reject'
           ? prompt('Rejection reason (optional):') || undefined
           : undefined
-      const token = await user.getIdToken()
-      const res = await fetch('/api/admin/community-approvals', {
+      const json = await adminApiFetch('/api/admin/community-approvals', {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ type, id, communityId, action, reason }),
       })
-      const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Action failed')
       await load()
     } catch (err) {
