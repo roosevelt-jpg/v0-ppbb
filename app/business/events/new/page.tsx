@@ -12,6 +12,8 @@ import { toEventDate } from '@/lib/event-utils'
 import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
 import { GoogleMapPin } from '@/components/google-map-pin'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { EventHostingFields } from '@/components/events/event-hosting-fields'
+import type { EventCoupon, EventRecurrence, TicketType } from '@/lib/event-types'
 
 export default function NewEventPage() {
   return (
@@ -57,6 +59,14 @@ function BusinessEventForm() {
     speakers: [] as { name: string; title: string; bio: string; photoURL: string; link: string }[],
     agenda: [] as { time: string; title: string; description: string; speaker: string; durationMinutes: number }[],
     maxAttendees: '',
+    ticketTypes: [] as TicketType[],
+    coupons: [] as EventCoupon[],
+    requireApproval: false,
+    enableWaitlist: true,
+    showGuestList: true,
+    isFeatured: false,
+    cohostEmails: '',
+    recurrence: null as EventRecurrence | null,
   })
 
   const [uploadingBanner, setUploadingBanner] = React.useState(false)
@@ -121,6 +131,14 @@ function BusinessEventForm() {
           speakers: Array.isArray(event.speakers) ? event.speakers : [],
           agenda: Array.isArray(event.agenda) ? event.agenda : [],
           maxAttendees: event.maxAttendees != null ? String(event.maxAttendees) : '',
+          ticketTypes: Array.isArray(event.ticketTypes) ? event.ticketTypes : [],
+          coupons: Array.isArray(event.coupons) ? event.coupons : [],
+          requireApproval: Boolean(event.requireApproval),
+          enableWaitlist: event.enableWaitlist !== false,
+          showGuestList: event.showGuestList !== false,
+          isFeatured: Boolean(event.isFeatured),
+          cohostEmails: Array.isArray(event.cohostEmails) ? event.cohostEmails.join(', ') : '',
+          recurrence: event.recurrence || null,
         })
         setApprovalNotes(event.approvalNotes || null)
         setExistingStatus(event.status || null)
@@ -160,10 +178,28 @@ function BusinessEventForm() {
         bannerURL: formData.bannerURL || null,
         tags: formData.tags || [],
         speakers: formData.speakers || [],
-        agenda: formData.agenda || [],
+        agenda: (formData.agenda || []).map((a: any, i: number) => ({
+          time: a.time,
+          title: a.title,
+          description: a.description,
+          speakerName: a.speakerName || a.speaker || null,
+          durationMinutes: a.durationMinutes ?? null,
+          order: i,
+        })),
         maxAttendees: formData.maxAttendees ? Number(formData.maxAttendees) : null,
         timezone: formData.timezone || 'Asia/Dubai',
         price: formData.pricingType === 'free' ? null : parseFloat(formData.price),
+        ticketTypes: formData.ticketTypes,
+        coupons: formData.coupons,
+        requireApproval: formData.requireApproval,
+        enableWaitlist: formData.enableWaitlist,
+        showGuestList: formData.showGuestList,
+        isFeatured: formData.isFeatured,
+        cohostEmails: formData.cohostEmails
+          .split(/[,;\s]+/)
+          .map((e) => e.trim())
+          .filter(Boolean),
+        recurrence: formData.recurrence,
         status,
         createdBy: user?.id,
         createdByRole: 'business' as const,
@@ -885,6 +921,19 @@ function BusinessEventForm() {
               )}
             </div>
           </div>
+
+          <EventHostingFields
+            currency={formData.currency}
+            ticketTypes={formData.ticketTypes}
+            coupons={formData.coupons}
+            requireApproval={formData.requireApproval}
+            enableWaitlist={formData.enableWaitlist}
+            showGuestList={formData.showGuestList}
+            isFeatured={formData.isFeatured}
+            cohostEmails={formData.cohostEmails}
+            recurrence={formData.recurrence}
+            onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
+          />
 
           <div
             style={{

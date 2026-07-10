@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db, auth } from '@/lib/firebase'
-import { doc, getDoc, Timestamp } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
+import { getEventEndDate, getEventLocationLabel, getEventStartDate } from '@/lib/event-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +12,6 @@ export async function POST(request: NextRequest) {
 
     const { eventId } = await request.json()
 
-    // Get calendar integration
     const integrationDoc = await getDoc(
       doc(db, 'users', user.uid, 'calendarIntegrations', 'google')
     )
@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
     const integration = integrationDoc.data()
     let accessToken = integration.accessToken
 
-    // Check if token is expired and refresh if needed
     if (integration.expiresAt.toDate() < new Date()) {
       const refreshResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -45,55 +44,59 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch event details
-    const { db: firebaseDb } = await import('@/lib/firebase')
-    const { getDoc: fbGetDoc, doc: fbDoc } = await import('firebase/firestore')
-
-    const eventDoc = await fbGetDoc(fbDoc(firebaseDb, 'events', eventId))
+    const eventDoc = await getDoc(doc(db, 'events', eventId))
     if (!eventDoc.exists()) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const event = eventDoc.data()
-    const eventDate = event.date instanceof Date ? event.date : event.date?.toDate() || new Date()
-    const startDateTime = new Date(eventDate)
-    const [startHour, startMin] = event.startTime.split(':')
-    startDateTime.setHours(parseInt(startHour), parseInt(startMin), 0)
+    const event = eventDoc.data()!
+    const startDateTime = getEventStartDate(event as never)
+    const endDateTime = getEventEndDate(event as never)
+    if (!event.startDate && event.date && typeof event.startTime === 'string') {
+      const [startHour, startMin] = String(event.startTime).split(':')
+      startDateTime.setHours(parseInt(startHour || '0', 10), parseInt(startMin || '0', 10), 0)
+      if (typeof event.endTime === 'string') {
+        const [endHour, endMin] = String(event.endTime).split(':')
+        endDateTime.setTime(startDateTime.getTime())
+        endDateTime.setHours(parseInt(endHour || '0', 10), parseInt(endMin || '0', 10), 0)
+      }
+    }
 
-    const endDateTime = new Date(startDateTime)
-    const [endHour, endMin] = event.endTime.split(':')
-    endDateTime.setHours(parseInt(endHour), parseInt(endMin), 0)
+    const location =
+      getEventLocationLabel(event as never) ||
+      (event.location
+        ? `${event.location.address || ''}, ${event.location.city || ''}`.trim()
+        : '')
 
-    // Create Google Calendar event
     const calendarEvent = {
       summary: event.title,
       description: event.description,
-      location: `${event.location.address}, ${event.location.city}`,
+      location,
       start: {
         dateTime: startDateTime.toISOString(),
-        timeZone: 'UTC',
+        timeZone: event.timezone || 'UTC',
       },
       end: {
         dateTime: endDateTime.toISOString(),
-        timeZone: 'UTC',
+        timeZone: event.timezone || 'UTC',
       },
     }
 
-    const googleResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(calendarEvent),
-    })
+    const googleResponse = await fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(calendarEvent),
+      }
+    )
 
     if (!googleResponse.ok) {
       console.error('[v0] Failed to create Google Calendar event:', await googleResponse.text())
-      return NextResponse.json(
-        { error: 'Failed to create calendar event' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to create calendar event' }, { status: 500 })
     }
 
     const googleEvent = await googleResponse.json()
@@ -105,9 +108,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[v0] Error creating calendar event:', error)
-    return NextResponse.json(
-      { error: 'Failed to create calendar event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create calendar event' }, { status: 500 })
   }
 }

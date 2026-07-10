@@ -335,6 +335,21 @@ export default function EventDetailPage() {
                 <Edit2 size={16} />
                 Edit
               </button>
+              <button
+                onClick={() => router.push(`/admin/events/${eventId}/guests`)}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 500,
+                }}
+              >
+                Guests & Check-in
+              </button>
               {event.status === 'published' && (
                 <button
                   onClick={() => router.push(`/admin/events/${eventId}/revenue`)}

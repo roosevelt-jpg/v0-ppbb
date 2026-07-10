@@ -2,9 +2,18 @@
 
 import React from 'react'
 import { format } from 'date-fns'
-import { MapPin, Calendar, Users, DollarSign, Loader2 } from 'lucide-react'
+import {
+  MapPin,
+  Calendar,
+  Users,
+  DollarSign,
+  Loader2,
+  Share2,
+  CalendarPlus,
+  Copy,
+} from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import type { Event } from '@/lib/event-types'
+import type { Event, TicketType } from '@/lib/event-types'
 import { toEventDate } from '@/lib/event-utils'
 
 interface EventDetailViewProps {
@@ -12,6 +21,10 @@ interface EventDetailViewProps {
   previewMode?: boolean
   registering?: boolean
   error?: string | null
+  selectedTicketId?: string
+  couponCode?: string
+  onTicketChange?: (id: string) => void
+  onCouponChange?: (code: string) => void
   onRegister?: () => void
 }
 
@@ -25,10 +38,34 @@ export function EventDetailView({
   previewMode = false,
   registering = false,
   error = null,
+  selectedTicketId,
+  couponCode = '',
+  onTicketChange,
+  onCouponChange,
   onRegister,
 }: EventDetailViewProps) {
+  const ticketTypes: TicketType[] = Array.isArray(event.ticketTypes)
+    ? event.ticketTypes.filter((t) => t.isActive !== false)
+    : []
+  const enableWaitlist = Boolean((event as any).enableWaitlist)
   const isFull =
     event.maxAttendees != null && event.currentAttendees >= event.maxAttendees
+  const canWaitlist = isFull && enableWaitlist
+
+  const shareUrl =
+    typeof window !== 'undefined' ? window.location.href : `/events/${event.id}`
+
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      alert('Link copied')
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const selected =
+    ticketTypes.find((t) => t.id === selectedTicketId) || ticketTypes[0] || null
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -55,7 +92,9 @@ export function EventDetailView({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 break-words">{event.title}</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 break-words">
+                {event.title}
+              </h1>
               <p className="text-gray-700 text-base sm:text-lg break-words">{event.description}</p>
             </div>
 
@@ -74,21 +113,29 @@ export function EventDetailView({
                   <p className="font-semibold break-words">{event.locationName}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
-                <Users className="text-gray-600 shrink-0" size={20} />
-                <div>
-                  <p className="text-xs text-gray-500">Attending</p>
-                  <p className="font-semibold">
-                    {event.currentAttendees}/{event.maxAttendees || '∞'}
-                  </p>
+              {(event as any).showGuestList !== false && (
+                <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
+                  <Users className="text-gray-600 shrink-0" size={20} />
+                  <div>
+                    <p className="text-xs text-gray-500">Attending</p>
+                    <p className="font-semibold">
+                      {event.currentAttendees}/{event.maxAttendees || '∞'}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
                 <DollarSign className="text-gray-600 shrink-0" size={20} />
                 <div>
-                  <p className="text-xs text-gray-500">Price</p>
+                  <p className="text-xs text-gray-500">From</p>
                   <p className="font-semibold">
-                    {event.pricingType === 'free' ? 'Free' : `${event.currency || 'AED'} ${event.price}`}
+                    {selected
+                      ? selected.price > 0
+                        ? `${selected.currency} ${selected.price}`
+                        : 'Free'
+                      : event.pricingType === 'free'
+                        ? 'Free'
+                        : `${event.currency || 'AED'} ${event.price}`}
                   </p>
                 </div>
               </div>
@@ -102,7 +149,11 @@ export function EventDetailView({
                     <div key={idx}>
                       {speaker.photoURL && (
                         <div className="w-full h-40 rounded-lg overflow-hidden mb-3">
-                          <img src={speaker.photoURL} alt={speaker.name} className="w-full h-full object-cover" />
+                          <img
+                            src={speaker.photoURL}
+                            alt={speaker.name}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       )}
                       <h3 className="font-semibold text-black">{speaker.name}</h3>
@@ -119,9 +170,19 @@ export function EventDetailView({
                 <h2 className="text-2xl font-bold mb-6">Agenda</h2>
                 <div className="space-y-4">
                   {event.agenda.map((item, idx) => (
-                    <div key={idx} className="flex flex-col sm:flex-row gap-2 sm:gap-4 pb-4 border-b border-gray-200 last:border-0">
-                      <span className="font-mono font-bold text-gray-700 sm:min-w-20">{item.time}</span>
-                      <span className="text-gray-900">{item.title}</span>
+                    <div
+                      key={idx}
+                      className="flex flex-col sm:flex-row gap-2 sm:gap-4 pb-4 border-b border-gray-200 last:border-0"
+                    >
+                      <span className="font-mono font-bold text-gray-700 sm:min-w-20">
+                        {item.time}
+                      </span>
+                      <div>
+                        <span className="text-gray-900">{item.title}</span>
+                        {item.speakerName && (
+                          <p className="text-xs text-gray-500">{item.speakerName}</p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -147,12 +208,47 @@ export function EventDetailView({
                   </div>
                 )}
 
-                {event.pricingType !== 'free' && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-black">
-                      {event.currency || 'AED'} {event.price}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">per ticket</p>
+                {ticketTypes.length > 0 && onTicketChange && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Ticket type</p>
+                    {ticketTypes.map((t) => (
+                      <label
+                        key={t.id}
+                        className={`flex items-center justify-between gap-2 p-3 border rounded-lg cursor-pointer ${
+                          selectedTicketId === t.id || (!selectedTicketId && t === ticketTypes[0])
+                            ? 'border-black bg-neutral-50'
+                            : 'border-gray-200'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 text-sm">
+                          <input
+                            type="radio"
+                            name="ticketType"
+                            checked={
+                              selectedTicketId === t.id ||
+                              (!selectedTicketId && t.id === ticketTypes[0].id)
+                            }
+                            onChange={() => onTicketChange(t.id)}
+                          />
+                          {t.name}
+                        </span>
+                        <span className="text-sm font-semibold">
+                          {t.price > 0 ? `${t.currency} ${t.price}` : 'Free'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                {onCouponChange && (
+                  <div>
+                    <label className="text-sm font-medium">Coupon / unlock code</label>
+                    <input
+                      value={couponCode}
+                      onChange={(e) => onCouponChange(e.target.value)}
+                      placeholder="Optional"
+                      className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                    />
                   </div>
                 )}
 
@@ -160,11 +256,17 @@ export function EventDetailView({
                   <button
                     type="button"
                     onClick={onRegister}
-                    disabled={registering || isFull}
+                    disabled={registering || (isFull && !canWaitlist)}
                     className="w-full py-3 bg-black !text-white rounded-lg font-semibold hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
                   >
                     {registering && <Loader2 size={16} className="animate-spin" />}
-                    {isFull ? 'Event Full' : 'Register Now'}
+                    {isFull && !canWaitlist
+                      ? 'Event Full'
+                      : canWaitlist
+                        ? 'Join Waitlist'
+                        : selected && selected.price > 0
+                          ? 'Get Tickets'
+                          : 'Register Now'}
                   </button>
                 )}
 
@@ -178,7 +280,34 @@ export function EventDetailView({
                   {event.maxAttendees
                     ? `${Math.max(0, event.maxAttendees - event.currentAttendees)} spots remaining`
                     : 'No limit on attendees'}
+                  {canWaitlist ? ' · Waitlist open' : ''}
                 </p>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={copyShare}
+                    className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                  >
+                    <Copy size={14} /> Copy share link
+                  </button>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`${event.title} ${shareUrl}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                  >
+                    <Share2 size={14} /> Share on WhatsApp
+                  </a>
+                  {event.id && (
+                    <a
+                      href={`/api/events/${event.id}/ics`}
+                      className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                    >
+                      <CalendarPlus size={14} /> Add to calendar
+                    </a>
+                  )}
+                </div>
 
                 <div className="pt-4 border-t border-gray-200 space-y-2 text-xs text-gray-600 break-words">
                   <p>{event.locationAddress}</p>

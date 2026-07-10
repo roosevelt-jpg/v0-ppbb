@@ -1,5 +1,12 @@
 import type { EventTag, GenderRestriction } from '@/lib/types'
-import type { EventStatus, PricingType } from '@/lib/event-types'
+import type {
+  EventCoupon,
+  EventRecurrence,
+  EventStatus,
+  PricingType,
+  TicketType,
+} from '@/lib/event-types'
+import { createDefaultTicketType } from '@/lib/event-types'
 
 export interface AdminEventFormInput {
   title: string
@@ -24,6 +31,30 @@ export interface AdminEventFormInput {
   category?: string
   createdBy?: string
   createdByRole?: 'admin' | 'business'
+  speakers?: Array<{
+    name: string
+    title?: string
+    bio?: string
+    photoURL?: string
+    link?: string | null
+  }>
+  agenda?: Array<{
+    time: string
+    title: string
+    description?: string | null
+    speakerName?: string | null
+    durationMinutes?: number | null
+    order: number
+  }>
+  ticketTypes?: TicketType[]
+  coupons?: EventCoupon[]
+  requireApproval?: boolean
+  enableWaitlist?: boolean
+  cohostIds?: string[]
+  cohostEmails?: string[]
+  showGuestList?: boolean
+  isFeatured?: boolean
+  recurrence?: EventRecurrence | null
 }
 
 function combineDateAndTime(date: string, time: string): Date {
@@ -39,6 +70,28 @@ function inferCategory(tags: EventTag[], genderRestriction: GenderRestriction): 
   return 'mixed'
 }
 
+function normalizeTicketTypes(
+  form: AdminEventFormInput
+): TicketType[] {
+  if (Array.isArray(form.ticketTypes) && form.ticketTypes.length > 0) {
+    return form.ticketTypes.map((t) => ({
+      ...t,
+      id: t.id || `tt_${Math.random().toString(36).slice(2, 9)}`,
+      soldCount: typeof t.soldCount === 'number' ? t.soldCount : 0,
+      isActive: t.isActive !== false,
+      requireApproval: Boolean(t.requireApproval),
+      currency: t.currency || form.currency || 'AED',
+    }))
+  }
+  return [
+    createDefaultTicketType(
+      form.isPaid ? form.price : 0,
+      form.currency || 'AED',
+      form.isPaid ? 'Paid Ticket' : 'General Admission'
+    ),
+  ]
+}
+
 export function buildEventApiPayload(form: AdminEventFormInput) {
   const startDate = combineDateAndTime(form.date, form.startTime)
   const endDate = combineDateAndTime(form.date, form.endTime)
@@ -49,12 +102,20 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     tags.push('free')
   }
 
+  const ticketTypes = normalizeTicketTypes(form)
+  const primaryPrice = form.isPaid
+    ? ticketTypes[0]?.price ?? form.price
+    : 0
+
   return {
     title: form.title.trim(),
     description: form.description.trim(),
     category: form.category || inferCategory(tags, form.genderRestriction),
     tags,
     genderRestriction: form.genderRestriction,
+    isFeatured: Boolean(form.isFeatured),
+    speakers: form.speakers || [],
+    agenda: form.agenda || [],
     locationName: form.locationName.trim(),
     locationAddress: form.locationAddress.trim() || form.locationName.trim(),
     locationPlaceId: form.locationPlaceId || '',
@@ -64,7 +125,7 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     endDate: endDate.toISOString(),
     timezone: 'Asia/Dubai',
     pricingType,
-    price: form.isPaid ? form.price : null,
+    price: form.isPaid ? primaryPrice : null,
     currency: form.currency || 'AED',
     revenueModel: form.isPaid ? 'pb_full' : null,
     paymentGateway: form.isPaid ? form.paymentGateway || 'stripe' : null,
@@ -73,12 +134,23 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     status: form.status as EventStatus,
     createdBy: form.createdBy || 'admin',
     createdByRole: form.createdByRole || 'admin',
+    ticketTypes,
+    coupons: Array.isArray(form.coupons) ? form.coupons : [],
+    requireApproval: Boolean(form.requireApproval),
+    enableWaitlist: Boolean(form.enableWaitlist),
+    waitlistCount: 0,
+    cohostIds: form.cohostIds || [],
+    cohostEmails: form.cohostEmails || [],
+    showGuestList: form.showGuestList !== false,
+    recurrence: form.recurrence || null,
+    seriesId: null,
   }
 }
 
 /** Fields safe to PUT when editing — excludes createdAt / createdBy / createdByRole. */
 export function buildEventUpdatePayload(form: AdminEventFormInput) {
-  const { createdBy: _createdBy, createdByRole: _createdByRole, ...rest } = buildEventApiPayload(form)
+  const { createdBy: _createdBy, createdByRole: _createdByRole, waitlistCount: _w, seriesId: _s, ...rest } =
+    buildEventApiPayload(form)
   return rest
 }
 
@@ -159,5 +231,16 @@ export function mapEventDocToAdminForm(
     category: typeof data.category === 'string' ? data.category : undefined,
     approvalNotes: typeof data.approvalNotes === 'string' ? data.approvalNotes : null,
     existingStatus: (data.status as EventStatus) || 'draft',
+    speakers: Array.isArray(data.speakers) ? (data.speakers as AdminEventFormInput['speakers']) : [],
+    agenda: Array.isArray(data.agenda) ? (data.agenda as AdminEventFormInput['agenda']) : [],
+    ticketTypes: Array.isArray(data.ticketTypes) ? (data.ticketTypes as TicketType[]) : [],
+    coupons: Array.isArray(data.coupons) ? (data.coupons as EventCoupon[]) : [],
+    requireApproval: Boolean(data.requireApproval),
+    enableWaitlist: Boolean(data.enableWaitlist),
+    cohostIds: Array.isArray(data.cohostIds) ? (data.cohostIds as string[]) : [],
+    cohostEmails: Array.isArray(data.cohostEmails) ? (data.cohostEmails as string[]) : [],
+    showGuestList: data.showGuestList !== false,
+    isFeatured: Boolean(data.isFeatured),
+    recurrence: (data.recurrence as EventRecurrence) || null,
   }
 }

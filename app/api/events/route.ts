@@ -141,6 +141,13 @@ export async function POST(request: NextRequest) {
     const isPublished = status === 'published'
     const isPending = status === 'pending_approval'
 
+    let cohostIds: string[] = Array.isArray(body.cohostIds) ? body.cohostIds : []
+    if (Array.isArray(body.cohostEmails) && body.cohostEmails.length) {
+      const { resolveCohostIds } = await import('@/lib/event-luma-server')
+      const resolved = await resolveCohostIds(body.cohostEmails)
+      cohostIds = Array.from(new Set([...cohostIds, ...resolved]))
+    }
+
     const eventData = sanitizeForFirestore({
       title: body.title,
       description: body.description || '',
@@ -170,6 +177,17 @@ export async function POST(request: NextRequest) {
       businessPayoutPercent: body.businessPayoutPercent || null,
       pbCommissionOverride: body.pbCommissionOverride || false,
       paymentGateway: body.paymentGateway || null,
+
+      ticketTypes: body.ticketTypes || [],
+      coupons: body.coupons || [],
+      requireApproval: Boolean(body.requireApproval),
+      enableWaitlist: body.enableWaitlist !== false,
+      waitlistCount: 0,
+      cohostIds,
+      cohostEmails: body.cohostEmails || [],
+      showGuestList: body.showGuestList !== false,
+      recurrence: body.recurrence || null,
+      seriesId: body.seriesId || null,
 
       bannerURL: body.bannerURL || body.bannerImageUrl || body.bannerImage || '',
       maxAttendees: body.maxAttendees || null,
@@ -204,6 +222,13 @@ export async function POST(request: NextRequest) {
     })
 
     const docRef = await db.collection('events').add(eventData)
+
+    if (isPublished && body.recurrence?.frequency) {
+      const { generateRecurringEvents } = await import('@/lib/event-luma-server')
+      void generateRecurringEvents(docRef.id, { ...eventData, id: docRef.id }, body.recurrence).catch(
+        console.error
+      )
+    }
 
     if (isPublished) {
       void notifyNewEventPublished(String(body.title || 'New event'), docRef.id).catch(console.error)
@@ -291,6 +316,15 @@ export async function PUT(request: NextRequest) {
 
     if (updates.status === 'published' && existing.status !== 'published') {
       void notifyNewEventPublished(title, id).catch(console.error)
+      if (updates.recurrence || existing.recurrence) {
+        const { generateRecurringEvents } = await import('@/lib/event-luma-server')
+        const recurrence = (updates.recurrence || existing.recurrence) as any
+        if (recurrence?.frequency) {
+          void generateRecurringEvents(id, { ...existing, ...updates, id }, recurrence).catch(
+            console.error
+          )
+        }
+      }
     }
 
     if (updates.status === 'published' && existing.status === 'pending_approval') {

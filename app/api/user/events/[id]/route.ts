@@ -1,19 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { Timestamp } from 'firebase-admin/firestore'
+import { getAuthUidFromRequest, promoteNextWaitlisted } from '@/lib/event-luma-server'
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+type Ctx = { params: Promise<{ id: string }> }
+
+export async function DELETE(request: NextRequest, context: Ctx) {
   try {
-    const eventId = params.id
-    const userId = request.nextUrl.searchParams.get('userId')
+    const { id: eventId } = await context.params
+    const authUid = await getAuthUidFromRequest(request)
+    const userId = authUid || request.nextUrl.searchParams.get('userId')
     const db = getAdminDb()
 
     if (!userId) {
-      return NextResponse.json({ success: false, error: 'userId required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Find and delete registration
-    const regSnapshot = await db.collection('eventRegistrations')
+    const regSnapshot = await db
+      .collection('eventRegistrations')
       .where('eventId', '==', eventId)
       .where('userId', '==', userId)
       .get()
@@ -23,23 +27,26 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     const regDoc = regSnapshot.docs[0]
-    const registration = regDoc.data() as any
+    const registration = regDoc.data()
 
-    // Get current event data
-    const eventDoc = await db.collection('events').doc(eventId).get()
-    const event = eventDoc.data() as any
-
-    // Delete registration
-    await regDoc.ref.delete()
-
-    // Update event attendee count
-    await db.collection('events').doc(eventId).update({
-      currentAttendees: Math.max(0, (event.currentAttendees || 0) - 1),
-      totalRevenue: Math.max(0, (event.totalRevenue || 0) - (registration.amountPaid || 0)),
-      pbRevenue: Math.max(0, (event.pbRevenue || 0) - (registration.pbCut || 0)),
-      businessRevenue: Math.max(0, (event.businessRevenue || 0) - (registration.businessCut || 0)),
-      updatedAt: Timestamp.now(),
+    await regDoc.ref.update({
+      status: 'cancelled',
+      cancelledAt: Timestamp.now(),
+      cancellationReason: 'User cancelled',
     })
+
+    if (registration.status === 'confirmed') {
+      await db.collection('events').doc(eventId).update({
+        currentAttendees: FieldValue.increment(-1),
+        updatedAt: Timestamp.now(),
+      })
+      void promoteNextWaitlisted(eventId).catch(console.error)
+    } else if (registration.status === 'waitlisted') {
+      await db.collection('events').doc(eventId).update({
+        waitlistCount: FieldValue.increment(-1),
+        updatedAt: Timestamp.now(),
+      })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

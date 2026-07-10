@@ -1,10 +1,26 @@
 import { Timestamp } from 'firebase/firestore'
 
 export type GenderRestriction = 'mixed' | 'men-only' | 'ladies-only'
-export type EventStatus = 'draft' | 'pending_approval' | 'changes_requested' | 'published' | 'rejected' | 'cancelled' | 'completed'
+export type EventStatus =
+  | 'draft'
+  | 'pending_approval'
+  | 'changes_requested'
+  | 'published'
+  | 'rejected'
+  | 'cancelled'
+  | 'completed'
 export type PricingType = 'free' | 'paid_by_business' | 'paid_by_pb' | 'premium' | 'member_only'
 export type RevenueModel = 'business_split' | 'pb_full' | null
 export type PayoutStatus = 'not_applicable' | 'pending' | 'processing' | 'paid_out'
+
+export type RegistrationStatus =
+  | 'confirmed'
+  | 'pending'
+  | 'waitlisted'
+  | 'cancelled'
+  | 'rejected'
+
+export type RecurrenceFrequency = 'weekly' | 'monthly'
 
 export interface Speaker {
   name: string
@@ -33,12 +49,40 @@ export interface EventLocation {
   placeId?: string
 }
 
+/** Luma-style ticket tier */
+export interface TicketType {
+  id: string
+  name: string
+  description?: string
+  price: number
+  currency: string
+  capacity?: number | null
+  soldCount: number
+  requireApproval: boolean
+  isActive: boolean
+}
+
+export interface EventCoupon {
+  code: string
+  percentOff?: number | null
+  amountOff?: number | null
+  maxRedemptions?: number | null
+  usedCount: number
+  ticketTypeIds?: string[] | null
+}
+
+export interface EventRecurrence {
+  frequency: RecurrenceFrequency
+  interval: number
+  until?: string | null
+}
+
 export interface Event {
   id?: string
   title: string
   description: string
-  category: string // from platformConfig.events.categories
-  tags: string[] // from platformConfig.events.tags
+  category: string
+  tags: string[]
   genderRestriction: GenderRestriction
   isFeatured: boolean
 
@@ -63,6 +107,19 @@ export interface Event {
   businessPayoutPercent: number | null
   pbCommissionOverride: boolean
   paymentGateway: string | null
+
+  /** Luma-parity hosting fields */
+  ticketTypes: TicketType[]
+  coupons: EventCoupon[]
+  requireApproval: boolean
+  enableWaitlist: boolean
+  waitlistCount: number
+  cohostIds: string[]
+  cohostEmails: string[]
+  shareSlug?: string | null
+  recurrence?: EventRecurrence | null
+  seriesId?: string | null
+  showGuestList: boolean
 
   bannerURL: string
   maxAttendees: number | null
@@ -108,9 +165,20 @@ export interface EventRegistration {
   userEmail: string
   userGender: string
   registeredAt: Timestamp | Date
-  status: 'confirmed' | 'pending' | 'cancelled'
+  status: RegistrationStatus
   cancelledAt: Timestamp | null
   cancellationReason: string | null
+
+  ticketTypeId?: string | null
+  ticketTypeName?: string | null
+  waitlistPosition?: number | null
+  checkInCode?: string | null
+  qrToken?: string | null
+  checkedInAt?: Timestamp | Date | null
+  checkedInBy?: string | null
+  inviteStatus?: 'invited' | 'added' | 'self' | null
+  couponCode?: string | null
+  referralCode?: string | null
 
   paymentStatus: 'free' | 'paid' | 'pending' | 'refunded' | null
   amountPaid: number | null
@@ -122,6 +190,7 @@ export interface EventRegistration {
   paidAt: Timestamp | null
   refundedAt: Timestamp | null
   refundReference: string | null
+  stripeSessionId?: string | null
 
   calendarSynced: boolean
   calendarEventId: string | null
@@ -160,4 +229,22 @@ export interface CalendarIntegration {
   accessToken: string
   refreshToken?: string
   expiresAt: Timestamp | Date
+}
+
+export function createDefaultTicketType(
+  price = 0,
+  currency = 'AED',
+  name = 'General Admission'
+): TicketType {
+  return {
+    id: `tt_${Date.now().toString(36)}`,
+    name,
+    description: '',
+    price,
+    currency,
+    capacity: null,
+    soldCount: 0,
+    requireApproval: false,
+    isActive: true,
+  }
 }

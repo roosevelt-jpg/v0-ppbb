@@ -32,9 +32,9 @@ export default function EventsFinancePage() {
   }
 
   const totalRevenue = events.reduce((sum, e) => sum + (e.totalRevenue || 0), 0)
-  const totalPBCut = events.reduce((sum, e) => sum + (e.pbCommissionAmount || 0), 0)
-  const totalBusinessCut = events.reduce((sum, e) => sum + (e.businessPayoutAmount || 0), 0)
-  const pendingPayout = events.filter(e => e.payoutStatus === 'pending').reduce((sum, e) => sum + (e.businessPayoutAmount || 0), 0)
+  const totalPBCut = events.reduce((sum, e) => sum + (e.pbRevenue || e.pbCommissionAmount || 0), 0)
+  const totalBusinessCut = events.reduce((sum, e) => sum + (e.businessRevenue || e.businessPayoutAmount || 0), 0)
+  const pendingPayout = events.filter(e => e.payoutStatus === 'pending').reduce((sum, e) => sum + (e.businessRevenue || e.businessPayoutAmount || 0), 0)
 
   return (
     <AdminPageLayout title="Events Finance">
@@ -102,8 +102,8 @@ export default function EventsFinancePage() {
                     <tr key={event.id} style={{ borderBottom: '1px solid #e4e1da' }}>
                       <td style={{ padding: '12px', fontWeight: 500 }}>{event.title}</td>
                       <td style={{ padding: '12px' }}>AED {event.totalRevenue?.toFixed(2)}</td>
-                      <td style={{ padding: '12px' }}>AED {event.pbCommissionAmount?.toFixed(2)}</td>
-                      <td style={{ padding: '12px' }}>AED {event.businessPayoutAmount?.toFixed(2)}</td>
+                      <td style={{ padding: '12px' }}>AED {(event.pbRevenue || event.pbCommissionAmount || 0).toFixed(2)}</td>
+                      <td style={{ padding: '12px' }}>AED {(event.businessRevenue || event.businessPayoutAmount || 0).toFixed(2)}</td>
                       <td style={{ padding: '12px' }}>
                         <span style={{
                           display: 'inline-block',

@@ -785,6 +785,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Event registrations (Luma-style guest list)
+    // Host/cohost management goes through Admin SDK APIs; client rules cover own + admin.
+    match /eventRegistrations/{regId} {
+      allow read: if isAuth() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+    }
+
     // Default deny all other requests
     match /{document=**} {
       allow read, write: if false;

@@ -139,7 +139,10 @@ export default function MyEventsPage() {
   const handleCancel = async (eventId: string) => {
     if (!confirm('Cancel registration for this event?')) return
     try {
-      const res = await fetch(`/api/user/events/${eventId}`, { method: 'DELETE' })
+      const res = await fetch(
+        `/api/user/events/${eventId}?userId=${encodeURIComponent(user.id)}`,
+        { method: 'DELETE' }
+      )
       const json = await res.json()
       if (json.success) loadRegistered()
     } catch (err) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db, auth } from '@/lib/firebase'
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore'
+import { getEventEndDate, getEventLocationLabel, getEventStartDate } from '@/lib/event-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +12,6 @@ export async function POST(request: NextRequest) {
 
     const { eventId } = await request.json()
 
-    // Get calendar integration
     const integrationDoc = await getDoc(
       doc(db, 'users', user.uid, 'calendarIntegrations', 'microsoft')
     )
@@ -26,52 +26,57 @@ export async function POST(request: NextRequest) {
     const integration = integrationDoc.data()
     let accessToken = integration.accessToken
 
-    // Check if token is expired and refresh if needed
     if (integration.expiresAt.toDate() < new Date()) {
-      const refreshResponse = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          refresh_token: integration.refreshToken,
-          client_id: process.env.MICROSOFT_CALENDAR_CLIENT_ID!,
-          client_secret: process.env.MICROSOFT_CALENDAR_CLIENT_SECRET!,
-          grant_type: 'refresh_token',
-          scope: 'Calendars.ReadWrite offline_access',
-        }).toString(),
-      })
+      const refreshResponse = await fetch(
+        'https://login.microsoftonline.com/common/oauth2/v2.0/token',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            refresh_token: integration.refreshToken,
+            client_id: process.env.MICROSOFT_CALENDAR_CLIENT_ID!,
+            client_secret: process.env.MICROSOFT_CALENDAR_CLIENT_SECRET!,
+            grant_type: 'refresh_token',
+            scope: 'Calendars.ReadWrite offline_access',
+          }).toString(),
+        }
+      )
 
       if (refreshResponse.ok) {
         const newTokens = await refreshResponse.json()
         accessToken = newTokens.access_token
-        // Update stored token
-        await setDoc(
-          doc(db, 'users', user.uid, 'calendarIntegrations', 'microsoft'),
-          {
-            ...integration,
-            accessToken: newTokens.access_token,
-            updatedAt: Timestamp.now(),
-          }
-        )
+        await setDoc(doc(db, 'users', user.uid, 'calendarIntegrations', 'microsoft'), {
+          ...integration,
+          accessToken: newTokens.access_token,
+          updatedAt: Timestamp.now(),
+        })
       }
     }
 
-    // Fetch event details
     const eventDoc = await getDoc(doc(db, 'events', eventId))
     if (!eventDoc.exists()) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 })
     }
 
-    const event = eventDoc.data()
-    const eventDate = event.date instanceof Date ? event.date : event.date?.toDate() || new Date()
-    const startDateTime = new Date(eventDate)
-    const [startHour, startMin] = event.startTime.split(':')
-    startDateTime.setHours(parseInt(startHour), parseInt(startMin), 0)
+    const event = eventDoc.data()!
+    const startDateTime = getEventStartDate(event as never)
+    const endDateTime = getEventEndDate(event as never)
+    if (!event.startDate && event.date && typeof event.startTime === 'string') {
+      const [startHour, startMin] = String(event.startTime).split(':')
+      startDateTime.setHours(parseInt(startHour || '0', 10), parseInt(startMin || '0', 10), 0)
+      if (typeof event.endTime === 'string') {
+        const [endHour, endMin] = String(event.endTime).split(':')
+        endDateTime.setTime(startDateTime.getTime())
+        endDateTime.setHours(parseInt(endHour || '0', 10), parseInt(endMin || '0', 10), 0)
+      }
+    }
 
-    const endDateTime = new Date(startDateTime)
-    const [endHour, endMin] = event.endTime.split(':')
-    endDateTime.setHours(parseInt(endHour), parseInt(endMin), 0)
+    const location =
+      getEventLocationLabel(event as never) ||
+      (event.location
+        ? `${event.location.address || ''}, ${event.location.city || ''}`.trim()
+        : '')
 
-    // Create Microsoft Calendar event
     const calendarEvent = {
       subject: event.title,
       bodyPreview: event.description,
@@ -81,14 +86,14 @@ export async function POST(request: NextRequest) {
       },
       start: {
         dateTime: startDateTime.toISOString(),
-        timeZone: 'UTC',
+        timeZone: event.timezone || 'UTC',
       },
       end: {
         dateTime: endDateTime.toISOString(),
-        timeZone: 'UTC',
+        timeZone: event.timezone || 'UTC',
       },
       location: {
-        displayName: `${event.location.address}, ${event.location.city}`,
+        displayName: location,
       },
       isReminderOn: true,
       reminderMinutesBeforeStart: 15,
@@ -104,11 +109,11 @@ export async function POST(request: NextRequest) {
     })
 
     if (!microsoftResponse.ok) {
-      console.error('[v0] Failed to create Microsoft Calendar event:', await microsoftResponse.text())
-      return NextResponse.json(
-        { error: 'Failed to create calendar event' },
-        { status: 500 }
+      console.error(
+        '[v0] Failed to create Microsoft Calendar event:',
+        await microsoftResponse.text()
       )
+      return NextResponse.json({ error: 'Failed to create calendar event' }, { status: 500 })
     }
 
     const microsoftEvent = await microsoftResponse.json()
@@ -120,9 +125,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[v0] Error creating calendar event:', error)
-    return NextResponse.json(
-      { error: 'Failed to create calendar event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create calendar event' }, { status: 500 })
   }
 }

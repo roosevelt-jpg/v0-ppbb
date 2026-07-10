@@ -192,6 +192,22 @@ export default function BusinessEventsPage() {
                     <Edit2 size={16} />
                   </button>
                   <button
+                    onClick={() => router.push(`/business/events/${event.id}/guests`)}
+                    style={{
+                      padding: '8px 12px',
+                      backgroundColor: '#374151',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: 600,
+                    }}
+                    title="Guests & Check-in"
+                  >
+                    Guests
+                  </button>
+                  <button
                     onClick={() => handleDelete(event.id!)}
                     style={{
                       padding: '8px 12px',

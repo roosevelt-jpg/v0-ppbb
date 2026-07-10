@@ -47,6 +47,74 @@ export async function POST(req: NextRequest) {
           }
           await handleMarketplaceCheckoutCompleted(event.data.object as never)
           await markCheckoutSessionProcessed(session.id)
+        } else if (session.metadata?.type === 'event_ticket' && session.metadata.registrationId) {
+          const { getAdminDb } = await import('@/lib/firebase-admin')
+          const { Timestamp, FieldValue } = await import('firebase-admin/firestore')
+          const {
+            generateCheckInCode,
+            generateQrToken,
+            incrementTicketSold,
+            incrementCouponUsed,
+          } = await import('@/lib/event-luma-server')
+          const db = getAdminDb()
+          const regRef = db.collection('eventRegistrations').doc(session.metadata.registrationId)
+          const regSnap = await regRef.get()
+          if (regSnap.exists && regSnap.data()?.paymentStatus !== 'paid') {
+            const reg = regSnap.data()!
+            const amount =
+              typeof session.amount_total === 'number'
+                ? session.amount_total / 100
+                : reg.amountPaid || 0
+            await regRef.update({
+              paymentStatus: 'paid',
+              status: reg.status === 'pending' ? 'pending' : 'confirmed',
+              paidAt: Timestamp.now(),
+              paymentReference: session.id,
+              checkInCode: reg.checkInCode || generateCheckInCode(),
+              qrToken: reg.qrToken || generateQrToken(),
+              amountPaid: amount,
+            })
+            if (reg.status !== 'pending') {
+              await db.collection('events').doc(session.metadata.eventId).update({
+                currentAttendees: FieldValue.increment(1),
+                totalRevenue: FieldValue.increment(amount),
+                pbRevenue: FieldValue.increment(reg.pbCut || 0),
+                businessRevenue: FieldValue.increment(reg.businessCut || 0),
+                updatedAt: Timestamp.now(),
+              })
+              if (session.metadata.ticketTypeId && session.metadata.ticketTypeId !== 'legacy') {
+                await incrementTicketSold(session.metadata.eventId, session.metadata.ticketTypeId)
+              }
+              if (session.metadata.couponCode) {
+                await incrementCouponUsed(session.metadata.eventId, session.metadata.couponCode)
+              }
+            }
+            if (amount > 0 && session.metadata.userId) {
+              void recordReferralConversion({
+                convertedUserId: session.metadata.userId,
+                conversionType: 'event',
+                relatedDocId: session.metadata.registrationId,
+                revenueAmount: amount,
+                status: 'confirmed',
+                idempotencyKey: `event-paid:${session.id}`,
+              }).catch((err) => console.error('[referral] event paid:', err))
+            }
+            const email = (reg.userEmail as string) || ''
+            if (email) {
+              const eventSnap = await db.collection('events').doc(session.metadata.eventId).get()
+              const title = (eventSnap.data()?.title as string) || 'Event'
+              const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+              const updated = (await regRef.get()).data()
+              const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+              void sendEventRegistrationEmail({
+                to: email,
+                eventTitle: title,
+                eventUrl: `${site}/events/${session.metadata.eventId}/confirmation?registrationId=${session.metadata.registrationId}`,
+                status: String(updated?.status || 'confirmed'),
+                checkInCode: (updated?.checkInCode as string) || null,
+              })
+            }
+          }
         } else if (
           session.metadata?.type === 'membership' &&
           session.metadata.userId &&

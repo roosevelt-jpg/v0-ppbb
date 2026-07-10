@@ -14,7 +14,8 @@ import {
   mapEventDocToAdminForm,
 } from '@/lib/build-event-payload'
 import type { EventTag, GenderRestriction } from '@/lib/types'
-import type { EventStatus } from '@/lib/event-types'
+import type { EventCoupon, EventRecurrence, EventStatus, TicketType } from '@/lib/event-types'
+import { EventHostingFields } from '@/components/events/event-hosting-fields'
 
 interface EventFormData {
   title: string
@@ -36,6 +37,14 @@ interface EventFormData {
   status: 'draft' | 'published'
   genderRestriction: GenderRestriction
   tags: EventTag[]
+  ticketTypes: TicketType[]
+  coupons: EventCoupon[]
+  requireApproval: boolean
+  enableWaitlist: boolean
+  showGuestList: boolean
+  isFeatured: boolean
+  cohostEmails: string
+  recurrence: EventRecurrence | null
 }
 
 const EMPTY_FORM: EventFormData = {
@@ -58,6 +67,14 @@ const EMPTY_FORM: EventFormData = {
   status: 'draft',
   genderRestriction: 'mixed',
   tags: [],
+  ticketTypes: [],
+  coupons: [],
+  requireApproval: false,
+  enableWaitlist: true,
+  showGuestList: true,
+  isFeatured: false,
+  cohostEmails: '',
+  recurrence: null,
 }
 
 export default function CreateEventPage() {
@@ -124,6 +141,14 @@ function CreateEventForm() {
           status: mapped.status,
           genderRestriction: mapped.genderRestriction,
           tags: mapped.tags,
+          ticketTypes: mapped.ticketTypes || [],
+          coupons: mapped.coupons || [],
+          requireApproval: Boolean(mapped.requireApproval),
+          enableWaitlist: mapped.enableWaitlist !== false,
+          showGuestList: mapped.showGuestList !== false,
+          isFeatured: Boolean(mapped.isFeatured),
+          cohostEmails: (mapped.cohostEmails || []).join(', '),
+          recurrence: mapped.recurrence || null,
         })
         setApprovalNotes(mapped.approvalNotes || null)
         setExistingStatus(mapped.existingStatus || null)
@@ -201,6 +226,10 @@ function CreateEventForm() {
           ...formData,
           bannerURL,
           status: statusToSave === 'published' ? 'published' : 'draft',
+          cohostEmails: formData.cohostEmails
+            .split(/[,;\s]+/)
+            .map((e) => e.trim())
+            .filter(Boolean),
         })
 
         const res = await fetch('/api/events', {
@@ -241,6 +270,10 @@ function CreateEventForm() {
         status: createStatus,
         createdBy: user?.id || user?.email || 'admin',
         createdByRole: 'admin',
+        cohostEmails: formData.cohostEmails
+          .split(/[,;\s]+/)
+          .map((e) => e.trim())
+          .filter(Boolean),
       })
 
       const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken()
@@ -535,6 +568,19 @@ function CreateEventForm() {
               </div>
             </div>
           </div>
+
+          <EventHostingFields
+            currency={formData.currency}
+            ticketTypes={formData.ticketTypes}
+            coupons={formData.coupons}
+            requireApproval={formData.requireApproval}
+            enableWaitlist={formData.enableWaitlist}
+            showGuestList={formData.showGuestList}
+            isFeatured={formData.isFeatured}
+            cohostEmails={formData.cohostEmails}
+            recurrence={formData.recurrence}
+            onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
+          />
 
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-black">Pricing & Payment</h2>
