@@ -1,270 +1,339 @@
 'use client'
 
 import React from 'react'
-import { auth, db } from '@/lib/firebase'
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
-import { User } from '@/lib/types'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Clock, Heart, Users, Calendar, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { useAuth } from '@/lib/auth-context'
+import { db } from '@/lib/firebase'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
+import { Calendar, Heart, Briefcase, Clock, ArrowRight, Bell, X, Crown } from 'lucide-react'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+} from '@/components/dashboard-states'
+import { getMemberApplications } from '@/lib/business-queries'
+import {
+  eventVisibleToUser,
+  fetchMemberDonationTotal,
+  parseFirestoreDate,
+  subscribeToMemberNotifications,
+  type MemberNotification,
+} from '@/lib/member-dashboard'
+import type { User } from '@/lib/types'
+
+function formatMemberDate(value: unknown): string {
+  const d = parseFirestoreDate(value)
+  return d ? d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : '—'
+}
 
 export default function DashboardPage() {
-  const [user, setUser] = React.useState<User | null>(null)
+  const { user, firebaseUser, loading: authLoading } = useAuth()
   const [stats, setStats] = React.useState({
-    registeredEvents: 0,
-    donationAmount: 0,
-    volunteeredHours: 0,
+    upcomingEvents: 0,
+    applications: 0,
+    donations: 0,
+    volunteerHours: 0,
   })
+  const [upcomingEvents, setUpcomingEvents] = React.useState<Record<string, unknown>[]>([])
+  const [applications, setApplications] = React.useState<Record<string, unknown>[]>([])
+  const [notifications, setNotifications] = React.useState<MemberNotification[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [membershipLabel, setMembershipLabel] = React.useState<string>('View plans')
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      const firebaseUser = auth.currentUser
-      if (!firebaseUser) return
+    if (authLoading) return
+    if (!user?.id || !firebaseUser) {
+      setLoading(false)
+      return
+    }
+
+    let cancelled = false
+    let unsubNotifications: (() => void) | undefined
+
+    const load = async () => {
+      setLoading(true)
+      setError(null)
 
       try {
-        // Fetch user data
-        const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
-        if (userDocSnap.exists()) {
-          setUser(userDocSnap.data() as User)
+        await firebaseUser.getIdToken(true)
+        if (cancelled) return
+
+        const member = user as User
+        const now = new Date()
+
+        const [eventsResult, appsResult, donationTotal, profileResult] = await Promise.allSettled([
+          getDocs(
+            query(
+              collection(db, 'events'),
+              where('status', '==', 'published'),
+              orderBy('startDate', 'asc'),
+              limit(20)
+            )
+          ),
+          getMemberApplications(user.id),
+          fetchMemberDonationTotal(user.id),
+          getDoc(doc(db, 'users', user.id)),
+        ])
+
+        if (cancelled) return
+
+        const allEvents =
+          eventsResult.status === 'fulfilled'
+            ? (eventsResult.value?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
+            : eventsResult.status === 'rejected'
+              ? (console.warn('[v0] events query failed:', eventsResult.reason), [])
+              : []
+
+        const futureEvents = allEvents
+          .filter((e) => {
+            const startDate = parseFirestoreDate(e.startDate)
+            return startDate && startDate >= now
+          })
+          .filter((e) => eventVisibleToUser(e, member.gender))
+          .slice(0, 3)
+
+        const apps = appsResult.status === 'fulfilled' ? (appsResult.value ?? []).slice(0, 3) : []
+
+        const profileHours =
+          profileResult.status === 'fulfilled' && profileResult.value?.exists()
+            ? Number(profileResult.value.data()?.volunteeredHours) || 0
+            : Number(member.volunteeredHours) || 0
+
+        if (profileResult.status === 'fulfilled' && profileResult.value?.exists()) {
+          const profileData = profileResult.value.data()
+          const planName = profileData?.membershipPlanName
+          const tier = profileData?.membershipTier
+          if (typeof planName === 'string' && planName.trim()) {
+            setMembershipLabel(planName)
+          } else if (typeof tier === 'string' && tier.trim() && tier !== 'standard') {
+            setMembershipLabel(tier)
+          } else {
+            setMembershipLabel('View plans')
+          }
         }
 
-        // Fetch registered events
-        const eventsSnap = await getDocs(
-          query(
-            collection(db, 'events'),
-            where('attendees', 'array-contains', firebaseUser.uid)
-          )
+        setUpcomingEvents(futureEvents)
+        setApplications(
+          apps.map((a) => ({
+            id: a.id,
+            title: a.opportunityTitle,
+            company: a.businessName,
+            status: a.status,
+            date: a.createdAt,
+          }))
         )
-
-        // Fetch donations
-        const donationsSnap = await getDocs(
-          query(
-            collection(db, 'donations'),
-            where('donorId', '==', firebaseUser.uid),
-            where('status', '==', 'completed')
-          )
-        )
-
-        const totalDonated = donationsSnap.docs.reduce(
-          (sum, doc) => sum + (doc.data().amount || 0),
-          0
-        )
-
         setStats({
-          registeredEvents: eventsSnap.size,
-          donationAmount: totalDonated,
-          volunteeredHours: userDocSnap.data()?.volunteeredHours || 0,
+          upcomingEvents: futureEvents.length,
+          applications: appsResult.status === 'fulfilled' ? appsResult.value.length : 0,
+          donations: donationTotal.status === 'fulfilled' ? donationTotal.value : 0,
+          volunteerHours: profileHours,
         })
-      } catch (error) {
-        console.error('[v0] Error fetching dashboard data:', error)
+
+        unsubNotifications = subscribeToMemberNotifications(
+          user.id,
+          (items) => {
+            if (!cancelled) setNotifications(items)
+          },
+          (msg) => {
+            console.warn('[v0] notifications unavailable:', msg)
+          }
+        )
+      } catch (err) {
+        console.error('[v0] Dashboard load error:', err)
+        if (!cancelled) setError('Failed to load dashboard data.')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
-    fetchData()
-  }, [])
+    load()
+    return () => {
+      cancelled = true
+      unsubNotifications?.()
+    }
+  }, [authLoading, user?.id, firebaseUser, (user as User | null)?.gender])
 
-  const statCards = [
-    {
-      title: 'Volunteered Hours',
-      value: stats.volunteeredHours,
-      suffix: 'hours this year',
-      icon: Clock,
-      color: '#e3f2fd',
-      iconColor: '#1976d2',
-    },
-    {
-      title: 'Events Attended',
-      value: stats.registeredEvents,
-      suffix: 'events this year',
-      icon: Calendar,
-      color: '#e8f5e9',
-      iconColor: '#388e3c',
-    },
-    {
-      title: 'Total Donations',
-      value: `AED ${stats.donationAmount.toLocaleString()}`,
-      suffix: 'total contributed',
-      icon: Heart,
-      color: '#ffebee',
-      iconColor: '#d32f2f',
-    },
-    {
-      title: 'Membership',
-      value: (user?.membershipTier || 'standard').toUpperCase(),
-      suffix: `since ${new Date(user?.memberSince || '').toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}`,
-      icon: Users,
-      color: '#f3e5f5',
-      iconColor: '#7b1fa2',
-    },
+  const dismissNotification = async (id: string) => {
+    if (!user?.id) return
+    try {
+      await updateDoc(doc(db, 'users', user.id, 'notifications', id), { dismissed: true })
+      setNotifications((prev) => prev.filter((n) => n.id !== id))
+    } catch (err) {
+      console.error('[v0] Dismiss notification error:', err)
+    }
+  }
+
+  if (authLoading || loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
+
+  const member = user as User | null
+  const quickLinks = [
+    { label: 'Browse Jobs', href: '/dashboard/opportunities' },
+    { label: 'Browse Marketplace', href: '/dashboard/marketplace' },
+    { label: 'Volunteer', href: '/dashboard/volunteering' },
+    { label: 'Make Donation', href: '/donate' },
+    { label: 'View Certificates', href: '/dashboard/certificates' },
+    { label: 'Learning Resources', href: '/dashboard/learning' },
+    { label: 'Membership Plans', href: '/dashboard/membership' },
+    { label: 'My Communities', href: '/dashboard/communities' },
+    { label: 'Settings', href: '/dashboard/settings' },
   ]
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        {statCards.map((stat) => {
-          const Icon = stat.icon
+    <DashboardPageShell
+      title="Dashboard"
+      subtitle={`${member?.firstName ?? 'Member'} • Active member`}
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        {[
+          { label: 'Upcoming Events', value: stats.upcomingEvents, icon: Calendar, href: '/dashboard/events' },
+          { label: 'My Applications', value: stats.applications, icon: Briefcase, href: '/dashboard/opportunities' },
+          { label: 'Total Donated', value: `AED ${stats.donations.toLocaleString()}`, icon: Heart, href: '/dashboard/donations' },
+          { label: 'Volunteer Hours', value: stats.volunteerHours, icon: Clock, href: '/dashboard/volunteering' },
+          { label: 'Membership', value: membershipLabel, icon: Crown, href: '/dashboard/membership' },
+        ].map((card) => {
+          const Icon = card.icon
           return (
-            <div key={stat.title} style={{
-              backgroundColor: stat.color,
-              borderRadius: '16px',
-              padding: '1.5rem',
-              border: '1px solid rgba(17, 17, 17, 0.08)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              transition: 'all 0.3s ease',
-              cursor: 'default',
-              ':hover': {
-                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                transform: 'translateY(-2px)',
-              }
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)'
-              e.currentTarget.style.transform = 'translateY(-2px)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06)'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <Link
+              key={card.label}
+              href={card.href}
+              className="block rounded-xl border border-neutral-200 bg-white p-5 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between">
                 <div>
-                  <p style={{ fontSize: '12px', fontWeight: '600', color: '#888888', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem' }}>{stat.title}</p>
-                  <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>{loading ? '...' : stat.value}</p>
-                  <p style={{ fontSize: '12px', color: '#888888' }}>{stat.suffix}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{card.label}</p>
+                  <p className="text-2xl font-bold text-neutral-900 mt-2">{card.value}</p>
                 </div>
-                <Icon size={24} style={{ color: stat.iconColor }} />
+                <Icon className="w-5 h-5 text-neutral-400" />
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>
 
-      {/* Quick Actions & Membership */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-        {/* Quick Actions */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          padding: '2rem',
-          border: '1px solid #e4e1da',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-        }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Quick Actions</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-            {[
-              { label: 'Browse Events', href: '/dashboard/events' },
-              { label: 'Find Opportunities', href: '/dashboard/community' },
-              { label: 'Make Donation', href: '/dashboard/donations' },
-              { label: 'Edit Profile', href: '/dashboard/profile' },
-            ].map(({ label, href }) => (
-              <Link key={label} href={href}>
-                <button style={{
-                  width: '100%',
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  border: '1px solid #e4e1da',
-                  backgroundColor: '#f7f6f2',
-                  color: '#111111',
-                  fontWeight: '600',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e4e1da'
-                  e.currentTarget.style.borderColor = '#888888'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f7f6f2'
-                  e.currentTarget.style.borderColor = '#e4e1da'
-                }}>
-                  {label}
-                  <ArrowRight size={16} />
+      {notifications.length > 0 ? (
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Bell className="w-5 h-5 text-neutral-700" />
+            <h2 className="text-xl font-bold text-neutral-900">Notifications</h2>
+          </div>
+          <div className="space-y-2">
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                className="flex items-start justify-between gap-3 border border-neutral-200 rounded-xl p-4 bg-white"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold text-neutral-900 text-sm">
+                    {n.title ?? 'Notification'}
+                  </p>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    {n.message ?? n.body ?? ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => dismissNotification(n.id)}
+                  className="shrink-0 !bg-white !text-neutral-500 border border-neutral-200 p-1.5 rounded-lg"
+                  aria-label="Dismiss"
+                >
+                  <X className="w-4 h-4" />
                 </button>
-              </Link>
+              </div>
             ))}
           </div>
-        </div>
+        </section>
+      ) : null}
 
-        {/* Membership Status */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          padding: '2rem',
-          border: '1px solid #e4e1da',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-          background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.05) 0%, rgba(17, 17, 17, 0.02) 100%)',
-        }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: '#111111' }}>Membership Status</h3>
-          <div style={{
-            backgroundColor: '#111111',
-            color: '#f7f6f2',
-            padding: '1rem',
-            borderRadius: '12px',
-            marginBottom: '1rem',
-            textAlign: 'center',
-          }}>
-            <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{user?.membershipTier?.toUpperCase() || 'STANDARD'}</p>
-            <p style={{ fontSize: '12px', opacity: 0.9, marginTop: '0.5rem' }}>Active Member</p>
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-neutral-900">Upcoming Events</h2>
+          <Link href="/dashboard/events" className="text-sm font-medium text-neutral-600 hover:text-black">
+            View All Events
+          </Link>
+        </div>
+        {upcomingEvents.length === 0 ? (
+          <p className="text-sm text-neutral-500 border border-neutral-200 rounded-xl p-6 bg-white">
+            No upcoming events right now. Check back soon.
+          </p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-3">
+            {upcomingEvents.map((event) => (
+              <div key={String(event.id)} className="border border-neutral-200 rounded-xl p-4 bg-white">
+                <h3 className="font-semibold text-neutral-900 line-clamp-2">{String(event.title ?? 'Event')}</h3>
+                <p className="text-sm text-neutral-500 mt-2">
+                  {formatMemberDate(event.startDate)}
+                  {event.locationName ? ` • ${String(event.locationName)}` : ''}
+                </p>
+                <Link
+                  href={`/events/${event.id}`}
+                  className="inline-flex mt-3 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+                >
+                  View
+                </Link>
+              </div>
+            ))}
           </div>
-          <button style={{
-            width: '100%',
-            padding: '0.75rem',
-            borderRadius: '12px',
-            backgroundColor: '#111111',
-            color: '#f7f6f2',
-            fontWeight: '600',
-            fontSize: '13px',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#333333'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#111111'
-          }}>
-            View Benefits
-          </button>
-        </div>
-      </div>
+        )}
+      </section>
 
-      {/* Community Impact */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '16px',
-        padding: '2rem',
-        border: '1px solid #e4e1da',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-      }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Community Impact</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>
-          {[
-            { value: '3,412', label: 'Active Members' },
-            { value: '8,940', label: 'Volunteer Hours' },
-            { value: 'AED 92K', label: 'Donations Tracked' },
-          ].map(({ value, label }) => (
-            <div key={label} style={{
-              textAlign: 'center',
-              padding: '1.5rem',
-              backgroundColor: '#f7f6f2',
-              borderRadius: '12px',
-              border: '1px solid #e4e1da',
-            }}>
-              <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>{value}</p>
-              <p style={{ fontSize: '13px', color: '#888888', fontWeight: '500' }}>{label}</p>
-            </div>
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-neutral-900">Recent Applications</h2>
+          <Link href="/dashboard/opportunities" className="text-sm font-medium text-neutral-600 hover:text-black">
+            View All
+          </Link>
+        </div>
+        {applications.length === 0 ? (
+          <p className="text-sm text-neutral-500 border border-neutral-200 rounded-xl p-6 bg-white">
+            No job applications yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {applications.map((app) => (
+              <div
+                key={String(app.id)}
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-neutral-200 rounded-xl p-4 bg-white"
+              >
+                <div>
+                  <p className="font-semibold text-neutral-900">{String(app.title ?? 'Role')}</p>
+                  <p className="text-sm text-neutral-500">{String(app.company ?? '')}</p>
+                </div>
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 capitalize">
+                  {String(app.status ?? 'submitted')}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-neutral-900 mb-4">Quick Links</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {quickLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-semibold text-neutral-900 hover:bg-neutral-100"
+            >
+              {link.label}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           ))}
         </div>
-      </div>
-    </div>
+      </section>
+    </DashboardPageShell>
   )
 }

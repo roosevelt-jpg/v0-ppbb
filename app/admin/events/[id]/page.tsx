@@ -25,7 +25,7 @@ export default function EventDetailPage() {
 
   const loadEvent = async () => {
     try {
-      const res = await fetch(`/api/events?id=${eventId}`)
+      const res = await fetch(`/api/events/${eventId}`)
       const json = await res.json()
       if (json.success && json.data) {
         setEvent(Array.isArray(json.data) ? json.data[0] : json.data)

@@ -33,7 +33,10 @@ export default function ContactRequestsPage() {
     try {
       setLoading(true)
       setError('')
-      const url = filter === 'all' ? '/api/contact' : `/api/contact?status=${filter}`
+      const url =
+        filter === 'all'
+          ? '/api/contact?source=legacy'
+          : `/api/contact?source=legacy&status=${filter}`
       const res = await fetch(url, { cache: 'no-store' })
       const json = await res.json()
 
@@ -147,10 +150,10 @@ export default function ContactRequestsPage() {
                   setFilter(f)
                   setSelectedMessage(null)
                 }}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors !min-h-0 !rounded-none !shadow-none hover:!shadow-none ${
                   filter === f
-                    ? 'border-b-2 border-black text-black'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? '!bg-black !text-white border-b-2 border-black'
+                    : '!bg-white !text-gray-600 hover:!text-gray-900 hover:!bg-gray-50'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}

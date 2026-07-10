@@ -2,10 +2,10 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/theme-provider'
 import Link from 'next/link'
 import { useLogos } from '@/hooks/use-logos'
-import { DEFAULT_LOGOS } from '@/lib/logo-manager'
+import { DEFAULT_LOGOS, getLogoForBackground } from '@/lib/logo-manager'
 
 interface LogoProps {
   className?: string
@@ -30,11 +30,12 @@ export function Logo({ className = '', size = 'md', href = '/' }: LogoProps) {
 
   const { width, height } = sizeMap[size]
 
-  // Determine if we should show dark or light logo
+  // Determine if we should show dark or light logo (theme-aware public pages)
   const isDark = theme === 'dark' || (theme === 'system' && systemTheme === 'dark')
 
-  // Use dynamic logo or fallback
-  const logoUrl = isDark ? logos.darkLogoUrl : logos.lightLogoUrl
+  const logoUrl = isDark
+    ? getLogoForBackground('dark', logos)
+    : getLogoForBackground('light', logos)
 
   if (!mounted || loading) {
     return <div style={{ width, height }} className={className} />

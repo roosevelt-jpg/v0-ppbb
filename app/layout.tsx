@@ -1,16 +1,23 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Playfair_Display } from 'next/font/google'
+import { Inter, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import { ChatWidget } from '@/components/chat/chat-widget'
 import { EUDataProtectionPopup } from '@/components/eu-data-protection-popup'
+import { PublicExtras } from '@/components/public-extras'
 
-const dmSans = DM_Sans({ variable: '--font-dm-sans', subsets: ['latin'] })
-const playfairDisplay = Playfair_Display({
-  variable: '--font-playfair',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['300', '400', '500', '600', '700'],
+})
+
+const cormorantGaramond = Cormorant_Garamond({
+  variable: '--font-cormorant-garamond',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  style: ['normal', 'italic'],
 })
 
 export const metadata: Metadata = {
@@ -47,15 +54,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${cormorantGaramond.variable}`} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Passive Blessings" />
       </head>
-      <body className="font-sans antialiased bg-background text-foreground">
+      <body className="font-body antialiased bg-background text-foreground">
         <Providers>{children}</Providers>
+        <PublicExtras />
         <EUDataProtectionPopup />
         <ChatWidget />
         {process.env.NODE_ENV === 'production' && <Analytics />}

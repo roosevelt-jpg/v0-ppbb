@@ -8,6 +8,15 @@
 * { scrollbar-width: none; }
 body { -ms-overflow-style: none; }
 
+/* RTL layout when Arabic / Urdu selected */
+html[dir='rtl'] body {
+  text-align: right;
+}
+
+html[dir='rtl'] .rtl-flip-row {
+  flex-direction: row-reverse;
+}
+
 /* Custom checkbox styling for black theme */
 input[type='checkbox']:checked {
   background-color: #111111;
@@ -20,8 +29,9 @@ input[type='checkbox'] {
 }
 
 @theme inline {
-  --font-playfair: var(--font-playfair-display);
-  --font-sans: var(--font-dm-sans), 'DM Sans Fallback';
+  --font-headline: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --font-sans: var(--font-body);
   --font-mono: 'DM Mono', 'Courier New', monospace;
   --color-ink-black: #111111;
   --color-charcoal: #333333;
@@ -37,14 +47,13 @@ input[type='checkbox'] {
   --size-input: 36px;
   --size-nav: 48px;
   --size-sidebar: 175px;
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 12px;
-  --spacing-lg: 16px;
-  --spacing-xl: 24px;
-  --spacing-2xl: 32px;
-  --spacing-3xl: 48px;
-  --spacing-4xl: 64px;
+  /*
+   * Do NOT define --spacing-{xs,sm,md,lg,xl,2xl,3xl,4xl} in @theme.
+   * Tailwind v4 resolves max-w-* / w-* from --spacing-* before --container-*.
+   * Those names collided with the container scale (e.g. max-w-3xl → 48px
+   * instead of 48rem), which crushed CMS forms into a ~70–90px column.
+   * Use --pb-space-* below for design spacing tokens if needed.
+   */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -84,6 +93,17 @@ input[type='checkbox'] {
 }
 
 :root {
+  --font-headline: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  /* Design spacing (outside @theme so they do not override max-w-* containers) */
+  --pb-space-xs: 4px;
+  --pb-space-sm: 8px;
+  --pb-space-md: 12px;
+  --pb-space-lg: 16px;
+  --pb-space-xl: 24px;
+  --pb-space-2xl: 32px;
+  --pb-space-3xl: 48px;
+  --pb-space-4xl: 64px;
   --background: #f7f6f2;
   --foreground: #111111;
   --card: #ffffff;
@@ -152,21 +172,37 @@ input[type='checkbox'] {
   --sidebar-ring: #888888;
 }
 
+.font-headline { font-family: var(--font-headline); }
+.font-body     { font-family: var(--font-body); }
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.caption-mixed {
+  font-family: var(--font-body);
+}
+.caption-mixed em,
+.caption-mixed i {
+  font-family: var(--font-headline);
+  font-style: italic;
+}
+
 @layer base {
   * { @apply border-border outline-ring/50; }
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-sans);
+    @apply bg-background text-foreground font-body;
     font-size: 13px;
     line-height: 1.5;
   }
-  html { @apply font-sans; }
+  html { @apply font-body; }
 
-  h1 { @apply font-playfair font-bold text-3xl tracking-tight leading-tight; }
-  h2 { @apply font-playfair font-bold text-2xl tracking-tight leading-snug; }
-  h3 { @apply font-sans font-semibold text-lg leading-snug; }
-  h4 { @apply font-sans font-semibold text-base leading-snug; }
-  p  { @apply leading-relaxed; }
+  h1 { @apply font-headline font-bold text-3xl tracking-tight leading-tight; }
+  h2 { @apply font-headline font-bold text-2xl tracking-tight leading-snug; }
+  h3 { @apply font-body font-semibold text-lg leading-snug; }
+  h4 { @apply font-body font-semibold text-base leading-snug; }
+  p  { @apply leading-relaxed font-body; }
 
   input, textarea, select {
     @apply px-4 py-2 text-sm rounded-xl border border-sand-border bg-white text-charcoal placeholder:text-warm-grey focus:outline-none focus:ring-2 focus:ring-ink-black focus:border-transparent transition-all;
@@ -180,15 +216,32 @@ input[type='checkbox'] {
     box-shadow: 0 4px 12px rgba(17,17,17,0.1);
   }
 
-  button {
-    @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-warm-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md;
+  /* Native select list highlight — OS defaults to blue without these overrides */
+  select {
+    accent-color: #111111;
+    color-scheme: light;
+  }
+
+  select option {
+    background-color: #ffffff;
+    color: #111111;
+  }
+
+  select option:checked,
+  select option:hover {
+    background-color: #111111;
+    color: #ffffff;
+  }
+
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]) {
+    @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md font-body;
     font-size: 13px;
     /* REMOVED h-10 — let height be natural */
     min-height: 36px;
   }
 
-  button:disabled { @apply opacity-50 cursor-not-allowed; }
-  button.secondary { @apply bg-warm-white border-2 border-sand-border text-charcoal hover:bg-sand-border; }
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):disabled { @apply opacity-50 cursor-not-allowed; }
+  button:not([data-slot='button']):not([data-dashboard-control]).secondary { @apply bg-warm-white border-2 border-sand-border text-charcoal hover:bg-sand-border; }
 
   label {
     /* REMOVED uppercase and tracking — breaks form labels */
@@ -222,6 +275,48 @@ input[type='checkbox'] {
   overflow: auto;
 }
 
+/* Dashboard page content — cards stay white/grey with black text in dark mode */
+[data-dashboard-surface='light'] {
+  background-color: #faf9f7;
+  color: #111111;
+}
+
+[data-dashboard-surface='light'] [data-slot='card'],
+[data-dashboard-surface='light'] .bg-card {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border-color: #e4e1da !important;
+}
+
+[data-dashboard-surface='light'] [data-slot='card'] .text-muted-foreground,
+[data-dashboard-surface='light'] .text-muted-foreground {
+  color: #737373 !important;
+}
+
+[data-dashboard-surface='light'] h1,
+[data-dashboard-surface='light'] h2,
+[data-dashboard-surface='light'] h3,
+[data-dashboard-surface='light'] .text-foreground,
+[data-dashboard-surface='light'] .text-card-foreground {
+  color: #111111 !important;
+}
+
+[data-dashboard-surface='light'] .text-neutral-900 {
+  color: #111111 !important;
+}
+
+[data-dashboard-surface='light'] .text-neutral-500 {
+  color: #737373 !important;
+}
+
+[data-dashboard-surface='light'] .text-neutral-600 {
+  color: #525252 !important;
+}
+
+[data-dashboard-surface='light'] .border-border {
+  border-color: #e4e1da !important;
+}
+
 /* ── Modal styles ── */
 [role="dialog"], .modal-overlay, .modal-backdrop {
   position: fixed;
@@ -252,6 +347,14 @@ input[type='checkbox'] {
   padding: 1.5rem;
 }
 
+.admin-modal-content--wide {
+  max-width: 56rem;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to   { opacity: 1; transform: scale(1); }
@@ -263,3 +366,44 @@ input[type='checkbox'] {
 
 .modal-enter { animation: fadeIn 0.2s ease-out; }
 .modal-slide { animation: slideIn 0.3s ease-out; }
+
+@keyframes partners-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.partners-marquee-track {
+  animation: partners-marquee var(--marquee-duration, 40s) linear infinite;
+  width: max-content;
+}
+
+.partners-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Admin tables: visible horizontal scrollbar (global CSS hides scrollbars elsewhere) */
+.admin-table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #888888 #e4e1da;
+}
+
+.admin-table-scroll::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+}
+
+.admin-table-scroll::-webkit-scrollbar-thumb {
+  background-color: #888888;
+  border-radius: 4px;
+}
+
+.admin-table-scroll::-webkit-scrollbar-track {
+  background-color: #e4e1da;
+  border-radius: 4px;
+}

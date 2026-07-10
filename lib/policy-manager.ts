@@ -151,34 +151,15 @@ export const DEFAULT_POLICIES = {
 
 export async function initializePolicies() {
   try {
-    // Check if policies exist
+    // Client-side: read only. Policy seeding runs via Admin SDK (/api/init-policies).
     const policiesRef = collection(db, POLICIES_COLLECTION)
     const snapshot = await getDocs(policiesRef)
-    
+
     if (snapshot.empty) {
-      // Create default policies with current timestamp
-      const now = new Date()
-      for (const [type, template] of Object.entries(POLICY_TEMPLATES)) {
-        const policyData: Policy = {
-          id: type,
-          type: type as 'privacy' | 'terms' | 'codeofconduct',
-          title: template.title,
-          slug: template.slug,
-          content: template.getContent(), // Get fresh content with current date
-          version: 1,
-          lastUpdated: now,
-          effectiveDate: now,
-          status: 'active',
-          createdAt: now,
-          updatedAt: now
-        }
-        
-        await setDoc(doc(db, POLICIES_COLLECTION, type), policyData)
-      }
-      console.log('[v0] Policies initialized successfully')
+      console.log('[v0] No policies in Firestore yet — use /api/init-policies to seed defaults')
     }
   } catch (error) {
-    console.error('[v0] Error initializing policies:', error)
+    console.error('[v0] Error checking policies:', error)
   }
 }
 

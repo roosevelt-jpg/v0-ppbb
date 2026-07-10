@@ -1,101 +1,77 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import { Briefcase, Loader2 } from 'lucide-react'
+import { Briefcase } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
-import { hasBusinessAccess } from '@/lib/roles'
-import { BusinessOnboardingModal, BusinessFormData } from './business-onboarding-modal'
+import { hasBusinessAccess, isBasicMember } from '@/lib/roles'
+import { UpgradeToBusinessModal } from '@/components/upgrade-to-business-modal'
 
-export function BusinessPortalSwitcher() {
+/**
+ * Business portal / upgrade control. Header variant removed from member header;
+ * sidebar variant lives in MemberSidebar below Settings.
+ */
+export function BusinessPortalSwitcher({
+  variant = 'header',
+  onNavigate,
+}: {
+  variant?: 'header' | 'sidebar'
+  onNavigate?: () => void
+}) {
   const router = useRouter()
-  const { firebaseUser, user } = useAuth()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const { user } = useAuth()
+  const [upgradeOpen, setUpgradeOpen] = React.useState(false)
 
-  // Check if user has business access (business role or admin)
   const hasBusinessRole = hasBusinessAccess(user)
 
-  const handleClick = async () => {
+  const handleClick = () => {
     if (hasBusinessRole) {
-      // Direct redirect if already has business access
+      onNavigate?.()
       router.push('/business/dashboard')
-    } else {
-      // Show onboarding modal
-      setIsModalOpen(true)
+      return
     }
+    if (isBasicMember(user) || user) {
+      onNavigate?.()
+      setUpgradeOpen(true)
+      return
+    }
+    onNavigate?.()
+    router.push('/join?type=business')
   }
 
-  const handleOnboardingSubmit = async (formData: BusinessFormData) => {
-    setIsLoading(true)
-    setError('')
+  const label = hasBusinessRole ? 'Business Portal' : 'Upgrade to Business'
+  const title = hasBusinessRole ? 'Go to Business Portal' : 'Upgrade to Business Account'
 
-    try {
-      if (!firebaseUser || !user) {
-        throw new Error('Not authenticated')
-      }
-
-      const response = await fetch('/api/user/upgrade-to-business', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          userId: firebaseUser.uid,
-        }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to create business profile')
-      }
-
-      console.log('[v0] Business upgrade successful')
-
-      // Close modal and redirect to business portal. Reload so the auth
-      // context picks up the newly-added business role from Firestore.
-      setIsModalOpen(false)
-      window.location.href = '/business/dashboard'
-    } catch (err: any) {
-      console.error('[v0] Business upgrade error:', err)
-      setError(err.message || 'Failed to upgrade to business')
-    } finally {
-      setIsLoading(false)
-    }
+  if (variant === 'sidebar') {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={handleClick}
+          title={title}
+          className="flex items-center gap-3 px-4 py-2 rounded-lg transition-colors w-full text-left bg-black !text-white hover:bg-neutral-900"
+        >
+          <Briefcase className="h-4 w-4 shrink-0" />
+          <span className="text-sm font-medium">{label}</span>
+        </button>
+        <UpgradeToBusinessModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+      </>
+    )
   }
 
   return (
     <>
       <button
         onClick={handleClick}
-        disabled={isLoading}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors text-sm font-medium disabled:opacity-50"
-        title={hasBusinessRole ? 'Go to Business Portal' : 'Create Business Profile'}
+        className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg bg-black text-white hover:bg-neutral-900 transition-colors text-sm font-medium min-h-[44px]"
+        style={{ fontFamily: 'Inter, sans-serif' }}
+        title={title}
       >
-        {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Creating...</span>
-          </>
-        ) : (
-          <>
-            <Briefcase className="w-4 h-4" />
-            <span>Business Portal</span>
-          </>
-        )}
+        <Briefcase className="w-4 h-4" />
+        <span className="hidden sm:inline">{label}</span>
       </button>
 
-      <BusinessOnboardingModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false)
-          setError('')
-        }}
-        onSubmit={handleOnboardingSubmit}
-        isLoading={isLoading}
-      />
+      <UpgradeToBusinessModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
     </>
   )
 }

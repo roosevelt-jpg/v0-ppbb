@@ -106,8 +106,8 @@ export default function SponsorMarketplacePage() {
                 onClick={() => setTypeFilter(option.value)}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
                   typeFilter === option.value
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-neutral-300 text-neutral-700 hover:border-blue-300'
+                    ? 'bg-black text-white'
+                    : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
                 }`}
               >
                 {option.label}

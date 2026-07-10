@@ -1,279 +1,248 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { getIntegrationUsage, getIntegrationStats, getActiveAlerts, resolveAlert, IntegrationUsageEntry, IntegrationAlert } from '@/lib/integration-usage'
+import React from 'react'
+import { adminApiFetch } from '@/lib/admin-api-client'
+import type { IntegrationAlert, IntegrationUsageEntry } from '@/lib/integration-usage'
+import type { IntegrationStats } from '@/lib/integration-analytics-server'
 import { INTEGRATION_SERVICES } from '@/lib/integrations/services'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 import { format } from 'date-fns'
 import { AlertCircle, TrendingUp, Zap, X } from 'lucide-react'
 
+type AnalyticsPayload = {
+  usage: (IntegrationUsageEntry & { id: string })[]
+  stats: IntegrationStats
+  alerts: (IntegrationAlert & { id: string })[]
+}
+
+const EMPTY_STATS: IntegrationStats = {
+  totalCalls: 0,
+  successfulCalls: 0,
+  failedCalls: 0,
+  successRate: 0,
+  avgResponseTime: 0,
+  maxResponseTime: 0,
+  minResponseTime: 0,
+}
+
 export default function IntegrationAnalyticsPage() {
   const services = Object.values(INTEGRATION_SERVICES)
-  const [selectedService, setSelectedService] = useState(services[0]?.id || '')
-  const [usage, setUsage] = useState<(IntegrationUsageEntry & { id: string })[]>([])
-  const [stats, setStats] = useState<any>(null)
-  const [alerts, setAlerts] = useState<(IntegrationAlert & { id: string })[]>([])
-  const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState(24)
+  const [selectedService, setSelectedService] = React.useState(services[0]?.id || '')
+  const [usage, setUsage] = React.useState<(IntegrationUsageEntry & { id: string })[]>([])
+  const [stats, setStats] = React.useState<IntegrationStats>(EMPTY_STATS)
+  const [alerts, setAlerts] = React.useState<(IntegrationAlert & { id: string })[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [timeRange, setTimeRange] = React.useState(24)
 
-  useEffect(() => {
-    if (selectedService) {
-      loadData()
-    }
-  }, [selectedService, timeRange])
-
-  async function loadData() {
+  const loadData = React.useCallback(async () => {
+    if (!selectedService) return
     setLoading(true)
+    setError(null)
     try {
-      const [usageData, statsData, alertsData] = await Promise.all([
-        getIntegrationUsage(selectedService, timeRange),
-        getIntegrationStats(selectedService, timeRange),
-        getActiveAlerts(selectedService),
-      ])
-      setUsage(usageData)
-      setStats(statsData)
-      setAlerts(alertsData)
-    } catch (error) {
-      console.error('[v0] Error loading analytics:', error)
+      const res = await adminApiFetch<AnalyticsPayload>(
+        `/api/admin/integration-analytics?serviceId=${encodeURIComponent(selectedService)}&hours=${timeRange}`
+      )
+      if (!res.success || !res.data) {
+        setError(res.error || 'Failed to load analytics')
+        setUsage([])
+        setStats(EMPTY_STATS)
+        setAlerts([])
+        return
+      }
+      setUsage(res.data.usage || [])
+      setStats(res.data.stats || EMPTY_STATS)
+      setAlerts(res.data.alerts || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load analytics')
+      setUsage([])
+      setStats(EMPTY_STATS)
+      setAlerts([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedService, timeRange])
+
+  React.useEffect(() => {
+    void loadData()
+  }, [loadData])
 
   const handleResolveAlert = async (alertId: string) => {
-    await resolveAlert(alertId)
-    setAlerts(alerts.filter(a => a.id !== alertId))
+    const res = await adminApiFetch('/api/admin/integration-analytics', {
+      method: 'PATCH',
+      body: JSON.stringify({ alertId }),
+    })
+    if (res.success) {
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId))
+    }
   }
 
-  if (!selectedService || !stats) {
-    return (
-      <div style={{ padding: '2rem' }}>
-        <div style={{ textAlign: 'center', color: '#888888' }}>
-          Loading integration analytics...
-        </div>
-      </div>
-    )
-  }
-
-  const service = services.find(s => s.id === selectedService)
+  const service = services.find((s) => s.id === selectedService)
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>
-          Integration Analytics
-        </h1>
-        <p style={{ color: '#888888' }}>Usage statistics and health monitoring</p>
-      </div>
+    <AdminPageLayout
+      title="Integration Analytics"
+      subtitle="Usage statistics and health monitoring for connected services"
+    >
+      <div className="space-y-6 min-w-0">
+        {error ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {error}
+          </div>
+        ) : null}
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <select
-          value={selectedService}
-          onChange={(e) => setSelectedService(e.target.value)}
-          style={{
-            padding: '0.75rem',
-            border: '1px solid #e4e1da',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            backgroundColor: '#ffffff',
-            minWidth: '200px',
-          }}
-        >
-          {services.map(s => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <select
+            value={selectedService}
+            onChange={(e) => setSelectedService(e.target.value)}
+            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg text-sm bg-white"
+          >
+            {services.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
 
-        <select
-          value={timeRange}
-          onChange={(e) => setTimeRange(Number(e.target.value))}
-          style={{
-            padding: '0.75rem',
-            border: '1px solid #e4e1da',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            backgroundColor: '#ffffff',
-            minWidth: '150px',
-          }}
-        >
-          <option value={1}>Last 1 hour</option>
-          <option value={6}>Last 6 hours</option>
-          <option value={24}>Last 24 hours</option>
-          <option value={168}>Last 7 days</option>
-          <option value={720}>Last 30 days</option>
-        </select>
-      </div>
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(Number(e.target.value))}
+            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg text-sm bg-white"
+          >
+            <option value={1}>Last 1 hour</option>
+            <option value={6}>Last 6 hours</option>
+            <option value={24}>Last 24 hours</option>
+            <option value={168}>Last 7 days</option>
+            <option value={720}>Last 30 days</option>
+          </select>
+        </div>
 
-      {/* Alerts */}
-      {alerts.length > 0 && (
-        <div style={{ marginBottom: '2rem' }}>
-          {alerts.map(alert => (
-            <div
-              key={alert.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                padding: '1rem',
-                backgroundColor: alert.severity === 'critical' ? '#fef2f2' : '#fffbf0',
-                border: `1px solid ${alert.severity === 'critical' ? '#fecaca' : '#fed7aa'}`,
-                borderRadius: '0.5rem',
-                marginBottom: '0.5rem',
-              }}
-            >
-              <AlertCircle
-                className="h-5 w-5"
-                style={{
-                  color: alert.severity === 'critical' ? '#dc2626' : '#d97706',
-                  flexShrink: 0,
-                }}
-              />
-              <div style={{ flex: 1 }}>
-                <p style={{
-                  fontWeight: '600',
-                  color: alert.severity === 'critical' ? '#991b1b' : '#92400e',
-                  marginBottom: '0.25rem',
-                }}>
-                  {alert.message}
-                </p>
-                <p style={{ fontSize: '0.875rem', color: '#666666' }}>
-                  {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
-                </p>
-              </div>
-              <button
-                onClick={() => handleResolveAlert(alert.id)}
-                style={{
-                  padding: '0.5rem',
-                  backgroundColor: '#ffffff',
-                  border: 'none',
-                  borderRadius: '0.25rem',
-                  cursor: 'pointer',
-                  color: '#888888',
-                }}
+        {service ? (
+          <p className="text-sm text-neutral-500">
+            Monitoring <span className="font-medium text-neutral-800">{service.name}</span>
+          </p>
+        ) : null}
+
+        {alerts.length > 0 && (
+          <div className="space-y-2">
+            {alerts.map((alert) => (
+              <div
+                key={alert.id}
+                className={`flex items-center gap-3 p-4 rounded-lg border ${
+                  alert.severity === 'critical'
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-amber-50 border-amber-200'
+                }`}
               >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Stats Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1rem',
-        marginBottom: '2rem',
-      }}>
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e4e1da',
-          borderRadius: '0.5rem',
-          padding: '1.5rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#888888', marginBottom: '0.5rem' }}>Total Calls</p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111' }}>{stats.totalCalls}</p>
-          <p style={{ fontSize: '0.875rem', color: '#10b981', marginTop: '0.5rem' }}>
-            <TrendingUp className="h-3 w-3" style={{ display: 'inline', marginRight: '0.25rem' }} />
-            {stats.successfulCalls} successful
-          </p>
-        </div>
-
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e4e1da',
-          borderRadius: '0.5rem',
-          padding: '1.5rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#888888', marginBottom: '0.5rem' }}>Success Rate</p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111' }}>
-            {stats.successRate.toFixed(1)}%
-          </p>
-          <p style={{ fontSize: '0.875rem', color: '#ef4444', marginTop: '0.5rem' }}>
-            {stats.failedCalls} failed
-          </p>
-        </div>
-
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e4e1da',
-          borderRadius: '0.5rem',
-          padding: '1.5rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#888888', marginBottom: '0.5rem' }}>Avg Response Time</p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111' }}>
-            {stats.avgResponseTime.toFixed(0)}ms
-          </p>
-          <p style={{ fontSize: '0.875rem', color: '#888888', marginTop: '0.5rem' }}>
-            <Zap className="h-3 w-3" style={{ display: 'inline', marginRight: '0.25rem' }} />
-            {stats.maxResponseTime.toFixed(0)}ms peak
-          </p>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e4e1da',
-        borderRadius: '0.5rem',
-        overflow: 'hidden',
-      }}>
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid #e4e1da' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#111111' }}>Recent Activity</h2>
-        </div>
-
-        {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888888' }}>
-            Loading activity...
-          </div>
-        ) : usage.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888888' }}>
-            No activity in selected time range
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f9f8f5', borderBottom: '1px solid #e4e1da' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left', color: '#888888', fontWeight: '600' }}>Timestamp</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', color: '#888888', fontWeight: '600' }}>Endpoint</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', color: '#888888', fontWeight: '600' }}>Status</th>
-                  <th style={{ padding: '1rem', textAlign: 'left', color: '#888888', fontWeight: '600' }}>Response Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {usage.slice(0, 20).map(entry => (
-                  <tr key={entry.id} style={{ borderBottom: '1px solid #e4e1da' }}>
-                    <td style={{ padding: '1rem', color: '#666666' }}>
-                      {format(new Date(entry.timestamp), 'HH:mm:ss')}
-                    </td>
-                    <td style={{ padding: '1rem', color: '#666666', fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {entry.method} {entry.endpoint}
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <span
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          backgroundColor: entry.success ? '#ecfdf5' : '#fef2f2',
-                          color: entry.success ? '#10b981' : '#dc2626',
-                          borderRadius: '0.25rem',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                        }}
-                      >
-                        {entry.statusCode}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem', color: '#666666' }}>
-                      {entry.responseTime.toFixed(0)}ms
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                <AlertCircle
+                  className={`h-5 w-5 shrink-0 ${
+                    alert.severity === 'critical' ? 'text-red-600' : 'text-amber-600'
+                  }`}
+                />
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={`font-semibold text-sm ${
+                      alert.severity === 'critical' ? 'text-red-900' : 'text-amber-900'
+                    }`}
+                  >
+                    {alert.message}
+                  </p>
+                  <p className="text-xs text-neutral-600 mt-0.5">
+                    {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleResolveAlert(alert.id)}
+                  className="p-2 rounded bg-white text-neutral-500 hover:text-neutral-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Dismiss alert"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white border border-[#e4e1da] rounded-lg p-5">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Total Calls</p>
+            <p className="text-3xl font-bold text-neutral-900">{stats.totalCalls}</p>
+            <p className="text-sm text-emerald-600 mt-2 inline-flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" />
+              {stats.successfulCalls} successful
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#e4e1da] rounded-lg p-5">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Success Rate</p>
+            <p className="text-3xl font-bold text-neutral-900">{stats.successRate.toFixed(1)}%</p>
+            <p className="text-sm text-red-500 mt-2">{stats.failedCalls} failed</p>
+          </div>
+
+          <div className="bg-white border border-[#e4e1da] rounded-lg p-5">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Avg Response Time</p>
+            <p className="text-3xl font-bold text-neutral-900">{stats.avgResponseTime.toFixed(0)}ms</p>
+            <p className="text-sm text-neutral-500 mt-2 inline-flex items-center gap-1">
+              <Zap className="h-3 w-3" />
+              {stats.maxResponseTime.toFixed(0)}ms peak
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden min-w-0">
+          <div className="px-5 py-4 border-b border-[#e4e1da]">
+            <h2 className="text-base font-semibold text-neutral-900">Recent Activity</h2>
+          </div>
+
+          {loading ? (
+            <div className="p-8 text-center text-neutral-500 text-sm">Loading activity…</div>
+          ) : usage.length === 0 ? (
+            <div className="p-8 text-center text-neutral-500 text-sm">
+              No activity in the selected time range. Usage is logged when integrations are called.
+            </div>
+          ) : (
+            <div className="admin-table-scroll min-w-0">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead>
+                  <tr className="bg-neutral-50 border-b border-[#e4e1da] text-left text-neutral-500">
+                    <th className="px-4 py-3 font-medium">Timestamp</th>
+                    <th className="px-4 py-3 font-medium">Endpoint</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Response Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usage.slice(0, 20).map((entry) => (
+                    <tr key={entry.id} className="border-b border-[#f0eee8] last:border-0">
+                      <td className="px-4 py-3 text-neutral-600 whitespace-nowrap">
+                        {format(new Date(entry.timestamp), 'HH:mm:ss')}
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600 font-mono text-xs">
+                        {entry.method} {entry.endpoint}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`text-xs font-semibold px-2 py-1 rounded ${
+                            entry.success
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-red-50 text-red-700'
+                          }`}
+                        >
+                          {entry.statusCode}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-neutral-600">
+                        {Number(entry.responseTime).toFixed(0)}ms
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }

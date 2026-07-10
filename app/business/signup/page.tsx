@@ -75,7 +75,16 @@ export default function BusinessSignupPage() {
       const response = await fetch('/api/user/upgrade-to-business', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, userId: firebaseUser.uid }),
+        body: JSON.stringify({
+          userId: firebaseUser.uid,
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+          businessDescription: formData.businessDescription,
+          communityBenefit: formData.businessDescription,
+          services: [],
+          tradeLicenceURL: '',
+          productImages: [],
+        }),
       })
 
       if (!response.ok) {

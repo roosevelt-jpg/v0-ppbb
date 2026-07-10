@@ -5,7 +5,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
-import { Plus, Edit2, Archive, Users } from 'lucide-react'
+import { Plus, Edit2, Archive, Users, Layers } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
@@ -74,6 +74,18 @@ export default function CommunitiesPage() {
             />
           </div>
           <Link
+            href="/admin/communities/messages"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50 transition"
+          >
+            Messages
+          </Link>
+          <Link
+            href="/admin/communities/approvals"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-black rounded-lg hover:bg-neutral-50 transition"
+          >
+            Approvals
+          </Link>
+          <Link
             href="/admin/communities/create"
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
           >
@@ -133,9 +145,17 @@ export default function CommunitiesPage() {
 
                   <div className="flex gap-2">
                     <Link
+                      href={`/admin/communities/${community.id}/groups`}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-900"
+                      title="Manage groups"
+                    >
+                      <Layers className="w-4 h-4" />
+                      Groups
+                    </Link>
+                    <Link
                       href={`/admin/communities/${community.id}`}
                       className="p-2 hover:bg-gray-100 rounded transition"
-                      title="Edit"
+                      title="Community details"
                     >
                       <Edit2 className="w-5 h-5 text-black" />
                     </Link>

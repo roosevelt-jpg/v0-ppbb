@@ -4,6 +4,7 @@
     "impact": "Impact",
     "events": "Events",
     "marketplace": "Marketplace",
+    "partners": "Partners",
     "contact": "Contact",
     "signIn": "Sign in"
   },
@@ -14,6 +15,7 @@
     "transparency": "Transparency",
     "events": "Events",
     "marketplace": "Marketplace",
+    "partners": "Partners",
     "contact": "Contact",
     "dashboard": "Dashboard",
     "admin": "Admin"
@@ -60,8 +62,12 @@
     "values": "Our Values",
     "meetOurTeam": "Meet Our Team"
   },
+  "partnersPage": {
+    "title": "Partners",
+    "subtitle": "Build alongside Passive Blessings through government, corporate, and grassroots collaborations"
+  },
   "contact": {
-    "title": "Contact Us",
+    "title": "Contact",
     "subtitle": "Get in touch with the Passive Blessings team",
     "email": "Email",
     "phone": "Phone",

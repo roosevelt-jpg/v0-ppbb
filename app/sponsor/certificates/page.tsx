@@ -117,8 +117,8 @@ export default function CertificatesPage() {
               onClick={() => setFilterStatus(filter.value)}
               className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
                 filterStatus === filter.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-neutral-300 text-neutral-700 hover:border-blue-300'
+                  ? 'bg-black text-white'
+                  : 'bg-white border border-neutral-300 text-neutral-700 hover:border-black'
               }`}
             >
               {filter.label}
@@ -192,7 +192,7 @@ export default function CertificatesPage() {
                   <div className="flex gap-2 mt-auto">
                     {cert.certificateIssued && (
                       <>
-                        <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition text-sm font-medium">
+                        <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white text-black border border-black rounded-lg hover:bg-neutral-50 transition text-sm font-medium">
                           <Download className="w-4 h-4" />
                           Download
                         </button>

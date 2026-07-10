@@ -1,149 +1,306 @@
 'use client'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
-import React, { useEffect, useState } from 'react'
-import { db } from '@/lib/firebase'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { collection, onSnapshot, query } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { BookOpen, Video, FileText, Users } from 'lucide-react'
+import { BookOpen, Video, FileText, Users, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+  DashboardTabButton,
+} from '@/components/dashboard-states'
+import {
+  SPIRITUAL_CATEGORY_OPTIONS,
+  subscribeToPublishedLearningResources,
+  spiritualCategoryLabel,
+  type LearningResource,
+  type LearningResourceCategory,
+} from '@/lib/learning-resources'
 
+function parseDate(value: unknown): string {
+  if (!value) return 'Date TBA'
+  try {
+    const d =
+      typeof value === 'object' && value !== null && 'toDate' in value
+        ? (value as { toDate: () => Date }).toDate()
+        : new Date(value as string)
+    return Number.isNaN(d.getTime()) ? 'Date TBA' : d.toLocaleDateString()
+  } catch {
+    return 'Date TBA'
+  }
+}
+
+function resourceHref(resource: LearningResource): string | null {
+  return resource.fileUrl || resource.url || null
+}
 
 export default function LearningPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [resources, setResources] = useState<any[]>([])
-  const [workshops, setWorkshops] = useState<any[]>([])
+  const [resources, setResources] = useState<LearningResource[]>([])
+  const [legacyResources, setLegacyResources] = useState<Record<string, unknown>[]>([])
+  const [workshops, setWorkshops] = useState<Record<string, unknown>[]>([])
   const [filter, setFilter] = useState('all')
+  const [spiritualFilter, setSpiritualFilter] = useState<LearningResourceCategory | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const spiritualRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    // Fetch learning resources
-    const resourcesUnsubscribe = onSnapshot(
-      query(collection(db, 'resources')),
-      (snapshot) => {
-        setResources(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
-      }
-    )
-
-    // Fetch workshops
-    const workshopsUnsubscribe = onSnapshot(
-      query(collection(db, 'workshops')),
-      (snapshot) => {
-        setWorkshops(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
-        setLoading(false)
-      }
-    )
-
-    return () => {
-      resourcesUnsubscribe()
-      workshopsUnsubscribe()
+    const unsubs: Array<() => void> = []
+    let pending = 2
+    const done = () => {
+      pending -= 1
+      if (pending <= 0) setLoading(false)
     }
+
+    unsubs.push(
+      subscribeToPublishedLearningResources(
+        (data) => {
+          setResources(data)
+          done()
+        },
+        (err) => {
+          console.error('[v0] learningResources error:', err)
+          setError('Failed to load learning resources.')
+          done()
+        }
+      )
+    )
+
+    unsubs.push(
+      onSnapshot(
+        query(collection(db, 'workshops')),
+        (snapshot) => {
+          setWorkshops(snapshot?.docs?.map((doc) => ({ id: doc.id, ...doc.data() })) ?? [])
+          done()
+        },
+        (err) => {
+          console.error('[v0] workshops error:', err)
+          setError('Failed to load workshops.')
+          done()
+        }
+      )
+    )
+
+    // Legacy resources collection (optional)
+    unsubs.push(
+      onSnapshot(query(collection(db, 'resources')), (snapshot) => {
+        setLegacyResources(snapshot?.docs?.map((doc) => ({ id: doc.id, ...doc.data() })) ?? [])
+      })
+    )
+
+    return () => unsubs.forEach((u) => u())
   }, [])
 
-  const filteredResources = filter === 'all' ? resources : resources.filter(r => r.type === filter)
+  const generalResources = useMemo(
+    () => resources.filter((r) => r.category === 'general'),
+    [resources]
+  )
+
+  const spiritualResources = useMemo(() => {
+    if (!spiritualFilter) return []
+    return resources.filter((r) => r.category === spiritualFilter)
+  }, [resources, spiritualFilter])
+
+  const displayResources = useMemo(() => {
+    const merged = [
+      ...generalResources,
+      ...legacyResources.map((r) => ({
+        id: String(r.id),
+        title: String(r.title ?? 'Resource'),
+        description: String(r.description ?? ''),
+        category: 'general' as const,
+        type: (String(r.type ?? 'article') as LearningResource['type']),
+        url: r.url ? String(r.url) : undefined,
+        fileUrl: r.fileUrl ? String(r.fileUrl) : undefined,
+        duration: r.duration ? String(r.duration) : undefined,
+        status: 'published' as const,
+      })),
+    ]
+    if (filter === 'all') return merged
+    return merged.filter((r) => r.type === filter)
+  }, [generalResources, legacyResources, filter])
+
+  const openSpiritualSection = (category: LearningResourceCategory) => {
+    setSpiritualFilter(category)
+    window.setTimeout(() => {
+      spiritualRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
 
   const getIcon = (type: string) => {
     switch (type) {
       case 'video':
-        return <Video className="w-5 h-5" />
+        return <Video className="w-5 h-5 text-neutral-700" />
       case 'document':
-        return <FileText className="w-5 h-5" />
+        return <FileText className="w-5 h-5 text-neutral-700" />
+      case 'audio':
+        return <BookOpen className="w-5 h-5 text-neutral-700" />
       case 'workshop':
-        return <Users className="w-5 h-5" />
+        return <Users className="w-5 h-5 text-neutral-700" />
       default:
-        return <BookOpen className="w-5 h-5" />
+        return <BookOpen className="w-5 h-5 text-neutral-700" />
     }
   }
 
+  const renderResourceCards = (items: Array<LearningResource | (typeof displayResources)[number]>) => {
+    if (items.length === 0) {
+      return (
+        <DashboardEmptyState
+          title="Nothing published yet"
+          description="Your team can add content in Admin → CMS → Learning Resources."
+        />
+      )
+    }
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map((resource) => {
+          const href = resourceHref(resource as LearningResource)
+          return (
+            <Card key={String(resource.id)} className="p-5 border border-neutral-200">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-neutral-100 rounded-lg">{getIcon(String(resource.type ?? ''))}</div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-neutral-900 line-clamp-2">{String(resource.title ?? 'Resource')}</h3>
+                  <p className="text-xs text-neutral-500 capitalize">{String(resource.type ?? 'resource')}</p>
+                </div>
+              </div>
+              {resource.description ? (
+                <p className="text-sm text-neutral-600 mb-4 line-clamp-3">{String(resource.description)}</p>
+              ) : null}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-neutral-500">{String(resource.duration ?? 'Self-paced')}</span>
+                {href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="!bg-black !text-white px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1"
+                  >
+                    <ExternalLink size={12} />
+                    Open
+                  </a>
+                ) : (
+                  <span className="text-xs text-neutral-400">No link yet</span>
+                )}
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+    )
+  }
+
+  if (loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
+
   return (
-    <div className="p-8 space-y-8">
-        {/* Filter */}
-        <div className="flex gap-2">
-          {['all', 'video', 'document', 'workshop'].map((f) => (
+    <DashboardPageShell title="Learning" subtitle="Videos, documents, and workshops for members">
+      <div className="flex flex-wrap gap-2 mb-8">
+        {['all', 'video', 'document', 'article', 'audio'].map((f) => (
+          <DashboardTabButton key={f} active={filter === f} onClick={() => setFilter(f)}>
+            {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+          </DashboardTabButton>
+        ))}
+      </div>
+
+      <section className="mb-10">
+        <h2 className="text-2xl font-bold mb-4 text-neutral-900">Learning Resources</h2>
+        {displayResources.length === 0 ? (
+          <DashboardEmptyState
+            title={`No ${filter === 'all' ? '' : filter + ' '}resources`}
+            description="Published resources appear here. Admins can post content under CMS → Learning Resources."
+          />
+        ) : (
+          renderResourceCards(displayResources)
+        )}
+      </section>
+
+      <section className="mb-10">
+        <h2 className="text-2xl font-bold mb-4 text-neutral-900">Upcoming Workshops</h2>
+        {workshops.length === 0 ? (
+          <DashboardEmptyState title="No workshops scheduled" description="Check back for upcoming workshops." />
+        ) : (
+          <div className="space-y-4">
+            {workshops.map((workshop) => {
+              const sessions = Array.isArray(workshop.sessions) ? workshop.sessions : []
+              return (
+                <Card key={String(workshop.id)} className="p-5 border border-neutral-200">
+                  <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg font-semibold text-neutral-900">{String(workshop.title ?? 'Workshop')}</h3>
+                      {workshop.description ? (
+                        <p className="text-sm text-neutral-600 mt-1 line-clamp-2">{String(workshop.description)}</p>
+                      ) : null}
+                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-neutral-600">
+                        {workshop.instructor ? <span>Instructor: {String(workshop.instructor)}</span> : null}
+                        <span>Date: {parseDate(workshop.date ?? workshop.startDate)}</span>
+                        <span>Participants: {Number(workshop.participants ?? 0)}</span>
+                      </div>
+                      {sessions.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                          {sessions.map((session: Record<string, unknown>, idx: number) => (
+                            <div
+                              key={String(session.id ?? idx)}
+                              className="rounded-lg border border-neutral-200 bg-neutral-50 p-3"
+                            >
+                              <p className="font-medium text-sm text-neutral-900 line-clamp-2">
+                                {String(session.title ?? `Session ${idx + 1}`)}
+                              </p>
+                              <p className="text-xs text-neutral-500 mt-1">{parseDate(session.date)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                    <Link
+                      href="/workshops"
+                      className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold h-fit inline-flex items-center justify-center"
+                    >
+                      View workshops
+                    </Link>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      <Card className="p-6 border border-neutral-200 bg-gradient-to-r from-purple-50 to-blue-50">
+        <h2 className="text-xl font-bold mb-2 text-neutral-900">Spiritual Development</h2>
+        <p className="text-neutral-600 mb-4 text-sm">
+          Enhance your spiritual growth through guided meditations, reflections, and community wisdom sharing.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {SPIRITUAL_CATEGORY_OPTIONS.map((item) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg font-medium capitalize transition-colors ${
-                filter === f
-                  ? 'bg-black text-white hover:bg-gray-800'
-                  : 'bg-white border border-gray-300 text-black hover:bg-gray-50'
+              key={item.value}
+              type="button"
+              onClick={() => openSpiritualSection(item.value)}
+              className={`rounded-lg px-4 py-3 text-sm font-semibold text-left min-h-[44px] transition-colors ${
+                spiritualFilter === item.value
+                  ? '!bg-black !text-white'
+                  : '!bg-white !text-black border border-gray-300 hover:bg-neutral-50'
               }`}
             >
-              {f}
+              {item.label}
             </button>
           ))}
         </div>
+      </Card>
 
-        {/* Resources */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Learning Resources</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {filteredResources.map((resource) => (
-              <Card key={resource.id} className="p-6 hover:shadow-lg transition cursor-pointer">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="p-2 bg-gray-100 rounded-lg">
-                    {getIcon(resource.type)}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{resource.title}</h3>
-                    <p className="text-xs text-muted-foreground capitalize">{resource.type}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">{resource.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{resource.duration || 'Self-paced'}</span>
-                  <Button size="sm" variant="outline">Access</Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Workshops */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Upcoming Workshops</h2>
-          <div className="space-y-4">
-            {workshops.map((workshop) => (
-              <Card key={workshop.id} className="p-6 hover:shadow-lg transition">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-semibold">{workshop.title}</h3>
-                    <p className="text-sm text-muted-foreground">{workshop.description}</p>
-                    <div className="flex gap-4 mt-3 text-sm">
-                      <span>Instructor: {workshop.instructor}</span>
-                      <span>Date: {new Date(workshop.date).toLocaleDateString()}</span>
-                      <span>Participants: {workshop.participants || 0}</span>
-                    </div>
-                  </div>
-                  <Button>Register</Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Spiritual Development */}
-        <Card className="p-6 bg-gradient-to-r from-purple-50 to-blue-50">
-          <h2 className="text-xl font-bold mb-4">Spiritual Development</h2>
-          <p className="text-muted-foreground mb-4">Enhance your spiritual growth through guided meditations, reflections, and community wisdom sharing.</p>
-          <div className="grid md:grid-cols-3 gap-4">
-            {['Daily Meditations', 'Community Reflections', 'Wisdom Articles'].map((item) => (
-              <Button key={item} variant="outline" className="justify-start">
-                {item}
-              </Button>
-            ))}
-          </div>
-        </Card>
-      </div>
+      {spiritualFilter ? (
+        <section ref={spiritualRef} className="mt-8">
+          <h2 className="text-2xl font-bold mb-4 text-neutral-900">
+            {spiritualCategoryLabel(spiritualFilter)}
+          </h2>
+          {renderResourceCards(spiritualResources)}
+        </section>
+      ) : null}
+    </DashboardPageShell>
   )
 }

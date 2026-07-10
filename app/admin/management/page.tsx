@@ -5,8 +5,13 @@ import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Copy, Trash2, Plus, Eye, EyeOff } from 'lucide-react'
 import { format } from 'date-fns'
+import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { WELFARE_INVITE_ROLE_OPTIONS, isWelfareOperationalRole } from '@/lib/charity-cases'
+import { useAuth } from '@/lib/auth-context'
 
 export default function AdminManagementPage() {
+  const { firebaseUser } = useAuth()
   const [activeTab, setActiveTab] = React.useState<'access-codes' | 'admins'>('access-codes')
   const [admins, setAdmins] = React.useState<any[]>([])
   const [codes, setCodes] = React.useState<any[]>([])
@@ -18,6 +23,12 @@ export default function AdminManagementPage() {
   const [adminRole, setAdminRole] = React.useState('admin')
   const [selectedPermissions, setSelectedPermissions] = React.useState<string[]>([])
 
+  const INVITE_ROLE_OPTIONS = [
+    { value: 'admin', label: 'Admin', description: 'Standard admin with configurable permissions' },
+    { value: 'super_admin', label: 'Super Admin', description: 'Full unrestricted admin access' },
+    ...WELFARE_INVITE_ROLE_OPTIONS,
+  ]
+
   // Available permissions for admins
   const ADMIN_PERMISSIONS = [
     { id: 'manage_members', label: 'Manage Members', description: 'Add, edit, and remove members' },
@@ -27,7 +38,22 @@ export default function AdminManagementPage() {
     { id: 'view_reports', label: 'View Reports', description: 'Access analytics and reporting dashboard' },
     { id: 'manage_content', label: 'Manage Content', description: 'Edit pages, FAQs, and content' },
     { id: 'manage_integrations', label: 'Manage Integrations', description: 'Configure external services' },
+    {
+      id: 'manage_beneficiary',
+      label: 'Manage Beneficiary Requests',
+      description: 'Review welfare applications and sensitive documents',
+    },
   ]
+
+  React.useEffect(() => {
+    if (adminRole === 'welfare' || adminRole === 'founder' || adminRole === 'coordinator') {
+      setSelectedPermissions(['manage_beneficiary'])
+      return
+    }
+    if (adminRole === 'founder_admin' || adminRole === 'manager') {
+      setSelectedPermissions([])
+    }
+  }, [adminRole])
 
   React.useEffect(() => {
     loadData()
@@ -87,6 +113,7 @@ export default function AdminManagementPage() {
           permissions: permissionsToSend,
           sendEmail: true,
           expiresAt: expiresAt.toISOString(),
+          invitedByUserId: firebaseUser?.uid || '',
         }),
       })
       const json = await res.json()
@@ -133,9 +160,8 @@ export default function AdminManagementPage() {
   const handleDeleteAdmin = async (id: string) => {
     if (!confirm('Are you sure?')) return
     try {
-      const res = await fetch('/api/admin/management', {
+      const res = await fetch(`/api/admin/management?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
       })
       const json = await res.json()
       if (json.success) {
@@ -219,9 +245,20 @@ export default function AdminManagementPage() {
                     onChange={(e) => setAdminRole(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   >
-                    <option value="admin">Admin</option>
-                    <option value="super_admin">Super Admin</option>
+                    {INVITE_ROLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {INVITE_ROLE_OPTIONS.find((option) => option.value === adminRole)?.description}
+                  </p>
+                  {isWelfareOperationalRole(adminRole) && (
+                    <p className="text-xs text-amber-700 mt-1">
+                      Welfare-tier roles can access beneficiary requests and sensitive documents when invited with this role.
+                    </p>
+                  )}
                 </div>
 
                 {/* Permissions Selector */}
@@ -265,7 +302,7 @@ export default function AdminManagementPage() {
 
             <div>
               <h3 className="font-bold text-gray-900 mb-3">Generated Access Codes</h3>
-              <p className="text-sm text-gray-600 mb-4">Active access codes ready to be used</p>
+              <p className="text-sm text-gray-600 mb-4">All generated access codes (used and unused)</p>
             </div>
 
             {codes.length === 0 ? (
@@ -300,9 +337,9 @@ export default function AdminManagementPage() {
                       </div>
                     </div>
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      code.used ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
+                      code.used || code.isUsed ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
                     }`}>
-                      {code.used ? 'Used' : 'Unused'}
+                      {code.used || code.isUsed ? 'Used' : 'Unused'}
                     </span>
                   </div>
                 ))}
@@ -321,12 +358,14 @@ export default function AdminManagementPage() {
                 <p className="text-gray-500">No admins found. Generate an access code to create the first admin.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="bg-white rounded-lg border border-gray-200 min-w-0">
+                <div className="admin-table-scroll">
+                <table className="w-full text-sm min-w-[900px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Name</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Admin</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Email</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Phone</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Role</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Created</th>
                       <th className="px-6 py-3 text-left font-semibold text-gray-700">Actions</th>
@@ -335,8 +374,17 @@ export default function AdminManagementPage() {
                   <tbody className="divide-y divide-gray-200">
                     {admins.map((admin: any) => (
                       <tr key={admin.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-gray-900 font-medium">{admin.name || 'Unnamed'}</td>
+                        <td className="px-6 py-3">
+                          <AdminUserCell
+                            user={admin}
+                            name={admin.name || 'Unnamed'}
+                            hideSubtitle
+                          />
+                        </td>
                         <td className="px-6 py-3 text-gray-600">{admin.email}</td>
+                        <td className="px-6 py-3 text-gray-600 whitespace-nowrap">
+                          {formatUserPhoneDisplay(admin)}
+                        </td>
                         <td className="px-6 py-3">
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
                             {admin.role}
@@ -357,6 +405,7 @@ export default function AdminManagementPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </div>

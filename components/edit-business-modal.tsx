@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save } from 'lucide-react'
 
 interface EditBusinessModalProps {
@@ -14,6 +15,7 @@ interface EditBusinessModalProps {
 }
 
 export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: EditBusinessModalProps) {
+  const audit = useAdminAudit()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(business || {})
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -28,6 +30,14 @@ export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: Edit
     setLoading(true)
     try {
       await updateDocument('businesses', business.id, formData)
+      audit({
+        actionType: 'update',
+        action: `Updated business: ${formData.name || business.id}`,
+        entityType: 'business',
+        entityId: business.id,
+        entityName: formData.name || business.name,
+        status: 'success',
+      })
       onClose()
       onSuccess?.()
     } catch (error) {
@@ -44,6 +54,14 @@ export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: Edit
     setDeleteLoading(true)
     try {
       await deleteDocument('businesses', business.id)
+      audit({
+        actionType: 'delete',
+        action: `Deleted business: ${business?.name || business.id}`,
+        entityType: 'business',
+        entityId: business.id,
+        entityName: business?.name,
+        status: 'success',
+      })
       onClose()
       onSuccess?.()
     } catch (error) {

@@ -3,47 +3,111 @@
 import React from 'react'
 import { Card } from '@/components/ui/card'
 import { db } from '@/lib/firebase'
-import { collection, getDocs, query, where, updateDoc, doc, writeBatch, onSnapshot } from 'firebase/firestore'
-import { Crown, Gift, Zap, TrendingUp, Users, AlertCircle, CheckCircle, Download, Filter } from 'lucide-react'
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  writeBatch,
+  query,
+  orderBy,
+} from 'firebase/firestore'
+import { Users, AlertCircle, CheckCircle, Download } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { AdminUserCell } from '@/components/admin-user-cell'
+import { AdminSelect } from '@/components/admin-select'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
+import { PricingPlan } from '@/lib/pricing-types'
+import {
+  countMembersForPlan,
+  countUnassignedMembers,
+  formatPlanPrice,
+  getMemberAssignedPlan,
+  getPlanIncludedItems,
+  memberHasAssignedPlan,
+  memberMatchesPlan,
+} from '@/lib/pricing-utils'
+import { isExpiringsoon } from '@/lib/membership-utils'
+
+type MembershipFilter = 'all' | 'expiring' | 'unassigned' | string
 
 export default function MembershipPage() {
-  const [members, setMembers] = React.useState<any[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [filter, setFilter] = React.useState<'all' | 'standard' | 'gold' | 'platinum' | 'expiring'>('all')
+  const audit = useAdminAudit()
+  const [members, setMembers] = React.useState<Record<string, unknown>[]>([])
+  const [plans, setPlans] = React.useState<PricingPlan[]>([])
+  const [loadingMembers, setLoadingMembers] = React.useState(true)
+  const [loadingPlans, setLoadingPlans] = React.useState(true)
+  const [filter, setFilter] = React.useState<MembershipFilter>('all')
   const [selectedMembers, setSelectedMembers] = React.useState<Set<string>>(new Set())
-  const [bulkAction, setBulkAction] = React.useState<'upgrade' | 'downgrade' | 'renewal' | null>(null)
   const [bulkTierTarget, setBulkTierTarget] = React.useState<string>('')
   const [isProcessing, setIsProcessing] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState('')
   const [sortBy, setSortBy] = React.useState<'name' | 'joined' | 'tier'>('joined')
 
   React.useEffect(() => {
-    // Subscribe to real-time member updates
     const unsubscribe = onSnapshot(
       collection(db, 'users'),
       (snapshot) => {
-        const membersList = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
+        const membersList = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
         }))
         setMembers(membersList)
-        setLoading(false)
+        setLoadingMembers(false)
       },
       (error) => {
         console.error('[v0] Error fetching members:', error)
-        setLoading(false)
+        setLoadingMembers(false)
       }
     )
 
     return () => unsubscribe()
   }, [])
 
-  const handleUpgradeTier = async (memberId: string, newTier: string) => {
+  React.useEffect(() => {
+    const q = query(collection(db, 'pricingPlans'), orderBy('order', 'asc'))
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const plansData = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        })) as PricingPlan[]
+        const activePlans = plansData.filter((plan) => plan.active !== false)
+        setPlans(activePlans.length > 0 ? activePlans : plansData)
+        setLoadingPlans(false)
+      },
+      (error) => {
+        console.error('[v0] Error fetching pricing plans:', error)
+        setLoadingPlans(false)
+      }
+    )
+
+    return () => unsubscribe()
+  }, [])
+
+  const loading = loadingMembers || loadingPlans
+
+  const handleUpgradeTier = async (memberId: string, planId: string) => {
+    if (!planId) return
     try {
+      const plan = plans.find((p) => p.id === planId)
       await updateDoc(doc(db, 'users', memberId), {
-        membershipTier: newTier,
-        upgradedAt: new Date()
+        membershipTier: planId,
+        membershipPlanId: planId,
+        membershipPlanName: plan?.name ?? planId,
+        upgradedAt: new Date(),
+      })
+      audit({
+        actionType: 'update',
+        action: `Updated membership tier for member ${memberId}`,
+        entityType: 'member',
+        entityId: memberId,
+        entityName: plan?.name,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error upgrading tier:', error)
@@ -51,23 +115,34 @@ export default function MembershipPage() {
   }
 
   const handleBulkAction = async () => {
-    if (selectedMembers.size === 0 || !bulkAction || !bulkTierTarget) return
+    if (selectedMembers.size === 0 || !bulkTierTarget) return
 
     setIsProcessing(true)
     try {
+      const plan = plans.find((p) => p.id === bulkTierTarget)
       const batch = writeBatch(db)
       selectedMembers.forEach((memberId) => {
         const userRef = doc(db, 'users', memberId)
         batch.update(userRef, {
           membershipTier: bulkTierTarget,
+          membershipPlanId: bulkTierTarget,
+          membershipPlanName: plan?.name ?? bulkTierTarget,
           lastTierChange: new Date(),
-          bulkUpdateApplied: true
+          bulkUpdateApplied: true,
         })
       })
       await batch.commit()
 
+      audit({
+        actionType: 'update',
+        action: `Bulk membership tier update for ${selectedMembers.size} member(s)`,
+        entityType: 'member',
+        entityName: plan?.name,
+        status: 'success',
+        details: `Plan: ${plan?.name || bulkTierTarget}`,
+      })
+
       setSelectedMembers(new Set())
-      setBulkAction(null)
       setBulkTierTarget('')
     } catch (error) {
       console.error('[v0] Error applying bulk action:', error)
@@ -90,21 +165,26 @@ export default function MembershipPage() {
     if (selectedMembers.size === filteredAndSearchedMembers.length) {
       setSelectedMembers(new Set())
     } else {
-      setSelectedMembers(new Set(filteredAndSearchedMembers.map(m => m.id)))
+      setSelectedMembers(new Set(filteredAndSearchedMembers.map((m) => String(m.id))))
     }
   }
 
   const exportMembershipData = () => {
     const csv = [
       ['Name', 'Email', 'Tier', 'Joined', 'Status'],
-      ...filteredAndSearchedMembers.map(m => [
-        `${m.firstName} ${m.lastName}`,
-        m.email,
-        m.membershipTier || 'standard',
-        m.memberSince ? new Date(m.memberSince).toLocaleDateString() : '-',
-        m.active ? 'Active' : 'Inactive'
-      ])
-    ].map(row => row.join(',')).join('\n')
+      ...filteredAndSearchedMembers.map((m) => {
+        const plan = getMemberAssignedPlan(m, plans)
+        return [
+          `${m.firstName} ${m.lastName}`,
+          m.email,
+          plan?.name || String(m.membershipTier || 'Unassigned'),
+          m.memberSince ? new Date(String(m.memberSince)).toLocaleDateString() : '-',
+          m.active ? 'Active' : 'Inactive',
+        ]
+      }),
+    ]
+      .map((row) => row.join(','))
+      .join('\n')
 
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
@@ -114,294 +194,418 @@ export default function MembershipPage() {
     a.click()
   }
 
-  let filteredMembers = filter === 'all'
-    ? members
-    : filter === 'expiring'
-      ? members.filter(m => {
-          // Assuming expiring within 30 days
-          return true // Simplified for now
-        })
-      : members.filter(m => m.membershipTier === filter)
+  const isMemberExpiring = (member: Record<string, unknown>) => {
+    if (!member.membershipRenewDate) return false
+    const renewDate = member.membershipRenewDate as { toDate?: () => Date }
+    const date = renewDate.toDate?.() || new Date(String(member.membershipRenewDate))
+    return isExpiringsoon(date)
+  }
+
+  const filteredMembers =
+    filter === 'all'
+      ? members
+      : filter === 'expiring'
+        ? members.filter(isMemberExpiring)
+        : filter === 'unassigned'
+          ? members.filter((m) => !memberHasAssignedPlan(m))
+          : members.filter((m) => {
+              const plan = plans.find((p) => p.id === filter)
+              return plan ? memberMatchesPlan(m, plan) : false
+            })
 
   const filteredAndSearchedMembers = filteredMembers
-    .filter(m => {
+    .filter((m) => {
       const name = `${m.firstName} ${m.lastName}`.toLowerCase()
-      const email = m.email?.toLowerCase() || ''
+      const email = String(m.email || '').toLowerCase()
       return name.includes(searchTerm.toLowerCase()) || email.includes(searchTerm.toLowerCase())
     })
     .sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`)
-        case 'tier':
-          return (a.membershipTier || 'standard').localeCompare(b.membershipTier || 'standard')
+        case 'tier': {
+          const planA = getMemberAssignedPlan(a, plans)
+          const planB = getMemberAssignedPlan(b, plans)
+          return (planA?.name || '').localeCompare(planB?.name || '')
+        }
         case 'joined':
         default:
-          return (b.memberSince?.toMillis?.() || 0) - (a.memberSince?.toMillis?.() || 0)
+          return (
+            ((b.memberSince as { toMillis?: () => number })?.toMillis?.() || 0) -
+            ((a.memberSince as { toMillis?: () => number })?.toMillis?.() || 0)
+          )
       }
     })
 
-  const tierStats = {
-    standard: members.filter(m => m.membershipTier === 'standard' || !m.membershipTier).length,
-    gold: members.filter(m => m.membershipTier === 'gold').length,
-    platinum: members.filter(m => m.membershipTier === 'platinum').length,
-    active: members.filter(m => m.active).length,
+  const activeMemberCount = members.filter((m) => m.active).length
+  const unassignedCount = countUnassignedMembers(members)
+
+  const filterTabs: { key: MembershipFilter; label: string }[] = [
+    { key: 'all', label: 'All Members' },
+    ...plans.map((plan) => ({ key: plan.id, label: plan.name })),
+    ...(unassignedCount > 0 ? [{ key: 'unassigned' as const, label: 'Unassigned' }] : []),
+    { key: 'expiring', label: 'Expiring' },
+  ]
+
+  const getMemberPlanSelectValue = (member: Record<string, unknown>) => {
+    const assigned = getMemberAssignedPlan(member, plans)
+    return assigned?.id || ''
   }
 
-  const tiers = {
-    standard: {
-      icon: Gift,
-      color: 'bg-blue-100',
-      textColor: 'text-blue-700',
-      perks: ['Basic community access', 'Event invitations', 'Email support']
-    },
-    gold: {
-      icon: Crown,
-      color: 'bg-yellow-100',
-      textColor: 'text-yellow-700',
-      perks: ['All Standard perks', 'Priority event access', 'Monthly newsletter', 'Exclusive webinars']
-    },
-    platinum: {
-      icon: Zap,
-      color: 'bg-purple-100',
-      textColor: 'text-purple-700',
-      perks: ['All Gold perks', 'VIP event access', 'Direct admin support', 'Governance voting rights']
-    },
-  }
+  const tierSelectOptions = React.useMemo(
+    () => [
+      { value: '', label: 'Select tier…' },
+      ...plans.map((plan) => ({
+        value: plan.id,
+        label: plan.active === false ? `${plan.name} (Inactive)` : plan.name,
+      })),
+    ],
+    [plans]
+  )
 
   return (
-    <>
-
-      <div className="p-8 bg-neutral-50 space-y-8">
-        {/* Tier Overview - Enhanced Analytics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-6 border border-neutral-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral-600">Total Members</p>
-                <p className="text-3xl font-bold text-neutral-900 mt-2">{tierStats.active}</p>
-              </div>
-              <Users className="w-8 h-8 text-neutral-400" />
+    <div className="p-4 sm:p-6 lg:p-8 bg-neutral-50 space-y-6 lg:space-y-8 min-w-0">
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <Card className="p-4 sm:p-6 border border-neutral-200">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Total Members</p>
+              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{members.length}</p>
+              <p className="text-xs text-neutral-500 mt-1 font-body">{activeMemberCount} active</p>
             </div>
-          </Card>
-          {Object.entries(tiers).map(([tierName, tierInfo]: [string, any]) => {
-            const Icon = tierInfo.icon
-            return (
-              <Card key={tierName} className={`p-6 border-2 ${tierInfo.color}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${tierInfo.textColor} capitalize`}>{tierName}</p>
-                    <p className={`text-2xl font-bold ${tierInfo.textColor} mt-2`}>{tierStats[tierName as keyof typeof tierStats]}</p>
-                  </div>
-                  <Icon className={`w-6 h-6 ${tierInfo.textColor} opacity-60`} />
-                </div>
-              </Card>
-            )
-          })}
-        </div>
+            <Users className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
+          </div>
+        </Card>
 
-        {/* Tier Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Object.entries(tiers).map(([tierName, tierInfo]: [string, any]) => {
-            const Icon = tierInfo.icon
-            return (
-              <Card key={tierName} className={`p-6 border-2 ${tierInfo.color}`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className={`text-lg font-bold ${tierInfo.textColor} capitalize`}>{tierName} Tier</h3>
-                    <p className={`text-sm ${tierInfo.textColor} font-semibold mt-1`}>
-                      {tierStats[tierName as keyof typeof tierStats]} members
-                    </p>
-                  </div>
-                  <Icon className={`w-6 h-6 ${tierInfo.textColor}`} />
-                </div>
-                <div className="space-y-2">
-                  {tierInfo.perks.map((perk: string, i: number) => (
-                    <p key={i} className="text-sm text-neutral-700">• {perk}</p>
-                  ))}
-                </div>
-              </Card>
-            )
-          })}
-        </div>
-
-        {/* Bulk Actions */}
-        {selectedMembers.size > 0 && (
-          <Card className="p-6 border-2 border-blue-200 bg-blue-50">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h3 className="font-semibold text-neutral-900">{selectedMembers.size} members selected</h3>
-                <p className="text-sm text-neutral-600 mt-1">Apply bulk actions to selected members</p>
+        {unassignedCount > 0 && (
+          <Card className="p-4 sm:p-6 border border-neutral-200 bg-neutral-50">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Unassigned</p>
+                <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{unassignedCount}</p>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <select
-                  value={bulkTierTarget}
-                  onChange={(e) => setBulkTierTarget(e.target.value)}
-                  className="px-3 py-2 border border-neutral-300 rounded-lg text-sm"
-                >
-                  <option value="">Select target tier...</option>
-                  <option value="standard">Standard</option>
-                  <option value="gold">Gold</option>
-                  <option value="platinum">Platinum</option>
-                </select>
-                <button
-                  onClick={handleBulkAction}
-                  disabled={!bulkTierTarget || isProcessing}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
-                >
-                  {isProcessing ? 'Processing...' : 'Apply to All'}
-                </button>
-                <button
-                  onClick={() => setSelectedMembers(new Set())}
-                  className="px-4 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-medium hover:bg-neutral-400 transition"
-                >
-                  Clear Selection
-                </button>
-              </div>
+              <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
             </div>
           </Card>
         )}
 
-        {/* Filters and Search */}
-        <div className="space-y-4">
-          <div className="flex gap-2 flex-wrap">
-            {['all', 'standard', 'gold', 'platinum', 'expiring'].map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f as any)}
-                className={`px-4 py-2 rounded-lg font-medium transition capitalize ${
-                  filter === f
-                    ? 'bg-neutral-900 text-white'
-                    : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-300'
-                }`}
-              >
-                {f === 'all' ? 'All Members' : f}
-              </button>
-            ))}
-          </div>
+        {plans.map((plan) => {
+          const count = countMembersForPlan(members, plan)
+          const accent = plan.color || '#111111'
+          return (
+            <Card
+              key={plan.id}
+              className="p-4 sm:p-6 border-2"
+              style={{ borderColor: accent, backgroundColor: `${accent}12` }}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium truncate" style={{ color: accent }}>
+                    {plan.name}
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-headline font-bold mt-2" style={{ color: accent }}>
+                    {count}
+                  </p>
+                </div>
+                <span className="text-2xl sm:text-3xl shrink-0" aria-hidden>
+                  {plan.icon || '🎯'}
+                </span>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
 
-          <div className="flex gap-4 flex-wrap items-center">
-            <div className="flex-1 min-w-[200px]">
-              <input
-                type="text"
-                placeholder="Search by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm"
-              />
+      {/* Plan detail cards — driven by pricingPlans in Firestore */}
+      {plans.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          {plans.map((plan) => {
+            const count = countMembersForPlan(members, plan)
+            const accent = plan.color || '#111111'
+            const items = getPlanIncludedItems(plan)
+
+            return (
+              <Card
+                key={`detail-${plan.id}`}
+                className="p-4 sm:p-6 border-2"
+                style={{ borderColor: accent, backgroundColor: `${accent}08` }}
+              >
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-headline font-bold truncate" style={{ color: accent }}>
+                      {plan.name}
+                    </h3>
+                    <p className="text-sm font-medium mt-1" style={{ color: accent }}>
+                      {count} member{count === 1 ? '' : 's'} · {formatPlanPrice(plan)}
+                    </p>
+                    {plan.active === false ? (
+                      <p className="text-xs text-neutral-500 mt-1 font-body">Inactive plan</p>
+                    ) : null}
+                  </div>
+                  <span className="text-2xl shrink-0">{plan.icon || '🎯'}</span>
+                </div>
+                {plan.description ? (
+                  <p className="text-sm text-neutral-600 font-body mb-3">{plan.description}</p>
+                ) : null}
+                <div className="space-y-2">
+                  {items.length > 0 ? (
+                    items.map((item, i) => (
+                      <p key={i} className="text-sm text-neutral-700 font-body">
+                        • {item}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-sm text-neutral-500 font-body">
+                      No features listed. Edit this plan under Pricing Plans.
+                    </p>
+                  )}
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+      ) : (
+        <Card className="p-6 border border-dashed border-neutral-300 bg-white">
+          <p className="text-sm text-neutral-600 font-body">
+            No pricing plans configured yet. Create plans in{' '}
+            <a href="/admin/pricing" className="underline text-neutral-900">
+              Pricing Plans
+            </a>{' '}
+            to manage membership tiers.
+          </p>
+        </Card>
+      )}
+
+      {/* Bulk actions */}
+      {selectedMembers.size > 0 && (
+        <Card className="p-4 sm:p-6 border border-neutral-300 bg-neutral-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-neutral-900 font-body">{selectedMembers.size} members selected</h3>
+              <p className="text-sm text-neutral-600 mt-1 font-body">Apply bulk actions to selected members</p>
             </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-4 py-2 border border-neutral-300 rounded-lg text-sm"
-            >
-              <option value="joined">Sort by: Joined Date</option>
-              <option value="name">Sort by: Name</option>
-              <option value="tier">Sort by: Tier</option>
-            </select>
-            <button
-              onClick={exportMembershipData}
-              className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+              <select
+                value={bulkTierTarget}
+                onChange={(e) => setBulkTierTarget(e.target.value)}
+                className="w-full sm:w-auto px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white font-body"
+              >
+                <option value="">Select target tier...</option>
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleBulkAction}
+                disabled={!bulkTierTarget || isProcessing}
+                className={`${BUTTON_PRIMARY} w-full sm:w-auto disabled:bg-neutral-300 disabled:text-neutral-500 disabled:hover:bg-neutral-300`}
+              >
+                {isProcessing ? 'Processing...' : 'Apply to All'}
+              </button>
+              <button
+                onClick={() => setSelectedMembers(new Set())}
+                className={`${BUTTON_SECONDARY} w-full sm:w-auto`}
+              >
+                Clear Selection
+              </button>
+            </div>
           </div>
+        </Card>
+      )}
+
+      {/* Filters and search */}
+      <div className="space-y-4 min-w-0">
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key)}
+              className={`px-4 py-2 rounded-lg font-medium transition whitespace-nowrap shrink-0 font-body ${
+                filter === tab.key
+                  ? 'bg-black text-white'
+                  : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-400'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* Members Table */}
-        <Card className="border border-neutral-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-neutral-100 border-b border-neutral-200">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+          <div className="w-full sm:flex-1 min-w-0">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm font-body"
+            />
+          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'name' | 'joined' | 'tier')}
+            className="w-full sm:w-auto px-4 py-2 border border-neutral-300 rounded-lg text-sm bg-white font-body"
+          >
+            <option value="joined">Sort by: Joined Date</option>
+            <option value="name">Sort by: Name</option>
+            <option value="tier">Sort by: Tier</option>
+          </select>
+          <button
+            onClick={exportMembershipData}
+            className={`${BUTTON_PRIMARY} w-full sm:w-auto flex items-center justify-center gap-2`}
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+        </div>
+      </div>
+
+      {/* Members table */}
+      <Card className="border border-neutral-200 min-w-0">
+        <div className="admin-table-scroll">
+          <table className="w-full min-w-[900px]">
+            <thead className="bg-neutral-100 border-b border-neutral-200">
+              <tr>
+                <th className="px-4 py-3 text-left w-12">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedMembers.size === filteredAndSearchedMembers.length &&
+                      filteredAndSearchedMembers.length > 0
+                    }
+                    onChange={toggleAllSelection}
+                    className="cursor-pointer"
+                  />
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Member
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Email
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Phone
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Tier
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Status
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Joined
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
                 <tr>
-                  <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedMembers.size === filteredAndSearchedMembers.length && filteredAndSearchedMembers.length > 0}
-                      onChange={toggleAllSelection}
-                      className="cursor-pointer"
-                    />
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Name</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Email</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Tier</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Joined</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-700">Action</th>
+                  <td colSpan={8} className="px-6 py-8 text-center text-neutral-600 font-body">
+                    Loading members...
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-neutral-600">Loading members...</td>
-                  </tr>
-                ) : filteredAndSearchedMembers.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-neutral-600">No members found</td>
-                  </tr>
-                ) : (
-                  filteredAndSearchedMembers.map(member => (
-                    <tr key={member.id} className={`border-b border-neutral-200 hover:bg-neutral-50 ${selectedMembers.has(member.id) ? 'bg-blue-50' : ''}`}>
+              ) : filteredAndSearchedMembers.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-neutral-600 font-body">
+                    No members found
+                  </td>
+                </tr>
+              ) : (
+                filteredAndSearchedMembers.map((member) => {
+                  const assignedPlan = getMemberAssignedPlan(member, plans)
+                  const tierColor = assignedPlan?.color || '#111111'
+
+                  return (
+                    <tr
+                      key={String(member.id)}
+                      className={`border-b border-neutral-200 hover:bg-neutral-50 ${
+                        selectedMembers.has(String(member.id)) ? 'bg-neutral-100' : ''
+                      }`}
+                    >
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
-                          checked={selectedMembers.has(member.id)}
-                          onChange={() => toggleMemberSelection(member.id)}
+                          checked={selectedMembers.has(String(member.id))}
+                          onChange={() => toggleMemberSelection(String(member.id))}
                           className="cursor-pointer"
                         />
                       </td>
-                      <td className="px-6 py-4 text-sm text-neutral-900 font-medium">{member.firstName} {member.lastName}</td>
-                      <td className="px-6 py-4 text-sm text-neutral-600">{member.email}</td>
-                      <td className="px-6 py-4">
-                        <span className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${
-                          member.membershipTier === 'gold' ? 'bg-yellow-100 text-yellow-700' :
-                          member.membershipTier === 'platinum' ? 'bg-purple-100 text-purple-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
-                          {member.membershipTier || 'standard'}
+                      <td className="px-4 sm:px-6 py-4 text-sm">
+                        <AdminUserCell user={member} />
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 max-w-[200px] truncate">
+                        {String(member.email || '')}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 whitespace-nowrap">
+                        {formatUserPhoneDisplay(member)}
+                      </td>
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                        <span
+                          className="text-xs px-3 py-1 rounded-full font-medium"
+                          style={{
+                            backgroundColor: `${tierColor}20`,
+                            color: tierColor,
+                          }}
+                        >
+                          {assignedPlan?.name || String(member.membershipTier || 'Unassigned')}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {member.active ? (
                             <>
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                              <span className="text-xs text-green-700 font-medium">Active</span>
+                              <CheckCircle className="w-4 h-4 text-neutral-700" />
+                              <span className="text-xs text-neutral-700 font-medium">Active</span>
                             </>
                           ) : (
                             <>
-                              <AlertCircle className="w-4 h-4 text-orange-600" />
-                              <span className="text-xs text-orange-700 font-medium">Inactive</span>
+                              <AlertCircle className="w-4 h-4 text-neutral-500" />
+                              <span className="text-xs text-neutral-500 font-medium">Inactive</span>
                             </>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-neutral-600">
-                        {member.memberSince ? formatDistanceToNow(member.memberSince.toDate?.() || new Date(member.memberSince), { addSuffix: true }) : '-'}
+                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 whitespace-nowrap">
+                        {member.memberSince
+                          ? formatDistanceToNow(
+                              (member.memberSince as { toDate?: () => Date }).toDate?.() ||
+                                new Date(String(member.memberSince)),
+                              { addSuffix: true }
+                            )
+                          : '-'}
                       </td>
-                      <td className="px-6 py-4">
-                        <select
-                          onChange={(e) => handleUpgradeTier(member.id, e.target.value)}
-                          value={member.membershipTier || 'standard'}
-                          className="text-sm px-3 py-1 border border-neutral-200 rounded-lg hover:border-neutral-300 cursor-pointer"
+                      <td className="px-4 sm:px-6 py-4 whitespace-nowrap min-w-[10rem]">
+                        <div
+                          className="relative z-20"
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
                         >
-                          <option value="standard">Standard</option>
-                          <option value="gold">Gold</option>
-                          <option value="platinum">Platinum</option>
-                        </select>
+                          <AdminSelect
+                            value={getMemberPlanSelectValue(member)}
+                            onChange={(planId) => handleUpgradeTier(String(member.id), planId)}
+                            options={tierSelectOptions}
+                            aria-label={`Assign membership tier for ${member.firstName || 'member'}`}
+                            className="min-w-[10rem]"
+                          />
+                        </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-6 py-4 bg-neutral-50 border-t border-neutral-200 text-sm text-neutral-600">
-            Showing {filteredAndSearchedMembers.length} of {members.length} members
-          </div>
-        </Card>
-      </div>
-    </>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="px-4 sm:px-6 py-4 bg-neutral-50 border-t border-neutral-200 text-sm text-neutral-600 font-body">
+          Showing {filteredAndSearchedMembers.length} of {members.length} members
+        </div>
+      </Card>
+    </div>
   )
 }

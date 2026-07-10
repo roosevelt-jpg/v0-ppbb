@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Plus, Edit2, Trash2, Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { FAQEditor } from './editor'
+import { BUTTON_PRIMARY, BUTTON_ICON_PRIMARY, BUTTON_ICON_DANGER } from '@/lib/admin-design-system'
 
 interface FAQ {
   id?: string
@@ -120,7 +121,7 @@ export default function FAQManagementPage() {
             setEditingFAQ(null)
             setShowEditor(true)
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+          className={`flex items-center gap-2 ${BUTTON_PRIMARY}`}
         >
           <Plus className="w-5 h-5" />
           New FAQ
@@ -148,8 +149,8 @@ export default function FAQManagementPage() {
             No FAQs yet. Click "New FAQ" to create one.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="admin-table-scroll">
+            <table className="w-full min-w-[720px]">
               <thead className="border-b border-gray-200 bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Question</th>
@@ -176,7 +177,7 @@ export default function FAQManagementPage() {
                       <button
                         onClick={() => handleToggleStatus(faq)}
                         title={faq.status === 'published' ? 'Unpublish' : 'Publish'}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded"
+                        className={BUTTON_ICON_PRIMARY}
                       >
                         {faq.status === 'published' ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                       </button>
@@ -185,13 +186,15 @@ export default function FAQManagementPage() {
                           setEditingFAQ(faq)
                           setShowEditor(true)
                         }}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded"
+                        title="Edit FAQ"
+                        className={BUTTON_ICON_PRIMARY}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => faq.id && handleDelete(faq.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded"
+                        title="Delete FAQ"
+                        className={BUTTON_ICON_DANGER}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

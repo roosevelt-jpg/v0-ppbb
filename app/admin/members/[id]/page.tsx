@@ -6,6 +6,37 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
+import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
+
+const NOT_PROVIDED = 'Not provided'
+
+function formatOptionalDate(
+  value: unknown,
+  options?: Intl.DateTimeFormatOptions
+): string {
+  if (value == null || value === '') return NOT_PROVIDED
+  try {
+    let date: Date
+    if (value instanceof Date) {
+      date = value
+    } else if (typeof value === 'object' && value !== null && 'toDate' in value) {
+      date = (value as { toDate: () => Date }).toDate()
+    } else {
+      date = new Date(String(value))
+    }
+    if (Number.isNaN(date.getTime())) return NOT_PROVIDED
+    return date.toLocaleDateString('en-US', options)
+  } catch {
+    return NOT_PROVIDED
+  }
+}
+
+function formatMemberLocation(location: User['location'] | undefined): string {
+  if (!location) return NOT_PROVIDED
+  const parts = [location.city, location.emirate, location.country].filter(Boolean)
+  return parts.length > 0 ? parts.join(', ') : NOT_PROVIDED
+}
 
 export default function AdminMemberDetailPage() {
   const params = useParams()
@@ -100,9 +131,13 @@ export default function AdminMemberDetailPage() {
         <ArrowLeft size={18} /> Back to Members
       </button>
 
-      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', color: '#111' }}>
-        {member.firstName} {member.lastName}
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem', color: '#111' }}>
+        Member profile
       </h1>
+
+      <div style={{ marginBottom: '2rem' }}>
+        <AdminUserProfileSummary user={member} />
+      </div>
 
       {error && (
         <div style={{ padding: '1rem', marginBottom: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
@@ -125,22 +160,22 @@ export default function AdminMemberDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Email</p>
-              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{member.email}</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{member.email || NOT_PROVIDED}</p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Role</p>
-              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500, textTransform: 'capitalize' }}>{member.role}</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500, textTransform: 'capitalize' }}>{member.role || NOT_PROVIDED}</p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Member Since</p>
               <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>
-                {new Date(member.memberSince).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {formatOptionalDate(member.memberSince, { year: 'numeric', month: 'long', day: 'numeric' })}
               </p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Status</p>
               <p style={{ fontSize: '1rem', color: member.active ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
-                {member.active ? 'Active' : 'Inactive'}
+                {member.active === true ? 'Active' : 'Inactive'}
               </p>
             </div>
           </div>
@@ -152,15 +187,15 @@ export default function AdminMemberDetailPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Volunteered Hours</p>
-              <p style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700 }}>{member.volunteeredHours}</p>
+              <p style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700 }}>{member.volunteeredHours ?? 0}</p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Total Donated</p>
-              <p style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700 }}>AED {member.totalDonated.toLocaleString()}</p>
+              <p style={{ fontSize: '1.5rem', color: '#111', fontWeight: 700 }}>AED {(member.totalDonated ?? 0).toLocaleString()}</p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Membership Tier</p>
-              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500, textTransform: 'capitalize' }}>{member.membershipTier}</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500, textTransform: 'capitalize' }}>{member.membershipTier || NOT_PROVIDED}</p>
             </div>
           </div>
         </section>
@@ -170,8 +205,14 @@ export default function AdminMemberDetailPage() {
           <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#111', textTransform: 'uppercase' }}>Contact Information</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
+              <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Email</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500, wordBreak: 'break-all' }}>
+                {member.email || 'Not provided'}
+              </p>
+            </div>
+            <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Phone</p>
-              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{member.phone || 'Not provided'}</p>
+              <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{formatUserPhoneDisplay(member)}</p>
             </div>
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>WhatsApp</p>
@@ -180,7 +221,7 @@ export default function AdminMemberDetailPage() {
             <div>
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600 }}>Location</p>
               <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>
-                {member.location?.city}, {member.location?.emirate}
+                {formatMemberLocation(member.location)}
               </p>
             </div>
           </div>
@@ -200,11 +241,11 @@ export default function AdminMemberDetailPage() {
               <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.5rem' }}>Employer</p>
               <p style={{ fontSize: '1rem', color: '#111', fontWeight: 500 }}>{member.employer || 'Not provided'}</p>
             </div>
-            {member.skills && member.skills.length > 0 && (
+            {member.skills && (member.skills ?? []).length > 0 && (
               <div style={{ gridColumn: '1 / -1' }}>
                 <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.75rem' }}>Skills</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {member.skills.map(skill => (
+                  {(member.skills ?? []).map(skill => (
                     <span key={skill} style={{ padding: '0.5rem 1rem', backgroundColor: '#111111', color: '#ffffff', borderRadius: '9999px', fontSize: '0.875rem', fontWeight: 600 }}>
                       {skill}
                     </span>
@@ -276,7 +317,7 @@ export default function AdminMemberDetailPage() {
 
       {/* Last Update */}
       <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.75rem', fontSize: '0.875rem', color: '#666' }}>
-        <p>Last updated: {new Date(member.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+        <p>Last updated: {formatOptionalDate(member.updatedAt, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
       </div>
     </div>
   )

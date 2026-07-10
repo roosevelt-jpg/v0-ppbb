@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save, DollarSign } from 'lucide-react'
 
 interface EditDonationModalProps {
@@ -14,6 +15,7 @@ interface EditDonationModalProps {
 }
 
 export function EditDonationModal({ open, onOpenChange, donation, onSuccess }: EditDonationModalProps) {
+  const audit = useAdminAudit()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(donation || {})
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -28,6 +30,14 @@ export function EditDonationModal({ open, onOpenChange, donation, onSuccess }: E
       await updateDocument('donations', donation.id, {
         ...formData,
         updatedAt: new Date(),
+      })
+      audit({
+        actionType: 'update',
+        action: `Updated donation: ${donation.id}`,
+        entityType: 'donation',
+        entityId: donation.id,
+        entityName: donation?.donorName,
+        status: 'success',
       })
       onOpenChange(false)
       onSuccess?.()
@@ -44,6 +54,14 @@ export function EditDonationModal({ open, onOpenChange, donation, onSuccess }: E
     setDeleteLoading(true)
     try {
       await deleteDocument('donations', donation.id)
+      audit({
+        actionType: 'delete',
+        action: `Deleted donation: ${donation.id}`,
+        entityType: 'donation',
+        entityId: donation.id,
+        entityName: donation?.donorName,
+        status: 'success',
+      })
       onOpenChange(false)
       onSuccess?.()
     } catch (error) {

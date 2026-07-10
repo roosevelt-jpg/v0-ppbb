@@ -62,8 +62,8 @@ export default function VolunteerLeaderboardPage() {
       ) : leaderboard.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>No volunteer hours recorded yet</div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="admin-table-scroll min-w-0">
+          <table style={{ width: '100%', minWidth: '640px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
                 <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600, color: '#111111' }}>Rank</th>

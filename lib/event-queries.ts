@@ -17,6 +17,12 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import type { Event, EventRegistration, Payout, EventStatus } from '@/lib/event-types'
+import {
+  getEventStartDate,
+  mapEventDoc,
+  toEventDate,
+  type NormalizedEvent,
+} from '@/lib/event-utils'
 
 // ─────────────────────────────────────────────────────────────────
 // EVENTS QUERIES
@@ -35,21 +41,56 @@ export function subscribeToAllEvents(
     constraints.push(where('createdBy', '==', filters.createdBy))
   }
 
-  constraints.push(orderBy('createdAt', 'desc'))
-
-  const q = query(collection(db, 'events'), ...constraints)
+  const q =
+    constraints.length > 0
+      ? query(collection(db, 'events'), ...constraints)
+      : query(collection(db, 'events'))
 
   return onSnapshot(
     q,
     (snapshot) => {
-      const events = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Event[]
+      const events = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Event[]
+      events.sort((a, b) => {
+        const aTime = toEventDate(a.createdAt)?.getTime() ?? 0
+        const bTime = toEventDate(b.createdAt)?.getTime() ?? 0
+        return bTime - aTime
+      })
       callback(events)
     },
     (error) => {
       console.error('[v0] Error subscribing to events:', error)
+      callback([])
+    }
+  )
+}
+
+/** Public events page — published events only, sorted by start date client-side. */
+export function subscribeToPublishedEvents(
+  callback: (events: NormalizedEvent[]) => void
+): () => void {
+  const q = query(collection(db, 'events'), where('status', '==', 'published'))
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const events = snapshot.docs
+        .map((d) => mapEventDoc(d.id, d.data()))
+        .sort((a, b) => getEventStartDate(a).getTime() - getEventStartDate(b).getTime())
+      callback(events)
+    },
+    (error) => {
+      console.error('[v0] Error subscribing to published events:', error)
+      const message = error instanceof Error ? error.message : String(error)
+      if (message.includes('index') || (error as { code?: string })?.code === 'failed-precondition') {
+        console.error(
+          '[v0] Firestore index may be required for published events query. Open Firebase Console → Firestore → Indexes and create a single-field index on events.status if prompted:',
+          message
+        )
+      }
       callback([])
     }
   )

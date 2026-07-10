@@ -37,11 +37,30 @@ export const ADMIN_RADIUS = {
 // Button styles
 export const BUTTON_BASE = 'inline-flex items-center justify-center font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
 export const BUTTON_PRIMARY = `${BUTTON_BASE} bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 px-4 py-2 rounded-lg`
-export const BUTTON_SECONDARY = `${BUTTON_BASE} bg-neutral-200 text-neutral-900 hover:bg-neutral-300 active:bg-neutral-400 px-4 py-2 rounded-lg`
+export const BUTTON_SECONDARY = `${BUTTON_BASE} bg-white text-black border border-black hover:bg-neutral-50 active:bg-neutral-100 px-4 py-2 rounded-lg`
 export const BUTTON_DANGER = `${BUTTON_BASE} bg-red-600 text-white hover:bg-red-700 active:bg-red-800 px-4 py-2 rounded-lg`
-export const BUTTON_SUCCESS = `${BUTTON_BASE} bg-green-600 text-white hover:bg-green-700 active:bg-green-800 px-4 py-2 rounded-lg`
+/** Icon-only table actions — black primary */
+export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white`
+/** Icon-only table actions — danger delete */
+export const BUTTON_ICON_DANGER = `${BUTTON_BASE} inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 active:bg-red-800 border-0 shadow-none [&_svg]:text-white`
+/** Filter / tab pills */
+export const FILTER_PILL_ACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-black text-white border border-black'
+export const FILTER_PILL_INACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-white text-black border border-black hover:bg-neutral-50'
+/** Up/down reorder controls — black square with white icon */
+export const BUTTON_REORDER = `${BUTTON_BASE} min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0`
+/** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */
+export const BUTTON_SUCCESS = BUTTON_PRIMARY
 export const BUTTON_SMALL = 'px-3 py-1.5 text-sm'
 export const BUTTON_LARGE = 'px-6 py-3 text-base'
+
+/** Compact admin detail modal shell (profile popups, review dialogs) */
+export const ADMIN_DETAIL_MODAL_OVERLAY =
+  'fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-2'
+export const ADMIN_DETAIL_MODAL_BACKDROP = 'absolute inset-0 bg-black/50'
+export const ADMIN_DETAIL_MODAL_PANEL =
+  'relative bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-[18rem] sm:max-w-xs max-h-[85vh] overflow-hidden flex flex-col'
+export const ADMIN_DETAIL_MODAL_CLOSE =
+  'shrink-0 min-h-[26px] min-w-[26px] inline-flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100'
 
 // Form styles
 export const INPUT_BASE = 'w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-base transition-all duration-200'
@@ -49,6 +68,9 @@ export const INPUT_FOCUS = 'focus:outline-none focus:ring-2 focus:ring-black foc
 export const INPUT_STYLE = `${INPUT_BASE} ${INPUT_FOCUS}`
 export const TEXTAREA_STYLE = `${INPUT_BASE} ${INPUT_FOCUS} resize-vertical min-h-32`
 export const SELECT_STYLE = `${INPUT_BASE} ${INPUT_FOCUS} appearance-none cursor-pointer`
+/** Reset global button styles when using <button> as a select/combobox trigger */
+export const FIELD_TRIGGER_RESET =
+  '!min-h-0 !px-4 !py-2 !rounded-lg !font-normal !font-body !shadow-none hover:!shadow-none !bg-white !text-neutral-900 hover:!bg-white active:!bg-white'
 
 // Card styles
 export const CARD_BASE = 'bg-white border border-neutral-200 rounded-lg p-6 shadow-sm'
@@ -65,8 +87,8 @@ export const FLEX_BETWEEN = 'flex items-center justify-between'
 export const FLEX_COLUMN = 'flex flex-col'
 
 // Typography
-export const TEXT_HEADING = 'font-playfair text-3xl md:text-4xl font-bold text-neutral-900'
-export const TEXT_SUBHEADING = 'font-playfair text-2xl md:text-3xl font-bold text-neutral-900'
+export const TEXT_HEADING = 'font-headline text-3xl md:text-4xl font-bold text-neutral-900'
+export const TEXT_SUBHEADING = 'font-headline text-2xl md:text-3xl font-bold text-neutral-900'
 export const TEXT_SECTION = 'font-bold text-lg md:text-xl text-neutral-900'
 export const TEXT_LABEL = 'text-sm font-medium text-neutral-700'
 export const TEXT_SMALL = 'text-xs md:text-sm text-neutral-600'

@@ -1,5 +1,3 @@
-import { getFirestore, collection, getDocs, query, where, sum, getCountFromServer, aggregateQuerySnapshot } from 'firebase/firestore'
-
 export interface CommunityStats {
   totalMembers: number
   volunteerHours: number
@@ -7,47 +5,62 @@ export interface CommunityStats {
   totalDonations: number
 }
 
+const EMPTY_STATS: CommunityStats = {
+  totalMembers: 0,
+  volunteerHours: 0,
+  businessPartners: 0,
+  totalDonations: 0,
+}
+
+function parseStatNumber(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+  if (typeof value === 'string') {
+    const digits = value.replace(/[^0-9.]/g, '')
+    const parsed = Number(digits)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return 0
+}
+
+function normalizeStats(data: Partial<CommunityStats> | null | undefined): CommunityStats {
+  if (!data) return EMPTY_STATS
+  return {
+    totalMembers: parseStatNumber(data.totalMembers),
+    volunteerHours: parseStatNumber(data.volunteerHours),
+    businessPartners: parseStatNumber(data.businessPartners),
+    totalDonations: parseStatNumber(data.totalDonations),
+  }
+}
+
+/**
+ * Live platform stats for login/marketing surfaces.
+ * Prefers /api/public/community-stats (Admin SDK aggregation), then cached communityStats/public.
+ */
 export async function getCommunityStats(): Promise<CommunityStats> {
   try {
-    const db = getFirestore()
-
-    // Count total active members
-    const membersSnapshot = await getCountFromServer(
-      query(collection(db, 'users'), where('active', '==', true))
-    )
-    const totalMembers = membersSnapshot.data().count
-
-    // Get total volunteer hours
-    const usersSnapshot = await getDocs(collection(db, 'users'))
-    const volunteerHours = usersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().volunteeredHours || 0), 0)
-
-    // Count business partners
-    const businessSnapshot = await getCountFromServer(
-      query(collection(db, 'users'), where('role', '==', 'business'), where('active', '==', true))
-    )
-    const businessPartners = businessSnapshot.data().count
-
-    // Get total donations
-    const donationsSnapshot = await getDocs(
-      query(collection(db, 'donations'), where('status', '==', 'completed'))
-    )
-    const totalDonations = donationsSnapshot.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0)
-
-    return {
-      totalMembers,
-      volunteerHours,
-      businessPartners,
-      totalDonations,
+    const res = await fetch('/api/public/community-stats', { cache: 'no-store' })
+    if (res.ok) {
+      const json = await res.json()
+      if (json.success && json.data) {
+        return normalizeStats(json.data)
+      }
     }
   } catch (error) {
-    console.error('[v0] Error fetching community stats:', error)
-    return {
-      totalMembers: 0,
-      volunteerHours: 0,
-      businessPartners: 0,
-      totalDonations: 0,
-    }
+    console.warn('[v0] Live stats API unavailable, trying cache:', error)
   }
+
+  try {
+    const { getFirestore, doc, getDoc } = await import('firebase/firestore')
+    const db = getFirestore()
+    const communityStatsSnap = await getDoc(doc(db, 'communityStats', 'public'))
+    if (communityStatsSnap.exists()) {
+      return normalizeStats(communityStatsSnap.data() as CommunityStats)
+    }
+  } catch (error) {
+    console.error('[v0] Error reading cached community stats:', error)
+  }
+
+  return EMPTY_STATS
 }
 
 export function formatDonations(amount: number): string {
@@ -57,5 +70,5 @@ export function formatDonations(amount: number): string {
   if (amount >= 1000) {
     return `AED ${(amount / 1000).toFixed(0)}K`
   }
-  return `AED ${amount}`
+  return `AED ${Math.round(amount).toLocaleString()}`
 }

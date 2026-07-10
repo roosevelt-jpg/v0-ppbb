@@ -1,14 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/lib/firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { collection, doc, setDoc, query, where, getDocs } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { Loader2, Eye, EyeOff } from 'lucide-react'
-import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
+import { Loader2, Eye, EyeOff, MapPin } from 'lucide-react'
+import { SiteLogo } from '@/components/site-logo'
+import { SearchableSelect } from '@/components/searchable-select'
+import { COUNTRY_OPTIONS } from '@/lib/countries'
+import { UAE_EMIRATES, UAE_CITIES_BY_EMIRATE, isUaeCountry } from '@/lib/signup-locations'
+import { getUserLocation } from '@/lib/geolocation'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import type { LocationData } from '@/lib/types'
 
 const STEPS = [
   { id: 1, label: 'Personal info & account' },
@@ -18,33 +24,42 @@ const STEPS = [
 
 const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
 
-const EMIRATES = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Fujairah', 'Ras Al Khaimah', 'Umm Al Quwain']
+const COUNTRY_SELECT_OPTIONS = COUNTRY_OPTIONS.map((c) => ({ value: c.name, label: c.name }))
+const NATIONALITY_OPTIONS = COUNTRY_OPTIONS.map((c) => ({ value: c.name, label: c.name }))
 
 export default function SignupClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [detectingLocation, setDetectingLocation] = useState(false)
 
   const [formData, setFormData] = useState({
-    memberType: 'member',
+    memberType: searchParams.get('type') === 'business' ? 'business' : 'member',
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
     phone: '',
+    nationality: '',
     country: 'United Arab Emirates',
     emirate: 'Dubai',
+    city: 'Dubai',
+    customCity: '',
+    address: '',
+    countryCode: 'AE',
     gender: '',
     dateOfBirth: '',
-    placesData: null as any,
     skills: [] as string[],
     bio: '',
     consentTerms: false,
     consentPrivacy: false,
+    consentLocation: false,
+    consentNotifications: false,
     // Business fields (Step 3, for business user type)
     businessName: '',
     businessType: '',
@@ -52,6 +67,14 @@ export default function SignupClient() {
     businessLocation: '',
     businessDescription: '',
   })
+
+  useEffect(() => {
+    if (searchParams.get('type') === 'business') {
+      setFormData((prev) =>
+        prev.memberType === 'business' ? prev : { ...prev, memberType: 'business' }
+      )
+    }
+  }, [searchParams])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as any
@@ -70,6 +93,47 @@ export default function SignupClient() {
     }))
   }
 
+  const handleDetectLocation = async () => {
+    setDetectingLocation(true)
+    setError('')
+    try {
+      const detected = await getUserLocation()
+      if (!detected) {
+        setError('Could not detect your location. Please select country and city manually.')
+        return
+      }
+
+      const matchedCountry = COUNTRY_OPTIONS.find(
+        (c) => c.code === detected.countryCode || c.name === detected.country
+      )
+
+      setFormData((prev) => {
+        const country = matchedCountry?.name || detected.country || prev.country
+        const uae = isUaeCountry(country)
+        const emirate = uae
+          ? UAE_EMIRATES.find((e) => detected.state?.includes(e) || detected.city?.includes(e)) || detected.state || prev.emirate
+          : prev.emirate
+        const city = detected.city || prev.city
+
+        return {
+          ...prev,
+          country,
+          countryCode: matchedCountry?.code || detected.countryCode || prev.countryCode,
+          emirate: uae ? emirate : prev.emirate,
+          city: uae ? city : city,
+          customCity: uae ? prev.customCity : city,
+          address: detected.address || prev.address,
+          consentLocation: true,
+        }
+      })
+    } catch (err) {
+      console.error('[v0] Geolocation detect failed:', err)
+      setError('Location detection failed. You can still enter your location manually.')
+    } finally {
+      setDetectingLocation(false)
+    }
+  }
+
   const validateStep = async (step: number): Promise<boolean> => {
     setError('')
     
@@ -86,6 +150,10 @@ export default function SignupClient() {
         setError('Please select your gender')
         return false
       }
+      if (!formData.nationality.trim()) {
+        setError('Please select your nationality')
+        return false
+      }
       if (!formData.email.trim()) {
         setError('Email is required')
         return false
@@ -95,11 +163,10 @@ export default function SignupClient() {
         return false
       }
       
-      // Check email uniqueness by querying Firestore
       try {
-        const emailQuery = query(collection(db, 'users'), where('email', '==', formData.email.toLowerCase()))
-        const emailSnapshot = await getDocs(emailQuery)
-        if (!emailSnapshot.empty) {
+        const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(formData.email.toLowerCase())}`)
+        const json = await res.json()
+        if (res.ok && json.success && !json.available) {
           setError('This email is already registered. Please log in or use a different email.')
           return false
         }
@@ -138,8 +205,23 @@ export default function SignupClient() {
         setError('Date of birth is required')
         return false
       }
-      if (!formData.emirate) {
-        setError('Please select your address')
+      if (!formData.country.trim()) {
+        setError('Please select your country')
+        return false
+      }
+      const resolvedCity = isUaeCountry(formData.country)
+        ? formData.city
+        : (formData.customCity || formData.city).trim()
+      if (!resolvedCity) {
+        setError('Please enter your city')
+        return false
+      }
+      if (isUaeCountry(formData.country) && !formData.emirate) {
+        setError('Please select your emirate')
+        return false
+      }
+      if (!formData.consentLocation) {
+        setError('Please confirm your location details are accurate')
         return false
       }
     }
@@ -187,6 +269,18 @@ export default function SignupClient() {
 
       const firebaseUser = userCredential.user
       const now = new Date()
+      const resolvedCity = isUaeCountry(formData.country)
+        ? formData.city
+        : (formData.customCity || formData.city).trim()
+
+      const location: LocationData = sanitizeForFirestore({
+        country: formData.country,
+        countryCode: formData.countryCode,
+        emirate: isUaeCountry(formData.country) ? formData.emirate : formData.country,
+        city: resolvedCity,
+        state: isUaeCountry(formData.country) ? formData.emirate : undefined,
+        address: formData.address || undefined,
+      })
 
       // Update profile with display name
       await updateProfile(firebaseUser, {
@@ -196,54 +290,49 @@ export default function SignupClient() {
       // Create user document in Firestore with proper schema
       const userDocRef = doc(db, 'users', firebaseUser.uid)
       
-      const userData: any = {
-        // Auth info (Firebase Auth manages email/password, we reference UID)
+      const userData: Record<string, unknown> = {
         uid: firebaseUser.uid,
         email: formData.email.toLowerCase(),
         createdAt: now,
-        dateJoined: now, // Explicitly track when user joined
+        dateJoined: now,
+        memberSince: now,
         updatedAt: now,
-
-        // Display info (stored in Firestore per golden rule)
         firstName: formData.firstName,
         lastName: formData.lastName,
         displayName: `${formData.firstName} ${formData.lastName}`,
         phone: formData.phone,
+        whatsappNumber: formData.phone,
+        nationality: formData.nationality,
         country: formData.country,
-        emirate: formData.emirate,
-        location: formData.emirate, // For location-based queries
+        emirate: isUaeCountry(formData.country) ? formData.emirate : null,
+        city: resolvedCity,
+        location,
         gender: formData.gender,
-        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null,
-        placesData: formData.placesData,
-        bio: formData.bio,
+        dateOfBirth: formData.dateOfBirth,
+        bio: formData.bio || null,
         skills: formData.skills,
-
-        // Role management - separate roles for members and business users
-        // Members have only 'member' role, business users have only 'business' role
         role: formData.memberType,
         roles: [formData.memberType],
-
-        // User preferences
         language: 'en',
         timezone: 'Asia/Dubai',
-
-        // Status flags
         emailVerified: false,
         phoneVerified: false,
-        profileComplete: currentStep >= 2,
+        profileComplete: true,
         status: 'active',
-
-        // Avatar URL (when they upload, stored as URL per golden rule)
+        active: true,
+        membershipTier: 'standard',
+        volunteeredHours: 0,
+        volunteerHours: 0,
+        totalDonated: 0,
+        consentTerms: formData.consentTerms,
+        consentPrivacy: formData.consentPrivacy,
+        consentLocation: formData.consentLocation,
+        consentNotifications: formData.consentNotifications,
         avatarUrl: null,
-
-        // Empty initially, filled when user uploads files
         documentUrls: {
           idVerification: null,
           addressProof: null,
         },
-        
-        // Volunteer tracking
-        volunteerHours: 0,
       }
       
       // Add business profile if user type is business
@@ -251,22 +340,56 @@ export default function SignupClient() {
         userData.business = {
           name: formData.businessName,
           type: formData.businessType,
-          registration: formData.businessRegistration,
+          registration: formData.businessRegistration || null,
           location: formData.businessLocation,
-          description: formData.businessDescription,
+          description: formData.businessDescription || null,
           createdAt: now,
         }
+        userData.hasBusinessProfile = true
       }
       
-      await setDoc(userDocRef, userData, { merge: false })
+      await setDoc(userDocRef, sanitizeForFirestore(userData))
+
+      // Directory listing starts pending — admin must approve (Part 5C/5D)
+      if (formData.memberType === 'business') {
+        await setDoc(
+          doc(db, 'businesses', firebaseUser.uid),
+          {
+            name: formData.businessName || `${formData.firstName}'s Business`,
+            businessName: formData.businessName || `${formData.firstName}'s Business`,
+            category: formData.businessType || 'Services',
+            businessType: formData.businessType || 'Services',
+            description: formData.businessDescription || '',
+            communityBenefit: formData.businessDescription || '',
+            services: [],
+            productImages: [],
+            tradeLicenceURL: '',
+            logoURL: '',
+            bannerURL: '',
+            ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
+            ownerId: firebaseUser.uid,
+            userId: firebaseUser.uid,
+            email: formData.email.toLowerCase(),
+            phone: formData.phone || '',
+            location: formData.businessLocation || formData.emirate || '',
+            isApproved: false,
+            isActive: true,
+            isVerified: false,
+            featured: false,
+            status: 'pending_review',
+            createdAt: now,
+            updatedAt: now,
+            submittedAt: now,
+          },
+          { merge: true }
+        )
+      }
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)
 
-      // Redirect to success page instead of auto-logging in
+      // Redirect to success page — user can sign in from there
       setError('')
-      setTimeout(() => {
-        router.push('/signup/success')
-      }, 500)
+      router.push('/signup/success')
     } catch (err: any) {
       console.error('[v0] Signup error:', err)
       if (err.code === 'auth/email-already-in-use') {
@@ -289,11 +412,7 @@ export default function SignupClient() {
       <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
           <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#111111', height: '28px', display: 'flex', alignItems: 'center' }}>
-            <img 
-              src="/images/pb-logo-black.png" 
-              alt="Passive Blessings" 
-              style={{ height: '28px', width: 'auto' }}
-            />
+            <SiteLogo background="light" variant="primary" href="/" />
           </div>
           <Link href="/login" style={{ fontSize: '0.75rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>Sign In</Link>
         </div>
@@ -362,7 +481,7 @@ export default function SignupClient() {
 
                     {/* Gender */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Gender</label>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Gender *</label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.375rem' }}>
                         {['Male', 'Female', 'Other', 'Prefer not to say'].map(g => (
                           <label key={g} style={{ display: 'flex', alignItems: 'center', padding: '0.5rem', border: `1px solid ${formData.gender === g ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', backgroundColor: formData.gender === g ? '#f7f6f2' : '#fff', transition: 'all 0.2s' }}>
@@ -372,6 +491,16 @@ export default function SignupClient() {
                         ))}
                       </div>
                     </div>
+
+                    {/* Nationality */}
+                    <SearchableSelect
+                      label="Nationality"
+                      value={formData.nationality}
+                      options={NATIONALITY_OPTIONS}
+                      onChange={(value) => setFormData((prev) => ({ ...prev, nationality: value }))}
+                      placeholder="Search countries…"
+                      required
+                    />
 
                     {/* Email */}
                     <div>
@@ -427,11 +556,11 @@ export default function SignupClient() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
                         <input type="checkbox" name="consentTerms" checked={formData.consentTerms} onChange={handleInputChange} style={{ width: '16px', height: '16px', marginTop: '0.125rem', cursor: 'pointer', flexShrink: 0 }} />
-                        <span style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4' }}>I agree to the <Link href="/terms" style={{ color: '#111111', fontWeight: 600, textDecoration: 'underline' }}>Terms of Service</Link> *</span>
+                        <span style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4' }}>I agree to the <Link href="/pages/terms-of-service" target="_blank" rel="noopener noreferrer" style={{ color: '#111111', fontWeight: 600, textDecoration: 'underline' }}>Terms of Service</Link> *</span>
                       </label>
                       <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
                         <input type="checkbox" name="consentPrivacy" checked={formData.consentPrivacy} onChange={handleInputChange} style={{ width: '16px', height: '16px', marginTop: '0.125rem', cursor: 'pointer', flexShrink: 0 }} />
-                        <span style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4' }}>I agree to the <Link href="/privacy" style={{ color: '#111111', fontWeight: 600, textDecoration: 'underline' }}>Privacy Policy</Link> *</span>
+                        <span style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4' }}>I agree to the <Link href="/pages/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ color: '#111111', fontWeight: 600, textDecoration: 'underline' }}>Privacy Policy</Link> *</span>
                       </label>
                     </div>
                   </div>
@@ -439,7 +568,31 @@ export default function SignupClient() {
 
                 {currentStep === 2 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Complete your profile</h2>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Location & profile</h2>
+
+                    <button
+                      type="button"
+                      onClick={handleDetectLocation}
+                      disabled={detectingLocation}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        padding: '0.625rem',
+                        border: '1px solid #e4e1da',
+                        backgroundColor: '#ffffff',
+                        color: '#111111',
+                        borderRadius: '0.375rem',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: detectingLocation ? 'not-allowed' : 'pointer',
+                        opacity: detectingLocation ? 0.7 : 1,
+                      }}
+                    >
+                      <MapPin size={16} />
+                      {detectingLocation ? 'Detecting location…' : 'Use my current location (optional)'}
+                    </button>
 
                     {/* Phone */}
                     <div>
@@ -453,50 +606,114 @@ export default function SignupClient() {
                       <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} max={new Date().toISOString().split('T')[0]} style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
                     </div>
 
-                    {/* Address - Google Places */}
+                    <SearchableSelect
+                      label="Country of residence"
+                      value={formData.country}
+                      options={COUNTRY_SELECT_OPTIONS}
+                      onChange={(value) => {
+                        const match = COUNTRY_OPTIONS.find((c) => c.name === value)
+                        setFormData((prev) => ({
+                          ...prev,
+                          country: value,
+                          countryCode: match?.code || prev.countryCode,
+                          emirate: isUaeCountry(value) ? prev.emirate || 'Dubai' : '',
+                          city: isUaeCountry(value) ? prev.city || 'Dubai' : '',
+                          customCity: isUaeCountry(value) ? '' : prev.customCity,
+                        }))
+                      }}
+                      placeholder="Search countries…"
+                      required
+                    />
+
+                    {isUaeCountry(formData.country) ? (
+                      <>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Emirate *</label>
+                          <select
+                            name="emirate"
+                            value={formData.emirate}
+                            onChange={(e) => {
+                              const emirate = e.target.value
+                              const cities = UAE_CITIES_BY_EMIRATE[emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']
+                              setFormData((prev) => ({
+                                ...prev,
+                                emirate,
+                                city: cities[0] || prev.city,
+                              }))
+                            }}
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', backgroundColor: '#fff' }}
+                          >
+                            {UAE_EMIRATES.map((emirate) => (
+                              <option key={emirate} value={emirate}>{emirate}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>City / Area *</label>
+                          <select
+                            name="city"
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', backgroundColor: '#fff' }}
+                          >
+                            {(UAE_CITIES_BY_EMIRATE[formData.emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']).map((city) => (
+                              <option key={city} value={city}>{city}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    ) : (
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>City *</label>
+                        <input
+                          type="text"
+                          name="customCity"
+                          value={formData.customCity}
+                          onChange={handleInputChange}
+                          placeholder="Enter your city"
+                          style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                        />
+                      </div>
+                    )}
+
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Your Address *</label>
-                      <GooglePlacesAutocomplete
-                        value={formData.emirate}
-                        onChange={(place: any) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            emirate: place.mainText || place.placeId,
-                            placesData: place,
-                          }))
-                        }}
-                        countryRestrictions={['ae']}
-                        placeholder="Enter your address in UAE"
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Street address (optional)</label>
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        placeholder="Building, street, or neighbourhood"
+                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
                       />
                     </div>
 
-                    {/* Skills (if volunteer/sponsor) */}
-                    {(formData.memberType === 'volunteer' || formData.memberType === 'sponsor') && (
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', color: '#111111' }}>Your Skills (optional)</label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
-                          {SKILLS.map(skill => (
-                            <button
-                              key={skill}
-                              type="button"
-                              onClick={() => handleSkillToggle(skill)}
-                              style={{
-                                padding: '0.375rem 0.75rem',
-                                borderRadius: '9999px',
-                                fontSize: '0.75rem',
-                                border: `1px solid ${formData.skills.includes(skill) ? '#111111' : '#e4e1da'}`,
-                                backgroundColor: formData.skills.includes(skill) ? '#111111' : '#ffffff',
-                                color: formData.skills.includes(skill) ? '#ffffff' : '#111111',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                              }}
-                            >
-                              {skill}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        name="consentLocation"
+                        checked={formData.consentLocation}
+                        onChange={handleInputChange}
+                        style={{ width: '16px', height: '16px', marginTop: '0.125rem', cursor: 'pointer', flexShrink: 0 }}
+                      />
+                      <span style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4' }}>
+                        I confirm my location details are accurate and consent to being connected with local community events and members in my area. *
+                      </span>
+                    </label>
+
+                    <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        name="consentNotifications"
+                        checked={formData.consentNotifications}
+                        onChange={handleInputChange}
+                        style={{ width: '16px', height: '16px', marginTop: '0.125rem', cursor: 'pointer', flexShrink: 0 }}
+                      />
+                      <span style={{ fontSize: '0.75rem', color: '#666', lineHeight: '1.4' }}>
+                        I agree to receive WhatsApp and email updates about events and community news.
+                      </span>
+                    </label>
 
                     {/* Bio */}
                     <div>
@@ -691,7 +908,7 @@ export default function SignupClient() {
         </div>
 
         {/* Right Info Column */}
-        <div style={{ display: 'none', width: '380px', backgroundColor: '#f7f6f2', padding: '2rem', '@media (min-width: 1024px)': { display: 'flex' }, flexDirection: 'column', justifyContent: 'center' }}>
+        <div className="hidden lg:flex lg:flex-col lg:justify-center lg:w-[380px] flex-shrink-0 bg-[#f7f6f2] p-8">
           <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Why join Passive Blessings?</h3>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[

@@ -88,8 +88,8 @@ export default function EventRevenuePage() {
 
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
           <h3 className="text-lg font-semibold mb-4">Paid Registrations</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="admin-table-scroll min-w-0">
+            <table className="w-full min-w-[640px]">
               <thead>
                 <tr style={{ borderBottom: '1px solid #e4e1da' }}>
                   <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>Name</th>

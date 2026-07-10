@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import {
+  initialGroupStatus,
+  normalizeGenderRestriction,
+} from '@/lib/community-governance'
+import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,24 +41,55 @@ export async function POST(request: NextRequest) {
   try {
     const db = getAdminDb()
     const body = await request.json()
-    const { communityId, name, description, genderRestriction, iconURL, createdBy } = body
+    const { communityId, name, description, genderRestriction, iconURL, createdBy, requiresApproval, type } =
+      body
 
     if (!communityId || !name) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
     }
 
-    const docRef = await db
+    const communitySnap = await db.collection('communities').doc(communityId).get()
+    if (!communitySnap.exists) {
+      return NextResponse.json({ success: false, error: 'Community not found' }, { status: 404 })
+    }
+    const community = communitySnap.data() || {}
+
+    let isAdmin = false
+    const authHeader = request.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (token) {
+      const uid = await verifyIdToken(token)
+      if (uid) isAdmin = await isAdminUser(uid)
+    }
+
+    const groupStatus = initialGroupStatus({
+      isAdmin,
+      communityBusinessId: community.businessId,
+      createdByBusiness: Boolean(community.businessId && createdBy === community.createdBy),
+    })
+
+    const payload = sanitizeForFirestore({
+      name,
+      description: description || '',
+      genderRestriction: normalizeGenderRestriction(genderRestriction),
+      iconURL: iconURL || '',
+      type: type || 'discussion',
+      requiresApproval: requiresApproval === true,
+      capacity: typeof body.capacity === 'number' ? body.capacity : null,
+      status: groupStatus,
+      memberCount: 0,
+      createdBy,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    })
+
+    const docRef = await db.collection('communities').doc(communityId).collection('groups').add(payload)
+
+    await db
       .collection('communities')
       .doc(communityId)
-      .collection('groups')
-      .add({
-        name,
-        description: description || '',
-        genderRestriction: genderRestriction || 'mixed',
-        iconURL: iconURL || '',
-        memberCount: 0,
-        createdBy,
-        createdAt: Timestamp.now(),
+      .update({
+        groupCount: (community.groupCount || 0) + 1,
         updatedAt: Timestamp.now(),
       })
 

@@ -7,6 +7,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, Upload } from 'lucide-react'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export default function DonateConfirmContent() {
   const searchParams = useSearchParams()
@@ -14,9 +16,10 @@ export default function DonateConfirmContent() {
   const auth = getAuth()
   const user = auth.currentUser
 
-  const partner = searchParams.get('partnerName')
-  const paymentLink = searchParams.get('paymentLink')
-  const cause = searchParams.get('causeName')
+  const partner = searchParams.get('partnerName') || 'Charitable Partner'
+  const paymentLink = searchParams.get('paymentLink') || ''
+  const cause = searchParams.get('causeName') || 'Selected cause'
+  const causeDescription = searchParams.get('causeDescription') || ''
   const partnerId = searchParams.get('partner')
   const causeId = searchParams.get('cause')
 
@@ -24,103 +27,143 @@ export default function DonateConfirmContent() {
   const [formData, setFormData] = useState({
     amount: '',
     referenceNumber: '',
-    proofImage: '',
     notes: '',
   })
+  const [proofFile, setProofFile] = useState<File | null>(null)
+  const [proofPreview, setProofPreview] = useState('')
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
 
   const handleProceedToPayment = () => {
-    if (!formData.amount) {
-      alert('Please enter donation amount')
+    if (!formData.amount || Number(formData.amount) <= 0) {
+      setError('Please enter a valid donation amount in AED')
       return
     }
+    setError('')
     setStep('payment')
-    // Open payment link in new window
     if (paymentLink) {
-      window.open(paymentLink, '_blank', 'width=800,height=600')
+      window.open(paymentLink, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  const handleProofSelect = (file: File | null) => {
+    setProofFile(file)
+    if (file) {
+      setProofPreview(URL.createObjectURL(file))
+    } else {
+      setProofPreview('')
     }
   }
 
   const handleSubmitProof = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
+
     if (!formData.referenceNumber || !formData.amount) {
-      alert('Please fill in all required fields')
+      setError('Please fill in all required fields')
+      return
+    }
+    if (!proofFile) {
+      setError('Please upload a payment proof screenshot')
+      return
+    }
+
+    const currentUser = auth.currentUser
+    if (!currentUser) {
+      alert('You must be logged in to submit a donation')
+      router.push('/signin')
       return
     }
 
     setLoading(true)
     try {
-      if (!user) {
-        alert('You must be logged in to submit a donation')
-        router.push('/signin')
-        return
-      }
-
-      // Save donation submission to Firestore
-      const docRef = await addDoc(collection(db, 'donationSubmissions'), {
-        userId: user.uid,
-        donorName: user.displayName || user.email || 'Anonymous',
-        donorEmail: user.email,
-        amount: parseFloat(formData.amount),
-        referenceNumber: formData.referenceNumber,
-        proofImage: formData.proofImage,
-        notes: formData.notes,
-        causeId: causeId,
-        causeName: cause,
-        partnerId: partnerId,
-        partnerName: partner,
-        status: 'pending',
-        submittedAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
+      setUploading(true)
+      const proofImageUrl = await uploadImageToFirebase(proofFile, 'donation-proofs', {
+        preset: 'content',
       })
+      setUploading(false)
+
+      await addDoc(
+        collection(db, 'donationSubmissions'),
+        sanitizeForFirestore({
+          userId: currentUser.uid,
+          donorName: currentUser.displayName || currentUser.email || 'Anonymous',
+          donorEmail: currentUser.email || '',
+          donorPhone: currentUser.phoneNumber || null,
+          amount: parseFloat(formData.amount),
+          referenceNumber: formData.referenceNumber.trim(),
+          proofImage: proofImageUrl,
+          notes: formData.notes.trim() || null,
+          causeId: causeId || null,
+          causeName: cause,
+          partnerId: partnerId || null,
+          partnerName: partner,
+          status: 'pending_verification',
+          submittedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+        })
+      )
 
       setSuccess(true)
       setTimeout(() => {
         router.push('/dashboard/donations')
-      }, 3000)
-    } catch (error) {
-      console.error('Error submitting donation:', error)
-      alert('Error submitting donation. Please try again.')
+      }, 2500)
+    } catch (err) {
+      console.error('Error submitting donation:', err)
+      setError('Error submitting donation. Please try again.')
     } finally {
+      setUploading(false)
       setLoading(false)
     }
   }
 
+  const btnPrimary =
+    'w-full min-h-[44px] bg-black hover:bg-neutral-900 text-white py-3 rounded font-semibold text-sm'
+  const btnSecondary =
+    'w-full min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-50 py-3 rounded font-semibold text-sm'
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <Link href="/donate" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto w-full">
+        <Link
+          href="/donate"
+          className="inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900 mb-6 min-h-[44px]"
+          style={{ fontFamily: 'Inter, sans-serif' }}
+        >
           <ArrowLeft className="w-5 h-5" />
           Back to Causes
         </Link>
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Progress Steps */}
-          <div className="flex bg-gray-100">
-            <div className={`flex-1 py-4 px-4 text-center ${step === 'info' ? 'bg-blue-500 text-white' : ''}`}>
-              <p className="font-semibold">1. Donation Info</p>
-            </div>
-            <div className={`flex-1 py-4 px-4 text-center ${step === 'payment' ? 'bg-blue-500 text-white' : ''}`}>
-              <p className="font-semibold">2. Payment</p>
-            </div>
-            <div className={`flex-1 py-4 px-4 text-center ${step === 'submit' ? 'bg-blue-500 text-white' : ''}`}>
-              <p className="font-semibold">3. Proof Upload</p>
-            </div>
+          <div className="flex flex-col sm:flex-row bg-neutral-100 text-xs sm:text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {(['info', 'payment', 'submit'] as const).map((s, i) => (
+              <div
+                key={s}
+                className={`flex-1 py-3 px-3 text-center font-semibold ${
+                  step === s ? 'bg-black text-white' : 'text-neutral-600'
+                }`}
+              >
+                {i + 1}. {s === 'info' ? 'Amount' : s === 'payment' ? 'Payment' : 'Proof'}
+              </div>
+            ))}
           </div>
 
-          {/* Content */}
-          <div className="p-8">
+          <div className="p-5 sm:p-8" style={{ fontFamily: 'Inter, sans-serif' }}>
             {success ? (
-              <div className="text-center py-12">
-                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Donation Submitted!</h2>
-                <p className="text-gray-600 mb-6">
-                  Thank you for your generosity. Your donation proof has been submitted for verification. Our team will
-                  review it within 24 hours.
+              <div className="text-center py-10">
+                <CheckCircle className="w-14 h-14 text-green-600 mx-auto mb-4" />
+                <h2
+                  className="text-2xl mb-2"
+                  style={{ fontFamily: 'Cormorant Garamond, serif' }}
+                >
+                  Donation Submitted!
+                </h2>
+                <p className="text-neutral-600 mb-4">
+                  Your payment proof is pending verification. Our team will review it soon.
                 </p>
-                <p className="text-sm text-gray-500">Redirecting to your dashboard...</p>
+                <p className="text-sm text-neutral-500">Redirecting to your dashboard…</p>
               </div>
             ) : step === 'info' ? (
               <form
@@ -128,166 +171,179 @@ export default function DonateConfirmContent() {
                   e.preventDefault()
                   handleProceedToPayment()
                 }}
+                className="space-y-4"
               >
-                <h2 className="text-2xl font-bold mb-4">Donation Details</h2>
+                <h2 className="text-2xl mb-2" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                  Donation Details
+                </h2>
+                {error && <p className="text-sm text-red-600">{error}</p>}
 
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block font-semibold mb-1">Cause</label>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{cause}</p>
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-1">Charity Partner</label>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded">{partner}</p>
-                  </div>
-
-                  <div>
-                    <label htmlFor="amount" className="block font-semibold mb-1">
-                      Donation Amount (AED) *
-                    </label>
-                    <input
-                      id="amount"
-                      type="number"
-                      min="1"
-                      step="0.01"
-                      placeholder="Enter amount"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="w-full border rounded px-3 py-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="notes" className="block font-semibold mb-1">
-                      Message (Optional)
-                    </label>
-                    <textarea
-                      id="notes"
-                      placeholder="Add a personal message or note"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="w-full border rounded px-3 py-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                      rows={3}
-                    />
-                  </div>
+                <div>
+                  <label className="block font-semibold mb-1 text-sm">Cause</label>
+                  <p className="text-neutral-800 bg-neutral-50 p-3 rounded border border-neutral-100">
+                    {cause}
+                  </p>
+                  {causeDescription ? (
+                    <p className="text-sm text-neutral-600 mt-2">{causeDescription}</p>
+                  ) : null}
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-6">
-                  <p className="text-sm text-blue-900">
-                    <strong>Next:</strong> You&apos;ll be redirected to {partner} to complete the payment securely. After
-                    completing payment, return here to upload your proof of payment.
+                <div>
+                  <label className="block font-semibold mb-1 text-sm">Payment partner</label>
+                  <p className="text-neutral-800 bg-neutral-50 p-3 rounded border border-neutral-100">
+                    {partner}
                   </p>
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded font-semibold"
-                >
+                <div>
+                  <label htmlFor="amount" className="block font-semibold mb-1 text-sm">
+                    Donation Amount (AED) *
+                  </label>
+                  <input
+                    id="amount"
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="Enter amount"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                    className="w-full border border-neutral-300 rounded px-3 py-3 min-h-[44px] focus:outline-none focus:border-neutral-900"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="notes" className="block font-semibold mb-1 text-sm">
+                    Message (Optional)
+                  </label>
+                  <textarea
+                    id="notes"
+                    placeholder="Add a personal note"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    className="w-full border border-neutral-300 rounded px-3 py-3 focus:outline-none focus:border-neutral-900"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="bg-neutral-50 border border-neutral-200 rounded p-4 text-sm text-neutral-700">
+                  <strong>Next:</strong>{' '}
+                  {paymentLink
+                    ? `You will be redirected to ${partner} to complete payment securely.`
+                    : 'No payment link is configured yet — contact Passive Blessings for alternative methods.'}
+                </div>
+
+                <button type="submit" className={btnPrimary} disabled={!paymentLink}>
                   Proceed to Payment
                 </button>
               </form>
             ) : step === 'payment' ? (
-              <div className="text-center py-12">
-                <h2 className="text-2xl font-bold mb-4">Completing Payment</h2>
-                <p className="text-gray-600 mb-6">
-                  A new window has opened with {partner}. Complete your payment there, then click below to continue.
+              <div className="text-center py-8 space-y-4">
+                <h2 className="text-2xl" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                  Completing Payment
+                </h2>
+                <p className="text-neutral-600">
+                  A window should have opened for {partner}. Complete payment there, then continue
+                  to upload your proof.
                 </p>
-
-                <div className="space-y-3">
-                  <button
-                    onClick={() => setStep('submit')}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded font-semibold"
+                {paymentLink ? (
+                  <a
+                    href={paymentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${btnSecondary} inline-flex items-center justify-center`}
                   >
-                    Payment Complete - Continue
-                  </button>
-                  <button
-                    onClick={() => setStep('info')}
-                    className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 py-3 rounded font-semibold"
-                  >
-                    Go Back
-                  </button>
-                </div>
+                    Re-open payment page
+                  </a>
+                ) : null}
+                <button type="button" onClick={() => setStep('submit')} className={btnPrimary}>
+                  Payment Complete — Continue
+                </button>
+                <button type="button" onClick={() => setStep('info')} className={btnSecondary}>
+                  Go Back
+                </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmitProof}>
-                <h2 className="text-2xl font-bold mb-4">Upload Payment Proof</h2>
+              <form onSubmit={handleSubmitProof} className="space-y-4">
+                <h2 className="text-2xl mb-2" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                  Upload Payment Proof
+                </h2>
+                {error && <p className="text-sm text-red-600">{error}</p>}
 
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <label className="block font-semibold mb-1">Donation Amount</label>
-                    <p className="text-gray-700 bg-gray-50 p-3 rounded">AED {formData.amount}</p>
-                  </div>
-
-                  <div>
-                    <label htmlFor="referenceNumber" className="block font-semibold mb-1">
-                      Payment Reference Number *
-                    </label>
-                    <input
-                      id="referenceNumber"
-                      type="text"
-                      placeholder="Enter reference/transaction number from payment receipt"
-                      value={formData.referenceNumber}
-                      onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
-                      className="w-full border rounded px-3 py-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="proofImage" className="block font-semibold mb-1">
-                      Payment Proof Screenshot/Image *
-                    </label>
-                    <input
-                      id="proofImage"
-                      type="url"
-                      placeholder="Paste image URL of payment screenshot"
-                      value={formData.proofImage}
-                      onChange={(e) => setFormData({ ...formData, proofImage: e.target.value })}
-                      className="w-full border rounded px-3 py-2 border-gray-300 focus:outline-none focus:border-blue-500"
-                      required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Upload your payment proof screenshot using an image hosting service and paste the URL
-                    </p>
-                  </div>
+                <div>
+                  <label className="block font-semibold mb-1 text-sm">Cause (read-only)</label>
+                  <p className="text-neutral-800 bg-neutral-50 p-3 rounded border">{cause}</p>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded p-4 mb-6">
-                  <p className="text-sm text-yellow-900">
-                    <strong>Important:</strong> Please ensure your proof clearly shows the transaction amount, reference
-                    number, and timestamp. Our verification team will review within 24 hours.
+                <div>
+                  <label className="block font-semibold mb-1 text-sm">Amount donated (AED)</label>
+                  <p className="text-neutral-800 bg-neutral-50 p-3 rounded border">
+                    AED {formData.amount}
                   </p>
                 </div>
 
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep('payment')}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 py-3 rounded font-semibold"
-                  >
+                <div>
+                  <label htmlFor="referenceNumber" className="block font-semibold mb-1 text-sm">
+                    Payment Reference Number *
+                  </label>
+                  <input
+                    id="referenceNumber"
+                    type="text"
+                    placeholder="Transaction / reference number"
+                    value={formData.referenceNumber}
+                    onChange={(e) =>
+                      setFormData({ ...formData, referenceNumber: e.target.value })
+                    }
+                    className="w-full border border-neutral-300 rounded px-3 py-3 min-h-[44px] focus:outline-none focus:border-neutral-900"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="proofFile" className="block font-semibold mb-1 text-sm">
+                    Payment proof screenshot *
+                  </label>
+                  <input
+                    id="proofFile"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleProofSelect(e.target.files?.[0] || null)}
+                    className="w-full border border-neutral-300 rounded px-3 py-3 min-h-[44px] file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:bg-neutral-100 file:text-sm"
+                    required
+                  />
+                  {proofPreview ? (
+                    <img
+                      src={proofPreview}
+                      alt="Proof preview"
+                      className="mt-3 max-h-48 rounded border object-contain"
+                    />
+                  ) : null}
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Image uploads to Firebase Storage; only the URL is saved in Firestore.
+                  </p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded p-4 text-sm text-amber-900">
+                  Ensure the screenshot clearly shows amount, reference, and timestamp.
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button type="button" onClick={() => setStep('payment')} className={btnSecondary}>
                     Back
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 rounded font-semibold flex items-center justify-center gap-2"
+                    disabled={loading || uploading}
+                    className={`${btnPrimary} flex items-center justify-center gap-2 disabled:opacity-50`}
                   >
                     <Upload className="w-5 h-5" />
-                    {loading ? 'Submitting...' : 'Submit Proof'}
+                    {uploading ? 'Uploading…' : loading ? 'Submitting…' : 'Submit Proof'}
                   </button>
                 </div>
               </form>
             )}
           </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="mt-8 text-center text-gray-600">
-          <p className="text-sm">
-            Your donation will be recorded immediately upon verification. You&apos;ll receive a tax receipt via email.
-          </p>
         </div>
       </div>
     </div>

@@ -1,86 +1,29 @@
-import { db } from './firebase'
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  QueryConstraint,
-} from 'firebase/firestore'
-
-// Generic Firestore operations
-export async function getDocument<T extends Record<string, any>>(
-  collectionName: string,
-  docId: string
-): Promise<(T & { id: string }) | null> {
-  try {
-    const docRef = doc(db, collectionName, docId)
-    const docSnap = await getDoc(docRef)
-    return docSnap.exists() ? ({ id: docSnap.id, ...docSnap.data() } as T & { id: string }) : null
-  } catch (error) {
-    console.error(`[v0] Error fetching ${collectionName}/${docId}:`, error)
-    return null
-  }
+/**
+ * Strip undefined values before writing to Firestore.
+ * Firestore rejects documents that contain undefined fields.
+ * Preserves Date, FieldValue sentinels, Timestamp, and other non-plain objects.
+ */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object') return false
+  if (Array.isArray(value)) return false
+  if (value instanceof Date) return false
+  const proto = Object.getPrototypeOf(value)
+  return proto === Object.prototype || proto === null
 }
 
-export async function getCollection<T extends Record<string, any>>(
-  collectionName: string,
-  constraints: QueryConstraint[] = []
-): Promise<(T & { id: string })[]> {
-  try {
-    const q = query(collection(db, collectionName), ...constraints)
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((docSnapshot) => ({
-      id: docSnapshot.id,
-      ...docSnapshot.data(),
-    } as T & { id: string }))
-  } catch (error) {
-    console.error(`[v0] Error fetching ${collectionName}:`, error)
-    return []
+export function sanitizeForFirestore<T extends Record<string, unknown>>(data: T): T {
+  const result = {} as T
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) continue
+    if (isPlainObject(value)) {
+      result[key as keyof T] = sanitizeForFirestore(value) as T[keyof T]
+    } else if (Array.isArray(value)) {
+      result[key as keyof T] = value.map((item) =>
+        isPlainObject(item) ? sanitizeForFirestore(item) : item
+      ) as T[keyof T]
+    } else {
+      result[key as keyof T] = value as T[keyof T]
+    }
   }
-}
-
-export async function setDocument(
-  collectionName: string,
-  docId: string,
-  data: Record<string, any>
-): Promise<boolean> {
-  try {
-    const docRef = doc(db, collectionName, docId)
-    await setDoc(docRef, data, { merge: false })
-    return true
-  } catch (error) {
-    console.error(`[v0] Error setting ${collectionName}/${docId}:`, error)
-    return false
-  }
-}
-
-export async function updateDocument(
-  collectionName: string,
-  docId: string,
-  updates: Record<string, any>
-): Promise<boolean> {
-  try {
-    const docRef = doc(db, collectionName, docId)
-    await updateDoc(docRef, updates)
-    return true
-  } catch (error) {
-    console.error(`[v0] Error updating ${collectionName}/${docId}:`, error)
-    return false
-  }
-}
-
-export async function deleteDocument(collectionName: string, docId: string): Promise<boolean> {
-  try {
-    const docRef = doc(db, collectionName, docId)
-    await deleteDoc(docRef)
-    return true
-  } catch (error) {
-    console.error(`[v0] Error deleting ${collectionName}/${docId}:`, error)
-    return false
-  }
+  return result
 }

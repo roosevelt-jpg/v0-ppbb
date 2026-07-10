@@ -7,6 +7,7 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { subscribeToBusinessCommunities } from '@/lib/business-queries'
 import { Community } from '@/lib/community-types'
+import { genderRestrictionBadgeClass, genderRestrictionLabel, isPendingApproval } from '@/lib/community-governance'
 import { Plus, Trash2, Edit2 } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { deleteDoc, doc } from 'firebase/firestore'
@@ -16,6 +17,13 @@ export default function BusinessCommunitiesPage() {
   const router = useRouter()
   const [communities, setCommunities] = React.useState<Community[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [showApprovalsHint, setShowApprovalsHint] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShowApprovalsHint(window.location.search.includes('focus=approvals'))
+    }
+  }, [])
 
   React.useEffect(() => {
     if (!user || !hasBusinessAccess(user)) {
@@ -53,24 +61,34 @@ export default function BusinessCommunitiesPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
       {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '24px 32px' }}>
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between px-4 sm:px-0">
           <div>
             <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Communities</h1>
-            <p style={{ color: '#888888', marginTop: '4px' }}>Manage your business communities and groups</p>
+            <p style={{ color: '#888888', marginTop: '4px' }}>
+              Manage your business communities and groups
+            </p>
+            {showApprovalsHint ? (
+              <p
+                style={{
+                  marginTop: '12px',
+                  padding: '12px',
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fcd34d',
+                  borderRadius: '8px',
+                  color: '#92400e',
+                  fontSize: '14px',
+                  maxWidth: '560px',
+                }}
+              >
+                Open a community, then a group you created, to approve or reject pending members.
+                The Pending Members panel appears for group creators and platform admins.
+              </p>
+            ) : null}
           </div>
           <button
+            type="button"
             onClick={() => router.push('/business/communities/create')}
-            style={{
-              backgroundColor: '#111111',
-              color: '#ffffff',
-              padding: '12px 20px',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontWeight: 600,
-            }}
-            className="hover:bg-black"
+            className="min-h-[44px] w-full sm:w-auto bg-neutral-900 text-white px-5 rounded-lg flex items-center justify-center gap-2 font-semibold hover:bg-black"
           >
             <Plus size={18} />
             Create Community
@@ -127,8 +145,50 @@ export default function BusinessCommunitiesPage() {
                 <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
                   {community.name}
                 </h3>
+                {isPendingApproval(community.status) ? (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginBottom: '8px',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      backgroundColor: '#fffbeb',
+                      color: '#92400e',
+                      border: '1px solid #fcd34d',
+                    }}
+                  >
+                    Pending admin approval
+                  </span>
+                ) : community.status === 'archived' ? (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      marginBottom: '8px',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      backgroundColor: '#fef2f2',
+                      color: '#991b1b',
+                      border: '1px solid #fecaca',
+                    }}
+                  >
+                    Rejected / archived
+                  </span>
+                ) : null}
                 <p style={{ color: '#888888', fontSize: '14px', marginBottom: '12px' }}>
                   {community.description}
+                </p>
+                <p style={{ color: '#666666', fontSize: '12px', marginBottom: '12px' }}>
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full font-medium ${genderRestrictionBadgeClass(community.genderRestriction)}`}
+                  >
+                    {genderRestrictionLabel(community.genderRestriction)}
+                  </span>
+                  {' · '}
+                  {community.memberCount || 0} members · {community.groupCount || 0} groups
                 </p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                   {community.tags?.map((tag) => (
@@ -146,45 +206,38 @@ export default function BusinessCommunitiesPage() {
                     </span>
                   ))}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                <div className="flex flex-col sm:flex-row gap-2 mt-4">
                   <button
-                    onClick={() => router.push(`/business/communities/${community.id}`)}
-                    style={{
-                      flex: 1,
-                      backgroundColor: '#111111',
-                      color: '#ffffff',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                    }}
-                    className="hover:bg-black"
+                    type="button"
+                    onClick={() => router.push(`/communities/${community.id}`)}
+                    className="flex-1 min-h-[44px] bg-neutral-900 text-white px-4 rounded-md text-sm font-semibold hover:bg-black"
                   >
                     View
                   </button>
+                  {!isPendingApproval(community.status) && community.status === 'active' && (
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/business/communities/${community.id}/groups/create`)}
+                      className="flex-1 min-h-[44px] bg-white border border-neutral-300 text-neutral-900 px-4 rounded-md text-sm font-semibold hover:bg-neutral-50"
+                    >
+                      Add Group
+                    </button>
+                  )}
                   <button
-                    onClick={() => router.push(`/business/communities/${community.id}/edit`)}
-                    style={{
-                      padding: '10px 12px',
-                      backgroundColor: '#f0f0f0',
-                      borderRadius: '6px',
-                      color: '#111111',
-                    }}
-                    className="hover:bg-gray-200"
+                    type="button"
+                    onClick={() => router.push(`/business/communities/create?edit=${community.id}`)}
+                    className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-neutral-900 hover:bg-neutral-200"
+                    aria-label="Edit community"
                   >
-                    <Edit2 size={16} />
+                    <Edit2 size={16} className="mx-auto" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDelete(community.id)}
-                    style={{
-                      padding: '10px 12px',
-                      backgroundColor: '#f0f0f0',
-                      borderRadius: '6px',
-                      color: '#d32f2f',
-                    }}
-                    className="hover:bg-gray-200"
+                    className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-red-600 hover:bg-neutral-200"
+                    aria-label="Delete community"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} className="mx-auto" />
                   </button>
                 </div>
               </div>

@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe-utils'
 import { db } from '@/lib/firebase'
 import { doc, setDoc, updateDoc, Timestamp, query, collection, where, getDocs } from 'firebase/firestore'
+import {
+  constructStripeWebhookEvent,
+  handleMarketplaceCheckoutCompleted,
+  isCheckoutSessionProcessed,
+  markCheckoutSessionProcessed,
+} from '@/lib/stripe-webhook-marketplace'
+import { recordReferralConversion } from '@/lib/referral-conversion-server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -13,15 +20,53 @@ export async function POST(req: NextRequest) {
 
     let event
     try {
-      event = constructWebhookEvent(Buffer.from(body), signature)
-    } catch (err: any) {
-      console.error('[v0] Webhook signature verification failed:', err.message)
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+      event = await constructStripeWebhookEvent(Buffer.from(body), signature)
+    } catch {
+      try {
+        event = constructWebhookEvent(Buffer.from(body), signature)
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Invalid signature'
+        console.error('[v0] Webhook signature verification failed:', message)
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+      }
     }
 
     console.log('[v0] Processing webhook event:', event.type)
 
     switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as {
+          id: string
+          mode?: string
+          amount_total?: number | null
+          metadata?: Record<string, string>
+        }
+        if (session.metadata?.type === 'marketplace') {
+          if (await isCheckoutSessionProcessed(session.id)) {
+            break
+          }
+          await handleMarketplaceCheckoutCompleted(event.data.object as never)
+          await markCheckoutSessionProcessed(session.id)
+        } else if (
+          session.metadata?.type === 'membership' &&
+          session.metadata.userId &&
+          session.metadata.planId
+        ) {
+          const revenueAmount =
+            typeof session.amount_total === 'number' ? session.amount_total / 100 : 0
+          if (revenueAmount > 0) {
+            void recordReferralConversion({
+              convertedUserId: session.metadata.userId,
+              conversionType: 'membership',
+              relatedDocId: session.metadata.planId,
+              revenueAmount,
+              status: 'confirmed',
+              idempotencyKey: `membership:${session.id}`,
+            }).catch((err) => console.error('[referral] membership conversion:', err))
+          }
+        }
+        break
+      }
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as any

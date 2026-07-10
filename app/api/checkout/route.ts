@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/firebase'
 import { doc, getDoc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp } from 'firebase/firestore'
+import { persistUserReferralAttribution } from '@/lib/referral-attribution-server'
+import { getReferralCodeFromRequest } from '@/lib/referral-cookie'
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY
 const STRIPE_PRICE_ID_MAP: Record<string, string> = {} // Will be populated from plan data
 
 export async function POST(req: NextRequest) {
   try {
-    const { planId, userId, gateway } = await req.json()
+    const { planId, userId, gateway, referralCode: bodyReferralCode } = await req.json()
 
     if (!planId || !userId) {
       return NextResponse.json(
         { error: 'Missing planId or userId' },
         { status: 400 }
       )
+    }
+
+    const referralCode =
+      (typeof bodyReferralCode === 'string' && bodyReferralCode.trim()) ||
+      getReferralCodeFromRequest(req) ||
+      ''
+    if (referralCode) {
+      void persistUserReferralAttribution(userId, referralCode).catch(console.error)
     }
 
     // Fetch the pricing plan from Firestore
@@ -52,7 +62,8 @@ export async function POST(req: NextRequest) {
 
 async function handleStripeCheckout(plan: any, userId: string, planId: string) {
   try {
-    const stripe = require('stripe')(STRIPE_SECRET)
+    const { getStripeClient } = await import('@/lib/get-stripe-client')
+    const stripe = await getStripeClient()
 
     // Create or get Stripe product
     let productId = plan.stripeProductId
@@ -103,6 +114,7 @@ async function handleStripeCheckout(plan: any, userId: string, planId: string) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/membership?status=canceled`,
       customer_email: (await getDoc(doc(db, 'users', userId))).data()?.email,
       metadata: {
+        type: 'membership',
         userId,
         planId,
       },

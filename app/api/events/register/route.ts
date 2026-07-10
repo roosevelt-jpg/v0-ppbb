@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
+import { persistUserReferralAttribution } from '@/lib/referral-attribution-server'
+import { recordReferralConversion } from '@/lib/referral-conversion-server'
+import { getReferralCodeFromRequest } from '@/lib/referral-cookie'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +13,11 @@ export async function POST(request: NextRequest) {
 
     if (!eventId || !userId) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
+    }
+
+    const referralCode = getReferralCodeFromRequest(request)
+    if (referralCode) {
+      void persistUserReferralAttribution(userId, referralCode).catch(console.error)
     }
 
     // Get event
@@ -51,6 +59,17 @@ export async function POST(request: NextRequest) {
     }
 
     const regRef = await db.collection('eventRegistrations').add(registration)
+
+    if (registrationType !== 'free' && price > 0) {
+      void recordReferralConversion({
+        convertedUserId: userId,
+        conversionType: 'event',
+        relatedDocId: regRef.id,
+        revenueAmount: price,
+        status: 'pending',
+        idempotencyKey: `event:${regRef.id}`,
+      }).catch((err) => console.error('[referral] event conversion:', err))
+    }
 
     // Update event attendee count and revenue
     const increment = (value: number) => value

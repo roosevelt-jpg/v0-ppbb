@@ -1,175 +1,296 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { Calendar, MapPin, Users, Trash2, ArrowRight } from 'lucide-react'
 import type { Event } from '@/lib/event-types'
+import type { User } from '@/lib/types'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+  DashboardTabButton,
+} from '@/components/dashboard-states'
+import {
+  eventVisibleToUser,
+  parseFirestoreDate,
+} from '@/lib/member-dashboard'
+
+function parseEventDate(value: unknown): Date | null {
+  return parseFirestoreDate(value)
+}
+
+type BrowseEvent = Record<string, unknown> & { id: string }
 
 export default function MyEventsPage() {
-  const { user } = useAuth()
-  const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
+  const [browseEvents, setBrowseEvents] = React.useState<BrowseEvent[]>([])
   const [registeredEvents, setRegisteredEvents] = React.useState<Event[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [activeTab, setActiveTab] = React.useState<'upcoming' | 'past'>('upcoming')
+  const [registeredIds, setRegisteredIds] = React.useState<Set<string>>(new Set())
+  const [loadingBrowse, setLoadingBrowse] = React.useState(true)
+  const [loadingRegistered, setLoadingRegistered] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [registeringId, setRegisteringId] = React.useState<string | null>(null)
+  const [activeTab, setActiveTab] = React.useState<'browse' | 'registered'>('browse')
+
+  const loadRegistered = React.useCallback(async () => {
+    if (!user?.id) return
+    setLoadingRegistered(true)
+    try {
+      const res = await fetch(`/api/user/events?userId=${encodeURIComponent(user.id)}`)
+      const json = await res.json()
+      if (!json.success) {
+        setRegisteredEvents([])
+        setRegisteredIds(new Set())
+        return
+      }
+      const raw = json.data
+      const eventList = Array.isArray(raw) ? raw : raw ? [raw] : []
+      const events = eventList.filter(Boolean) as Event[]
+      setRegisteredEvents(events)
+      setRegisteredIds(new Set(events.map((e) => e.id!).filter(Boolean)))
+    } catch (err) {
+      console.error('[v0] Error loading registered events:', err)
+    } finally {
+      setLoadingRegistered(false)
+    }
+  }, [user?.id])
 
   React.useEffect(() => {
-    if (!user) {
-      router.push('/login')
+    if (authLoading) return
+    if (!user?.id) {
+      setLoadingBrowse(false)
+      setLoadingRegistered(false)
       return
     }
-    loadEvents()
-  }, [user, activeTab])
 
-  const loadEvents = async () => {
-    try {
-      const res = await fetch(`/api/user/events?userId=${user?.id}`)
-      const json = await res.json()
-      if (json.success) {
-        const eventList = Array.isArray(json.data) ? json.data : [json.data]
-        setRegisteredEvents(eventList)
+    loadRegistered()
+
+    const member = user as User
+    const now = new Date()
+
+    const unsub = onSnapshot(
+      query(collection(db, 'events'), where('status', '==', 'published')),
+      (snap) => {
+        const rows =
+          snap?.docs?.map((d) => ({ id: d.id, ...d.data() } as BrowseEvent)) ?? []
+        const filtered = rows
+          .filter((e) => {
+            const start = parseEventDate(e.startDate)
+            return start && start >= now
+          })
+          .filter((e) => eventVisibleToUser(e, member.gender))
+          .sort((a, b) => {
+            const ad = parseEventDate(a.startDate)?.getTime() ?? 0
+            const bd = parseEventDate(b.startDate)?.getTime() ?? 0
+            return ad - bd
+          })
+        setBrowseEvents(filtered)
+        setLoadingBrowse(false)
+        setError(null)
+      },
+      (err) => {
+        console.error('[v0] Events snapshot error:', err)
+        setError('Failed to load events.')
+        setLoadingBrowse(false)
       }
+    )
+
+    return () => unsub()
+  }, [authLoading, user?.id, user, loadRegistered])
+
+  const handleRegister = async (event: BrowseEvent) => {
+    if (!user?.id) return
+    setRegisteringId(event.id)
+    try {
+      const res = await fetch('/api/events/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: event.id,
+          userId: user.id,
+          userName: `${(user as User).firstName ?? ''} ${(user as User).lastName ?? ''}`.trim(),
+          userEmail: (user as User).email,
+          userGender: (user as User).gender,
+          registrationType: event.pricingType === 'free' || !event.price ? 'free' : 'paid',
+        }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        alert(json.error || 'Registration failed')
+        return
+      }
+      await loadRegistered()
+      setActiveTab('registered')
     } catch (err) {
-      console.error('[v0] Error loading events:', err)
+      console.error('[v0] Register error:', err)
+      alert('Registration failed. Please try again.')
     } finally {
-      setLoading(false)
+      setRegisteringId(null)
     }
   }
-
-  const now = new Date()
-  const filteredEvents = registeredEvents.filter(event => {
-    const eventDate = new Date(event.startDate)
-    if (activeTab === 'upcoming') return eventDate >= now
-    return eventDate < now
-  })
 
   const handleCancel = async (eventId: string) => {
     if (!confirm('Cancel registration for this event?')) return
     try {
       const res = await fetch(`/api/user/events/${eventId}`, { method: 'DELETE' })
       const json = await res.json()
-      if (json.success) {
-        loadEvents()
-      }
+      if (json.success) loadRegistered()
     } catch (err) {
       console.error('[v0] Error canceling event:', err)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <h1 className="text-3xl font-bold mb-6">My Events</h1>
-        <Card className="p-8 text-center text-gray-500">Loading your registered events...</Card>
-      </div>
-    )
-  }
+  const loading = authLoading || (activeTab === 'browse' ? loadingBrowse : loadingRegistered)
+  if (loading) return <DashboardSkeleton />
+  if (error && activeTab === 'browse') return <DashboardErrorState message={error} />
+
+  const now = new Date()
+  const upcomingRegistered = registeredEvents.filter((e) => {
+    const d = parseEventDate(e.startDate)
+    return d && d >= now
+  })
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">My Events</h1>
-          <p className="text-gray-600 mt-2">
-            {registeredEvents.length} event{registeredEvents.length !== 1 ? 's' : ''} registered
-          </p>
-        </div>
-        <Link href="/events">
-          <button
-            className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 inline-flex items-center gap-2"
-          >
-            Browse Events <ArrowRight className="w-4 h-4" />
-          </button>
+    <DashboardPageShell title="My Events" subtitle="Your upcoming and registered events">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <p className="text-sm text-neutral-500">
+          {registeredIds.size} event{registeredIds.size !== 1 ? 's' : ''} registered
+        </p>
+        <Link
+          href="/events"
+          className="inline-flex items-center gap-2 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+        >
+          Browse Public Events <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-        {(['upcoming', 'past'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === tab ? '#111111' : '#e4e1da',
-              color: activeTab === tab ? '#ffffff' : '#111111',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: activeTab === tab ? 600 : 500,
-              textTransform: 'capitalize',
-            }}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <DashboardTabButton active={activeTab === 'browse'} onClick={() => setActiveTab('browse')}>
+          Upcoming Events
+        </DashboardTabButton>
+        <DashboardTabButton active={activeTab === 'registered'} onClick={() => setActiveTab('registered')}>
+          Registered Events
+        </DashboardTabButton>
       </div>
 
-      {filteredEvents.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">No {activeTab} events</h2>
-          <p className="text-gray-500 mb-6">Browse upcoming events and register to get started</p>
-          <Link href="/events">
-            <button className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 inline-flex items-center gap-2">
-              Browse Events <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
-        </Card>
-      ) : (
-        <div className="grid gap-6">
-          {filteredEvents.map((event) => (
-            <Card
-              key={event.id}
-              style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1 }}>
-                  <Link href={`/events/${event.id}`} style={{ textDecoration: 'none' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111111', marginBottom: '8px', cursor: 'pointer' }}>
-                      {event.title}
-                    </h3>
-                  </Link>
-                  <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px' }}>{event.description}</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', fontSize: '13px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
+      {activeTab === 'browse' ? (
+        browseEvents.length === 0 ? (
+          <DashboardEmptyState
+            icon={<Calendar className="w-12 h-12" />}
+            title="No upcoming events"
+            description="No upcoming events right now. Check back soon."
+          />
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {browseEvents.map((event) => {
+              const start = parseEventDate(event.startDate)
+              const isRegistered = registeredIds.has(event.id)
+              return (
+                <Card key={event.id} className="p-4 sm:p-5 border border-neutral-200">
+                  <h3 className="text-lg font-semibold text-neutral-900">{String(event.title ?? 'Event')}</h3>
+                  {event.description ? (
+                    <p className="text-sm text-neutral-500 mt-1 line-clamp-2">{String(event.description)}</p>
+                  ) : null}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-sm text-neutral-600">
+                    <div className="flex items-center gap-2">
                       <Calendar size={14} />
-                      {format(new Date(event.startDate), 'MMM dd, yyyy')}
+                      {start ? format(start, 'MMM dd, yyyy') : 'Date TBA'}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
+                    <div className="flex items-center gap-2">
                       <MapPin size={14} />
-                      {event.locationName}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#666' }}>
-                      <Users size={14} />
-                      {event.currentAttendees} attending
+                      {String(event.locationName ?? 'Location TBA')}
                     </div>
                   </div>
+                  {event.genderRestriction ? (
+                    <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700 capitalize">
+                      {String(event.genderRestriction).replace(/-/g, ' ')}
+                    </span>
+                  ) : null}
+                  <div className="mt-4">
+                    {isRegistered ? (
+                      <span className="text-sm font-semibold text-green-700">Registered ✓</span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={registeringId === event.id}
+                        onClick={() => handleRegister(event)}
+                        className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                      >
+                        {registeringId === event.id ? 'Registering...' : 'Register / RSVP'}
+                      </button>
+                    )}
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        )
+      ) : upcomingRegistered.length === 0 ? (
+        <DashboardEmptyState
+          icon={<Calendar className="w-12 h-12" />}
+          title="No registered events"
+          description="You haven't registered for any events yet."
+          action={
+            <button
+              type="button"
+              onClick={() => setActiveTab('browse')}
+              className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+            >
+              Browse Upcoming Events
+            </button>
+          }
+        />
+      ) : (
+        <div className="grid gap-4">
+          {upcomingRegistered.map((event) => {
+            const start = parseEventDate(event.startDate)
+            return (
+              <Card key={event.id} className="p-4 sm:p-5 border border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/events/${event.id}`} className="no-underline">
+                      <h3 className="text-lg font-semibold text-neutral-900 hover:underline">
+                        {event.title ?? 'Event'}
+                      </h3>
+                    </Link>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm text-neutral-600">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} />
+                        {start ? format(start, 'MMM dd, yyyy') : 'Date TBA'}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} />
+                        {event.locationName || 'Location TBA'}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users size={14} />
+                        {event.currentAttendees ?? 0} attending
+                      </div>
+                    </div>
+                  </div>
+                  {event.id ? (
+                    <button
+                      type="button"
+                      onClick={() => handleCancel(event.id!)}
+                      className="self-start !bg-red-600 !text-white px-3 py-2 rounded-lg text-sm"
+                      aria-label="Cancel registration"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : null}
                 </div>
-                {activeTab === 'upcoming' && (
-                  <button
-                    onClick={() => handleCancel(event.id!)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: '#ffebee',
-                      color: '#c62828',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      marginLeft: '12px',
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
-            </Card>
-          ))}
+              </Card>
+            )
+          })}
         </div>
       )}
-    </div>
+    </DashboardPageShell>
   )
 }

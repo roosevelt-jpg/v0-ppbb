@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { auth, db } from '@/lib/firebase'
+import { useAuth } from '@/lib/auth-context'
+import { db } from '@/lib/firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle } from 'lucide-react'
@@ -12,6 +13,7 @@ const DEPARTMENTS = ['Community Support', 'Event Management', 'Volunteer Trainin
 
 export default function ProfileEditPage() {
   const router = useRouter()
+  const { user: authUser, loading: authLoading } = useAuth()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -21,15 +23,15 @@ export default function ProfileEditPage() {
   const [formData, setFormData] = useState<Partial<User>>({})
 
   useEffect(() => {
+    if (authLoading) return
     const fetchUser = async () => {
       try {
-        const firebaseUser = auth.currentUser
-        if (!firebaseUser) {
+        if (!authUser?.id) {
           router.push('/login')
           return
         }
 
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+        const userDoc = await getDoc(doc(db, 'users', authUser.id))
         if (userDoc.exists()) {
           const userData = userDoc.data() as User
           setUser(userData)
@@ -44,7 +46,7 @@ export default function ProfileEditPage() {
     }
 
     fetchUser()
-  }, [router])
+  }, [router, authLoading, authUser?.id])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -80,17 +82,16 @@ export default function ProfileEditPage() {
     setSaving(true)
 
     try {
-      const firebaseUser = auth.currentUser
-      if (!firebaseUser) {
+      if (!authUser?.id) {
         setError('Not authenticated')
         return
       }
 
       await setDoc(
-        doc(db, 'users', firebaseUser.uid),
+        doc(db, 'users', authUser.id),
         {
           ...formData,
-          id: firebaseUser.uid,
+          id: authUser.id,
           updatedAt: new Date(),
         },
         { merge: true }

@@ -4,11 +4,13 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser, loginWithGoogle, loginWithFacebook } from '@/lib/auth'
+import { auth } from '@/lib/firebase'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
 import { AlertCircle, Check } from 'lucide-react'
 import { logActivity } from '@/lib/activity-logger'
 import { hasBusinessAccess } from '@/lib/roles'
+import { User } from '@/lib/types'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,22 +22,29 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = React.useState(false)
   const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
   const [statsLoading, setStatsLoading] = React.useState(true)
+  const [oauthLoading, setOauthLoading] = React.useState<'google' | 'facebook' | null>(null)
+  const [authProviders, setAuthProviders] = React.useState({
+    google: { enabled: true, configured: false },
+    facebook: { enabled: true, configured: false },
+  })
 
-  // Route the user after a successful login. If a ?redirect= param is present
-  // (e.g. coming from "Create Business Account"), honor it; otherwise route by role.
-  const routeAfterLogin = (user: any) => {
+  // Route the user after a successful login. Honor returnUrl or redirect query params first.
+  const routeAfterLogin = (user: User) => {
     const params = new URLSearchParams(window.location.search)
-    const redirectTo = params.get('redirect')
-    if (redirectTo && redirectTo.startsWith('/')) {
-      router.push(redirectTo)
+    const returnUrl = params.get('returnUrl') || params.get('redirect')
+    if (returnUrl && returnUrl.startsWith('/')) {
+      router.push(returnUrl)
       return
     }
-    if (user.role === 'admin') {
-      router.push('/admin')
-    } else if (user.role === 'super_admin') {
+
+    if (!user.role) {
+      router.push('/')
+      return
+    }
+
+    if (user.role === 'admin' || user.role === 'super_admin') {
       router.push('/admin')
     } else if (hasBusinessAccess(user)) {
-      // User has business access (either primary role or via roles array)
       router.push('/business/dashboard')
     } else if (user.role === 'sponsor') {
       router.push('/sponsor')
@@ -63,11 +72,22 @@ export default function LoginPage() {
       setRememberMe(true)
     }
     
-    logActivity('guest', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
+    logActivity('', 'guest@passiveblessings.com', 'LOGIN_PAGE_VISIT', 'Visited login page', { 
       timestamp: new Date().toISOString()
     })
     
     fetchStats()
+
+    fetch('/api/public/auth-providers', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setAuthProviders(json.data)
+        }
+      })
+      .catch(() => {
+        /* keep defaults — Firebase Console may still work */
+      })
   }, [])
 
   // Save email to localStorage when rememberMe changes
@@ -84,16 +104,34 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    logActivity('guest', email, 'OTHER', 'Attempting sign in', { 
+    logActivity('', email, 'OTHER', 'Attempting sign in', { 
       timestamp: new Date().toISOString()
     })
 
     const { user, error: loginError } = await loginUser(email, password)
 
     if (loginError) {
-      setError(loginError)
-      logActivity('guest', email, 'SIGNIN_FAILED', 'Sign in failed', { 
-        error: loginError,
+      let displayError = loginError
+      try {
+        const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email.trim())}`)
+        const data = await res.json()
+        if (data.success) {
+          if (data.authExists && data.hasGoogle && !data.hasPassword) {
+            displayError =
+              'This email is registered with Google. Click Continue with Google instead of using a password.'
+          } else if (!data.authExists && data.firestoreExists) {
+            displayError =
+              'Your profile exists but Firebase sign-in is not set up for this email. Use Forgot password to create a password, or contact support.'
+          } else if (!data.authExists) {
+            displayError = 'No account found for this email. Please sign up first.'
+          }
+        }
+      } catch {
+        /* keep original error */
+      }
+      setError(displayError)
+      logActivity('', email, 'SIGNIN_FAILED', 'Sign in failed', { 
+        error: displayError,
         timestamp: new Date().toISOString()
       })
       setLoading(false)
@@ -101,60 +139,82 @@ export default function LoginPage() {
     }
 
     if (user) {
-      logActivity(user.id, user.email, 'SIGNIN', 'Successfully signed in', { 
-        userId: user.id,
+      const userId = user.id || auth.currentUser?.uid || 'guest'
+      logActivity(userId, user.email || email, 'SIGNIN', 'Successfully signed in', { 
         userRole: user.role,
         rememberMe,
         timestamp: new Date().toISOString()
       })
 
+      setLoading(false)
       routeAfterLogin(user)
+    } else {
+      setError('Sign in succeeded but no user profile was returned.')
+      setLoading(false)
     }
   }
 
   const handleGoogleLogin = async () => {
     setError('')
-    setLoading(true)
+    if (!authProviders.google.enabled) {
+      setError(
+        'Google Sign-In is not enabled. Add credentials under Admin → Integrations → Google Sign-In, then enable it in Firebase Authentication.'
+      )
+      return
+    }
+    setOauthLoading('google')
 
     const { user, error: loginError } = await loginWithGoogle()
 
     if (loginError) {
       setError(loginError)
-      setLoading(false)
+      setOauthLoading(null)
       return
     }
 
     if (user) {
-      logActivity(user.id, user.email, 'SIGNIN_GOOGLE', 'Signed in with Google', { 
-        userId: user.id,
+      const userId = user.id || auth.currentUser?.uid || 'guest'
+      logActivity(userId, user.email || '', 'SIGNIN_GOOGLE', 'Signed in with Google', { 
         timestamp: new Date().toISOString()
       })
 
       routeAfterLogin(user)
+    } else {
+      setOauthLoading(null)
     }
   }
 
   const handleFacebookLogin = async () => {
     setError('')
-    setLoading(true)
+    if (!authProviders.facebook.enabled) {
+      setError(
+        'Facebook Login is not enabled. Add credentials under Admin → Integrations → Facebook Login, then enable it in Firebase Authentication.'
+      )
+      return
+    }
+    setOauthLoading('facebook')
 
     const { user, error: loginError } = await loginWithFacebook()
 
     if (loginError) {
       setError(loginError)
-      setLoading(false)
+      setOauthLoading(null)
       return
     }
 
     if (user) {
-      logActivity(user.id, user.email, 'SIGNIN_FACEBOOK', 'Signed in with Facebook', { 
-        userId: user.id,
+      const userId = user.id || auth.currentUser?.uid || 'guest'
+      logActivity(userId, user.email || '', 'SIGNIN_FACEBOOK', 'Signed in with Facebook', { 
         timestamp: new Date().toISOString()
       })
 
       routeAfterLogin(user)
+    } else {
+      setOauthLoading(null)
     }
   }
+
+  const socialBusy = oauthLoading !== null
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 py-4 md:py-6 bg-neutral-100">
@@ -181,19 +241,19 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={loading}
+              disabled={loading || socialBusy}
               className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
             >
-              {loading ? 'Signing in...' : 'Continue with Google'}
+              {oauthLoading === 'google' ? 'Signing in...' : 'Continue with Google'}
             </button>
 
             <button
               type="button"
               onClick={handleFacebookLogin}
-              disabled={loading}
+              disabled={loading || socialBusy}
               className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
             >
-              {loading ? 'Signing in...' : 'Continue with Facebook'}
+              {oauthLoading === 'facebook' ? 'Signing in...' : 'Continue with Facebook'}
             </button>
           </div>
 
@@ -247,7 +307,10 @@ export default function LoginPage() {
                 />
                 <span className="text-xs text-neutral-900">Remember me</span>
               </label>
-              <Link href="/forgot-password" className="text-xs text-neutral-900 hover:underline font-medium">
+              <Link
+                href={email.trim() ? `/forgot-password?email=${encodeURIComponent(email.trim())}` : '/forgot-password'}
+                className="text-xs text-neutral-900 hover:underline font-medium"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -283,7 +346,8 @@ export default function LoginPage() {
               Your community hub <span className="italic font-light">awaits</span>
             </h2>
             <p className="text-sm text-neutral-300 mb-4 leading-relaxed">
-              Access dashboard, track hours, register events, manage donations, and connect with 3,400+ members.
+              Access dashboard, track hours, register events, manage donations, and connect with{' '}
+              {statsLoading ? 'members' : `${stats.totalMembers.toLocaleString()}+ members`}.
             </p>
 
             <div className="space-y-2">
@@ -344,7 +408,8 @@ export default function LoginPage() {
             </div>
 
             <div className="text-xs text-neutral-500 pt-2 border-t border-neutral-800">
-              TRUSTED BY 3,400+ MEMBERS • ESTD 2025 • DUBAI, UAE
+              TRUSTED BY{' '}
+              {statsLoading ? 'MEMBERS' : `${stats.totalMembers.toLocaleString()}+ MEMBERS`} • ESTD 2025 • DUBAI, UAE
             </div>
           </div>
         </div>

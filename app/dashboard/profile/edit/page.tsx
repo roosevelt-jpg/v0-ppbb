@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { auth, db } from '@/lib/firebase'
+import { useAuth } from '@/lib/auth-context'
+import { db } from '@/lib/firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function ProfileEditPage() {
   const router = useRouter()
+  const { user: authUser, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -18,17 +20,17 @@ export default function ProfileEditPage() {
   const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
 
   useEffect(() => {
+    if (authLoading) return
     const fetchUser = async () => {
       try {
-        const currentUser = auth.currentUser
-        if (!currentUser) {
+        if (!authUser?.id) {
           router.push('/login')
           return
         }
 
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
+        const userDoc = await getDoc(doc(db, 'users', authUser.id))
         if (userDoc.exists()) {
-          setUser({ id: currentUser.uid, ...userDoc.data() as User })
+          setUser({ id: authUser.id, ...userDoc.data() } as User)
         }
       } catch (err) {
         console.error('[v0] Error fetching user:', err)
@@ -39,7 +41,7 @@ export default function ProfileEditPage() {
     }
 
     fetchUser()
-  }, [router])
+  }, [router, authLoading, authUser?.id])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_SMALL, TEXT_SMALL, FLEX_BETWEEN } from '@/lib/admin-design-system'
+import { ADMIN_TABLE_SCROLL_CLASS } from '@/components/admin-table'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 
 interface AdminTableColumn {
@@ -62,8 +63,8 @@ export function AdminTable({
   }
 
   return (
-    <div className="overflow-x-auto border border-neutral-200 rounded-lg">
-      <table className="w-full">
+    <div className={`${ADMIN_TABLE_SCROLL_CLASS} border border-neutral-200 rounded-lg min-w-0`}>
+      <table className="w-full min-w-[640px]">
         <thead className="bg-neutral-50 border-b border-neutral-200">
           <tr>
             {columns.map(col => (

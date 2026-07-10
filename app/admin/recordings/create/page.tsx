@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, ArrowLeft, Loader2, X } from 'lucide-react'
 import Link from 'next/link'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 
 interface RecordingFormData {
   title: string
@@ -221,7 +222,7 @@ export default function CreateRecordingPage() {
               <button
                 type="button"
                 onClick={() => router.push('/admin/recordings')}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+                className={`${BUTTON_SECONDARY} flex-1`}
               >
                 Cancel
               </button>
@@ -229,7 +230,7 @@ export default function CreateRecordingPage() {
                 type="button"
                 onClick={() => saveRecording('draft')}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
+                className={`${BUTTON_SECONDARY} flex-1 flex items-center justify-center gap-2`}
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 Draft
@@ -238,7 +239,7 @@ export default function CreateRecordingPage() {
                 type="button"
                 onClick={() => saveRecording('published')}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className={`${BUTTON_PRIMARY} flex-1 flex items-center justify-center gap-2`}
               >
                 {saving && <Loader2 size={16} className="animate-spin" />}
                 Publish

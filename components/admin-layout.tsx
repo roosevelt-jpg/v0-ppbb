@@ -8,99 +8,165 @@ import {
   Users,
   Calendar,
   Store,
-  FileText,
   Zap,
   Heart,
   DollarSign,
   CheckCircle,
   ShieldAlert,
   CreditCard,
-  AlertCircle,
-  Flag,
   Mail,
   HandHeart,
-  Target,
   Plug,
-  Image,
   Play,
   Shield,
   Lock,
   HelpCircle,
   Menu,
+  Briefcase,
+  Share2,
+  Inbox,
+  ShieldCheck,
+  LayoutTemplate,
+  ClipboardList,
+  ScrollText,
+  Home,
+  Info,
+  Handshake,
+  MessageSquareQuote,
+  Building2,
+  HeartHandshake,
+  ShoppingBag,
+  Compass,
+  Activity,
+  TrendingUp,
+  FileChartColumn,
+  History,
+  UserCog,
+  UserCircle,
+  Award,
+  Building,
+  UsersRound,
+  Presentation,
+  ClipboardCheck,
+  Receipt,
+  Wallet,
+  Tags,
+  BadgeCheck,
+  MessageSquare,
+  CalendarCog,
+  Landmark,
+  Video,
+  MapPin,
+  PieChart,
+  BookOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
+import { SiteLogo } from '@/components/site-logo'
+import { ProfileMenuButton } from '@/components/profile-quick-edit'
 import { logoutUser } from '@/lib/auth'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { useAuth } from '@/lib/auth-context'
+import { filterAdminMenuByPermissions } from '@/lib/admin-invite-permissions'
 
-const adminMenuItems = [
+export const adminMenuItems = [
   // Dashboard & System
   { label: 'Overview', href: '/admin', icon: BarChart3, group: 'Dashboard' },
-  { label: 'System Health', href: '/admin/health', icon: Zap, group: 'Dashboard' },
-  { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, group: 'Dashboard' },
-  { label: 'Reporting', href: '/admin/reporting', icon: FileText, group: 'Dashboard' },
+  { label: 'System Health', href: '/admin/health', icon: Activity, group: 'Dashboard' },
+  { label: 'Analytics', href: '/admin/analytics', icon: TrendingUp, group: 'Dashboard' },
+  { label: 'Reporting', href: '/admin/reporting', icon: FileChartColumn, group: 'Dashboard' },
 
   // Security & Access
   { label: 'Security Center', href: '/admin/security-center', icon: Lock, group: 'Security' },
-  { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileText, group: 'Security' },
-  { label: 'Admin Management', href: '/admin/management', icon: Users, group: 'Security' },
+  { label: 'Audit Logs', href: '/admin/audit-logs', icon: History, group: 'Security' },
+  { label: 'Admin Management', href: '/admin/management', icon: UserCog, group: 'Security' },
 
   // User Management
-  { label: 'Members', href: '/admin/members', icon: Users, group: 'Users' },
-  { label: 'Team (About)', href: '/admin/team', icon: Users, group: 'Users' },
+  { label: 'Members', href: '/admin/members', icon: UserCircle, group: 'Users' },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
-  { label: 'Sponsors', href: '/admin/sponsors', icon: Store, group: 'Users' },
-  { label: 'Businesses', href: '/admin/businesses', icon: Store, group: 'Users' },
+  { label: 'Sponsors', href: '/admin/sponsors', icon: Award, group: 'Users' },
+  { label: 'Businesses', href: '/admin/businesses', icon: Building, group: 'Users' },
+  { label: 'Vendor Applications', href: '/admin/vendor-applications', icon: ClipboardCheck, group: 'Users' },
 
   // Community & Events
-  { label: 'Community', href: '/admin/communities', icon: Users, group: 'Community' },
+  { label: 'Community', href: '/admin/communities', icon: UsersRound, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
-  { label: 'Workshops', href: '/admin/workshops', icon: Calendar, group: 'Community' },
+  { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
+  { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },
+  { label: 'Partnerships', href: '/admin/partnerships', icon: Handshake, group: 'Community' },
+  { label: 'Workshops', href: '/admin/workshops', icon: Presentation, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
 
   // Charity & Support
   { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert, group: 'Charity' },
   { label: 'Donations', href: '/admin/donations', icon: DollarSign, group: 'Charity' },
-  { label: 'Donation Causes', href: '/admin/causes', icon: Target, group: 'Charity' },
-  { label: 'Charity Partners', href: '/admin/partners', icon: HandHeart, group: 'Charity' },
+  { label: 'Charity Partners', href: '/admin/charity-partners', icon: Landmark, group: 'Charity' },
   { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },
-  { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: HandHeart, group: 'Charity' },
+  { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: ClipboardCheck, group: 'Charity' },
+
+  // Finance
+  { label: 'Donation Tracking', href: '/admin/finance/donations', icon: Receipt, group: 'Finance' },
+  { label: 'Event Finance', href: '/admin/finance/events', icon: Wallet, group: 'Finance' },
+  { label: 'Business Referrals', href: '/admin/finance/referrals', icon: Share2, group: 'Finance' },
+  { label: 'Referrals Overview', href: '/admin/referrals', icon: Share2, group: 'Finance' },
 
   // Memberships & Commerce
   { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },
-  { label: 'Pricing Plans', href: '/admin/pricing', icon: DollarSign, group: 'Memberships' },
-  { label: 'Approvals', href: '/admin/approvals', icon: CheckCircle, group: 'Memberships' },
+  { label: 'Pricing Plans', href: '/admin/pricing', icon: Tags, group: 'Memberships' },
+  { label: 'Approvals', href: '/admin/approvals', icon: BadgeCheck, group: 'Memberships' },
 
   // Communication & Support
-  { label: 'Contact Requests', href: '/admin/contact-requests', icon: Mail, group: 'Communication' },
+  { label: 'Contact Requests', href: '/admin/contact-requests', icon: MessageSquare, group: 'Communication' },
+  { label: 'Contact Submissions', href: '/admin/contact-submissions', icon: Inbox, group: 'Communication' },
   { label: 'Newsletters', href: '/admin/newsletters', icon: Mail, group: 'Communication' },
-  { label: 'Moderation', href: '/admin/moderation', icon: Flag, group: 'Communication' },
+  { label: 'Moderation', href: '/admin/moderation', icon: ShieldCheck, group: 'Communication' },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap, group: 'Communication' },
 
   // Content Management
-  { label: 'Pages (CMS)', href: '/admin/pages', icon: FileText, group: 'Content' },
-  { label: 'Custom Forms', href: '/admin/forms', icon: FileText, group: 'Content' },
+  { label: 'Pages (CMS)', href: '/admin/pages', icon: LayoutTemplate, group: 'Content' },
+  // Part 11 — CMS section order (do not scramble; Partners & Logos is logos collection)
+  { label: 'Homepage', href: '/admin/cms/homepage', icon: Home, group: 'CMS' },
+  { label: 'About Page', href: '/admin/cms/about', icon: Info, group: 'CMS' },
+  { label: 'Events Config', href: '/admin/cms/events', icon: CalendarCog, group: 'CMS' },
+  { label: 'Marketplace Config', href: '/admin/cms/marketplace', icon: Store, group: 'CMS' },
+  { label: 'Partners Page', href: '/admin/cms/partners', icon: Handshake, group: 'CMS' },
+  { label: 'Donations Config', href: '/admin/cms/donations', icon: HeartHandshake, group: 'CMS' },
+  { label: 'Transparency Page', href: '/admin/cms/transparency', icon: BarChart3, group: 'CMS' },
+  { label: 'Shop Config', href: '/admin/cms/shop', icon: ShoppingBag, group: 'CMS' },
+  { label: 'Volunteer Config', href: '/admin/cms/volunteer', icon: HandHeart, group: 'CMS' },
+  { label: 'Learning Resources', href: '/admin/cms/learning', icon: BookOpen, group: 'CMS' },
+  { label: 'Volunteer Certificates', href: '/admin/cms/certificates', icon: Award, group: 'CMS' },
+  { label: 'Navigation', href: '/admin/cms/navigation', icon: Compass, group: 'CMS' },
+  { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
+  { label: 'Team Members', href: '/admin/team', icon: Users, group: 'CMS' },
+  { label: 'Testimonials', href: '/admin/cms/testimonials', icon: MessageSquareQuote, group: 'CMS' },
+  { label: 'Partners & Logos', href: '/admin/partners', icon: Building2, group: 'CMS' },
+  { label: 'Custom Forms', href: '/admin/forms', icon: ClipboardList, group: 'Content' },
   { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },
-  { label: 'Policies', href: '/admin/policies', icon: FileText, group: 'Content' },
+  { label: 'Policies', href: '/admin/policies', icon: ScrollText, group: 'Content' },
   { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield, group: 'Content' },
 
   // Assets & Media
-  { label: 'Hero Slider', href: '/admin/assets', icon: Image, group: 'Assets' },
-  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Play, group: 'Assets' },
+  { label: 'YouTube Videos', href: '/admin/youtube-config', icon: Video, group: 'Assets' },
 
   // Configuration
-  { label: 'Location Config', href: '/admin/location-config', icon: Shield, group: 'Configuration' },
+  { label: 'Location Config', href: '/admin/location-config', icon: MapPin, group: 'Configuration' },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug, group: 'Configuration' },
-  { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: BarChart3, group: 'Configuration' },
-  { label: 'Settings', href: '/admin/settings', icon: Settings, group: 'Configuration' },
+  { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: PieChart, group: 'Configuration' },
 ]
 
 export function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { user } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+
+  const visibleMenuItems = React.useMemo(
+    () => filterAdminMenuByPermissions(adminMenuItems, user),
+    [user]
+  )
 
   const handleLogout = async () => {
     await logoutUser()
@@ -108,7 +174,7 @@ export function AdminSidebar() {
   }
 
   // Group items by category
-  const groupedItems = adminMenuItems.reduce((acc, item) => {
+  const groupedItems = visibleMenuItems.reduce((acc, item) => {
     const group = item.group || 'Other'
     if (!acc[group]) {
       acc[group] = []
@@ -118,7 +184,20 @@ export function AdminSidebar() {
   }, {} as Record<string, typeof adminMenuItems>)
 
   // Sort groups in order of appearance
-  const groupOrder = ['Dashboard', 'Security', 'Users', 'Community', 'Charity', 'Memberships', 'Communication', 'Content', 'Assets', 'Configuration']
+  const groupOrder = [
+    'Dashboard',
+    'Security',
+    'Users',
+    'Community',
+    'Charity',
+    'Finance',
+    'Memberships',
+    'Communication',
+    'Content',
+    'CMS',
+    'Assets',
+    'Configuration',
+  ]
   const sortedGroups = groupOrder.filter(g => groupedItems[g])
 
   return (
@@ -126,14 +205,8 @@ export function AdminSidebar() {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-52 min-h-screen flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
         {/* Logo */}
-        <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
-          <Link href="/admin">
-            <img 
-              src="/pb-logo-black.png" 
-              alt="Passive Blessings"
-              style={{ maxWidth: '140px', height: 'auto' }}
-            />
-          </Link>
+        <div className="px-4 py-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da' }}>
+          <SiteLogo background="light" variant="sidebar" href="/admin" />
         </div>
 
         {/* Navigation with Groups */}
@@ -159,7 +232,7 @@ export function AdminSidebar() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+                      className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg transition-colors text-xs"
                       style={{
                         backgroundColor: isActive ? '#111111' : 'transparent',
                         color: isActive ? '#f7f6f2' : '#333333',
@@ -179,7 +252,7 @@ export function AdminSidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 p-3 rounded-lg transition-colors"
+        className="lg:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center min-h-[48px] min-w-[48px] p-3 rounded-lg transition-colors"
         style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
         aria-label="Toggle menu"
       >
@@ -197,13 +270,9 @@ export function AdminSidebar() {
           {/* Drawer */}
           <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-64 flex flex-col border-r overflow-y-auto z-30" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
             {/* Logo */}
-            <div className="p-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da', minHeight: '100px' }}>
+            <div className="px-4 py-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da' }}>
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                <img 
-                  src="/pb-logo-black.png" 
-                  alt="Passive Blessings"
-                  style={{ maxWidth: '140px', height: 'auto' }}
-                />
+                <SiteLogo background="light" variant="sidebar" linked={false} />
               </Link>
             </div>
 
@@ -231,7 +300,7 @@ export function AdminSidebar() {
                           key={item.href}
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-xs"
+                          className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg transition-colors text-xs"
                           style={{
                             backgroundColor: isActive ? '#111111' : 'transparent',
                             color: isActive ? '#f7f6f2' : '#333333',
@@ -302,7 +371,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
   return (
     <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
       <div className="flex-1 min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold truncate" style={{ color: '#111111', fontFamily: 'Playfair Display', fontWeight: 700 }}>
+        <h1 className="text-xl sm:text-2xl font-bold truncate font-headline" style={{ color: '#111111', fontWeight: 700 }}>
           {title}
         </h1>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
@@ -318,6 +387,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
       <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap justify-end">
         <LanguageSwitcherWithFlags />
         <ThemeToggle />
+        <ProfileMenuButton />
         
         {/* Message Notification Badge */}
         {unreadMessages > 0 && (

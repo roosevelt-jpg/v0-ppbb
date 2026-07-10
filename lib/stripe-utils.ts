@@ -101,5 +101,16 @@ export async function getCustomerSubscriptions(customerId: string) {
 export function constructWebhookEvent(body: Buffer, signature: string) {
   if (!stripe) throw new Error('Stripe not configured')
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ''
+  if (!webhookSecret) throw new Error('Stripe webhook secret not configured')
   return stripe.webhooks.constructEvent(body, signature, webhookSecret)
+}
+
+export async function constructWebhookEventAsync(body: Buffer, signature: string) {
+  const { resolveStripeConfig } = await import('@/lib/resolve-stripe-key')
+  const config = await resolveStripeConfig()
+  if (!config?.secretKey || !config.webhookSecret) {
+    throw new Error('Stripe webhook secret not configured')
+  }
+  const client = new Stripe(config.secretKey, { apiVersion: '2024-04-10' })
+  return client.webhooks.constructEvent(body, signature, config.webhookSecret)
 }

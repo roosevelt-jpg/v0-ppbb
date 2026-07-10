@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save, Calendar } from 'lucide-react'
 
 interface EditEventModalProps {
@@ -14,6 +15,7 @@ interface EditEventModalProps {
 }
 
 export function EditEventModal({ open, onOpenChange, event, onSuccess }: EditEventModalProps) {
+  const audit = useAdminAudit()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(event || {})
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -28,6 +30,14 @@ export function EditEventModal({ open, onOpenChange, event, onSuccess }: EditEve
       await updateDocument('events', event.id, {
         ...formData,
         updatedAt: new Date(),
+      })
+      audit({
+        actionType: 'update',
+        action: `Updated event: ${formData.title || event.id}`,
+        entityType: 'event',
+        entityId: event.id,
+        entityName: formData.title,
+        status: 'success',
       })
       onOpenChange(false)
       onSuccess?.()
@@ -44,6 +54,14 @@ export function EditEventModal({ open, onOpenChange, event, onSuccess }: EditEve
     setDeleteLoading(true)
     try {
       await deleteDocument('events', event.id)
+      audit({
+        actionType: 'delete',
+        action: `Deleted event: ${event?.title || event.id}`,
+        entityType: 'event',
+        entityId: event.id,
+        entityName: event?.title,
+        status: 'success',
+      })
       onOpenChange(false)
       onSuccess?.()
     } catch (error) {

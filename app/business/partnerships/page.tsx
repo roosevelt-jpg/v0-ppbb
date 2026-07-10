@@ -2,157 +2,188 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
-import { useRouter } from 'next/navigation'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import {
-  getBusinessPartnerships,
-  subscribeToBusinessPartnerships,
-  createPartnership,
+  subscribeToPartnershipRequests,
+  withdrawPartnershipRequest,
 } from '@/lib/business-queries'
-import { BusinessPartnership } from '@/lib/types'
-import { Briefcase, Plus, Trash2 } from 'lucide-react'
+import { PartnershipRequest } from '@/lib/types'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardEmptyState,
+  DashboardTabButton,
+} from '@/components/dashboard-states'
+import { Briefcase, Plus } from 'lucide-react'
 
-export default function Partnerships() {
+const STATUS_BADGES: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-800',
+  under_review: 'bg-blue-100 text-blue-800',
+  approved: 'bg-green-100 text-green-800',
+  declined: 'bg-red-100 text-red-800',
+}
+
+function toDate(value: unknown): Date | null {
+  if (!value) return null
+  if (value instanceof Date) return value
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    try {
+      return (value as { toDate: () => Date }).toDate()
+    } catch {
+      return null
+    }
+  }
+  const d = new Date(value as string)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+type Tab = 'all' | 'pending' | 'under_review' | 'approved' | 'declined'
+
+export default function PartnershipsPage() {
   const { user } = useAuth()
   const router = useRouter()
-  const [partnerships, setPartnerships] = React.useState<BusinessPartnership[]>([])
+  const [requests, setRequests] = React.useState<PartnershipRequest[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [showForm, setShowForm] = React.useState(false)
+  const [tab, setTab] = React.useState<Tab>('all')
 
   React.useEffect(() => {
-    if (!user || (!hasBusinessAccess(user))) {
+    if (!user || !hasBusinessAccess(user)) {
       router.push('/login')
       return
     }
-
-    setLoading(true)
-    const unsubscribe = subscribeToBusinessPartnerships(user.id, (data) => {
-      setPartnerships(data)
+    const unsub = subscribeToPartnershipRequests(user.id, (data) => {
+      setRequests(data)
       setLoading(false)
     })
-
-    return () => unsubscribe()
+    return () => unsub()
   }, [user, router])
 
-  if (!user || (!hasBusinessAccess(user))) {
+  const filtered =
+    tab === 'all' ? requests : requests.filter((r) => r.status === tab)
+
+  const handleWithdraw = async (id: string) => {
+    if (!confirm('Withdraw this request?')) return
+    try {
+      await withdrawPartnershipRequest(id)
+    } catch (err) {
+      console.error('[partnerships] withdraw:', err)
+      alert('Failed to withdraw request')
+    }
+  }
+
+  if (!user || !hasBusinessAccess(user)) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
-  const activePartnerships = partnerships.filter((p) => p.status === 'active')
-  const pendingPartnerships = partnerships.filter((p) => p.status === 'pending')
+  if (loading) return <DashboardSkeleton rows={3} />
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'under_review', label: 'Under Review' },
+    { id: 'approved', label: 'Approved' },
+    { id: 'declined', label: 'Declined' },
+  ]
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
-              Partnerships & Collaborations
-            </h1>
-            <p style={{ color: '#888888', marginTop: '8px' }}>
-              Manage business partnerships and collaborations
-            </p>
-          </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            style={{
-              backgroundColor: '#111111',
-              color: '#ffffff',
-            }}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Request Partnership
-          </Button>
-        </div>
+    <DashboardPageShell
+      title="Partnerships & Requests"
+      subtitle="Submit a partnership, campaign, or sponsorship request"
+      action={
+        <Link
+          href="/business/partnerships/new"
+          className="inline-flex items-center gap-2 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" /> Submit New Request
+        </Link>
+      }
+    >
+      <div className="flex flex-wrap gap-2 mb-6">
+        {tabs.map((t) => (
+          <DashboardTabButton key={t.id} active={tab === t.id} onClick={() => setTab(t.id)}>
+            {t.label}
+          </DashboardTabButton>
+        ))}
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto p-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-            <div className="flex items-center gap-4">
-              <Briefcase style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
-              <div>
-                <p style={{ color: '#888888', fontSize: '14px' }}>Total Partnerships</p>
-                <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                  {partnerships.length}
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-            <div className="flex items-center gap-4">
-              <Briefcase style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
-              <div>
-                <p style={{ color: '#888888', fontSize: '14px' }}>Active</p>
-                <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                  {activePartnerships.length}
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-            <div className="flex items-center gap-4">
-              <Briefcase style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
-              <div>
-                <p style={{ color: '#888888', fontSize: '14px' }}>Pending</p>
-                <p style={{ color: '#111111', fontSize: '24px', fontWeight: 600 }}>
-                  {pendingPartnerships.length}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Partnerships List */}
-        {loading ? (
-          <div className="text-center py-8">Loading partnerships...</div>
-        ) : partnerships.length === 0 ? (
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>
-            <p style={{ color: '#888888', marginBottom: '16px' }}>No partnerships yet</p>
-            <Button
-              onClick={() => setShowForm(true)}
-              style={{ backgroundColor: '#111111', color: '#ffffff' }}
+      {filtered.length === 0 ? (
+        <DashboardEmptyState
+          icon={<Briefcase className="w-12 h-12" />}
+          title="No requests submitted yet"
+          description="Submit a partnership, campaign, or sponsorship request."
+          action={
+            <Link
+              href="/business/partnerships/new"
+              className="inline-flex !bg-black !text-white px-4 py-2 rounded-lg text-sm"
             >
-              Request Your First Partnership
-            </Button>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {partnerships.map((partnership) => (
-              <Card
-                key={partnership.id}
-                style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}
-              >
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600 }}>
-                      {partnership.partnerBusinessName}
-                    </h3>
-                    <p style={{ color: '#888888', fontSize: '14px', marginTop: '4px' }}>
-                      {partnership.type}
-                    </p>
-                    {partnership.description && (
-                      <p style={{ color: '#888888', fontSize: '14px', marginTop: '8px' }}>
-                        {partnership.description}
-                      </p>
-                    )}
-                    <span style={{ backgroundColor: '#f0f0f0', color: '#111111', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', marginTop: '12px', display: 'inline-block' }}>
-                      {partnership.status}
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              Submit a Request
+            </Link>
+          }
+        />
+      ) : (
+        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
+            <thead>
+              <tr className="border-b text-left text-xs uppercase text-neutral-500">
+                <th className="py-3 px-4">Type</th>
+                <th className="py-3 px-4">Title</th>
+                <th className="py-3 px-4">Submitted</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Admin Notes</th>
+                <th className="py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((req) => {
+                const submitted = toDate(req.submittedAt)
+                return (
+                  <tr key={req.id} className="border-b border-neutral-100">
+                    <td className="py-3 px-4">{req.type}</td>
+                    <td className="py-3 px-4 font-medium">{req.title}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      {submitted ? submitted.toLocaleDateString() : '—'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`px-2 py-1 rounded text-xs capitalize ${STATUS_BADGES[req.status] || 'bg-neutral-100'}`}
+                      >
+                        {req.status.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-neutral-500 max-w-[200px] truncate">
+                      {req.adminNotes || '—'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-wrap gap-2">
+                        {req.status === 'pending' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleWithdraw(req.id)}
+                            className="text-xs text-red-600 underline"
+                          >
+                            Withdraw
+                          </button>
+                        ) : null}
+                        {req.status === 'declined' ? (
+                          <Link
+                            href="/business/partnerships/new"
+                            className="text-xs text-neutral-700 underline"
+                          >
+                            Edit & Resubmit
+                          </Link>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </DashboardPageShell>
   )
 }

@@ -6,8 +6,11 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { ArrowLeft, Award, CheckCircle, AlertCircle, Mail, Phone } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function SponsorDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const sponsorId = params.id as string
@@ -57,6 +60,13 @@ export default function SponsorDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'sponsors', sponsorId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated sponsor: ${sponsorId}`,
+        entityType: 'content',
+        entityId: sponsorId,
+        status: 'success',
+      })
       setSuccess('Sponsor updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -104,13 +114,13 @@ export default function SponsorDetailPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Award className="w-6 h-6 text-yellow-600" />
-              <h1 className="text-3xl font-bold text-neutral-900">{sponsor.name}</h1>
+              <h1 className="text-3xl font-bold text-neutral-900">{sponsor.name || 'Not provided'}</h1>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
               sponsor.status === 'active' ? 'bg-green-100 text-green-700' :
               'bg-neutral-100 text-neutral-700'
             }`}>
-              {sponsor.status ? sponsor.status.toUpperCase() : 'ACTIVE'}
+              {sponsor.status ? String(sponsor.status).toUpperCase() : 'ACTIVE'}
             </span>
           </div>
 
@@ -144,7 +154,16 @@ export default function SponsorDetailPage() {
             <Card className="p-4 border border-neutral-200">
               <p className="text-sm text-neutral-600">Since</p>
               <p className="text-lg font-bold text-neutral-900 mt-1">
-                {sponsor.joinedAt ? new Date(sponsor.joinedAt?.toDate?.() || sponsor.joinedAt).toLocaleDateString() : 'N/A'}
+                {(() => {
+                  if (!sponsor.joinedAt) return 'N/A'
+                  try {
+                    const raw = sponsor.joinedAt?.toDate?.() || sponsor.joinedAt
+                    const d = raw instanceof Date ? raw : new Date(String(raw))
+                    return Number.isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString()
+                  } catch {
+                    return 'N/A'
+                  }
+                })()}
               </p>
             </Card>
           </div>
@@ -239,13 +258,13 @@ export default function SponsorDetailPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+                className={`${BUTTON_PRIMARY} flex-1`}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
               <button
                 onClick={() => router.back()}
-                className="flex-1 px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg font-medium hover:bg-neutral-300 transition"
+                className={`${BUTTON_SECONDARY} flex-1`}
               >
                 Cancel
               </button>

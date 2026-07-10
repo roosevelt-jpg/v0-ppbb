@@ -1,1511 +1,260 @@
 'use client'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore'
+import { BeneficiarySupportForm } from '@/components/beneficiary-support-form'
 import {
-  Plus,
-  FileText,
-  Trash2,
-  Upload,
-  File,
   AlertCircle,
   CheckCircle2,
   Clock,
-  Eye,
-  EyeOff,
+  FileText,
+  Plus,
 } from 'lucide-react'
-import {
-  createBeneficiarySupportRequest,
-  submitBeneficiarySupportRequest,
-  getUserBeneficiaryRequests,
-  createSensitiveDocumentMetadata,
-  createBeneficiaryDocumentMetadata,
-} from '@/lib/beneficiary-queries'
-import { uploadBeneficiaryDocument } from '@/lib/beneficiary-document-upload'
-import { BeneficiarySupportRequest, BeneficiaryConsent } from '@/lib/types'
-import crypto from 'crypto'
 
-export default function CharityRequestsPage() {
-  const { user } = useAuth()
-  const [requests, setRequests] = useState<BeneficiarySupportRequest[]>([])
+type RequestRow = {
+  id: string
+  fullName?: string
+  status?: string
+  emergencyLevel?: string
+  createdAt?: { toDate?: () => Date }
+  submissionDate?: { toDate?: () => Date }
+  reason?: string
+}
+
+function statusMeta(status?: string) {
+  switch (status) {
+    case 'approved':
+      return { label: 'Approved', className: 'bg-green-100 text-green-800', Icon: CheckCircle2 }
+    case 'rejected':
+      return { label: 'Rejected', className: 'bg-red-100 text-red-800', Icon: AlertCircle }
+    case 'under_review':
+      return { label: 'Under review', className: 'bg-amber-100 text-amber-800', Icon: Clock }
+    case 'pending':
+    case 'submitted':
+      return {
+        label: status === 'pending' ? 'Pending' : 'Submitted',
+        className: 'bg-amber-100 text-amber-800',
+        Icon: Clock,
+      }
+    default:
+      return { label: status || 'Unknown', className: 'bg-neutral-100 text-neutral-700', Icon: FileText }
+  }
+}
+
+function CharityRequestsContent() {
+  const { user, loading: authLoading } = useAuth()
+  const searchParams = useSearchParams()
+  const [requests, setRequests] = useState<RequestRow[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [step, setStep] = useState(1) // Step 1: Form, Step 2: Consent & Review
-  const [submitLoading, setSubmitLoading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState<string>('')
 
-  // Form state - All fields from comprehensive form
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phoneNumber: '',
-    email: '',
-    dateOfBirth: '', // DD/MM/YYYY format
-    currentEmirateArea: '', // Dropdown selection
-    emiratesId: { number: '', expiryDate: '', file: null as File | null },
-    passport: { number: '', expiryDate: '', countryCode: '', file: null as File | null },
-    visa: { number: '', expiryDate: '', sponsorName: '', file: null as File | null },
-    salaryDoc: { type: '', file: null as File | null },
-    bankStatement: { file: null as File | null },
-    supportingDocs: [] as { file: File; description: string }[],
-    amountNeeded: 0, // AED amount
-    employmentStatus: '', // Dropdown
-    monthlyIncome: 0, // AED
-    numberOfDependents: 0,
-    reason: '',
-    reasonCategory: 'emergency',
-    emergencyLevel: 'medium', // Will map to critical/urgent/standard
-    referralSource: 'self',
-    referralPersonName: '', // Name of person who referred
-  })
-
-  // Consent state
-  const [consent, setConsent] = useState({
-    privacyPolicyAccepted: false,
-    dataProcessingAgreed: false,
-    documentRetentionUnderstood: false,
-  })
-
-  // Load user requests
   useEffect(() => {
-    if (!user) return
+    if (searchParams.get('apply') === '1') {
+      setShowForm(true)
+    }
+  }, [searchParams])
 
-    const unsubscribe = getUserBeneficiaryRequests(user.uid, (reqs) => {
-      setRequests(reqs)
+  useEffect(() => {
+    if (authLoading) return
+    if (!user?.id) {
       setLoading(false)
-    })
-
-    return () => unsubscribe?.()
-  }, [user])
-
-  // Pre-fill user email
-  useEffect(() => {
-    if (user?.email) {
-      setFormData((prev) => ({ ...prev, email: user.email }))
-    }
-  }, [user])
-
-  const handleFileChange = (field: string, file: File) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: { ...prev[field], file },
-    }))
-  }
-
-  const handleMultipleFiles = (files: FileList) => {
-    Array.from(files).forEach((file) => {
-      setFormData((prev) => ({
-        ...prev,
-        supportingDocs: [
-          ...prev.supportingDocs,
-          { file, description: '' },
-        ],
-      }))
-    })
-  }
-
-  const removeSupportingDoc = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      supportingDocs: prev.supportingDocs.filter((_, i) => i !== index),
-    }))
-  }
-
-  const validateForm = (): boolean => {
-    if (!formData.fullName || !formData.phoneNumber || !formData.email) return false
-    if (!formData.reason || !formData.reasonCategory) return false
-    // At least one ID document required
-    if (!formData.emiratesId.file && !formData.passport.file) return false
-    return true
-  }
-
-  const validateConsent = (): boolean => {
-    return consent.privacyPolicyAccepted && consent.dataProcessingAgreed && consent.documentRetentionUnderstood
-  }
-
-  const handleSubmitRequest = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      alert('Please fill in all required fields')
       return
     }
 
-    setStep(2)
-  }
+    let unsubFallback: (() => void) | null = null
 
-  const handleFinalSubmit = async () => {
-    if (!validateConsent()) {
-      alert('Please accept all consent requirements')
-      return
+    const q = query(
+      collection(db, 'beneficiaryRequests'),
+      where('userId', '==', user.id),
+      orderBy('createdAt', 'desc')
+    )
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setRequests(
+          snapshot.docs.map((d) => ({
+            id: d.id,
+            ...(d.data() as Omit<RequestRow, 'id'>),
+          }))
+        )
+        setLoading(false)
+      },
+      (err) => {
+        console.warn('[charity-requests] ordered query failed, using fallback:', err)
+        const fallback = query(
+          collection(db, 'beneficiaryRequests'),
+          where('userId', '==', user.id)
+        )
+        unsubFallback = onSnapshot(
+          fallback,
+          (snapshot) => {
+            const rows = snapshot.docs.map((d) => ({
+              id: d.id,
+              ...(d.data() as Omit<RequestRow, 'id'>),
+            }))
+            rows.sort((a, b) => {
+              const aT = a.createdAt?.toDate?.()?.getTime() || 0
+              const bT = b.createdAt?.toDate?.()?.getTime() || 0
+              return bT - aT
+            })
+            setRequests(rows)
+            setLoading(false)
+          },
+          (fallbackErr) => {
+            console.error('[charity-requests] fallback query failed:', fallbackErr)
+            setLoading(false)
+          }
+        )
+      }
+    )
+
+    return () => {
+      unsubscribe()
+      unsubFallback?.()
     }
+  }, [authLoading, user?.id])
 
-    if (!user) return
-
-    setSubmitLoading(true)
-    try {
-      // Create beneficiary support request
-      const consentData: BeneficiaryConsent = {
-        id: '',
-        beneficiaryRequestId: '',
-        userId: user.uid,
-        consentGiven: true,
-        consentDate: new Date(),
-        uaePrivacyPolicyVersion: '1.0',
-        privacyPolicyAccepted: consent.privacyPolicyAccepted,
-        dataProcessingAgreed: consent.dataProcessingAgreed,
-        documentRetentionUnderstood: consent.documentRetentionUnderstood,
-        ipAddress: '0.0.0.0', // Will be set by API
-        userAgent: navigator.userAgent,
-        timestamp: new Date(),
-      }
-
-      const beneficiaryData = {
-        fullName: formData.fullName,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email,
-        reason: formData.reason,
-        reasonCategory: formData.reasonCategory,
-        emergencyLevel: formData.emergencyLevel,
-        referralSource: formData.referralSource,
-        emiratesId: formData.emiratesId.file ? {
-          number: formData.emiratesId.number,
-          expiryDate: new Date(formData.emiratesId.expiryDate),
-        } : undefined,
-        passport: formData.passport.file ? {
-          number: formData.passport.number,
-          expiryDate: new Date(formData.passport.expiryDate),
-          countryCode: formData.passport.countryCode,
-        } : undefined,
-        visa: formData.visa.file ? {
-          number: formData.visa.number,
-          expiryDate: new Date(formData.visa.expiryDate),
-          sponsorName: formData.visa.sponsorName,
-        } : undefined,
-        supportingDocuments: [],
-      }
-
-      const { requestId, consentId } = await createBeneficiarySupportRequest(
-        user.uid,
-        beneficiaryData,
-        consentData
-      )
-
-      // Upload documents to Firebase Storage and create metadata
-      const uploadedDocuments: Array<{ type: string; documentId: string; url: string }> = []
-
-      // Upload Emirates ID
-      if (formData.emiratesId.file) {
-        setUploadProgress('Uploading Emirates ID...')
-        const uploadedDoc = await uploadBeneficiaryDocument(
-          requestId,
-          'emirates_id',
-          formData.emiratesId.file
-        )
-        const documentId = await createBeneficiaryDocumentMetadata(
-          requestId,
-          'emirates_id',
-          uploadedDoc.fileName,
-          uploadedDoc.fileSize,
-          uploadedDoc.fileHash,
-          uploadedDoc.downloadUrl,
-          uploadedDoc.storagePath
-        )
-        uploadedDocuments.push({ type: 'emirates_id', documentId, url: uploadedDoc.downloadUrl })
-      }
-
-      // Upload Passport
-      if (formData.passport.file) {
-        setUploadProgress('Uploading Passport...')
-        const uploadedDoc = await uploadBeneficiaryDocument(
-          requestId,
-          'passport',
-          formData.passport.file
-        )
-        const documentId = await createBeneficiaryDocumentMetadata(
-          requestId,
-          'passport',
-          uploadedDoc.fileName,
-          uploadedDoc.fileSize,
-          uploadedDoc.fileHash,
-          uploadedDoc.downloadUrl,
-          uploadedDoc.storagePath
-        )
-        uploadedDocuments.push({ type: 'passport', documentId, url: uploadedDoc.downloadUrl })
-      }
-
-      // Upload Visa
-      if (formData.visa.file) {
-        setUploadProgress('Uploading Visa...')
-        const uploadedDoc = await uploadBeneficiaryDocument(
-          requestId,
-          'visa',
-          formData.visa.file
-        )
-        const documentId = await createBeneficiaryDocumentMetadata(
-          requestId,
-          'visa',
-          uploadedDoc.fileName,
-          uploadedDoc.fileSize,
-          uploadedDoc.fileHash,
-          uploadedDoc.downloadUrl,
-          uploadedDoc.storagePath
-        )
-        uploadedDocuments.push({ type: 'visa', documentId, url: uploadedDoc.downloadUrl })
-      }
-
-      // Upload Salary Document
-      if (formData.salaryDoc.file) {
-        setUploadProgress('Uploading Salary Document...')
-        const uploadedDoc = await uploadBeneficiaryDocument(
-          requestId,
-          'salary_certificate',
-          formData.salaryDoc.file
-        )
-        const documentId = await createBeneficiaryDocumentMetadata(
-          requestId,
-          'salary_certificate',
-          uploadedDoc.fileName,
-          uploadedDoc.fileSize,
-          uploadedDoc.fileHash,
-          uploadedDoc.downloadUrl,
-          uploadedDoc.storagePath
-        )
-        uploadedDocuments.push({ type: 'salary_certificate', documentId, url: uploadedDoc.downloadUrl })
-      }
-
-      // Upload Bank Statement
-      if (formData.bankStatement.file) {
-        setUploadProgress('Uploading Bank Statement...')
-        const uploadedDoc = await uploadBeneficiaryDocument(
-          requestId,
-          'bank_statement',
-          formData.bankStatement.file
-        )
-        const documentId = await createBeneficiaryDocumentMetadata(
-          requestId,
-          'bank_statement',
-          uploadedDoc.fileName,
-          uploadedDoc.fileSize,
-          uploadedDoc.fileHash,
-          uploadedDoc.downloadUrl,
-          uploadedDoc.storagePath
-        )
-        uploadedDocuments.push({ type: 'bank_statement', documentId, url: uploadedDoc.downloadUrl })
-      }
-
-      // Upload Supporting Documents
-      for (let i = 0; i < formData.supportingDocs.length; i++) {
-        const doc = formData.supportingDocs[i]
-        setUploadProgress(`Uploading Supporting Document ${i + 1}/${formData.supportingDocs.length}...`)
-        const uploadedDoc = await uploadBeneficiaryDocument(
-          requestId,
-          'supporting_docs',
-          doc.file
-        )
-        const documentId = await createBeneficiaryDocumentMetadata(
-          requestId,
-          'supporting_docs',
-          uploadedDoc.fileName,
-          uploadedDoc.fileSize,
-          uploadedDoc.fileHash,
-          uploadedDoc.downloadUrl,
-          uploadedDoc.storagePath
-        )
-        uploadedDocuments.push({ type: 'supporting_docs', documentId, url: uploadedDoc.downloadUrl })
-      }
-
-      setUploadProgress('Finalizing submission...')
-
-      // Submit request
-      await submitBeneficiarySupportRequest(requestId)
-
-      // Reset form
-      setFormData({
-        fullName: '',
-        phoneNumber: '',
-        email: user.email,
-        dateOfBirth: '',
-        currentEmirateArea: '',
-        emiratesId: { number: '', expiryDate: '', file: null },
-        passport: { number: '', expiryDate: '', countryCode: '', file: null },
-        visa: { number: '', expiryDate: '', sponsorName: '', file: null },
-        salaryDoc: { type: '', file: null },
-        bankStatement: { file: null },
-        supportingDocs: [],
-        amountNeeded: 0,
-        employmentStatus: '',
-        monthlyIncome: 0,
-        numberOfDependents: 0,
-        reason: '',
-        reasonCategory: 'emergency',
-        emergencyLevel: 'medium',
-        referralSource: 'self',
-        referralPersonName: '',
-      })
-      setConsent({
-        privacyPolicyAccepted: false,
-        dataProcessingAgreed: false,
-        documentRetentionUnderstood: false,
-      })
-      setStep(1)
-      setShowForm(false)
-      setUploadProgress('')
-
-      alert('Request submitted successfully! Our team will review it shortly.')
-    } catch (error) {
-      console.error('[v0] Error submitting request:', error)
-      alert(`Error submitting request: ${error instanceof Error ? error.message : 'Please try again.'}`)
-    } finally {
-      setSubmitLoading(false)
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return { bg: '#e8f5e9', text: '#2e7d32', icon: CheckCircle2 }
-      case 'pending':
-      case 'submitted':
-      case 'under_review':
-        return { bg: '#fff3e0', text: '#e65100', icon: Clock }
-      case 'rejected':
-        return { bg: '#ffebee', text: '#c62828', icon: AlertCircle }
-      default:
-        return { bg: '#f5f5f5', text: '#666666', icon: FileText }
-    }
-  }
+  const btnPrimary =
+    'min-h-[44px] inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-900 text-white px-4 py-2.5 rounded text-sm font-semibold'
+  const btnSecondary =
+    'min-h-[44px] inline-flex items-center justify-center gap-2 bg-white text-black border border-neutral-300 hover:bg-neutral-50 px-4 py-2.5 rounded text-sm font-semibold'
 
   return (
-            <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto', space: '24px' }}>
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
-          <Button
-            onClick={() => {
-              setShowForm(!showForm)
-              setStep(1)
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              backgroundColor: '#111111',
-              color: '#ffffff',
-              padding: '10px 16px',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+        <div>
+          <p
+            className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-2"
+            style={{ fontFamily: 'Inter, sans-serif' }}
           >
-            <Plus size={16} />
-            New Request
-          </Button>
+            Member support
+          </p>
+          <h1
+            className="text-3xl sm:text-4xl text-neutral-900"
+            style={{ fontFamily: 'Cormorant Garamond, serif' }}
+          >
+            Charity Support Requests
+          </h1>
+          <p
+            className="text-sm text-neutral-600 mt-2 max-w-xl"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            Apply confidentially for welfare support. Your documents are stored on a restricted path
+            and reviewed only by authorized administrators.
+          </p>
         </div>
-
-        {/* Form */}
-        {showForm && (
-          <Card
-            style={{
-              padding: '24px',
-              marginBottom: '24px',
-              backgroundColor: '#ffffff',
-              borderRadius: '8px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            }}
+        {!showForm ? (
+          <button
+            type="button"
+            className={btnPrimary}
+            style={{ fontFamily: 'Inter, sans-serif' }}
+            onClick={() => setShowForm(true)}
           >
-            {step === 1 ? (
-              <>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#111111' }}>
-                  Submit Charity Support Request
-                </h2>
-                <form onSubmit={handleSubmitRequest} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {/* Personal Information */}
-                  <fieldset style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <legend style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
-                      1. Personal Information
-                    </legend>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.fullName}
-                          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: '1px solid #e4e1da',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                          }}
-                          placeholder="Your full name"
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                          Phone Number *
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          value={formData.phoneNumber}
-                          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: '1px solid #e4e1da',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                          }}
-                          placeholder="+971 50 123 4567"
-                        />
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                          Email *
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: '1px solid #e4e1da',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                          }}
-                          placeholder="your.email@example.com"
-                        />
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Date of Birth
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.dateOfBirth}
-                            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                            placeholder="DD / MM / YYYY"
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Current Emirate / Area
-                          </label>
-                          <select
-                            value={formData.currentEmirateArea}
-                            onChange={(e) => setFormData({ ...formData, currentEmirateArea: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            <option value="">Select emirate...</option>
-                            <option value="Dubai">Dubai</option>
-                            <option value="Abu Dhabi">Abu Dhabi</option>
-                            <option value="Sharjah">Sharjah</option>
-                            <option value="Ajman">Ajman</option>
-                            <option value="Umm Al Quwain">Umm Al Quwain</option>
-                            <option value="Ras Al Khaimah">Ras Al Khaimah</option>
-                            <option value="Fujairah">Fujairah</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </fieldset>
-
-                  {/* Identification Documents */}
-                  <fieldset style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <legend style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
-                      2. Identification Documents (select at least one)
-                    </legend>
-                    
-                    {/* Emirates ID */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={!!formData.emiratesId.file}
-                          onChange={(e) => {
-                            if (!e.target.checked) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                emiratesId: { number: '', expiryDate: '', file: null },
-                              }))
-                            }
-                          }}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#111111' }}>
-                          Emirates ID
-                        </span>
-                      </label>
-                      
-                      {formData.emiratesId.file && (
-                        <div style={{ marginTop: '12px', paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          <input
-                            type="text"
-                            placeholder="ID Number"
-                            value={formData.emiratesId.number}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              emiratesId: { ...prev.emiratesId, number: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <input
-                            type="date"
-                            placeholder="Expiry Date"
-                            value={formData.emiratesId.expiryDate}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              emiratesId: { ...prev.emiratesId, expiryDate: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                            <Upload size={16} />
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.png"
-                              onChange={(e) => e.target.files && handleFileChange('emiratesId', e.target.files[0])}
-                              style={{ display: 'none' }}
-                            />
-                            Upload Copy
-                          </label>
-                          {formData.emiratesId.file && (
-                            <p style={{ fontSize: '12px', color: '#666666' }}>
-                              📄 {formData.emiratesId.file.name}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Passport */}
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={!!formData.passport.file}
-                          onChange={(e) => {
-                            if (!e.target.checked) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                passport: { number: '', expiryDate: '', countryCode: '', file: null },
-                              }))
-                            }
-                          }}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#111111' }}>
-                          Passport
-                        </span>
-                      </label>
-                      
-                      {formData.passport.file && (
-                        <div style={{ marginTop: '12px', paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          <input
-                            type="text"
-                            placeholder="Passport Number"
-                            value={formData.passport.number}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              passport: { ...prev.passport, number: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Country Code"
-                            value={formData.passport.countryCode}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              passport: { ...prev.passport, countryCode: e.target.value },
-                            }))}
-                            maxLength={2}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <input
-                            type="date"
-                            placeholder="Expiry Date"
-                            value={formData.passport.expiryDate}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              passport: { ...prev.passport, expiryDate: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                            <Upload size={16} />
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.png"
-                              onChange={(e) => e.target.files && handleFileChange('passport', e.target.files[0])}
-                              style={{ display: 'none' }}
-                            />
-                            Upload Copy
-                          </label>
-                          {formData.passport.file && (
-                            <p style={{ fontSize: '12px', color: '#666666' }}>
-                              📄 {formData.passport.file.name}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Visa */}
-                    <div>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={!!formData.visa.file}
-                          onChange={(e) => {
-                            if (!e.target.checked) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                visa: { number: '', expiryDate: '', sponsorName: '', file: null },
-                              }))
-                            }
-                          }}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: '#111111' }}>
-                          Visa
-                        </span>
-                      </label>
-                      
-                      {formData.visa.file && (
-                        <div style={{ marginTop: '12px', paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                          <input
-                            type="text"
-                            placeholder="Visa Number"
-                            value={formData.visa.number}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              visa: { ...prev.visa, number: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <input
-                            type="date"
-                            placeholder="Expiry Date"
-                            value={formData.visa.expiryDate}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              visa: { ...prev.visa, expiryDate: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Sponsor Name (optional)"
-                            value={formData.visa.sponsorName}
-                            onChange={(e) => setFormData((prev) => ({
-                              ...prev,
-                              visa: { ...prev.visa, sponsorName: e.target.value },
-                            }))}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                            }}
-                          />
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                            <Upload size={16} />
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.png"
-                              onChange={(e) => e.target.files && handleFileChange('visa', e.target.files[0])}
-                              style={{ display: 'none' }}
-                            />
-                            Upload Copy
-                          </label>
-                          {formData.visa.file && (
-                            <p style={{ fontSize: '12px', color: '#666666' }}>
-                              📄 {formData.visa.file.name}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </fieldset>
-
-                  {/* Financial Documents */}
-                  <fieldset style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <legend style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
-                      3. Financial Documents
-                    </legend>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      {/* Salary Document */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '8px' }}>
-                          Salary Certificate / Pay Slip *
-                        </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                          <Upload size={16} />
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.jpg,.png"
-                            onChange={(e) => e.target.files && handleFileChange('salaryDoc', e.target.files[0])}
-                            style={{ display: 'none' }}
-                          />
-                          Upload Document
-                        </label>
-                        {formData.salaryDoc.file && (
-                          <p style={{ fontSize: '12px', color: '#666666', marginTop: '8px' }}>
-                            📄 {formData.salaryDoc.file.name}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Bank Statement */}
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#888888', marginBottom: '8px' }}>
-                          Bank Statement (optional)
-                        </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                          <Upload size={16} />
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.jpg,.png"
-                            onChange={(e) => e.target.files && handleFileChange('bankStatement', e.target.files[0])}
-                            style={{ display: 'none' }}
-                          />
-                          Upload Document
-                        </label>
-                        {formData.bankStatement.file && (
-                          <p style={{ fontSize: '12px', color: '#666666', marginTop: '8px' }}>
-                            📄 {formData.bankStatement.file.name}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </fieldset>
-
-                  {/* Supporting Documents */}
-                  <fieldset style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <legend style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
-                      4. Supporting Documents
-                    </legend>
-                    
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                      <Upload size={16} />
-                      <input
-                        type="file"
-                        multiple
-                        accept=".pdf,.doc,.docx,.jpg,.png,.xlsx"
-                        onChange={(e) => e.target.files && handleMultipleFiles(e.target.files)}
-                        style={{ display: 'none' }}
-                      />
-                      Upload Additional Documents
-                    </label>
-                    
-                    {formData.supportingDocs.length > 0 && (
-                      <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {formData.supportingDocs.map((doc, idx) => (
-                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', backgroundColor: '#faf9f7', borderRadius: '6px' }}>
-                            <File size={16} />
-                            <span style={{ fontSize: '12px', flex: 1 }}>{doc.file.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeSupportingDoc(idx)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626' }}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </fieldset>
-
-                  {/* Request Details */}
-                  <fieldset style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <legend style={{ fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
-                      5. Request Details
-                    </legend>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      {/* Financial Information */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Amount Needed (AED) *
-                          </label>
-                          <input
-                            type="number"
-                            required
-                            min="0"
-                            value={formData.amountNeeded}
-                            onChange={(e) => setFormData({ ...formData, amountNeeded: parseFloat(e.target.value) || 0 })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                            placeholder="e.g. AED 3,500"
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Employment Status
-                          </label>
-                          <select
-                            value={formData.employmentStatus}
-                            onChange={(e) => setFormData({ ...formData, employmentStatus: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            <option value="">Select status...</option>
-                            <option value="employed">Employed</option>
-                            <option value="self_employed">Self Employed</option>
-                            <option value="unemployed">Unemployed</option>
-                            <option value="retired">Retired</option>
-                            <option value="student">Student</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Monthly Income (AED)
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={formData.monthlyIncome}
-                            onChange={(e) => setFormData({ ...formData, monthlyIncome: parseFloat(e.target.value) || 0 })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                            placeholder="e.g. AED 2,500 or 0"
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Number of Dependents
-                          </label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={formData.numberOfDependents}
-                            onChange={(e) => setFormData({ ...formData, numberOfDependents: parseInt(e.target.value) || 0 })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                            placeholder="e.g. 2 children, 1 spouse"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                          Reason for Request *
-                        </label>
-                        <textarea
-                          required
-                          value={formData.reason}
-                          onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: '1px solid #e4e1da',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                            minHeight: '100px',
-                            resize: 'vertical',
-                          }}
-                          placeholder="Describe your situation and why you need support"
-                        />
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Category *
-                          </label>
-                          <select
-                            value={formData.reasonCategory}
-                            onChange={(e) => setFormData({ ...formData, reasonCategory: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            <option value="housing">Housing</option>
-                            <option value="medical">Medical</option>
-                            <option value="emergency">Emergency</option>
-                            <option value="education">Education</option>
-                            <option value="employment">Employment</option>
-                            <option value="family">Family</option>
-                            <option value="other">Other</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '12px' }}>
-                            Emergency Level *
-                          </label>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                            {[
-                              { value: 'critical', label: 'Critical', color: '#dc2626', bgColor: '#fee2e2' },
-                              { value: 'high', label: 'Urgent', color: '#ea580c', bgColor: '#ffedd5' },
-                              { value: 'medium', label: 'Standard', color: '#059669', bgColor: '#ecfdf5' },
-                            ].map((level) => (
-                              <button
-                                key={level.value}
-                                type="button"
-                                onClick={() => setFormData({ ...formData, emergencyLevel: level.value as any })}
-                                style={{
-                                  padding: '12px',
-                                  borderRadius: '6px',
-                                  border: formData.emergencyLevel === level.value ? `2px solid ${level.color}` : '1px solid #e4e1da',
-                                  backgroundColor: formData.emergencyLevel === level.value ? level.bgColor : '#ffffff',
-                                  cursor: 'pointer',
-                                  fontSize: '13px',
-                                  fontWeight: 600,
-                                  color: level.color,
-                                  transition: 'all 0.2s',
-                                }}
-                              >
-                                {level.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            How did you hear about us? *
-                          </label>
-                          <select
-                            required
-                            value={formData.referralSource}
-                            onChange={(e) => setFormData({ ...formData, referralSource: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                          >
-                            <option value="">Select source...</option>
-                            <option value="self">Myself</option>
-                            <option value="community_member">Community Member</option>
-                            <option value="business">Business Partner</option>
-                            <option value="admin_referral">Admin Referral</option>
-                            <option value="social_media">Social Media</option>
-                            <option value="other">Other</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#111111', marginBottom: '6px' }}>
-                            Referral Person Name (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.referralPersonName}
-                            onChange={(e) => setFormData({ ...formData, referralPersonName: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '10px 12px',
-                              border: '1px solid #e4e1da',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontFamily: 'inherit',
-                            }}
-                            placeholder="Name of person who referred you, if any"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </fieldset>
-
-                  {/* Form Actions */}
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <Button
-                      type="button"
-                      onClick={() => setShowForm(false)}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: 'transparent',
-                        color: '#111111',
-                        border: '1px solid #e4e1da',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#111111',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                      }}
-                    >
-                      Review & Accept Terms
-                    </Button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#111111' }}>
-                  Review & Consent
-                </h2>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  {/* Summary */}
-                  <div style={{ backgroundColor: '#faf9f7', padding: '16px', borderRadius: '8px' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#111111' }}>
-                      Request Summary
-                    </h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '14px' }}>
-                      <div>
-                        <p style={{ color: '#888888', marginBottom: '4px' }}>Name</p>
-                        <p style={{ fontWeight: 600, color: '#111111' }}>{formData.fullName}</p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#888888', marginBottom: '4px' }}>Category</p>
-                        <p style={{ fontWeight: 600, color: '#111111', textTransform: 'capitalize' }}>
-                          {formData.reasonCategory}
-                        </p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#888888', marginBottom: '4px' }}>Emergency Level</p>
-                        <p style={{ fontWeight: 600, color: '#111111', textTransform: 'capitalize' }}>
-                          {formData.emergencyLevel}
-                        </p>
-                      </div>
-                      <div>
-                        <p style={{ color: '#888888', marginBottom: '4px' }}>Documents Uploaded</p>
-                        <p style={{ fontWeight: 600, color: '#111111' }}>
-                          {(formData.emiratesId.file ? 1 : 0) +
-                            (formData.passport.file ? 1 : 0) +
-                            (formData.visa.file ? 1 : 0) +
-                            (formData.salaryDoc.file ? 1 : 0) +
-                            (formData.bankStatement.file ? 1 : 0) +
-                            formData.supportingDocs.length} file(s)
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Consent Section */}
-                  <div style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
-                      Consent & Compliance
-                    </h3>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={consent.privacyPolicyAccepted}
-                          onChange={(e) =>
-                            setConsent({ ...consent, privacyPolicyAccepted: e.target.checked })
-                          }
-                          style={{ width: '16px', height: '16px', marginTop: '2px', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '13px', color: '#111111', lineHeight: '1.5' }}>
-                          I have read and accept the{' '}
-                          <a
-                            href="https://passiveblessings.ae/privacy-policy"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#0066cc', textDecoration: 'underline' }}
-                          >
-                            UAE Privacy Policy
-                          </a>{' '}
-                          and understand how my data will be used and protected in accordance with UAE data protection laws.
-                        </span>
-                      </label>
-
-                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={consent.dataProcessingAgreed}
-                          onChange={(e) =>
-                            setConsent({ ...consent, dataProcessingAgreed: e.target.checked })
-                          }
-                          style={{ width: '16px', height: '16px', marginTop: '2px', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '13px', color: '#111111', lineHeight: '1.5' }}>
-                          I consent to Passive Blessings processing my personal and financial information for the sole purpose of reviewing and processing my support request. This data will only be accessed by authorized welfare administrators, founders, and approved charity coordinators.
-                        </span>
-                      </label>
-
-                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={consent.documentRetentionUnderstood}
-                          onChange={(e) =>
-                            setConsent({ ...consent, documentRetentionUnderstood: e.target.checked })
-                          }
-                          style={{ width: '16px', height: '16px', marginTop: '2px', cursor: 'pointer' }}
-                        />
-                        <span style={{ fontSize: '13px', color: '#111111', lineHeight: '1.5' }}>
-                          I understand that my sensitive documents will be encrypted and securely stored, with access logs maintained for audit purposes. Documents may be retained for 2 years in accordance with UAE legal requirements.
-                        </span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Legal Disclaimer */}
-                  <div
-                    style={{
-                      backgroundColor: '#fee2e2',
-                      border: '1px solid #fca5a5',
-                      borderRadius: '6px',
-                      padding: '12px',
-                      display: 'flex',
-                      gap: '12px',
-                    }}
-                  >
-                    <AlertCircle size={20} style={{ color: '#dc2626', flexShrink: 0, marginTop: '2px' }} />
-                    <div style={{ fontSize: '13px', color: '#7f1d1d', lineHeight: '1.5' }}>
-                      <p style={{ fontWeight: 600, marginBottom: '6px' }}>Important Legal Notice</p>
-                      <p>
-                        All information provided must be accurate and truthful. Providing false information or submitting fraudulent documents may result in legal action and permanent ban from Passive Blessings. Your submission will be investigated by authorized personnel.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '12px',
-                      justifyContent: 'flex-end',
-                      paddingTop: '16px',
-                      borderTop: '1px solid #e4e1da',
-                    }}
-                  >
-                    <Button
-                      onClick={() => setStep(1)}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: 'transparent',
-                        color: '#111111',
-                        border: '1px solid #e4e1da',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                      }}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      onClick={handleFinalSubmit}
-                      disabled={!validateConsent() || submitLoading}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: validateConsent() ? '#111111' : '#cccccc',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: validateConsent() ? 'pointer' : 'not-allowed',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        opacity: submitLoading ? 0.7 : 1,
-                      }}
-                    >
-                      {submitLoading ? 'Submitting...' : 'Submit Request'}
-                    </Button>
-                  </div>
-                  
-                  {uploadProgress && (
-                    <div style={{
-                      marginTop: '12px',
-                      padding: '12px',
-                      backgroundColor: '#f0f7ff',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      color: '#1e40af',
-                      fontWeight: 500,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        backgroundColor: '#3b82f6',
-                        animation: 'spin 1s linear infinite'
-                      }} />
-                      {uploadProgress}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </Card>
+            <Plus className="w-4 h-4" />
+            Apply for Support
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={btnSecondary}
+            style={{ fontFamily: 'Inter, sans-serif' }}
+            onClick={() => setShowForm(false)}
+          >
+            Hide form
+          </button>
         )}
-
-        {/* Requests List */}
-        <div style={{ space: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '16px', color: '#111111' }}>
-            Your Requests
-          </h2>
-
-          {loading ? (
-            <p style={{ color: '#888888' }}>Loading requests...</p>
-          ) : requests.length === 0 ? (
-            <Card
-              style={{
-                padding: '24px',
-                textAlign: 'center',
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-              }}
-            >
-              <p style={{ color: '#888888' }}>No requests submitted yet</p>
-            </Card>
-          ) : (
-            <div style={{ display: 'grid', gap: '16px' }}>
-              {requests.map((request) => {
-                const statusColor = getStatusColor(request.status)
-                const StatusIcon = statusColor.icon
-
-                return (
-                  <Card
-                    key={request.id}
-                    style={{
-                      padding: '20px',
-                      backgroundColor: '#ffffff',
-                      borderRadius: '8px',
-                      borderLeft: `4px solid ${statusColor.text}`,
-                    }}
-                  >
-                    <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                      <StatusIcon
-                        size={32}
-                        style={{ color: statusColor.text, flexShrink: 0, marginTop: '4px' }}
-                      />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                          <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111111' }}>
-                            {request.reasonCategory.charAt(0).toUpperCase() + request.reasonCategory.slice(1)}
-                          </h3>
-                          <span
-                            style={{
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              padding: '4px 12px',
-                              backgroundColor: statusColor.bg,
-                              color: statusColor.text,
-                              borderRadius: '4px',
-                              textTransform: 'capitalize',
-                            }}
-                          >
-                            {request.status.replace(/_/g, ' ')}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              padding: '4px 12px',
-                              backgroundColor:
-                                request.emergencyLevel === 'critical'
-                                  ? '#fee2e2'
-                                  : request.emergencyLevel === 'high'
-                                    ? '#fef3c7'
-                                    : '#e0e7ff',
-                              color:
-                                request.emergencyLevel === 'critical'
-                                  ? '#dc2626'
-                                  : request.emergencyLevel === 'high'
-                                    ? '#d97706'
-                                    : '#4f46e5',
-                              borderRadius: '4px',
-                              textTransform: 'capitalize',
-                            }}
-                          >
-                            {request.emergencyLevel}
-                          </span>
-                        </div>
-
-                        <p style={{ fontSize: '14px', color: '#666666', marginBottom: '12px', lineHeight: '1.5' }}>
-                          {request.reason}
-                        </p>
-
-                        <div
-                          style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                            gap: '12px',
-                            fontSize: '13px',
-                          }}
-                        >
-                          <div>
-                            <p style={{ color: '#888888', marginBottom: '4px' }}>Submitted</p>
-                            <p style={{ fontWeight: 600, color: '#111111' }}>
-                              {request.submissionDate
-                                ? new Date(request.submissionDate).toLocaleDateString()
-                                : 'Pending'}
-                            </p>
-                          </div>
-                          <div>
-                            <p style={{ color: '#888888', marginBottom: '4px' }}>Category</p>
-                            <p style={{ fontWeight: 600, color: '#111111', textTransform: 'capitalize' }}>
-                              {request.reasonCategory}
-                            </p>
-                          </div>
-                          {request.reviewDate && (
-                            <div>
-                              <p style={{ color: '#888888', marginBottom: '4px' }}>Reviewed</p>
-                              <p style={{ fontWeight: 600, color: '#111111' }}>
-                                {new Date(request.reviewDate).toLocaleDateString()}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {request.reviewNotes && (
-                          <div style={{ marginTop: '12px', borderTop: '1px solid #e4e1da', paddingTop: '12px' }}>
-                            <p style={{ fontSize: '13px', fontWeight: 600, color: '#111111', marginBottom: '6px' }}>
-                              Review Notes
-                            </p>
-                            <p style={{ fontSize: '13px', color: '#666666' }}>{request.reviewNotes}</p>
-                          </div>
-                        )}
-
-                        {request.approvalNotes && (
-                          <div style={{ marginTop: '12px', borderTop: '1px solid #e4e1da', paddingTop: '12px' }}>
-                            <p style={{ fontSize: '13px', fontWeight: 600, color: '#111111', marginBottom: '6px' }}>
-                              Approval Notes
-                            </p>
-                            <p style={{ fontSize: '13px', color: '#666666' }}>{request.approvalNotes}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-        </div>
       </div>
+
+      {showForm ? (
+        <div className="mb-10">
+          <BeneficiarySupportForm onCancel={() => setShowForm(false)} />
+        </div>
+      ) : null}
+
+      <div className="bg-white border border-neutral-200 rounded-lg p-4 sm:p-6">
+        <h2
+          className="text-xl mb-4 text-neutral-900"
+          style={{ fontFamily: 'Cormorant Garamond, serif' }}
+        >
+          Your requests
+        </h2>
+
+        {loading ? (
+          <div className="space-y-3 animate-pulse">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-16 bg-neutral-100 rounded" />
+            ))}
+          </div>
+        ) : requests.length === 0 ? (
+          <div className="text-center py-12" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <FileText className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+            <p className="text-neutral-600 mb-1">No support requests yet</p>
+            <p className="text-sm text-neutral-500 mb-6">
+              Start an application when you need confidential charity support.
+            </p>
+            <button type="button" className={btnPrimary} onClick={() => setShowForm(true)}>
+              <Plus className="w-4 h-4" />
+              Apply for Support
+            </button>
+          </div>
+        ) : (
+          <ul className="space-y-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {requests.map((r) => {
+              const meta = statusMeta(r.status)
+              const when = r.submissionDate?.toDate?.() || r.createdAt?.toDate?.() || null
+              return (
+                <li
+                  key={r.id}
+                  className="border border-neutral-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <meta.Icon className="w-4 h-4 text-neutral-500 shrink-0" />
+                      <span className="font-medium text-neutral-900 truncate">
+                        {r.fullName || 'Support request'}
+                      </span>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded capitalize ${meta.className}`}
+                      >
+                        {meta.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-1 capitalize">
+                      {r.emergencyLevel || '—'} priority
+                      {when ? ` · ${when.toLocaleDateString()}` : ''}
+                    </p>
+                    {r.reason ? (
+                      <p className="text-sm text-neutral-600 mt-1 line-clamp-2">{r.reason}</p>
+                    ) : null}
+                  </div>
+                  <p className="text-[10px] font-mono text-neutral-400 break-all sm:text-right">
+                    {r.id}
+                  </p>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function CharityRequestsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="px-4 py-8 max-w-4xl mx-auto animate-pulse space-y-4">
+          <div className="h-8 bg-neutral-200 rounded w-1/2" />
+          <div className="h-40 bg-neutral-200 rounded" />
+        </div>
+      }
+    >
+      <CharityRequestsContent />
+    </Suspense>
   )
 }

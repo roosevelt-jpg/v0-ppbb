@@ -1,15 +1,21 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { ArrowLeft } from 'lucide-react'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 
 export default function CreateCommunityPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const editId = searchParams.get('edit')
+  const isEditMode = Boolean(editId)
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [loadingExisting, setLoadingExisting] = useState(Boolean(editId))
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -24,6 +30,41 @@ export default function CreateCommunityPage() {
     }
   }, [user, router])
 
+  React.useEffect(() => {
+    if (!editId || !user) return
+
+    const loadCommunity = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'communities', editId))
+        if (!snap.exists()) {
+          alert('Community not found')
+          router.push('/business/communities')
+          return
+        }
+        const data = snap.data()
+        if (data.businessId !== user.id) {
+          alert('You can only edit your own communities')
+          router.push('/business/communities')
+          return
+        }
+        setFormData({
+          name: data.name || '',
+          description: data.description || '',
+          category: data.category || 'business',
+          visibility: data.visibility || 'public',
+          rules: Array.isArray(data.rules) ? data.rules.join('\n') : '',
+        })
+      } catch (error) {
+        console.error('[v0] Error loading community:', error)
+        alert('Failed to load community')
+      } finally {
+        setLoadingExisting(false)
+      }
+    }
+
+    void loadCommunity()
+  }, [editId, user, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) {
@@ -33,53 +74,65 @@ export default function CreateCommunityPage() {
 
     setLoading(true)
     try {
-      console.log('[v0] Creating business community:', { ...formData, createdBy: user.id, businessId: user.id })
+      const payload = {
+        ...formData,
+        createdBy: user.id,
+        businessId: user.id,
+        createdByName: user.displayName || user.firstName || 'Business owner',
+        createdByEmail: user.email || '',
+        rules: formData.rules.split('\n').filter((r) => r.trim()),
+      }
 
       const response = await fetch('/api/communities', {
-        method: 'POST',
+        method: isEditMode ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          createdBy: user.id,
-          businessId: user.id,
-          rules: formData.rules.split('\n').filter(r => r.trim()),
-        }),
+        body: JSON.stringify(isEditMode ? { id: editId, ...payload } : payload),
       })
 
       const data = await response.json()
       if (!data.success) throw new Error(data.error)
 
-      console.log('[v0] Community created successfully:', data.data.id)
-      alert('Community created successfully!')
+      alert(
+        isEditMode
+          ? 'Community updated successfully!'
+          : 'Community submitted for admin approval. You will be notified when it goes live.'
+      )
       router.push('/business/communities')
-    } catch (error: any) {
-      console.error('[v0] Error creating community:', error)
-      alert(`Failed to create community: ${error.message}`)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      console.error('[v0] Error saving community:', error)
+      alert(`Failed to save community: ${message}`)
     } finally {
       setLoading(false)
     }
   }
 
+  if (loadingExisting) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-neutral-500">
+        Loading community…
+      </div>
+    )
+  }
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '24px 32px' }}>
+    <div className="min-h-full bg-[#faf9f7]">
+      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button
+            type="button"
             onClick={() => router.back()}
-            style={{
-              backgroundColor: 'transparent',
-              color: '#111111',
-              padding: '8px',
-              borderRadius: '6px',
-            }}
-            className="hover:bg-gray-100"
+            className="min-h-[44px] min-w-[44px] rounded-md text-neutral-900 hover:bg-neutral-100"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Create Community</h1>
-            <p style={{ color: '#888888', marginTop: '4px' }}>Build a community for your business</p>
+            <h1 className="text-2xl sm:text-[28px] font-bold text-neutral-900">
+              {isEditMode ? 'Edit Community' : 'Create Community'}
+            </h1>
+            <p className="text-neutral-500 mt-1 text-sm">
+              {isEditMode ? 'Update your community details' : 'Build a community for your business'}
+            </p>
           </div>
         </div>
       </div>
@@ -218,7 +271,7 @@ export default function CreateCommunityPage() {
               }}
               className="hover:bg-black disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Community'}
+              {loading ? (isEditMode ? 'Saving...' : 'Creating...') : isEditMode ? 'Save changes' : 'Create Community'}
             </button>
             <button
               type="button"

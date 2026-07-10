@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { User } from '@/lib/types'
 import { AlertCircle } from 'lucide-react'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 
 interface MemberDetailViewerProps {
   memberId: string
@@ -55,7 +56,10 @@ export function MemberDetailViewer({ memberId }: MemberDetailViewerProps) {
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111111', marginBottom: '0.5rem' }}>
           {member.firstName} {member.lastName}
         </h2>
-        <p style={{ fontSize: '0.875rem', color: '#666' }}>{member.email}</p>
+        <p style={{ fontSize: '0.875rem', color: '#666' }}>{member.email || 'Not provided'}</p>
+        <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+          Phone: {formatUserPhoneDisplay(member)}
+        </p>
         <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem' }}>
           <span style={{ padding: '0.25rem 0.75rem', backgroundColor: '#f0f0f0', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, color: '#111111', textTransform: 'capitalize' }}>
             {member.role || 'member'}
@@ -123,15 +127,13 @@ export function MemberDetailViewer({ memberId }: MemberDetailViewerProps) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div>
             <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#666', marginBottom: '0.25rem' }}>Email</p>
-            <p style={{ color: '#111111', wordBreak: 'break-all' }}>{member.email}</p>
+            <p style={{ color: '#111111', wordBreak: 'break-all' }}>{member.email || 'Not provided'}</p>
           </div>
-          {member.phone && (
-            <div>
-              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#666', marginBottom: '0.25rem' }}>Phone</p>
-              <p style={{ color: '#111111' }}>{member.phone}</p>
-            </div>
-          )}
-          {member.whatsappNumber && (
+          <div>
+            <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#666', marginBottom: '0.25rem' }}>Phone</p>
+            <p style={{ color: '#111111' }}>{formatUserPhoneDisplay(member)}</p>
+          </div>
+          {member.whatsappNumber && member.whatsappNumber !== member.phone && (
             <div>
               <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#666', marginBottom: '0.25rem' }}>WhatsApp</p>
               <p style={{ color: '#111111' }}>{member.whatsappNumber}</p>

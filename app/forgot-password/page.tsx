@@ -1,17 +1,24 @@
 'use client'
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { sendPasswordReset } from '@/lib/auth'
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
+  const [sentToEmail, setSentToEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const prefill = searchParams.get('email')
+    if (prefill) setEmail(prefill)
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,13 +26,14 @@ export default function ForgotPasswordPage() {
     setSuccess(false)
     setLoading(true)
 
-    if (!email.trim()) {
+    const trimmed = email.trim()
+    if (!trimmed) {
       setError('Please enter your email address')
       setLoading(false)
       return
     }
 
-    const { success: resetSuccess, error: resetError } = await sendPasswordReset(email)
+    const { success: resetSuccess, error: resetError } = await sendPasswordReset(trimmed)
 
     if (!resetSuccess) {
       setError(resetError || 'Failed to send reset email. Please try again.')
@@ -33,22 +41,20 @@ export default function ForgotPasswordPage() {
       return
     }
 
+    setSentToEmail(trimmed)
     setSuccess(true)
     setEmail('')
     setLoading(false)
 
-    // Redirect after 3 seconds
     setTimeout(() => {
       router.push('/login')
-    }, 3000)
+    }, 4000)
   }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 py-6 md:py-8 bg-neutral-100">
       <div className="w-full max-w-md">
-        {/* Card */}
         <div className="bg-white rounded-xl shadow-sm p-5 md:p-6">
-          {/* Header */}
           <div className="mb-4">
             <Link href="/login" className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-900 transition-colors mb-4">
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -74,7 +80,10 @@ export default function ForgotPasswordPage() {
               <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
               <div className="text-xs text-green-900">
                 <p className="font-medium mb-1">Check your email</p>
-                <p>We&apos;ve sent password reset instructions to {email}. Please check your inbox and follow the link to reset your password.</p>
+                <p>
+                  We&apos;ve sent password reset instructions to{' '}
+                  <strong>{sentToEmail}</strong>. Please check your inbox and follow the link to reset your password.
+                </p>
               </div>
             </div>
           )}
@@ -87,6 +96,7 @@ export default function ForgotPasswordPage() {
               <input
                 id="email"
                 type="email"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -100,7 +110,7 @@ export default function ForgotPasswordPage() {
               disabled={loading || success}
               className="w-full py-2 bg-neutral-900 text-white font-semibold text-xs rounded-lg hover:bg-neutral-800 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Sending...' : success ? 'Email sent - redirecting...' : 'Send reset link'}
+              {loading ? 'Sending...' : success ? 'Email sent — redirecting...' : 'Send reset link'}
             </button>
           </form>
 
@@ -111,11 +121,18 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        {/* Footer Info */}
         <div className="mt-6 text-center text-xs text-neutral-500">
           <p>By continuing, you agree to our Terms of Service and Privacy Policy</p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-100" />}>
+      <ForgotPasswordContent />
+    </Suspense>
   )
 }

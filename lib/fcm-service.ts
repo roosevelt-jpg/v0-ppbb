@@ -1,23 +1,8 @@
 import { db } from './firebase'
 import { doc, updateDoc, getDoc } from 'firebase/firestore'
+import { DEFAULT_FCM_SETTINGS, type FCMSettings } from '@/lib/fcm-settings'
 
-export interface FCMSettings {
-  enabled: boolean
-  newCommunityNotification: boolean
-  newGroupMessageNotification: boolean
-  newEventNotification: boolean
-  newsletterNotification: boolean
-  newGroupJoinedNotification: boolean
-}
-
-export const DEFAULT_FCM_SETTINGS: FCMSettings = {
-  enabled: true,
-  newCommunityNotification: true,
-  newGroupMessageNotification: true,
-  newEventNotification: true,
-  newsletterNotification: true,
-  newGroupJoinedNotification: true,
-}
+export type { FCMSettings } from '@/lib/fcm-settings'
 
 export async function requestNotificationPermission(): Promise<string | null> {
   try {

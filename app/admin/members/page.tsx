@@ -4,12 +4,24 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Search } from 'lucide-react'
+import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromMember } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 
 export default function AdminMembersPage() {
   const [members, setMembers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [userType, setUserType] = React.useState<string>('all')
   const [search, setSearch] = React.useState('')
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+
+  const openProfile = (member: Record<string, unknown>) => {
+    setActiveProfile(profileFromMember(member))
+    setProfileOpen(true)
+  }
 
   React.useEffect(() => {
     loadMembers()
@@ -123,24 +135,31 @@ export default function AdminMembersPage() {
             <p className="text-gray-500">No members found matching your filters.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-lg border border-gray-200 admin-table-scroll min-w-0">
+            <table className="w-full min-w-[1020px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Volunteer Hours</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Joined</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Profile</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {displayMembers.map((member: any) => (
                   <tr key={member.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 text-sm font-medium text-gray-900">{member.name || member.firstName + ' ' + member.lastName || 'Unknown'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{member.email}</td>
+                    <td className="px-6 py-3 text-sm">
+                        <AdminUserCell user={member} />
+                    </td>
+                    <td className="px-6 py-3 text-sm text-gray-600 hidden md:table-cell">{member.email}</td>
+                    <td className="px-6 py-3 text-sm text-gray-600 whitespace-nowrap">
+                      {formatUserPhoneDisplay(member)}
+                    </td>
                     <td className="px-6 py-3 text-sm">
                       <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
                         {member.role || member.userType || 'member'}
@@ -152,13 +171,16 @@ export default function AdminMembersPage() {
                     </td>
                     <td className="px-6 py-3 text-sm">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        member.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        member.status === 'active' ? 'bg-neutral-900 text-white' : 'bg-gray-100 text-gray-800'
                       }`}>
                         {member.status || 'active'}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {member.dateJoined ? new Date(member.dateJoined).toLocaleDateString() : member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : '-'}
+                    </td>
+                    <td className="px-6 py-3 text-sm whitespace-nowrap">
+                      <AdminViewProfileButton compact onClick={() => openProfile(member)} />
                     </td>
                   </tr>
                 ))}
@@ -167,6 +189,13 @@ export default function AdminMembersPage() {
           </div>
         )}
       </div>
+
+      <AdminUserProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={activeProfile}
+        editLabel="Edit member"
+      />
     </AdminPageLayout>
   )
 }

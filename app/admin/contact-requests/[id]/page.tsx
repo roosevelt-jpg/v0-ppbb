@@ -10,6 +10,7 @@ import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, whe
 import { formatDistanceToNow } from 'date-fns'
 import { ArrowLeft, Send, Mail, Clock, User, Phone, FileText } from 'lucide-react'
 import Link from 'next/link'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 interface ContactRequest {
   id: string
@@ -34,6 +35,7 @@ interface Reply {
 }
 
 export default function ContactRequestDetailPage() {
+  const audit = useAdminAudit()
   const router = useRouter()
   const params = useParams()
   const requestId = params.id as string
@@ -139,6 +141,15 @@ export default function ContactRequestDetailPage() {
             status: 'replied',
           })
 
+          audit({
+            actionType: 'update',
+            action: `Replied to contact request: ${request.subject}`,
+            entityType: 'content',
+            entityId: requestId,
+            entityName: request.name,
+            status: 'success',
+          })
+
           setSuccess('Reply sent successfully!')
           setReplyMessage('')
         } else {
@@ -165,6 +176,14 @@ export default function ContactRequestDetailPage() {
     try {
       await updateDoc(doc(db, 'contactRequests', requestId), {
         status: 'closed',
+      })
+      audit({
+        actionType: 'update',
+        action: `Closed contact request: ${request.subject}`,
+        entityType: 'content',
+        entityId: requestId,
+        entityName: request.name,
+        status: 'success',
       })
       setRequest({ ...request, status: 'closed' })
       setSuccess('Contact request marked as closed')

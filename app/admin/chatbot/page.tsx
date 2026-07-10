@@ -1,14 +1,17 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import { AdminPageLayout } from '@/components/admin-page-layout'
+import { ChatbotAvatar } from '@/components/chatbot-avatar'
 import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, updateDoc, doc, getDocs } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Send, Check, X, Search, Filter, Archive, AlertCircle } from 'lucide-react'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
+import { useAuth } from '@/lib/auth-context'
 
 interface Conversation {
   id: string
@@ -30,6 +33,8 @@ interface Conversation {
 }
 
 export default function AdminChatbotPage() {
+  const audit = useAdminAudit()
+  const { user, firebaseUser } = useAuth()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConvId, setSelectedConvId] = useState<string>('')
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null)
@@ -41,28 +46,55 @@ export default function AdminChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'conversations'), snapshot => {
-      const convs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-        lastMessageAt: doc.data().lastMessageAt?.toDate?.() || new Date(),
-        messages: (doc.data().messages || []).map((m: any) => ({
-          ...m,
-          timestamp: m.timestamp?.toDate?.() || new Date(),
-        })),
-      })) as Conversation[]
+    if (!user || !firebaseUser) return
 
-      setConversations(convs)
-      setLoading(false)
+    let unsubscribe: (() => void) | undefined
+    let cancelled = false
 
-      if (convs.length > 0 && !selectedConvId) {
-        setSelectedConvId(convs[0].id)
+    const subscribe = async () => {
+      try {
+        await firebaseUser.getIdToken(true)
+        if (cancelled) return
+
+        unsubscribe = onSnapshot(
+          collection(db, 'conversations'),
+          snapshot => {
+            const convs = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+              lastMessageAt: doc.data().lastMessageAt?.toDate?.() || new Date(),
+              messages: (doc.data().messages || []).map((m: any) => ({
+                ...m,
+                timestamp: m.timestamp?.toDate?.() || new Date(),
+              })),
+            })) as Conversation[]
+
+            setConversations(convs)
+            setLoading(false)
+
+            if (convs.length > 0 && !selectedConvId) {
+              setSelectedConvId(convs[0].id)
+            }
+          },
+          error => {
+            console.error('[v0] conversations onSnapshot permission error:', error)
+            setLoading(false)
+          }
+        )
+      } catch (error) {
+        console.error('[v0] Error preparing conversations subscription:', error)
+        setLoading(false)
       }
-    })
+    }
 
-    return () => unsubscribe()
-  }, [])
+    void subscribe()
+
+    return () => {
+      cancelled = true
+      unsubscribe?.()
+    }
+  }, [user?.id, firebaseUser])
 
   useEffect(() => {
     if (selectedConvId) {
@@ -94,6 +126,14 @@ export default function AdminChatbotPage() {
         status: 'resolved',
         updatedAt: new Date(),
       })
+      audit({
+        actionType: 'update',
+        action: `Resolved chatbot conversation: ${selectedConv.title || selectedConv.id}`,
+        entityType: 'content',
+        entityId: selectedConv.id,
+        entityName: selectedConv.title,
+        status: 'success',
+      })
 
       setReplyText('')
     } catch (error) {
@@ -108,6 +148,13 @@ export default function AdminChatbotPage() {
       await updateDoc(doc(db, 'conversations', convId), {
         status: newStatus,
         updatedAt: new Date(),
+      })
+      audit({
+        actionType: 'update',
+        action: `Set conversation status to ${newStatus}: ${convId}`,
+        entityType: 'content',
+        entityId: convId,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error updating status:', error)
@@ -142,9 +189,12 @@ export default function AdminChatbotPage() {
     <AdminPageLayout title="Chatbot Management" subtitle="Manage and reply to customer support conversations">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900">Chatbot Management</h1>
-          <p className="text-neutral-600 mt-1">Manage and reply to customer support conversations</p>
+        <div className="mb-8 flex items-start gap-4">
+          <ChatbotAvatar size={48} className="w-10 h-10 sm:w-12 sm:h-12 shrink-0" />
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900">Chatbot Management</h1>
+            <p className="text-neutral-600 mt-1 font-body">Manage and reply to customer support conversations</p>
+          </div>
         </div>
 
         {/* Stats */}
@@ -217,8 +267,10 @@ export default function AdminChatbotPage() {
                     <button
                       key={conv.id}
                       onClick={() => setSelectedConvId(conv.id)}
-                      className={`w-full text-left p-3 hover:bg-neutral-50 transition border-l-2 ${
-                        selectedConvId === conv.id ? 'border-l-blue-600 bg-blue-50' : 'border-l-transparent'
+                      className={`w-full text-left p-3 transition border-l-2 shadow-none min-h-0 rounded-none font-normal ${
+                        selectedConvId === conv.id
+                          ? 'border-l-blue-600 !bg-neutral-200 !text-neutral-900'
+                          : 'border-l-transparent !bg-neutral-100 !text-neutral-900 hover:!bg-neutral-200'
                       }`}
                     >
                       <h4 className="text-sm font-medium text-neutral-900 truncate">{conv.title}</h4>
@@ -315,7 +367,7 @@ export default function AdminChatbotPage() {
                       <button
                         type="submit"
                         disabled={replySending || !replyText.trim()}
-                        className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 transition"
+                        className={`${BUTTON_PRIMARY} text-sm`}
                       >
                         <Send className="w-4 h-4" />
                       </button>
@@ -325,13 +377,7 @@ export default function AdminChatbotPage() {
               </Card>
             ) : (
               <Card className="p-12 border border-neutral-200 text-center">
-                <Image
-                  src="/icons/emirati-dress-icon.png"
-                  alt="Chatbot Assistant"
-                  width={48}
-                  height={48}
-                  style={{ margin: '0 auto 16px', opacity: 0.3 }}
-                />
+                <ChatbotAvatar size={48} className="mx-auto mb-4 opacity-30" />
                 <p className="text-neutral-500">Select a conversation to view details</p>
               </Card>
             )}

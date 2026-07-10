@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logAdminLogin } from '@/lib/admin-login-tracking'
+import { auditFromApiRequest } from '@/lib/audit-log-server'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,6 +46,20 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    const isSuccess = (status || 'success') === 'success'
+    await auditFromApiRequest(request, {
+      adminId,
+      adminEmail,
+      adminName,
+      adminRole: 'admin',
+      actionType: isSuccess ? 'login' : 'login_failed',
+      action: isSuccess ? 'Admin login successful' : 'Admin login failed',
+      entityType: 'auth',
+      status: isSuccess ? 'success' : 'failed',
+      failureReason: failureReason || '',
+      details: accessCodeId ? `Access code setup: ${accessCodeId}` : '',
+    })
 
     return NextResponse.json({
       success: true,

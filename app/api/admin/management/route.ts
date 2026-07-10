@@ -1,8 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { getUserDisplayName, getUserProfilePictureURL, getUserInitials } from '@/lib/user-profile'
+import { auditFromApiRequest } from '@/lib/audit-log-server'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 import crypto from 'crypto'
 
 const db = getAdminDb()
+
+function formatInviteRoleLabel(role: string): string {
+  const labels: Record<string, string> = {
+    super_admin: 'Super Admin',
+    admin: 'Admin',
+    founder_admin: 'Founder Admin',
+    manager: 'Manager',
+    welfare: 'Welfare',
+    founder: 'Founder',
+    coordinator: 'Coordinator',
+    moderator: 'Moderator',
+  }
+  return labels[role] || role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+async function loadInviterProfile(userId: string) {
+  if (!userId?.trim()) return null
+  const userSnap = await db.collection('users').doc(userId.trim()).get()
+  if (!userSnap.exists) return null
+  const data = userSnap.data() as Record<string, unknown>
+  const role = typeof data.role === 'string' ? data.role : 'admin'
+  return {
+    name: getUserDisplayName(data as Parameters<typeof getUserDisplayName>[0]),
+    roleLabel: formatInviteRoleLabel(role),
+    profilePictureURL: getUserProfilePictureURL(data as Parameters<typeof getUserProfilePictureURL>[0]),
+    initials: getUserInitials(data as Parameters<typeof getUserInitials>[0]),
+  }
+}
 
 // Generate a random access code
 function generateAccessCode(): string {
@@ -15,29 +47,60 @@ export async function GET(request: NextRequest) {
 
     if (query === 'admins') {
       const snapshot = await db.collection('admin-users').orderBy('createdAt', 'desc').get()
-      const admins = snapshot.docs.map(doc => {
-        const data = doc.data()
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt,
-          lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
-        }
-      })
+      const admins = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const data = docSnap.data()
+          let profilePictureURL = ''
+          let phone = typeof data.phone === 'string' ? data.phone : ''
+          if (typeof data.profilePictureURL === 'string') {
+            profilePictureURL = data.profilePictureURL
+          }
+          const userSnap = await db.collection('users').doc(docSnap.id).get()
+          if (userSnap.exists) {
+            const u = userSnap.data() as Record<string, unknown>
+            profilePictureURL =
+              (typeof u.profilePictureURL === 'string' && u.profilePictureURL) ||
+              profilePictureURL ||
+              (typeof u.avatarUrl === 'string' && u.avatarUrl) ||
+              ''
+            phone =
+              (typeof u.phone === 'string' && u.phone) ||
+              phone ||
+              (typeof u.whatsappNumber === 'string' && u.whatsappNumber) ||
+              ''
+          }
+          return {
+            id: docSnap.id,
+            ...data,
+            profilePictureURL,
+            phone,
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
+          }
+        })
+      )
       return NextResponse.json({ success: true, data: admins })
     }
 
     if (query === 'access-codes') {
-      const snapshot = await db.collection('admin-access-codes').where('used', '==', false).get()
-      const codes = snapshot.docs.map(doc => {
-        const data = doc.data()
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.() || data.createdAt,
-          expiresAt: data.expiresAt?.toDate?.() || data.expiresAt,
-        }
-      })
+      const snapshot = await db.collection('adminAccessCodes').get()
+      const codes = snapshot.docs
+        .map((docSnap) => {
+          const data = docSnap.data()
+          const isUsed = data.isUsed === true || data.used === true || data.status === 'used'
+          return {
+            id: docSnap.id,
+            ...data,
+            used: isUsed,
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            expiresAt: data.expiresAt?.toDate?.() || data.expiresAt,
+          }
+        })
+        .sort((a, b) => {
+          const aTime = new Date(a.createdAt).getTime()
+          const bTime = new Date(b.createdAt).getTime()
+          return bTime - aTime
+        })
       return NextResponse.json({ success: true, data: codes })
     }
 
@@ -61,7 +124,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (action === 'generate-access-code') {
-      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr } = data
+      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr, invitedByUserId } = data
       
       console.log('[v0] Processing generate-access-code with:', {
         adminName,
@@ -86,26 +149,30 @@ export async function POST(request: NextRequest) {
         code,
         adminName,
         adminEmail,
+        adminRole: role,
         role,
         permissions: permissions || ['full_access'],
+        isUsed: false,
         used: false,
+        status: 'active',
         usedBy: null,
         usedAt: null,
         createdAt: new Date(),
         expiresAt,
         sendEmail: !!sendEmail,
+        createdBy: invitedByUserId || 'management-api',
       }
 
       console.log('[v0] Saving access code to Firestore:', {
         code,
         permissions: accessCodeData.permissions,
         expiresAt,
-        collectionName: 'admin-access-codes',
+        collectionName: 'adminAccessCodes',
       })
 
       let docRef
       try {
-        docRef = await db.collection('admin-access-codes').add(accessCodeData)
+        docRef = await db.collection('adminAccessCodes').add(accessCodeData)
         console.log('[v0] Access code saved successfully:', {
           docId: docRef.id,
           code,
@@ -114,7 +181,7 @@ export async function POST(request: NextRequest) {
       } catch (dbError) {
         console.error('[v0] Firestore write error:', {
           error: dbError instanceof Error ? dbError.message : String(dbError),
-          collection: 'admin-access-codes',
+          collection: 'adminAccessCodes',
           dataSize: JSON.stringify(accessCodeData).length,
         })
         throw dbError
@@ -124,6 +191,7 @@ export async function POST(request: NextRequest) {
       if (sendEmail) {
         console.log('[v0] Triggering email send to:', adminEmail)
         try {
+          const invitedBy = invitedByUserId ? await loadInviterProfile(invitedByUserId) : null
           const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/api/email/send-admin-invite`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -134,6 +202,7 @@ export async function POST(request: NextRequest) {
               role,
               expiresAt: expiresAt.toISOString(),
               permissions: accessCodeData.permissions,
+              invitedBy,
             }),
           })
           
@@ -159,6 +228,23 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      if (invitedByUserId) {
+        const inviterSnap = await db.collection('users').doc(invitedByUserId).get()
+        const inviter = inviterSnap.data() as Record<string, unknown> | undefined
+        await auditFromApiRequest(request, {
+          adminId: invitedByUserId,
+          adminEmail: String(inviter?.email || 'unknown'),
+          adminName: getUserDisplayName(inviter as Parameters<typeof getUserDisplayName>[0]),
+          adminRole: formatAdminRoleLabel(String(inviter?.role || 'admin')),
+          actionType: 'create',
+          action: `Generated admin invitation for ${adminEmail}`,
+          entityType: 'admin',
+          entityName: adminName,
+          status: 'success',
+          details: `Role: ${role}; Code sent: ${!!sendEmail}`,
+        })
+      }
+
       return NextResponse.json({
         success: true,
         data: { id: docRef.id, ...accessCodeData },
@@ -173,9 +259,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
       }
 
-      // Mark access code as used
-      await db.collection('admin-access-codes').doc(accessCodeId).update({
+      const codeRef = db.collection('adminAccessCodes').doc(accessCodeId)
+      const codeSnap = await codeRef.get()
+      const codeData = codeSnap.exists ? codeSnap.data() : null
+      const invitePermissions = Array.isArray(codeData?.permissions)
+        ? codeData.permissions
+        : getRolePermissions(role)
+
+      await codeRef.update({
+        isUsed: true,
         used: true,
+        status: 'used',
         usedBy: email,
         usedAt: new Date(),
       })
@@ -185,7 +279,7 @@ export async function POST(request: NextRequest) {
         email,
         name,
         role, // 'super_admin' | 'admin' | 'moderator'
-        permissions: getRolePermissions(role),
+        permissions: invitePermissions,
         avatarUrl: '', // User uploads this after signup
         bio: '',
         status: 'active',
@@ -195,6 +289,20 @@ export async function POST(request: NextRequest) {
       }
 
       const docRef = await db.collection('admin-users').add(adminData)
+
+      await auditFromApiRequest(request, {
+        adminId: email,
+        adminEmail: email,
+        adminName: name || email,
+        adminRole: formatAdminRoleLabel(role),
+        actionType: 'create',
+        action: `Admin account created via access code: ${email}`,
+        entityType: 'admin',
+        entityId: docRef.id,
+        entityName: name || email,
+        status: 'success',
+        details: `Role: ${role}`,
+      })
 
       return NextResponse.json({
         success: true,
@@ -223,6 +331,7 @@ export async function POST(request: NextRequest) {
 // Update admin user
 export async function PUT(request: NextRequest) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const body = await request.json()
     const { id, ...updateData } = body
 
@@ -239,6 +348,18 @@ export async function PUT(request: NextRequest) {
 
     await db.collection('admin-users').doc(id).update(updateData)
 
+    if (adminUid) {
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'update',
+        action: `Updated admin user: ${updateData.email || updateData.name || id}`,
+        entityType: 'admin',
+        entityId: id,
+        entityName: String(updateData.name || updateData.email || id),
+        status: 'success',
+        details: updateData.role ? `Role: ${updateData.role}` : '',
+      })
+    }
+
     return NextResponse.json({ success: true, message: 'Admin user updated' })
   } catch (error) {
     console.error('[v0] Admin update error:', error)
@@ -249,6 +370,7 @@ export async function PUT(request: NextRequest) {
 // Delete admin user
 export async function DELETE(request: NextRequest) {
   try {
+    const adminUid = await tryResolveAdminUid(request)
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -256,7 +378,22 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
     }
 
+    const snap = await db.collection('admin-users').doc(id).get()
+    const data = snap.data() as Record<string, unknown> | undefined
+    const label = String(data?.name || data?.email || id)
+
     await db.collection('admin-users').doc(id).delete()
+
+    if (adminUid) {
+      await auditAdminApiAction(request, adminUid, {
+        actionType: 'delete',
+        action: `Deleted admin user: ${label}`,
+        entityType: 'admin',
+        entityId: id,
+        entityName: label,
+        status: 'success',
+      })
+    }
 
     return NextResponse.json({ success: true, message: 'Admin user deleted' })
   } catch (error) {
@@ -280,6 +417,32 @@ function getRolePermissions(role: string): string[] {
       'view_analytics',
       'manage_security',
     ],
+    founder_admin: [
+      'manage_admins',
+      'manage_events',
+      'manage_workshops',
+      'manage_recordings',
+      'manage_team',
+      'manage_community',
+      'manage_members',
+      'manage_settings',
+      'view_analytics',
+      'manage_security',
+      'manage_beneficiary',
+    ],
+    manager: [
+      'manage_events',
+      'manage_workshops',
+      'manage_recordings',
+      'manage_team',
+      'manage_community',
+      'manage_members',
+      'view_analytics',
+      'manage_beneficiary',
+    ],
+    welfare: ['manage_beneficiary'],
+    founder: ['manage_beneficiary'],
+    coordinator: ['manage_beneficiary'],
     admin: [
       'manage_events',
       'manage_workshops',

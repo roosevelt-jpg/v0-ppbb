@@ -7,7 +7,8 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { createOpportunity } from '@/lib/business-queries'
+import { auth } from '@/lib/firebase'
+import { RichTextEditor } from '@/components/rich-text-editor'
 
 export default function NewOpportunity() {
   const { user } = useAuth()
@@ -16,16 +17,34 @@ export default function NewOpportunity() {
   const [formData, setFormData] = React.useState({
     title: '',
     type: 'job',
+    roleType: 'full_time',
+    companyName: '',
     description: '',
     category: '',
     salary: 0,
     remote: false,
+    locationCity: '',
     duration: '',
     hoursPerWeek: 0,
     requirements: '',
     benefits: '',
-    status: 'open' as const,
+    suitableFor: [] as string[],
+    genderRestriction: 'mixed' as 'male' | 'female' | 'mixed',
+    applicationProcess: 'cv_upload' as 'cv_upload' | 'external_link' | 'both',
+    applicationURL: '',
+    deadline: '',
+    posterRelation: 'employer' as 'employer' | 'connector',
+    isMemberOnly: false,
   })
+
+  React.useEffect(() => {
+    if (user?.businessProfile?.businessName) {
+      setFormData((prev) => ({
+        ...prev,
+        companyName: prev.companyName || user.businessProfile?.businessName || '',
+      }))
+    }
+  }, [user?.businessProfile?.businessName])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -37,20 +56,53 @@ export default function NewOpportunity() {
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const toggleSuitableFor = (label: string) => {
+    setFormData((prev) => {
+      const next = prev.suitableFor.includes(label)
+        ? prev.suitableFor.filter((s) => s !== label)
+        : [...prev.suitableFor, label]
+      let genderRestriction: 'male' | 'female' | 'mixed' = 'mixed'
+      if (next.includes('Women Only')) genderRestriction = 'female'
+      else if (next.includes('Men Only')) genderRestriction = 'male'
+      return { ...prev, suitableFor: next, genderRestriction }
+    })
+  }
+
+  const submitOpportunity = async (isDraft: boolean) => {
     if (!user) return
 
     try {
       setIsSaving(true)
-      await createOpportunity(user.id, user.businessProfile?.businessName || 'Unknown', {
-        ...formData,
-        applications: 0,
-        applicants: [],
-        requirements: formData.requirements.split('\n').filter((r) => r.trim()),
-        benefits: formData.benefits.split('\n').filter((b) => b.trim()),
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) {
+        alert('Please sign in again to post a job.')
+        return
+      }
+      const res = await fetch('/api/business/opportunities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          businessName: user.businessProfile?.businessName || 'Unknown',
+          companyName: formData.companyName || user.businessProfile?.businessName || 'Unknown',
+          requirements: formData.requirements.split('\n').filter((r) => r.trim()),
+          benefits: formData.benefits.split('\n').filter((b) => b.trim()),
+          status: isDraft ? 'draft' : 'pending_approval',
+        }),
       })
-      alert('Opportunity posted successfully!')
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        alert(json.error || 'Error posting opportunity. Please try again.')
+        return
+      }
+      alert(
+        isDraft
+          ? 'Draft saved.'
+          : 'Job submitted for admin approval. It will appear publicly once approved.'
+      )
       router.push('/business/opportunities')
     } catch (error) {
       console.error('[v0] Error posting opportunity:', error)
@@ -58,6 +110,11 @@ export default function NewOpportunity() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submitOpportunity(false)
   }
 
   if (!user || (!hasBusinessAccess(user))) {
@@ -69,11 +126,13 @@ export default function NewOpportunity() {
       {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
         <div className="max-w-2xl mx-auto">
-          <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
+          <h1
+            style={{ color: '#111111', fontSize: '32px', fontWeight: 700, fontFamily: 'Cormorant Garamond, serif' }}
+          >
             Post New Opportunity
           </h1>
-          <p style={{ color: '#888888', marginTop: '8px' }}>
-            Share a job, internship, or gig with our community
+          <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
+            Share a job, internship, or gig — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
@@ -127,6 +186,8 @@ export default function NewOpportunity() {
                   <option value="job">Job</option>
                   <option value="internship">Internship</option>
                   <option value="gig">Gig</option>
+                  <option value="volunteer">Volunteer</option>
+                  <option value="contract">Contract</option>
                 </select>
               </div>
               <div>
@@ -152,18 +213,16 @@ export default function NewOpportunity() {
               </div>
             </div>
 
-            {/* Description */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Description *
+                Company / Organization Name
               </label>
-              <textarea
-                name="description"
-                value={formData.description}
+              <input
+                type="text"
+                name="companyName"
+                value={formData.companyName}
                 onChange={handleChange}
-                required
-                rows={5}
-                placeholder="Describe the opportunity in detail..."
+                placeholder="Your company or organization name"
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -171,8 +230,46 @@ export default function NewOpportunity() {
                   borderRadius: '8px',
                   backgroundColor: '#ffffff',
                   color: '#111111',
-                  fontFamily: 'inherit',
                 }}
+              />
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Employment Type
+              </label>
+              <select
+                name="roleType"
+                value={formData.roleType}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                }}
+              >
+                <option value="full_time">Full Time</option>
+                <option value="part_time">Part Time</option>
+                <option value="freelance">Freelance</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="internship">Internship</option>
+                <option value="contract">Contract</option>
+              </select>
+            </div>
+
+            {/* Description */}
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Description *
+              </label>
+              <RichTextEditor
+                value={formData.description}
+                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
+                placeholder="Describe the opportunity in detail..."
+                minHeight={180}
               />
             </div>
 
@@ -255,6 +352,136 @@ export default function NewOpportunity() {
               </div>
             </div>
 
+            {!formData.remote && (
+              <div>
+                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                  Location / City
+                </label>
+                <input
+                  type="text"
+                  name="locationCity"
+                  value={formData.locationCity}
+                  onChange={handleChange}
+                  placeholder="e.g. Dubai, UAE"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '1px solid #e4e1da',
+                    borderRadius: '8px',
+                    backgroundColor: '#ffffff',
+                    color: '#111111',
+                  }}
+                />
+              </div>
+            )}
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Who is this suitable for?
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {['Students', 'Graduates', 'Women Only', 'Men Only', 'Open to All'].map((label) => (
+                  <label key={label} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={formData.suitableFor.includes(label)}
+                      onChange={() => toggleSuitableFor(label)}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Application Process
+              </label>
+              <div className="flex flex-wrap gap-4 text-sm">
+                {(
+                  [
+                    ['cv_upload', 'CV Upload on Platform'],
+                    ['external_link', 'External Link'],
+                    ['both', 'Both'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <label key={value} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="applicationProcess"
+                      checked={formData.applicationProcess === value}
+                      onChange={() => setFormData((p) => ({ ...p, applicationProcess: value }))}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              {(formData.applicationProcess === 'external_link' ||
+                formData.applicationProcess === 'both') && (
+                <input
+                  type="url"
+                  name="applicationURL"
+                  value={formData.applicationURL}
+                  onChange={handleChange}
+                  placeholder="https://yourcompany.com/careers/apply"
+                  className="mt-3 w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                />
+              )}
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Application Deadline (optional)
+              </label>
+              <input
+                type="date"
+                name="deadline"
+                value={formData.deadline}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Your relation to this opportunity
+              </label>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={formData.posterRelation === 'employer'}
+                    onChange={() => setFormData((p) => ({ ...p, posterRelation: 'employer' }))}
+                  />
+                  Employer
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={formData.posterRelation === 'connector'}
+                    onChange={() => setFormData((p) => ({ ...p, posterRelation: 'connector' }))}
+                  />
+                  Connector
+                </label>
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={formData.isMemberOnly}
+                onChange={(e) => setFormData((p) => ({ ...p, isMemberOnly: e.target.checked }))}
+              />
+              Restrict to platform members only
+            </label>
+
             {/* Requirements */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
@@ -302,7 +529,7 @@ export default function NewOpportunity() {
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Button
                 type="submit"
                 disabled={isSaving}
@@ -313,6 +540,19 @@ export default function NewOpportunity() {
                 }}
               >
                 {isSaving ? 'Posting...' : 'Post Opportunity'}
+              </Button>
+              <Button
+                type="button"
+                disabled={isSaving}
+                onClick={() => void submitOpportunity(true)}
+                style={{
+                  backgroundColor: '#ffffff',
+                  color: '#111111',
+                  border: '1px solid #e4e1da',
+                  padding: '12px 24px',
+                }}
+              >
+                Save as Draft
               </Button>
               <Button
                 type="button"

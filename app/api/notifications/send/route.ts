@@ -1,46 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminDb } from '@/lib/firebase-admin'
+import { sendPushToUser } from '@/lib/push-notifications-server'
+import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 
 export async function POST(request: NextRequest) {
   try {
-    const db = getAdminDb()
+    const authHeader = request.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!token) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const uid = await verifyIdToken(token)
+    if (!uid || !(await isAdminUser(uid))) {
+      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+    }
+
     const body = await request.json()
     const { userId, notification, data } = body
 
-    if (!userId || !notification) {
+    const targetUserId = typeof userId === 'string' && userId ? userId : uid
+
+    if (!notification?.title) {
       return NextResponse.json(
-        { success: false, error: 'userId and notification required' },
+        { success: false, error: 'notification.title required' },
         { status: 400 }
       )
     }
 
-    // Get user's FCM token
-    const userDoc = await db.collection('users').doc(userId).get()
-    if (!userDoc.exists || !userDoc.data()?.fcmToken) {
-      return NextResponse.json(
-        { success: false, error: 'FCM token not found for user' },
-        { status: 404 }
-      )
+    const result = await sendPushToUser(
+      targetUserId,
+      { title: notification.title, body: notification.body || '' },
+      typeof data === 'object' && data ? data : { type: 'test' }
+    )
+
+    if (result.skipped && !result.sent) {
+      return NextResponse.json({ success: true, skipped: result.skipped })
     }
 
-    const fcmToken = userDoc.data().fcmToken
-    const fcmSettings = userDoc.data().fcmSettings || {}
-
-    // Check if notifications are enabled for this type
-    if (!fcmSettings.enabled) {
-      return NextResponse.json({ success: true, skipped: 'Notifications disabled' })
-    }
-
-    // Send via Firebase Admin SDK (would use firebase-admin messaging)
-    console.log('[v0] Sending FCM notification to:', userId, {
-      title: notification.title,
-      body: notification.body,
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Notification queued for delivery',
-    })
+    return NextResponse.json({ success: true, sent: result.sent })
   } catch (error) {
     console.error('[v0] Error sending notification:', error)
     return NextResponse.json(

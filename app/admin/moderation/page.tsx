@@ -7,10 +7,15 @@ import { db } from '@/lib/firebase'
 import { collection, getDocs, query, where, updateDoc, doc, onSnapshot, orderBy, writeBatch, addDoc } from 'firebase/firestore'
 import { AlertCircle, CheckCircle, XCircle, Flag, Trash2, Ban, Eye, MessageSquare, TrendingUp, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { BUTTON_PRIMARY, BUTTON_DANGER, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 type ModerationTab = 'reports' | 'users' | 'content' | 'community-messages' | 'banned-words'
 
 export default function ModerationPage() {
+  const audit = useAdminAudit()
   const [reports, setReports] = React.useState<any[]>([])
   const [flaggedUsers, setFlaggedUsers] = React.useState<any[]>([])
   const [flaggedContent, setFlaggedContent] = React.useState<any[]>([])
@@ -122,6 +127,13 @@ export default function ModerationPage() {
         resolvedAt: new Date(),
         resolvedBy: 'admin'
       })
+      audit({
+        actionType: 'approve',
+        action: `Approved community report: ${reportId}`,
+        entityType: 'content',
+        entityId: reportId,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error approving report:', error)
     }
@@ -133,6 +145,13 @@ export default function ModerationPage() {
         status: 'rejected',
         resolvedAt: new Date(),
         resolvedBy: 'admin'
+      })
+      audit({
+        actionType: 'reject',
+        action: `Rejected community report: ${reportId}`,
+        entityType: 'content',
+        entityId: reportId,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error rejecting report:', error)
@@ -146,6 +165,13 @@ export default function ModerationPage() {
         deletedAt: new Date(),
         deletedBy: 'admin'
       })
+      audit({
+        actionType: 'delete',
+        action: `Deleted flagged post: ${contentId}`,
+        entityType: 'content',
+        entityId: contentId,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error deleting content:', error)
     }
@@ -157,6 +183,14 @@ export default function ModerationPage() {
         active: false,
         bannedAt: new Date(),
         bannedReason: 'Community violation'
+      })
+      audit({
+        actionType: 'update',
+        action: `Banned user: ${userId}`,
+        entityType: 'member',
+        entityId: userId,
+        status: 'success',
+        details: 'Community violation',
       })
     } catch (error) {
       console.error('[v0] Error banning user:', error)
@@ -177,6 +211,13 @@ export default function ModerationPage() {
         })
       })
       await batch.commit()
+      audit({
+        actionType: bulkAction === 'approve' ? 'approve' : bulkAction === 'reject' ? 'reject' : 'delete',
+        action: `Bulk ${bulkAction} on ${selectedReports.size} community report(s)`,
+        entityType: 'content',
+        status: 'success',
+        details: `Report IDs: ${Array.from(selectedReports).join(', ')}`,
+      })
       setSelectedReports(new Set())
       setBulkAction(null)
     } catch (error) {
@@ -203,6 +244,13 @@ export default function ModerationPage() {
         deletedAt: new Date(),
         deletedBy: 'admin'
       })
+      audit({
+        actionType: 'delete',
+        action: `Deleted community message: ${messageId}`,
+        entityType: 'content',
+        entityId: messageId,
+        status: 'success',
+      })
     } catch (error) {
       console.error('[v0] Error deleting community message:', error)
     }
@@ -214,6 +262,13 @@ export default function ModerationPage() {
       await updateDoc(doc(db, 'community_messages', messageId), {
         moderationStatus: 'approved',
         isFlagged: false
+      })
+      audit({
+        actionType: 'approve',
+        action: `Approved community message: ${messageId}`,
+        entityType: 'content',
+        entityId: messageId,
+        status: 'success',
       })
     } catch (error) {
       console.error('[v0] Error approving community message:', error)
@@ -242,6 +297,13 @@ export default function ModerationPage() {
         })
       }
       
+      audit({
+        actionType: 'update',
+        action: `Added banned word: ${word}`,
+        entityType: 'settings',
+        status: 'success',
+      })
+
       setBannedWords(updatedWords)
       setNewBannedWord('')
     } catch (error) {
@@ -263,6 +325,13 @@ export default function ModerationPage() {
         })
       }
       
+      audit({
+        actionType: 'update',
+        action: `Removed banned word: ${wordToRemove}`,
+        entityType: 'settings',
+        status: 'success',
+      })
+
       setBannedWords(updatedWords)
     } catch (error) {
       console.error('[v0] Error removing banned word:', error)
@@ -320,16 +389,13 @@ export default function ModerationPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-neutral-200 overflow-x-auto">
+        <div className="flex gap-2 flex-wrap overflow-x-auto">
           {(['reports', 'users', 'content', 'community-messages', 'banned-words'] as const).map(tab => (
             <button
               key={tab}
+              type="button"
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium border-b-2 transition whitespace-nowrap ${
-                activeTab === tab
-                  ? 'border-neutral-900 bg-neutral-900 text-white'
-                  : 'border-transparent text-neutral-600 hover:text-neutral-900'
-              }`}
+              className={activeTab === tab ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
             >
               {tab === 'reports' && `Reports (${stats.pendingReports})`}
               {tab === 'users' && `Flagged Users (${stats.flaggedUsers})`}
@@ -349,11 +415,7 @@ export default function ModerationPage() {
                 <button
                   key={f}
                   onClick={() => setFilter(f as any)}
-                  className={`px-4 py-2 rounded-lg font-medium transition text-sm ${
-                    filter === f
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-300'
-                  }`}
+                  className={filter === f ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
                 >
                   {f === 'all' ? 'All' : f === 'pending' ? 'Pending' : 'Resolved'}
                 </button>
@@ -385,13 +447,13 @@ export default function ModerationPage() {
                     <button
                       onClick={handleBulkModeration}
                       disabled={!bulkAction}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+                      className={`${BUTTON_PRIMARY} text-sm`}
                     >
                       Apply
                     </button>
                     <button
                       onClick={() => setSelectedReports(new Set())}
-                      className="px-4 py-2 bg-neutral-300 text-neutral-900 rounded-lg text-sm font-medium hover:bg-neutral-400 transition"
+                      className={`${FILTER_PILL_INACTIVE} text-sm`}
                     >
                       Clear
                     </button>
@@ -438,14 +500,14 @@ export default function ModerationPage() {
                         <div className="flex gap-2 flex-shrink-0">
                           <button
                             onClick={() => handleApprove(report.id)}
-                            className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition flex items-center gap-1"
+                            className={`${BUTTON_PRIMARY} text-sm flex items-center gap-1`}
                           >
                             <CheckCircle className="w-4 h-4" />
                             Approve
                           </button>
                           <button
                             onClick={() => handleReject(report.id)}
-                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition flex items-center gap-1"
+                            className={`${BUTTON_DANGER} text-sm flex items-center gap-1`}
                           >
                             <XCircle className="w-4 h-4" />
                             Reject
@@ -469,10 +531,13 @@ export default function ModerationPage() {
               flaggedUsers.map(user => (
                 <Card key={user.id} className="p-4 border border-neutral-200">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-neutral-900">{user.firstName} {user.lastName}</h4>
-                      <p className="text-sm text-neutral-600">{user.email}</p>
-                      <p className="text-xs text-neutral-500 mt-1">Flags: {user.flags || 0}</p>
+                    <div className="flex-1 min-w-0">
+                      <AdminUserCell user={user} />
+                      <p className="text-sm text-neutral-600 mt-1 break-all">{user.email || 'Not provided'}</p>
+                      <p className="text-sm text-neutral-600">
+                        Phone: {formatUserPhoneDisplay(user)}
+                      </p>
+                      <p className="text-xs text-neutral-500 mt-2">Flags: {user.flags || 0}</p>
                     </div>
                     <button
                       onClick={() => handleBanUser(user.id)}
@@ -528,11 +593,7 @@ export default function ModerationPage() {
                 <button
                   key={f}
                   onClick={() => setCommunityFilter(f as any)}
-                  className={`px-4 py-2 rounded-lg font-medium transition text-sm ${
-                    communityFilter === f
-                      ? 'bg-neutral-900 text-white'
-                      : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-300'
-                  }`}
+                  className={communityFilter === f ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
                 >
                   {f === 'pending' ? 'Pending' : 'All'}
                 </button>
@@ -569,14 +630,14 @@ export default function ModerationPage() {
                         <div className="flex gap-2 flex-shrink-0">
                           <button
                             onClick={() => handleApproveCommunityMessage(message.id)}
-                            className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200 transition flex items-center gap-1"
+                            className={`${BUTTON_PRIMARY} text-sm flex items-center gap-1`}
                           >
                             <CheckCircle className="w-4 h-4" />
                             Approve
                           </button>
                           <button
                             onClick={() => handleDeleteCommunityMessage(message.id)}
-                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition flex items-center gap-1"
+                            className={`${BUTTON_DANGER} text-sm flex items-center gap-1`}
                           >
                             <Trash2 className="w-4 h-4" />
                             Delete

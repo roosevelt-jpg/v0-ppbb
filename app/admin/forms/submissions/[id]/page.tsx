@@ -8,6 +8,7 @@ import { getSubmissionById, getFormById, updateSubmissionStatus } from '@/lib/fo
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ChevronLeft } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 
 export default function SubmissionDetailPage() {
   const params = useParams()
@@ -130,9 +131,20 @@ export default function SubmissionDetailPage() {
                   return (
                     <div key={field.id}>
                       <p className="text-sm text-gray-600">{field.label}</p>
-                      <p className="font-medium mt-1">
-                        {Array.isArray(value) ? value.join(', ') : value || '(No response)'}
-                      </p>
+                      {field.type === 'file' && typeof value === 'object' && value && 'url' in value ? (
+                        <a
+                          href={(value as { url: string; name?: string }).url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium mt-1 text-black underline break-all"
+                        >
+                          {(value as { name?: string }).name || 'Download attachment'}
+                        </a>
+                      ) : (
+                        <p className="font-medium mt-1 break-words">
+                          {Array.isArray(value) ? value.join(', ') : value || '(No response)'}
+                        </p>
+                      )}
                     </div>
                   )
                 })}
@@ -171,14 +183,14 @@ export default function SubmissionDetailPage() {
           Mark as Reviewed
         </Button>
         <Button
-          className="bg-green-600 hover:bg-green-700"
+          className={BUTTON_PRIMARY}
           onClick={() => handleStatusUpdate('approved')}
           disabled={isUpdating}
         >
           Approve
         </Button>
         <Button
-          className="bg-red-600 hover:bg-red-700"
+          className={BUTTON_DANGER}
           onClick={() => handleStatusUpdate('rejected')}
           disabled={isUpdating}
         >

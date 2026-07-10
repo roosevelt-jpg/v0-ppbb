@@ -166,7 +166,7 @@ export default function PartnershipsPage() {
 
                   {/* Actions */}
                   <div className="md:col-span-1 flex flex-col justify-center gap-2">
-                    <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition font-medium text-sm">
+                    <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-black border border-black rounded-lg hover:bg-neutral-50 transition font-medium text-sm">
                       <MessageSquare className="w-4 h-4" />
                       Contact
                     </button>

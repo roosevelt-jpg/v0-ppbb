@@ -4,6 +4,8 @@ import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { auth } from '@/lib/firebase'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 import { Trash2, Save, Clock, Users } from 'lucide-react'
 
 interface EditVolunteerModalProps {
@@ -14,6 +16,7 @@ interface EditVolunteerModalProps {
 }
 
 export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }: EditVolunteerModalProps) {
+  const audit = useAdminAudit()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState(volunteer || {})
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -28,6 +31,28 @@ export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }:
       await updateDocument('users', volunteer.id, {
         ...formData,
         updatedAt: new Date(),
+      })
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (token) {
+          await fetch('/api/certificates/check-milestones', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: volunteer.id }),
+          })
+        }
+      } catch {
+        /* certificate check is best-effort */
+      }
+      audit({
+        actionType: 'update',
+        action: `Updated volunteer: ${volunteer.id}`,
+        entityType: 'member',
+        entityId: volunteer.id,
+        status: 'success',
       })
       onOpenChange(false)
       onSuccess?.()
@@ -44,6 +69,13 @@ export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }:
     setDeleteLoading(true)
     try {
       await deleteDocument('users', volunteer.id)
+      audit({
+        actionType: 'delete',
+        action: `Deleted volunteer: ${volunteer.id}`,
+        entityType: 'member',
+        entityId: volunteer.id,
+        status: 'success',
+      })
       onOpenChange(false)
       onSuccess?.()
     } catch (error) {

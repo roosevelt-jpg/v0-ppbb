@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="PB Assistant">
+  <rect width="64" height="64" rx="32" fill="#F7F6F2"/>
+  <circle cx="32" cy="23" r="9.5" fill="#C9A27A"/>
+  <path d="M15.5 25.5C20 16 44 16 48.5 25.5L46.5 36.5C40.5 33.5 23.5 33.5 17.5 36.5L15.5 25.5Z" fill="#FFFFFF" stroke="#D8D4CB" stroke-width="1"/>
+  <ellipse cx="32" cy="21.5" rx="13.5" ry="3.8" fill="#111111"/>
+  <path d="M22.5 37.5C27 41.5 37 41.5 41.5 37.5L45.5 58H18.5L22.5 37.5Z" fill="#FFFFFF" stroke="#D8D4CB" stroke-width="1"/>
+  <path d="M32 37.5V58" stroke="#E8E4DB" stroke-width="1"/>
+</svg>

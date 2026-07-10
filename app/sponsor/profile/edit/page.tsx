@@ -287,7 +287,7 @@ export default function EditSponsorProfilePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-black text-white rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition"
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Saving...' : 'Save Changes'}

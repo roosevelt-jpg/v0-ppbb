@@ -1,5 +1,16 @@
 // User roles and types
-export type UserRole = 'member' | 'volunteer' | 'business' | 'admin' | 'sponsor' | 'super_admin'
+export type UserRole =
+  | 'member'
+  | 'volunteer'
+  | 'business'
+  | 'admin'
+  | 'sponsor'
+  | 'super_admin'
+  | 'welfare'
+  | 'founder'
+  | 'coordinator'
+  | 'founder_admin'
+  | 'manager'
 
 // Admin role permissions
 export type AdminRole = 'founder_admin' | 'manager' | 'moderator' | 'analyst'
@@ -123,12 +134,14 @@ export interface User {
   emiratesIdNumber?: string
   avatar?: UploadedImage
   avatarUrl?: string
+  profilePictureURL?: string
   role: UserRole
   // Additional roles a user holds beyond their primary role (e.g. a member who
   // also runs a business). Used to grant access to the business portal.
   roles?: UserRole[]
   phone?: string
   whatsappNumber?: string
+  bio?: string
   location?: LocationData
   profession?: string
   jobTitle?: string
@@ -175,6 +188,15 @@ export interface User {
   profileComplete: boolean
   createdAt: Date
   updatedAt: Date
+  /** Free-text location label for settings / directory display */
+  locationLabel?: string
+  notificationPreferences?: import('@/lib/user-settings').NotificationPreferences
+  privacySettings?: import('@/lib/user-settings').PrivacySettings
+  status?: 'active' | 'deleted' | 'suspended'
+  deletedAt?: Date
+  newsletterOptOut?: boolean
+  fcmToken?: string
+  fcmSettings?: import('@/lib/fcm-settings').FCMSettings
 }
 
 export interface BusinessProfile extends User {
@@ -478,6 +500,10 @@ export interface Page {
   order: number
   // Menu configuration
   menuLocation?: 'navbar' | 'footer-quicklinks' | 'footer-getinvolved' | 'footer-legal' | 'none'
+  /** When menuLocation is navbar — parent nav item href from platformConfig/navigation */
+  headerSection?: string
+  /** Link to an existing app route instead of /pages/[slug] */
+  externalHref?: string
   showInMenu: boolean
   menuLabel?: string
   menuOrder: number
@@ -571,6 +597,15 @@ export interface Newsletter {
   scheduledFor?: Date
   sentAt?: Date
   recipientCount: number
+  totalTargeted?: number
+  failedCount?: number
+  sendStatus?: 'pending' | 'sent' | 'partial' | 'failed'
+  sendErrors?: string
+  subtitle?: string
+  seoTitle?: string
+  metaDescription?: string
+  ctaText?: string
+  ctaUrl?: string
   openedCount: number
   clickedCount: number
   createdBy: string
@@ -885,32 +920,6 @@ export interface AuditLog {
   ipAddress?: string
 }
 
-// Hero Slider
-export interface SliderImage {
-  id: string
-  imageUrl: string
-  image?: UploadedImage
-  title: string
-  subtitle?: string
-  link?: string
-  displayDuration: number // in seconds
-  displayOrder: number
-  isActive: boolean
-}
-
-export interface HeroSliderSettings {
-  id: string
-  transitionEffect: 'fade' | 'slide' | 'zoom' | 'fade-slide'
-  transitionDuration: number // in milliseconds
-  autoplay: boolean
-  autoplayDuration: number // in seconds
-  displayMode: 'auto' | 'manual'
-  images: SliderImage[]
-  createdAt: Date
-  updatedAt: Date
-  publishedAt?: Date
-}
-
 // YouTube Integration
 export interface YouTubeVideo {
   id: string
@@ -962,7 +971,18 @@ export interface BusinessOpportunity {
   views?: number
   applications: number
   applicants: string[]
-  status: 'open' | 'closed' | 'filled' | 'archived'
+  /** pending_approval until admin publishes; then open/closed/filled/archived */
+  status: 'draft' | 'pending_approval' | 'open' | 'closed' | 'filled' | 'archived' | 'rejected'
+  companyName?: string
+  roleType?: string
+  locationCity?: string
+  locationType?: string
+  suitableFor?: string[]
+  genderRestriction?: 'male' | 'female' | 'mixed' | string
+  applicationProcess?: 'cv_upload' | 'external_link' | 'both' | string
+  applicationURL?: string | null
+  posterRelation?: 'employer' | 'connector' | string
+  isMemberOnly?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -995,15 +1015,24 @@ export interface BusinessOffer {
   type: 'product' | 'service' | 'discount'
   description: string
   category: string
+  /** Colour / size line shown on /shop for merchandise */
+  variant?: string
   price?: number
   discountPercentage?: number
   originalPrice?: number
   image?: UploadedImage
   imageUrl?: string
+  imageURLs?: string[]
+  isMemberOnly?: boolean
   validUntil?: Date
   targetAudience?: 'members' | 'volunteers' | 'public'
   memberBenefit?: number
-  status: 'active' | 'archived'
+  /**
+   * pending_approval until admin publishes.
+   * published = eligible for /shop merch when category is merchandise;
+   * active = marketplace directory.
+   */
+  status: 'draft' | 'pending_approval' | 'active' | 'archived' | 'published' | 'rejected'
   views: number
   conversions: number
   createdAt: Date
@@ -1020,7 +1049,11 @@ export interface BusinessLead {
   email: string
   phone?: string
   message?: string
-  leadSource: 'opportunity' | 'offer' | 'direct' | 'marketplace'
+  leadSource: 'opportunity' | 'offer' | 'direct' | 'marketplace' | 'job_view' | 'offer_view' | 'profile_view' | 'message' | 'discount_use'
+  sourceType?: 'job_view' | 'offer_view' | 'profile_view' | 'message' | 'discount_use' | string
+  value?: number
+  converted?: boolean
+  userId?: string
   status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
   notes?: string
   createdAt: Date
@@ -1061,6 +1094,38 @@ export interface BusinessPartnership {
   endDate?: Date
   createdAt: Date
   updatedAt: Date
+}
+
+/** Admin partnership / sponsorship request submitted by a business user */
+export interface PartnershipRequest {
+  id: string
+  submittedBy: string
+  submitterName: string
+  submitterEmail: string
+  type: string
+  title: string
+  description: string
+  proposedBudget?: string | null
+  attachmentURL?: string | null
+  status: 'pending' | 'under_review' | 'approved' | 'declined'
+  adminNotes?: string | null
+  submittedAt: Date
+  updatedAt: Date
+}
+
+/** Individual referral conversion record */
+export interface ReferralRecord {
+  id: string
+  referrerId: string
+  referredUserId?: string
+  referredUserName?: string
+  referredUserEmail?: string
+  status: 'pending' | 'converted' | 'failed'
+  commissionPercent?: number
+  amount?: number
+  settled?: boolean
+  referredAt: Date
+  convertedAt?: Date
 }
 
 // Community Support Requests from Businesses

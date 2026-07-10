@@ -1,197 +1,197 @@
 'use client'
-import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
 
 import React, { useEffect, useState } from 'react'
+import { useAuth } from '@/lib/auth-context'
 import { auth, db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Award, Download, Share2 } from 'lucide-react'
-
+import { Award, Printer } from 'lucide-react'
+import {
+  DashboardPageShell,
+  DashboardSkeleton,
+  DashboardErrorState,
+  DashboardEmptyState,
+} from '@/components/dashboard-states'
+import { CertificateDesignPreview } from '@/components/certificate-design-preview'
+import { normalizeIssuedCertificate, type IssuedCertificate } from '@/lib/certificate-templates'
 
 export default function CertificatesPage() {
-  const [certificates, setCertificates] = useState<any[]>([])
-  const [badges, setBadges] = useState<any[]>([])
+  const { user, loading: authLoading } = useAuth()
+  const [certificates, setCertificates] = useState<IssuedCertificate[]>([])
+  const [badges, setBadges] = useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [previewId, setPreviewId] = useState<string | null>(null)
 
   useEffect(() => {
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) {
+    if (authLoading) return
+    if (!user?.id) {
       setLoading(false)
       return
     }
 
-    let certLoaded = false
-    let badgesLoaded = false
+    void (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (token) {
+          await fetch('/api/certificates/check-milestones', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: user.id }),
+          })
+        }
+      } catch {
+        /* non-blocking */
+      }
+    })()
 
-    // Fetch certificates
-    const certUnsubscribe = onSnapshot(
-      query(collection(db, 'certificates'), where('userId', '==', firebaseUser.uid)),
+    let certDone = false
+    let badgeDone = false
+    const maybeDone = () => {
+      if (certDone && badgeDone) setLoading(false)
+    }
+
+    const certUnsub = onSnapshot(
+      query(collection(db, 'certificates'), where('userId', '==', user.id)),
       (snapshot) => {
-        setCertificates(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
-        certLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+        const rows =
+          snapshot?.docs
+            ?.map((d) => normalizeIssuedCertificate(d.id, d.data() as Record<string, unknown>))
+            .sort((a, b) => b.issuedAt.getTime() - a.issuedAt.getTime()) ?? []
+        setCertificates(rows)
+        certDone = true
+        maybeDone()
       },
-      (error) => {
-        console.error('[v0] Error fetching certificates:', error)
-        certLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+      (err) => {
+        console.error('[v0] certificates error:', err)
+        setError('Failed to load certificates.')
+        certDone = true
+        maybeDone()
       }
     )
 
-    // Fetch badges
-    const badgeUnsubscribe = onSnapshot(
-      query(collection(db, 'badges'), where('userId', '==', firebaseUser.uid)),
+    const badgeUnsub = onSnapshot(
+      query(collection(db, 'badges'), where('userId', '==', user.id)),
       (snapshot) => {
-        setBadges(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        )
-        badgesLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+        setBadges(snapshot?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
+        badgeDone = true
+        maybeDone()
       },
-      (error) => {
-        console.error('[v0] Error fetching badges:', error)
-        badgesLoaded = true
-        if (certLoaded && badgesLoaded) {
-          setLoading(false)
-        }
+      () => {
+        badgeDone = true
+        maybeDone()
       }
     )
 
     return () => {
-      certUnsubscribe()
-      badgeUnsubscribe()
+      certUnsub()
+      badgeUnsub()
     }
-  }, [])
+  }, [authLoading, user?.id])
+
+  const handlePrint = (certId: string) => {
+    setPreviewId(certId)
+    window.setTimeout(() => {
+      window.print()
+    }, 300)
+  }
+
+  if (authLoading || loading) return <DashboardSkeleton />
+  if (error) return <DashboardErrorState message={error} />
+
+  const previewCert = certificates.find((c) => c.id === previewId)
 
   return (
-    <div className="p-8 space-y-8">
-        {/* Badges Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Your Badges</h2>
-          {loading ? (
-            <p className="text-muted-foreground">Loading badges...</p>
-          ) : badges.length === 0 ? (
-            <Card className="p-6">
-              <div className="text-center">
-                <Award size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-muted-foreground">No badges earned yet</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Complete activities to earn badges
-                </p>
+    <DashboardPageShell title="Certificates" subtitle="Milestone certificates earned through volunteer service">
+      <section className="mb-10">
+        <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Badges</h2>
+        {badges.length === 0 ? (
+          <DashboardEmptyState
+            icon={<Award className="w-12 h-12" />}
+            title="No badges yet"
+            description="Complete activities to earn badges."
+          />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {badges.map((badge) => (
+              <Card key={String(badge.id)} className="p-4 text-center border border-neutral-200">
+                <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center bg-neutral-900 rounded-full text-white">
+                  <Award size={32} />
+                </div>
+                <h3 className="font-bold text-sm">{String(badge.name ?? 'Badge')}</h3>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Certificates</h2>
+        {certificates.length === 0 ? (
+          <DashboardEmptyState
+            icon={<Award className="w-12 h-12" />}
+            title="No certificates yet"
+            description="Certificates are awarded automatically when you reach volunteer hour milestones. Log hours via volunteering activities."
+          />
+        ) : (
+          <div className="space-y-8">
+            {certificates.map((cert) => (
+              <div key={cert.id} className="space-y-4">
+                <CertificateDesignPreview
+                  id={`cert-${cert.id}`}
+                  data={{
+                    title: cert.title,
+                    subtitle: cert.subtitle,
+                    bodyText: cert.bodyText,
+                    memberName: cert.memberName,
+                    hours: cert.hoursAtIssuance,
+                    credentialId: cert.credentialId,
+                    issuedDate: cert.issuedAt.toLocaleDateString('en-GB'),
+                    accentColor: cert.accentColor,
+                    logoURL: cert.logoURL,
+                    signatories: cert.signatories,
+                  }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handlePrint(cert.id)}
+                    className="!bg-black !text-white px-4 py-2 rounded-lg text-sm inline-flex items-center gap-2"
+                  >
+                    <Printer size={16} />
+                    Print / Save PDF
+                  </button>
+                  <span className="text-xs text-neutral-500 self-center">
+                    Issued {cert.issuedAt.toLocaleDateString('en-GB')} · {cert.hoursAtIssuance} hours
+                  </span>
+                </div>
               </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {badges.map((badge) => (
-                <Card key={badge.id} className="p-4 text-center hover:shadow-lg transition">
-                  <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500 rounded-full text-white text-2xl">
-                    {badge.icon || <Award size={32} />}
-                  </div>
-                  <h3 className="font-bold text-sm">{badge.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{badge.description}</p>
-                  <p className="text-xs mt-2" style={{ color: '#888888' }}>
-                    {badge.earnedAt
-                      ? new Date(badge.earnedAt).toLocaleDateString()
-                      : 'Recently'}
-                  </p>
-                </Card>
-              ))}
-            </div>
-          )}
+            ))}
+          </div>
+        )}
+      </section>
+
+      {previewCert ? (
+        <div className="hidden print:block fixed inset-0 bg-white p-8 z-[9999]">
+          <CertificateDesignPreview
+            data={{
+              title: previewCert.title,
+              subtitle: previewCert.subtitle,
+              bodyText: previewCert.bodyText,
+              memberName: previewCert.memberName,
+              hours: previewCert.hoursAtIssuance,
+              credentialId: previewCert.credentialId,
+              issuedDate: previewCert.issuedAt.toLocaleDateString('en-GB'),
+              accentColor: previewCert.accentColor,
+              logoURL: previewCert.logoURL,
+              signatories: previewCert.signatories,
+            }}
+          />
         </div>
-
-        {/* Certificates Section */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Your Certificates</h2>
-          {loading ? (
-            <p className="text-muted-foreground">Loading certificates...</p>
-          ) : certificates.length === 0 ? (
-            <Card className="p-6">
-              <div className="text-center">
-                <Award size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-muted-foreground">No certificates yet</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Complete courses and volunteer hours to earn certificates
-                </p>
-              </div>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {certificates.map((cert) => (
-                <Card key={cert.id} className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-bold text-lg">{cert.title}</h3>
-                      <p className="text-muted-foreground text-sm mt-1">{cert.issuedBy}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Issued:{' '}
-                        {cert.issuedDate
-                          ? new Date(cert.issuedDate).toLocaleDateString()
-                          : 'N/A'}
-                      </p>
-                      {cert.expiryDate && (
-                        <p className="text-xs text-muted-foreground">
-                          Expires:{' '}
-                          {new Date(cert.expiryDate).toLocaleDateString()}
-                        </p>
-                      )}
-                      {cert.credentialId && (
-                        <p className="text-xs text-black mt-2 font-medium">
-                          ID: {cert.credentialId}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Download certificate
-                          console.log('Download:', cert.id)
-                        }}
-                      >
-                        <Download size={16} />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          // Share certificate
-                          console.log('Share:', cert.id)
-                        }}
-                      >
-                        <Share2 size={16} />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {cert.description && (
-                    <p className="text-sm mt-4 text-muted-foreground">
-                      {cert.description}
-                    </p>
-                  )}
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      ) : null}
+    </DashboardPageShell>
   )
 }

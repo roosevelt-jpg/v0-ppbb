@@ -5,6 +5,8 @@ import {
   BusinessLead,
   BusinessReferral,
   BusinessPartnership,
+  PartnershipRequest,
+  ReferralRecord,
   BusinessSupportRequest,
   BusinessRating,
   BusinessPayment,
@@ -28,9 +30,117 @@ import {
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { normalizeOpportunityFromJob, isOpportunityExpired } from '@/lib/opportunity-utils'
+
+function toCreatedAtMillis(value: unknown): number {
+  if (!value) return 0
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    try {
+      return (value as { toDate: () => Date }).toDate().getTime()
+    } catch {
+      return 0
+    }
+  }
+  const d = new Date(value as string)
+  return Number.isNaN(d.getTime()) ? 0 : d.getTime()
+}
+
+function isMissingFirestoreIndex(error: unknown): boolean {
+  const code =
+    typeof error === 'object' && error !== null && 'code' in error
+      ? String((error as { code: string }).code)
+      : ''
+  return code === 'failed-precondition'
+}
+
+/** Fetch business-owned docs; falls back to client sort when composite index is building. */
+async function getByBusinessId<T extends { createdAt?: unknown }>(
+  collectionName: string,
+  businessId: string
+): Promise<T[]> {
+  const col = collection(db, collectionName)
+  const mapDocs = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const items = docs.map((d) => ({ id: d.id, ...d.data() }) as T)
+    items.sort((a, b) => toCreatedAtMillis(b.createdAt) - toCreatedAtMillis(a.createdAt))
+    return items
+  }
+
+  try {
+    const snap = await getDocs(
+      query(col, where('businessId', '==', businessId), orderBy('createdAt', 'desc'))
+    )
+    return mapDocs(snap.docs)
+  } catch (error) {
+    if (isMissingFirestoreIndex(error)) {
+      try {
+        const snap = await getDocs(query(col, where('businessId', '==', businessId)))
+        return mapDocs(snap.docs)
+      } catch (fallbackError) {
+        console.warn(`[v0] ${collectionName} fetch failed:`, fallbackError)
+        return []
+      }
+    }
+    console.warn(`[v0] ${collectionName} fetch failed:`, error)
+    return []
+  }
+}
+
+/** Subscribe to business-owned docs; falls back to client sort when composite index is building. */
+function subscribeByBusinessId<T extends { createdAt?: unknown }>(
+  collectionName: string,
+  businessId: string,
+  callback: (items: T[]) => void,
+  onError?: (error: Error) => void
+) {
+  const col = collection(db, collectionName)
+  const indexedQ = query(col, where('businessId', '==', businessId), orderBy('createdAt', 'desc'))
+  const fallbackQ = query(col, where('businessId', '==', businessId))
+
+  let fallbackUnsub: (() => void) | undefined
+
+  const emit = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const items = docs.map((d) => ({ id: d.id, ...d.data() }) as T)
+    items.sort((a, b) => toCreatedAtMillis(b.createdAt) - toCreatedAtMillis(a.createdAt))
+    callback(items)
+  }
+
+  const unsub = onSnapshot(
+    indexedQ,
+    (snapshot) => emit(snapshot.docs),
+    (error) => {
+      if (isMissingFirestoreIndex(error)) {
+        console.warn(`[v0] ${collectionName} index missing — using client-side sort until index builds`)
+        fallbackUnsub = onSnapshot(
+          fallbackQ,
+          (snapshot) => emit(snapshot.docs),
+          (fallbackError) => {
+            console.error(`[v0] Error in ${collectionName} subscription:`, fallbackError)
+            onError?.(fallbackError as Error)
+            callback([])
+          }
+        )
+        return
+      }
+      console.error(`[v0] Error in ${collectionName} subscription:`, error)
+      onError?.(error as Error)
+      callback([])
+    }
+  )
+
+  return () => {
+    unsub()
+    fallbackUnsub?.()
+  }
+}
 
 // BUSINESS OPPORTUNITIES QUERIES
 
+/**
+ * Business posts always start as pending_approval (admin must publish).
+ * Prefer POST /api/business/opportunities (Admin SDK + role check) from UI.
+ */
 export async function createOpportunity(
   businessId: string,
   businessName: string,
@@ -38,15 +148,39 @@ export async function createOpportunity(
 ): Promise<BusinessOpportunity> {
   const id = doc(collection(db, 'businessOpportunities')).id
   const now = Timestamp.now()
+  // Enforce approval gate — ignore client-supplied live statuses
+  const status: BusinessOpportunity['status'] =
+    data.status === 'closed' || data.status === 'filled' || data.status === 'archived'
+      ? data.status
+      : 'pending_approval'
   const opportunity: BusinessOpportunity = {
     id,
     businessId,
     businessName,
     ...data,
+    status,
     createdAt: now.toDate(),
     updatedAt: now.toDate(),
   }
-  await setDoc(doc(db, 'businessOpportunities', id), opportunity)
+  await setDoc(doc(db, 'businessOpportunities', id), sanitizeForFirestore(opportunity as unknown as Record<string, unknown>))
+
+  // Dual-write CMS canonical jobs collection (directory counts / profile)
+  await setDoc(
+    doc(db, 'jobs', id),
+    sanitizeForFirestore({
+      id,
+      businessId,
+      businessName,
+      title: data.title,
+      description: data.description || '',
+      category: data.category || data.type || '',
+      jobType: data.type || '',
+      status,
+      createdAt: now.toDate(),
+      updatedAt: now.toDate(),
+    })
+  )
+
   return opportunity
 }
 
@@ -62,35 +196,60 @@ export async function getBusinessOpportunities(businessId: string) {
 
 export function subscribeToBusinessOpportunities(
   businessId: string,
-  callback: (opportunities: BusinessOpportunity[]) => void
+  callback: (opportunities: BusinessOpportunity[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessOpportunities'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
+  return subscribeByBusinessId<BusinessOpportunity>(
+    'businessOpportunities',
+    businessId,
+    callback,
+    onError
   )
-  return onSnapshot(q, (snapshot) => {
-    const opportunities = snapshot.docs.map((doc) => doc.data() as BusinessOpportunity)
-    callback(opportunities)
-  })
 }
 
 export async function updateOpportunity(
   opportunityId: string,
   data: Partial<BusinessOpportunity>
 ) {
-  await updateDoc(doc(db, 'businessOpportunities', opportunityId), {
+  const now = Timestamp.now()
+  const payload = sanitizeForFirestore({
     ...data,
-    updatedAt: Timestamp.now(),
-  })
+    updatedAt: now,
+  } as Record<string, unknown>)
+  await updateDoc(doc(db, 'businessOpportunities', opportunityId), payload)
+  // Keep canonical jobs in sync when status/title change
+  if (data.status !== undefined || data.title !== undefined || data.description !== undefined) {
+    try {
+      await updateDoc(
+        doc(db, 'jobs', opportunityId),
+        sanitizeForFirestore({
+          ...(data.status !== undefined ? { status: data.status } : {}),
+          ...(data.title !== undefined ? { title: data.title } : {}),
+          ...(data.description !== undefined ? { description: data.description } : {}),
+          updatedAt: now,
+        })
+      )
+    } catch {
+      // jobs dual-write may not exist for older records
+    }
+  }
 }
 
 export async function deleteOpportunity(opportunityId: string) {
   await deleteDoc(doc(db, 'businessOpportunities', opportunityId))
+  try {
+    await deleteDoc(doc(db, 'jobs', opportunityId))
+  } catch {
+    /* ignore */
+  }
 }
 
 // BUSINESS OFFERS QUERIES
 
+/**
+ * Business offers always start as pending_approval (admin must publish).
+ * Prefer POST /api/business/offers (Admin SDK + role check) from UI.
+ */
 export async function createOffer(
   businessId: string,
   businessName: string,
@@ -98,15 +257,67 @@ export async function createOffer(
 ): Promise<BusinessOffer> {
   const id = doc(collection(db, 'businessOffers')).id
   const now = Timestamp.now()
+  // Enforce approval gate — ignore client-supplied live statuses
+  const offerStatus: BusinessOffer['status'] =
+    data.status === 'archived' ? 'archived' : 'pending_approval'
   const offer: BusinessOffer = {
     id,
     businessId,
     businessName,
     ...data,
+    status: offerStatus,
     createdAt: now.toDate(),
     updatedAt: now.toDate(),
   }
-  await setDoc(doc(db, 'businessOffers', id), offer)
+  await setDoc(doc(db, 'businessOffers', id), sanitizeForFirestore(offer as unknown as Record<string, unknown>))
+
+  // Dual-write CMS canonical offers collection (directory counts / profile)
+  const imageURL =
+    (typeof data.imageUrl === 'string' && data.imageUrl) ||
+    (data.image && typeof data.image === 'object' && 'url' in data.image
+      ? String((data.image as { url?: string }).url || '')
+      : '')
+  const isMemberDiscount =
+    data.type === 'discount' ||
+    (typeof data.memberBenefit === 'number' && data.memberBenefit > 0) ||
+    (typeof data.discountPercentage === 'number' && data.discountPercentage > 0)
+
+  const categoryRaw = String(data.category || data.type || '').trim()
+  const categoryNormalized =
+    categoryRaw.toLowerCase() === 'merchandise' || categoryRaw.toLowerCase() === 'merch'
+      ? 'merchandise'
+      : categoryRaw
+
+  const variant =
+    typeof (data as { variant?: string }).variant === 'string'
+      ? String((data as { variant?: string }).variant).trim()
+      : ''
+
+  await setDoc(
+    doc(db, 'offers', id),
+    sanitizeForFirestore({
+      id,
+      businessId,
+      businessName,
+      title: data.title,
+      description: data.description || '',
+      category: categoryNormalized,
+      type: data.type || 'product',
+      status: offerStatus,
+      price: data.price,
+      originalPrice: data.originalPrice,
+      currency: 'AED',
+      variant: variant || null,
+      imageURL,
+      images: imageURL ? [imageURL] : [],
+      isMemberDiscount,
+      memberBenefit: data.memberBenefit,
+      discountPercentage: data.discountPercentage,
+      createdAt: now.toDate(),
+      updatedAt: now.toDate(),
+    })
+  )
+
   return offer
 }
 
@@ -138,28 +349,43 @@ export async function getAllActiveOffers(): Promise<BusinessOffer[]> {
 
 export function subscribeToBusinessOffers(
   businessId: string,
-  callback: (offers: BusinessOffer[]) => void
+  callback: (offers: BusinessOffer[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessOffers'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
-  )
-  return onSnapshot(q, (snapshot) => {
-    const offers = snapshot.docs.map((doc) => doc.data() as BusinessOffer)
-    callback(offers)
-  })
+  return subscribeByBusinessId<BusinessOffer>('businessOffers', businessId, callback, onError)
 }
 
 export async function updateOffer(offerId: string, data: Partial<BusinessOffer>) {
-  await updateDoc(doc(db, 'businessOffers', offerId), {
+  const now = Timestamp.now()
+  const payload = sanitizeForFirestore({
     ...data,
-    updatedAt: Timestamp.now(),
-  })
+    updatedAt: now,
+  } as Record<string, unknown>)
+  await updateDoc(doc(db, 'businessOffers', offerId), payload)
+  if (data.status !== undefined || data.title !== undefined || data.description !== undefined) {
+    try {
+      await updateDoc(
+        doc(db, 'offers', offerId),
+        sanitizeForFirestore({
+          ...(data.status !== undefined ? { status: data.status } : {}),
+          ...(data.title !== undefined ? { title: data.title } : {}),
+          ...(data.description !== undefined ? { description: data.description } : {}),
+          updatedAt: now,
+        })
+      )
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export async function deleteOffer(offerId: string) {
   await deleteDoc(doc(db, 'businessOffers', offerId))
+  try {
+    await deleteDoc(doc(db, 'offers', offerId))
+  } catch {
+    /* ignore */
+  }
 }
 
 // BUSINESS LEADS QUERIES
@@ -193,17 +419,10 @@ export async function getBusinessLeads(businessId: string) {
 
 export function subscribeToBusinessLeads(
   businessId: string,
-  callback: (leads: BusinessLead[]) => void
+  callback: (leads: BusinessLead[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessLeads'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
-  )
-  return onSnapshot(q, (snapshot) => {
-    const leads = snapshot.docs.map((doc) => doc.data() as BusinessLead)
-    callback(leads)
-  })
+  return subscribeByBusinessId<BusinessLead>('businessLeads', businessId, callback, onError)
 }
 
 export async function updateLead(leadId: string, data: Partial<BusinessLead>) {
@@ -262,6 +481,36 @@ export function subscribeToReferral(
   })
 }
 
+export function subscribeToReferralRecords(
+  referrerId: string,
+  callback: (records: ReferralRecord[]) => void
+) {
+  const q = query(
+    collection(db, 'referrals'),
+    where('referrerId', '==', referrerId),
+    orderBy('referredAt', 'desc')
+  )
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const records = snapshot.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as ReferralRecord
+      )
+      callback(records)
+    },
+    () => callback([])
+  )
+}
+
+export async function updateBusinessReferralPercent(businessId: string, percent: number) {
+  await updateDoc(doc(db, 'businesses', businessId), {
+    referralContributionPercent: percent,
+    referralPercent: percent,
+    updatedAt: Timestamp.now(),
+  })
+  await createOrUpdateReferral(businessId, { referralPercentage: percent })
+}
+
 // BUSINESS PARTNERSHIPS QUERIES
 
 export async function createPartnership(
@@ -281,6 +530,34 @@ export async function createPartnership(
   return partnership
 }
 
+export function subscribeToPartnershipRequests(
+  submittedBy: string,
+  callback: (requests: PartnershipRequest[]) => void
+) {
+  const q = query(
+    collection(db, 'partnerships'),
+    where('submittedBy', '==', submittedBy),
+    orderBy('submittedAt', 'desc')
+  )
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const requests = snapshot.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as PartnershipRequest
+      )
+      callback(requests)
+    },
+    () => callback([])
+  )
+}
+
+export async function withdrawPartnershipRequest(requestId: string) {
+  await updateDoc(doc(db, 'partnerships', requestId), {
+    status: 'declined',
+    updatedAt: Timestamp.now(),
+  })
+}
+
 export async function getBusinessPartnerships(businessId: string) {
   const q = query(
     collection(db, 'businessPartnerships'),
@@ -293,17 +570,15 @@ export async function getBusinessPartnerships(businessId: string) {
 
 export function subscribeToBusinessPartnerships(
   businessId: string,
-  callback: (partnerships: BusinessPartnership[]) => void
+  callback: (partnerships: BusinessPartnership[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessPartnerships'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
+  return subscribeByBusinessId<BusinessPartnership>(
+    'businessPartnerships',
+    businessId,
+    callback,
+    onError
   )
-  return onSnapshot(q, (snapshot) => {
-    const partnerships = snapshot.docs.map((doc) => doc.data() as BusinessPartnership)
-    callback(partnerships)
-  })
 }
 
 export async function updatePartnership(
@@ -441,17 +716,15 @@ export async function getBusinessPayments(businessId: string) {
 
 export function subscribeToBusinessPayments(
   businessId: string,
-  callback: (payments: BusinessPayment[]) => void
+  callback: (payments: BusinessPayment[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessPayments'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
+  return subscribeByBusinessId<BusinessPayment>(
+    'businessPayments',
+    businessId,
+    callback,
+    onError
   )
-  return onSnapshot(q, (snapshot) => {
-    const payments = snapshot.docs.map((doc) => doc.data() as BusinessPayment)
-    callback(payments)
-  })
 }
 
 export async function updatePayment(paymentId: string, data: Partial<BusinessPayment>) {
@@ -465,29 +738,56 @@ export async function updatePayment(paymentId: string, data: Partial<BusinessPay
 
 export function subscribeToBusinessCommunities(
   businessId: string,
-  callback: (communities: Community[]) => void
+  callback: (communities: Community[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'communities'),
-    where('businessId', '==', businessId),
-    orderBy('createdAt', 'desc')
-  )
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const communities = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
-        updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
-      })) as Community[]
-      callback(communities)
-    },
+  const col = collection(db, 'communities')
+  const indexedQ = query(col, where('businessId', '==', businessId), orderBy('createdAt', 'desc'))
+  const fallbackQ = query(col, where('businessId', '==', businessId))
+
+  let fallbackUnsub: (() => void) | undefined
+
+  const emit = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const communities = docs
+      .map((d) => ({
+        id: d.id,
+        ...d.data(),
+        createdAt:
+          (d.data().createdAt as { toDate?: () => Date })?.toDate?.() || d.data().createdAt,
+        updatedAt:
+          (d.data().updatedAt as { toDate?: () => Date })?.toDate?.() || d.data().updatedAt,
+      }))
+      .sort((a, b) => toCreatedAtMillis(b.createdAt) - toCreatedAtMillis(a.createdAt)) as Community[]
+    callback(communities)
+  }
+
+  const unsub = onSnapshot(
+    indexedQ,
+    (snapshot) => emit(snapshot.docs),
     (error) => {
+      if (isMissingFirestoreIndex(error)) {
+        console.warn('[v0] communities index missing — using client-side sort until index builds')
+        fallbackUnsub = onSnapshot(
+          fallbackQ,
+          (snapshot) => emit(snapshot.docs),
+          (fallbackError) => {
+            console.error('[v0] Error in subscribeToBusinessCommunities:', fallbackError)
+            onError?.(fallbackError as Error)
+            callback([])
+          }
+        )
+        return
+      }
       console.error('[v0] Error in subscribeToBusinessCommunities:', error)
+      onError?.(error as Error)
       callback([])
     }
   )
+
+  return () => {
+    unsub()
+    fallbackUnsub?.()
+  }
 }
 
 export async function getBusinessCommunities(businessId: string): Promise<Community[]> {
@@ -556,18 +856,55 @@ export async function updateAnalytics(analyticsId: string, data: Partial<Busines
 
 export function subscribeToBusinessAnalytics(
   businessId: string,
-  callback: (analytics: BusinessAnalytics[]) => void
+  callback: (analytics: BusinessAnalytics[]) => void,
+  onError?: (error: Error) => void
 ) {
-  const q = query(
-    collection(db, 'businessAnalytics'),
+  const col = collection(db, 'businessAnalytics')
+  const indexedQ = query(
+    col,
     where('businessId', '==', businessId),
     orderBy('month', 'desc'),
     limit(12)
   )
-  return onSnapshot(q, (snapshot) => {
-    const analytics = snapshot.docs.map((doc) => doc.data() as BusinessAnalytics)
+  const fallbackQ = query(col, where('businessId', '==', businessId), limit(50))
+
+  let fallbackUnsub: (() => void) | undefined
+
+  const emit = (docs: { id: string; data: () => Record<string, unknown> }[]) => {
+    const analytics = docs
+      .map((d) => ({ id: d.id, ...d.data() }) as BusinessAnalytics)
+      .sort((a, b) => String(b.month || '').localeCompare(String(a.month || '')))
+      .slice(0, 12)
     callback(analytics)
-  })
+  }
+
+  const unsub = onSnapshot(
+    indexedQ,
+    (snapshot) => emit(snapshot.docs),
+    (error) => {
+      if (isMissingFirestoreIndex(error)) {
+        console.warn('[v0] businessAnalytics index missing — using client-side sort until index builds')
+        fallbackUnsub = onSnapshot(
+          fallbackQ,
+          (snapshot) => emit(snapshot.docs),
+          (fallbackError) => {
+            console.error('[v0] Error in businessAnalytics subscription:', fallbackError)
+            onError?.(fallbackError as Error)
+            callback([])
+          }
+        )
+        return
+      }
+      console.error('[v0] Error in businessAnalytics subscription:', error)
+      onError?.(error as Error)
+      callback([])
+    }
+  )
+
+  return () => {
+    unsub()
+    fallbackUnsub?.()
+  }
 }
 
 // UTILITY FUNCTIONS
@@ -582,23 +919,49 @@ export async function getBusinessDashboardStats(businessId: string) {
     referral,
     ratings,
   ] = await Promise.all([
-    getBusinessOpportunities(businessId),
-    getBusinessOffers(businessId),
-    getBusinessLeads(businessId),
-    getBusinessPartnerships(businessId),
-    getBusinessPayments(businessId),
-    getBusinessReferral(businessId),
-    getBusinessRatings(businessId),
+    getByBusinessId<BusinessOpportunity>('businessOpportunities', businessId),
+    getByBusinessId<BusinessOffer>('businessOffers', businessId),
+    getByBusinessId<BusinessLead>('businessLeads', businessId),
+    getByBusinessId<BusinessPartnership>('businessPartnerships', businessId),
+    getByBusinessId<BusinessPayment>('businessPayments', businessId),
+    getBusinessReferral(businessId).catch(() => undefined),
+    getByBusinessId<BusinessRating>('businessRatings', businessId),
   ])
 
   const convertedLeads = leads.filter((l) => l.status === 'converted').length
   const conversionRate = leads.length > 0 ? (convertedLeads / leads.length) * 100 : 0
   const averageRating = ratings.length > 0 ? ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length : 0
 
+  // Own events only (createdBy == businessId) — never platform-wide
+  let ownEvents = 0
+  let ownPublishedEvents = 0
+  try {
+    const eventsSnap = await getDocs(
+      query(collection(db, 'events'), where('createdBy', '==', businessId), limit(200))
+    )
+    ownEvents = eventsSnap.size
+    ownPublishedEvents = eventsSnap.docs.filter((d) => d.data().status === 'published').length
+  } catch {
+    /* index or permission — leave zeros */
+  }
+
+  let ownGroups = 0
+  try {
+    const communities = await getBusinessCommunities(businessId)
+    ownGroups = communities.length
+  } catch {
+    /* leave zero */
+  }
+
   return {
     opportunitiesPosted: opportunities.length,
     openOpportunities: opportunities.filter((o) => o.status === 'open').length,
+    pendingOpportunities: opportunities.filter((o) => o.status === 'pending_approval').length,
     offersPosted: offers.length,
+    pendingOffers: offers.filter((o) => o.status === 'pending_approval').length,
+    ownEvents,
+    ownPublishedEvents,
+    ownCommunities: ownGroups,
     leadsGenerated: leads.length,
     convertedLeads,
     conversionRate,
@@ -613,28 +976,107 @@ export async function getBusinessDashboardStats(businessId: string) {
 
 // PUBLIC / CROSS-BUSINESS OPPORTUNITY BROWSING
 
-// Get all open opportunities across every business (for the public jobs board
-// and the member dashboard). Sorted client-side to avoid a composite index.
+// Get all published opportunities (jobs + legacy businessOpportunities).
 export async function getAllOpenOpportunities(): Promise<BusinessOpportunity[]> {
-  const q = query(
-    collection(db, 'businessOpportunities'),
-    where('status', '==', 'open')
-  )
-  const snapshot = await getDocs(q)
-  const opportunities = snapshot.docs.map((d) => d.data() as BusinessOpportunity)
-  return opportunities.sort((a, b) => {
-    const aTime = new Date(a.createdAt as any).getTime() || 0
-    const bTime = new Date(b.createdAt as any).getTime() || 0
-    return bTime - aTime
-  })
+  const jobsQ = query(collection(db, 'jobs'), where('status', 'in', ['published', 'open']))
+  const legacyQ = query(collection(db, 'businessOpportunities'), where('status', '==', 'open'))
+
+  const [jobsSnap, legacySnap] = await Promise.all([getDocs(jobsQ), getDocs(legacyQ)])
+
+  const map = new Map<string, BusinessOpportunity>()
+  for (const d of legacySnap.docs) {
+    map.set(d.id, { id: d.id, ...d.data() } as BusinessOpportunity)
+  }
+  for (const d of jobsSnap.docs) {
+    map.set(d.id, normalizeOpportunityFromJob(d.id, d.data() as Record<string, unknown>))
+  }
+
+  return Array.from(map.values())
+    .filter((o) => !isOpportunityExpired(o))
+    .sort((a, b) => {
+      const aTime = new Date(a.createdAt as Date).getTime() || 0
+      const bTime = new Date(b.createdAt as Date).getTime() || 0
+      return bTime - aTime
+    })
+}
+
+export function subscribeToPublishedOpportunities(
+  callback: (opportunities: BusinessOpportunity[]) => void
+): () => void {
+  const mergeAndEmit = () => {
+    const map = new Map<string, BusinessOpportunity>()
+    const apply = (id: string, data: Record<string, unknown>, fromJob: boolean) => {
+      const status = String(data.status || '')
+      if (fromJob && status !== 'published' && status !== 'open') return
+      if (!fromJob && status !== 'open') return
+      const opp = fromJob
+        ? normalizeOpportunityFromJob(id, data)
+        : ({ id, ...data } as BusinessOpportunity)
+      if (!isOpportunityExpired(opp)) map.set(id, opp)
+    }
+
+    let jobsData: BusinessOpportunity[] = []
+    let legacyData: BusinessOpportunity[] = []
+
+    const emit = () => {
+      const merged = new Map<string, BusinessOpportunity>()
+      for (const o of legacyData) merged.set(o.id, o)
+      for (const o of jobsData) merged.set(o.id, o)
+      callback(
+        Array.from(merged.values()).sort((a, b) => {
+          const aT = new Date(a.createdAt as Date).getTime() || 0
+          const bT = new Date(b.createdAt as Date).getTime() || 0
+          return bT - aT
+        })
+      )
+    }
+
+    const unsubJobs = onSnapshot(
+      query(collection(db, 'jobs'), where('status', 'in', ['published', 'open'])),
+      (snap) => {
+        jobsData = snap.docs.map((d) =>
+          normalizeOpportunityFromJob(d.id, d.data() as Record<string, unknown>)
+        )
+        emit()
+      },
+      () => {
+        jobsData = []
+        emit()
+      }
+    )
+
+    const unsubLegacy = onSnapshot(
+      query(collection(db, 'businessOpportunities'), where('status', '==', 'open')),
+      (snap) => {
+        legacyData = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as BusinessOpportunity)
+        emit()
+      },
+      () => {
+        legacyData = []
+        emit()
+      }
+    )
+
+    return () => {
+      unsubJobs()
+      unsubLegacy()
+    }
+  }
+
+  return mergeAndEmit()
 }
 
 export async function getOpportunityById(
   opportunityId: string
 ): Promise<BusinessOpportunity | null> {
+  const jobRef = doc(db, 'jobs', opportunityId)
+  const jobSnap = await getDoc(jobRef)
+  if (jobSnap.exists()) {
+    return normalizeOpportunityFromJob(jobSnap.id, jobSnap.data() as Record<string, unknown>)
+  }
   const ref = doc(db, 'businessOpportunities', opportunityId)
   const snap = await getDoc(ref)
-  return snap.exists() ? (snap.data() as BusinessOpportunity) : null
+  return snap.exists() ? ({ id: snap.id, ...snap.data() } as BusinessOpportunity) : null
 }
 
 // JOB APPLICATION QUERIES
@@ -672,6 +1114,17 @@ export async function applyToOpportunity(
   }
   await setDoc(doc(db, 'jobApplications', id), application)
 
+  try {
+    await setDoc(doc(db, 'jobs', opportunity.id, 'applications', id), {
+      ...application,
+      jobId: opportunity.id,
+      createdAt: now,
+      updatedAt: now,
+    })
+  } catch {
+    /* jobs mirror optional */
+  }
+
   // Increment the opportunity's application count and track applicant id.
   const oppRef = doc(db, 'businessOpportunities', opportunity.id)
   const applicants = Array.isArray(opportunity.applicants) ? [...opportunity.applicants] : []
@@ -683,6 +1136,19 @@ export async function applyToOpportunity(
     applications: applicants.length,
     updatedAt: now.toDate(),
   })
+
+  try {
+    const jobsRef = doc(db, 'jobs', opportunity.id)
+    const jobsSnap = await getDoc(jobsRef)
+    if (jobsSnap.exists()) {
+      await updateDoc(jobsRef, {
+        applicationCount: applicants.length,
+        updatedAt: now,
+      })
+    }
+  } catch {
+    // Legacy-only opportunity without jobs mirror
+  }
 
   return application
 }
@@ -744,7 +1210,7 @@ export async function getOpportunityApplications(
     where('opportunityId', '==', opportunityId)
   )
   const snapshot = await getDocs(q)
-  return snapshot.docs.map((d) => d.data() as JobApplication)
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as JobApplication)
 }
 
 export async function updateApplicationStatus(

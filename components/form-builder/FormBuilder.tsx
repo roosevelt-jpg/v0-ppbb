@@ -2,19 +2,18 @@
 
 import React, { useState } from 'react'
 import { CustomForm, FormSection, FormField, FormFieldType } from '@/lib/form-builder-types'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import {
   Plus,
   Trash2,
-  Copy,
   ChevronDown,
   ChevronUp,
-  Edit2,
   Eye,
-  EyeOff,
+  Loader2,
+  ImageIcon,
 } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_ICON_DANGER } from '@/lib/admin-design-system'
 
 const FIELD_TYPES: { type: FormFieldType; label: string; icon: string }[] = [
   { type: 'text', label: 'Text', icon: 'T' },
@@ -34,7 +33,7 @@ const FIELD_TYPES: { type: FormFieldType; label: string; icon: string }[] = [
 interface FormBuilderProps {
   form: CustomForm
   onSave: (form: CustomForm) => void
-  onPreview?: () => void
+  onPreview?: (form: CustomForm) => void
   isLoading?: boolean
 }
 
@@ -49,6 +48,27 @@ export default function FormBuilder({
     new Set(currentForm.sections.map(s => s.id))
   )
   const [selectedField, setSelectedField] = useState<string | null>(null)
+  const [bannerUploading, setBannerUploading] = useState(false)
+
+  const uploadBanner = async (file: File) => {
+    setBannerUploading(true)
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('folder', 'forms/banners')
+      const res = await fetch('/api/upload', { method: 'POST', body })
+      const json = await res.json()
+      if (json.success && json.url) {
+        setCurrentForm({ ...currentForm, bannerImageUrl: json.url })
+      } else {
+        alert(json.error || 'Banner upload failed')
+      }
+    } catch {
+      alert('Banner upload failed')
+    } finally {
+      setBannerUploading(false)
+    }
+  }
 
   const addSection = () => {
     const newSection: FormSection = {
@@ -131,23 +151,76 @@ export default function FormBuilder({
   return (
     <div className="space-y-6">
       {/* Form Header */}
-      <div className="bg-white rounded-lg p-6 border">
+      <div className="bg-white rounded-lg p-4 sm:p-6 border border-neutral-200">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold mb-2">Form Title</label>
-            <Input
-              value={currentForm.title}
-              onChange={e => setCurrentForm({ ...currentForm, title: e.target.value })}
-              className="max-w-lg"
-              placeholder="Enter form title"
-            />
+            <label className="block text-sm font-semibold font-body mb-2">Banner Image (optional)</label>
+            {currentForm.bannerImageUrl ? (
+              <div className="relative mb-3 max-w-lg">
+                <img
+                  src={currentForm.bannerImageUrl}
+                  alt="Form banner"
+                  className="w-full h-32 sm:h-40 object-cover rounded-lg border border-neutral-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCurrentForm({ ...currentForm, bannerImageUrl: '' })}
+                  className="absolute top-2 right-2 text-xs bg-white border border-black rounded px-2 py-1 font-body"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : null}
+            <label className={`inline-flex items-center gap-2 cursor-pointer ${BUTTON_SECONDARY} text-sm`}>
+              {bannerUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+              {bannerUploading ? 'Uploading…' : 'Upload banner'}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                disabled={bannerUploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) void uploadBanner(file)
+                }}
+              />
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold font-body mb-2">Form Title</label>
+              <Input
+                value={currentForm.title}
+                onChange={(e) => setCurrentForm({ ...currentForm, title: e.target.value })}
+                className="max-w-lg"
+                placeholder="Enter form title"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold font-body mb-2">Status</label>
+              <select
+                value={currentForm.status}
+                onChange={(e) =>
+                  setCurrentForm({
+                    ...currentForm,
+                    status: e.target.value as CustomForm['status'],
+                  })
+                }
+                className="w-full max-w-lg px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 font-body"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-2">Description</label>
+            <label className="block text-sm font-semibold font-body mb-2">Description</label>
             <textarea
               value={currentForm.description}
-              onChange={e => setCurrentForm({ ...currentForm, description: e.target.value })}
-              className="w-full max-w-lg p-2 border rounded text-sm"
+              onChange={(e) => setCurrentForm({ ...currentForm, description: e.target.value })}
+              className="w-full max-w-2xl p-3 border border-neutral-300 rounded-lg text-sm font-body"
               rows={3}
               placeholder="Enter form description"
             />
@@ -180,13 +253,14 @@ export default function FormBuilder({
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
+                  type="button"
                   onClick={() => deleteSection(section.id)}
+                  className={BUTTON_ICON_DANGER}
+                  title="Delete section"
                 >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
@@ -252,13 +326,14 @@ export default function FormBuilder({
                           </div>
                         </div>
                         <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                          <button
+                            type="button"
                             onClick={() => deleteField(section.id, field.id)}
+                            className={BUTTON_ICON_DANGER}
+                            title="Delete field"
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
 
@@ -277,17 +352,21 @@ export default function FormBuilder({
                       )}
 
                       {/* Field Settings */}
-                      <div className="mt-2 pt-2 border-t flex gap-2">
-                        <label className="text-xs flex items-center gap-1">
+                      <div className="mt-3 pt-3 border-t border-neutral-200 flex items-center justify-between gap-3">
+                        <label className="text-sm font-body flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={field.required}
-                            onChange={e =>
+                            onChange={(e) =>
                               updateField(section.id, field.id, { required: e.target.checked })
                             }
+                            className="w-4 h-4 rounded border-neutral-400"
                           />
-                          Required
+                          <span className="font-medium text-neutral-800">Required field</span>
                         </label>
+                        <span className="text-xs text-neutral-500 font-body">
+                          {field.required ? 'Submitter must fill this' : 'Optional'}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -296,17 +375,16 @@ export default function FormBuilder({
                 {/* Add Field Button */}
                 <div className="bg-gray-50 p-3 rounded">
                   <p className="text-xs font-semibold mb-2 text-gray-700">Add Field</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {FIELD_TYPES.map(fieldType => (
-                      <Button
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {FIELD_TYPES.map((fieldType) => (
+                      <button
                         key={fieldType.type}
-                        variant="outline"
-                        size="sm"
+                        type="button"
                         onClick={() => addFieldToSection(section.id, fieldType.type)}
-                        className="text-xs"
+                        className={`${BUTTON_SECONDARY} text-xs py-2`}
                       >
                         {fieldType.label}
-                      </Button>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -317,27 +395,29 @@ export default function FormBuilder({
       </div>
 
       {/* Add Section Button */}
-      <Button onClick={addSection} className="w-full" variant="outline">
-        <Plus className="h-4 w-4 mr-2" />
+      <button type="button" onClick={addSection} className={`w-full ${BUTTON_SECONDARY}`}>
+        <Plus className="h-4 w-4 mr-2 inline" />
         Add Section
-      </Button>
+      </button>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 justify-end pt-4">
-        <Button
-          onClick={onPreview}
-          variant="outline"
+      <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-4">
+        <button
+          type="button"
+          onClick={() => onPreview?.(currentForm)}
           disabled={isLoading}
+          className={`${BUTTON_SECONDARY} inline-flex items-center justify-center gap-2`}
         >
-          <Eye className="h-4 w-4 mr-2" />
+          <Eye className="h-4 w-4" />
           Preview
-        </Button>
-        <Button
+        </button>
+        <button
+          type="button"
           onClick={() => onSave(currentForm)}
           disabled={isLoading}
+          className={`${BUTTON_PRIMARY} inline-flex items-center justify-center gap-2`}
         >
-          {isLoading ? 'Saving...' : 'Save Form'}
-        </Button>
+          {isLoading ? 'Saving…' : 'Save Form'}
+        </button>
       </div>
     </div>
   )

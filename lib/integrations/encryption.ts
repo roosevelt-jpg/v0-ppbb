@@ -38,6 +38,8 @@ const ENCRYPTED_FIELDS: Record<string, Set<string>> = {
   stripe: new Set(['secretKey', 'webhookSecret']),
   ziina: new Set(['apiSecret', 'webhookSecret']),
   firebase: new Set(['privateKey']),
+  googleAuth: new Set(['webClientSecret']),
+  facebookAuth: new Set(['appSecret']),
   googleCalendar: new Set(['refreshToken', 'accessToken']),
   microsoftCalendar: new Set(['refreshToken', 'accessToken']),
   appleCalendar: new Set(['refreshToken']),

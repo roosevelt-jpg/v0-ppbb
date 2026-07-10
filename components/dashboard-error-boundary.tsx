@@ -1,11 +1,12 @@
 'use client'
 
 import React from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth-context'
+import Link from 'next/link'
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
+  homeHref?: string
+  homeLabel?: string
 }
 
 interface ErrorBoundaryState {
@@ -30,16 +31,29 @@ export class DashboardErrorBoundary extends React.Component<ErrorBoundaryProps, 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-8">
-          <div className="bg-red-50 border border-red-200 rounded p-6">
-            <h2 className="text-lg font-bold text-red-800 mb-2">Page Error</h2>
-            <p className="text-red-700 mb-4">Failed to load this page. Please refresh or try again.</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8">
+          <div className="text-4xl" aria-hidden>
+            ⚠️
+          </div>
+          <h2 className="text-xl font-semibold text-neutral-900">This page couldn&apos;t load</h2>
+          <p className="text-neutral-500 text-sm text-center max-w-sm">
+            Something went wrong loading this section. Please try again or contact support if the
+            problem continues.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
             <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              type="button"
+              onClick={() => this.setState({ hasError: false, error: null })}
+              className="!bg-black !text-white px-6 py-2 rounded-lg text-sm"
             >
-              Refresh Page
+              Try Again
             </button>
+            <Link
+              href={this.props.homeHref || '/dashboard'}
+              className="inline-flex items-center !bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50"
+            >
+              {this.props.homeLabel || 'Go to Dashboard'}
+            </Link>
           </div>
         </div>
       )

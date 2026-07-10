@@ -182,8 +182,8 @@ export default function IntegrationHealthPage() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#888888' }}>Loading...</div>
       ) : (
-        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="admin-table-scroll min-w-0" style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem' }}>
+          <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ backgroundColor: '#f9f8f5', borderBottom: '1px solid #e4e1da' }}>
                 <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>

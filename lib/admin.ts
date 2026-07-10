@@ -1,43 +1,86 @@
 import { db } from '@/lib/firebase'
 import { SiteSettings, Page, AuditLog } from '@/lib/types'
 import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore'
+import { mergeGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/global-settings'
+import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+import { getUserDisplayName } from '@/lib/user-profile'
+
+export type PageAuditActor = {
+  id: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  name?: string
+  role?: string
+}
+
+function buildPageAuditPayload(actor?: PageAuditActor) {
+  if (!actor?.id) return undefined
+  return {
+    adminId: actor.id,
+    adminEmail: actor.email || 'unknown',
+    adminName: getUserDisplayName(actor),
+    adminRole: formatAdminRoleLabel(actor.role || 'admin'),
+  }
+}
 
 const SITE_SETTINGS_ID = 'default'
 
-// Site Settings
+/**
+ * Reads canonical platformConfig/globalSettings and maps to legacy SiteSettings shape
+ * for callers that still expect that type (e.g. metadata).
+ */
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   try {
-    // Read from settings/global (same as admin API)
-    const docSnap = await getDoc(doc(db, 'settings', 'global'))
-    return docSnap.exists() ? (docSnap.data() as SiteSettings) : null
+    const docSnap = await getDoc(doc(db, 'platformConfig', 'globalSettings'))
+    const g = mergeGlobalSettings(docSnap.exists() ? docSnap.data() : undefined)
+    return {
+      id: 'globalSettings',
+      siteName: g.platformName,
+      siteDescription: g.siteDescription,
+      logoUrl: g.logoUrlLight,
+      logoUrlDark: g.logoUrlDark,
+      faviconUrl: g.faviconUrl,
+      primaryColor: '#111111',
+      secondaryColor: '#f7f6f2',
+      accentColor: '#888888',
+      email: g.contactEmail,
+      phone: g.phone,
+      address: g.address,
+      socialLinks: g.socialLinks || {},
+      footerText: g.footerText,
+      maintenanceMode: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
   } catch (error) {
     console.error('[v0] Error fetching site settings:', error)
     return null
   }
 }
 
+/** @deprecated Prefer platformConfig/globalSettings via CMS — legacy write path kept for scripts */
 export async function updateSiteSettings(updates: Partial<SiteSettings>): Promise<boolean> {
   try {
     const settingsRef = doc(db, 'siteSettings', SITE_SETTINGS_ID)
     const currentSettings = await getDoc(settingsRef)
 
     if (!currentSettings.exists()) {
-      // Create default settings if they don't exist
       const defaultSettings: SiteSettings = {
         id: SITE_SETTINGS_ID,
-        siteName: 'Passive Blessings',
-        siteDescription: 'Community platform for events, volunteering, and community support',
-        logoUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-yu7P76Kj7QQ6XvNGPww4648xqCmM4s.png',
-        logoUrlDark: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bblack%5D-9KcTa1PocHznEBM4QR6dN4R2eseFlT.png',
+        siteName: DEFAULT_GLOBAL_SETTINGS.platformName,
+        siteDescription: DEFAULT_GLOBAL_SETTINGS.siteDescription,
+        logoUrl: '',
+        logoUrlDark: '',
         faviconUrl: '/favicon.ico',
         primaryColor: '#000000',
         secondaryColor: '#FFFFFF',
         accentColor: '#666666',
-        email: 'support@passiveblessings.ae',
-        phone: '+971 50 000 0000',
-        address: 'Dubai, UAE',
+        email: DEFAULT_GLOBAL_SETTINGS.contactEmail,
+        phone: DEFAULT_GLOBAL_SETTINGS.phone,
+        address: DEFAULT_GLOBAL_SETTINGS.address,
         socialLinks: {},
-        footerText: 'Passive Blessings © 2025. All rights reserved.',
+        footerText: DEFAULT_GLOBAL_SETTINGS.footerText,
         maintenanceMode: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -92,12 +135,15 @@ export async function getAllPages(includePublished: boolean = false): Promise<Pa
   }
 }
 
-export async function createPage(pageData: Omit<Page, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
+export async function createPage(
+  pageData: Omit<Page, 'id' | 'createdAt' | 'updatedAt'>,
+  actor?: PageAuditActor
+): Promise<string | null> {
   try {
     const res = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'create', payload: pageData }),
+      body: JSON.stringify({ action: 'create', payload: pageData, audit: buildPageAuditPayload(actor) }),
     })
     const json = await res.json()
     return json.success ? (json.id as string) : null
@@ -107,12 +153,20 @@ export async function createPage(pageData: Omit<Page, 'id' | 'createdAt' | 'upda
   }
 }
 
-export async function updatePage(pageId: string, updates: Partial<Page>): Promise<boolean> {
+export async function updatePage(
+  pageId: string,
+  updates: Partial<Page>,
+  actor?: PageAuditActor
+): Promise<boolean> {
   try {
     const res = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'update', payload: { id: pageId, ...updates } }),
+      body: JSON.stringify({
+        action: 'update',
+        payload: { id: pageId, ...updates },
+        audit: buildPageAuditPayload(actor),
+      }),
     })
     const json = await res.json()
     return !!json.success
@@ -122,12 +176,16 @@ export async function updatePage(pageId: string, updates: Partial<Page>): Promis
   }
 }
 
-export async function deletePage(pageId: string): Promise<boolean> {
+export async function deletePage(pageId: string, actor?: PageAuditActor): Promise<boolean> {
   try {
     const res = await fetch('/api/pages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', payload: { id: pageId } }),
+      body: JSON.stringify({
+        action: 'delete',
+        payload: { id: pageId },
+        audit: buildPageAuditPayload(actor),
+      }),
     })
     const json = await res.json()
     return !!json.success

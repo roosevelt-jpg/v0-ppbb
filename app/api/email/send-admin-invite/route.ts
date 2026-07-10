@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createGmailTransporter, sendAdminInviteEmail, getGmailSmtpConfig } from '@/lib/gmail-service'
 
+interface InviterProfile {
+  name: string
+  roleLabel: string
+  profilePictureURL?: string | null
+  initials: string
+}
+
 interface SendAdminInviteRequest {
   adminName: string
   adminEmail: string
-  role: 'admin' | 'super_admin'
+  role: string
   permissions: string[]
   accessCode: string
   expiresAt: string
+  invitedBy?: InviterProfile | null
 }
 
 export async function POST(request: NextRequest) {
@@ -56,6 +64,7 @@ export async function POST(request: NextRequest) {
       expiresAt: new Date(body.expiresAt),
       setupUrl,
       fromName: gmailConfig.fromName || 'Passive Blessings',
+      invitedBy: body.invitedBy || undefined,
     })
 
     console.log('[v0] Admin invite email sent successfully:', result.messageId)

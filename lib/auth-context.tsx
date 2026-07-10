@@ -1,16 +1,19 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { auth, db } from '@/lib/firebase'
-import { doc, getDoc } from 'firebase/firestore'
-import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth'
+import { doc, onSnapshot, getDoc } from 'firebase/firestore'
+import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth'
 import { User, BusinessProfile } from '@/lib/types'
+import { isAccountDeleted } from '@/lib/user-settings'
+import { requestAndRegisterFCM } from '@/lib/fcm-client'
 
 interface AuthContextType {
   user: User | BusinessProfile | null
   firebaseUser: FirebaseUser | null
   loading: boolean
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,28 +24,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      try {
-        if (currentUser) {
-          setFirebaseUser(currentUser)
-          // Fetch user profile from Firestore
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid))
-          if (userDoc.exists()) {
-            setUser(userDoc.data() as User | BusinessProfile)
+    let unsubscribeProfile: (() => void) | undefined
+    let cancelled = false
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (unsubscribeProfile) {
+        unsubscribeProfile()
+        unsubscribeProfile = undefined
+      }
+
+      setFirebaseUser(currentUser)
+
+      if (currentUser) {
+        setLoading(true)
+        const uid = currentUser.uid
+
+        const subscribeProfile = async () => {
+          try {
+            // Wait for the auth token before Firestore reads (avoids permission-denied races)
+            await currentUser.getIdToken(true)
+            if (cancelled) return
+
+            unsubscribeProfile = onSnapshot(
+              doc(db, 'users', uid),
+              (snap) => {
+                if (snap.exists()) {
+                  const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile
+                  if (isAccountDeleted(profile)) {
+                    setUser(null)
+                    setLoading(false)
+                    void signOut(auth)
+                    return
+                  }
+                  setUser(profile)
+                  void requestAndRegisterFCM(uid).catch(() => {})
+                } else {
+                  setUser(null)
+                }
+                setLoading(false)
+              },
+              (error) => {
+                const code = (error as { code?: string })?.code
+                if (code === 'permission-denied') {
+                  // Retry once with getDoc after token propagation
+                  void getDoc(doc(db, 'users', uid))
+                    .then((snap) => {
+                      if (snap.exists()) {
+                        const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile
+                        if (!isAccountDeleted(profile)) setUser(profile)
+                      }
+                      setLoading(false)
+                    })
+                    .catch(() => {
+                      setUser(null)
+                      setLoading(false)
+                    })
+                  return
+                }
+                console.warn('[v0] User profile subscription error:', error)
+                setUser(null)
+                setLoading(false)
+              }
+            )
+          } catch (error) {
+            console.error('[v0] Error preparing user profile subscription:', error)
+            setUser(null)
+            setLoading(false)
           }
-        } else {
-          setFirebaseUser(null)
-          setUser(null)
         }
-      } catch (error) {
-        console.error('[v0] Error fetching user:', error)
+
+        void subscribeProfile()
+      } else {
         setUser(null)
-      } finally {
         setLoading(false)
       }
     })
 
-    return () => unsubscribe()
+    return () => {
+      cancelled = true
+      unsubscribeAuth()
+      unsubscribeProfile?.()
+    }
   }, [])
 
   const logout = async () => {
@@ -51,8 +113,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setFirebaseUser(null)
   }
 
+  const refreshUser = useCallback(async () => {
+    const current = auth.currentUser
+    if (!current) return
+    try {
+      await current.getIdToken(true)
+      const snap = await getDoc(doc(db, 'users', current.uid))
+      if (snap.exists()) {
+        const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile
+        if (!isAccountDeleted(profile)) {
+          setUser(profile)
+        }
+      }
+    } catch (error) {
+      console.error('[v0] refreshUser failed:', error)
+    }
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )
@@ -61,12 +140,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    // Return a default context instead of throwing to allow for non-auth pages
     return {
       user: null,
       firebaseUser: null,
       loading: true,
       logout: async () => {},
+      refreshUser: async () => {},
     }
   }
   return context

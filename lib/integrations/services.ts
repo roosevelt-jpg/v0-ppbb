@@ -74,6 +74,63 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     ],
     docs: 'https://firebase.google.com/docs/web/setup',
   },
+  googleAuth: {
+    id: 'googleAuth',
+    name: 'Google Sign-In',
+    category: 'backend',
+    description: 'Continue with Google on login & signup',
+    icon: '🔐',
+    fields: [
+      {
+        name: 'webClientId',
+        label: 'OAuth Web Client ID',
+        type: 'text',
+        required: true,
+        placeholder: '123456789-abc.apps.googleusercontent.com',
+      },
+      {
+        name: 'webClientSecret',
+        label: 'OAuth Client Secret',
+        type: 'password',
+        required: false,
+        encrypt: true,
+        placeholder: 'Optional — stored for admin reference',
+      },
+      {
+        name: 'enabled',
+        label: 'Enable Google Sign-In on login page',
+        type: 'checkbox',
+        required: false,
+      },
+    ],
+    docs: 'https://firebase.google.com/docs/auth/web/google-signin',
+    help: 'Create OAuth Web credentials in Google Cloud Console, then enable Google in Firebase Authentication using the same Client ID.',
+  },
+  facebookAuth: {
+    id: 'facebookAuth',
+    name: 'Facebook Login',
+    category: 'backend',
+    description: 'Continue with Facebook on login & signup',
+    icon: '🔐',
+    fields: [
+      { name: 'appId', label: 'Facebook App ID', type: 'text', required: true, placeholder: '1234567890123456' },
+      {
+        name: 'appSecret',
+        label: 'Facebook App Secret',
+        type: 'password',
+        required: true,
+        encrypt: true,
+      },
+      {
+        name: 'enabled',
+        label: 'Enable Facebook Login on login page',
+        type: 'checkbox',
+        required: false,
+      },
+    ],
+    docs: 'https://firebase.google.com/docs/auth/web/facebook-login',
+    help: 'Add your App ID and Secret in Firebase Authentication > Sign-in method > Facebook, then save the same values here.',
+  },
   // Calendars
   googleCalendar: {
     id: 'googleCalendar',
@@ -125,15 +182,16 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
   },
   sendgrid: {
     id: 'sendgrid',
-    name: 'Email (SMTP/SendGrid)',
+    name: 'SendGrid',
     category: 'messaging',
-    description: 'Email delivery service',
+    description: 'Bulk newsletter & campaign email via SendGrid (separate from Gmail SMTP for admin invites)',
     icon: '📧',
     fields: [
       { name: 'provider', label: 'Provider', type: 'select', required: true, options: [{ label: 'SendGrid', value: 'sendgrid' }, { label: 'SMTP', value: 'smtp' }] },
-      { name: 'apiKey', label: 'API Key / Password', type: 'password', required: true, encrypt: true },
+      { name: 'apiKey', label: 'SendGrid API Key', type: 'password', required: true, encrypt: true },
       { name: 'fromAddress', label: 'From Address', type: 'text', required: true, placeholder: 'noreply@passiveblessings.ae' },
     ],
+    help: 'Emails are sent with display name "Passive Blessings". Verify your from address in SendGrid.',
   },
   gmailSmtp: {
     id: 'gmailSmtp',
@@ -235,6 +293,25 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'method', label: 'HTTP Method', type: 'select', required: true, options: [{ label: 'POST', value: 'POST' }, { label: 'PUT', value: 'PUT' }] },
       { name: 'secretToken', label: 'Secret Token', type: 'password', required: false, encrypt: true },
     ],
+  },
+  anthropic: {
+    id: 'anthropic',
+    name: 'Anthropic (Claude API)',
+    category: 'backend',
+    description: 'Powers the site chatbot via Claude',
+    icon: '🤖',
+    fields: [
+      {
+        name: 'apiKey',
+        label: 'API Key',
+        type: 'password',
+        required: true,
+        encrypt: true,
+        placeholder: 'sk-ant-...',
+        help: 'Create an API key at console.anthropic.com',
+      },
+    ],
+    docs: 'https://docs.anthropic.com/en/api/getting-started',
   },
 }
 

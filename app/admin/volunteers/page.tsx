@@ -4,7 +4,12 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminTable } from '@/components/admin-table'
 import { AdminPageLayout } from '@/components/admin-page-layout'
+import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { EditVolunteerModal } from '@/components/edit-volunteer-modal'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromVolunteer } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
@@ -14,6 +19,13 @@ export default function VolunteersPage() {
   const [loading, setLoading] = React.useState(true)
   const [selectedVolunteer, setSelectedVolunteer] = React.useState<any>(null)
   const [editModalOpen, setEditModalOpen] = React.useState(false)
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+
+  const openProfile = (volunteer: Record<string, unknown>) => {
+    setActiveProfile(profileFromVolunteer(volunteer))
+    setProfileOpen(true)
+  }
 
   React.useEffect(() => {
     // Subscribe to real-time volunteer updates
@@ -41,14 +53,27 @@ export default function VolunteersPage() {
   const columns = [
     {
       key: 'name',
-      label: 'Name',
-      width: '200px',
+      label: 'Volunteer',
+      width: '240px',
+      render: (_: unknown, row: Record<string, unknown>) => (
+        <AdminUserCell user={row as Parameters<typeof AdminUserCell>[0]['user']} hideSubtitle />
+      ),
     },
     {
       key: 'email',
       label: 'Email',
-      width: '250px',
-      render: (value: any) => <span style={{ color: '#888888' }}>{value}</span>,
+      width: '220px',
+      render: (value: unknown) => (
+        <span style={{ color: '#888888' }}>{String(value || '—')}</span>
+      ),
+    },
+    {
+      key: 'phone',
+      label: 'Phone',
+      width: '150px',
+      render: (_: unknown, row: Record<string, unknown>) => (
+        <span style={{ color: '#888888' }}>{formatUserPhoneDisplay(row as Parameters<typeof formatUserPhoneDisplay>[0])}</span>
+      ),
     },
     {
       key: 'location',
@@ -69,8 +94,8 @@ export default function VolunteersPage() {
       render: (value: any) => (
         <span
           style={{
-            backgroundColor: value === 'active' ? '#e8f5e9' : '#fff3e0',
-            color: value === 'active' ? '#2e7d32' : '#e65100',
+            backgroundColor: value === 'active' ? '#f3f4f6' : '#fff3e0',
+            color: value === 'active' ? '#111111' : '#e65100',
             padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '12px',
@@ -92,25 +117,11 @@ export default function VolunteersPage() {
       },
     },
     {
-      key: 'actions',
-      label: 'Actions',
-      width: '120px',
-      render: (_: any, row: any) => (
-        <a
-          href={`/admin/volunteers/${row.id}`}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            color: '#0066cc',
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 500,
-          }}
-          className="hover:underline"
-        >
-          View Details →
-        </a>
+      key: 'profile',
+      label: 'Profile',
+      width: '130px',
+      render: (_: unknown, row: Record<string, unknown>) => (
+        <AdminViewProfileButton compact onClick={() => openProfile(row)} />
       ),
     },
   ]
@@ -146,6 +157,24 @@ export default function VolunteersPage() {
             setEditModalOpen(false)
             setSelectedVolunteer(null)
           }}
+        />
+
+        <AdminUserProfileModal
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          profile={activeProfile}
+          editLabel="Edit volunteer"
+          onEdit={
+            activeProfile
+              ? () => {
+                  const match = volunteers.find((v) => v.id === activeProfile.id)
+                  if (match) {
+                    handleEditVolunteer(match)
+                    setProfileOpen(false)
+                  }
+                }
+              : undefined
+          }
         />
       </div>
     </AdminPageLayout>

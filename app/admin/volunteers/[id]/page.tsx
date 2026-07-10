@@ -6,8 +6,12 @@ import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'fireb
 import { db } from '@/lib/firebase'
 import { AlertCircle, CheckCircle, ArrowLeft, Clock, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function VolunteerDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const volunteerId = params.id as string
@@ -71,6 +75,13 @@ export default function VolunteerDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'users', volunteerId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated volunteer: ${volunteerId}`,
+        entityType: 'member',
+        entityId: volunteerId,
+        status: 'success',
+      })
       setSuccess('Volunteer updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -128,6 +139,11 @@ export default function VolunteerDetailPage() {
           </div>
         )}
 
+        {/* Profile summary */}
+        <Card className="p-6 border border-neutral-200">
+          <AdminUserProfileSummary user={volunteer} />
+        </Card>
+
         {/* Main Info Card */}
         <Card className="p-6 border border-neutral-200">
           <h2 className="text-xl font-bold text-neutral-900 mb-4">Basic Information</h2>
@@ -177,7 +193,7 @@ export default function VolunteerDetailPage() {
               <input
                 type="text"
                 name="location"
-                value={formData.location || ''}
+                value={typeof formData.location === 'string' ? formData.location : ''}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               />
@@ -187,7 +203,7 @@ export default function VolunteerDetailPage() {
               <input
                 type="number"
                 name="volunteerHours"
-                value={formData.volunteerHours || 0}
+                value={formData.volunteerHours ?? formData.volunteeredHours ?? 0}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               />
@@ -212,7 +228,7 @@ export default function VolunteerDetailPage() {
               <Clock className="w-4 h-4 text-blue-600" />
               <span className="text-sm text-neutral-600">Total Hours</span>
             </div>
-            <p className="text-2xl font-bold text-neutral-900">{volunteer?.volunteerHours || 0}</p>
+            <p className="text-2xl font-bold text-neutral-900">{volunteer?.volunteeredHours ?? volunteer?.volunteerHours ?? 0}</p>
           </Card>
           <Card className="p-4 border border-neutral-200">
             <div className="flex items-center gap-2 mb-2">
@@ -240,8 +256,8 @@ export default function VolunteerDetailPage() {
               {volunteerEvents.map(event => (
                 <div key={event.id} className="p-3 border border-neutral-200 rounded-lg flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-neutral-900">{event.title}</p>
-                    <p className="text-xs text-neutral-600">{event.date}</p>
+                    <p className="font-medium text-neutral-900">{event.title || 'Untitled event'}</p>
+                    <p className="text-xs text-neutral-600">{event.date ? String(event.date) : 'Date not provided'}</p>
                   </div>
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">Event</span>
                 </div>
@@ -255,13 +271,13 @@ export default function VolunteerDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+            className={`${BUTTON_PRIMARY} px-6 py-2`}
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-medium hover:bg-neutral-400 transition"
+            className={`${BUTTON_SECONDARY} px-6 py-2`}
           >
             Cancel
           </button>

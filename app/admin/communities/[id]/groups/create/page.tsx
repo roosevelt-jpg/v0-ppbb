@@ -1,13 +1,25 @@
 'use client'
 
 export const dynamic = 'force-dynamic'
+
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { ChevronLeft, Upload } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { uploadGroupIcon } from '@/lib/firebase-storage'
 import { useAuth } from '@/lib/auth-context'
+import { adminApiFetch } from '@/lib/admin-api-client'
+import { AdminGroupForm, type AdminGroupFormValues } from '@/components/admin/admin-group-form'
+
+const defaultValues: AdminGroupFormValues = {
+  name: '',
+  description: '',
+  type: 'discussion',
+  genderRestriction: 'mixed',
+  requiresApproval: false,
+  capacity: '',
+}
 
 export default function CreateGroupPage() {
   const params = useParams()
@@ -15,27 +27,11 @@ export default function CreateGroupPage() {
   const { user } = useAuth()
   const communityId = params.id as string
 
-  const [formData, setFormData] = React.useState({
-    name: '',
-    description: '',
-    genderRestriction: 'mixed',
-  })
+  const [formData, setFormData] = React.useState<AdminGroupFormValues>(defaultValues)
   const [icon, setIcon] = React.useState<File | null>(null)
-  const [iconPreview, setIconPreview] = React.useState<string>('')
+  const [iconPreview, setIconPreview] = React.useState('')
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState('')
-
-  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setIcon(file)
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setIconPreview(event.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,24 +49,25 @@ export default function CreateGroupPage() {
         iconURL = await uploadGroupIcon(communityId, `new_${Date.now()}`, icon)
       }
 
-      const res = await fetch('/api/groups', {
+      const json = await adminApiFetch<{ id: string }>('/api/groups', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           communityId,
-          name: formData.name,
+          name: formData.name.trim(),
           description: formData.description,
+          type: formData.type,
           genderRestriction: formData.genderRestriction,
           iconURL,
+          requiresApproval: formData.requiresApproval,
+          capacity: formData.capacity ? Number(formData.capacity) : null,
           createdBy: user?.id,
         }),
       })
 
-      const data = await res.json()
-      if (data.success) {
+      if (json.success) {
         router.push(`/admin/communities/${communityId}/groups`)
       } else {
-        setError(data.error || 'Failed to create group')
+        setError(json.error || 'Failed to create group')
       }
     } catch (err) {
       console.error('[v0] Error creating group:', err)
@@ -81,122 +78,38 @@ export default function CreateGroupPage() {
   }
 
   return (
-    <AdminPageLayout title="Create Group">
+    <AdminPageLayout title="Create Group" subtitle="Add a group with chat, members, and join rules">
       <div className="max-w-2xl space-y-6">
         <Link
           href={`/admin/communities/${communityId}/groups`}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
         >
           <ChevronLeft size={20} />
           Back to Groups
         </Link>
 
-        <h2 className="text-2xl font-bold text-black">Create New Group</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-black">Create New Group</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Groups support member chat, file sharing, join approval, gender rules, and capacity limits.
+          </p>
+        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-          {/* Group Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Group Name *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="e.g., Prayer Circle, Book Club"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-              disabled={loading}
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="What is this group about?"
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-              disabled={loading}
-            />
-          </div>
-
-          {/* Gender Restriction */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Gender Restriction
-            </label>
-            <div className="space-y-2">
-              {[
-                { value: 'mixed', label: 'All (Mixed)' },
-                { value: 'male', label: 'Men Only' },
-                { value: 'female', label: 'Women Only' },
-              ].map((option) => (
-                <label key={option.value} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="genderRestriction"
-                    value={option.value}
-                    checked={formData.genderRestriction === option.value}
-                    onChange={(e) => setFormData({ ...formData, genderRestriction: e.target.value })}
-                    disabled={loading}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-gray-700">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Group Icon */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Group Icon (optional)
-            </label>
-            <div className="flex gap-4">
-              {iconPreview && (
-                <img src={iconPreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
-              )}
-              <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                <Upload size={18} className="mr-2" />
-                Choose File
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleIconChange}
-                  disabled={loading}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* Submit */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium disabled:opacity-50"
-            >
-              {loading ? 'Creating...' : 'Create Group'}
-            </button>
-            <Link
-              href={`/admin/communities/${communityId}/groups`}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-center"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
+        <AdminGroupForm
+          communityId={communityId}
+          values={formData}
+          onChange={setFormData}
+          iconPreview={iconPreview}
+          onIconChange={(file, preview) => {
+            setIcon(file)
+            setIconPreview(preview)
+          }}
+          loading={loading}
+          error={error}
+          submitLabel="Create Group"
+          onSubmit={handleSubmit}
+          cancelHref={`/admin/communities/${communityId}/groups`}
+        />
       </div>
     </AdminPageLayout>
   )

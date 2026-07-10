@@ -6,8 +6,11 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, User, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function DonationDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const donationId = params.id as string
@@ -57,6 +60,13 @@ export default function DonationDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'donations', donationId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated donation: ${donationId}`,
+        entityType: 'donation',
+        entityId: donationId,
+        status: 'success',
+      })
       setSuccess('Donation updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -244,13 +254,13 @@ export default function DonationDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+            className={`${BUTTON_PRIMARY} px-6 py-2`}
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 bg-neutral-300 text-neutral-900 rounded-lg font-medium hover:bg-neutral-400 transition"
+            className={`${BUTTON_SECONDARY} px-6 py-2`}
           >
             Cancel
           </button>

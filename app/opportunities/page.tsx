@@ -1,9 +1,19 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { OpportunitiesList } from '@/components/opportunities-list'
+
+function OpportunitiesLoading() {
+  return (
+    <div className="grid gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="h-32 bg-neutral-100 rounded-lg animate-pulse" />
+      ))}
+    </div>
+  )
+}
 
 export default function OpportunitiesPage() {
   return (
@@ -20,7 +30,9 @@ export default function OpportunitiesPage() {
               Passive Blessings community. Sign in to apply.
             </p>
           </div>
-          <OpportunitiesList />
+          <Suspense fallback={<OpportunitiesLoading />}>
+            <OpportunitiesList />
+          </Suspense>
         </div>
       </main>
       <Footer />

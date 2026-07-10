@@ -7,204 +7,203 @@ import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, MessageCircle, Send } from 'lucide-react'
+import { Users, MessageCircle, Send, ArrowLeft } from 'lucide-react'
+
+type DirectoryMember = {
+  id: string
+  displayName: string
+  firstName?: string
+  lastName?: string
+  location?: string
+  bio?: string
+  skills?: string[]
+}
 
 export default function Marketplace() {
   const { user } = useAuth()
   const router = useRouter()
-  const [members, setMembers] = React.useState<any[]>([])
+  const [members, setMembers] = React.useState<DirectoryMember[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [selectedMember, setSelectedMember] = React.useState<any>(null)
+  const [search, setSearch] = React.useState('')
+  const [selectedMember, setSelectedMember] = React.useState<DirectoryMember | null>(null)
   const [message, setMessage] = React.useState('')
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    if (!user || (!hasBusinessAccess(user))) {
+    if (!user || !hasBusinessAccess(user)) {
       router.push('/login')
       return
     }
 
-    // Simulated member data
-    setMembers([
-      {
-        id: '1',
-        name: 'Ahmed Mohammed',
-        role: 'member',
-        profession: 'Software Developer',
-        skills: ['React', 'Node.js', 'TypeScript'],
-      },
-      {
-        id: '2',
-        name: 'Fatima Al Mansouri',
-        role: 'member',
-        profession: 'Marketing Specialist',
-        skills: ['Digital Marketing', 'Social Media', 'Content Writing'],
-      },
-      {
-        id: '3',
-        name: 'Mohammed Hassan',
-        role: 'volunteer',
-        profession: 'Graphic Designer',
-        skills: ['UI/UX Design', 'Branding', 'Illustration'],
-      },
-    ])
-    setLoading(false)
-  }, [user, router])
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const params = new URLSearchParams({ limit: '100' })
+        if (search.trim()) params.set('search', search.trim())
+        const res = await fetch(`/api/members/directory?${params.toString()}`)
+        const json = await res.json()
+        if (!json.success) throw new Error(json.error || 'Failed to load members')
+        setMembers(
+          (json.data || []).map((m: DirectoryMember) => ({
+            ...m,
+            skills: Array.isArray(m.skills) ? m.skills : [],
+          }))
+        )
+      } catch (err) {
+        console.error('[v0] Marketplace directory error:', err)
+        setError('Unable to load member directory.')
+        setMembers([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    const t = setTimeout(() => void load(), search ? 300 : 0)
+    return () => clearTimeout(t)
+  }, [user, router, search])
 
   const handleSendMessage = () => {
-    if (message.trim() && selectedMember) {
-      console.log(`[v0] Message sent to ${selectedMember.name}: ${message}`)
-      alert('Message sent successfully!')
-      setMessage('')
+    if (!selectedMember) return
+    if (message.trim()) {
+      sessionStorage.setItem(`dm_draft_${selectedMember.id}`, message.trim())
     }
+    router.push(`/dashboard/messages?to=${selectedMember.id}`)
   }
 
-  if (!user || (!hasBusinessAccess(user))) {
+  if (!user || !hasBusinessAccess(user)) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
+  const showMobileDetail = Boolean(selectedMember)
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-6xl mx-auto">
-          <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>
-            Marketplace & Networking
-          </h1>
-          <p style={{ color: '#888888', marginTop: '8px' }}>
-            Connect with community members and potential partners
+    <div className="min-h-screen bg-[#faf9f7]">
+      <div className="bg-white border-b border-[#e4e1da] px-4 py-6 sm:px-6 sm:py-8">
+        <div className="max-w-6xl mx-auto min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#111111]">Marketplace & Networking</h1>
+          <p className="text-[#888888] mt-2 text-sm sm:text-base">
+            Connect with community members who opted into the member directory
           </p>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 min-w-0">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search members by name, location, or bio…"
+          className="w-full mb-6 min-h-[44px] px-4 py-3 border border-neutral-300 rounded-lg text-sm"
+        />
+
+        {error ? <p className="text-sm text-red-600 mb-4">{error}</p> : null}
+
         {loading ? (
-          <div className="text-center py-8">Loading marketplace...</div>
+          <div className="text-center py-8">Loading members…</div>
+        ) : members.length === 0 ? (
+          <Card className="bg-white border-[#e4e1da] p-8 sm:p-12 text-center">
+            <Users className="w-12 h-12 mx-auto mb-4 text-neutral-400" />
+            <p className="text-[#888888]">No members in the directory yet.</p>
+          </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Members List */}
-            <div className="lg:col-span-1">
-              <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-                <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
-                  Community Members
-                </h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 min-w-0">
+            <div className={`lg:col-span-1 min-w-0 ${showMobileDetail ? 'hidden lg:block' : 'block'}`}>
+              <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
+                <h3 className="text-lg font-semibold text-[#111111] mb-4">Community Members</h3>
+                <div className="space-y-2 max-h-[min(24rem,50vh)] lg:max-h-96 overflow-y-auto">
                   {members.map((member) => (
-                    <div
+                    <button
                       key={member.id}
+                      type="button"
                       onClick={() => setSelectedMember(member)}
-                      style={{
-                        padding: '12px',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        backgroundColor:
-                          selectedMember?.id === member.id
-                            ? '#f0f0f0'
-                            : '#ffffff',
-                        border:
-                          selectedMember?.id === member.id
-                            ? '2px solid #111111'
-                            : '1px solid #e4e1da',
-                      }}
+                      className={`w-full text-left p-3 min-h-[44px] rounded-lg border transition-colors ${
+                        selectedMember?.id === member.id
+                          ? 'border-[#111111] border-2 bg-neutral-100'
+                          : 'border-[#e4e1da] bg-white hover:bg-neutral-50'
+                      }`}
                     >
-                      <p style={{ color: '#111111', fontWeight: 600 }}>{member.name}</p>
-                      <p style={{ color: '#888888', fontSize: '12px' }}>
-                        {member.profession}
-                      </p>
-                    </div>
+                      <p className="font-semibold text-[#111111] truncate">{member.displayName}</p>
+                      {member.location ? (
+                        <p className="text-[#888888] text-xs truncate mt-0.5">{member.location}</p>
+                      ) : null}
+                    </button>
                   ))}
                 </div>
               </Card>
             </div>
 
-            {/* Member Details & Message */}
-            <div className="lg:col-span-2">
+            <div
+              className={`lg:col-span-2 min-w-0 ${showMobileDetail ? 'block' : 'hidden lg:block'}`}
+            >
               {selectedMember ? (
-                <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-                  <h3 style={{ color: '#111111', fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>
-                    {selectedMember.name}
-                  </h3>
+                <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
+                  <div className="flex items-center gap-2 mb-4 min-h-[44px]">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMember(null)}
+                      className="lg:hidden inline-flex items-center justify-center min-h-[36px] min-w-[36px] rounded-lg hover:bg-neutral-100"
+                      aria-label="Back to members"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </button>
+                    <h3 className="text-lg sm:text-xl font-semibold text-[#111111] truncate">
+                      {selectedMember.displayName}
+                    </h3>
+                  </div>
 
-                  {/* Member Info */}
                   <div className="space-y-4 mb-6">
-                    <div>
-                      <p style={{ color: '#888888', fontSize: '12px', textTransform: 'uppercase' }}>
-                        Role
-                      </p>
-                      <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>
-                        {selectedMember.role}
-                      </p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#888888', fontSize: '12px', textTransform: 'uppercase' }}>
-                        Profession
-                      </p>
-                      <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>
-                        {selectedMember.profession}
-                      </p>
-                    </div>
-                    {selectedMember.skills && selectedMember.skills.length > 0 && (
+                    {selectedMember.location ? (
                       <div>
-                        <p style={{ color: '#888888', fontSize: '12px', textTransform: 'uppercase' }}>
-                          Skills
-                        </p>
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          {selectedMember.skills.map((skill: string) => (
+                        <p className="text-[#888888] text-xs uppercase">Location</p>
+                        <p className="text-[#111111] font-semibold mt-1 break-words">{selectedMember.location}</p>
+                      </div>
+                    ) : null}
+                    {selectedMember.bio ? (
+                      <div>
+                        <p className="text-[#888888] text-xs uppercase">Bio</p>
+                        <p className="text-[#111111] mt-1 whitespace-pre-wrap break-words">{selectedMember.bio}</p>
+                      </div>
+                    ) : null}
+                    {selectedMember.skills && selectedMember.skills.length > 0 ? (
+                      <div>
+                        <p className="text-[#888888] text-xs uppercase mb-2">Skills</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedMember.skills.map((skill) => (
                             <span
                               key={skill}
-                              style={{
-                                backgroundColor: '#f0f0f0',
-                                color: '#111111',
-                                padding: '6px 12px',
-                                borderRadius: '4px',
-                                fontSize: '12px',
-                              }}
+                              className="bg-neutral-100 text-[#111111] px-3 py-1 rounded text-xs"
                             >
                               {skill}
                             </span>
                           ))}
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
 
-                  {/* Message Box */}
-                  <div style={{ borderTop: '1px solid #e4e1da', paddingTop: '16px' }}>
-                    <p style={{ color: '#888888', fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                      Send Message
-                    </p>
+                  <div className="border-t border-[#e4e1da] pt-4">
+                    <p className="text-[#888888] text-xs uppercase mb-2">Message</p>
                     <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Write your message..."
+                      placeholder="Write your message…"
                       rows={4}
-                      style={{
-                        width: '100%',
-                        padding: '12px',
-                        border: '1px solid #e4e1da',
-                        borderRadius: '8px',
-                        color: '#111111',
-                        fontFamily: 'inherit',
-                        marginBottom: '12px',
-                      }}
+                      className="w-full min-h-[88px] p-3 border border-[#e4e1da] rounded-lg text-[#111111] text-sm mb-3 resize-y"
                     />
                     <Button
                       onClick={handleSendMessage}
-                      style={{
-                        backgroundColor: '#111111',
-                        color: '#ffffff',
-                      }}
-                      className="flex items-center gap-2 w-full justify-center"
+                      className="flex items-center gap-2 w-full justify-center min-h-[44px] bg-[#111111] text-white hover:bg-neutral-800"
                     >
                       <Send className="w-4 h-4" />
-                      Send Message
+                      Open Messages
                     </Button>
                   </div>
                 </Card>
               ) : (
-                <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>
-                  <Users style={{ color: '#888888', opacity: 0.3 }} className="w-12 h-12 mx-auto mb-4" />
-                  <p style={{ color: '#888888' }}>Select a member to start connecting</p>
+                <Card className="bg-white border-[#e4e1da] p-8 sm:p-12 text-center hidden lg:block">
+                  <MessageCircle className="w-12 h-12 mx-auto mb-4 text-[#888888] opacity-30" />
+                  <p className="text-[#888888]">Select a member to start connecting</p>
                 </Card>
               )}
             </div>

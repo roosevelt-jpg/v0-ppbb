@@ -1,15 +1,17 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
 import React from 'react'
 import Link from 'next/link'
 import { subscribeToUserCommunities } from '@/lib/community-queries'
 import type { Community } from '@/lib/community-types'
 import { useAuth } from '@/lib/auth-context'
-import { Users, Tag, ChevronRight } from 'lucide-react'
+import { Users, Tag, ChevronRight, MessageCircle } from 'lucide-react'
+import { genderRestrictionBadgeClass, genderRestrictionLabel } from '@/lib/community-governance'
+import { CommunityListSkeleton } from '@/components/community-list-skeleton'
+import { DashboardPageShell, DashboardEmptyState } from '@/components/dashboard-states'
 
 export default function MyCommunities() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [communities, setCommunities] = React.useState<Community[]>([])
   const [loading, setLoading] = React.useState(true)
 
@@ -27,111 +29,116 @@ export default function MyCommunities() {
     return () => unsubscribe()
   }, [user])
 
-  if (!user) {
+  if (authLoading || loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-black">My Communities</h1>
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-          <p className="text-gray-500 mb-4">Please log in to view your communities</p>
-          <Link href="/login" className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900">
-            Log In
-          </Link>
-        </div>
-      </div>
+      <DashboardPageShell title="My Communities" subtitle="Loading your communities…">
+        <CommunityListSkeleton count={3} />
+      </DashboardPageShell>
     )
   }
 
-  if (loading) {
+  if (!user) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-black">My Communities</h1>
-        <p className="text-gray-500">Loading communities...</p>
-      </div>
+      <DashboardPageShell title="My Communities" subtitle="Communities and groups you belong to">
+        <DashboardEmptyState
+          title="Sign in required"
+          description="Please log in to view your communities."
+          actionLabel="Log in"
+          actionHref="/login"
+        />
+      </DashboardPageShell>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-black">My Communities</h1>
+    <DashboardPageShell
+      title="My Communities"
+      subtitle="WhatsApp-style communities — join groups to chat, share, and discuss"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <p className="text-sm text-neutral-600">
+          {communities.length === 0
+            ? 'Browse public communities and join groups that match your profile.'
+            : `${communities.length} communit${communities.length === 1 ? 'y' : 'ies'} joined`}
+        </p>
         <Link
           href="/communities"
-          className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-sm font-semibold min-h-[44px]"
         >
           Explore Communities
+          <ChevronRight size={16} />
         </Link>
       </div>
 
       {communities.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200 space-y-4">
-          <p className="text-gray-500">You haven&apos;t joined any communities yet</p>
-          <Link
-            href="/communities"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
-          >
-            Browse Communities
-            <ChevronRight size={18} />
-          </Link>
-        </div>
+        <DashboardEmptyState
+          title="No communities yet"
+          description="Join a community, then pick Men only, Ladies only, or Mixed groups inside it to start chatting."
+          actionLabel="Browse Communities"
+          actionHref="/communities"
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {communities.map((community) => (
-            <Link
+            <div
               key={community.id}
-              href={`/communities/${community.id}`}
-              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Banner */}
               {community.bannerURL && (
                 <div
-                  className="w-full h-40 bg-gray-200 bg-cover bg-center"
+                  className="w-full h-36 bg-neutral-100 bg-cover bg-center"
                   style={{ backgroundImage: `url(${community.bannerURL})` }}
                 />
               )}
 
-              {/* Content */}
               <div className="p-4 space-y-3">
-                <h3 className="font-bold text-black text-lg line-clamp-2 hover:text-blue-600">
-                  {community.name}
-                </h3>
+                <div>
+                  <h3 className="font-bold text-neutral-900 text-lg line-clamp-2">{community.name}</h3>
+                  <p className="text-xs text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+                    <span
+                      className={`px-2 py-0.5 rounded-full font-medium ${genderRestrictionBadgeClass(community.genderRestriction)}`}
+                    >
+                      {genderRestrictionLabel(community.genderRestriction)}
+                    </span>
+                    <span>{community.groupCount || 0} groups</span>
+                  </p>
+                </div>
 
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {community.description}
-                </p>
+                <p className="text-sm text-neutral-600 line-clamp-2">{community.description}</p>
 
-                {/* Tags */}
                 {community.tags && community.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {community.tags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-700"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-neutral-100 rounded text-xs text-neutral-700"
                       >
                         <Tag size={12} />
                         {tag}
                       </span>
                     ))}
-                    {community.tags.length > 2 && (
-                      <span className="text-xs text-gray-500 px-2 py-1">
-                        +{community.tags.length - 2}
-                      </span>
-                    )}
                   </div>
                 )}
 
-                {/* Stats */}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
+                  <div className="flex items-center gap-1 text-sm text-neutral-600">
                     <Users size={14} />
-                    {community.memberCount}
+                    {community.memberCount || 0} members
                   </div>
-                  <span className="text-xs text-gray-500">{community.groupCount} groups</span>
                 </div>
+
+                <Link
+                  href={`/communities/${community.id}`}
+                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-neutral-900 text-white rounded-lg text-sm font-semibold hover:bg-neutral-800 min-h-[44px]"
+                >
+                  <MessageCircle size={16} />
+                  Open groups & chat
+                </Link>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
-    </div>
+    </DashboardPageShell>
   )
 }

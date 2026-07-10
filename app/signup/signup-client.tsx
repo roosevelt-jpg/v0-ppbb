@@ -491,11 +491,11 @@ function SignupPageContent() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="consentTerms" checked={formData.consentTerms} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
-                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to the <Link href="/policies/terms-of-service" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/policies/code-of-conduct" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Community Code of Conduct</Link> of Passive Blessings.</span>
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I agree to the <Link href="/pages/terms-of-service" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/pages/code-of-conduct" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Community Code of Conduct</Link> of Passive Blessings.</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="consentPrivacy" checked={formData.consentPrivacy} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
-                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I consent to my personal data being stored and processed in accordance with the <Link href="/policies/privacy-policy" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Privacy Policy</Link>. My data is encrypted and will not be shared with third parties.</span>
+                  <span style={{ fontSize: '0.875rem', color: '#111111' }}>I consent to my personal data being stored and processed in accordance with the <Link href="/pages/privacy-policy" target="_blank" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Privacy Policy</Link>. My data is encrypted and will not be shared with third parties.</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
                   <input type="checkbox" name="consentLocation" checked={formData.consentLocation} onChange={handleInputChange} style={{ marginTop: '0.25rem', cursor: 'pointer', width: '18px', height: '18px' }} required />
@@ -630,7 +630,7 @@ function SignupPageContent() {
                     {/* Terms checkbox */}
                     <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
                       <input type="checkbox" name="consentTerms" checked={formData.consentTerms} onChange={handleInputChange} style={{ width: '16px', height: '16px', cursor: 'pointer', marginTop: '0.2rem', flexShrink: 0 }} required />
-                      <span style={{ fontSize: '0.7rem', color: '#666', lineHeight: '1.3' }}>I agree to the Terms & Conditions and Privacy Policy</span>
+                      <span style={{ fontSize: '0.7rem', color: '#666', lineHeight: '1.3' }}>I agree to the <Link href="/pages/terms-of-service" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Terms & Conditions</Link> and <Link href="/pages/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', fontWeight: 600, color: '#111111' }}>Privacy Policy</Link></span>
                     </label>
                   </div>
                 )}

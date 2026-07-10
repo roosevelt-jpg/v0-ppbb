@@ -2,149 +2,395 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
-import { AdminTable } from '@/components/admin-table'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { EditBusinessModal } from '@/components/edit-business-modal'
-import { formatDistanceToNow } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import {
+  CheckCircle2,
+  BadgeCheck,
+  Ban,
+  Star,
+  Trash2,
+  RefreshCw,
+  Store,
+  AlertCircle,
+} from 'lucide-react'
+import { AdminUserCell } from '@/components/admin-user-cell'
+import { formatRecordPhoneDisplay } from '@/lib/user-profile'
+import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
+import { profileFromBusiness } from '@/lib/admin-profile-view'
+import type { AdminProfileViewData } from '@/lib/admin-profile-view'
+
+import { auth } from '@/lib/firebase'
+
+async function getAdminToken(): Promise<string | null> {
+  return (await auth.currentUser?.getIdToken()) || null
+}
+
+type BusinessRow = {
+  id: string
+  name: string
+  category: string
+  ownerName: string
+  email: string
+  isApproved: boolean
+  isActive: boolean
+  isVerified: boolean
+  featured: boolean
+  status: string
+  referralCode?: string | null
+  referralContributionPercent?: number | null
+  ownerProfilePictureURL?: string | null
+  phone?: string
+  createdAt: string | Date | null
+}
+
+type FilterTab = 'all' | 'pending' | 'approved' | 'suspended' | 'featured'
 
 export default function BusinessesPage() {
-  const [businesses, setBusinesses] = React.useState<any[]>([])
+  const [businesses, setBusinesses] = React.useState<BusinessRow[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [selectedBusiness, setSelectedBusiness] = React.useState<any>(null)
-  const [editModalOpen, setEditModalOpen] = React.useState(false)
+  const [actingId, setActingId] = React.useState<string | null>(null)
+  const [filter, setFilter] = React.useState<FilterTab>('all')
+  const [search, setSearch] = React.useState('')
+  const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(
+    null
+  )
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+
+  const openProfile = (biz: BusinessRow) => {
+    setActiveProfile(profileFromBusiness(biz as unknown as Record<string, unknown>))
+    setProfileOpen(true)
+  }
+
+  const fetchBusinesses = React.useCallback(async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filter !== 'all') params.set('status', filter)
+      if (search.trim()) params.set('search', search.trim())
+      const response = await fetch(`/api/admin/businesses?${params.toString()}`)
+      if (!response.ok) throw new Error('Failed to fetch')
+      const data = await response.json()
+      if (data.success) {
+        setBusinesses(data.data || [])
+      }
+    } catch (error) {
+      console.error('[v0] Error fetching businesses:', error)
+      setMessage({ type: 'error', text: 'Failed to load businesses' })
+    } finally {
+      setLoading(false)
+    }
+  }, [filter, search])
 
   React.useEffect(() => {
-    const fetchBusinesses = async () => {
-      try {
-        const response = await fetch('/api/admin/businesses')
-        if (!response.ok) throw new Error('Failed to fetch')
-        const data = await response.json()
-        if (data.success) {
-          setBusinesses(data.data || [])
-        }
-      } catch (error) {
-        console.error('[v0] Error fetching businesses:', error)
-      } finally {
-        setLoading(false)
-      }
+    void fetchBusinesses()
+  }, [fetchBusinesses])
+
+  const runAction = async (
+    id: string,
+    action:
+      | 'approve'
+      | 'verify'
+      | 'suspend'
+      | 'feature'
+      | 'unfeature'
+      | 'delete'
+      | 'set_referral_percent',
+    extra?: Record<string, unknown>
+  ) => {
+    if (action === 'delete') {
+      const ok = window.confirm(
+        'Delete this business listing? Related jobs/offers will be soft-deactivated (not hard-deleted).'
+      )
+      if (!ok) return
     }
 
-    fetchBusinesses()
-  }, [])
+    setActingId(id)
+    setMessage(null)
+    try {
+      const token = await getAdminToken()
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (token) headers.Authorization = `Bearer ${token}`
 
-  const columns = [
-    {
-      key: 'businessName',
-      label: 'Business Name',
-      width: '200px',
-      render: (value: any) => <span style={{ fontWeight: 500, color: '#111111' }}>{value || 'N/A'}</span>,
-    },
-    {
-      key: 'businessType',
-      label: 'Type',
-      width: '150px',
-      render: (value: any) => <span style={{ color: '#888888', textTransform: 'capitalize' }}>{value || '-'}</span>,
-    },
-    {
-      key: 'businessLocation',
-      label: 'Location',
-      width: '180px',
-      render: (value: any) => <span style={{ color: '#888888' }}>{value || '-'}</span>,
-    },
-    {
-      key: 'businessPhone',
-      label: 'Phone',
-      width: '140px',
-      render: (value: any) => <span style={{ color: '#888888', fontSize: '12px' }}>{value || '-'}</span>,
-    },
-    {
-      key: 'hasMemberRole',
-      label: 'Member Role',
-      width: '120px',
-      render: (value: any) => (
-        <span
-          style={{
-            backgroundColor: value ? '#e8f5e9' : '#ffebee',
-            color: value ? '#2e7d32' : '#c62828',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: 500,
-          }}
-        >
-          {value ? 'Yes' : 'No'}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      width: '110px',
-      render: (value: any) => (
-        <span
-          style={{
-            backgroundColor: value === 'active' ? '#e8f5e9' : '#fff3e0',
-            color: value === 'active' ? '#2e7d32' : '#e65100',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: 500,
-            textTransform: 'capitalize',
-          }}
-        >
-          {value || 'active'}
-        </span>
-      ),
-    },
-    {
-      key: 'dateJoined',
-      label: 'Joined',
-      width: '140px',
-      render: (value: any) => {
-        if (!value) return '-'
-        const date = typeof value === 'string' ? new Date(value) : value
-        return <span style={{ color: '#888888', fontSize: '12px' }}>{new Date(date).toLocaleDateString()}</span>
-      },
-    },
+      const res = await fetch('/api/admin/businesses', {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ id, action, ...extra }),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Action failed')
+      setMessage({
+        type: 'success',
+        text: json.message || `Business ${action} successful`,
+      })
+      await fetchBusinesses()
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Action failed',
+      })
+    } finally {
+      setActingId(null)
+    }
+  }
+
+  const editReferralPercent = (biz: BusinessRow) => {
+    const current =
+      typeof biz.referralContributionPercent === 'number'
+        ? String(biz.referralContributionPercent)
+        : '10'
+    const input = window.prompt(
+      `Referral contribution % for ${biz.name} (0–100). Current: ${current}`,
+      current
+    )
+    if (input === null) return
+    const percent = Number(input)
+    if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
+      setMessage({ type: 'error', text: 'Enter a number between 0 and 100.' })
+      return
+    }
+    void runAction(biz.id, 'set_referral_percent', { referralContributionPercent: percent })
+  }
+
+  const tabs: { id: FilterTab; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'pending', label: 'Pending' },
+    { id: 'approved', label: 'Approved' },
+    { id: 'suspended', label: 'Suspended' },
+    { id: 'featured', label: 'Featured' },
   ]
 
   return (
-    <AdminPageLayout title="Businesses" subtitle="Manage and track businesses">
-      <div className="space-y-6">
-        <AdminTable
-          title="All Businesses"
-          columns={columns}
-          data={businesses}
-          loading={loading}
-          searchPlaceholder="Search by business name, category, or location..."
-          onEdit={(item) => {
-            setSelectedBusiness(item)
-            setEditModalOpen(true)
-          }}
-          onDelete={async (item) => {
-            if (confirm('Are you sure you want to delete this business?')) {
-              try {
-                const { updateDocument } = await import('@/lib/admin-queries')
-                await updateDocument('users', item.id, { active: false, updatedAt: new Date() })
-              } catch (error) {
-                console.error('[v0] Error deleting business:', error)
-                alert('Failed to delete business')
-              }
-            }
-          }}
+    <AdminPageLayout
+      title="Businesses"
+      subtitle="Approve marketplace listings · Verify · Suspend · Feature · Delete"
+    >
+      <div className="space-y-6 w-full min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFilter(tab.id)}
+                className={`min-h-[44px] px-4 py-2 rounded-lg font-body text-sm font-semibold ${
+                  filter === tab.id
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black border border-[#e4e1da] hover:bg-neutral-50'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <Button
+            type="button"
+            onClick={() => void fetchBusinesses()}
+            className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
+
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, category, owner, email…"
+          className="w-full min-h-[44px] px-4 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white"
         />
 
-        {selectedBusiness && (
-          <EditBusinessModal
-            isOpen={editModalOpen}
-            onClose={() => {
-              setEditModalOpen(false)
-              setSelectedBusiness(null)
-            }}
-            business={selectedBusiness}
-          />
+        {message && (
+          <div
+            className={`flex items-center gap-2 p-3 rounded-lg text-sm font-body ${
+              message.type === 'success'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 shrink-0" />
+            )}
+            {message.text}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="space-y-3 animate-pulse">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-24 bg-neutral-200 rounded-lg" />
+            ))}
+          </div>
+        ) : businesses.length === 0 ? (
+          <Card className="p-10 text-center">
+            <Store className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
+            <p className="font-headline text-xl font-bold mb-1">No businesses found</p>
+            <p className="font-body text-sm text-neutral-600">
+              Pending listing submissions will appear here for approval.
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {businesses.map((biz) => {
+              const busy = actingId === biz.id
+              return (
+                <Card key={biz.id} className="p-4 sm:p-5">
+                  <div className="flex flex-col lg:flex-row lg:items-start gap-4 justify-between">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-headline text-xl font-bold text-neutral-900 break-words">
+                          {biz.name}
+                        </h3>
+                        {!biz.isApproved && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-amber-100 text-amber-800">
+                            Pending review
+                          </span>
+                        )}
+                        {biz.isApproved && biz.isActive && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-green-100 text-green-800">
+                            In directory
+                          </span>
+                        )}
+                        {!biz.isActive && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-red-100 text-red-800">
+                            Suspended
+                          </span>
+                        )}
+                        {biz.isVerified && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-blue-100 text-blue-800 inline-flex items-center gap-1">
+                            <BadgeCheck className="w-3 h-3" /> Verified
+                          </span>
+                        )}
+                        {biz.featured && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-violet-100 text-violet-800 inline-flex items-center gap-1">
+                            <Star className="w-3 h-3" /> Featured
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-body text-sm text-neutral-600 break-words flex flex-wrap items-center gap-2">
+                        {biz.ownerName ? (
+                          <AdminUserCell
+                            user={{
+                              firstName: biz.ownerName,
+                              profilePictureURL: biz.ownerProfilePictureURL || undefined,
+                              email: biz.email,
+                            }}
+                            name={biz.ownerName}
+                            subtitle={[biz.category, biz.email].filter(Boolean).join(' · ')}
+                          />
+                        ) : (
+                          [biz.category, biz.ownerName, biz.email].filter(Boolean).join(' · ')
+                        )}
+                      </p>
+                      <p className="font-body text-xs text-neutral-500">
+                        Phone: {formatRecordPhoneDisplay(biz.phone)}
+                      </p>
+                      <p className="font-body text-xs text-neutral-500">ID: {biz.id}</p>
+                      {biz.isApproved && biz.referralCode ? (
+                        <p className="font-body text-xs text-neutral-600">
+                          Referral code:{' '}
+                          <span className="font-mono text-neutral-900">{biz.referralCode}</span>
+                          {' · '}
+                          Rate:{' '}
+                          {typeof biz.referralContributionPercent === 'number'
+                            ? `${biz.referralContributionPercent}%`
+                            : 'default'}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 shrink-0">
+                      <AdminViewProfileButton onClick={() => openProfile(biz)} />
+                      {!biz.isApproved && (
+                        <Button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void runAction(biz.id, 'approve')}
+                          className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                          Approve
+                        </Button>
+                      )}
+                      {biz.isApproved ? (
+                        <Button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => editReferralPercent(biz)}
+                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        >
+                          Referral %
+                        </Button>
+                      ) : null}
+                      <Button
+                        type="button"
+                        disabled={busy || biz.isVerified}
+                        onClick={() => void runAction(biz.id, 'verify')}
+                        className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                      >
+                        <BadgeCheck className="w-4 h-4 mr-1.5" />
+                        Verify
+                      </Button>
+                      {biz.isActive ? (
+                        <Button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void runAction(biz.id, 'suspend')}
+                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        >
+                          <Ban className="w-4 h-4 mr-1.5" />
+                          Suspend
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void runAction(biz.id, 'approve')}
+                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        >
+                          Reactivate
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void runAction(biz.id, biz.featured ? 'unfeature' : 'feature')
+                        }
+                        className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                      >
+                        <Star className="w-4 h-4 mr-1.5" />
+                        {biz.featured ? 'Unfeature' : 'Feature'}
+                      </Button>
+                      <Button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void runAction(biz.id, 'delete')}
+                        className="bg-red-600 text-white hover:bg-red-700 min-h-[44px]"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1.5" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
         )}
       </div>
+
+      <AdminUserProfileModal
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        profile={activeProfile}
+        editLabel="Edit business"
+      />
     </AdminPageLayout>
   )
 }

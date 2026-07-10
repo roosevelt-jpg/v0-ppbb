@@ -5,10 +5,11 @@ import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { subscribeToCommunity, subscribeToCommunityGroups, joinGroup } from '@/lib/community-queries'
+import { subscribeToCommunity, subscribeToCommunityGroups, joinGroup, subscribeToUserGroupMemberships } from '@/lib/community-queries'
 import type { Community, Group } from '@/lib/community-types'
 import { useAuth } from '@/lib/auth-context'
 import { ChevronLeft, Users, Tag, MessageCircle, Lock } from 'lucide-react'
+import { canJoinByGenderRestriction, genderRestrictionBadgeClass, genderRestrictionLabel } from '@/lib/community-governance'
 
 export default function CommunityDetailPage() {
   const router = useRouter()
@@ -18,7 +19,7 @@ export default function CommunityDetailPage() {
 
   const [community, setCommunity] = React.useState<Community | null>(null)
   const [groups, setGroups] = React.useState<Group[]>([])
-  const [userGroups, setUserGroups] = React.useState<Set<string>>(new Set())
+  const [userGroups, setUserGroups] = React.useState<Record<string, 'active' | 'pending' | 'rejected'>>({})
   const [loading, setLoading] = React.useState(true)
   const [joiningGroup, setJoiningGroup] = React.useState<string | null>(null)
 
@@ -32,11 +33,17 @@ export default function CommunityDetailPage() {
       setGroups(data)
     })
 
+    let unsubMemberships = () => {}
+    if (user?.id) {
+      unsubMemberships = subscribeToUserGroupMemberships(communityId, user.id, setUserGroups)
+    }
+
     return () => {
       unsubCommunity()
       unsubGroups()
+      unsubMemberships()
     }
-  }, [communityId])
+  }, [communityId, user?.id])
 
   const handleJoinGroup = async (group: Group) => {
     if (!user) {
@@ -46,8 +53,16 @@ export default function CommunityDetailPage() {
 
     setJoiningGroup(group.id!)
     try {
-      await joinGroup(communityId, group.id!, user.id, user.displayName || '', user.email || '', user.gender, user.photoURL)
-      setUserGroups(new Set([...userGroups, group.id!]))
+      const status = await joinGroup(
+        communityId,
+        group.id!,
+        user.id,
+        user.displayName || '',
+        user.email || '',
+        user.gender,
+        user.photoURL
+      )
+      setUserGroups((prev) => ({ ...prev, [group.id!]: status }))
     } catch (error) {
       console.error('[v0] Error joining group:', error)
       alert('Failed to join group')
@@ -190,16 +205,24 @@ export default function CommunityDetailPage() {
           ) : (
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               {groups.map((group) => {
-                const isMember = userGroups.has(group.id!)
-                const isRestricted =
-                  group.genderRestriction !== 'mixed' &&
-                  group.genderRestriction !== user?.gender
+                const membership = userGroups[group.id!]
+                const isMember = membership === 'active'
+                const isPending = membership === 'pending'
+                const genderCheck = canJoinByGenderRestriction(group.genderRestriction, user?.gender)
+                const isRestricted = !genderCheck.allowed
 
                 return (
                   <div
                     key={group.id}
-                    className="bg-white rounded-lg border border-gray-200 p-6 space-y-4"
+                    className="bg-white rounded-lg border border-gray-200 p-6 space-y-4 overflow-hidden"
                   >
+                    {group.iconURL && (
+                      <img
+                        src={group.iconURL}
+                        alt={group.name}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                    )}
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-bold text-black text-lg mb-1">
@@ -214,16 +237,11 @@ export default function CommunityDetailPage() {
                       )}
                     </div>
 
-                    {/* Gender Restriction Badge */}
-                    {group.genderRestriction !== 'mixed' && (
-                      <div className={`text-xs font-medium px-3 py-1 rounded-full inline-block ${
-                        group.genderRestriction === 'male'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-pink-100 text-pink-700'
-                      }`}>
-                        {group.genderRestriction === 'male' ? 'Men Only' : 'Women Only'}
-                      </div>
-                    )}
+                    <span
+                      className={`text-xs font-medium px-3 py-1 rounded-full inline-block ${genderRestrictionBadgeClass(group.genderRestriction)}`}
+                    >
+                      {genderRestrictionLabel(group.genderRestriction)}
+                    </span>
 
                     {/* Group Stats */}
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
@@ -239,35 +257,51 @@ export default function CommunityDetailPage() {
                     {/* Gender Restriction Badge */}
                     {isRestricted && (
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
-                        <p className="text-amber-900 font-medium">
-                          {group.genderRestriction === 'male' ? 'Men Only Group' : 'Women Only Group'}
+                        <p className="text-amber-900 font-medium flex items-center gap-1">
+                          <Lock size={14} />
+                          {genderRestrictionLabel(group.genderRestriction)} group
                         </p>
                         <p className="text-amber-700 text-xs mt-1">
-                          This group is restricted to {group.genderRestriction === 'male' ? 'men' : 'women'} only
+                          {genderCheck.reason || 'This group has a gender restriction.'}
                         </p>
                       </div>
                     )}
 
                     {/* Action Button */}
-                    <button
-                      onClick={() => handleJoinGroup(group)}
-                      disabled={joiningGroup === group.id || isRestricted}
-                      className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
-                        isMember
-                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          : isRestricted
-                          ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                          : 'bg-black text-white hover:bg-gray-900'
-                      }`}
-                    >
-                      {isRestricted
-                        ? 'Access Denied'
-                        : isMember
-                        ? 'Joined'
-                        : joiningGroup === group.id
-                        ? 'Joining...'
-                        : 'Join Group'}
-                    </button>
+                    {isMember ? (
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/communities/${communityId}/groups/${group.id}`)}
+                        className="w-full px-4 py-2 rounded-lg font-medium bg-black !text-white hover:bg-gray-900 min-h-[44px]"
+                      >
+                        Enter Group
+                      </button>
+                    ) : isPending ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full px-4 py-2 rounded-lg font-medium bg-white border border-gray-300 text-black min-h-[44px]"
+                      >
+                        Pending Approval
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleJoinGroup(group)}
+                        disabled={joiningGroup === group.id || isRestricted}
+                        className={`w-full px-4 py-2 rounded-lg font-medium transition-colors min-h-[44px] ${
+                          isRestricted
+                            ? 'bg-white border border-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-black !text-white hover:bg-gray-900'
+                        }`}
+                      >
+                        {isRestricted
+                          ? 'Access Denied'
+                          : joiningGroup === group.id
+                          ? 'Joining...'
+                          : 'Join Group'}
+                      </button>
+                    )}
                   </div>
                 )
               })}

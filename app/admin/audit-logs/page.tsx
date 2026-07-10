@@ -1,285 +1,279 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { getAllAuditLogs, AuditLog } from '@/lib/admin-audit'
+import {
+  subscribeToAllAuditLogs,
+  recordAdminAuditFromUser,
+  type AuditLog,
+} from '@/lib/admin-audit'
+import { AUDIT_ACTION_FILTER_OPTIONS } from '@/lib/audit-log-shared'
 import { format } from 'date-fns'
-import { ChevronDown, Search, Download, MapPin, Monitor, Globe } from 'lucide-react'
+import { ChevronDown, Search, Download, Globe, Monitor, Smartphone } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+
+function AuditLogsSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="h-20 bg-neutral-200 rounded-lg" />
+        <div className="h-20 bg-neutral-200 rounded-lg" />
+      </div>
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-24 bg-neutral-200 rounded-lg" />
+      ))}
+    </div>
+  )
+}
 
 export default function AuditLogsPage() {
-  const { user: authUser } = useAuth()
-  const [logs, setLogs] = useState<(AuditLog & { id: string })[]>([])
+  const { user } = useAuth()
+  const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [expandedLog, setExpandedLog] = useState<string | null>(null)
 
   useEffect(() => {
-    loadLogs()
+    const unsub = subscribeToAllAuditLogs((data) => {
+      setLogs(data)
+      setLoading(false)
+    })
+    return () => unsub()
   }, [])
 
-  async function loadLogs() {
-    setLoading(true)
-    try {
-      const data = await getAllAuditLogs(200)
-      setLogs(data)
-    } catch (error) {
-      console.error('[v0] Error loading audit logs:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const filteredLogs = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim()
+    return logs.filter((log) => {
+      const matchesSearch =
+        !term ||
+        log.adminEmail?.toLowerCase().includes(term) ||
+        log.adminName?.toLowerCase().includes(term) ||
+        log.entityName?.toLowerCase().includes(term) ||
+        log.action?.toLowerCase().includes(term) ||
+        log.route?.toLowerCase().includes(term) ||
+        log.entityType?.toLowerCase().includes(term)
 
-  const filteredLogs = logs.filter(log => {
-    const matchesSearch = 
-      log.adminEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.entityName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.action.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesFilter = filterType === 'all' || log.entityType === filterType
+      const matchesFilter =
+        filterType === 'all' ||
+        log.actionType === filterType ||
+        log.entityType === filterType
 
-    return matchesSearch && matchesFilter
-  })
+      return matchesSearch && matchesFilter
+    })
+  }, [logs, searchTerm, filterType])
+
+  const successRate = useMemo(() => {
+    if (filteredLogs.length === 0) return 0
+    const ok = filteredLogs.filter((l) => l.status === 'success').length
+    return (ok / filteredLogs.length) * 100
+  }, [filteredLogs])
 
   const handleExport = () => {
-    const csv = [
-      'Timestamp,Admin,Action,Entity Type,Entity,Status,Details',
-      ...filteredLogs.map(log => 
-        `"${format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss')}","${log.adminEmail}","${log.action}","${log.entityType}","${log.entityName || '—'}","${log.status}","${log.details || ''}"`
-      )
-    ].join('\n')
+    const headers = [
+      'Timestamp',
+      'Admin Name',
+      'Admin Email',
+      'Role',
+      'Action Type',
+      'Action',
+      'Entity Type',
+      'Entity',
+      'Route',
+      'Status',
+      'IP',
+      'Browser',
+      'OS',
+      'Device',
+      'Details',
+    ]
+    const rows = filteredLogs.map((log) =>
+      [
+        format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss'),
+        log.adminName,
+        log.adminEmail,
+        log.adminRole,
+        log.actionType,
+        log.action,
+        log.entityType,
+        log.entityName || '',
+        log.route || '',
+        log.status,
+        log.ipAddress || '',
+        log.deviceBrowser || '',
+        log.deviceOs || '',
+        log.deviceType || '',
+        log.details || log.failureReason || '',
+      ]
+        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+        .join(',')
+    )
 
+    const csv = [headers.join(','), ...rows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = `audit-logs-${Date.now()}.csv`
     a.click()
+    window.URL.revokeObjectURL(url)
+
+    if (user) {
+      recordAdminAuditFromUser(user, {
+        actionType: 'export',
+        action: `Exported ${filteredLogs.length} audit logs`,
+        entityType: 'other',
+        status: 'success',
+      })
+    }
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>
-          Audit Logs
-        </h1>
-        <p style={{ color: '#888888' }}>Complete activity trail of all admin actions</p>
+    <div className="w-full max-w-6xl mx-auto">
+      <div className="mb-6 sm:mb-8">
+        <p className="font-body text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1">Security</p>
+        <h1 className="font-headline text-2xl sm:text-3xl font-bold text-neutral-900">Audit Logs</h1>
+        <p className="font-body text-sm text-neutral-600 mt-1">Complete activity trail of admin actions</p>
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '250px', position: 'relative' }}>
-          <Search className="h-4 w-4" style={{ position: 'absolute', left: '0.75rem', top: '0.75rem', color: '#888888' }} />
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1 min-w-0">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
-            type="text"
-            placeholder="Search logs..."
+            type="search"
+            placeholder="Search by admin, action, route…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.75rem 0.75rem 0.75rem 2.5rem',
-              border: '1px solid #e4e1da',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-            }}
+            className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-sm font-body"
           />
         </div>
-
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          style={{
-            padding: '0.75rem',
-            border: '1px solid #e4e1da',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            backgroundColor: '#ffffff',
-            minWidth: '150px',
-          }}
+          className="px-4 py-2.5 border border-neutral-300 rounded-lg bg-white text-sm font-body min-w-[140px]"
         >
-          <option value="all">All Types</option>
-          <option value="admin">Admin</option>
-          <option value="integration">Integration</option>
-          <option value="settings">Settings</option>
-          <option value="webhook">Webhook</option>
-          <option value="alert">Alert</option>
+          {AUDIT_ACTION_FILTER_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
-
-        <button
-          onClick={handleExport}
-          style={{
-            padding: '0.75rem 1.5rem',
-            backgroundColor: '#111111',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}
-        >
+        <button type="button" onClick={handleExport} className={`${BUTTON_PRIMARY} inline-flex items-center gap-2 whitespace-nowrap`}>
           <Download className="h-4 w-4" />
           Export
         </button>
       </div>
 
-      {/* Stats */}
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1rem',
-        marginBottom: '2rem'
-      }}>
-        <div style={{
-          backgroundColor: '#f9f8f5',
-          border: '1px solid #e4e1da',
-          borderRadius: '0.5rem',
-          padding: '1rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#888888', marginBottom: '0.5rem' }}>Total Logs</p>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111111' }}>{filteredLogs.length}</p>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
+        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+          <p className="text-xs text-neutral-500 font-body uppercase tracking-wide">Total Logs</p>
+          <p className="text-2xl font-bold text-neutral-900 mt-1">{filteredLogs.length}</p>
         </div>
-        <div style={{
-          backgroundColor: '#f9f8f5',
-          border: '1px solid #e4e1da',
-          borderRadius: '0.5rem',
-          padding: '1rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#888888', marginBottom: '0.5rem' }}>Success Rate</p>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#10b981' }}>
-            {filteredLogs.length > 0 
-              ? ((filteredLogs.filter(l => l.status === 'success').length / filteredLogs.length) * 100).toFixed(1)
-              : 0}%
-          </p>
+        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+          <p className="text-xs text-neutral-500 font-body uppercase tracking-wide">Success Rate</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{successRate.toFixed(1)}%</p>
         </div>
       </div>
 
-      {/* Logs Table */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e4e1da',
-        borderRadius: '0.5rem',
-        overflow: 'hidden',
-      }}>
+      <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888888' }}>Loading audit logs...</div>
+          <div className="p-6">
+            <AuditLogsSkeleton />
+          </div>
         ) : filteredLogs.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888888' }}>No audit logs found</div>
+          <div className="p-8 text-center text-neutral-600 font-body text-sm">
+            No audit logs found. Actions will appear here as admins use the panel.
+          </div>
         ) : (
           <div>
             {filteredLogs.map((log) => (
-              <div key={log.id} style={{ borderBottom: '1px solid #e4e1da' }}>
+              <div key={log.id} className="border-b border-neutral-200 last:border-b-0">
                 <button
+                  type="button"
                   onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    backgroundColor: expandedLog === log.id ? '#f9f8f5' : '#ffffff',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    textAlign: 'left',
-                  }}
+                  className={`w-full p-4 text-left flex items-start gap-3 transition ${
+                    expandedLog === log.id ? 'bg-neutral-50' : 'bg-white hover:bg-neutral-50'
+                  }`}
                 >
                   <ChevronDown
-                    className="h-4 w-4"
-                    style={{
-                      flexShrink: 0,
-                      transform: expandedLog === log.id ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s',
-                      color: '#888888',
-                    }}
+                    className={`h-4 w-4 flex-shrink-0 mt-1 text-neutral-500 transition-transform ${
+                      expandedLog === log.id ? 'rotate-180' : ''
+                    }`}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.25rem' }}>
-                      <span style={{ fontWeight: '600', color: '#111111' }}>{log.action}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="font-semibold text-neutral-900 font-body text-sm sm:text-base">{log.action}</span>
                       <span
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          backgroundColor: log.status === 'success' ? '#ecfdf5' : '#fef2f2',
-                          color: log.status === 'success' ? '#10b981' : '#dc2626',
-                          borderRadius: '0.25rem',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                        }}
+                        className={`text-xs px-2 py-0.5 rounded font-medium ${
+                          log.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}
                       >
                         {log.status}
                       </span>
-                      <span style={{ fontSize: '0.75rem', color: '#888888', marginLeft: 'auto' }}>
-                        {format(new Date(log.timestamp), 'MMM dd, yyyy HH:mm:ss')}
+                      <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 font-body">
+                        {log.actionType}
+                      </span>
+                      <span className="text-xs text-neutral-500 ml-auto font-body whitespace-nowrap">
+                        {format(new Date(log.timestamp), 'MMM d, yyyy HH:mm:ss')}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#888888' }}>
-                      <span>{log.adminEmail}</span>
-                      <span>•</span>
-                      <span>{log.entityType}</span>
-                      {log.entityName && (
-                        <>
-                          <span>•</span>
-                          <span>{log.entityName}</span>
-                        </>
-                      )}
-                    </div>
+                    <p className="text-xs sm:text-sm text-neutral-600 font-body truncate">
+                      {log.adminName} ({log.adminRole}) · {log.adminEmail}
+                      {log.route ? ` · ${log.route}` : ''}
+                      {log.entityName ? ` · ${log.entityName}` : ''}
+                    </p>
                   </div>
                 </button>
 
                 {expandedLog === log.id && (
-                  <div style={{
-                    padding: '1rem',
-                    backgroundColor: '#f9f8f5',
-                    borderTop: '1px solid #e4e1da',
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '1rem',
-                  }}>
-                    {/* Security Details */}
-                    <div>
-                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.75rem' }}>Security Information</p>
-                      {log.ipAddress && (
-                        <div style={{ marginBottom: '0.75rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                            <Globe className="h-4 w-4" style={{ color: '#888888' }} />
-                            <span style={{ fontSize: '0.75rem', color: '#888888' }}>IP Address</span>
+                  <div className="px-4 pb-4 pt-0 bg-neutral-50 border-t border-neutral-100">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7 text-sm font-body">
+                      <div>
+                        <p className="font-semibold text-neutral-900 mb-2">Security</p>
+                        <div className="space-y-2 text-neutral-700">
+                          <div className="flex items-start gap-2">
+                            <Globe className="h-4 w-4 mt-0.5 text-neutral-500 flex-shrink-0" />
+                            <span className="font-mono text-xs break-all">{log.ipAddress || '—'}</span>
                           </div>
-                          <p style={{ fontSize: '0.875rem', color: '#111111', fontFamily: 'monospace', marginLeft: '1.5rem' }}>{log.ipAddress}</p>
-                        </div>
-                      )}
-                      {log.userAgent && (
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                            <Monitor className="h-4 w-4" style={{ color: '#888888' }} />
-                            <span style={{ fontSize: '0.75rem', color: '#888888' }}>User Agent</span>
+                          <div className="flex items-start gap-2">
+                            <Monitor className="h-4 w-4 mt-0.5 text-neutral-500 flex-shrink-0" />
+                            <span>
+                              {log.deviceBrowser} on {log.deviceOs}
+                            </span>
                           </div>
-                          <p style={{ fontSize: '0.75rem', color: '#666666', fontFamily: 'monospace', marginLeft: '1.5rem', wordBreak: 'break-word' }}>{log.userAgent}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Details and Changes */}
-                    <div>
-                      {log.details && (
-                        <div style={{ marginBottom: '1rem' }}>
-                          <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.5rem' }}>Details</p>
-                          <p style={{ fontSize: '0.875rem', color: '#666666', fontFamily: 'monospace' }}>{log.details}</p>
-                        </div>
-                      )}
-                      {log.changes && Object.keys(log.changes).length > 0 && (
-                        <div>
-                          <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#111111', marginBottom: '0.5rem' }}>Changes</p>
-                          <div style={{ fontSize: '0.75rem', color: '#666666' }}>
-                            {Object.entries(log.changes).map(([key, value]) => (
-                              <div key={key} style={{ marginBottom: '0.5rem' }}>
-                                <strong>{key}:</strong> {JSON.stringify(value.before)} → {JSON.stringify(value.after)}
-                              </div>
-                            ))}
+                          <div className="flex items-start gap-2">
+                            <Smartphone className="h-4 w-4 mt-0.5 text-neutral-500 flex-shrink-0" />
+                            <span className="capitalize">{log.deviceType || 'desktop'}</span>
                           </div>
                         </div>
-                      )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-neutral-900 mb-2">Context</p>
+                        <dl className="space-y-1 text-neutral-700 text-xs sm:text-sm">
+                          <div>
+                            <dt className="inline font-medium">Entity: </dt>
+                            <dd className="inline">{log.entityType}{log.entityId ? ` (${log.entityId})` : ''}</dd>
+                          </div>
+                          {log.details ? (
+                            <div>
+                              <dt className="font-medium">Details</dt>
+                              <dd className="mt-1 text-neutral-600">{log.details}</dd>
+                            </div>
+                          ) : null}
+                          {log.failureReason ? (
+                            <div>
+                              <dt className="font-medium text-red-700">Failure</dt>
+                              <dd className="text-red-600">{log.failureReason}</dd>
+                            </div>
+                          ) : null}
+                          {log.userAgent ? (
+                            <div className="mt-2">
+                              <dt className="font-medium text-neutral-500">User agent</dt>
+                              <dd className="font-mono text-[10px] sm:text-xs break-all text-neutral-500">{log.userAgent}</dd>
+                            </div>
+                          ) : null}
+                        </dl>
+                      </div>
                     </div>
                   </div>
                 )}

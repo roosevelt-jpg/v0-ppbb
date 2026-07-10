@@ -4,35 +4,39 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { CustomForm, FormStatistics } from '@/lib/form-builder-types'
 import {
-  getAllForms,
   getFormStatistics,
   createDefaultForms,
+  subscribeToForms,
 } from '@/lib/form-builder-queries'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Button } from '@/components/ui/button'
+import {
+  BUTTON_PRIMARY,
+  BUTTON_SECONDARY,
+  BUTTON_ICON_PRIMARY,
+  BUTTON_ICON_DANGER,
+  FILTER_PILL_ACTIVE,
+  FILTER_PILL_INACTIVE,
+} from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
-import { Plus, Edit2, Eye, Trash2, Archive } from 'lucide-react'
+import { Plus, Edit2, Eye, Trash2, Copy, Check } from 'lucide-react'
 import { deleteForm } from '@/lib/form-builder-queries'
+import { getPublicFormPath } from '@/lib/form-builder-utils'
 
 export default function FormsPage() {
   const [forms, setForms] = useState<CustomForm[]>([])
   const [stats, setStats] = useState<FormStatistics | null>(null)
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   useEffect(() => {
+    let unsub = () => {}
     const loadData = async () => {
       try {
-        // Initialize default forms
         await createDefaultForms()
-
-        // Fetch forms
-        const allForms = await getAllForms()
-        setForms(allForms)
-
-        // Fetch statistics
         const statistics = await getFormStatistics()
         setStats(statistics)
+        unsub = subscribeToForms(setForms)
       } catch (error) {
         console.error('[v0] Error loading forms:', error)
       } finally {
@@ -40,8 +44,21 @@ export default function FormsPage() {
       }
     }
 
-    loadData()
+    void loadData()
+    return () => unsub()
   }, [])
+
+  const copyPublicUrl = async (form: CustomForm) => {
+    if (!form.slug || form.status !== 'active') return
+    const url = `${window.location.origin}${getPublicFormPath(form.slug)}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedId(form.id)
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch {
+      window.prompt('Copy this link:', url)
+    }
+  }
 
   const handleDeleteForm = async (formId: string) => {
     if (!confirm('Are you sure you want to delete this form? All submissions will be deleted.')) {
@@ -65,9 +82,19 @@ export default function FormsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600">Loading forms...</p>
-      </div>
+      <AdminPageLayout title="Custom Forms" subtitle="Loading…">
+        <div className="space-y-6 animate-pulse">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-20 bg-neutral-200 rounded-lg" />
+            ))}
+          </div>
+          <div className="h-12 bg-neutral-200 rounded w-48" />
+          {[1, 2].map((i) => (
+            <div key={i} className="h-28 bg-neutral-200 rounded-lg" />
+          ))}
+        </div>
+      </AdminPageLayout>
     )
   }
 
@@ -80,17 +107,15 @@ export default function FormsPage() {
           <h1 className="text-3xl font-bold">Custom Forms</h1>
           <p className="text-gray-600 mt-1">Create and manage custom forms for different purposes</p>
         </div>
-        <Link href="/admin/forms/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Form
-          </Button>
+        <Link href="/admin/forms/new" className={`inline-flex items-center gap-2 ${BUTTON_PRIMARY}`}>
+          <Plus className="h-4 w-4" />
+          Create Form
         </Link>
       </div>
 
       {/* Statistics Cards */}
       {stats && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="p-4">
             <p className="text-sm text-gray-600">Total Forms</p>
             <p className="text-2xl font-bold mt-2">{stats.totalForms}</p>
@@ -111,16 +136,16 @@ export default function FormsPage() {
       )}
 
       {/* Filter Buttons */}
-      <div className="flex gap-2">
-        {(['all', 'active', 'inactive'] as const).map(option => (
-          <Button
+      <div className="flex flex-wrap gap-2">
+        {(['all', 'active', 'inactive'] as const).map((option) => (
+          <button
             key={option}
-            variant={filter === option ? 'default' : 'outline'}
+            type="button"
             onClick={() => setFilter(option)}
-            className="capitalize"
+            className={filter === option ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
           >
             {option}
-          </Button>
+          </button>
         ))}
       </div>
 
@@ -133,53 +158,66 @@ export default function FormsPage() {
         ) : (
           filteredForms.map(form => (
             <Card key={form.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <h3 className="font-semibold">{form.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{form.description}</p>
-                      <div className="flex gap-2 mt-2">
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                          {form.category}
-                        </span>
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${
-                            form.status === 'active'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}
-                        >
-                          {form.status}
-                        </span>
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
-                          {form.submissionCount} submissions
-                        </span>
-                      </div>
-                    </div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold font-body">{form.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1 font-body line-clamp-2">{form.description}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded font-body">
+                      {form.category}
+                    </span>
+                    <span
+                      className={`text-xs px-2 py-1 rounded font-body ${
+                        form.status === 'active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {form.status}
+                    </span>
+                    <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded font-body">
+                      {form.submissionCount ?? 0} submissions
+                    </span>
                   </div>
+                  {form.status === 'active' && form.slug ? (
+                    <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
+                      <code className="text-xs bg-neutral-100 px-2 py-1 rounded break-all font-body">
+                        {getPublicFormPath(form.slug)}
+                      </code>
+                      <button
+                        type="button"
+                        onClick={() => void copyPublicUrl(form)}
+                        className={`${BUTTON_SECONDARY} text-xs inline-flex items-center gap-1 self-start`}
+                      >
+                        {copiedId === form.id ? (
+                          <>
+                            <Check className="h-3 w-3" /> Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="h-3 w-3" /> Copy link
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Link href={`/admin/forms/${form.id}/submissions`}>
-                    <Button variant="ghost" size="sm" title="View Submissions">
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                <div className="flex gap-2 flex-shrink-0">
+                  <Link href={`/admin/forms/${form.id}/submissions`} className={BUTTON_ICON_PRIMARY} title="View Submissions">
+                    <Eye className="h-4 w-4" />
                   </Link>
-                  <Link href={`/admin/forms/${form.id}`}>
-                    <Button variant="ghost" size="sm" title="Edit Form">
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
+                  <Link href={`/admin/forms/${form.id}`} className={BUTTON_ICON_PRIMARY} title="Edit Form">
+                    <Edit2 className="h-4 w-4" />
                   </Link>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
+                    type="button"
                     onClick={() => handleDeleteForm(form.id)}
                     title="Delete Form"
+                    className={BUTTON_ICON_DANGER}
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </Card>

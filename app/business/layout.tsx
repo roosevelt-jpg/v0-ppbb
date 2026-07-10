@@ -4,10 +4,18 @@ import React from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
+import { BusinessPortalAccessDenied } from '@/components/business-feature-gate'
 import Link from 'next/link'
-import Image from 'next/image'
+import { SiteLogo } from '@/components/site-logo'
+import { DashboardErrorBoundary } from '@/components/dashboard-error-boundary'
+import { DashboardTopBar } from '@/components/dashboard-top-bar'
 import {
-  LogOut,
+  getBusinessPageTitle,
+  getWelcomeFirstName,
+} from '@/lib/dashboard-page-titles'
+import { getUserDisplayName } from '@/lib/user-profile'
+import { ContentProtection } from '@/components/content-protection'
+import {
   BarChart3,
   Briefcase,
   TrendingUp,
@@ -17,84 +25,37 @@ import {
   DollarSign,
   Heart,
   Share2,
-  LayoutGrid,
   Menu,
   X,
-  Moon,
-  Sun,
-  Globe,
   Calendar,
   Users2,
+  Tag,
 } from 'lucide-react'
 
 const businessMenuItems = [
   { label: 'Dashboard', href: '/business/dashboard', icon: BarChart3 },
-  { label: 'Profile', href: '/business/profile', icon: Users },
-  { label: 'Events', href: '/business/events', icon: Calendar },
-  { label: 'Communities', href: '/business/communities', icon: Users2 },
-  { label: 'Opportunities', href: '/business/opportunities', icon: Briefcase },
-  { label: 'Offers', href: '/business/offers', icon: ShoppingBag },
-  { label: 'Leads', href: '/business/leads', icon: Zap },
+  { label: 'Business Profile', href: '/business/profile', icon: Users },
+  { label: 'Jobs & Gigs', href: '/business/opportunities', icon: Briefcase },
+  { label: 'Products & Offers', href: '/business/offers', icon: ShoppingBag },
+  { label: 'Member Discounts', href: '/business/discounts', icon: Tag },
+  { label: 'Network / Connections', href: '/business/marketplace', icon: Users },
+  { label: 'Leads & Conversions', href: '/business/leads', icon: Zap },
   { label: 'Referrals', href: '/business/referrals', icon: Share2 },
-  { label: 'Partnerships', href: '/business/partnerships', icon: Heart },
-  { label: 'Marketplace', href: '/business/marketplace', icon: LayoutGrid },
-  { label: 'Payments', href: '/business/payments', icon: DollarSign },
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },
+  { label: 'Networking Events', href: '/business/events', icon: Calendar },
+  { label: 'Partnerships & Requests', href: '/business/partnerships', icon: Heart },
+  { label: 'Communities', href: '/business/communities', icon: Users2 },
+  { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },
 ]
 
-function BusinessHeaderDate({ mobile = false }: { mobile?: boolean }) {
-  const [dateTime, setDateTime] = React.useState('')
-
-  React.useEffect(() => {
-    const updateDateTime = () => {
-      const now = new Date()
-      const formatted = new Intl.DateTimeFormat('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(now)
-      setDateTime(formatted)
-    }
-
-    updateDateTime()
-    const interval = setInterval(updateDateTime, 60000) // Update every minute
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div className={`text-sm text-neutral-600 ${mobile ? 'text-xs' : ''}`}>
-      {dateTime || 'Loading...'}
-    </div>
-  )
-}
-
 function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const router = useRouter()
   const pathname = usePathname()
-  const { logout } = useAuth()
-
-  const handleLogout = async () => {
-    await logout()
-    router.push('/login')
-  }
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-white">
+    <div className="flex h-full min-h-screen flex-col bg-white dark:bg-neutral-900">
       {/* Header with Logo */}
-      <div className="border-b border-neutral-200 p-6">
-        <Link href="/business/dashboard" className="flex items-center justify-center">
-          {/* Passive Blessings Logo - Full Logo Only */}
-          <Image
-            src="/pb-logo-black.png"
-            alt="Passive Blessings"
-            width={64}
-            height={64}
-            className="rounded-lg"
-          />
-        </Link>
+      <div className="border-b border-neutral-200 dark:border-neutral-700 px-4 py-4 flex items-center justify-center">
+        <SiteLogo background="light" variant="sidebar" href="/business/dashboard" />
       </div>
 
       {/* Navigation */}
@@ -111,8 +72,8 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   onClick={onNavigate}
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-neutral-900 text-white'
-                      : 'text-neutral-700 hover:bg-neutral-100'
+                      ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
+                      : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800'
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -125,11 +86,11 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-neutral-200 p-4">
+      <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
         <Link
           href="/dashboard"
           onClick={onNavigate}
-          className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-100 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-200"
+          className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-100 dark:bg-neutral-800 px-4 py-3 text-sm font-medium text-neutral-700 dark:text-neutral-200 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-700"
         >
           <Users className="h-4 w-4 shrink-0" />
           Member Dashboard
@@ -163,11 +124,10 @@ export default function BusinessLayout({
     if (loading || isSignupRoute) return
     if (!user) {
       router.push('/login')
-    } else if (!canAccess) {
-      // Logged in but no business account yet - send to business signup
-      router.push('/signup')
     }
-  }, [user, loading, canAccess, router, isSignupRoute])
+    // Basic members stay on this layout briefly so BusinessPortalAccessDenied can show the upgrade modal.
+    // Do NOT auto-redirect to /join — Part 10C requires the modal first.
+  }, [user, loading, router, isSignupRoute])
 
   if (isSignupRoute) {
     return <>{children}</>
@@ -181,18 +141,37 @@ export default function BusinessLayout({
     )
   }
 
-  if (!user || !canAccess) {
+  if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#faf9f7]">
-        <p className="text-neutral-500">Redirecting...</p>
+        <p className="text-neutral-500">Redirecting to login…</p>
       </div>
     )
   }
 
+  if (!canAccess) {
+    return <BusinessPortalAccessDenied />
+  }
+
+  const pageTitle = getBusinessPageTitle(pathname || '/business/dashboard')
+  const welcome = `Welcome, ${getWelcomeFirstName(getUserDisplayName(user))}!`
+
+  const mobileMenu = (
+    <button
+      type="button"
+      data-dashboard-control
+      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      className="md:hidden inline-flex items-center justify-center min-h-[32px] min-w-[32px] rounded-md bg-transparent text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+      aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+    >
+      {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+    </button>
+  )
+
   return (
-    <div className="flex min-h-screen bg-[#faf9f7]">
+    <div className="flex min-h-screen bg-[#faf9f7] dark:bg-neutral-950">
       {/* Desktop Sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-neutral-200 md:block">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-r border-neutral-200 dark:border-neutral-800 md:block">
         <BusinessSidebarContent />
       </aside>
 
@@ -205,7 +184,7 @@ export default function BusinessLayout({
         />
       )}
       <aside
-        className={`fixed left-0 top-0 z-40 h-full w-64 transform border-r border-neutral-200 transition-transform duration-300 md:hidden ${
+        className={`fixed left-0 top-0 z-40 h-full w-64 transform border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 transition-transform duration-300 md:hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -214,49 +193,26 @@ export default function BusinessLayout({
 
       {/* Main Content */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {/* Desktop Header */}
-        <div className="hidden items-center justify-between border-b border-neutral-200 bg-white px-6 py-4 md:flex">
-          <BusinessHeaderDate />
-          <div className="flex items-center gap-3">
-            <button
-              className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
-              aria-label="Language"
-              title="Language"
-            >
-              <Globe className="h-5 w-5" />
-            </button>
-            <button
-              className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-100"
-              aria-label="Theme"
-              title="Dark mode"
-            >
-              <Moon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
-              aria-label="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign out
-            </button>
-          </div>
-        </div>
+        <DashboardTopBar
+          title={pageTitle}
+          welcome={welcome}
+          onLogout={handleLogout}
+          logoutLabel="Sign out"
+          trailing={mobileMenu}
+        />
 
-        {/* Mobile Header */}
-        <div className="flex items-center justify-between border-b border-neutral-200 bg-white p-4 md:hidden">
-          <BusinessHeaderDate mobile />
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="rounded-md p-2 text-neutral-700 hover:bg-neutral-100"
-            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-          >
-            {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+        {/* Content — always light surface so cards stay white with black text */}
+        <div className="flex-1 overflow-auto" data-dashboard-surface="light">
+          <ContentProtection>
+            <DashboardErrorBoundary
+              key={pathname}
+              homeHref="/business/dashboard"
+              homeLabel="Go to Business Dashboard"
+            >
+              {children}
+            </DashboardErrorBoundary>
+          </ContentProtection>
         </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto">{children}</div>
       </main>
     </div>
   )

@@ -14,26 +14,15 @@ interface PlacePrediction {
 interface GooglePlacesAutocompleteProps {
   value: string
   onChange: (place: PlacePrediction) => void
+  onTextChange?: (text: string) => void
   countryRestrictions?: string[]
   placeholder?: string
-}
-
-declare global {
-  interface Window {
-    google?: {
-      maps: {
-        places: {
-          AutocompleteService: any
-          PlacesService: any
-        }
-      }
-    }
-  }
 }
 
 export default function GooglePlacesAutocomplete({
   value,
   onChange,
+  onTextChange,
   countryRestrictions = [],
   placeholder = 'Search location...',
 }: GooglePlacesAutocompleteProps) {
@@ -42,225 +31,190 @@ export default function GooglePlacesAutocomplete({
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [apiReady, setApiReady] = useState(false)
-  const autocompleteService = useRef<any>(null)
-  const placesService = useRef<any>(null)
-  const mapRef = useRef<any>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestIdRef = useRef(0)
 
-  // Load Google Maps API on mount
   useEffect(() => {
-    const loadGoogleMapsAPI = async () => {
-      // Check if already loaded
-      if (window.google?.maps?.places?.AutocompleteService) {
-        console.log('[v0] Google Maps API already loaded')
-        autocompleteService.current = new window.google.maps.places.AutocompleteService()
-        const dummyDiv = document.createElement('div')
-        mapRef.current = new window.google.maps.Map(dummyDiv)
-        placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
-        setApiReady(true)
-        return
-      }
+    setInput(value)
+  }, [value])
 
-      // First try environment variable, then fetch from integrations API
-      let apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY
-      
-      if (!apiKey) {
-        try {
-          console.log('[v0] Fetching Google Maps API key from integrations...')
-          const res = await fetch('/api/admin/integrations/googleMaps')
-          if (res.ok) {
-            const data = await res.json()
-            apiKey = data.data?.credentials?.apiKey
-            console.log('[v0] API key fetched from integrations:', apiKey ? 'Success' : 'Empty')
-          } else {
-            console.warn('[v0] Integration endpoint returned:', res.status, 'Response:', await res.text())
-          }
-        } catch (error) {
-          console.warn('[v0] Failed to fetch Google Maps API key from integrations:', error)
-          setError('Failed to load integrations')
-        }
-      } else {
-        console.log('[v0] Using environment variable API key')
-      }
-
-      if (!apiKey) {
-        const msg = 'Google Places API key not configured. Please configure it in Admin > Integrations > Google Maps API'
-        console.warn('[v0]', msg)
-        setError(msg)
-        return
-      }
-
-      const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
-      script.async = true
-      script.defer = true
-      script.onload = () => {
-        console.log('[v0] Google Maps script loaded successfully')
-        if (window.google?.maps?.places) {
-          try {
-            autocompleteService.current = new window.google.maps.places.AutocompleteService()
-            const dummyDiv = document.createElement('div')
-            mapRef.current = new window.google.maps.Map(dummyDiv)
-            placesService.current = new window.google.maps.places.PlacesService(mapRef.current)
-            setApiReady(true)
-            setError(null)
-            console.log('[v0] Google Places services initialized')
-          } catch (err) {
-            console.error('[v0] Error initializing Places services:', err)
-            setError('Failed to initialize Places services')
-          }
-        }
-      }
-      script.onerror = () => {
-        const msg = 'Failed to load Google Maps API script'
-        console.error('[v0]', msg)
-        setError(msg)
-      }
-      document.head.appendChild(script)
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-
-    loadGoogleMapsAPI()
   }, [])
 
-  const fetchPlacePredictions = (searchTerm: string) => {
-    if (!searchTerm.trim()) {
+  const formatPlaceLabel = (prediction: PlacePrediction) =>
+    prediction.secondaryText
+      ? `${prediction.mainText}, ${prediction.secondaryText}`
+      : prediction.mainText
+
+  const emitManualEntry = (text: string) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+
+    onChange({
+      placeId: `manual-${Date.now()}`,
+      mainText: trimmed,
+      secondaryText: undefined,
+      lat: 0,
+      lng: 0,
+    })
+  }
+
+  const fetchPlacePredictions = async (searchTerm: string) => {
+    const trimmed = searchTerm.trim()
+    if (!trimmed) {
       setPredictions([])
       return
     }
 
-    if (!autocompleteService.current) {
-      console.warn('[v0] AutocompleteService not ready yet')
-      setError('Google Places service not initialized')
-      setPredictions([])
-      return
-    }
-
+    const requestId = ++requestIdRef.current
     setLoading(true)
-    console.log('[v0] Fetching predictions for:', searchTerm, 'Country restrictions:', countryRestrictions)
-    
+
     try {
-      autocompleteService.current.getPlacePredictions(
-        {
-          input: searchTerm,
-          componentRestrictions: countryRestrictions.length > 0 
-            ? { country: countryRestrictions }
-            : undefined,
-        },
-        (predictions: any[], status: string) => {
-          console.log('[v0] Predictions callback - status:', status, 'predictions:', predictions)
+      const params = new URLSearchParams({ input: trimmed })
+      if (countryRestrictions.length > 0) {
+        params.set('countries', countryRestrictions.join(','))
+      }
 
-          if (status !== 'OK' && status !== 'ZERO_RESULTS') {
-            console.warn('[v0] Predictions API returned status:', status)
-            setError(status === 'REQUEST_DENIED' ? 'Google API key not authorized for Places API' : `Location service: ${status}`)
-            setPredictions([])
-            setLoading(false)
-            return
-          }
+      const res = await fetch(`/api/places/autocomplete?${params.toString()}`)
+      const data = await res.json()
 
-          if (!predictions || predictions.length === 0) {
-            console.log('[v0] No predictions found for:', searchTerm)
-            setPredictions([])
-            setError(null)
-            setLoading(false)
-            return
-          }
+      if (requestId !== requestIdRef.current) return
 
-          const formattedPredictions = predictions.map((prediction: any) => ({
-            placeId: prediction.place_id,
-            mainText: prediction.structured_formatting?.main_text || prediction.description,
-            secondaryText: prediction.structured_formatting?.secondary_text,
-          }))
-          console.log('[v0] Formatted predictions:', formattedPredictions)
-          setPredictions(formattedPredictions)
-          setIsOpen(true)
-          setError(null)
-          setLoading(false)
-        }
-      )
-    } catch (error) {
-      console.error('[v0] Error fetching predictions:', error)
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-      setError(`Location error: ${errorMsg}`)
+      if (!data.success) {
+        setError(data.error || 'Location suggestions are unavailable')
+        setPredictions([])
+        setIsOpen(true)
+        return
+      }
+
+      setPredictions(data.predictions || [])
+      setIsOpen(true)
+      setError(null)
+    } catch {
+      if (requestId !== requestIdRef.current) return
+      setError('Location suggestions are unavailable')
       setPredictions([])
-      setLoading(false)
+      setIsOpen(true)
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false)
+      }
     }
   }
 
-  const getPlaceDetails = (placeId: string) => {
-    if (!placesService.current) return
+  const schedulePredictions = (searchTerm: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      fetchPlacePredictions(searchTerm)
+    }, 250)
+  }
 
-    placesService.current.getDetails(
-      { placeId, fields: ['geometry', 'formatted_address'] },
-      (place: any, status: string) => {
-        if (status === 'OK' && place.geometry) {
-          const prediction = predictions.find(p => p.placeId === placeId)
-          if (prediction) {
-            onChange({
-              ...prediction,
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng(),
-            })
-          }
-        }
+  const getPlaceDetails = async (prediction: PlacePrediction) => {
+    if (prediction.placeId.startsWith('manual-')) {
+      onChange(prediction)
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/places/details?placeId=${encodeURIComponent(prediction.placeId)}`)
+      const data = await res.json()
+
+      if (!data.success || !data.place) {
+        onChange({
+          ...prediction,
+          mainText: formatPlaceLabel(prediction),
+        })
+        return
       }
-    )
+
+      onChange({
+        placeId: prediction.placeId,
+        mainText: data.place.formattedAddress || formatPlaceLabel(prediction),
+        secondaryText: data.place.city || prediction.secondaryText,
+        lat: data.place.lat,
+        lng: data.place.lng,
+      })
+    } catch {
+      onChange({
+        ...prediction,
+        mainText: formatPlaceLabel(prediction),
+      })
+    }
   }
 
   const handleSelectPrediction = (prediction: PlacePrediction) => {
-    setInput(prediction.mainText)
+    const label = formatPlaceLabel(prediction)
+    setInput(label)
     setPredictions([])
     setIsOpen(false)
-    onChange(prediction)
+    onTextChange?.(label)
+    void getPlaceDetails(prediction)
   }
 
   const handleManualEntry = () => {
-    // Allow user to proceed with manual location entry
-    if (input.trim()) {
-      const manualPrediction: PlacePrediction = {
-        placeId: `manual-${Date.now()}`,
-        mainText: input.trim(),
-        secondaryText: 'Manual entry',
-        lat: 0,
-        lng: 0,
-      }
-      onChange(manualPrediction)
+    if (!input.trim()) return
+    const manualPrediction: PlacePrediction = {
+      placeId: `manual-${Date.now()}`,
+      mainText: input.trim(),
+      secondaryText: undefined,
+      lat: 0,
+      lng: 0,
+    }
+    handleSelectPrediction(manualPrediction)
+    setError(null)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextValue = e.target.value
+    setInput(nextValue)
+    onTextChange?.(nextValue)
+
+    if (nextValue.trim()) {
+      schedulePredictions(nextValue)
+    } else {
+      setPredictions([])
       setIsOpen(false)
       setError(null)
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setInput(value)
-    if (value.trim()) {
-      if (apiReady && autocompleteService.current) {
-        fetchPlacePredictions(value)
-      } else {
-        // If API not ready, show option to use manual entry
-        console.log('[v0] API not ready, showing manual entry option')
-      }
-    } else {
-      setPredictions([])
+  const handleBlur = () => {
+    window.setTimeout(() => {
       setIsOpen(false)
-    }
+      if (input.trim()) {
+        emitManualEntry(input)
+      }
+    }, 150)
   }
 
   const handleClear = () => {
     setInput('')
     setPredictions([])
     setIsOpen(false)
+    setError(null)
+    onTextChange?.('')
+    onChange({
+      placeId: '',
+      mainText: '',
+      secondaryText: undefined,
+      lat: 0,
+      lng: 0,
+    })
     inputRef.current?.focus()
   }
 
   return (
     <div className="relative w-full">
       {error && (
-        <div className="mb-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {error}
+        <div className="mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          {error}. You can still type a location and continue.
         </div>
       )}
-      
+
       <div className="relative">
         <Search className="absolute left-3 top-3 text-gray-400" size={18} />
         <input
@@ -268,14 +222,12 @@ export default function GooglePlacesAutocomplete({
           type="text"
           value={input}
           onChange={handleInputChange}
+          onBlur={handleBlur}
           onFocus={() => input && setIsOpen(true)}
           placeholder={placeholder}
-          disabled={!apiReady}
-          className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${
-            !apiReady ? 'bg-gray-100 cursor-not-allowed border-gray-300' : 'border-gray-300'
-          }`}
+          className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent border-gray-300"
         />
-        {input && apiReady && (
+        {input && (
           <button
             type="button"
             onClick={handleClear}
@@ -286,29 +238,26 @@ export default function GooglePlacesAutocomplete({
         )}
       </div>
 
-      {isOpen && apiReady && (
+      {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
           {loading && (
             <div className="p-4 text-center text-gray-500">
-              <div className="inline-block w-5 h-5 border-2 border-gray-300 border-t-black rounded-full animate-spin"></div>
+              <div className="inline-block w-5 h-5 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
             </div>
           )}
-          
+
           {!loading && predictions.length === 0 && input.trim() && (
             <div className="space-y-2 p-3">
-              <div className="text-center text-gray-500 text-sm">
-                No locations found
-              </div>
-              {error && (
-                <button
-                  type="button"
-                  onClick={handleManualEntry}
-                  className="w-full p-3 text-left bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
-                >
-                  <p className="font-medium text-blue-900 text-sm">Use entered location</p>
-                  <p className="text-xs text-blue-700">"{input.trim()}"</p>
-                </button>
-              )}
+              <div className="text-center text-gray-500 text-sm">No locations found</div>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleManualEntry}
+                className="w-full p-3 text-left bg-white border border-black rounded-lg hover:bg-neutral-50 transition"
+              >
+                <p className="font-medium text-neutral-900 text-sm">Use entered location</p>
+                <p className="text-xs text-neutral-600">&quot;{input.trim()}&quot;</p>
+              </button>
             </div>
           )}
 
@@ -316,6 +265,7 @@ export default function GooglePlacesAutocomplete({
             <button
               key={prediction.placeId}
               type="button"
+              onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectPrediction(prediction)}
               className="w-full text-left p-3 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition"
             >

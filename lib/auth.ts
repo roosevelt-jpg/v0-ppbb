@@ -11,8 +11,51 @@ import {
   signInWithPopup,
   sendPasswordResetEmail,
 } from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc, DocumentSnapshot } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { isAccountDeleted } from '@/lib/user-settings'
+import { formatAuthError } from '@/lib/auth-errors'
+
+async function fetchOwnUserProfile(firebaseUser: FirebaseUser): Promise<DocumentSnapshot> {
+  const userRef = doc(db, 'users', firebaseUser.uid)
+  const maxAttempts = 4
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await firebaseUser.getIdToken(attempt > 0)
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 75 * attempt))
+    }
+
+    try {
+      return await getDoc(userRef)
+    } catch (error: unknown) {
+      const code = (error as { code?: string })?.code
+      const isLastAttempt = attempt === maxAttempts - 1
+      if (code !== 'permission-denied' || isLastAttempt) {
+        throw error
+      }
+    }
+  }
+
+  return getDoc(userRef)
+}
+
+async function buildLoginResult(
+  firebaseUser: FirebaseUser,
+  userDocSnap: DocumentSnapshot
+): Promise<{ user: User | null; error: string | null } | null> {
+  if (!userDocSnap.exists()) return null
+  const profile = { id: firebaseUser.uid, ...userDocSnap.data() } as User
+  if (isAccountDeleted(profile)) {
+    await signOut(auth)
+    return {
+      user: null,
+      error: 'This account has been deactivated. Contact support to restore access.',
+    }
+  }
+  return { user: profile, error: null }
+}
 
 interface RegisterUserOptions {
   dateOfBirth?: string
@@ -65,7 +108,7 @@ export async function registerUser(
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
   } catch (error: any) {
@@ -84,12 +127,10 @@ export async function loginUser(
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const firebaseUser = userCredential.user
 
-    // Fetch user profile from Firestore
-    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+    const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
-    if (userDocSnap.exists()) {
-      return { user: userDocSnap.data() as User, error: null }
-    }
+    const existing = await buildLoginResult(firebaseUser, userDocSnap)
+    if (existing) return existing
 
     // Auto-create user profile on first login if it doesn't exist
     // This handles test members or users created via Firebase console
@@ -111,11 +152,11 @@ export async function loginUser(
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: formatAuthError(error) }
   }
 }
 
@@ -124,15 +165,18 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
     await setPersistence(auth, browserLocalPersistence)
     
     const provider = new GoogleAuthProvider()
+    provider.addScope('email')
+    provider.addScope('profile')
+    provider.setCustomParameters({ prompt: 'select_account' })
+
     const result = await signInWithPopup(auth, provider)
     const firebaseUser = result.user
 
-    // Check if user exists in Firestore
-    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+    await firebaseUser.getIdToken(true)
+    const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
-    if (userDocSnap.exists()) {
-      return { user: userDocSnap.data() as User, error: null }
-    }
+    const existing = await buildLoginResult(firebaseUser, userDocSnap)
+    if (existing) return existing
 
     // Create new user profile for first-time Google sign-in
     const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
@@ -154,11 +198,11 @@ export async function loginWithGoogle(): Promise<{ user: User | null; error: str
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: formatAuthError(error) }
   }
 }
 
@@ -167,15 +211,17 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
     await setPersistence(auth, browserLocalPersistence)
     
     const provider = new FacebookAuthProvider()
+    provider.addScope('email')
+    provider.addScope('public_profile')
+
     const result = await signInWithPopup(auth, provider)
     const firebaseUser = result.user
 
-    // Check if user exists in Firestore
-    const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+    await firebaseUser.getIdToken(true)
+    const userDocSnap = await fetchOwnUserProfile(firebaseUser)
 
-    if (userDocSnap.exists()) {
-      return { user: userDocSnap.data() as User, error: null }
-    }
+    const existing = await buildLoginResult(firebaseUser, userDocSnap)
+    if (existing) return existing
 
     // Create new user profile for first-time Facebook sign-in
     const [firstName, ...lastNameParts] = firebaseUser.displayName?.split(' ') || ['', '']
@@ -197,20 +243,24 @@ export async function loginWithFacebook(): Promise<{ user: User | null; error: s
       updatedAt: new Date(),
     }
 
-    await setDoc(doc(db, 'users', firebaseUser.uid), userProfile)
+    await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userProfile as Record<string, unknown>))
 
     return { user: userProfile, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: formatAuthError(error) }
   }
 }
 
 export async function sendPasswordReset(email: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    await sendPasswordResetEmail(auth, email)
+    const trimmed = email.trim()
+    if (!trimmed) {
+      return { success: false, error: 'Please enter your email address.' }
+    }
+    await sendPasswordResetEmail(auth, trimmed)
     return { success: true, error: null }
-  } catch (error: any) {
-    return { success: false, error: error.message }
+  } catch (error: unknown) {
+    return { success: false, error: formatAuthError(error) }
   }
 }
 

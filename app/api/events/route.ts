@@ -1,15 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+import { notifyNewEventPublished } from '@/lib/push-notifications-server'
+
+function sortEventsByCreatedAt(events: Array<Record<string, unknown> & { id: string }>) {
+  return events.sort((a, b) => {
+    const aTime = new Date((a.createdAt as string) || 0).getTime()
+    const bTime = new Date((b.createdAt as string) || 0).getTime()
+    return bTime - aTime
+  })
+}
+
+async function notifyEventCreator(
+  createdBy: string,
+  title: string,
+  type: 'event_approved' | 'event_rejected' | 'event_changes_requested',
+  message: string
+) {
+  if (!createdBy || createdBy === 'admin') return
+  try {
+    const db = getAdminDb()
+    await db.collection('users').doc(createdBy).collection('notifications').add({
+      type,
+      title,
+      message,
+      read: false,
+      createdAt: Timestamp.now(),
+    })
+  } catch (error) {
+    console.warn('[v0] Could not notify event creator:', error)
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
     const status = request.nextUrl.searchParams.get('status')
     const createdBy = request.nextUrl.searchParams.get('createdBy')
-    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100')
+    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100', 10)
+    const id = request.nextUrl.searchParams.get('id')
 
     const db = getAdminDb()
-    let query: any = db.collection('events')
+
+    if (id) {
+      const snap = await db.collection('events').doc(id).get()
+      if (!snap.exists) {
+        return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 })
+      }
+      return NextResponse.json({
+        success: true,
+        data: serializeFirestoreDoc(snap.id, snap.data() as Record<string, unknown>),
+      })
+    }
+
+    let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = db.collection('events')
 
     if (status && status !== 'all') {
       query = query.where('status', '==', status)
@@ -18,23 +63,23 @@ export async function GET(request: NextRequest) {
       query = query.where('createdBy', '==', createdBy)
     }
 
-    query = query.orderBy('createdAt', 'desc').limit(limit)
-
-    const snapshot = await query.get()
-    const events = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      startDate: doc.data().startDate?.toDate?.() || doc.data().startDate,
-      endDate: doc.data().endDate?.toDate?.() || doc.data().endDate,
-      submittedAt: doc.data().submittedAt?.toDate?.() || doc.data().submittedAt,
-      publishedAt: doc.data().publishedAt?.toDate?.() || doc.data().publishedAt,
-      createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
-      updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
-    }))
+    const snapshot = await query.limit(limit).get()
+    const events = sortEventsByCreatedAt(
+      snapshot.docs.map((doc) =>
+        serializeFirestoreDoc(doc.id, doc.data() as Record<string, unknown>) as Record<string, unknown> & { id: string }
+      )
+    )
 
     return NextResponse.json({ success: true, data: events })
   } catch (error) {
     console.error('[v0] Events fetch error:', error)
+    const message = error instanceof Error ? error.message : 'Failed to fetch events'
+    if (message.includes('index')) {
+      console.error(
+        '[v0] Firestore composite index may be required. Create it in Firebase Console → Firestore → Indexes:',
+        message
+      )
+    }
     return NextResponse.json({ success: false, error: 'Failed to fetch events' }, { status: 500 })
   }
 }
@@ -43,16 +88,60 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const db = getAdminDb()
+    const { verifyIdToken } = await import('@/lib/admin-access-server')
+    const { hasBusinessAccessServer, hasAdminAccessServer } = await import('@/lib/roles-server')
 
-    // Validate required fields
-    if (!body.title || !body.startDate || !body.locationName) {
+    const authHeader = request.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authorization required to create events' },
+        { status: 401 }
+      )
+    }
+
+    const uid = await verifyIdToken(token)
+    if (!uid) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userSnap = await db.collection('users').doc(uid).get()
+    const userRoleData = (userSnap.data() as { role?: string; roles?: string[] }) || null
+
+    if (!hasAdminAccessServer(userRoleData) && !hasBusinessAccessServer(userRoleData)) {
+      return NextResponse.json(
+        { success: false, error: 'Members cannot create events' },
+        { status: 403 }
+      )
+    }
+
+    const createdByRole = hasAdminAccessServer(userRoleData) ? 'admin' : 'business'
+
+    const locationName = body.locationName || body.location
+    const startDate = body.startDate || body.date
+    if (!body.title || !startDate || !locationName) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields: title, startDate, or locationName' },
         { status: 400 }
       )
     }
 
-    const eventData = {
+    let status = body.status || 'draft'
+    const isBusiness = createdByRole === 'business'
+
+    if (isBusiness) {
+      if (status === 'published') {
+        status = 'pending_approval'
+      }
+      if (status === 'submitted') {
+        status = 'pending_approval'
+      }
+    }
+
+    const isPublished = status === 'published'
+    const isPending = status === 'pending_approval'
+
+    const eventData = sanitizeForFirestore({
       title: body.title,
       description: body.description || '',
       category: body.category || 'general',
@@ -63,26 +152,26 @@ export async function POST(request: NextRequest) {
       speakers: body.speakers || [],
       agenda: body.agenda || [],
 
-      locationName: body.locationName,
-      locationAddress: body.locationAddress,
-      locationPlaceId: body.locationPlaceId,
-      locationLat: body.locationLat || 0,
-      locationLng: body.locationLng || 0,
+      locationName: body.locationName || body.location || '',
+      locationAddress: body.locationAddress || body.locationName || body.location || '',
+      locationPlaceId: body.locationPlaceId || body.locationData?.placeId || '',
+      locationLat: body.locationLat ?? body.locationData?.lat ?? 0,
+      locationLng: body.locationLng ?? body.locationData?.lng ?? 0,
 
-      startDate: new Date(body.startDate),
-      endDate: new Date(body.endDate || body.startDate),
+      startDate: new Date(body.startDate || body.date),
+      endDate: new Date(body.endDate || body.startDate || body.date),
       timezone: body.timezone || 'Asia/Dubai',
 
-      pricingType: body.pricingType || 'free',
-      price: body.price || null,
+      pricingType: body.pricingType || (body.isPaid ? 'paid_by_pb' : 'free'),
+      price: body.price ?? null,
       currency: body.currency || 'AED',
-      revenueModel: body.revenueModel || null,
+      revenueModel: body.revenueModel || (body.isPaid ? 'pb_full' : null),
       pbCommissionPercent: body.pbCommissionPercent || null,
       businessPayoutPercent: body.businessPayoutPercent || null,
       pbCommissionOverride: body.pbCommissionOverride || false,
       paymentGateway: body.paymentGateway || null,
 
-      bannerURL: body.bannerURL || '',
+      bannerURL: body.bannerURL || body.bannerImageUrl || body.bannerImage || '',
       maxAttendees: body.maxAttendees || null,
       currentAttendees: 0,
 
@@ -93,16 +182,16 @@ export async function POST(request: NextRequest) {
       payoutReference: null,
       payoutDate: null,
 
-      status: body.status || 'draft',
-      publishedAt: null,
+      status,
+      publishedAt: isPublished ? Timestamp.now() : null,
       cancelledAt: null,
       cancelReason: null,
 
-      createdBy: body.createdBy || 'admin',
-      createdByRole: body.createdByRole || 'admin',
-      submittedAt: null,
-      approvedBy: null,
-      approvedAt: null,
+      createdBy: uid,
+      createdByRole,
+      submittedAt: isPending ? Timestamp.now() : null,
+      approvedBy: isPublished && !isBusiness ? uid : null,
+      approvedAt: isPublished && !isBusiness ? Timestamp.now() : null,
       approvalNotes: null,
       lastEditedBy: null,
       lastEditedAt: null,
@@ -112,9 +201,13 @@ export async function POST(request: NextRequest) {
 
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-    }
+    })
 
     const docRef = await db.collection('events').add(eventData)
+
+    if (isPublished) {
+      void notifyNewEventPublished(String(body.title || 'New event'), docRef.id).catch(console.error)
+    }
 
     return NextResponse.json({
       success: true,
@@ -130,35 +223,56 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, ...rawUpdates } = body
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Event ID required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'Event ID required' }, { status: 400 })
     }
 
     const db = getAdminDb()
+    const existingSnap = await db.collection('events').doc(id).get()
+    if (!existingSnap.exists) {
+      return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 })
+    }
+    const existing = existingSnap.data()!
 
-    // If publishing and no commission set, snapshot from platformConfig
+    // Never overwrite immutable create metadata via update
+    const {
+      createdAt: _createdAt,
+      createdBy: _createdBy,
+      createdByRole: _createdByRole,
+      id: _ignoredId,
+      ...safeUpdates
+    } = rawUpdates as Record<string, unknown>
+
+    const updates: Record<string, unknown> = { ...safeUpdates }
+
+    if (updates.startDate && typeof updates.startDate === 'string') {
+      updates.startDate = new Date(updates.startDate)
+    }
+    if (updates.endDate && typeof updates.endDate === 'string') {
+      updates.endDate = new Date(updates.endDate)
+    }
+
     if (updates.status === 'published' && !updates.pbCommissionPercent) {
       try {
         const configDoc = await db.collection('platformConfig').doc('events').get()
         if (configDoc.exists) {
           const config = configDoc.data()
           updates.pbCommissionPercent = config?.pbCommissionPercent || 10
-          updates.businessPayoutPercent = 100 - (updates.pbCommissionPercent || 10)
+          updates.businessPayoutPercent = 100 - (updates.pbCommissionPercent as number || 10)
         }
-      } catch (configError) {
-        console.warn('[v0] Could not fetch platformConfig, using defaults')
+      } catch {
         updates.pbCommissionPercent = 10
         updates.businessPayoutPercent = 90
       }
       updates.publishedAt = Timestamp.now()
     }
 
-    // If approving business submission
+    if (updates.status === 'pending_approval' && !updates.submittedAt) {
+      updates.submittedAt = Timestamp.now()
+    }
+
     if (updates.status === 'published' && !updates.publishedAt) {
       updates.publishedAt = Timestamp.now()
       updates.approvedAt = Timestamp.now()
@@ -169,15 +283,49 @@ export async function PUT(request: NextRequest) {
       updates.lastEditedAt = Timestamp.now()
     }
 
-    await db.collection('events').doc(id).update(updates)
+    const sanitized = sanitizeForFirestore(updates)
+    await db.collection('events').doc(id).update(sanitized)
 
-    return NextResponse.json({ success: true, message: 'Event updated', data: { id, ...updates } })
+    const title = (existing.title as string) || 'Your event'
+    const createdBy = (existing.createdBy as string) || ''
+
+    if (updates.status === 'published' && existing.status !== 'published') {
+      void notifyNewEventPublished(title, id).catch(console.error)
+    }
+
+    if (updates.status === 'published' && existing.status === 'pending_approval') {
+      await notifyEventCreator(
+        createdBy,
+        title,
+        'event_approved',
+        `Your event "${title}" has been approved and published.`
+      )
+    }
+    if (updates.status === 'rejected') {
+      await notifyEventCreator(
+        createdBy,
+        title,
+        'event_rejected',
+        updates.approvalNotes
+          ? `Your event "${title}" was rejected: ${updates.approvalNotes}`
+          : `Your event "${title}" was rejected.`
+      )
+    }
+    if (updates.status === 'changes_requested') {
+      await notifyEventCreator(
+        createdBy,
+        title,
+        'event_changes_requested',
+        updates.approvalNotes
+          ? `Changes requested for "${title}": ${updates.approvalNotes}`
+          : `Changes were requested for your event "${title}".`
+      )
+    }
+
+    return NextResponse.json({ success: true, message: 'Event updated', data: { id, ...sanitized } })
   } catch (error) {
     console.error('[v0] Event update error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to update event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Failed to update event' }, { status: 500 })
   }
 }
 
@@ -187,10 +335,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Event ID required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'Event ID required' }, { status: 400 })
     }
 
     const db = getAdminDb()
@@ -199,9 +344,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'Event deleted' })
   } catch (error) {
     console.error('[v0] Event delete error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to delete event' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Failed to delete event' }, { status: 500 })
   }
 }

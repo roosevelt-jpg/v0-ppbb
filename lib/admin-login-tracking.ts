@@ -2,23 +2,9 @@ import { AdminLoginLog, AdminAccessCode } from '@/lib/types'
 import { db } from '@/lib/firebase'
 import { collection, addDoc, query, where, getDocs, orderBy, limit, Timestamp } from 'firebase/firestore'
 
-/**
- * Parse user agent to extract device info
- */
-export function parseUserAgent(userAgent: string) {
-  const browserMatch = userAgent.match(/(Chrome|Safari|Firefox|Edge|Opera)\/[\d.]+/)
-  const osMatch = userAgent.match(/(Windows|Mac|Linux|iOS|Android)/)
-  
-  return {
-    browser: browserMatch ? browserMatch[1] : 'Unknown',
-    os: osMatch ? osMatch[1] : 'Unknown',
-    osVersion: userAgent.match(/OS [\d_.]+|Windows NT [\d.]+|Android [\d.]+/) ? 
-      userAgent.match(/OS [\d_.]+|Windows NT [\d.]+|Android [\d.]+/)?.[0] || 'Unknown' : 
-      'Unknown',
-    deviceType: /Mobile|Android|iPhone|iPad|Tablet/.test(userAgent) ? 
-      /Tablet|iPad/.test(userAgent) ? 'tablet' : 'mobile' : 'desktop',
-  }
-}
+import { parseUserAgent } from '@/lib/audit-log-shared'
+
+export { parseUserAgent }
 
 /**
  * Get geolocation from IP address using ipapi (free tier available)
@@ -66,7 +52,13 @@ export async function logAdminLogin(
   failureReason?: string
 ): Promise<AdminLoginLog | null> {
   try {
-    const deviceInfo = parseUserAgent(userAgent)
+    const parsed = parseUserAgent(userAgent)
+    const deviceInfo = {
+      browser: parsed.deviceBrowser,
+      os: parsed.deviceOs,
+      osVersion: 'Unknown',
+      deviceType: parsed.deviceType,
+    }
     const location = await getLocationFromIP(ipAddress)
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 

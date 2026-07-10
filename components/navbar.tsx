@@ -2,117 +2,228 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Menu, X, ChevronDown } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { LanguageSwitcherWithFlags } from './language-switcher-flags'
-import { getPagesByMenuLocation } from '@/lib/admin'
-import { Page } from '@/lib/types'
+import { SiteLogo } from './site-logo'
+import { ProfileMenuButton } from './profile-quick-edit'
+import { useAuth } from '@/lib/auth-context'
+import { logoutUser } from '@/lib/auth'
+import { hasAdminAccess, hasBusinessAccess } from '@/lib/roles'
+import { User, BusinessProfile, Page } from '@/lib/types'
+import {
+  subscribeToNavigation,
+  DEFAULT_NAVIGATION,
+  NavigationConfig,
+} from '@/lib/platform-config'
+import { ensureMenuPagesSeeded, subscribeToMenuPages } from '@/lib/cms-menu-live'
+import { getCmsPageHref, getCmsPageLabel } from '@/lib/cms-page-routes'
+
+function getDashboardHref(user: User | BusinessProfile): string {
+  if (hasAdminAccess(user)) return '/admin'
+  if (hasBusinessAccess(user) && user.role === 'business') return '/business/dashboard'
+  if (user.role === 'sponsor') return '/sponsor'
+  return '/dashboard'
+}
+
+function headerChildrenForLink(pages: Page[], href: string): Page[] {
+  return pages
+    .filter((p) => p.headerSection === href || p.headerSection === href.replace(/\/$/, ''))
+    .sort((a, b) => (a.menuOrder || 0) - (b.menuOrder || 0))
+}
 
 export function Navbar() {
+  const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [navItems, setNavItems] = useState<any[]>([
-    { label: 'About us', href: '/about' },
-    { label: 'Impact', href: '/transparency' },
-    { label: 'Events', href: '/events' },
-    { label: 'Marketplace', href: '/marketplace' },
-    { label: 'Opportunities', href: '/opportunities' },
-    { label: 'Contact', href: '/contact' },
-  ])
+  const [navConfig, setNavConfig] = useState<NavigationConfig>(DEFAULT_NAVIGATION)
+  const [headerPages, setHeaderPages] = useState<Page[]>([])
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
-    const loadMenuItems = async () => {
-      try {
-        const menuPages = await getPagesByMenuLocation('navbar')
-        if (menuPages.length > 0) {
-          // Dedupe by href so duplicate-slug CMS pages don't produce
-          // colliding React keys (e.g. two pages resolving to "/signup"),
-          // which causes unstable reconciliation and Fast Refresh errors.
-          const seen = new Set<string>()
-          const items = menuPages
-            .map((page) => ({
-              label: page.menuLabel || page.title,
-              href: `/${page.slug}`,
-            }))
-            .filter((item) => {
-              if (!item.href || item.href === '/' || seen.has(item.href)) return false
-              seen.add(item.href)
-              return true
-            })
-          if (items.length > 0) {
-            setNavItems(items)
+    return subscribeToNavigation(setNavConfig)
+  }, [])
+
+  useEffect(() => {
+    void ensureMenuPagesSeeded()
+    return subscribeToMenuPages('navbar', setHeaderPages)
+  }, [])
+
+  const visibleLinks = navConfig.links
+    .filter((link) => link.isVisible !== false)
+    .sort((a, b) => a.order - b.order)
+
+  const topLevelHeaderPages = headerPages.filter((p) => !p.headerSection)
+
+  const handleSignOut = async () => {
+    setSigningOut(true)
+    try {
+      await logoutUser()
+      router.push('/')
+    } finally {
+      setSigningOut(false)
+      setMobileMenuOpen(false)
+    }
+  }
+
+  const authActions = authLoading ? null : user ? (
+    <>
+      <Link
+        href={getDashboardHref(user as User | BusinessProfile)}
+        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
+      >
+        Dashboard
+      </Link>
+      <button
+        type="button"
+        onClick={handleSignOut}
+        disabled={signingOut}
+        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap bg-transparent shadow-none min-h-0"
+      >
+        {signingOut ? 'Signing out…' : 'Sign out'}
+      </button>
+    </>
+  ) : (
+    <>
+      <Link
+        href="/login"
+        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
+      >
+        {navConfig.signInLabel}
+      </Link>
+      <Link
+        href={navConfig.ctaButton.href}
+        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-white text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
+      >
+        {navConfig.ctaButton.label}
+      </Link>
+    </>
+  )
+
+  const renderNavItem = (item: { label: string; href: string }, mobile = false) => {
+    const children = headerChildrenForLink(headerPages, item.href)
+    const hasChildren = children.length > 0
+
+    if (!hasChildren) {
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={
+            mobile
+              ? 'block px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 font-body'
+              : 'text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap font-body'
           }
-        }
-      } catch (error) {
-        // Silently fail - use default items
-        // Permission errors are expected for unauthenticated users
-      }
+          onClick={() => mobile && setMobileMenuOpen(false)}
+        >
+          {item.label}
+        </Link>
+      )
     }
 
-    loadMenuItems()
-  }, [])
+    if (mobile) {
+      return (
+        <div key={item.href} className="border-b border-neutral-700">
+          <Link
+            href={item.href}
+            className="block px-4 py-3 text-sm font-semibold text-white font-body"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            {item.label}
+          </Link>
+          {children.map((child) => (
+            <Link
+              key={child.id}
+              href={getCmsPageHref(child)}
+              className="block px-6 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-700 font-body"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {getCmsPageLabel(child)}
+            </Link>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div
+        key={item.href}
+        className="relative"
+        onMouseEnter={() => setOpenDropdown(item.href)}
+        onMouseLeave={() => setOpenDropdown(null)}
+      >
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap font-body bg-transparent shadow-none min-h-0 p-0"
+          onClick={() => setOpenDropdown(openDropdown === item.href ? null : item.href)}
+          aria-expanded={openDropdown === item.href}
+        >
+          {item.label}
+          <ChevronDown className="w-3.5 h-3.5" />
+        </button>
+        {openDropdown === item.href && (
+          <div className="absolute left-0 top-full pt-2 z-50 min-w-[12rem]">
+            <div className="rounded-lg border border-neutral-700 bg-neutral-900 shadow-lg py-1">
+              <Link
+                href={item.href}
+                className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800 hover:text-white"
+              >
+                {item.label}
+              </Link>
+              {children.map((child) => (
+                <Link
+                  key={child.id}
+                  href={getCmsPageHref(child)}
+                  className="block px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
+                >
+                  {getCmsPageLabel(child)}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <nav className="w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
-      {/* Desktop Navigation */}
       <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-8">
-          {/* Logo */}
-          <div className="flex-shrink-0 h-8">
-            <Link href="/">
-              <img 
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
-                alt="Passive Blessings" 
-                className="h-8 w-auto"
-              />
-            </Link>
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 lg:gap-8 min-h-[84px]">
+          <div className="flex-shrink-0">
+            <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
 
-          {/* Center Menu Items */}
           <div className="flex-1 flex items-center justify-center gap-6 lg:gap-8">
-            {navItems.map((item, idx) => (
+            {visibleLinks.map((item) => renderNavItem(item))}
+            {topLevelHeaderPages.map((page) => (
               <Link
-                key={`${item.href}-${idx}`}
-                href={item.href}
-                className="text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
+                key={page.id}
+                href={getCmsPageHref(page)}
+                className="text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap font-body"
               >
-                {item.label}
+                {getCmsPageLabel(page)}
               </Link>
             ))}
           </div>
 
-          {/* Right side actions */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <LanguageSwitcherWithFlags />
             <ThemeToggle />
-
-            <Link
-              href="/login"
-              className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/signup"
-              className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-white text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
-            >
-              Join now
-            </Link>
+            <ProfileMenuButton />
+            {authActions}
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between">
-        <Link href="/">
-          <img 
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-kynXCNIfTNVyEpS4pVpqQsl2Pxf9yq.png" 
-            alt="Passive Blessings" 
-            className="h-6 sm:h-8 w-auto"
-          />
-        </Link>
+      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2 min-h-[58px]">
+        <SiteLogo background="dark" variant="navbar" href="/" />
         <div className="flex items-center gap-2">
           <LanguageSwitcherWithFlags />
           <ThemeToggle />
+          <ProfileMenuButton />
           <button
             className="p-2 -mr-2 text-white"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -123,41 +234,61 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-neutral-800 dark:bg-neutral-900 border-t border-neutral-700 max-h-96 overflow-y-auto">
-          {navItems.map((item, idx) => (
+          {visibleLinks.map((item) => renderNavItem(item, true))}
+          {topLevelHeaderPages.map((page) => (
             <Link
-              key={`${item.href}-${idx}`}
-              href={item.href}
-              className="block px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700"
+              key={page.id}
+              href={getCmsPageHref(page)}
+              className="block px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 font-body"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {item.label}
+              {getCmsPageLabel(page)}
             </Link>
           ))}
 
-          {/* Language Switcher Mobile */}
           <div className="border-t border-neutral-700 px-4 py-3">
             <LanguageSwitcherWithFlags />
           </div>
 
-          {/* Mobile Login Section */}
           <div className="border-t border-neutral-700">
-            <Link
-              href="/login"
-              className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="block w-full px-4 py-3 text-sm font-semibold bg-white text-neutral-900 hover:bg-neutral-100 transition-colors text-center"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Join Now
-            </Link>
+            {!authLoading && user ? (
+              <>
+                <Link
+                  href={getDashboardHref(user as User | BusinessProfile)}
+                  className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={signingOut}
+                  className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors text-center bg-transparent shadow-none min-h-0"
+                >
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {navConfig.signInLabel}
+                </Link>
+                <Link
+                  href={navConfig.ctaButton.href}
+                  className="block w-full px-4 py-3 text-sm font-semibold bg-white text-neutral-900 hover:bg-neutral-100 transition-colors text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {navConfig.ctaButton.label}
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

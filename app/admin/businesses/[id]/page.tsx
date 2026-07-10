@@ -6,8 +6,11 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { ArrowLeft, Building, CheckCircle, AlertCircle, Mail, Phone, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function BusinessDetailPage() {
+  const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
   const businessId = params.id as string
@@ -57,6 +60,13 @@ export default function BusinessDetailPage() {
     setSuccess('')
     try {
       await updateDoc(doc(db, 'businesses', businessId), formData)
+      audit({
+        actionType: 'update',
+        action: `Updated business: ${businessId}`,
+        entityType: 'business',
+        entityId: businessId,
+        status: 'success',
+      })
       setSuccess('Business updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -104,14 +114,14 @@ export default function BusinessDetailPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Building className="w-6 h-6 text-blue-600" />
-              <h1 className="text-3xl font-bold text-neutral-900">{business.name}</h1>
+              <h1 className="text-3xl font-bold text-neutral-900">{business.name || 'Not provided'}</h1>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
               business.status === 'active' ? 'bg-green-100 text-green-700' :
               business.status === 'inactive' ? 'bg-red-100 text-red-700' :
               'bg-neutral-100 text-neutral-700'
             }`}>
-              {business.status ? business.status.toUpperCase() : 'ACTIVE'}
+              {business.status ? String(business.status).toUpperCase() : 'ACTIVE'}
             </span>
           </div>
 
@@ -271,13 +281,13 @@ export default function BusinessDetailPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 transition"
+                className={`${BUTTON_PRIMARY} flex-1`}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
               <button
                 onClick={() => router.back()}
-                className="flex-1 px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg font-medium hover:bg-neutral-300 transition"
+                className={`${BUTTON_SECONDARY} flex-1`}
               >
                 Cancel
               </button>
