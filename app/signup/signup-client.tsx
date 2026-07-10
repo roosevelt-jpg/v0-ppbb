@@ -694,11 +694,6 @@ function SignupPageContent() {
           </div>
         </div>
       </div>
-          <Link href="/login" style={{ fontSize: '1rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>
-            Sign In
-          </Link>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', width: '100%' }}>

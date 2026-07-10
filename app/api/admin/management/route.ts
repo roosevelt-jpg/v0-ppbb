@@ -6,8 +6,6 @@ import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
 import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 import crypto from 'crypto'
 
-const db = getAdminDb()
-
 function formatInviteRoleLabel(role: string): string {
   const labels: Record<string, string> = {
     super_admin: 'Super Admin',
@@ -43,6 +41,7 @@ function generateAccessCode(): string {
 
 export async function GET(request: NextRequest) {
   try {
+    const db = getAdminDb()
     const query = request.nextUrl.searchParams.get('query')
 
     if (query === 'admins') {
@@ -114,6 +113,7 @@ export async function GET(request: NextRequest) {
 // Generate new access code for admin invitation
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb()
     const body = await request.json()
     const { action, ...data } = body
 
@@ -331,6 +331,7 @@ export async function POST(request: NextRequest) {
 // Update admin user
 export async function PUT(request: NextRequest) {
   try {
+    const db = getAdminDb()
     const adminUid = await tryResolveAdminUid(request)
     const body = await request.json()
     const { id, ...updateData } = body
@@ -370,6 +371,7 @@ export async function PUT(request: NextRequest) {
 // Delete admin user
 export async function DELETE(request: NextRequest) {
   try {
+    const db = getAdminDb()
     const adminUid = await tryResolveAdminUid(request)
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
