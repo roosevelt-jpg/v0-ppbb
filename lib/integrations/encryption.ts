@@ -7,7 +7,8 @@ export function encryptField(value: string): string {
   if (!value) return value
   try {
     const iv = crypto.randomBytes(IV_LENGTH)
-    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32)), iv)
+    const key = Buffer.from(ENCRYPTION_KEY.padEnd(32).slice(0, 32))
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv)
     let encrypted = cipher.update(value, 'utf8', 'hex')
     encrypted += cipher.final('hex')
     return iv.toString('hex') + ':' + encrypted
@@ -18,17 +19,20 @@ export function encryptField(value: string): string {
 }
 
 export function decryptField(encrypted: string): string {
-  if (!encrypted || !encrypted.includes(':')) return encrypted
+  if (encrypted == null) return ''
+  const value = typeof encrypted === 'string' ? encrypted : String(encrypted)
+  if (!value || !value.includes(':')) return value
   try {
-    const parts = encrypted.split(':')
+    const parts = value.split(':')
     const iv = Buffer.from(parts[0], 'hex')
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32)), iv)
+    const key = Buffer.from(ENCRYPTION_KEY.padEnd(32).slice(0, 32))
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv)
     let decrypted = decipher.update(parts[1], 'hex', 'utf8')
     decrypted += decipher.final('utf8')
     return decrypted
   } catch (error) {
     console.error('[v0] Decryption error:', error)
-    return encrypted
+    return value
   }
 }
 

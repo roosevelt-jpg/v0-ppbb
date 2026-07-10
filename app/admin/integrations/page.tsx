@@ -59,12 +59,20 @@ function IntegrationsPageContent() {
           const errText = await integrationsRes.text()
           console.error('[v0] Integrations request failed:', integrationsRes.status, errText)
           setIntegrations([])
+          let apiMessage = ''
+          try {
+            apiMessage = JSON.parse(errText)?.error || ''
+          } catch {
+            /* ignore */
+          }
           setLoadError(
             integrationsRes.status === 423
               ? 'Integrations vault is locked. Unlock with the passcode to continue.'
               : integrationsRes.status === 403
               ? 'Access denied loading integrations. Ensure your admin account has manage_integrations permission.'
-              : `Could not load integrations (${integrationsRes.status}). Saved credentials may still exist — try refreshing after deploy.`
+              : apiMessage
+                ? `${apiMessage} (HTTP ${integrationsRes.status})`
+                : `Could not load integrations (${integrationsRes.status}). Saved credentials may still exist — try refreshing after deploy.`
           )
         }
       } else {

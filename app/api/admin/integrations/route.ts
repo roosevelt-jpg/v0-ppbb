@@ -4,6 +4,9 @@ import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 import { requireIntegrationsAccess } from '@/lib/integrations/require-vault-access'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const MOCK_USER_ID = INTEGRATION_OWNER_USER_ID
 
 export async function GET(request: NextRequest) {
@@ -19,9 +22,13 @@ export async function GET(request: NextRequest) {
       count: integrations.length,
     })
   } catch (error) {
-    console.error('[v0] GET error:', error instanceof Error ? error.message : String(error))
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[v0] GET error:', message)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to retrieve integrations' },
+      {
+        error: message || 'Failed to retrieve integrations',
+        hint: 'Credentials are stored in Firestore and were not deleted. Retry after deploy, or check server logs.',
+      },
       { status: 500 }
     )
   }
