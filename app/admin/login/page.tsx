@@ -119,13 +119,18 @@ function AdminLoginForm() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ width: '100%', maxWidth: '480px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
-            <SiteLogo background="light" variant="primary" href="/" linked />
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <SiteLogo
+              background="light"
+              variant="custom"
+              href="/"
+              linked
+              heightClass="h-[88px] sm:h-[110px] md:h-[128px]"
+              maxWidth={420}
+              className="max-w-[min(90vw,420px)]"
+            />
           </div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#000', marginBottom: '8px' }}>
-            Admin Sign In
-          </h1>
           <p style={{ fontSize: '15px', color: '#666' }}>
             Sign in with your existing admin credentials
           </p>
