@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getAdminDb()
-
 interface SiteSettings {
   branding?: {
     siteName: string
@@ -78,7 +76,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
 export async function GET(request: NextRequest) {
   try {
     // Always read from settings/global to be consistent with POST
-    const docRef = await db.collection('settings').doc('global').get()
+    const docRef = await getAdminDb().collection('settings').doc('global').get()
 
     if (docRef.exists) {
       return NextResponse.json({
@@ -105,7 +103,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    const docRef = db.collection('settings').doc('global')
+    const docRef = getAdminDb().collection('settings').doc('global')
     const currentDoc = await docRef.get()
     const currentData = currentDoc.exists ? currentDoc.data() : {}
 

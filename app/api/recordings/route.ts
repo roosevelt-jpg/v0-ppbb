@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getAdminDb()
-
 export async function GET(request: NextRequest) {
   try {
     const status = request.nextUrl.searchParams.get('status') || 'published'
     const type = request.nextUrl.searchParams.get('type') // 'audio' | 'video' | null for all
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100')
 
-    let query = db.collection('recordings').where('status', '==', status).orderBy('createdAt', 'desc').limit(limit)
+    let query = getAdminDb().collection('recordings').where('status', '==', status).orderBy('createdAt', 'desc').limit(limit)
 
     const snapshot = await query.get()
     let recordings = snapshot.docs.map(doc => ({
@@ -56,7 +54,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     }
 
-    const docRef = await db.collection('recordings').add(recordingData)
+    const docRef = await getAdminDb().collection('recordings').add(recordingData)
 
     return NextResponse.json({
       success: true,
@@ -79,7 +77,7 @@ export async function PUT(request: NextRequest) {
 
     updateData.updatedAt = new Date()
 
-    await db.collection('recordings').doc(id).update(updateData)
+    await getAdminDb().collection('recordings').doc(id).update(updateData)
 
     return NextResponse.json({ success: true, message: 'Recording updated' })
   } catch (error) {
@@ -97,7 +95,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing recording ID' }, { status: 400 })
     }
 
-    await db.collection('recordings').doc(id).delete()
+    await getAdminDb().collection('recordings').doc(id).delete()
 
     return NextResponse.json({ success: true, message: 'Recording deleted' })
   } catch (error) {

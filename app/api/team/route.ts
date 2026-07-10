@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getAdminDb()
-
 export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.searchParams.get('id')
 
     // Get single team member by ID
     if (id) {
-      const doc = await db.collection('team-members').doc(id).get()
+      const doc = await getAdminDb().collection('team-members').doc(id).get()
       if (!doc.exists) {
         return NextResponse.json({ success: false, error: 'Team member not found' }, { status: 404 })
       }
@@ -28,7 +26,7 @@ export async function GET(request: NextRequest) {
     const status = request.nextUrl.searchParams.get('status') || 'published'
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100')
 
-    let query = db.collection('team-members').where('status', '==', status).orderBy('order', 'asc').limit(limit)
+    let query = getAdminDb().collection('team-members').where('status', '==', status).orderBy('order', 'asc').limit(limit)
 
     const snapshot = await query.get()
     const teamMembers = snapshot.docs.map(doc => ({
@@ -71,7 +69,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     }
 
-    const docRef = await db.collection('team-members').add(teamMemberData)
+    const docRef = await getAdminDb().collection('team-members').add(teamMemberData)
 
     return NextResponse.json({
       success: true,
@@ -94,7 +92,7 @@ export async function PUT(request: NextRequest) {
 
     updateData.updatedAt = new Date()
 
-    await db.collection('team-members').doc(id).update(updateData)
+    await getAdminDb().collection('team-members').doc(id).update(updateData)
 
     return NextResponse.json({ success: true, message: 'Team member updated' })
   } catch (error) {
@@ -112,7 +110,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing team member ID' }, { status: 400 })
     }
 
-    await db.collection('team-members').doc(id).delete()
+    await getAdminDb().collection('team-members').doc(id).delete()
 
     return NextResponse.json({ success: true, message: 'Team member deleted' })
   } catch (error) {

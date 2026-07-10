@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getAdminDb()
-
 export async function GET(request: NextRequest) {
   try {
     const status = request.nextUrl.searchParams.get('status') || 'published'
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100')
 
-    let query = db.collection('workshops').where('status', '==', status).orderBy('date', 'asc').limit(limit)
+    let query = getAdminDb().collection('workshops').where('status', '==', status).orderBy('date', 'asc').limit(limit)
 
     const snapshot = await query.get()
     const workshops = snapshot.docs.map(doc => ({
@@ -51,7 +49,7 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     }
 
-    const docRef = await db.collection('workshops').add(workshopData)
+    const docRef = await getAdminDb().collection('workshops').add(workshopData)
 
     return NextResponse.json({
       success: true,
@@ -75,7 +73,7 @@ export async function PUT(request: NextRequest) {
     updateData.updatedAt = new Date()
     if (updateData.date) updateData.date = new Date(updateData.date)
 
-    await db.collection('workshops').doc(id).update(updateData)
+    await getAdminDb().collection('workshops').doc(id).update(updateData)
 
     return NextResponse.json({ success: true, message: 'Workshop updated' })
   } catch (error) {
@@ -93,7 +91,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing workshop ID' }, { status: 400 })
     }
 
-    await db.collection('workshops').doc(id).delete()
+    await getAdminDb().collection('workshops').doc(id).delete()
 
     return NextResponse.json({ success: true, message: 'Workshop deleted' })
   } catch (error) {

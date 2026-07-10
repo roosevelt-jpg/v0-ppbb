@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getAdminDb()
-
 interface FAQ {
   id?: string
   question: string
@@ -20,7 +18,7 @@ export async function GET(request: NextRequest) {
     const isAdmin = request.headers.get('x-admin-auth') === 'true'
     const category = request.nextUrl.searchParams.get('category')
 
-    let query = db.collection('faqs')
+    let query = getAdminDb().collection('faqs')
 
     if (!isAdmin) {
       // Public: only published FAQs
@@ -72,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     if (id) {
       // Update existing
-      await db.collection('faqs').doc(id).update(faqData)
+      await getAdminDb().collection('faqs').doc(id).update(faqData)
       return NextResponse.json({
         success: true,
         data: { id, ...faqData },
@@ -81,7 +79,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new
       faqData.createdAt = new Date()
-      const docRef = await db.collection('faqs').add(faqData)
+      const docRef = await getAdminDb().collection('faqs').add(faqData)
       return NextResponse.json({
         success: true,
         data: { id: docRef.id, ...faqData },
@@ -110,7 +108,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    await db.collection('faqs').doc(id).delete()
+    await getAdminDb().collection('faqs').doc(id).delete()
     return NextResponse.json({ success: true, message: 'FAQ deleted' })
   } catch (error) {
     console.error('[v0] FAQ delete error:', error)

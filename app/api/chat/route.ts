@@ -3,8 +3,6 @@ import { Anthropic } from '@anthropic-ai/sdk'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { resolveAnthropicApiKey } from '@/lib/resolve-anthropic-key'
 
-const db = getAdminDb()
-
 interface FAQ {
   id: string
   question: string
@@ -20,7 +18,7 @@ async function searchFAQs(userMessage: string): Promise<{ faq: FAQ | null; match
     const lowerMessage = userMessage.toLowerCase()
     const keywords = lowerMessage.split(/\s+/).filter(w => w.length > 3)
 
-    const snapshot = await db.collection('faqs').where('isActive', '==', true).get()
+    const snapshot = await getAdminDb().collection('faqs').where('isActive', '==', true).get()
     const faqs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FAQ[]
 
     let bestMatch: FAQ | null = null

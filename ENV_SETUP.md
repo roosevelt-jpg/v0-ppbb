@@ -79,6 +79,42 @@ NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your_vercel_analytics_id
 - Location data is captured automatically when user allows geolocation permission
 - Date/time fields are populated with current values automatically
 
+## Production Deployment (Vercel)
+
+In **Vercel → Project → Settings → Environment Variables**, add at minimum:
+
+### Firebase client (public)
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=pasiveblessings
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+```
+
+### Firebase Admin (server — required for API routes & build)
+Either paste the full service account JSON as one variable:
+```
+GCP_SERVICE_ACCOUNT={"type":"service_account","project_id":"...",...}
+```
+
+Or use separate fields:
+```
+FIREBASE_ADMIN_PROJECT_ID=pasiveblessings
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-...@pasiveblessings.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_STORAGE_BUCKET=pasiveblessings-media
+```
+
+Optional but recommended:
+```
+INTEGRATION_ENCRYPTION_KEY=your-32-char-secret
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
+
+Redeploy after saving variables. Without Admin credentials, the build and API routes will fail.
+
 ## Production Deployment
 
 When deploying to production:

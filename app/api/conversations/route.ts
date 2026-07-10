@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getAdminDb()
-
 export async function POST(request: NextRequest) {
   try {
     const { userId, title, role } = await request.json()
@@ -11,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
 
-    const conversationRef = await db.collection('conversations').add({
+    const conversationRef = await getAdminDb().collection('conversations').add({
       userId,
       userRole: role || 'user',
       title: title || 'New Conversation',
@@ -46,13 +44,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
 
-    let query = db.collection('conversations').where('userId', '==', userId)
+    let query = getAdminDb().collection('conversations').where('userId', '==', userId)
 
     // Admins can see all conversations
     if (role !== 'admin') {
       query = query.orderBy('lastMessageAt', 'desc').limit(50)
     } else {
-      query = db.collection('conversations').orderBy('lastMessageAt', 'desc').limit(100)
+      query = getAdminDb().collection('conversations').orderBy('lastMessageAt', 'desc').limit(100)
     }
 
     const snapshot = await query.get()

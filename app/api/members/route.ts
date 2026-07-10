@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { isAccountDeleted } from '@/lib/user-settings'
 
-const db = getAdminDb()
-
 export async function GET(request: NextRequest) {
   try {
     const userType = request.nextUrl.searchParams.get('userType')
@@ -11,7 +9,7 @@ export async function GET(request: NextRequest) {
     const search = request.nextUrl.searchParams.get('search')
     const limit = parseInt(request.nextUrl.searchParams.get('limit') || '1000')
 
-    let query = db.collection('users').orderBy('dateJoined', 'desc').limit(limit)
+    let query = getAdminDb().collection('users').orderBy('dateJoined', 'desc').limit(limit)
 
     const snapshot = await query.get()
     let members = snapshot.docs.map(doc => {
@@ -67,7 +65,7 @@ export async function PUT(request: NextRequest) {
 
     updateData.updatedAt = new Date()
 
-    await db.collection('users').doc(id).update(updateData)
+    await getAdminDb().collection('users').doc(id).update(updateData)
 
     return NextResponse.json({ success: true, message: 'Member updated' })
   } catch (error) {

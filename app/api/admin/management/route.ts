@@ -6,8 +6,6 @@ import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
 import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 import crypto from 'crypto'
 
-const db = getAdminDb()
-
 function formatInviteRoleLabel(role: string): string {
   const labels: Record<string, string> = {
     super_admin: 'Super Admin',
@@ -24,7 +22,7 @@ function formatInviteRoleLabel(role: string): string {
 
 async function loadInviterProfile(userId: string) {
   if (!userId?.trim()) return null
-  const userSnap = await db.collection('users').doc(userId.trim()).get()
+  const userSnap = await getAdminDb().collection('users').doc(userId.trim()).get()
   if (!userSnap.exists) return null
   const data = userSnap.data() as Record<string, unknown>
   const role = typeof data.role === 'string' ? data.role : 'admin'
@@ -46,7 +44,7 @@ export async function GET(request: NextRequest) {
     const query = request.nextUrl.searchParams.get('query')
 
     if (query === 'admins') {
-      const snapshot = await db.collection('admin-users').orderBy('createdAt', 'desc').get()
+      const snapshot = await getAdminDb().collection('admin-users').orderBy('createdAt', 'desc').get()
       const admins = await Promise.all(
         snapshot.docs.map(async (docSnap) => {
           const data = docSnap.data()
@@ -55,7 +53,7 @@ export async function GET(request: NextRequest) {
           if (typeof data.profilePictureURL === 'string') {
             profilePictureURL = data.profilePictureURL
           }
-          const userSnap = await db.collection('users').doc(docSnap.id).get()
+          const userSnap = await getAdminDb().collection('users').doc(docSnap.id).get()
           if (userSnap.exists) {
             const u = userSnap.data() as Record<string, unknown>
             profilePictureURL =
@@ -83,7 +81,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (query === 'access-codes') {
-      const snapshot = await db.collection('adminAccessCodes').get()
+      const snapshot = await getAdminDb().collection('adminAccessCodes').get()
       const codes = snapshot.docs
         .map((docSnap) => {
           const data = docSnap.data()
@@ -172,7 +170,7 @@ export async function POST(request: NextRequest) {
 
       let docRef
       try {
-        docRef = await db.collection('adminAccessCodes').add(accessCodeData)
+        docRef = await getAdminDb().collection('adminAccessCodes').add(accessCodeData)
         console.log('[v0] Access code saved successfully:', {
           docId: docRef.id,
           code,
@@ -229,7 +227,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (invitedByUserId) {
-        const inviterSnap = await db.collection('users').doc(invitedByUserId).get()
+        const inviterSnap = await getAdminDb().collection('users').doc(invitedByUserId).get()
         const inviter = inviterSnap.data() as Record<string, unknown> | undefined
         await auditFromApiRequest(request, {
           adminId: invitedByUserId,
@@ -259,7 +257,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
       }
 
-      const codeRef = db.collection('adminAccessCodes').doc(accessCodeId)
+      const codeRef = getAdminDb().collection('adminAccessCodes').doc(accessCodeId)
       const codeSnap = await codeRef.get()
       const codeData = codeSnap.exists ? codeSnap.data() : null
       const invitePermissions = Array.isArray(codeData?.permissions)
@@ -288,7 +286,7 @@ export async function POST(request: NextRequest) {
         lastLogin: null,
       }
 
-      const docRef = await db.collection('admin-users').add(adminData)
+      const docRef = await getAdminDb().collection('admin-users').add(adminData)
 
       await auditFromApiRequest(request, {
         adminId: email,
@@ -346,7 +344,7 @@ export async function PUT(request: NextRequest) {
       updateData.permissions = getRolePermissions(updateData.role)
     }
 
-    await db.collection('admin-users').doc(id).update(updateData)
+    await getAdminDb().collection('admin-users').doc(id).update(updateData)
 
     if (adminUid) {
       await auditAdminApiAction(request, adminUid, {
@@ -378,11 +376,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
     }
 
-    const snap = await db.collection('admin-users').doc(id).get()
+    const snap = await getAdminDb().collection('admin-users').doc(id).get()
     const data = snap.data() as Record<string, unknown> | undefined
     const label = String(data?.name || data?.email || id)
 
-    await db.collection('admin-users').doc(id).delete()
+    await getAdminDb().collection('admin-users').doc(id).delete()
 
     if (adminUid) {
       await auditAdminApiAction(request, adminUid, {

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --no-error-on-unmatched-pattern",
     "deploy:firestore-rules": "firebase deploy --only firestore:rules",
     "deploy:firestore-indexes": "firebase deploy --only firestore:indexes",
     "seed:businesses": "node --env-file=.env.local scripts/seed-businesses.mjs",
@@ -50,11 +50,14 @@
     "world-countries": "^5.1.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^24",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.10",
     "postcss": "^8.5",
     "tailwindcss": "^4.2.0",
     "typescript": "5.7.3"
