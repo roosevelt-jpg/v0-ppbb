@@ -36,20 +36,20 @@ const VARIANT_CLASSES: Record<
 > = {
   primary: {
     wrapper: 'inline-flex items-center shrink-0 leading-none',
-    img: 'block h-10 w-auto max-h-10 md:h-12 md:max-h-12 object-contain',
+    img: 'block h-12 w-auto max-h-12 md:h-14 md:max-h-14 object-contain',
   },
   navbar: {
     wrapper:
-      'inline-flex items-center shrink-0 leading-none max-w-[min(48vw,220px)] sm:max-w-[min(40vw,260px)] md:max-w-none',
-    img: 'block h-9 w-auto max-h-9 sm:h-10 sm:max-h-10 md:h-12 md:max-h-12 lg:h-14 lg:max-h-14 object-contain object-left',
+      'inline-flex items-center shrink-0 leading-none max-w-[min(52vw,260px)] sm:max-w-[min(44vw,300px)] md:max-w-none',
+    img: 'block h-11 w-auto max-h-11 sm:h-12 sm:max-h-12 md:h-14 md:max-h-14 lg:h-16 lg:max-h-16 object-contain object-left',
   },
   sidebar: {
-    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[140px]',
-    img: 'block w-full max-w-[140px] max-h-14 h-auto object-contain',
+    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[180px]',
+    img: 'block w-full max-w-[180px] max-h-16 h-auto object-contain',
   },
   footer: {
     wrapper: 'inline-flex items-center shrink-0 leading-none',
-    img: 'block w-auto max-w-[140px] max-h-12 h-auto object-contain',
+    img: 'block w-auto max-w-[180px] max-h-14 h-auto object-contain',
   },
 }
 
