@@ -1,5 +1,5 @@
-import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
+import { createRemoteJWKSet, jwtVerify } from 'jose'
 import { getAdminApp } from '@/lib/firebase-admin'
 import {
   canAccessAdminPath,
@@ -10,14 +10,43 @@ import { isWelfareOperationalRole } from '@/lib/charity-cases'
 import type { User } from '@/lib/types'
 
 /**
+ * Firebase ID token JWKS. Verifying with jose avoids importing `firebase-admin/auth`,
+ * which currently crashes some Vercel/Next serverless bundles at module load
+ * (HTML 500 before route handlers run). Firestore Admin remains fine.
+ */
+const FIREBASE_AUTH_JWKS = createRemoteJWKSet(
+  new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com')
+)
+
+function firebaseProjectId(): string | null {
+  return (
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    process.env.FIREBASE_ADMIN_PROJECT_ID ||
+    null
+  )
+}
+
+/**
  * Server-side only: Verify Firebase ID token and get user ID.
- * Uses the shared Admin app from lib/firebase-admin (GCP_SERVICE_ACCOUNT or FIREBASE_ADMIN_*).
+ * Uses JWKS verification (no firebase-admin/auth import).
  */
 export async function verifyIdToken(token: string): Promise<string | null> {
   try {
-    const app = getAdminApp()
-    const decodedToken = await getAuth(app).verifyIdToken(token)
-    return decodedToken.uid
+    const projectId = firebaseProjectId()
+    if (!projectId) {
+      console.error('[v0] Token verification failed: missing Firebase project id')
+      return null
+    }
+
+    const { payload } = await jwtVerify(token, FIREBASE_AUTH_JWKS, {
+      issuer: `https://securetoken.google.com/${projectId}`,
+      audience: projectId,
+    })
+
+    const uid = typeof payload.sub === 'string' ? payload.sub : null
+    if (!uid) return null
+    if (payload.auth_time == null) return null
+    return uid
   } catch (error) {
     console.error('[v0] Token verification failed:', error)
     return null

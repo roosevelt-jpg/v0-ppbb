@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuth } from 'firebase-admin/auth'
 import { getAdminDb, getAdminApp } from '@/lib/firebase-admin'
 
 export const runtime = 'nodejs'
@@ -18,6 +17,8 @@ export async function GET(request: NextRequest) {
 
     let authUser: { providers: string[]; uid: string } | null = null
     try {
+      // Dynamic import: top-level firebase-admin/auth can crash the serverless module.
+      const { getAuth } = await import('firebase-admin/auth')
       const record = await getAuth(getAdminApp()).getUserByEmail(email)
       authUser = {
         uid: record.uid,

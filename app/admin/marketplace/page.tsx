@@ -4,7 +4,8 @@ export const dynamic = 'force-dynamic'
 
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { auth, db } from '@/lib/firebase'
+import { db } from '@/lib/firebase'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { CheckCircle2, Trash2, Star, Tag } from 'lucide-react'
 
@@ -34,10 +35,6 @@ type DiscountRow = {
   discountType?: string
   status?: string
   createdAt?: Date | null
-}
-
-async function getToken() {
-  return (await auth.currentUser?.getIdToken()) || null
 }
 
 export default function AdminMarketplacePage() {
@@ -138,25 +135,18 @@ export default function AdminMarketplacePage() {
   const runAction = async (id: string, action: string) => {
     setActingId(id)
     try {
-      const token = await getToken()
-      if (!token) return
-      const res = await fetch('/api/admin/offers', {
+      const json = await adminApiFetch('/api/admin/offers', {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ id, action }),
       })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok || !json.success) {
-        alert(json.error || `Action failed (${res.status})`)
+      if (!json.success) {
+        alert(json.error || 'Action failed')
         return
       }
       // Refresh list so Feature/Unfeature label updates
       window.location.reload()
-    } catch {
-      alert('Action failed')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Action failed')
     } finally {
       setActingId(null)
     }
@@ -165,24 +155,17 @@ export default function AdminMarketplacePage() {
   const runDiscountAction = async (id: string, action: string) => {
     setActingId(id)
     try {
-      const token = await getToken()
-      if (!token) return
-      const res = await fetch('/api/admin/discounts', {
+      const json = await adminApiFetch('/api/admin/discounts', {
         method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ id, action }),
       })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok || !json.success) {
-        alert(json.error || `Action failed (${res.status})`)
+      if (!json.success) {
+        alert(json.error || 'Action failed')
         return
       }
       window.location.reload()
-    } catch {
-      alert('Action failed')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Action failed')
     } finally {
       setActingId(null)
     }

@@ -5,6 +5,9 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get('authorization') || ''
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null

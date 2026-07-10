@@ -5,6 +5,9 @@ const nextConfig = {
   },
   // Skip static generation for all pages - use on-demand ISR
   output: 'standalone',
+  // Keep firebase-admin out of the bundler — Auth submodule crashes some
+  // Turbopack/standalone serverless chunks when bundled (HTML 500 at import).
+  serverExternalPackages: ['firebase-admin'],
   async headers() {
     return [
       {

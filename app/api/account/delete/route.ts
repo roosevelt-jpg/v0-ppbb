@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuth } from 'firebase-admin/auth'
 import { Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
@@ -52,8 +51,9 @@ export async function POST(request: NextRequest) {
     )
 
     try {
-      const adminAuth = getAuth()
-      await adminAuth.updateUser(uid, { disabled: true })
+      const { getAuth } = await import('firebase-admin/auth')
+      const { getAdminApp } = await import('@/lib/firebase-admin')
+      await getAuth(getAdminApp()).updateUser(uid, { disabled: true })
     } catch (authError) {
       console.warn('[account/delete] Could not disable auth user:', authError)
     }
