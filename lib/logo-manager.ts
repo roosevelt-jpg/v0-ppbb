@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
-import { DEFAULT_GLOBAL_SETTINGS, mergeGlobalSettings } from '@/lib/global-settings'
+import { mergeGlobalSettings } from '@/lib/global-settings'
 
 export interface LogoAssets {
   lightLogoUrl: string
@@ -11,15 +11,19 @@ export interface LogoAssets {
   updatedAt: number
 }
 
-/** Dark artwork for light backgrounds */
+/** Built-in dark artwork for light backgrounds (original brand mark). */
 export const DEFAULT_LOGO_ON_LIGHT_BG =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bblack%5D-9KcTa1PocHznEBM4QR6dN4R2eseFlT.png'
 
-/** Light artwork for dark backgrounds */
+/** Built-in light artwork for dark backgrounds (original brand mark). */
 export const DEFAULT_LOGO_ON_DARK_BG =
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bwhite%5D-yu7P76Kj7QQ6XvNGPww4648xqCmM4s.png'
 
-/** Fallbacks when Firestore has no logo URLs yet */
+/**
+ * Site chrome always uses the built-in brand logos.
+ * Admin CMS uploads no longer override these (they looked worse than the originals).
+ * Favicon can still come from Global Settings.
+ */
 export const DEFAULT_LOGOS: LogoAssets = {
   lightLogoUrl: DEFAULT_LOGO_ON_LIGHT_BG,
   darkLogoUrl: DEFAULT_LOGO_ON_DARK_BG,
@@ -31,10 +35,8 @@ export const DEFAULT_LOGOS: LogoAssets = {
 function logosFromGlobal(data: Record<string, unknown> | undefined): LogoAssets {
   const g = mergeGlobalSettings(data)
   return {
-    // logoUrlDark = dark-colored logo for light backgrounds
-    lightLogoUrl: g.logoUrlDark || DEFAULT_LOGO_ON_LIGHT_BG,
-    // logoUrlLight = light-colored logo for dark backgrounds
-    darkLogoUrl: g.logoUrlLight || DEFAULT_LOGO_ON_DARK_BG,
+    lightLogoUrl: DEFAULT_LOGO_ON_LIGHT_BG,
+    darkLogoUrl: DEFAULT_LOGO_ON_DARK_BG,
     faviconUrl: g.faviconUrl || DEFAULT_LOGOS.faviconUrl,
     updatedAt: Date.now(),
   }
@@ -43,7 +45,7 @@ function logosFromGlobal(data: Record<string, unknown> | undefined): LogoAssets 
 /** Pick logo URL based on the background it sits on (not app theme). */
 export function getLogoForBackground(
   background: 'light' | 'dark',
-  logos: LogoAssets
+  logos: LogoAssets = DEFAULT_LOGOS
 ): string {
   return background === 'dark' ? logos.darkLogoUrl : logos.lightLogoUrl
 }

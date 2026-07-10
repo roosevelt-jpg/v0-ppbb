@@ -19,6 +19,10 @@ import {
 } from '@/lib/referral-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { auth } from '@/lib/firebase'
+import {
+  DEFAULT_LOGO_ON_DARK_BG,
+  DEFAULT_LOGO_ON_LIGHT_BG,
+} from '@/lib/logo-manager'
 
 const SOCIAL_FIELDS: Array<{ key: keyof GlobalSocialLinks; label: string }> = [
   { key: 'twitter', label: 'Twitter' },
@@ -34,7 +38,7 @@ export default function AdminCmsGlobalSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [savingReferrals, setSavingReferrals] = useState(false)
   const [migrating, setMigrating] = useState(false)
-  const [uploading, setUploading] = useState<'light' | 'dark' | 'favicon' | null>(null)
+  const [uploading, setUploading] = useState<'favicon' | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(
     null
   )
@@ -52,30 +56,6 @@ export default function AdminCmsGlobalSettingsPage() {
       ...prev,
       socialLinks: { ...prev.socialLinks, [key]: value },
     }))
-  }
-
-  const handleLogoUpload = async (file: File, variant: 'light' | 'dark') => {
-    setUploading(variant)
-    setMessage(null)
-    try {
-      const url = await uploadImageToFirebase(
-        file,
-        variant === 'light' ? 'branding/logo-light' : 'branding/logo-dark',
-        { preset: 'brandLogo' }
-      )
-      handleChange(variant === 'light' ? 'logoUrlLight' : 'logoUrlDark', url)
-      setMessage({
-        type: 'success',
-        text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded at 268×95 (shown at 134×48). Remember to Save.`,
-      })
-    } catch (error: unknown) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Logo upload failed',
-      })
-    } finally {
-      setUploading(null)
-    }
   }
 
   const handleFaviconUpload = async (file: File) => {
@@ -278,50 +258,39 @@ export default function AdminCmsGlobalSettingsPage() {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(['light', 'dark'] as const).map((variant) => {
-              const url = variant === 'light' ? settings.logoUrlLight : settings.logoUrlDark
-              // Light artwork = for dark header/footer; dark artwork = for light sidebars
-              const previewBg = variant === 'light' ? 'bg-black' : 'bg-neutral-100'
-              return (
-                <div key={variant} className="border border-dashed border-neutral-300 rounded-lg p-4">
-                  <label className="block text-sm font-medium mb-2">
-                    Logo ({variant === 'light' ? 'for dark backgrounds' : 'for light backgrounds'})
-                  </label>
-                  {url ? (
-                    <div
-                      className={`mb-3 flex h-20 items-center justify-center rounded ${previewBg}`}
-                    >
-                      <img
-                        src={url}
-                        alt={`${variant} logo`}
-                        className="h-16 w-auto max-w-full object-contain bg-transparent"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-xs text-neutral-400 mb-3 text-center">No logo yet</p>
-                  )}
-                  <p className="text-xs text-neutral-500 mb-2">
-                    Any format (PNG, JPG, WebP, SVG). Auto-resized to{' '}
-                    <strong>268×95</strong> (displayed at <strong>134×48</strong>) with solid
-                    backgrounds removed for transparent display on black headers/footers.
-                  </p>
-                  <label className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
-                    <Upload className="w-4 h-4" />
-                    {uploading === variant ? 'Uploading…' : url ? 'Change logo' : 'Upload logo'}
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-                      className="hidden"
-                      disabled={!!uploading}
-                      onChange={(e) => {
-                        const f = e.target.files?.[0]
-                        if (f) void handleLogoUpload(f, variant)
-                      }}
-                    />
-                  </label>
+            {(
+              [
+                {
+                  key: 'dark-bg',
+                  label: 'Logo (dark backgrounds — navbar / footer)',
+                  src: DEFAULT_LOGO_ON_DARK_BG,
+                  previewBg: 'bg-black',
+                },
+                {
+                  key: 'light-bg',
+                  label: 'Logo (light backgrounds — sidebars)',
+                  src: DEFAULT_LOGO_ON_LIGHT_BG,
+                  previewBg: 'bg-neutral-100',
+                },
+              ] as const
+            ).map((item) => (
+              <div key={item.key} className="border border-dashed border-neutral-300 rounded-lg p-4">
+                <label className="block text-sm font-medium mb-2">{item.label}</label>
+                <div
+                  className={`mb-3 flex h-20 items-center justify-center rounded ${item.previewBg}`}
+                >
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    className="h-16 w-auto max-w-full object-contain bg-transparent"
+                  />
                 </div>
-              )
-            })}
+                <p className="text-xs text-neutral-500">
+                  Built-in original brand mark. Site chrome always uses these (admin uploads are
+                  disabled for logos).
+                </p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-4 border border-dashed border-neutral-300 rounded-lg p-4 max-w-md">
