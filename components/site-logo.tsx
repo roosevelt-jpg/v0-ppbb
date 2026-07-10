@@ -36,20 +36,20 @@ const VARIANT_CLASSES: Record<
 > = {
   primary: {
     wrapper: 'inline-flex items-center shrink-0 leading-none',
-    img: 'block h-12 w-auto max-h-12 md:h-14 md:max-h-14 object-contain',
+    img: 'block h-14 w-auto max-h-14 md:h-16 md:max-h-16 object-contain',
   },
   navbar: {
     wrapper:
-      'inline-flex items-center shrink-0 leading-none max-w-[min(52vw,260px)] sm:max-w-[min(44vw,300px)] md:max-w-none',
-    img: 'block h-11 w-auto max-h-11 sm:h-12 sm:max-h-12 md:h-14 md:max-h-14 lg:h-16 lg:max-h-16 object-contain object-left',
+      'inline-flex items-center shrink-0 leading-none max-w-[min(60vw,320px)] sm:max-w-[min(50vw,360px)] md:max-w-none',
+    img: 'block h-14 w-auto max-h-14 sm:h-16 sm:max-h-16 md:h-[4.5rem] md:max-h-[4.5rem] lg:h-20 lg:max-h-20 object-contain object-left',
   },
   sidebar: {
-    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[180px]',
-    img: 'block w-full max-w-[180px] max-h-16 h-auto object-contain',
+    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[220px]',
+    img: 'block w-full max-w-[220px] max-h-20 h-auto object-contain',
   },
   footer: {
     wrapper: 'inline-flex items-center shrink-0 leading-none',
-    img: 'block w-auto max-w-[180px] max-h-14 h-auto object-contain',
+    img: 'block w-auto max-w-[220px] max-h-16 h-auto object-contain',
   },
 }
 
