@@ -51,6 +51,7 @@ const ENCRYPTED_FIELDS: Record<string, Set<string>> = {
   sendgrid: new Set(['apiKey']),
   twilio: new Set(['authToken']),
   googleMaps: new Set(['apiKey']),
+  gmailSmtp: new Set(['gmailAppPassword']),
   cloudStorage: new Set(['secretAccessKey']),
   googleCloudStorage: new Set(['serviceAccountJson']),
   googleDrive: new Set(['serviceAccountJson']),

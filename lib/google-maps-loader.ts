@@ -40,12 +40,14 @@ async function resolveGoogleMapsApiKey(): Promise<string | null> {
   }
 
   try {
-    const res = await fetch('/api/admin/integrations/googleMaps')
-    if (!res.ok) {
-      return null
-    }
+    const res = await fetch('/api/admin/location-config', { cache: 'no-store' })
+    if (!res.ok) return null
     const data = await res.json()
-    return data.data?.credentials?.apiKey || data.data?.apiKey || null
+    return (
+      data?.data?.googlePlacesApiKey ||
+      data?.data?.googleMapsApiKey ||
+      null
+    )
   } catch {
     return null
   }

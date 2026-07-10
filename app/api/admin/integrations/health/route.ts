@@ -3,6 +3,9 @@ import { getAllIntegrationHealthServer } from '@/lib/integrations/handlers-serve
 import { getAllServices } from '@/lib/integrations/services'
 import { requireIntegrationsAccess } from '@/lib/integrations/require-vault-access'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireIntegrationsAccess(request)

@@ -1,4 +1,4 @@
-import { getFirestore, type Firestore, type QueryDocumentSnapshot } from 'firebase-admin/firestore'
+import { getFirestore, type Firestore, type DocumentSnapshot, type QueryDocumentSnapshot } from 'firebase-admin/firestore'
 import { Integration, IntegrationHealth } from './types'
 import { encryptCredentials, decryptCredentials } from './encryption'
 import { initializeApp, cert, deleteApp } from 'firebase-admin/app'
@@ -326,7 +326,7 @@ function toClientIntegration(input: {
   }
 }
 
-function mapIntegrationDoc(docSnap: QueryDocumentSnapshot): Record<string, unknown> | null {
+function mapIntegrationDoc(docSnap: DocumentSnapshot | QueryDocumentSnapshot): Record<string, unknown> | null {
   try {
     const data = docSnap.data() || {}
     const serviceId = typeof data.serviceId === 'string' ? data.serviceId : ''
@@ -390,36 +390,16 @@ export async function getAllIntegrationsServer(
   userId: string = INTEGRATION_OWNER_USER_ID
 ): Promise<Integration[]> {
   const db = getAdminDb()
-  let docs: QueryDocumentSnapshot[] = []
-
-  try {
-    const ownerSnap = await db
-      .collection(INTEGRATIONS_COLLECTION)
-      .where('userId', '==', userId)
-      .get()
-    docs = ownerSnap.docs
-  } catch (error) {
-    console.warn('[v0] Owner integrations query failed, falling back to full scan:', error)
-  }
-
-  if (docs.length === 0) {
-    const snap = await db.collection(INTEGRATIONS_COLLECTION).get()
-    docs = snap.docs
-  }
-
-  const mapped = docs
-    .map((docSnap) => mapIntegrationDoc(docSnap))
-    .filter((row): row is Record<string, unknown> => Boolean(row))
-
-  // Prefer canonical owner rows when duplicates exist.
   const byService = new Map<string, Record<string, unknown>>()
-  for (const row of mapped) {
+
+  const upsert = (row: Record<string, unknown> | null) => {
+    if (!row) return
     const serviceId = String(row.serviceId || '')
-    if (!serviceId) continue
+    if (!serviceId) return
     const existing = byService.get(serviceId)
     if (!existing) {
       byService.set(serviceId, row)
-      continue
+      return
     }
     const rankNew = integrationStatusRank(row.status as Integration['status'])
     const rankOld = integrationStatusRank(existing.status as Integration['status'])
@@ -427,6 +407,53 @@ export async function getAllIntegrationsServer(
     const updatedOld = toMillis(existing.updatedAt)
     if (rankNew > rankOld || (rankNew === rankOld && updatedNew > updatedOld)) {
       byService.set(serviceId, row)
+    }
+  }
+
+  // 1) Prefer direct reads of canonical docs for every known catalog service.
+  //    This avoids flaky collection queries / full scans that can 500 the admin UI.
+  try {
+    const { getAllServices } = await import('@/lib/integrations/services')
+    const serviceIds = getAllServices().map((s) => s.id)
+    const refs = serviceIds.map((serviceId) =>
+      db.collection(INTEGRATIONS_COLLECTION).doc(integrationDocId(serviceId, userId))
+    )
+    // Firestore getAll accepts up to a batch of refs; chunk if needed.
+    const chunkSize = 100
+    for (let i = 0; i < refs.length; i += chunkSize) {
+      const chunk = refs.slice(i, i + chunkSize)
+      const snaps = await db.getAll(...chunk)
+      for (const snap of snaps) {
+        if (!snap.exists) continue
+        upsert(mapIntegrationDoc(snap))
+      }
+    }
+  } catch (error) {
+    console.warn('[v0] Canonical integrations getAll failed:', error)
+  }
+
+  // 2) Also pull owner-scoped rows (covers legacy / unknown serviceIds).
+  try {
+    const ownerSnap = await db
+      .collection(INTEGRATIONS_COLLECTION)
+      .where('userId', '==', userId)
+      .get()
+    for (const docSnap of ownerSnap.docs) {
+      upsert(mapIntegrationDoc(docSnap))
+    }
+  } catch (error) {
+    console.warn('[v0] Owner integrations query failed:', error)
+  }
+
+  // 3) Only if still empty, fall back to a bounded full scan.
+  if (byService.size === 0) {
+    try {
+      const snap = await db.collection(INTEGRATIONS_COLLECTION).limit(200).get()
+      for (const docSnap of snap.docs) {
+        upsert(mapIntegrationDoc(docSnap))
+      }
+    } catch (error) {
+      console.warn('[v0] Full integrations scan failed:', error)
     }
   }
 

@@ -32,30 +32,47 @@ export async function GET(request: NextRequest) {
     const authResult = await requireIntegrationsAccess(request)
     if (authResult instanceof NextResponse) return authResult
 
-    const integrations = await getAllIntegrationsServer(MOCK_USER_ID)
+    let integrations: unknown[] = []
+    let loadWarning = ''
+    try {
+      integrations = await getAllIntegrationsServer(MOCK_USER_ID)
+    } catch (loadError) {
+      loadWarning =
+        loadError instanceof Error ? loadError.message : 'Failed to read integrations collection'
+      console.error('[v0] getAllIntegrationsServer failed:', loadWarning)
+      integrations = []
+    }
+
     const data = safeJson(integrations)
+    const list = Array.isArray(data) ? data : []
     return NextResponse.json({
       success: true,
-      data,
+      data: list,
       message: 'Integrations retrieved successfully',
-      count: Array.isArray(data) ? data.length : 0,
-      activeCount: Array.isArray(data)
-        ? data.filter((row: { status?: string; credentials?: Record<string, unknown> }) => {
-            const creds = row?.credentials
-            const hasCreds = !!creds && Object.keys(creds).length > 0
-            return row?.status === 'active' || (hasCreds && row?.status !== 'error')
-          }).length
-        : 0,
+      count: list.length,
+      activeCount: list.filter((row: { status?: string; credentials?: Record<string, unknown> }) => {
+        const creds = row?.credentials
+        const hasCreds = !!creds && Object.keys(creds).length > 0
+        return row?.status === 'active' || (hasCreds && row?.status !== 'error')
+      }).length,
+      ...(loadWarning ? { warning: loadWarning } : {}),
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[v0] GET error:', message)
+    // Never blank the UI with a hard 500 if auth already passed — return empty
+    // list so cards still render as Pending while ops investigate Firestore.
     return NextResponse.json(
       {
+        success: true,
+        data: [],
+        count: 0,
+        activeCount: 0,
         error: message || 'Failed to retrieve integrations',
-        hint: 'Credentials are stored in Firestore and were not deleted. Retry after deploy, or check server logs.',
+        warning:
+          'Credentials are stored in Firestore and were not deleted. Retry after deploy, or check server logs.',
       },
-      { status: 500 }
+      { status: 200 }
     )
   }
 }

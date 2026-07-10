@@ -44,7 +44,9 @@ export default function LocationConfigPage() {
         defaultCountry: data.defaultCountry || 'AE',
       })
     } catch (err) {
-      setError('Failed to load configuration. Please try again.')
+      const message =
+        err instanceof Error ? err.message : 'Failed to load configuration. Please try again.'
+      setError(message)
       console.error('[v0] Error loading location config:', err)
     } finally {
       setLoading(false)

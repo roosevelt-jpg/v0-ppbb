@@ -51,20 +51,17 @@ function IntegrationsPageContent() {
 
       if (integrationsRes) {
         console.log('[v0] Integrations response:', integrationsRes.status, integrationsRes.ok)
-        if (integrationsRes.ok) {
-          const data = await integrationsRes.json()
+        const data = await integrationsRes.json().catch(() => ({}))
+        if (integrationsRes.ok || Array.isArray(data?.data)) {
           console.log('[v0] Integrations data:', data)
-          setIntegrations(data.data || [])
-        } else {
-          const errText = await integrationsRes.text()
-          console.error('[v0] Integrations request failed:', integrationsRes.status, errText)
-          setIntegrations([])
-          let apiMessage = ''
-          try {
-            apiMessage = JSON.parse(errText)?.error || ''
-          } catch {
-            /* ignore */
+          setIntegrations(Array.isArray(data.data) ? data.data : [])
+          if (data.warning || data.error) {
+            setLoadError(String(data.warning || data.error))
           }
+        } else {
+          console.error('[v0] Integrations request failed:', integrationsRes.status, data)
+          setIntegrations([])
+          const apiMessage = typeof data?.error === 'string' ? data.error : ''
           setLoadError(
             integrationsRes.status === 423
               ? 'Integrations vault is locked. Unlock with the passcode to continue.'
