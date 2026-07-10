@@ -66,7 +66,7 @@ export default function AdminCmsGlobalSettingsPage() {
       handleChange(variant === 'light' ? 'logoUrlLight' : 'logoUrlDark', url)
       setMessage({
         type: 'success',
-        text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded at 268×95 (background removed). Remember to Save.`,
+        text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded at 268×95 (shown at 134×48). Remember to Save.`,
       })
     } catch (error: unknown) {
       setMessage({
@@ -302,8 +302,8 @@ export default function AdminCmsGlobalSettingsPage() {
                   )}
                   <p className="text-xs text-neutral-500 mb-2">
                     Any format (PNG, JPG, WebP, SVG). Auto-resized to{' '}
-                    <strong>268×95</strong> with solid backgrounds removed for
-                    transparent display on black headers/footers.
+                    <strong>268×95</strong> (displayed at <strong>134×48</strong>) with solid
+                    backgrounds removed for transparent display on black headers/footers.
                   </p>
                   <label className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
                     <Upload className="w-4 h-4" />

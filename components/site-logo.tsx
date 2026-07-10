@@ -8,14 +8,14 @@ import { DEFAULT_GLOBAL_SETTINGS } from '@/lib/global-settings'
 
 export type SiteLogoBackground = 'light' | 'dark'
 
-/** Canonical brand logo box — matches upload export 268×95 */
-export const LOGO_BOX_WIDTH_PX = 268
-export const LOGO_BOX_HEIGHT_PX = 95
-/** Mobile: ~56% scale so logo fits beside hamburger + controls at 375px */
-export const LOGO_BOX_MOBILE_WIDTH_PX = 150
+/** Canonical brand logo display box — half of 268×95 upload export (retina-friendly) */
+export const LOGO_BOX_WIDTH_PX = 134
+export const LOGO_BOX_HEIGHT_PX = 48
+/** Mobile: ~56% of desktop box so logo fits beside hamburger + controls at 375px */
+export const LOGO_BOX_MOBILE_WIDTH_PX = 75
 export const LOGO_BOX_MOBILE_HEIGHT_PX = Math.round(
   (LOGO_BOX_MOBILE_WIDTH_PX * LOGO_BOX_HEIGHT_PX) / LOGO_BOX_WIDTH_PX
-) // ~53px — preserves 268:95 aspect ratio
+) // ~27px — preserves 134:48 aspect ratio
 
 export type SiteLogoVariant = 'primary' | 'navbar' | 'sidebar' | 'footer' | 'custom'
 
@@ -29,7 +29,7 @@ interface SiteLogoProps {
   heightClass?: string
   /** Used when variant is `custom` */
   maxWidth?: number | string
-  /** `primary` (and legacy navbar/sidebar/footer aliases) use the 190×84 box */
+  /** `primary` (and legacy navbar/sidebar/footer aliases) use the 134×48 display box */
   variant?: SiteLogoVariant
   /** When false, render image only (wrap in your own Link) */
   linked?: boolean
@@ -64,7 +64,7 @@ export function SiteLogo({
 
   const box = isPrimary ? (
     <span
-      className={`inline-flex shrink-0 items-center justify-center overflow-hidden w-[150px] h-[53px] md:w-[268px] md:h-[95px] ${className}`.trim()}
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden w-[75px] h-[27px] md:w-[134px] md:h-[48px] ${className}`.trim()}
       aria-hidden
     >
       <img
