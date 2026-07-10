@@ -20,12 +20,8 @@ import { formatRecordPhoneDisplay } from '@/lib/user-profile'
 import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
 import { profileFromBusiness } from '@/lib/admin-profile-view'
 import type { AdminProfileViewData } from '@/lib/admin-profile-view'
-
-import { auth } from '@/lib/firebase'
-
-async function getAdminToken(): Promise<string | null> {
-  return (await auth.currentUser?.getIdToken()) || null
-}
+import { adminApiFetch } from '@/lib/admin-api-client'
+import { useAuth } from '@/lib/auth-context'
 
 type BusinessRow = {
   id: string
@@ -48,6 +44,7 @@ type BusinessRow = {
 type FilterTab = 'all' | 'pending' | 'approved' | 'suspended' | 'featured'
 
 export default function BusinessesPage() {
+  const { firebaseUser } = useAuth()
   const [businesses, setBusinesses] = React.useState<BusinessRow[]>([])
   const [loading, setLoading] = React.useState(true)
   const [actingId, setActingId] = React.useState<string | null>(null)
@@ -65,24 +62,35 @@ export default function BusinessesPage() {
   }
 
   const fetchBusinesses = React.useCallback(async () => {
+    if (!firebaseUser) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
+    setMessage(null)
     try {
       const params = new URLSearchParams()
       if (filter !== 'all') params.set('status', filter)
       if (search.trim()) params.set('search', search.trim())
-      const response = await fetch(`/api/admin/businesses?${params.toString()}`)
-      if (!response.ok) throw new Error('Failed to fetch')
-      const data = await response.json()
-      if (data.success) {
-        setBusinesses(data.data || [])
+      const qs = params.toString()
+      const json = await adminApiFetch<BusinessRow[]>(
+        `/api/admin/businesses${qs ? `?${qs}` : ''}`
+      )
+      if (!json.success) {
+        throw new Error(json.error || 'Failed to load businesses')
       }
+      setBusinesses(Array.isArray(json.data) ? json.data : [])
     } catch (error) {
       console.error('[v0] Error fetching businesses:', error)
-      setMessage({ type: 'error', text: 'Failed to load businesses' })
+      setBusinesses([])
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Failed to load businesses',
+      })
     } finally {
       setLoading(false)
     }
-  }, [filter, search])
+  }, [filter, search, firebaseUser])
 
   React.useEffect(() => {
     void fetchBusinesses()
@@ -110,16 +118,10 @@ export default function BusinessesPage() {
     setActingId(id)
     setMessage(null)
     try {
-      const token = await getAdminToken()
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-      if (token) headers.Authorization = `Bearer ${token}`
-
-      const res = await fetch('/api/admin/businesses', {
+      const json = await adminApiFetch<BusinessRow>('/api/admin/businesses', {
         method: 'PATCH',
-        headers,
         body: JSON.stringify({ id, action, ...extra }),
       })
-      const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Action failed')
       setMessage({
         type: 'success',

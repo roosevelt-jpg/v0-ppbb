@@ -5,6 +5,7 @@ export type AdminApiJson<T = unknown> = {
   error?: string
   data?: T
   url?: string
+  message?: string
   canViewSensitiveDocuments?: boolean
 }
 
