@@ -113,7 +113,11 @@ function IntegrationsPageContent() {
   })
 
   const configured = integrations.length
-  const active = integrations.filter((i) => i.status === 'active').length
+  const active = integrations.filter((i) => {
+    const hasCredentials =
+      !!i?.credentials && typeof i.credentials === 'object' && Object.keys(i.credentials).length > 0
+    return i.status === 'active' || (hasCredentials && i.status !== 'error')
+  }).length
   const pending = Math.max(0, allServices.length - configured)
   const lastUpdatedMs = integrations.reduce((max, row) => {
     const raw = row.updatedAt || row.createdAt

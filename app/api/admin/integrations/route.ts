@@ -35,9 +35,17 @@ export async function GET(request: NextRequest) {
     const integrations = await getAllIntegrationsServer(MOCK_USER_ID)
     const data = safeJson(integrations)
     return NextResponse.json({
+      success: true,
       data,
       message: 'Integrations retrieved successfully',
       count: Array.isArray(data) ? data.length : 0,
+      activeCount: Array.isArray(data)
+        ? data.filter((row: { status?: string; credentials?: Record<string, unknown> }) => {
+            const creds = row?.credentials
+            const hasCreds = !!creds && Object.keys(creds).length > 0
+            return row?.status === 'active' || (hasCreds && row?.status !== 'error')
+          }).length
+        : 0,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

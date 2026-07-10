@@ -48,11 +48,22 @@ export function getEffectiveInvitePermissions(
   role?: string
 ): string[] {
   if (role === 'super_admin') return ['full_access']
+  // Founder / manager always retain full operational access, even if an older
+  // invite stored a partial permissions array (which previously hid Integrations).
   if (role === 'founder_admin' || role === 'manager') {
-    if (!permissions?.length) return ['full_access']
+    return ['full_access']
   }
   if (role === 'welfare' || role === 'founder' || role === 'coordinator') {
     if (!permissions?.length) return ['manage_beneficiary']
+  }
+  if (role === 'admin') {
+    if (!permissions?.length) return ['full_access']
+    if (
+      !permissions.includes('full_access') &&
+      !permissions.includes('manage_integrations')
+    ) {
+      return [...permissions, 'manage_integrations']
+    }
   }
   if (!permissions?.length) return ['full_access']
   return permissions

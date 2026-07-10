@@ -304,8 +304,12 @@ function toClientIntegration(input: {
   const creds = normalizeCredentialRecord(input.credentials)
   const hasCredentials = Object.keys(creds).length > 0
   let status = input.status || 'inactive'
-  // Treat configured rows as active in the UI even if status was never set.
-  if (hasCredentials && (status === 'inactive' || status === 'pending' || !status)) {
+  // Treat configured rows as active in the UI even if status was never set / left inactive.
+  if (hasCredentials && (status === 'inactive' || status === 'pending' || !status || status === 'undefined')) {
+    status = 'active'
+  }
+  // Also treat any non-error configured row as active (matches IntegrationCard).
+  if (hasCredentials && status !== 'error' && status !== 'active') {
     status = 'active'
   }
   const createdMs = toMillis(input.createdAt)

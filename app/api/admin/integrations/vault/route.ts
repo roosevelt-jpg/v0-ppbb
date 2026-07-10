@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import {
-  verifyIdToken,
-  isAdminUser,
-  hasInvitePermissionServer,
-  getAdminUserData,
-} from '@/lib/admin-access-server'
+import { verifyIdToken, isAdminUser, getAdminUserData } from '@/lib/admin-access-server'
+import { canManageIntegrations } from '@/lib/integrations/require-vault-access'
 import {
   clearIntegrationsVaultPasscode,
   createIntegrationsUnlockToken,
@@ -25,8 +21,7 @@ async function requireAdmin(request: NextRequest): Promise<{ uid: string } | Nex
   if (!(await isAdminUser(uid))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  const allowed = await hasInvitePermissionServer(uid, 'manage_integrations')
-  if (!allowed) {
+  if (!(await canManageIntegrations(uid))) {
     return NextResponse.json(
       { error: 'Forbidden: manage_integrations permission required' },
       { status: 403 }

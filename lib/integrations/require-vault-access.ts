@@ -3,12 +3,38 @@ import {
   verifyIdToken,
   isAdminUser,
   hasInvitePermissionServer,
+  grantIntegrationPermission,
+  getAdminUserData,
 } from '@/lib/admin-access-server'
 import {
   getIntegrationsVaultSettings,
   getUnlockTokenFromRequest,
   verifyIntegrationsUnlockToken,
 } from '@/lib/integrations/vault-lock'
+
+export async function canManageIntegrations(uid: string): Promise<boolean> {
+  // Best-effort: ensure founder_admin docs include manage_integrations.
+  try {
+    await grantIntegrationPermission(uid)
+  } catch {
+    /* non-blocking */
+  }
+
+  if (await hasInvitePermissionServer(uid, 'manage_integrations')) {
+    return true
+  }
+
+  // Fallback for legacy admin profiles where role is admin/super_admin but
+  // invite permissions were never written.
+  const data = await getAdminUserData(uid)
+  const role = String(data?.role || data?.adminRole || '').toLowerCase()
+  return (
+    role === 'super_admin' ||
+    role === 'founder_admin' ||
+    role === 'manager' ||
+    role === 'admin'
+  )
+}
 
 /**
  * Require admin + manage_integrations, and vault unlock when passcode is enabled.
@@ -29,8 +55,7 @@ export async function requireIntegrationsAccess(
     if (!(await isAdminUser(uid))) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    const allowed = await hasInvitePermissionServer(uid, 'manage_integrations')
-    if (!allowed) {
+    if (!(await canManageIntegrations(uid))) {
       return NextResponse.json(
         { error: 'Forbidden: manage_integrations permission required' },
         { status: 403 }
