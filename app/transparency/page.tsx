@@ -80,30 +80,30 @@ export default function TransparencyPage() {
   const metrics = [
     {
       icon: Heart,
-      label: 'Total Donations',
+      label: copy.metricDonationsLabel,
       value: `AED ${stats.totalDonations.toLocaleString()}`,
-      subtext: `${stats.completedDonations} donations`,
+      subtext: `${stats.completedDonations} ${copy.metricDonationsSubtext}`,
       color: '#e74c3c',
     },
     {
       icon: Users2,
-      label: 'Beneficiaries Helped',
+      label: copy.metricBeneficiariesLabel,
       value: stats.totalBeneficiaries.toLocaleString(),
-      subtext: 'Lives impacted',
+      subtext: copy.metricBeneficiariesSubtext,
       color: '#3498db',
     },
     {
       icon: Target,
-      label: 'Active Causes',
+      label: copy.metricCausesLabel,
       value: stats.activeCauses.toLocaleString(),
-      subtext: 'Ongoing initiatives',
+      subtext: copy.metricCausesSubtext,
       color: '#27ae60',
     },
     {
       icon: Award,
-      label: 'Volunteer Hours',
+      label: copy.metricVolunteerLabel,
       value: stats.volunteerHours.toLocaleString(),
-      subtext: `${stats.totalVolunteers} volunteers`,
+      subtext: `${stats.totalVolunteers} ${copy.metricVolunteerSubtext}`,
       color: '#f39c12',
     },
   ]
@@ -211,7 +211,7 @@ export default function TransparencyPage() {
             <div className="space-y-4">
               <div className="bg-white p-6 sm:p-8 rounded-lg border border-[#e4e1da]">
                 <PieChart className="h-6 w-6 text-[#f39c12] mb-3" />
-                <p className="text-[#888888] text-sm mb-2">Total Fundraised</p>
+                <p className="text-[#888888] text-sm mb-2">{copy.totalFundraisedLabel}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-[#111111] mb-4">
                   {loading ? '-' : `AED ${stats.totalDonations.toLocaleString()}`}
                 </p>
@@ -231,12 +231,12 @@ export default function TransparencyPage() {
 
               <div className="bg-white p-6 sm:p-8 rounded-lg border border-[#e4e1da]">
                 <TrendingUp className="h-6 w-6 text-[#27ae60] mb-3" />
-                <p className="text-[#888888] text-sm mb-2">Causes Funded</p>
+                <p className="text-[#888888] text-sm mb-2">{copy.causesFundedLabel}</p>
                 <p className="text-2xl sm:text-3xl font-bold text-[#111111]">
                   {causes.filter((c) => (c.goalAmount || 0) > 0 && c.currentAmount >= c.goalAmount).length} of{' '}
                   {causes.length}
                 </p>
-                <p className="text-xs text-[#888888] mt-2">Fully funded</p>
+                <p className="text-xs text-[#888888] mt-2">{copy.causesFundedSubtext}</p>
               </div>
             </div>
           </div>
@@ -253,7 +253,7 @@ export default function TransparencyPage() {
                 <div className="h-12 w-12 rounded-full bg-[#e74c3c] bg-opacity-20 flex items-center justify-center mb-4">
                   <Heart className="h-6 w-6 text-[#e74c3c]" />
                 </div>
-                <p className="text-[#888888] text-sm mb-2">This Month</p>
+                <p className="text-[#888888] text-sm mb-2">{copy.timelineThisMonthLabel}</p>
                 <p className="text-2xl font-bold text-[#111111]">
                   AED {(stats.totalDonations * 0.3).toLocaleString()}
                 </p>
@@ -263,7 +263,7 @@ export default function TransparencyPage() {
                 <div className="h-12 w-12 rounded-full bg-[#3498db] bg-opacity-20 flex items-center justify-center mb-4">
                   <Users2 className="h-6 w-6 text-[#3498db]" />
                 </div>
-                <p className="text-[#888888] text-sm mb-2">This Quarter</p>
+                <p className="text-[#888888] text-sm mb-2">{copy.timelineThisQuarterLabel}</p>
                 <p className="text-2xl font-bold text-[#111111]">
                   AED {(stats.totalDonations * 0.7).toLocaleString()}
                 </p>
@@ -273,7 +273,7 @@ export default function TransparencyPage() {
                 <div className="h-12 w-12 rounded-full bg-[#27ae60] bg-opacity-20 flex items-center justify-center mb-4">
                   <TrendingUp className="h-6 w-6 text-[#27ae60]" />
                 </div>
-                <p className="text-[#888888] text-sm mb-2">Year-to-Date</p>
+                <p className="text-[#888888] text-sm mb-2">{copy.timelineYtdLabel}</p>
                 <p className="text-2xl font-bold text-[#111111]">AED {stats.totalDonations.toLocaleString()}</p>
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function TransparencyPage() {
               </ul>
 
               <p className="text-[#888888] text-sm mt-6 pt-6 border-t border-[#e4e1da]">
-                Questions about our transparency? Contact our team at{' '}
+                {copy.contactPrompt}{' '}
                 <a
                   href={`mailto:${copy.contactEmail}`}
                   className="text-[#3498db] hover:underline break-all"

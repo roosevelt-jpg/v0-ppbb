@@ -55,8 +55,14 @@ export async function POST(
     const db = getAdminDb()
     const docRef = db.collection('platformConfig').doc(section)
 
+    let nextBody = body
+    if (section === 'transparency' && body && typeof body === 'object') {
+      const { mergeTransparencyConfig } = await import('@/lib/transparency-config')
+      nextBody = mergeTransparencyConfig(body)
+    }
+
     const payload = sanitizeForFirestore({
-      ...body,
+      ...nextBody,
       updatedAt: new Date(),
     })
 
