@@ -22,6 +22,29 @@ export default function MembershipPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [checkingOut, setCheckingOut] = useState<string | null>(null)
+  const [gateways, setGateways] = useState<{ stripe: boolean; paypal: boolean; ziina: boolean }>({
+    stripe: true,
+    paypal: false,
+    ziina: false,
+  })
+  const [statusBanner, setStatusBanner] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const status = new URLSearchParams(window.location.search).get('status')
+    if (status === 'success') setStatusBanner('Payment successful. Your membership is updating.')
+    else if (status === 'canceled') setStatusBanner('Checkout was canceled.')
+    else if (status === 'error') setStatusBanner('Payment could not be completed. Please try again or contact support.')
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/checkout/gateways')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.data) setGateways(json.data)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (authLoading) return
@@ -54,25 +77,40 @@ export default function MembershipPage() {
     return () => unsub()
   }, [authLoading, user?.id])
 
+  const resolveGateway = (plan: PricingPlan): 'stripe' | 'paypal' | 'ziina' => {
+    const preferred = plan.paymentGateway || 'stripe'
+    if (preferred === 'paypal' && gateways.paypal) return 'paypal'
+    if (preferred === 'ziina' && gateways.ziina) return 'ziina'
+    if (preferred === 'stripe' && gateways.stripe) return 'stripe'
+    if (gateways.stripe) return 'stripe'
+    if (gateways.paypal) return 'paypal'
+    if (gateways.ziina) return 'ziina'
+    return preferred
+  }
+
   const handleCheckout = async (plan: PricingPlan) => {
     if (!user?.id) return
     setCheckingOut(plan.id)
     try {
+      const gateway = resolveGateway(plan)
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           planId: plan.id,
           userId: user.id,
-          gateway: 'stripe',
+          gateway,
           referralCode: getReferralCodeFromDocument(),
         }),
       })
       const data = await response.json()
-      if (data.checkoutUrl) window.location.href = data.checkoutUrl
+      if (!response.ok || !data.checkoutUrl) {
+        throw new Error(data.error || `Checkout failed (${gateway})`)
+      }
+      window.location.href = data.checkoutUrl
     } catch (err) {
       console.error('[v0] Checkout error:', err)
-      alert('Failed to start checkout. Please try again.')
+      alert(err instanceof Error ? err.message : 'Failed to start checkout. Please try again.')
     } finally {
       setCheckingOut(null)
     }
@@ -101,6 +139,11 @@ export default function MembershipPage() {
 
   return (
     <DashboardPageShell title="Membership" subtitle="Your plan and available upgrades">
+      {statusBanner ? (
+        <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
+          {statusBanner}
+        </Card>
+      ) : null}
       {activePlanName ? (
         <Card className="p-5 mb-8 border border-neutral-200 bg-neutral-50">
           <div className="flex items-center gap-4">
@@ -159,7 +202,7 @@ export default function MembershipPage() {
               ) : isCurrentPlan ? (
                 'Current Plan'
               ) : (
-                'Subscribe Now'
+                `Subscribe with ${resolveGateway(plan).replace(/^./, (c) => c.toUpperCase())}`
               )}
             </button>
           </Card>

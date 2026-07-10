@@ -165,6 +165,103 @@ export async function POST(request: NextRequest) {
     }
 
     if (needsPayment) {
+      const gateway = ((event.paymentGateway as string) || 'stripe').toLowerCase()
+      const origin =
+        request.headers.get('origin') ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        'https://test.myflynai.com'
+      const currency = (ticket.currency || (event.currency as string) || 'AED').toString()
+      const description = `${String(event.title || 'Event')} — ${ticket.name}`
+
+      if (price > 0) {
+        void recordReferralConversion({
+          convertedUserId: userId,
+          conversionType: 'event',
+          relatedDocId: regRef.id,
+          revenueAmount: price,
+          status: 'pending',
+          idempotencyKey: `event:${regRef.id}`,
+        }).catch((err) => console.error('[referral] event conversion:', err))
+      }
+
+      if (gateway === 'paypal') {
+        const { resolvePayPalConfig } = await import('@/lib/resolve-paypal-config')
+        const { createPayPalOrder } = await import('@/lib/paypal-client')
+        const paypalConfig = await resolvePayPalConfig()
+        if (!paypalConfig) {
+          await regRef.delete()
+          return NextResponse.json(
+            { success: false, error: 'PayPal is not configured' },
+            { status: 500 }
+          )
+        }
+        const order = await createPayPalOrder({
+          amountMajor: price,
+          currency,
+          description,
+          returnUrl: `${origin}/api/paypal/return?type=event&eventId=${encodeURIComponent(eventId)}&registrationId=${encodeURIComponent(regRef.id)}`,
+          cancelUrl: `${origin}/events/${eventId}?cancelled=1`,
+          customId: regRef.id,
+        })
+        await regRef.update({
+          paypalOrderId: order.id,
+          paymentGateway: 'paypal',
+        })
+        return NextResponse.json({
+          success: true,
+          registrationId: regRef.id,
+          checkoutUrl: order.approveUrl,
+          gateway: 'paypal',
+          status: registration.status,
+          registration: { id: regRef.id, ...registration, paypalOrderId: order.id },
+        })
+      }
+
+      if (gateway === 'ziina') {
+        const { resolveZiinaConfig } = await import('@/lib/resolve-ziina-config')
+        const { createZiinaPaymentIntent } = await import('@/lib/ziina-client')
+        const ziinaConfig = await resolveZiinaConfig()
+        if (!ziinaConfig) {
+          await regRef.delete()
+          return NextResponse.json(
+            { success: false, error: 'Ziina is not configured' },
+            { status: 500 }
+          )
+        }
+        const intent = await createZiinaPaymentIntent({
+          amountMinor: Math.round(price * 100),
+          currency,
+          message: description,
+          successUrl:
+            `${origin}/api/ziina/return?type=event` +
+            `&eventId=${encodeURIComponent(eventId)}` +
+            `&registrationId=${encodeURIComponent(regRef.id)}` +
+            `&payment_intent_id={PAYMENT_INTENT_ID}`,
+          cancelUrl: `${origin}/events/${eventId}?cancelled=1`,
+        })
+        if (!intent.redirect_url) {
+          await regRef.delete()
+          return NextResponse.json(
+            { success: false, error: 'Ziina did not return a checkout URL' },
+            { status: 500 }
+          )
+        }
+        await regRef.update({
+          ziinaPaymentIntentId: intent.id,
+          paymentGateway: 'ziina',
+        })
+        return NextResponse.json({
+          success: true,
+          registrationId: regRef.id,
+          checkoutUrl: intent.redirect_url,
+          gateway: 'ziina',
+          status: registration.status,
+          registration: { id: regRef.id, ...registration, ziinaPaymentIntentId: intent.id },
+        })
+      }
+
+      // Default: Stripe
       const stripeConfig = await resolveStripeConfig()
       if (!stripeConfig?.secretKey) {
         await regRef.delete()
@@ -172,7 +269,6 @@ export async function POST(request: NextRequest) {
       }
 
       const stripe = new Stripe(stripeConfig.secretKey, { apiVersion: '2024-04-10' })
-      const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         payment_method_types: ['card'],
@@ -181,10 +277,10 @@ export async function POST(request: NextRequest) {
           {
             quantity: 1,
             price_data: {
-              currency: (ticket.currency || 'AED').toLowerCase(),
+              currency: currency.toLowerCase(),
               unit_amount: Math.round(price * 100),
               product_data: {
-                name: `${event.title} — ${ticket.name}`,
+                name: description,
                 description: `Event ticket via Passive Blessings`,
               },
             },
@@ -202,23 +298,13 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      await regRef.update({ stripeSessionId: session.id })
-
-      if (price > 0) {
-        void recordReferralConversion({
-          convertedUserId: userId,
-          conversionType: 'event',
-          relatedDocId: regRef.id,
-          revenueAmount: price,
-          status: 'pending',
-          idempotencyKey: `event:${regRef.id}`,
-        }).catch((err) => console.error('[referral] event conversion:', err))
-      }
+      await regRef.update({ stripeSessionId: session.id, paymentGateway: 'stripe' })
 
       return NextResponse.json({
         success: true,
         registrationId: regRef.id,
         checkoutUrl: session.url,
+        gateway: 'stripe',
         status: registration.status,
         registration: { id: regRef.id, ...registration, stripeSessionId: session.id },
       })
