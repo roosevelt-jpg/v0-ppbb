@@ -35,6 +35,7 @@ export interface AssetFile {
   mimeType: string
   size: number
   storageProvider: AssetStorageProvider
+  driveFileId?: string | null
   createdAt: string
   updatedAt: string
   createdBy?: string

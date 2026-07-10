@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 import { uploadBufferToStorage } from '@/lib/storage-server'
+import { uploadToGoogleDrive } from '@/lib/google-drive-storage'
 import type { AssetStorageProvider } from '@/lib/asset-library-types'
 
 interface UploadResult {
@@ -104,7 +105,7 @@ export async function uploadEventAsset(
   mimeType: string,
   folderPath: string,
   originalName: string
-): Promise<UploadResult & { provider: AssetStorageProvider }> {
+): Promise<UploadResult & { provider: AssetStorageProvider; driveFileId?: string | null }> {
   const provider = await getActiveAssetStorageProvider()
 
   switch (provider) {
@@ -113,13 +114,11 @@ export async function uploadEventAsset(
     case 'google_cloud':
       return uploadToGoogleCloud(buffer, mimeType, folderPath, originalName)
     case 'google_drive':
-      // Drive sync is configured in Integrations; files land in Firebase until Drive API is wired.
-      console.warn('[assets] Google Drive selected — storing in Firebase bucket; link Drive folder in integration settings.')
-      break
+      return uploadToGoogleDrive(buffer, mimeType, folderPath, originalName)
     default:
       break
   }
 
   const result = await uploadBufferToStorage(buffer, mimeType, `event-assets/${folderPath}`, originalName)
-  return { ...result, provider: 'firebase' }
+  return { ...result, provider: 'firebase', driveFileId: null }
 }

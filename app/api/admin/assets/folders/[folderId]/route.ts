@@ -4,6 +4,7 @@ import {
   deleteAssetFolder,
   getAssetFolder,
   listAssetFiles,
+  resolveEventTitle,
   updateAssetFolder,
 } from '@/lib/asset-library-server'
 import { parseTagsInput } from '@/lib/asset-library-types'
@@ -35,12 +36,19 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { folderId } = await context.params
     const body = await request.json()
+    let eventTitle = body.eventTitle
+    if (body.eventId !== undefined) {
+      eventTitle =
+        body.eventTitle?.trim() ||
+        (body.eventId ? await resolveEventTitle(body.eventId) : null) ||
+        null
+    }
     const folder = await updateAssetFolder(folderId, {
       name: body.name,
       description: body.description,
       tags: body.tags !== undefined ? parseTagsInput(body.tags) : undefined,
       eventId: body.eventId,
-      eventTitle: body.eventTitle,
+      eventTitle,
       visibility: body.visibility,
       status: body.status,
       coverImageUrl: body.coverImageUrl,

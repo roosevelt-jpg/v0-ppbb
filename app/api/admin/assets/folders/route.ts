@@ -3,6 +3,7 @@ import { requireAdminFromRequest, unauthorizedResponse } from '@/lib/admin-api-a
 import {
   createAssetFolder,
   listAssetFolders,
+  resolveEventTitle,
 } from '@/lib/asset-library-server'
 import { getActiveAssetStorageProvider } from '@/lib/resolve-asset-storage'
 import { parseTagsInput } from '@/lib/asset-library-types'
@@ -33,13 +34,19 @@ export async function POST(request: NextRequest) {
     }
 
     const provider = await getActiveAssetStorageProvider()
+    const eventId = body.eventId || null
+    const eventTitle =
+      body.eventTitle?.trim() ||
+      (eventId ? await resolveEventTitle(eventId) : null) ||
+      null
+
     const folder = await createAssetFolder(
       {
         name: body.name.trim(),
         description: body.description || '',
         tags: parseTagsInput(body.tags),
-        eventId: body.eventId || null,
-        eventTitle: body.eventTitle || null,
+        eventId,
+        eventTitle,
         visibility: body.visibility || 'both',
         status: body.status || 'draft',
         coverImageUrl: null,

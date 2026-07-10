@@ -1,6 +1,7 @@
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { deleteFromStorage } from '@/lib/storage-server'
+import { deleteFromGoogleDrive } from '@/lib/google-drive-storage'
 import type {
   AssetFile,
   AssetFolder,
@@ -50,10 +51,19 @@ function mapFile(id: string, data: FirebaseFirestore.DocumentData): AssetFile {
     mimeType: data.mimeType || 'application/octet-stream',
     size: data.size || 0,
     storageProvider: data.storageProvider || 'firebase',
+    driveFileId: data.driveFileId ?? null,
     createdAt: toIso(data.createdAt),
     updatedAt: toIso(data.updatedAt),
     createdBy: data.createdBy,
   }
+}
+
+export async function resolveEventTitle(eventId: string | null | undefined): Promise<string | null> {
+  if (!eventId) return null
+  const doc = await getAdminDb().collection('events').doc(eventId).get()
+  if (!doc.exists) return null
+  const data = doc.data()!
+  return String(data.title || data.name || 'Untitled event')
 }
 
 export async function listAssetFolders(options: {
@@ -141,7 +151,11 @@ export async function deleteAssetFolder(folderId: string): Promise<boolean> {
   const filesSnap = await db.collection(FILES).where('folderId', '==', folderId).get()
   for (const fileDoc of filesSnap.docs) {
     const data = fileDoc.data()
-    if (data.storagePath) await deleteFromStorage(data.storagePath)
+    if (data.driveFileId) {
+      await deleteFromGoogleDrive(data.driveFileId)
+    } else if (data.storagePath && !String(data.storagePath).startsWith('drive://')) {
+      await deleteFromStorage(data.storagePath)
+    }
     await fileDoc.ref.delete()
   }
   await db.collection(FOLDERS).doc(folderId).delete()
@@ -204,7 +218,11 @@ export async function deleteAssetFile(fileId: string): Promise<boolean> {
   const doc = await ref.get()
   if (!doc.exists) return false
   const data = doc.data()!
-  if (data.storagePath) await deleteFromStorage(data.storagePath)
+  if (data.driveFileId) {
+    await deleteFromGoogleDrive(data.driveFileId)
+  } else if (data.storagePath && !String(data.storagePath).startsWith('drive://')) {
+    await deleteFromStorage(data.storagePath)
+  }
   await ref.delete()
   await db
     .collection(FOLDERS)
