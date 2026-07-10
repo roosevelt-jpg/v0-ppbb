@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { SiteLogo } from '@/components/site-logo'
+import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/logo-manager'
 import { useAuth } from '@/lib/auth-context'
 import { loginUser, logoutUser } from '@/lib/auth'
 import { hasAdminAccess } from '@/lib/roles'
@@ -119,19 +119,38 @@ function AdminLoginForm() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ width: '100%', maxWidth: '480px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-            <SiteLogo
-              background="light"
-              variant="custom"
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: '100%',
+              minHeight: 140,
+              marginBottom: 8,
+            }}
+          >
+            <Link
               href="/"
-              linked
-              heightClass="h-[88px] sm:h-[110px] md:h-[128px]"
-              maxWidth={420}
-              className="max-w-[min(90vw,420px)]"
-            />
+              style={{ display: 'inline-flex', width: '100%', maxWidth: 440, justifyContent: 'center' }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={DEFAULT_LOGO_ON_LIGHT_BG}
+                alt="Passive Blessings"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  height: 'auto',
+                  maxHeight: 160,
+                  objectFit: 'contain',
+                  backgroundColor: 'transparent',
+                }}
+                decoding="async"
+              />
+            </Link>
           </div>
-          <p style={{ fontSize: '15px', color: '#666' }}>
+          <p style={{ fontSize: '15px', color: '#666', margin: 0 }}>
             Sign in with your existing admin credentials
           </p>
         </div>
