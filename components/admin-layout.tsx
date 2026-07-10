@@ -234,11 +234,11 @@ export function AdminSidebar() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg transition-colors text-xs"
-                      style={{
-                        backgroundColor: isActive ? '#111111' : 'transparent',
-                        color: isActive ? '#f7f6f2' : '#333333',
-                      }}
+                      className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-medium truncate transition-all duration-200 ${
+                        isActive
+                          ? 'bg-[#111111] text-[#f7f6f2] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]'
+                          : 'text-[#333333] hover:bg-[#f0efeb] hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
+                      }`}
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
                       <span className="font-medium truncate">{item.label}</span>
@@ -302,11 +302,11 @@ export function AdminSidebar() {
                           key={item.href}
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg transition-colors text-xs"
-                          style={{
-                            backgroundColor: isActive ? '#111111' : 'transparent',
-                            color: isActive ? '#f7f6f2' : '#333333',
-                          }}
+                          className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-medium transition-all duration-200 ${
+                            isActive
+                              ? 'bg-[#111111] text-[#f7f6f2] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]'
+                              : 'text-[#333333] hover:bg-[#f0efeb] hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
+                          }`}
                         >
                           <Icon className="h-4 w-4 flex-shrink-0" />
                           <span className="font-medium">{item.label}</span>
