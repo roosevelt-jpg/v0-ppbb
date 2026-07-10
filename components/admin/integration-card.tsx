@@ -20,8 +20,20 @@ export function IntegrationCard({ service, integration, health, onRefresh }: Int
   const [testingFcm, setTestingFcm] = useState(false)
   const [fcmTestResult, setFcmTestResult] = useState('')
 
-  const statusColor = integration?.status === 'active' ? '#10b981' : integration?.status === 'error' ? '#ef4444' : '#888888'
-  const statusLabel = integration?.status === 'active' ? 'Active' : integration?.status === 'error' ? 'Error' : 'Inactive'
+  const hasCredentials =
+    !!integration?.credentials && Object.keys(integration.credentials).length > 0
+  const effectiveStatus =
+    integration?.status === 'active' || (hasCredentials && integration?.status !== 'error')
+      ? 'active'
+      : integration?.status === 'error'
+        ? 'error'
+        : integration
+          ? integration.status || 'inactive'
+          : undefined
+  const statusColor =
+    effectiveStatus === 'active' ? '#10b981' : effectiveStatus === 'error' ? '#ef4444' : '#888888'
+  const statusLabel =
+    effectiveStatus === 'active' ? 'Active' : effectiveStatus === 'error' ? 'Error' : 'Inactive'
 
   const handleFcmTest = async () => {
     if (!auth.firebaseUser) return

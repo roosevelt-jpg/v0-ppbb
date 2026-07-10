@@ -277,19 +277,6 @@ async function migrateToCanonicalOwner(
   )
 }
 
-function serializeIntegration(integration: Integration): Integration {
-  return {
-    ...integration,
-    createdAt: toMillis(integration.createdAt)
-      ? new Date(toMillis(integration.createdAt))
-      : integration.createdAt,
-    updatedAt: toMillis(integration.updatedAt)
-      ? new Date(toMillis(integration.updatedAt))
-      : integration.updatedAt,
-    credentials: normalizeCredentialRecord(integration.credentials),
-  }
-}
-
 function normalizeCredentialRecord(
   credentials: Record<string, string> | null | undefined
 ): Record<string, string> {
@@ -304,18 +291,90 @@ function normalizeCredentialRecord(
   return out
 }
 
-function mapIntegrationDoc(docSnap: QueryDocumentSnapshot): Integration | null {
+function toClientIntegration(input: {
+  id: string
+  serviceId: string
+  userId?: string
+  serviceName?: string
+  status?: string
+  credentials?: Record<string, string>
+  createdAt?: unknown
+  updatedAt?: unknown
+}): Record<string, unknown> {
+  const creds = normalizeCredentialRecord(input.credentials)
+  const hasCredentials = Object.keys(creds).length > 0
+  let status = input.status || 'inactive'
+  // Treat configured rows as active in the UI even if status was never set.
+  if (hasCredentials && (status === 'inactive' || status === 'pending' || !status)) {
+    status = 'active'
+  }
+  const createdMs = toMillis(input.createdAt)
+  const updatedMs = toMillis(input.updatedAt)
+  return {
+    id: input.id,
+    userId: input.userId || INTEGRATION_OWNER_USER_ID,
+    serviceId: input.serviceId,
+    serviceName: input.serviceName || input.serviceId,
+    status,
+    credentials: creds,
+    createdAt: createdMs ? new Date(createdMs).toISOString() : null,
+    updatedAt: updatedMs ? new Date(updatedMs).toISOString() : null,
+  }
+}
+
+function mapIntegrationDoc(docSnap: QueryDocumentSnapshot): Record<string, unknown> | null {
   try {
-    const data = docSnap.data() as Integration | undefined
-    if (!data?.serviceId) return null
-    const credentials = decryptCredentials(
-      normalizeCredentialRecord(data.credentials),
-      data.serviceId
-    )
-    return serializeIntegration({
-      ...data,
+    const data = docSnap.data() || {}
+    const serviceId = typeof data.serviceId === 'string' ? data.serviceId : ''
+    if (!serviceId) {
+      // Recover serviceId from canonical doc id: `{owner}_{serviceId}`
+      const id = docSnap.id
+      const prefix = `${INTEGRATION_OWNER_USER_ID}_`
+      if (id.startsWith(prefix)) {
+        const recovered = id.slice(prefix.length)
+        if (!recovered) return null
+        let credentials: Record<string, string> = {}
+        try {
+          credentials = decryptCredentials(
+            normalizeCredentialRecord(data.credentials as Record<string, string>),
+            recovered
+          )
+        } catch {
+          credentials = normalizeCredentialRecord(data.credentials as Record<string, string>)
+        }
+        return toClientIntegration({
+          id: docSnap.id,
+          serviceId: recovered,
+          userId: typeof data.userId === 'string' ? data.userId : INTEGRATION_OWNER_USER_ID,
+          serviceName: typeof data.serviceName === 'string' ? data.serviceName : recovered,
+          status: typeof data.status === 'string' ? data.status : 'active',
+          credentials,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        })
+      }
+      return null
+    }
+
+    let credentials: Record<string, string> = {}
+    try {
+      credentials = decryptCredentials(
+        normalizeCredentialRecord(data.credentials as Record<string, string>),
+        serviceId
+      )
+    } catch {
+      credentials = normalizeCredentialRecord(data.credentials as Record<string, string>)
+    }
+
+    return toClientIntegration({
       id: docSnap.id,
+      serviceId,
+      userId: typeof data.userId === 'string' ? data.userId : INTEGRATION_OWNER_USER_ID,
+      serviceName: typeof data.serviceName === 'string' ? data.serviceName : serviceId,
+      status: typeof data.status === 'string' ? data.status : 'inactive',
       credentials,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     })
   } catch (error) {
     console.error('[v0] Failed to map integration doc', docSnap.id, error)
@@ -327,81 +386,47 @@ export async function getAllIntegrationsServer(
   userId: string = INTEGRATION_OWNER_USER_ID
 ): Promise<Integration[]> {
   const db = getAdminDb()
+  let docs: QueryDocumentSnapshot[] = []
 
-  // Prefer canonical owner docs first (fast path). Fall back to full scan.
-  let integrations: Integration[] = []
   try {
     const ownerSnap = await db
       .collection(INTEGRATIONS_COLLECTION)
       .where('userId', '==', userId)
       .get()
-    integrations = ownerSnap.docs
-      .map((docSnap) => mapIntegrationDoc(docSnap))
-      .filter((row): row is Integration => Boolean(row))
+    docs = ownerSnap.docs
   } catch (error) {
     console.warn('[v0] Owner integrations query failed, falling back to full scan:', error)
   }
 
-  if (integrations.length === 0) {
+  if (docs.length === 0) {
     const snap = await db.collection(INTEGRATIONS_COLLECTION).get()
-    const allIntegrations = snap.docs
-      .map((docSnap) => mapIntegrationDoc(docSnap))
-      .filter((row): row is Integration => Boolean(row))
-    integrations = mergeIntegrationsByService(allIntegrations)
-
-    // Best-effort migrate to canonical owner — never fail the read path.
-    await Promise.all(
-      integrations.map(async (integration) => {
-        try {
-          await migrateToCanonicalOwner(db, integration, userId)
-        } catch (error) {
-          console.warn('[v0] Integration migrate skipped:', integration.serviceId, error)
-        }
-      })
-    )
+    docs = snap.docs
   }
 
-  // Best-effort status self-heal — never fail the read path.
-  await Promise.all(
-    integrations.map(async (integration) => {
-      try {
-        const hasCredentials =
-          !!integration.credentials && Object.keys(integration.credentials).length > 0
-        if (integration.status === 'active' || !hasCredentials) return
+  const mapped = docs
+    .map((docSnap) => mapIntegrationDoc(docSnap))
+    .filter((row): row is Record<string, unknown> => Boolean(row))
 
-        let newStatus: Integration['status']
-        if (
-          integration.serviceId === 'firebase' &&
-          integration.credentials?.privateKey &&
-          integration.credentials?.clientEmail &&
-          integration.credentials?.projectId
-        ) {
-          const verified = await verifyFirebaseCredentials({
-            projectId: integration.credentials.projectId,
-            clientEmail: integration.credentials.clientEmail,
-            privateKey: integration.credentials.privateKey,
-          })
-          newStatus = verified ? 'active' : 'error'
-        } else if (integration.status === 'pending' || integration.status === 'inactive') {
-          newStatus = 'active'
-        } else {
-          return
-        }
+  // Prefer canonical owner rows when duplicates exist.
+  const byService = new Map<string, Record<string, unknown>>()
+  for (const row of mapped) {
+    const serviceId = String(row.serviceId || '')
+    if (!serviceId) continue
+    const existing = byService.get(serviceId)
+    if (!existing) {
+      byService.set(serviceId, row)
+      continue
+    }
+    const rankNew = integrationStatusRank(row.status as Integration['status'])
+    const rankOld = integrationStatusRank(existing.status as Integration['status'])
+    const updatedNew = toMillis(row.updatedAt)
+    const updatedOld = toMillis(existing.updatedAt)
+    if (rankNew > rankOld || (rankNew === rankOld && updatedNew > updatedOld)) {
+      byService.set(serviceId, row)
+    }
+  }
 
-        if (newStatus !== integration.status) {
-          integration.status = newStatus
-          await db
-            .collection(INTEGRATIONS_COLLECTION)
-            .doc(integration.id)
-            .set({ status: newStatus, updatedAt: new Date() }, { merge: true })
-        }
-      } catch (error) {
-        console.warn('[v0] Integration self-heal skipped:', integration.serviceId, error)
-      }
-    })
-  )
-
-  return integrations
+  return Array.from(byService.values()) as unknown as Integration[]
 }
 
 export async function deleteIntegrationServer(userId: string, serviceId: string): Promise<void> {

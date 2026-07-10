@@ -9,6 +9,23 @@ export const dynamic = 'force-dynamic'
 
 const MOCK_USER_ID = INTEGRATION_OWNER_USER_ID
 
+function safeJson<T>(value: T): T {
+  return JSON.parse(
+    JSON.stringify(value, (_key, v) => {
+      if (v === undefined) return null
+      if (typeof v === 'bigint') return v.toString()
+      if (v && typeof v === 'object' && typeof (v as { toDate?: () => Date }).toDate === 'function') {
+        try {
+          return (v as { toDate: () => Date }).toDate().toISOString()
+        } catch {
+          return null
+        }
+      }
+      return v
+    })
+  ) as T
+}
+
 export async function GET(request: NextRequest) {
   try {
     console.log('[v0] GET /api/admin/integrations')
@@ -16,10 +33,11 @@ export async function GET(request: NextRequest) {
     if (authResult instanceof NextResponse) return authResult
 
     const integrations = await getAllIntegrationsServer(MOCK_USER_ID)
+    const data = safeJson(integrations)
     return NextResponse.json({
-      data: integrations,
+      data,
       message: 'Integrations retrieved successfully',
-      count: integrations.length,
+      count: Array.isArray(data) ? data.length : 0,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -68,13 +86,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Integration saved successfully',
-      integration: {
+      integration: safeJson({
         id: integration.id,
         serviceId: integration.serviceId,
         status: integration.status,
         createdAt: integration.createdAt,
         updatedAt: integration.updatedAt,
-      },
+      }),
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
