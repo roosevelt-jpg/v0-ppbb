@@ -8,14 +8,14 @@ import { DEFAULT_GLOBAL_SETTINGS } from '@/lib/global-settings'
 
 export type SiteLogoBackground = 'light' | 'dark'
 
-/** Canonical brand logo box — 190×84 at md+; scaled on mobile (375px) */
-export const LOGO_BOX_WIDTH_PX = 190
-export const LOGO_BOX_HEIGHT_PX = 84
-/** Mobile: ~68% scale so logo fits beside hamburger + controls at 375px */
-export const LOGO_BOX_MOBILE_WIDTH_PX = 130
+/** Canonical brand logo box — matches upload export 268×95 */
+export const LOGO_BOX_WIDTH_PX = 268
+export const LOGO_BOX_HEIGHT_PX = 95
+/** Mobile: ~56% scale so logo fits beside hamburger + controls at 375px */
+export const LOGO_BOX_MOBILE_WIDTH_PX = 150
 export const LOGO_BOX_MOBILE_HEIGHT_PX = Math.round(
   (LOGO_BOX_MOBILE_WIDTH_PX * LOGO_BOX_HEIGHT_PX) / LOGO_BOX_WIDTH_PX
-) // 58px — preserves 190:84 aspect ratio
+) // ~53px — preserves 268:95 aspect ratio
 
 export type SiteLogoVariant = 'primary' | 'navbar' | 'sidebar' | 'footer' | 'custom'
 
@@ -64,7 +64,7 @@ export function SiteLogo({
 
   const box = isPrimary ? (
     <span
-      className={`inline-flex shrink-0 items-center justify-center overflow-hidden w-[130px] h-[58px] md:w-[190px] md:h-[84px] ${className}`.trim()}
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden w-[150px] h-[53px] md:w-[268px] md:h-[95px] ${className}`.trim()}
       aria-hidden
     >
       <img

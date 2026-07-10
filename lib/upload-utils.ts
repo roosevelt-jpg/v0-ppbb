@@ -8,6 +8,12 @@ const UPLOAD_MAX_BYTES = 5 * 1024 * 1024
 
 const RASTER_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const LOGO_TYPES = [...RASTER_TYPES, 'image/svg+xml']
+const FAVICON_TYPES = [
+  ...RASTER_TYPES,
+  'image/x-icon',
+  'image/vnd.microsoft.icon',
+  'image/svg+xml',
+]
 
 export interface UploadImageOptions extends CompressImageOptions {
   preset?: CmsImagePreset
@@ -28,7 +34,8 @@ export async function uploadImageToFirebase(
   }
 
   const preset = options.preset ?? 'content'
-  const allowSvg = options.allowSvg ?? preset === 'logo'
+  const allowSvg =
+    options.allowSvg ?? (preset === 'logo' || preset === 'brandLogo' || preset === 'favicon')
 
   const typeCheck = validateImageFile(file, { allowSvg, preset })
   if (!typeCheck.valid) {
@@ -41,6 +48,8 @@ export async function uploadImageToFirebase(
     maxDimension: options.maxDimension,
     maxBytes: options.maxBytes,
     aspectRatio: options.aspectRatio,
+    exactWidth: options.exactWidth,
+    exactHeight: options.exactHeight,
   })
 
   if (prepared.size > UPLOAD_MAX_BYTES) {
@@ -94,15 +103,25 @@ export function validateImageFile(
     return { valid: false, error: 'No file selected' }
   }
 
-  const allowSvg = options.allowSvg ?? options.preset === 'logo'
-  const validTypes = allowSvg ? LOGO_TYPES : RASTER_TYPES
+  const allowSvg =
+    options.allowSvg ??
+    (options.preset === 'logo' || options.preset === 'brandLogo')
+  const validTypes =
+    options.preset === 'favicon'
+      ? FAVICON_TYPES
+      : allowSvg
+        ? LOGO_TYPES
+        : RASTER_TYPES
 
-  if (!validTypes.includes(file.type)) {
+  if (!validTypes.includes(file.type) && !(options.preset === 'favicon' && file.name.toLowerCase().endsWith('.ico'))) {
     return {
       valid: false,
-      error: allowSvg
-        ? 'File must be an image (JPEG, PNG, WebP, GIF, or SVG)'
-        : 'File must be an image (JPEG, PNG, WebP, or GIF)',
+      error:
+        options.preset === 'favicon'
+          ? 'File must be an image (PNG, JPEG, WebP, GIF, ICO, or SVG)'
+          : allowSvg
+            ? 'File must be an image (JPEG, PNG, WebP, GIF, or SVG)'
+            : 'File must be an image (JPEG, PNG, WebP, or GIF)',
     }
   }
 

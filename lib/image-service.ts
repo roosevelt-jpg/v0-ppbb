@@ -129,8 +129,22 @@ export const CMS_IMAGE_PRESETS = {
   hero: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 4 / 3 },
   /** About Story founder headshot — portrait 3:4 center-crop */
   founder: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 3 / 4 },
-  /** Partner / logo thumbnails */
+  /** Partner / logo thumbnails (flexible max) */
   logo: { maxDimension: 500, maxBytes: 2 * 1024 * 1024 },
+  /** Site brand logos — always exported at 268×95 transparent PNG */
+  brandLogo: {
+    maxDimension: 268,
+    maxBytes: 2 * 1024 * 1024,
+    exactWidth: 268,
+    exactHeight: 95,
+  },
+  /** Browser favicon — square transparent PNG */
+  favicon: {
+    maxDimension: 64,
+    maxBytes: 512 * 1024,
+    exactWidth: 64,
+    exactHeight: 64,
+  },
 } as const
 
 export type CmsImagePreset = keyof typeof CMS_IMAGE_PRESETS
@@ -142,8 +156,11 @@ export interface CompressImageOptions {
   preset?: CmsImagePreset
   /** Target width ÷ height; when set, image is center-cropped (cover) before resize */
   aspectRatio?: number
-  /** Auto-trim fully transparent edges (logo preset enables this by default) */
+  /** Auto-trim fully transparent edges (logo presets enable this by default) */
   trimTransparent?: boolean
+  /** Force exact output canvas size (contain + transparent pad) */
+  exactWidth?: number
+  exactHeight?: number
 }
 
 function resolveCompressOptions(
@@ -152,31 +169,54 @@ function resolveCompressOptions(
   allowSvg: boolean
   aspectRatio?: number
   trimTransparent: boolean
+  exactWidth?: number
+  exactHeight?: number
 } {
   if (typeof presetOrOptions === 'string') {
     const defaults = CMS_IMAGE_PRESETS[presetOrOptions]
+    const isLogoFamily =
+      presetOrOptions === 'logo' ||
+      presetOrOptions === 'brandLogo' ||
+      presetOrOptions === 'favicon'
     return {
       maxDimension: defaults.maxDimension,
       maxBytes: defaults.maxBytes,
-      allowSvg: presetOrOptions === 'logo',
+      allowSvg:
+        presetOrOptions === 'logo' ||
+        presetOrOptions === 'brandLogo' ||
+        presetOrOptions === 'favicon',
       aspectRatio: 'aspectRatio' in defaults ? defaults.aspectRatio : undefined,
-      trimTransparent: presetOrOptions === 'logo',
+      trimTransparent: isLogoFamily,
+      exactWidth: 'exactWidth' in defaults ? defaults.exactWidth : undefined,
+      exactHeight: 'exactHeight' in defaults ? defaults.exactHeight : undefined,
     }
   }
 
   const presetDefaults = presetOrOptions.preset
     ? CMS_IMAGE_PRESETS[presetOrOptions.preset]
     : CMS_IMAGE_PRESETS.content
+  const presetName = presetOrOptions.preset
+  const isLogoFamily =
+    presetName === 'logo' || presetName === 'brandLogo' || presetName === 'favicon'
 
   return {
     maxDimension: presetOrOptions.maxDimension ?? presetDefaults.maxDimension,
     maxBytes: presetOrOptions.maxBytes ?? presetDefaults.maxBytes,
-    allowSvg: presetOrOptions.allowSvg ?? presetOrOptions.preset === 'logo',
+    allowSvg:
+      presetOrOptions.allowSvg ??
+      (presetName === 'logo' ||
+        presetName === 'brandLogo' ||
+        presetName === 'favicon'),
     aspectRatio:
       presetOrOptions.aspectRatio ??
       ('aspectRatio' in presetDefaults ? presetDefaults.aspectRatio : undefined),
-    trimTransparent:
-      presetOrOptions.trimTransparent ?? presetOrOptions.preset === 'logo',
+    trimTransparent: presetOrOptions.trimTransparent ?? isLogoFamily,
+    exactWidth:
+      presetOrOptions.exactWidth ??
+      ('exactWidth' in presetDefaults ? presetDefaults.exactWidth : undefined),
+    exactHeight:
+      presetOrOptions.exactHeight ??
+      ('exactHeight' in presetDefaults ? presetDefaults.exactHeight : undefined),
   }
 }
 
@@ -537,8 +577,39 @@ async function prepareSvgLogoFile(file: File, maxBytes: number): Promise<File> {
   })
 }
 
-/** Logo pipeline: knock out solid bg, trim padding, preserve alpha, export PNG. */
-async function compressLogoToFile(file: File, maxDimension: number, maxBytes: number): Promise<File> {
+/** Fit source into exact WxH canvas with transparent padding (object-contain). */
+function fitCanvasToExactSize(
+  source: HTMLCanvasElement,
+  exactWidth: number,
+  exactHeight: number
+): HTMLCanvasElement {
+  const out = document.createElement('canvas')
+  out.width = exactWidth
+  out.height = exactHeight
+  const ctx = out.getContext('2d')
+  if (!ctx) return source
+  ctx.clearRect(0, 0, exactWidth, exactHeight)
+
+  const scale = Math.min(exactWidth / source.width, exactHeight / source.height)
+  const drawW = Math.max(1, Math.round(source.width * scale))
+  const drawH = Math.max(1, Math.round(source.height * scale))
+  const dx = Math.round((exactWidth - drawW) / 2)
+  const dy = Math.round((exactHeight - drawH) / 2)
+
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(source, dx, dy, drawW, drawH)
+  return out
+}
+
+/** Logo pipeline: knock out solid bg, trim, optionally force exact size, export PNG. */
+async function compressLogoToFile(
+  file: File,
+  maxDimension: number,
+  maxBytes: number,
+  exactWidth?: number,
+  exactHeight?: number
+): Promise<File> {
   const objectUrl = URL.createObjectURL(file)
   try {
     const img = await loadImageElement(objectUrl)
@@ -557,18 +628,30 @@ async function compressLogoToFile(file: File, maxDimension: number, maxBytes: nu
 
     let trimmed = trimCanvasToOpaqueContent(stage, 1)
 
-    let targetWidth = trimmed.width
-    let targetHeight = trimmed.height
-    if (targetWidth > maxDimension || targetHeight > maxDimension) {
-      const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
-      targetWidth = Math.max(1, Math.round(targetWidth * scale))
-      targetHeight = Math.max(1, Math.round(targetHeight * scale))
-      trimmed = scaleCanvas(trimmed, targetWidth, targetHeight)
+    if (exactWidth && exactHeight && exactWidth > 0 && exactHeight > 0) {
+      trimmed = fitCanvasToExactSize(trimmed, exactWidth, exactHeight)
+    } else {
+      let targetWidth = trimmed.width
+      let targetHeight = trimmed.height
+      if (targetWidth > maxDimension || targetHeight > maxDimension) {
+        const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
+        targetWidth = Math.max(1, Math.round(targetWidth * scale))
+        targetHeight = Math.max(1, Math.round(targetHeight * scale))
+        trimmed = scaleCanvas(trimmed, targetWidth, targetHeight)
+      }
     }
 
+    let targetWidth = trimmed.width
+    let targetHeight = trimmed.height
     let blob = await canvasToBlob(trimmed, 'image/png')
 
-    while (blob.size > maxBytes && (targetWidth > 120 || targetHeight > 120)) {
+    // Exact-size logos should not be downscaled further (would break 268×95).
+    const lockedSize = Boolean(exactWidth && exactHeight)
+    while (
+      !lockedSize &&
+      blob.size > maxBytes &&
+      (targetWidth > 120 || targetHeight > 120)
+    ) {
       targetWidth = Math.max(1, Math.round(targetWidth * 0.85))
       targetHeight = Math.max(1, Math.round(targetHeight * 0.85))
       trimmed = scaleCanvas(trimmed, targetWidth, targetHeight)
@@ -602,15 +685,19 @@ export async function compressImageToFile(
     throw new Error('compressImageToFile must run in the browser')
   }
 
-  const { maxDimension, maxBytes, allowSvg, aspectRatio, trimTransparent } =
+  const { maxDimension, maxBytes, allowSvg, aspectRatio, trimTransparent, exactWidth, exactHeight } =
     resolveCompressOptions(presetOrOptions)
 
   if (file.type === 'image/svg+xml') {
     if (!allowSvg) {
       throw new Error('SVG is not supported for this upload. Use PNG, WebP, or JPEG.')
     }
-    // Logo SVGs: strip solid white backdrop rects so they work on black headers.
-    if (trimTransparent || presetOrOptions === 'logo' || (typeof presetOrOptions !== 'string' && presetOrOptions.preset === 'logo')) {
+    // Brand logos / favicons with exact size: rasterize via canvas pipeline.
+    if (exactWidth && exactHeight) {
+      return compressLogoToFile(file, maxDimension, maxBytes, exactWidth, exactHeight)
+    }
+    // Flexible logo SVGs: strip solid white backdrop rects.
+    if (trimTransparent) {
       return prepareSvgLogoFile(file, maxBytes)
     }
     if (file.size > maxBytes) {
@@ -621,13 +708,13 @@ export async function compressImageToFile(
     return file
   }
 
-  if (!RASTER_IMAGE_TYPES.has(file.type)) {
-    throw new Error('File must be an image (JPEG, PNG, WebP, GIF, or SVG for logos).')
+  if (!RASTER_IMAGE_TYPES.has(file.type) && file.type !== 'image/x-icon' && file.type !== 'image/vnd.microsoft.icon') {
+    throw new Error('File must be an image (JPEG, PNG, WebP, GIF, ICO, or SVG for logos).')
   }
 
-  // Logos always run through trim pipeline (never skip early return).
+  // Logos / favicons always run through trim + optional exact-size pipeline.
   if (trimTransparent && !aspectRatio) {
-    return compressLogoToFile(file, maxDimension, maxBytes)
+    return compressLogoToFile(file, maxDimension, maxBytes, exactWidth, exactHeight)
   }
 
   const objectUrl = URL.createObjectURL(file)

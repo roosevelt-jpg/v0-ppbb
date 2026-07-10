@@ -34,7 +34,7 @@ export default function AdminCmsGlobalSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [savingReferrals, setSavingReferrals] = useState(false)
   const [migrating, setMigrating] = useState(false)
-  const [uploading, setUploading] = useState<'light' | 'dark' | null>(null)
+  const [uploading, setUploading] = useState<'light' | 'dark' | 'favicon' | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(
     null
   )
@@ -61,17 +61,39 @@ export default function AdminCmsGlobalSettingsPage() {
       const url = await uploadImageToFirebase(
         file,
         variant === 'light' ? 'branding/logo-light' : 'branding/logo-dark',
-        { preset: 'logo' }
+        { preset: 'brandLogo' }
       )
       handleChange(variant === 'light' ? 'logoUrlLight' : 'logoUrlDark', url)
       setMessage({
         type: 'success',
-        text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded (solid background removed). Remember to Save.`,
+        text: `${variant === 'light' ? 'Light' : 'Dark'} logo uploaded at 268×95 (background removed). Remember to Save.`,
       })
     } catch (error: unknown) {
       setMessage({
         type: 'error',
         text: error instanceof Error ? error.message : 'Logo upload failed',
+      })
+    } finally {
+      setUploading(null)
+    }
+  }
+
+  const handleFaviconUpload = async (file: File) => {
+    setUploading('favicon')
+    setMessage(null)
+    try {
+      const url = await uploadImageToFirebase(file, 'branding/favicon', {
+        preset: 'favicon',
+      })
+      handleChange('faviconUrl', url)
+      setMessage({
+        type: 'success',
+        text: 'Favicon uploaded (64×64). Remember to Save.',
+      })
+    } catch (error: unknown) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Favicon upload failed',
       })
     } finally {
       setUploading(null)
@@ -279,8 +301,9 @@ export default function AdminCmsGlobalSettingsPage() {
                     <p className="text-xs text-neutral-400 mb-3 text-center">No logo yet</p>
                   )}
                   <p className="text-xs text-neutral-500 mb-2">
-                    Any format (PNG, JPG, WebP, SVG). White/solid backgrounds are removed
-                    automatically so the logo stays transparent on black headers and footers.
+                    Any format (PNG, JPG, WebP, SVG). Auto-resized to{' '}
+                    <strong>268×95</strong> with solid backgrounds removed for
+                    transparent display on black headers/footers.
                   </p>
                   <label className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
                     <Upload className="w-4 h-4" />
@@ -299,6 +322,43 @@ export default function AdminCmsGlobalSettingsPage() {
                 </div>
               )
             })}
+          </div>
+
+          <div className="mt-4 border border-dashed border-neutral-300 rounded-lg p-4 max-w-md">
+            <label className="block text-sm font-medium mb-2">Favicon</label>
+            {settings.faviconUrl ? (
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded bg-neutral-100 border border-neutral-200">
+                <img
+                  src={settings.faviconUrl}
+                  alt="Favicon"
+                  className="h-10 w-10 object-contain bg-transparent"
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-400 mb-3">No favicon yet</p>
+            )}
+            <p className="text-xs text-neutral-500 mb-2">
+              Browser tab icon. Auto-resized to <strong>64×64</strong> PNG (PNG, JPG,
+              WebP, GIF, ICO, or SVG).
+            </p>
+            <label className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
+              <Upload className="w-4 h-4" />
+              {uploading === 'favicon'
+                ? 'Uploading…'
+                : settings.faviconUrl
+                  ? 'Change favicon'
+                  : 'Upload favicon'}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/x-icon,.ico"
+                className="hidden"
+                disabled={!!uploading}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) void handleFaviconUpload(f)
+                }}
+              />
+            </label>
           </div>
         </Card>
 
