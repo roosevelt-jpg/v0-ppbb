@@ -550,11 +550,27 @@ function scaleCanvas(source: HTMLCanvasElement, targetWidth: number, targetHeigh
  * Strip common solid-fill backdrop rects from SVG logos so they stay
  * transparent on black headers/footers.
  */
+const SVG_WHITE_FILL =
+  String.raw`(?:#fff(?:fff)?|#ffffff|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))`
+
 function stripSvgSolidBackground(svgText: string): string {
+  const whiteRectSelfClosing = new RegExp(
+    String.raw`<rect\b[^>]*?(?:fill\s*=\s*["']${SVG_WHITE_FILL}["'][^>]*?)\/>`,
+    'gi'
+  )
+  const whiteRectPaired = new RegExp(
+    String.raw`<rect\b[^>]*?(?:fill\s*=\s*["']${SVG_WHITE_FILL}["'][^>]*?>\s*<\/rect>)`,
+    'gi'
+  )
+  const whiteFillAttr = new RegExp(
+    String.raw`\sfill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white)["']`,
+    'gi'
+  )
+
   return svgText
-    .replace(/<rect\b[^>]*?(?:fill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))["'][^>]*?)\/>/gi, '')
-    .replace(/<rect\b[^>]*?(?:fill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))["'][^>]*?>\s*<\/rect>/gi, '')
-    .replace(/\sfill\s*=\s*["'](?:#fff(?:fff)?|#ffffff|white)["']/gi, (match, offset, full) => {
+    .replace(whiteRectSelfClosing, '')
+    .replace(whiteRectPaired, '')
+    .replace(whiteFillAttr, (match, offset, full) => {
       // Only strip fill on root <svg> if present — keep fills on paths.
       const before = full.slice(Math.max(0, offset - 80), offset)
       if (/<svg\b[^>]*$/.test(before)) return ' fill="none"'
