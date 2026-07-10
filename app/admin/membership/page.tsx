@@ -289,32 +289,6 @@ export default function MembershipPage() {
             </div>
           </Card>
         )}
-
-        {plans.map((plan) => {
-          const count = countMembersForPlan(members, plan)
-          const accent = plan.color || '#111111'
-          return (
-            <Card
-              key={plan.id}
-              className="p-4 sm:p-6 border-2"
-              style={{ borderColor: accent, backgroundColor: `${accent}12` }}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-medium truncate" style={{ color: accent }}>
-                    {plan.name}
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-headline font-bold mt-2" style={{ color: accent }}>
-                    {count}
-                  </p>
-                </div>
-                <span className="text-2xl sm:text-3xl shrink-0" aria-hidden>
-                  {plan.icon || '🎯'}
-                </span>
-              </div>
-            </Card>
-          )
-        })}
       </div>
 
       {/* Plan detail cards — driven by pricingPlans in Firestore */}
