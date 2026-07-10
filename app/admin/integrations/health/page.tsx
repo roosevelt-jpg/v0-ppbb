@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { getAllServices } from '@/lib/integrations/services'
+import { IntegrationsVaultGate } from '@/components/admin/integrations-vault-gate'
+import { integrationsVaultHeaders } from '@/lib/integrations/vault-client'
 import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
 
-export default function IntegrationHealthPage() {
+function IntegrationHealthPageContent() {
   const auth = useAuth()
   const [health, setHealth] = useState<any[]>([])
   const [summary, setSummary] = useState<any>(null)
@@ -24,7 +26,7 @@ export default function IntegrationHealthPage() {
     try {
       const token = await auth.firebaseUser.getIdToken()
       const response = await fetch('/api/admin/integrations/health', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: integrationsVaultHeaders(token),
       })
 
       if (response.ok) {
@@ -260,5 +262,13 @@ export default function IntegrationHealthPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function IntegrationHealthPage() {
+  return (
+    <IntegrationsVaultGate>
+      <IntegrationHealthPageContent />
+    </IntegrationsVaultGate>
   )
 }

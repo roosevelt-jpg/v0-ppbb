@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { IntegrationService, Integration } from '@/lib/integrations/types'
+import { integrationsVaultHeaders } from '@/lib/integrations/vault-client'
 import { X, Loader2 } from 'lucide-react'
 
 interface IntegrationModalProps {
@@ -44,7 +45,10 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
 
       const response = await fetch(endpoint, {
         method,
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {
+          ...integrationsVaultHeaders(token),
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ serviceId: service.id, credentials, serviceName: service.name }),
       })
 

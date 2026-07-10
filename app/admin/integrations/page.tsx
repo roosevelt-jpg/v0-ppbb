@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { getAllServices, CATEGORIES } from '@/lib/integrations/services'
 import { IntegrationCard } from '@/components/admin/integration-card'
+import { IntegrationsVaultGate } from '@/components/admin/integrations-vault-gate'
+import { integrationsVaultHeaders } from '@/lib/integrations/vault-client'
 import { Search, X } from 'lucide-react'
 
-export default function IntegrationsPage() {
+function IntegrationsPageContent() {
   const auth = useAuth()
   const [integrations, setIntegrations] = useState<any[]>([])
   const [health, setHealth] = useState<any[]>([])
@@ -34,13 +36,13 @@ export default function IntegrationsPage() {
       
       const [integrationsRes, healthRes] = await Promise.all([
         fetch('/api/admin/integrations', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: integrationsVaultHeaders(token),
         }).catch(e => {
           console.error('[v0] Integrations fetch error:', e)
           return null
         }),
         fetch('/api/admin/integrations/health', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: integrationsVaultHeaders(token),
         }).catch(e => {
           console.error('[v0] Health fetch error:', e)
           return null
@@ -58,7 +60,9 @@ export default function IntegrationsPage() {
           console.error('[v0] Integrations request failed:', integrationsRes.status, errText)
           setIntegrations([])
           setLoadError(
-            integrationsRes.status === 403
+            integrationsRes.status === 423
+              ? 'Integrations vault is locked. Unlock with the passcode to continue.'
+              : integrationsRes.status === 403
               ? 'Access denied loading integrations. Ensure your admin account has manage_integrations permission.'
               : `Could not load integrations (${integrationsRes.status}). Saved credentials may still exist — try refreshing after deploy.`
           )
@@ -308,5 +312,13 @@ export default function IntegrationsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function IntegrationsPage() {
+  return (
+    <IntegrationsVaultGate>
+      <IntegrationsPageContent />
+    </IntegrationsVaultGate>
   )
 }

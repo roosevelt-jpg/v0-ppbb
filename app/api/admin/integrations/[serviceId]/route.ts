@@ -6,44 +6,17 @@ import {
   updateIntegrationStatusServer,
 } from '@/lib/integrations/handlers-server'
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
-import {
-  verifyIdToken,
-  isAdminUser,
-  hasInvitePermissionServer,
-} from '@/lib/admin-access-server'
+import { requireIntegrationsAccess } from '@/lib/integrations/require-vault-access'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 
 const MOCK_USER_ID = INTEGRATION_OWNER_USER_ID
 
-async function requireManageIntegrations(
-  request: NextRequest
-): Promise<{ uid: string } | NextResponse> {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const uid = await verifyIdToken(token)
-  if (!uid) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const isAdmin = await isAdminUser(uid)
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
-  const allowed = await hasInvitePermissionServer(uid, 'manage_integrations')
-  if (!allowed) {
-    return NextResponse.json(
-      { error: 'Forbidden: manage_integrations permission required' },
-      { status: 403 }
-    )
-  }
-  return { uid }
-}
-
-export async function GET(request: NextRequest, { params }: { params: Promise<{ serviceId: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ serviceId: string }> }
+) {
   try {
-    const authResult = await requireManageIntegrations(request)
+    const authResult = await requireIntegrationsAccess(request)
     if (authResult instanceof NextResponse) return authResult
 
     const { serviceId } = await params
@@ -61,9 +34,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ serviceId: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ serviceId: string }> }
+) {
   try {
-    const authResult = await requireManageIntegrations(request)
+    const authResult = await requireIntegrationsAccess(request)
     if (authResult instanceof NextResponse) return authResult
 
     const { serviceId } = await params
@@ -119,9 +95,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ serviceId: string }> }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ serviceId: string }> }
+) {
   try {
-    const authResult = await requireManageIntegrations(request)
+    const authResult = await requireIntegrationsAccess(request)
     if (authResult instanceof NextResponse) return authResult
 
     const { serviceId } = await params

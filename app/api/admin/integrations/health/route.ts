@@ -1,44 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllIntegrationHealthServer } from '@/lib/integrations/handlers-server'
 import { getAllServices } from '@/lib/integrations/services'
-import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
-import {
-  verifyIdToken,
-  isAdminUser,
-  hasInvitePermissionServer,
-} from '@/lib/admin-access-server'
-
-const MOCK_USER_ID = INTEGRATION_OWNER_USER_ID
-
-async function requireManageIntegrations(
-  request: NextRequest
-): Promise<{ uid: string } | NextResponse> {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const uid = await verifyIdToken(token)
-  if (!uid) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  const isAdmin = await isAdminUser(uid)
-  if (!isAdmin) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
-  const allowed = await hasInvitePermissionServer(uid, 'manage_integrations')
-  if (!allowed) {
-    return NextResponse.json(
-      { error: 'Forbidden: manage_integrations permission required' },
-      { status: 403 }
-    )
-  }
-  return { uid }
-}
+import { requireIntegrationsAccess } from '@/lib/integrations/require-vault-access'
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = await requireManageIntegrations(request)
+    const authResult = await requireIntegrationsAccess(request)
     if (authResult instanceof NextResponse) return authResult
 
     const allServices = getAllServices()
@@ -46,7 +13,6 @@ export async function GET(request: NextRequest) {
     try {
       const healthData = await getAllIntegrationHealthServer()
 
-      // Ensure all services have health records
       const completeHealth = allServices.map((service) => {
         const health = healthData.find((h) => h.serviceId === service.id)
         return (
@@ -63,14 +29,13 @@ export async function GET(request: NextRequest) {
         )
       })
 
-      // Calculate summary stats
       const operational = completeHealth.filter((h) => h.status === 'operational').length
       const degraded = completeHealth.filter((h) => h.status === 'degraded').length
       const down = completeHealth.filter((h) => h.status === 'down').length
       const notConfigured = completeHealth.filter((h) => h.status === 'not_configured').length
       const avgLatency = Math.round(
-        completeHealth.filter((h) => h.latency > 0).reduce((sum, h) => sum + h.latency, 0) / 
-        Math.max(completeHealth.filter((h) => h.latency > 0).length, 1)
+        completeHealth.filter((h) => h.latency > 0).reduce((sum, h) => sum + h.latency, 0) /
+          Math.max(completeHealth.filter((h) => h.latency > 0).length, 1)
       )
 
       return NextResponse.json({
@@ -87,9 +52,11 @@ export async function GET(request: NextRequest) {
         health: completeHealth,
       })
     } catch (firebaseError) {
-      console.error('[v0] Firestore error:', firebaseError instanceof Error ? firebaseError.message : String(firebaseError))
-      
-      // Return mock health data as fallback
+      console.error(
+        '[v0] Firestore error:',
+        firebaseError instanceof Error ? firebaseError.message : String(firebaseError)
+      )
+
       const completeHealth = allServices.map((service) => ({
         id: `${service.id}_health`,
         serviceId: service.id,
@@ -116,7 +83,10 @@ export async function GET(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error('[v0] Health check error:', error instanceof Error ? error.message : String(error))
+    console.error(
+      '[v0] Health check error:',
+      error instanceof Error ? error.message : String(error)
+    )
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

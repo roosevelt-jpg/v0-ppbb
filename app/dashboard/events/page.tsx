@@ -109,9 +109,14 @@ export default function MyEventsPage() {
     if (!user?.id) return
     setRegisteringId(event.id)
     try {
+      const { auth } = await import('@/lib/firebase')
+      const token = await auth.currentUser?.getIdToken()
       const res = await fetch('/api/events/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           eventId: event.id,
           userId: user.id,
@@ -124,6 +129,10 @@ export default function MyEventsPage() {
       const json = await res.json()
       if (!json.success) {
         alert(json.error || 'Registration failed')
+        return
+      }
+      if (json.checkoutUrl) {
+        window.location.href = json.checkoutUrl
         return
       }
       await loadRegistered()
