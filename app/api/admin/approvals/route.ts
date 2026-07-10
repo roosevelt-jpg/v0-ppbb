@@ -7,6 +7,7 @@ import {
   type ApprovalItemType,
 } from '@/lib/admin-approvals-server'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {

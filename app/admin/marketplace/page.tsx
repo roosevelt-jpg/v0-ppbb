@@ -148,8 +148,13 @@ export default function AdminMarketplacePage() {
         },
         body: JSON.stringify({ id, action }),
       })
-      const json = await res.json()
-      if (!json.success) alert(json.error || 'Action failed')
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        alert(json.error || `Action failed (${res.status})`)
+        return
+      }
+      // Refresh list so Feature/Unfeature label updates
+      window.location.reload()
     } catch {
       alert('Action failed')
     } finally {
@@ -170,8 +175,12 @@ export default function AdminMarketplacePage() {
         },
         body: JSON.stringify({ id, action }),
       })
-      const json = await res.json()
-      if (!json.success) alert(json.error || 'Action failed')
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        alert(json.error || `Action failed (${res.status})`)
+        return
+      }
+      window.location.reload()
     } catch {
       alert('Action failed')
     } finally {

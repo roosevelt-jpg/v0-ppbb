@@ -5,6 +5,10 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { ensureBusinessReferralCode } from '@/lib/referral-code-server'
 import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 import type { AuditActionType } from '@/lib/audit-log-shared'
+import { serializeFirestoreValue } from '@/lib/serialize-firestore'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 type BusinessAction =
   | 'approve'
@@ -35,6 +39,8 @@ function asString(value: unknown, fallback = ''): string {
 
 function mapBusinessDoc(id: string, data: Record<string, unknown>) {
   const isApproved = data.isApproved === true
+  const created = asDate(data.createdAt)
+  const updated = asDate(data.updatedAt)
   return {
     id,
     name: asString(data.name) || asString(data.businessName) || 'Untitled',
@@ -50,8 +56,10 @@ function mapBusinessDoc(id: string, data: Record<string, unknown>) {
     website: asString(data.website),
     logoURL: asString(data.logoURL) || asString(data.logo),
     bannerURL: asString(data.bannerURL) || asString(data.banner),
-    services: Array.isArray(data.services) ? data.services : [],
-    productImages: Array.isArray(data.productImages) ? data.productImages : [],
+    services: serializeFirestoreValue(Array.isArray(data.services) ? data.services : []),
+    productImages: serializeFirestoreValue(
+      Array.isArray(data.productImages) ? data.productImages : []
+    ),
     tradeLicenceURL: asString(data.tradeLicenceURL),
     communityBenefit: asString(data.communityBenefit),
     isApproved,
@@ -64,8 +72,8 @@ function mapBusinessDoc(id: string, data: Record<string, unknown>) {
       typeof data.referralContributionPercent === 'number'
         ? data.referralContributionPercent
         : null,
-    createdAt: asDate(data.createdAt),
-    updatedAt: asDate(data.updatedAt),
+    createdAt: created ? created.toISOString() : null,
+    updatedAt: updated ? updated.toISOString() : null,
   }
 }
 
@@ -148,8 +156,8 @@ export async function GET(request: NextRequest) {
     let businesses = snapshot.docs.map((d) => mapBusinessDoc(d.id, d.data() as Record<string, unknown>))
 
     businesses.sort((a, b) => {
-      const aTime = a.createdAt ? a.createdAt.getTime() : 0
-      const bTime = b.createdAt ? b.createdAt.getTime() : 0
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
       return bTime - aTime
     })
 

@@ -4,6 +4,10 @@ import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access
 import { canAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
 import { getSignedReadUrl } from '@/lib/storage-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
+import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 const SENSITIVE_KEYS = [
   'emiratesIdUrl',
@@ -232,7 +236,8 @@ function redactRequest(
   data: Record<string, unknown>,
   canViewDocs: boolean
 ): Record<string, unknown> {
-  const out: Record<string, unknown> = { id, ...data }
+  const serialized = serializeFirestoreDoc(id, data) as Record<string, unknown>
+  const out: Record<string, unknown> = { ...serialized }
   // Never send long-lived signed URLs in list payloads — welfare opens via ?document=
   delete out.emiratesIdUrl
   delete out.passportUrl

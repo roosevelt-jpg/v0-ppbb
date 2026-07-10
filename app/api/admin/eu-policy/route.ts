@@ -3,22 +3,12 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
+import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const DOC_ID = 'current'
-
-function serialize(data: Record<string, unknown>): Record<string, unknown> {
-  const out: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(data)) {
-    if (v && typeof v === 'object' && typeof (v as { toDate?: () => Date }).toDate === 'function') {
-      out[k] = (v as { toDate: () => Date }).toDate().toISOString()
-    } else {
-      out[k] = v
-    }
-  }
-  return out
-}
 
 async function requireAdmin(request: NextRequest) {
   const authHeader = request.headers.get('authorization') || ''
@@ -47,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: { id: snap.id, ...serialize(snap.data() as Record<string, unknown>) },
+      data: serializeFirestoreDoc(snap.id, snap.data() as Record<string, unknown>),
     })
   } catch (error) {
     console.error('[admin/eu-policy GET]', error)
@@ -112,7 +102,7 @@ export async function POST(request: NextRequest) {
     const saved = await ref.get()
     return NextResponse.json({
       success: true,
-      data: { id: saved.id, ...serialize(saved.data() as Record<string, unknown>) },
+      data: serializeFirestoreDoc(saved.id, (saved.data() || {}) as Record<string, unknown>),
     })
   } catch (error) {
     console.error('[admin/eu-policy POST]', error)

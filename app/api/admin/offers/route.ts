@@ -6,6 +6,9 @@ import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get('authorization') || ''
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
@@ -24,13 +27,20 @@ async function syncOffer(id: string, updates: Record<string, unknown>) {
   const legacyRef = db.collection('businessOffers').doc(id)
   const [offersSnap, legacySnap] = await Promise.all([offersRef.get(), legacyRef.get()])
 
-  if (offersSnap.exists) writes.push(offersRef.update(payload))
+  if (offersSnap.exists) {
+    writes.push(offersRef.set(payload, { merge: true }))
+  }
   if (legacySnap.exists) {
     const legacyPayload = { ...payload }
     if (updates.status === 'published') {
       legacyPayload.status = 'active'
     }
-    writes.push(legacyRef.update(legacyPayload))
+    writes.push(legacyRef.set(legacyPayload, { merge: true }))
+  }
+
+  // If the listing only exists in one collection under a different shape, still persist.
+  if (writes.length === 0) {
+    writes.push(offersRef.set(payload, { merge: true }))
   }
 
   await Promise.all(writes)

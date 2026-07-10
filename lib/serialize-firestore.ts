@@ -1,9 +1,24 @@
 /** Convert Firestore Admin / client timestamps to ISO strings for JSON APIs. */
 export function serializeFirestoreValue(value: unknown): unknown {
   if (value === null || value === undefined) return value
+  if (typeof value === 'bigint') return value.toString()
   if (value instanceof Date) return value.toISOString()
   if (typeof value === 'object' && value !== null && 'toDate' in value && typeof (value as { toDate: () => Date }).toDate === 'function') {
-    return (value as { toDate: () => Date }).toDate().toISOString()
+    try {
+      return (value as { toDate: () => Date }).toDate().toISOString()
+    } catch {
+      return null
+    }
+  }
+  // DocumentReference / GeoPoint-ish — avoid circular JSON crashes
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'path' in value &&
+    typeof (value as { path?: unknown }).path === 'string' &&
+    'firestore' in value
+  ) {
+    return (value as { path: string }).path
   }
   if (Array.isArray(value)) {
     return value.map(serializeFirestoreValue)
