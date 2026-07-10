@@ -3,6 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { AdminPageLayout } from '@/components/admin-page-layout'
+import { EventPickerSelect } from '@/components/admin/event-picker-select'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import { getStorageProviderLabel } from '@/lib/asset-library-types'
 import type { AssetFolder, AssetStorageProvider } from '@/lib/asset-library-types'
@@ -18,6 +19,7 @@ export default function AdminAssetsPage() {
     name: '',
     description: '',
     tags: '',
+    eventId: '',
     eventTitle: '',
     visibility: 'both' as AssetFolder['visibility'],
     status: 'draft' as AssetFolder['status'],
@@ -51,6 +53,7 @@ export default function AdminAssetsPage() {
         name: '',
         description: '',
         tags: '',
+        eventId: '',
         eventTitle: '',
         visibility: 'both',
         status: 'draft',
@@ -108,11 +111,10 @@ export default function AdminAssetsPage() {
               rows={3}
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
             />
-            <input
-              value={form.eventTitle}
-              onChange={(e) => setForm({ ...form, eventTitle: e.target.value })}
-              placeholder="Linked event name (optional)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            <EventPickerSelect
+              value={form.eventId}
+              eventTitle={form.eventTitle}
+              onChange={(eventId, eventTitle) => setForm({ ...form, eventId, eventTitle })}
             />
             <input
               value={form.tags}

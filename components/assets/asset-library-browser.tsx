@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { FolderOpen, Image, Film, FileText, Search, Tag } from 'lucide-react'
+import { FolderOpen, Image, Film, FileText, Search, Tag, Calendar } from 'lucide-react'
 import { auth } from '@/lib/firebase'
 import type { AssetFile, AssetFolder } from '@/lib/asset-library-types'
 
@@ -32,11 +32,15 @@ export function AssetLibraryBrowser({ basePath, title = 'Event Assets' }: AssetL
   const [loading, setLoading] = React.useState(true)
   const [search, setSearch] = React.useState('')
   const [tagFilter, setTagFilter] = React.useState('')
+  const [eventFilter, setEventFilter] = React.useState('')
 
   React.useEffect(() => {
     const load = async () => {
       try {
-        const qs = tagFilter ? `?tag=${encodeURIComponent(tagFilter)}` : ''
+        const params = new URLSearchParams()
+        if (tagFilter) params.set('tag', tagFilter)
+        if (eventFilter) params.set('eventId', eventFilter)
+        const qs = params.toString() ? `?${params.toString()}` : ''
         const json = await fetchWithAuth(`/api/assets/folders${qs}`)
         if (json.success) setFolders(json.data || [])
       } catch (e) {
@@ -46,7 +50,15 @@ export function AssetLibraryBrowser({ basePath, title = 'Event Assets' }: AssetL
       }
     }
     load()
-  }, [tagFilter])
+  }, [tagFilter, eventFilter])
+
+  const eventOptions = React.useMemo(() => {
+    const map = new Map<string, string>()
+    for (const f of folders) {
+      if (f.eventId && f.eventTitle) map.set(f.eventId, f.eventTitle)
+    }
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }))
+  }, [folders])
 
   const filtered = folders.filter((f) => {
     const q = search.trim().toLowerCase()
@@ -91,6 +103,23 @@ export function AssetLibraryBrowser({ basePath, title = 'Event Assets' }: AssetL
             className="w-full pl-10 pr-3 py-2 border border-neutral-200 rounded-lg text-sm"
           />
         </div>
+        {eventOptions.length > 0 && (
+          <div className="relative sm:w-56">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <select
+              value={eventFilter}
+              onChange={(e) => setEventFilter(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-neutral-200 rounded-lg text-sm bg-white appearance-none"
+            >
+              <option value="">All events</option>
+              {eventOptions.map((ev) => (
+                <option key={ev.id} value={ev.id}>
+                  {ev.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {filtered.length === 0 ? (
@@ -187,7 +216,18 @@ export function AssetFolderDetail({
         </Link>
         <h1 className="text-2xl font-semibold text-neutral-900 mt-2">{folder.name}</h1>
         {folder.eventTitle && (
-          <p className="text-sm text-neutral-500 mt-1">Event: {folder.eventTitle}</p>
+          <p className="text-sm text-neutral-500 mt-1">
+            Event: {folder.eventTitle}
+            {folder.eventId && (
+              <>
+                {' '}
+                ·{' '}
+                <Link href={`/events/${folder.eventId}`} className="underline">
+                  View event
+                </Link>
+              </>
+            )}
+          </p>
         )}
         {folder.description && <p className="text-sm text-neutral-600 mt-2">{folder.description}</p>}
         <div className="flex flex-wrap gap-1 mt-3">
