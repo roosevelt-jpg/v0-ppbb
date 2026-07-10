@@ -33,6 +33,20 @@ export function AssetLibraryBrowser({ basePath, title = 'Event Assets' }: AssetL
   const [search, setSearch] = React.useState('')
   const [tagFilter, setTagFilter] = React.useState('')
   const [eventFilter, setEventFilter] = React.useState('')
+  const [eventOptions, setEventOptions] = React.useState<Array<{ id: string; title: string }>>([])
+
+  React.useEffect(() => {
+    fetchWithAuth('/api/assets/folders')
+      .then((json) => {
+        if (!json.success) return
+        const map = new Map<string, string>()
+        for (const f of (json.data || []) as AssetFolder[]) {
+          if (f.eventId && f.eventTitle) map.set(f.eventId, f.eventTitle)
+        }
+        setEventOptions(Array.from(map.entries()).map(([id, title]) => ({ id, title })))
+      })
+      .catch(() => {})
+  }, [])
 
   React.useEffect(() => {
     const load = async () => {
@@ -51,14 +65,6 @@ export function AssetLibraryBrowser({ basePath, title = 'Event Assets' }: AssetL
     }
     load()
   }, [tagFilter, eventFilter])
-
-  const eventOptions = React.useMemo(() => {
-    const map = new Map<string, string>()
-    for (const f of folders) {
-      if (f.eventId && f.eventTitle) map.set(f.eventId, f.eventTitle)
-    }
-    return Array.from(map.entries()).map(([id, title]) => ({ id, title }))
-  }, [folders])
 
   const filtered = folders.filter((f) => {
     const q = search.trim().toLowerCase()

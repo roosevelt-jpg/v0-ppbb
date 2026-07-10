@@ -301,7 +301,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       },
       { name: 'folderUrl', label: 'Folder URL (reference)', type: 'text', required: false },
     ],
-    docs: 'https://developers.google.com/drive/api/guides/about-sdk',
+    help: 'Share the target Drive folder with the service account email. Enable the Google Drive API in Google Cloud Console.',
   },
   eventAssetsStorage: {
     id: 'eventAssetsStorage',
