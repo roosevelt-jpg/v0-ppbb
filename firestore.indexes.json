@@ -2,7 +2,7 @@
   "indexes": [
     {
       "collectionGroup": "auditLogs",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "adminId",
@@ -16,17 +16,7 @@
     },
     {
       "collectionGroup": "auditLogs",
-      "queryScope": "Collection",
-      "fields": [
-        {
-          "fieldPath": "timestamp",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "auditLogs",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "entityType",
@@ -44,7 +34,7 @@
     },
     {
       "collectionGroup": "integrationUsage",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "serviceId",
@@ -58,7 +48,7 @@
     },
     {
       "collectionGroup": "integrationAlerts",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "resolved",
@@ -72,7 +62,7 @@
     },
     {
       "collectionGroup": "integrationAlerts",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "serviceId",
@@ -90,7 +80,7 @@
     },
     {
       "collectionGroup": "adminUsers",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "isActive",
@@ -104,7 +94,7 @@
     },
     {
       "collectionGroup": "integrations",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -117,18 +107,8 @@
       ]
     },
     {
-      "collectionGroup": "messages",
-      "queryScope": "Collection Group",
-      "fields": [
-        {
-          "fieldPath": "timestamp",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "events",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -142,7 +122,7 @@
     },
     {
       "collectionGroup": "businesses",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "isApproved",
@@ -156,7 +136,7 @@
     },
     {
       "collectionGroup": "offers",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -170,7 +150,7 @@
     },
     {
       "collectionGroup": "offers",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "category",
@@ -184,7 +164,7 @@
     },
     {
       "collectionGroup": "jobs",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -197,18 +177,8 @@
       ]
     },
     {
-      "collectionGroup": "contactSubmissions",
-      "queryScope": "Collection",
-      "fields": [
-        {
-          "fieldPath": "submittedAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "beneficiaryRequests",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "userId",
@@ -217,16 +187,6 @@
         {
           "fieldPath": "createdAt",
           "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "events",
-      "queryScope": "Collection",
-      "fields": [
-        {
-          "fieldPath": "createdBy",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -246,7 +206,7 @@
     },
     {
       "collectionGroup": "communities",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -260,7 +220,7 @@
     },
     {
       "collectionGroup": "communities",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "isFeatured",
@@ -274,7 +234,7 @@
     },
     {
       "collectionGroup": "posts",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "flagged",
@@ -288,7 +248,7 @@
     },
     {
       "collectionGroup": "community_messages",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "isFlagged",
@@ -302,7 +262,7 @@
     },
     {
       "collectionGroup": "groups",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "isActive",
@@ -316,7 +276,7 @@
     },
     {
       "collectionGroup": "posts",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "isPinned",
@@ -330,7 +290,7 @@
     },
     {
       "collectionGroup": "groups",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "type",
@@ -348,7 +308,7 @@
     },
     {
       "collectionGroup": "recordings",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -362,7 +322,7 @@
     },
     {
       "collectionGroup": "workshops",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -376,7 +336,7 @@
     },
     {
       "collectionGroup": "team-members",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -390,7 +350,7 @@
     },
     {
       "collectionGroup": "formSubmissions",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "formId",
@@ -404,7 +364,7 @@
     },
     {
       "collectionGroup": "events",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -417,18 +377,8 @@
       ]
     },
     {
-      "collectionGroup": "notifications",
-      "queryScope": "Collection Group",
-      "fields": [
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "customForms",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "slug",
@@ -442,7 +392,7 @@
     },
     {
       "collectionGroup": "businessOpportunities",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -456,7 +406,7 @@
     },
     {
       "collectionGroup": "businessOffers",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -470,7 +420,7 @@
     },
     {
       "collectionGroup": "communities",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -484,7 +434,7 @@
     },
     {
       "collectionGroup": "businessLeads",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -498,7 +448,7 @@
     },
     {
       "collectionGroup": "businessReferrals",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -512,7 +462,7 @@
     },
     {
       "collectionGroup": "businessPartnerships",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -526,7 +476,7 @@
     },
     {
       "collectionGroup": "businessPayments",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -540,7 +490,7 @@
     },
     {
       "collectionGroup": "businessAnalytics",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -554,7 +504,7 @@
     },
     {
       "collectionGroup": "businessAnalytics",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -568,7 +518,7 @@
     },
     {
       "collectionGroup": "businessRatings",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -582,7 +532,7 @@
     },
     {
       "collectionGroup": "discounts",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -595,18 +545,8 @@
       ]
     },
     {
-      "collectionGroup": "vendorApplications",
-      "queryScope": "Collection",
-      "fields": [
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "dmThreads",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "participantIds",
@@ -619,38 +559,8 @@
       ]
     },
     {
-      "collectionGroup": "orders",
-      "queryScope": "Collection",
-      "fields": [
-        {
-          "fieldPath": "stripeSessionId",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "groups",
-      "queryScope": "Collection Group",
-      "fields": [
-        {
-          "fieldPath": "createdBy",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "groups",
-      "queryScope": "Collection Group",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "referrals",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "referrerId",
@@ -664,7 +574,7 @@
     },
     {
       "collectionGroup": "referrals",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "businessId",
@@ -678,7 +588,7 @@
     },
     {
       "collectionGroup": "assetFolders",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "status",
@@ -692,7 +602,7 @@
     },
     {
       "collectionGroup": "assetFiles",
-      "queryScope": "Collection",
+      "queryScope": "COLLECTION",
       "fields": [
         {
           "fieldPath": "folderId",
