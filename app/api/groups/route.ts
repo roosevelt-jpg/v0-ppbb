@@ -85,18 +85,23 @@ export async function POST(request: NextRequest) {
 
     const docRef = await db.collection('communities').doc(communityId).collection('groups').add(payload)
 
-    await db
-      .collection('communities')
-      .doc(communityId)
-      .update({
-        groupCount: (community.groupCount || 0) + 1,
-        updatedAt: Timestamp.now(),
-      })
+    try {
+      await db
+        .collection('communities')
+        .doc(communityId)
+        .update({
+          groupCount: (community.groupCount || 0) + 1,
+          updatedAt: Timestamp.now(),
+        })
+    } catch (countErr) {
+      console.warn('[v0] Group created but groupCount update failed:', countErr)
+    }
 
     return NextResponse.json({ success: true, id: docRef.id })
   } catch (error) {
     console.error('[v0] Error creating group:', error)
-    return NextResponse.json({ success: false, error: 'Failed to create group' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to create group'
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }
 

@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
-import { uploadGroupIcon } from '@/lib/firebase-storage'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { useAuth } from '@/lib/auth-context'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import { AdminGroupForm, type AdminGroupFormValues } from '@/components/admin/admin-group-form'
@@ -21,10 +21,24 @@ const defaultValues: AdminGroupFormValues = {
   capacity: '',
 }
 
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} timed out. Please try again.`)), ms)
+      }),
+    ])
+  } finally {
+    if (timer) clearTimeout(timer)
+  }
+}
+
 export default function CreateGroupPage() {
   const params = useParams()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, firebaseUser } = useAuth()
   const communityId = params.id as string
 
   const [formData, setFormData] = React.useState<AdminGroupFormValues>(defaultValues)
@@ -39,6 +53,10 @@ export default function CreateGroupPage() {
       setError('Group name is required')
       return
     }
+    if (!firebaseUser && !user?.id) {
+      setError('You must be signed in as an admin to create a group.')
+      return
+    }
 
     setLoading(true)
     setError('')
@@ -46,32 +64,55 @@ export default function CreateGroupPage() {
     try {
       let iconURL = ''
       if (icon) {
-        iconURL = await uploadGroupIcon(communityId, `new_${Date.now()}`, icon)
+        try {
+          iconURL = await withTimeout(
+            uploadImageToFirebase(icon, `communities/${communityId}/groups`, {
+              preset: 'logo',
+              maxDimension: 512,
+            }),
+            45000,
+            'Icon upload'
+          )
+        } catch (uploadErr) {
+          console.error('[v0] Group icon upload failed:', uploadErr)
+          setError(
+            uploadErr instanceof Error
+              ? `${uploadErr.message} (You can create the group without an icon.)`
+              : 'Icon upload failed. You can create the group without an icon.'
+          )
+          setLoading(false)
+          return
+        }
       }
 
-      const json = await adminApiFetch<{ id: string }>('/api/groups', {
-        method: 'POST',
-        body: JSON.stringify({
-          communityId,
-          name: formData.name.trim(),
-          description: formData.description,
-          type: formData.type,
-          genderRestriction: formData.genderRestriction,
-          iconURL,
-          requiresApproval: formData.requiresApproval,
-          capacity: formData.capacity ? Number(formData.capacity) : null,
-          createdBy: user?.id,
+      const json = await withTimeout(
+        adminApiFetch<{ id: string }>('/api/groups', {
+          method: 'POST',
+          body: JSON.stringify({
+            communityId,
+            name: formData.name.trim(),
+            description: formData.description,
+            type: formData.type,
+            genderRestriction: formData.genderRestriction,
+            iconURL,
+            requiresApproval: formData.requiresApproval,
+            capacity: formData.capacity ? Number(formData.capacity) : null,
+            createdBy: firebaseUser?.uid || user?.id,
+          }),
         }),
-      })
+        30000,
+        'Create group'
+      )
 
       if (json.success) {
         router.push(`/admin/communities/${communityId}/groups`)
-      } else {
-        setError(json.error || 'Failed to create group')
+        return
       }
+
+      setError(json.error || 'Failed to create group')
     } catch (err) {
       console.error('[v0] Error creating group:', err)
-      setError('An error occurred while creating the group')
+      setError(err instanceof Error ? err.message : 'An error occurred while creating the group')
     } finally {
       setLoading(false)
     }

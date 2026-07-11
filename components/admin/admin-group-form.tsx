@@ -169,7 +169,7 @@ export function AdminGroupForm({
           disabled={loading}
           className="flex-1 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 font-medium disabled:opacity-50 min-h-[44px]"
         >
-          {loading ? 'Saving…' : submitLabel}
+          {loading ? 'Creating…' : submitLabel}
         </button>
         <Link
           href={cancelHref}

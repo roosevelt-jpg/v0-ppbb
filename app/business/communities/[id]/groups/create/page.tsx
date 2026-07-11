@@ -5,7 +5,7 @@ import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ChevronLeft, Upload } from 'lucide-react'
 import Link from 'next/link'
-import { uploadGroupIcon } from '@/lib/firebase-storage'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { auth } from '@/lib/firebase'
@@ -62,7 +62,21 @@ export default function BusinessCreateGroupPage() {
     try {
       let iconURL = ''
       if (icon) {
-        iconURL = await uploadGroupIcon(communityId, `new_${Date.now()}`, icon)
+        try {
+          iconURL = await uploadImageToFirebase(icon, `communities/${communityId}/groups`, {
+            preset: 'logo',
+            maxDimension: 512,
+          })
+        } catch (uploadErr) {
+          console.error('[v0] Group icon upload failed:', uploadErr)
+          setError(
+            uploadErr instanceof Error
+              ? `${uploadErr.message} Remove the icon or try a smaller image.`
+              : 'Icon upload failed. Remove the icon or try again.'
+          )
+          setLoading(false)
+          return
+        }
       }
 
       const token = await auth.currentUser?.getIdToken()
