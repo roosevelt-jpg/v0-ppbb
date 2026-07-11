@@ -1,16 +1,68 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { useAuth } from '@/lib/auth-context'
 import { subscribeToAllAuditLogs, type AuditLog } from '@/lib/admin-audit'
-import { ShieldCheck, AlertTriangle, Lock, Clock, TrendingUp } from 'lucide-react'
-import { format } from 'date-fns'
+import { db } from '@/lib/firebase'
+import { ShieldCheck, AlertTriangle } from 'lucide-react'
+import { AdminPageLayout } from '@/components/admin-page-layout'
+
+type ChecklistKey =
+  | 'accessControl'
+  | 'auditLogging'
+  | 'encryption'
+  | 'securityReviews'
+  | 'backupRecovery'
+
+type ChecklistState = Record<ChecklistKey, boolean>
+
+const DEFAULT_CHECKLIST: ChecklistState = {
+  accessControl: true,
+  auditLogging: true,
+  encryption: true,
+  securityReviews: false,
+  backupRecovery: false,
+}
+
+const CHECKLIST_ITEMS: Array<{ key: ChecklistKey; label: string; hint: string }> = [
+  {
+    key: 'accessControl',
+    label: 'Access Control Configured',
+    hint: 'Admin roles and invite permissions are in use',
+  },
+  {
+    key: 'auditLogging',
+    label: 'Audit Logging Enabled',
+    hint: 'Admin actions are written to audit logs',
+  },
+  {
+    key: 'encryption',
+    label: 'Encryption Enabled',
+    hint: 'Integration secrets use encrypted vault storage',
+  },
+  {
+    key: 'securityReviews',
+    label: 'Regular Security Reviews',
+    hint: 'Mark complete after your latest security review',
+  },
+  {
+    key: 'backupRecovery',
+    label: 'Backup and Recovery Plan',
+    hint: 'Mark complete once backups and recovery steps are documented',
+  },
+]
 
 export default function SecurityCenterPage() {
-  const { user: authUser } = useAuth()
+  const router = useRouter()
+  const { firebaseUser } = useAuth()
   const [auditLogs, setAuditLogs] = useState<(AuditLog & { id: string })[]>([])
   const [loading, setLoading] = useState(true)
   const [securityScore, setSecurityScore] = useState(0)
+  const [checklist, setChecklist] = useState<ChecklistState>(DEFAULT_CHECKLIST)
+  const [savingKey, setSavingKey] = useState<ChecklistKey | null>(null)
 
   useEffect(() => {
     const unsub = subscribeToAllAuditLogs((logs) => {
@@ -23,200 +75,225 @@ export default function SecurityCenterPage() {
     return () => unsub()
   }, [])
 
-  // Get security events for the last 24 hours
-  const last24h = Date.now() - (24 * 60 * 60 * 1000)
-  const recentEvents = auditLogs.filter(log => log.timestamp > last24h)
-  const failedEvents = recentEvents.filter(log => log.status === 'failed')
-  const uniqueAdmins = new Set(recentEvents.map(log => log.adminId)).size
+  useEffect(() => {
+    let cancelled = false
+    const loadChecklist = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'platformConfig', 'securityChecklist'))
+        if (!cancelled && snap.exists()) {
+          const data = snap.data() as Partial<ChecklistState>
+          setChecklist({ ...DEFAULT_CHECKLIST, ...data })
+        }
+      } catch (error) {
+        console.warn('[security-center] Could not load checklist:', error)
+      }
+    }
+    void loadChecklist()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  // Security recommendations
+  const last24h = Date.now() - 24 * 60 * 60 * 1000
+  const recentEvents = auditLogs.filter((log) => log.timestamp > last24h)
+  const failedEvents = recentEvents.filter((log) => log.status === 'failed')
+  const uniqueAdmins = new Set(recentEvents.map((log) => log.adminId)).size
+
+  const handleRecommendationAction = (action: string) => {
+    if (action === 'Review Logs' || action === 'Improve') {
+      router.push('/admin/audit-logs')
+      return
+    }
+    if (action === 'View Admins') {
+      router.push('/admin/management')
+    }
+  }
+
+  const toggleChecklistItem = async (key: ChecklistKey) => {
+    const next = { ...checklist, [key]: !checklist[key] }
+    setChecklist(next)
+    setSavingKey(key)
+    try {
+      await setDoc(
+        doc(db, 'platformConfig', 'securityChecklist'),
+        {
+          ...next,
+          updatedAt: new Date().toISOString(),
+          updatedBy: firebaseUser?.uid || null,
+        },
+        { merge: true }
+      )
+    } catch (error) {
+      console.error('[security-center] Failed to save checklist:', error)
+      setChecklist(checklist)
+      window.alert('Could not save checklist change. Check your permissions and try again.')
+    } finally {
+      setSavingKey(null)
+    }
+  }
+
   const recommendations = [
     failedEvents.length > 0 && {
-      level: 'warning',
+      level: 'warning' as const,
       title: 'Multiple Failed Operations Detected',
       description: `${failedEvents.length} failed operations in the last 24 hours. Review audit logs for suspicious activity.`,
       action: 'Review Logs',
     },
     uniqueAdmins > 5 && {
-      level: 'info',
+      level: 'info' as const,
       title: 'Multiple Admin Users Active',
       description: `${uniqueAdmins} admin users have been active in the last 24 hours.`,
       action: 'View Admins',
     },
     securityScore < 80 && {
-      level: 'warning',
+      level: 'warning' as const,
       title: 'Security Score Below Threshold',
       description: `Current security score is ${securityScore.toFixed(1)}%. Review recent activity.`,
       action: 'Improve',
     },
-  ].filter(Boolean)
+  ].filter(Boolean) as Array<{
+    level: 'warning' | 'info'
+    title: string
+    description: string
+    action: string
+  }>
+
+  const completedCount = Object.values(checklist).filter(Boolean).length
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>
-          Security Center
-        </h1>
-        <p style={{ color: '#888888' }}>System security monitoring and recommendations</p>
-      </div>
-
-      {/* Security Score */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e4e1da',
-        borderRadius: '0.5rem',
-        padding: '2rem',
-        marginBottom: '2rem',
-        textAlign: 'center',
-      }}>
-        <ShieldCheck className="h-12 w-12" style={{ margin: '0 auto 1rem', color: securityScore > 80 ? '#10b981' : '#f59e0b' }} />
-        <p style={{ fontSize: '0.875rem', color: '#888888', marginBottom: '0.5rem' }}>Security Score</p>
-        <p style={{
-          fontSize: '3rem',
-          fontWeight: 'bold',
-          color: securityScore > 80 ? '#10b981' : securityScore > 60 ? '#f59e0b' : '#ef4444',
-        }}>
-          {securityScore.toFixed(1)}%
-        </p>
-        <p style={{ fontSize: '0.875rem', color: '#666666', marginTop: '1rem' }}>
-          {securityScore > 80 ? 'System is secure' : securityScore > 60 ? 'Monitor closely' : 'Review immediately'}
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1rem',
-        marginBottom: '2rem',
-      }}>
-        <div style={{
-          backgroundColor: '#f0fdf4',
-          border: '1px solid #dcfce7',
-          borderRadius: '0.5rem',
-          padding: '1rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#166534', marginBottom: '0.5rem' }}>Last 24 Hours</p>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#15803d' }}>{recentEvents.length}</p>
-          <p style={{ fontSize: '0.875rem', color: '#166534', marginTop: '0.5rem' }}>Events</p>
+    <AdminPageLayout title="Security Center" subtitle="System security monitoring and recommendations">
+      <div className="space-y-6 min-w-0">
+        <div className="bg-white border border-[#e4e1da] rounded-lg p-6 sm:p-8 text-center">
+          <ShieldCheck
+            className="h-12 w-12 mx-auto mb-4"
+            style={{ color: securityScore > 80 ? '#10b981' : '#f59e0b' }}
+          />
+          <p className="text-sm text-neutral-500 mb-1">Security Score</p>
+          <p
+            className="text-4xl sm:text-5xl font-bold font-headline"
+            style={{
+              color: securityScore > 80 ? '#10b981' : securityScore > 60 ? '#f59e0b' : '#ef4444',
+            }}
+          >
+            {loading ? '…' : `${securityScore.toFixed(1)}%`}
+          </p>
+          <p className="text-sm text-neutral-600 mt-3">
+            {securityScore > 80
+              ? 'System is secure'
+              : securityScore > 60
+                ? 'Monitor closely'
+                : 'Review immediately'}
+          </p>
+          <p className="text-xs text-neutral-500 mt-2">
+            Checklist progress: {completedCount}/{CHECKLIST_ITEMS.length}
+          </p>
         </div>
 
-        <div style={{
-          backgroundColor: '#fef2f2',
-          border: '1px solid #fecaca',
-          borderRadius: '0.5rem',
-          padding: '1rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#991b1b', marginBottom: '0.5rem' }}>Last 24 Hours</p>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#dc2626' }}>{failedEvents.length}</p>
-          <p style={{ fontSize: '0.875rem', color: '#991b1b', marginTop: '0.5rem' }}>Failed Operations</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 min-w-0">
+            <p className="text-xs text-green-800 mb-1">Last 24 Hours</p>
+            <p className="text-2xl font-bold text-green-700">{recentEvents.length}</p>
+            <p className="text-sm text-green-800 mt-1">Events</p>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 min-w-0">
+            <p className="text-xs text-red-800 mb-1">Last 24 Hours</p>
+            <p className="text-2xl font-bold text-red-600">{failedEvents.length}</p>
+            <p className="text-sm text-red-800 mt-1">Failed Operations</p>
+          </div>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 min-w-0">
+            <p className="text-xs text-blue-900 mb-1">Active Admins</p>
+            <p className="text-2xl font-bold text-blue-800">{uniqueAdmins}</p>
+            <p className="text-sm text-blue-900 mt-1">In Last 24 Hours</p>
+          </div>
         </div>
 
-        <div style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '0.5rem',
-          padding: '1rem',
-        }}>
-          <p style={{ fontSize: '0.75rem', color: '#0c2340', marginBottom: '0.5rem' }}>Active Admins</p>
-          <p style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1e40af' }}>{uniqueAdmins}</p>
-          <p style={{ fontSize: '0.875rem', color: '#0c2340', marginTop: '0.5rem' }}>In Last 24 Hours</p>
-        </div>
-      </div>
+        {recommendations.length > 0 && (
+          <div>
+            <h2 className="text-base font-semibold text-neutral-900 mb-3">Security Recommendations</h2>
+            <div className="space-y-2">
+              {recommendations.map((rec) => (
+                <div
+                  key={rec.title}
+                  className={`flex flex-col sm:flex-row sm:items-start gap-3 p-4 rounded-lg border ${
+                    rec.level === 'warning'
+                      ? 'bg-amber-50 border-amber-200'
+                      : 'bg-green-50 border-green-200'
+                  }`}
+                >
+                  <AlertTriangle
+                    className="h-5 w-5 shrink-0 mt-0.5"
+                    style={{ color: rec.level === 'warning' ? '#d97706' : '#10b981' }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`font-semibold mb-1 ${
+                        rec.level === 'warning' ? 'text-amber-900' : 'text-green-800'
+                      }`}
+                    >
+                      {rec.title}
+                    </p>
+                    <p className="text-sm text-neutral-600">{rec.description}</p>
+                  </div>
+                  <button
+                    type="button"
+                    data-dashboard-control
+                    onClick={() => handleRecommendationAction(rec.action)}
+                    className="shrink-0 min-h-[40px] px-4 rounded text-sm font-semibold text-white"
+                    style={{
+                      backgroundColor: rec.level === 'warning' ? '#f59e0b' : '#10b981',
+                    }}
+                  >
+                    {rec.action}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Recommendations */}
-      {recommendations.length > 0 && (
-        <div style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#111111', marginBottom: '1rem' }}>
-            Security Recommendations
-          </h2>
-          {recommendations.map((rec, idx) => (
-            <div
-              key={idx}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '1rem',
-                padding: '1rem',
-                backgroundColor: rec.level === 'warning' ? '#fffbf0' : '#f0fdf4',
-                border: `1px solid ${rec.level === 'warning' ? '#fed7aa' : '#dcfce7'}`,
-                borderRadius: '0.5rem',
-                marginBottom: '0.5rem',
-              }}
+        <div className="bg-white border border-[#e4e1da] rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <h2 className="text-base font-semibold text-neutral-900">Security Checklist</h2>
+            <Link
+              href="/admin/audit-logs"
+              className="text-sm font-medium text-neutral-700 underline underline-offset-2"
             >
-              <AlertTriangle
-                className="h-5 w-5"
-                style={{
-                  color: rec.level === 'warning' ? '#d97706' : '#10b981',
-                  flexShrink: 0,
-                  marginTop: '0.25rem',
-                }}
-              />
-              <div style={{ flex: 1 }}>
-                <p style={{
-                  fontWeight: '600',
-                  color: rec.level === 'warning' ? '#92400e' : '#166534',
-                  marginBottom: '0.25rem',
-                }}>
-                  {rec.title}
-                </p>
-                <p style={{ fontSize: '0.875rem', color: '#666666' }}>
-                  {rec.description}
-                </p>
-              </div>
-              <button
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: rec.level === 'warning' ? '#f59e0b' : '#10b981',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '0.25rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                }}
-              >
-                {rec.action}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+              Open Audit Logs →
+            </Link>
+          </div>
 
-      {/* Security Checklist */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        border: '1px solid #e4e1da',
-        borderRadius: '0.5rem',
-        padding: '1.5rem',
-      }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#111111', marginBottom: '1rem' }}>
-          Security Checklist
-        </h2>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[
-            { item: 'Access Control Configured', completed: true },
-            { item: 'Audit Logging Enabled', completed: true },
-            { item: 'Encryption Enabled', completed: true },
-            { item: 'Regular Security Reviews', completed: false },
-            { item: 'Backup and Recovery Plan', completed: false },
-          ].map((check, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <input
-                type="checkbox"
-                checked={check.completed}
-                readOnly
-                style={{ cursor: 'pointer' }}
-              />
-              <span style={{ color: check.completed ? '#10b981' : '#888888' }}>
-                {check.item}
-              </span>
-            </div>
-          ))}
+          <div className="flex flex-col gap-3">
+            {CHECKLIST_ITEMS.map((check) => {
+              const completed = checklist[check.key]
+              return (
+                <label
+                  key={check.key}
+                  className="flex items-start gap-3 cursor-pointer rounded-lg p-2 hover:bg-neutral-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={completed}
+                    disabled={savingKey === check.key}
+                    onChange={() => void toggleChecklistItem(check.key)}
+                    className="mt-1 h-4 w-4 accent-black"
+                  />
+                  <span className="min-w-0">
+                    <span
+                      className={`block text-sm font-medium ${
+                        completed ? 'text-green-700' : 'text-neutral-700'
+                      }`}
+                    >
+                      {check.label}
+                      {savingKey === check.key ? '…' : ''}
+                    </span>
+                    <span className="block text-xs text-neutral-500 mt-0.5">{check.hint}</span>
+                  </span>
+                </label>
+              )
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }
