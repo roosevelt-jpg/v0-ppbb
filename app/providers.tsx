@@ -6,6 +6,7 @@ import { PolicyInitializer } from '@/components/policy-initializer'
 import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ReferralAttributionCapture } from '@/components/referral-attribution-capture'
+import { SiteThemeApplier } from '@/components/site-theme-applier'
 import {
   PREFERRED_LANGUAGE_KEY,
   SUPPORTED_LOCALE_CODES,
@@ -62,6 +63,7 @@ export function Providers({ children }: ProvidersProps) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <PolicyInitializer />
           <ReferralAttributionCapture />
+          <SiteThemeApplier />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>

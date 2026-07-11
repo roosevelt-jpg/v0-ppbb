@@ -3,6 +3,10 @@
  * Canonical Firestore path: platformConfig/globalSettings
  */
 
+import { DEFAULT_SITE_THEME, mergeSiteTheme, type SiteTheme } from '@/lib/site-theme'
+
+export type { SiteTheme }
+
 export interface GlobalSocialLinks {
   facebook?: string
   twitter?: string
@@ -26,6 +30,8 @@ export interface GlobalSettings {
   faviconUrl: string
   socialLinks: GlobalSocialLinks
   footerText: string
+  /** Site-wide fonts & colors (admin typography panel) */
+  theme: SiteTheme
 }
 
 export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
@@ -40,6 +46,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   faviconUrl: '/favicon.ico',
   socialLinks: {},
   footerText: 'Passive Blessings © 2025. All rights reserved.',
+  theme: DEFAULT_SITE_THEME,
 }
 
 function asString(value: unknown, fallback = ''): string {
@@ -82,5 +89,6 @@ export function mergeGlobalSettings(data: Record<string, unknown> | undefined): 
     faviconUrl: asString(data.faviconUrl, defaults.faviconUrl),
     socialLinks: mergeSocialLinks(data.socialLinks || data.social),
     footerText: asString(data.footerText, defaults.footerText),
+    theme: mergeSiteTheme(data.theme),
   }
 }

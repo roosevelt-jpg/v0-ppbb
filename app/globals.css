@@ -49,13 +49,13 @@ html[dir='rtl'] .rtl-flip-row {
 
 /* Custom checkbox styling for black theme */
 input[type='checkbox']:checked {
-  background-color: #111111;
-  border-color: #111111;
-  accent-color: #111111;
+  background-color: var(--pb-color-primary, #111111);
+  border-color: var(--pb-color-primary, #111111);
+  accent-color: var(--pb-color-primary, #111111);
 }
 
 input[type='checkbox'] {
-  accent-color: #111111;
+  accent-color: var(--pb-color-primary, #111111);
 }
 
 @theme inline {
@@ -123,8 +123,23 @@ input[type='checkbox'] {
 }
 
 :root {
-  --font-headline: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
-  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --pb-font-heading: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
+  --pb-font-title: var(--font-cormorant-garamond), 'Cormorant Garamond', serif;
+  --pb-font-subheading: var(--font-inter), 'Inter', sans-serif;
+  --pb-font-content: var(--font-inter), 'Inter', sans-serif;
+  --pb-font-button: var(--font-inter), 'Inter', sans-serif;
+  --font-headline: var(--pb-font-heading);
+  --font-body: var(--pb-font-content);
+  --pb-color-primary: #111111;
+  --pb-color-secondary: #333333;
+  --pb-color-accent: #b8860b;
+  --pb-color-background: #f7f6f2;
+  --pb-color-foreground: #111111;
+  --pb-color-muted: #888888;
+  --pb-color-border: #e4e1da;
+  --pb-color-button-bg: #111111;
+  --pb-color-button-text: #ffffff;
+  --pb-color-button-hover: #333333;
   /* Design spacing (outside @theme so they do not override max-w-* containers) */
   --pb-space-xs: 4px;
   --pb-space-sm: 8px;
@@ -134,8 +149,8 @@ input[type='checkbox'] {
   --pb-space-2xl: 32px;
   --pb-space-3xl: 48px;
   --pb-space-4xl: 64px;
-  --background: #f7f6f2;
-  --foreground: #111111;
+  --background: var(--pb-color-background);
+  --foreground: var(--pb-color-foreground);
   --card: #ffffff;
   --card-foreground: #111111;
   --popover: #ffffff;
@@ -202,40 +217,60 @@ input[type='checkbox'] {
   --sidebar-ring: #888888;
 }
 
-.font-headline { font-family: var(--font-headline); }
-.font-body     { font-family: var(--font-body); }
+.font-headline { font-family: var(--pb-font-heading, var(--font-headline)); }
+.font-title    { font-family: var(--pb-font-title, var(--font-headline)); }
+.font-subheading { font-family: var(--pb-font-subheading, var(--font-body)); }
+.font-body     { font-family: var(--pb-font-content, var(--font-body)); }
+.font-button   { font-family: var(--pb-font-button, var(--font-body)); }
 .eyebrow {
-  font-family: var(--font-body);
+  font-family: var(--pb-font-content, var(--font-body));
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 .caption-mixed {
-  font-family: var(--font-body);
+  font-family: var(--pb-font-content, var(--font-body));
 }
 .caption-mixed em,
 .caption-mixed i {
-  font-family: var(--font-headline);
+  font-family: var(--pb-font-heading, var(--font-headline));
   font-style: italic;
 }
 
 @layer base {
   * { @apply border-border outline-ring/50; }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground;
+    font-family: var(--pb-font-content, var(--font-body));
     font-size: 13px;
     line-height: 1.5;
   }
-  html { @apply font-body; }
+  html { font-family: var(--pb-font-content, var(--font-body)); }
 
-  h1 { @apply font-headline font-bold text-3xl tracking-tight leading-tight; }
-  h2 { @apply font-headline font-bold text-2xl tracking-tight leading-snug; }
-  h3 { @apply font-body font-semibold text-lg leading-snug; }
-  h4 { @apply font-body font-semibold text-base leading-snug; }
-  p  { @apply leading-relaxed font-body; }
+  h1 {
+    font-family: var(--pb-font-heading, var(--font-headline));
+    @apply font-bold text-3xl tracking-tight leading-tight;
+  }
+  h2 {
+    font-family: var(--pb-font-title, var(--font-headline));
+    @apply font-bold text-2xl tracking-tight leading-snug;
+  }
+  h3 {
+    font-family: var(--pb-font-subheading, var(--font-body));
+    @apply font-semibold text-lg leading-snug;
+  }
+  h4 {
+    font-family: var(--pb-font-subheading, var(--font-body));
+    @apply font-semibold text-base leading-snug;
+  }
+  p  {
+    font-family: var(--pb-font-content, var(--font-body));
+    @apply leading-relaxed;
+  }
 
   input, textarea, select {
     @apply px-4 py-2 text-sm rounded-xl border border-sand-border bg-white text-charcoal placeholder:text-warm-grey focus:outline-none focus:ring-2 focus:ring-ink-black focus:border-transparent transition-all;
+    font-family: var(--pb-font-content, var(--font-body));
     font-size: 13px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     /* REMOVED h-10 — let height be natural */
@@ -248,30 +283,44 @@ input[type='checkbox'] {
 
   /* Native select list highlight — OS defaults to blue without these overrides */
   select {
-    accent-color: #111111;
+    accent-color: var(--pb-color-primary, #111111);
     color-scheme: light;
   }
 
   select option {
     background-color: #ffffff;
-    color: #111111;
+    color: var(--pb-color-foreground, #111111);
   }
 
   select option:checked,
   select option:hover {
-    background-color: #111111;
-    color: #ffffff;
+    background-color: var(--pb-color-primary, #111111);
+    color: var(--pb-color-button-text, #ffffff);
   }
 
   button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]) {
-    @apply px-5 rounded-xl font-semibold text-sm bg-ink-black text-white hover:bg-charcoal active:bg-charcoal transition-all duration-200 shadow-sm hover:shadow-md font-body;
+    @apply px-5 rounded-xl font-semibold text-sm active:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
+    font-family: var(--pb-font-button, var(--font-body));
+    background-color: var(--pb-color-button-bg, #111111);
+    color: var(--pb-color-button-text, #ffffff);
     font-size: 13px;
     /* REMOVED h-10 — let height be natural */
     min-height: 36px;
   }
 
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):hover {
+    background-color: var(--pb-color-button-hover, #333333);
+  }
+
   button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):disabled { @apply opacity-50 cursor-not-allowed; }
-  button:not([data-slot='button']):not([data-dashboard-control]).secondary { @apply bg-warm-white border-2 border-sand-border text-charcoal hover:bg-sand-border; }
+  button:not([data-slot='button']):not([data-dashboard-control]).secondary {
+    background-color: var(--pb-color-background, #f7f6f2);
+    color: var(--pb-color-foreground, #111111);
+    border: 2px solid var(--pb-color-border, #e4e1da);
+  }
+  button:not([data-slot='button']):not([data-dashboard-control]).secondary:hover {
+    background-color: var(--pb-color-border, #e4e1da);
+  }
 
   label {
     /* REMOVED uppercase and tracking — breaks form labels */

@@ -23,6 +23,15 @@ import {
   DEFAULT_LOGO_ON_DARK_BG,
   DEFAULT_LOGO_ON_LIGHT_BG,
 } from '@/lib/logo-manager'
+import {
+  COLOR_FIELD_LABELS,
+  DEFAULT_SITE_THEME,
+  FONT_ROLE_LABELS,
+  SITE_FONT_OPTIONS,
+  buildGoogleFontsHref,
+  type SiteFontRole,
+  type SiteThemeColors,
+} from '@/lib/site-theme'
 
 const SOCIAL_FIELDS: Array<{ key: keyof GlobalSocialLinks; label: string }> = [
   { key: 'twitter', label: 'Twitter' },
@@ -47,6 +56,22 @@ export default function AdminCmsGlobalSettingsPage() {
   useEffect(() => subscribeToGlobalSettings(setSettings), [])
   useEffect(() => subscribeToReferralsConfig(setReferrals), [])
 
+  // Load selected Google fonts for the live preview while editing
+  useEffect(() => {
+    const theme = settings.theme || DEFAULT_SITE_THEME
+    const href = buildGoogleFontsHref(theme)
+    if (!href || typeof document === 'undefined') return
+    const id = 'pb-admin-theme-preview-fonts'
+    let link = document.getElementById(id) as HTMLLinkElement | null
+    if (!link) {
+      link = document.createElement('link')
+      link.id = id
+      link.rel = 'stylesheet'
+      document.head.appendChild(link)
+    }
+    link.href = href
+  }, [settings.theme])
+
   const handleChange = <K extends keyof GlobalSettings>(field: K, value: GlobalSettings[K]) => {
     setSettings((prev) => ({ ...prev, [field]: value }))
   }
@@ -56,6 +81,34 @@ export default function AdminCmsGlobalSettingsPage() {
       ...prev,
       socialLinks: { ...prev.socialLinks, [key]: value },
     }))
+  }
+
+  const handleThemeFontChange = (role: SiteFontRole, fontId: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      theme: {
+        ...prev.theme,
+        fonts: { ...prev.theme.fonts, [role]: fontId },
+      },
+    }))
+  }
+
+  const handleThemeColorChange = (key: keyof SiteThemeColors, value: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      theme: {
+        ...prev.theme,
+        colors: { ...prev.theme.colors, [key]: value },
+      },
+    }))
+  }
+
+  const handleResetTheme = () => {
+    setSettings((prev) => ({ ...prev, theme: DEFAULT_SITE_THEME }))
+    setMessage({
+      type: 'info',
+      text: 'Theme reset to defaults in this form. Click Save global settings to apply.',
+    })
   }
 
   const handleFaviconUpload = async (file: File) => {
@@ -93,7 +146,7 @@ export default function AdminCmsGlobalSettingsPage() {
       if (!json.success) throw new Error(json.error || 'Save failed')
       setMessage({
         type: 'success',
-        text: 'Global settings saved. Public contact, footer socials, WhatsApp, and logos update live.',
+        text: 'Global settings saved. Branding, WhatsApp, fonts, and colors update live on the site.',
       })
     } catch (error: unknown) {
       setMessage({
@@ -177,7 +230,8 @@ export default function AdminCmsGlobalSettingsPage() {
             Global Settings
           </h1>
           <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Single source for platform branding, contact details, social links, and WhatsApp. API
+            Single source for platform branding, typography, colors, contact details, social links,
+            and WhatsApp. API
             credentials live on{' '}
             <Link href="/admin/integrations" className="underline font-medium">
               Integrations
@@ -438,6 +492,165 @@ export default function AdminCmsGlobalSettingsPage() {
                 />
               </div>
             ))}
+          </div>
+        </Card>
+
+        {/* Typography & Colors */}
+        <Card className="p-4 sm:p-6 space-y-6 w-full min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <p
+                className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                Appearance
+              </p>
+              <h2
+                className="text-xl text-neutral-900"
+                style={{ fontFamily: 'Cormorant Garamond, serif' }}
+              >
+                Typography & colors
+              </h2>
+              <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Choose fonts for headings, titles, subheadings, body content, and buttons, plus brand
+                colors. Changes apply site-wide after you save.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleResetTheme}
+              className="min-h-[44px] px-4 !bg-white !text-black border border-neutral-300 rounded text-sm font-semibold hover:!bg-neutral-50 shrink-0"
+            >
+              Reset to defaults
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">Fonts</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {(Object.keys(FONT_ROLE_LABELS) as SiteFontRole[]).map((role) => (
+                <div key={role}>
+                  <label className="block text-sm font-medium mb-1">
+                    {FONT_ROLE_LABELS[role].label}
+                  </label>
+                  <p className="text-xs text-neutral-500 mb-1.5">{FONT_ROLE_LABELS[role].hint}</p>
+                  <select
+                    value={settings.theme?.fonts?.[role] || DEFAULT_SITE_THEME.fonts[role]}
+                    onChange={(e) => handleThemeFontChange(role, e.target.value)}
+                    className={fieldClass}
+                  >
+                    {SITE_FONT_OPTIONS.map((font) => (
+                      <option key={font.id} value={font.id}>
+                        {font.label} ({font.category})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">Colors</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {COLOR_FIELD_LABELS.map(({ key, label, hint }) => {
+                const value =
+                  settings.theme?.colors?.[key] || DEFAULT_SITE_THEME.colors[key]
+                return (
+                  <div key={key}>
+                    <label className="block text-sm font-medium mb-1">{label}</label>
+                    <p className="text-xs text-neutral-500 mb-1.5">{hint}</p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={value.length === 7 ? value : '#111111'}
+                        onChange={(e) => handleThemeColorChange(key, e.target.value)}
+                        className="h-11 w-14 shrink-0 border border-neutral-300 rounded cursor-pointer bg-white p-1"
+                        aria-label={label}
+                      />
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => handleThemeColorChange(key, e.target.value)}
+                        className={fieldClass}
+                        placeholder="#111111"
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div
+            className="rounded-lg border border-neutral-200 p-4 space-y-3"
+            style={{
+              background: settings.theme?.colors?.background || DEFAULT_SITE_THEME.colors.background,
+              color: settings.theme?.colors?.foreground || DEFAULT_SITE_THEME.colors.foreground,
+              borderColor: settings.theme?.colors?.border || DEFAULT_SITE_THEME.colors.border,
+            }}
+          >
+            <p className="text-xs uppercase tracking-wide opacity-70">Live preview</p>
+            <p
+              className="text-3xl font-bold"
+              style={{
+                fontFamily:
+                  SITE_FONT_OPTIONS.find(
+                    (f) => f.id === (settings.theme?.fonts?.heading || 'cormorant-garamond')
+                  )?.stack,
+              }}
+            >
+              Heading sample
+            </p>
+            <p
+              className="text-2xl font-bold"
+              style={{
+                fontFamily:
+                  SITE_FONT_OPTIONS.find(
+                    (f) => f.id === (settings.theme?.fonts?.title || 'cormorant-garamond')
+                  )?.stack,
+              }}
+            >
+              Title sample
+            </p>
+            <p
+              className="text-lg font-semibold"
+              style={{
+                fontFamily:
+                  SITE_FONT_OPTIONS.find(
+                    (f) => f.id === (settings.theme?.fonts?.subheading || 'inter')
+                  )?.stack,
+              }}
+            >
+              Subheading sample
+            </p>
+            <p
+              className="text-sm"
+              style={{
+                fontFamily:
+                  SITE_FONT_OPTIONS.find(
+                    (f) => f.id === (settings.theme?.fonts?.content || 'inter')
+                  )?.stack,
+                color: settings.theme?.colors?.muted || DEFAULT_SITE_THEME.colors.muted,
+              }}
+            >
+              Body content sample — community events, volunteering, and support.
+            </p>
+            <button
+              type="button"
+              className="!min-h-[44px] !px-5 !rounded-lg !text-sm !font-semibold !shadow-none"
+              style={{
+                fontFamily:
+                  SITE_FONT_OPTIONS.find(
+                    (f) => f.id === (settings.theme?.fonts?.button || 'inter')
+                  )?.stack,
+                backgroundColor:
+                  settings.theme?.colors?.buttonBg || DEFAULT_SITE_THEME.colors.buttonBg,
+                color: settings.theme?.colors?.buttonText || DEFAULT_SITE_THEME.colors.buttonText,
+              }}
+            >
+              Button sample
+            </button>
           </div>
         </Card>
 
