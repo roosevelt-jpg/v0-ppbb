@@ -9,7 +9,7 @@ import { getCategoryColor, getCategoryName } from '@/lib/events-config'
 import type { NormalizedEvent } from '@/lib/event-utils'
 import {
   getEventStartDate,
-  getEventTimeLabel,
+  getEventTimeRangeLabel,
   getGenderBadgeLabel,
 } from '@/lib/event-utils'
 import { getEventPriceCornerLabel } from '@/lib/event-host'
@@ -92,9 +92,12 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           </div>
         )}
 
-        <h3 className="font-headline text-lg sm:text-xl font-bold text-foreground break-words mb-3">
+        <h3 className="font-headline text-lg sm:text-xl font-bold text-foreground break-words mb-1">
           {event.title}
         </h3>
+        <p className="font-body text-sm font-medium mb-3 break-words" style={{ color: categoryColor }}>
+          {categoryName}
+        </p>
 
         <div className="space-y-2 mb-3 text-sm text-muted-foreground">
           <div className="flex items-start gap-2 min-w-0">
@@ -103,7 +106,7 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           </div>
           <div className="flex items-start gap-2 min-w-0">
             <Clock className="w-4 h-4 mt-0.5 shrink-0" />
-            <span className="break-words">{getEventTimeLabel(event)}</span>
+            <span className="break-words">{getEventTimeRangeLabel(event)}</span>
           </div>
           <div className="flex items-start gap-2 min-w-0">
             <MapPin className="w-4 h-4 mt-0.5 shrink-0" />

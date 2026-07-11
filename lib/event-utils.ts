@@ -3,6 +3,9 @@ import type { Event, GenderRestriction, PricingType } from '@/lib/event-types'
 
 export type EventsAudienceFilter = 'all' | 'sisters' | 'brothers' | 'mixed' | 'family'
 
+/** Category filter id from CMS (`all` or a category id). */
+export type EventsCategoryFilter = string
+
 export interface NormalizedEvent extends Event {
   id: string
 }
@@ -43,6 +46,39 @@ export function getEventTimeLabel(event: Partial<Event> & { time?: string; start
   if (typeof event.startTime === 'string' && event.startTime) return event.startTime
   const start = getEventStartDate(event)
   return start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+}
+
+function formatTimeOfDay(date: Date): string {
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+}
+
+/** Start–end range when end differs from start; otherwise start only. */
+export function getEventTimeRangeLabel(
+  event: Partial<Event> & { time?: string; startTime?: string; endTime?: string }
+): string {
+  const start = getEventStartDate(event)
+  const end = getEventEndDate(event)
+
+  let startLabel = ''
+  if (typeof event.startTime === 'string' && event.startTime.trim()) {
+    startLabel = event.startTime.trim()
+  } else if (typeof event.time === 'string' && event.time.trim()) {
+    startLabel = event.time.trim()
+  } else {
+    startLabel = formatTimeOfDay(start)
+  }
+
+  let endLabel = ''
+  if (typeof event.endTime === 'string' && event.endTime.trim()) {
+    endLabel = event.endTime.trim()
+  } else if (end.getTime() !== start.getTime()) {
+    endLabel = formatTimeOfDay(end)
+  }
+
+  if (endLabel && endLabel !== startLabel) {
+    return `${startLabel} – ${endLabel}`
+  }
+  return startLabel
 }
 
 export function getEventLocationLabel(event: Partial<Event> & { location?: string }): string {
@@ -132,6 +168,18 @@ export function matchesAudienceFilter(
     )
   }
   return true
+}
+
+/** Match event against CMS category filter tab. */
+export function matchesCategoryFilter(
+  event: NormalizedEvent,
+  filter: EventsCategoryFilter
+): boolean {
+  if (!filter || filter === 'all') return true
+  const needle = filter.trim().toLowerCase()
+  if (!needle) return true
+  if (event.category.toLowerCase() === needle) return true
+  return event.tags.some((t) => t.toLowerCase() === needle)
 }
 
 export function isSameMonth(date: Date, month: Date): boolean {

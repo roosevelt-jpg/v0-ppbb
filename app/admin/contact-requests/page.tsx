@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Mail, Trash2, Check, AlertCircle } from 'lucide-react'
+import { auth } from '@/lib/firebase'
 
 interface ContactMessage {
   id: string
@@ -14,6 +15,13 @@ interface ContactMessage {
   createdAt: Date
   respondedAt?: Date
   response?: string
+}
+
+async function authHeaders(): Promise<HeadersInit> {
+  const token = await auth.currentUser?.getIdToken()
+  return token
+    ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+    : { 'Content-Type': 'application/json' }
 }
 
 export default function ContactRequestsPage() {
@@ -37,13 +45,15 @@ export default function ContactRequestsPage() {
         filter === 'all'
           ? '/api/contact?source=legacy'
           : `/api/contact?source=legacy&status=${filter}`
-      const res = await fetch(url, { cache: 'no-store' })
+      const headers = await authHeaders()
+      const res = await fetch(url, { cache: 'no-store', headers })
       const json = await res.json()
 
       if (json.success && Array.isArray(json.data)) {
         setMessages(json.data)
       } else {
         setMessages([])
+        if (res.status === 401) setError('Unauthorized — sign in as admin again.')
       }
     } catch (err) {
       console.error('[v0] Error loading messages:', err)
@@ -56,9 +66,10 @@ export default function ContactRequestsPage() {
   const handleMarkAsRead = async (id: string) => {
     try {
       setError('')
+      const headers = await authHeaders()
       const res = await fetch('/api/contact', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ id, status: 'read' }),
       })
       const json = await res.json()
@@ -73,9 +84,10 @@ export default function ContactRequestsPage() {
     if (!response.trim()) return
     try {
       setError('')
+      const headers = await authHeaders()
       const res = await fetch('/api/contact', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ id, status: 'resolved', response }),
       })
       const json = await res.json()
@@ -93,7 +105,8 @@ export default function ContactRequestsPage() {
     if (!confirm('Delete this message?')) return
     try {
       setError('')
-      const res = await fetch(`/api/contact?id=${id}`, { method: 'DELETE' })
+      const headers = await authHeaders()
+      const res = await fetch(`/api/contact?id=${id}`, { method: 'DELETE', headers })
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
       setSelectedMessage(null)

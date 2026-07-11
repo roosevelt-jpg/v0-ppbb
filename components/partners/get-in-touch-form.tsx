@@ -55,6 +55,7 @@ export function GetInTouchForm({
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
+          source: 'partners',
         }),
       })
       const json = await res.json()

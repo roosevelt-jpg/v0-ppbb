@@ -16,6 +16,11 @@ import {
 import type { EventTag, GenderRestriction } from '@/lib/types'
 import type { EventCoupon, EventRecurrence, EventStatus, TicketType } from '@/lib/event-types'
 import { EventHostingFields } from '@/components/events/event-hosting-fields'
+import {
+  subscribeToEventsConfig,
+  DEFAULT_EVENTS_CONFIG,
+  type EventsCategory,
+} from '@/lib/events-config'
 
 interface EventFormData {
   title: string
@@ -35,6 +40,7 @@ interface EventFormData {
   paymentGateway?: 'stripe' | 'paypal' | 'ziina'
   maxAttendees?: number
   status: 'draft' | 'published'
+  category: string
   genderRestriction: GenderRestriction
   tags: EventTag[]
   ticketTypes: TicketType[]
@@ -65,6 +71,7 @@ const EMPTY_FORM: EventFormData = {
   paymentGateway: 'stripe',
   maxAttendees: undefined,
   status: 'draft',
+  category: DEFAULT_EVENTS_CONFIG.categories[0]?.id || 'social',
   genderRestriction: 'mixed',
   tags: [],
   ticketTypes: [],
@@ -104,6 +111,11 @@ function CreateEventForm() {
   const [approvalNotes, setApprovalNotes] = useState<string | null>(null)
   const [existingStatus, setExistingStatus] = useState<EventStatus | null>(null)
   const [formData, setFormData] = useState<EventFormData>(EMPTY_FORM)
+  const [categories, setCategories] = useState<EventsCategory[]>(DEFAULT_EVENTS_CONFIG.categories)
+
+  useEffect(() => subscribeToEventsConfig((cfg) => {
+    setCategories(cfg.categories)
+  }), [])
 
   useEffect(() => {
     if (!eventId) return
@@ -139,6 +151,7 @@ function CreateEventForm() {
           paymentGateway: mapped.paymentGateway,
           maxAttendees: mapped.maxAttendees,
           status: mapped.status,
+          category: mapped.category || 'social',
           genderRestriction: mapped.genderRestriction,
           tags: mapped.tags,
           ticketTypes: mapped.ticketTypes || [],
@@ -202,6 +215,7 @@ function CreateEventForm() {
       if (!formData.title?.trim()) throw new Error('Event title is required')
       if (!formData.description?.trim()) throw new Error('Event description is required')
       if (!formData.date?.trim()) throw new Error('Event date is required')
+      if (!formData.category?.trim()) throw new Error('Event category is required')
       if (!formData.locationName?.trim()) throw new Error('Event location is required')
       if (formData.isPaid && (!formData.price || formData.price <= 0)) {
         throw new Error('Paid events require a ticket price greater than 0')
@@ -494,6 +508,35 @@ function CreateEventForm() {
 
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-black">Event Type & Audience</h2>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category (public filter tag) *
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => handleChange('category', e.target.value)}
+                className="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg"
+                required
+              >
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+                {formData.category &&
+                  !categories.some((c) => c.id === formData.category) && (
+                    <option value={formData.category}>{formData.category}</option>
+                  )}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Managed in{' '}
+                <Link href="/admin/cms/events" className="underline">
+                  CMS → Events
+                </Link>
+                . This drives /events filters and card labels.
+              </p>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">Who can attend?</label>

@@ -1,38 +1,21 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   subscribeToPartnersConfig,
   DEFAULT_PARTNERS_CONFIG,
   PartnersPlatformConfig,
+  getInquiryCategoryHref,
 } from '@/lib/partners-page-config'
 import { PartnersLogosGrid } from '@/components/partners/partners-logos-grid'
 import { GetInTouchForm } from '@/components/partners/get-in-touch-form'
 
-export const INQUIRY_CATEGORIES = [
-  {
-    id: 'partnerships',
-    label: 'Partnerships',
-    url: 'https://tinyurl.com/partnerpb26',
-  },
-  {
-    id: 'sponsorship',
-    label: 'Sponsorship',
-    url: 'https://tinyurl.com/partnerpb26',
-  },
-  {
-    id: 'charity-support',
-    label: 'Seeking Charity Support',
-    url: 'https://tinyurl.com/pbcharitysupport',
-  },
-] as const
-
-export type InquiryCategoryId = (typeof INQUIRY_CATEGORIES)[number]['id']
-
 export function PartnersPageCopy() {
+  const router = useRouter()
   const [config, setConfig] = useState<PartnersPlatformConfig>(DEFAULT_PARTNERS_CONFIG)
   const [ready, setReady] = useState(false)
-  const [inquiryCategory, setInquiryCategory] = useState<InquiryCategoryId>('partnerships')
+  const [inquiryCategoryId, setInquiryCategoryId] = useState('')
 
   useEffect(
     () =>
@@ -41,6 +24,19 @@ export function PartnersPageCopy() {
         setReady(true)
       }),
     []
+  )
+
+  const categories = config.pageConfig.inquiryCategories
+
+  useEffect(() => {
+    if (categories.length > 0 && !inquiryCategoryId) {
+      setInquiryCategoryId(categories[0].id)
+    }
+  }, [categories, inquiryCategoryId])
+
+  const selected = useMemo(
+    () => categories.find((c) => c.id === inquiryCategoryId) || categories[0],
+    [categories, inquiryCategoryId]
   )
 
   if (!ready) {
@@ -62,15 +58,28 @@ export function PartnersPageCopy() {
   }
 
   const pc = config.pageConfig
-  const selected = INQUIRY_CATEGORIES.find((c) => c.id === inquiryCategory) || INQUIRY_CATEGORIES[0]
 
   const openInquiry = () => {
-    window.open(selected.url, '_blank', 'noopener,noreferrer')
+    if (!selected) {
+      alert('No inquiry category available.')
+      return
+    }
+    const href = getInquiryCategoryHref(selected)
+    if (!href) {
+      alert(
+        'This inquiry category is not linked to a form yet. Please ask an admin to map it under CMS → Partners.'
+      )
+      return
+    }
+    if (/^https?:\/\//i.test(href)) {
+      window.open(href, '_blank', 'noopener,noreferrer')
+      return
+    }
+    router.push(href)
   }
 
   return (
     <div className="space-y-12 sm:space-y-16 md:space-y-20 min-w-0">
-      {/* Hero */}
       <section className="min-w-0">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.eyebrow}</p>
         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4 text-foreground break-words max-w-[42rem]">
@@ -81,7 +90,6 @@ export function PartnersPageCopy() {
         </p>
       </section>
 
-      {/* Sponsorship deck */}
       <section className="min-w-0 rounded-lg border border-[#e4e1da] bg-[#f7f6f2] p-5 sm:p-8">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.sponsorshipDeckEyebrow}</p>
         <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words">
@@ -109,7 +117,6 @@ export function PartnersPageCopy() {
         )}
       </section>
 
-      {/* Tracks */}
       <section className="min-w-0">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.tracksEyebrow}</p>
         <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-6 sm:mb-8 break-words">
@@ -129,7 +136,6 @@ export function PartnersPageCopy() {
         </div>
       </section>
 
-      {/* Inquiry with category → external form */}
       <section id="inquiry" className="min-w-0 scroll-mt-24">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.inquiryEyebrow}</p>
         <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words max-w-[36rem]">
@@ -146,11 +152,11 @@ export function PartnersPageCopy() {
             </label>
             <select
               id="inquiry-category"
-              value={inquiryCategory}
-              onChange={(e) => setInquiryCategory(e.target.value as InquiryCategoryId)}
+              value={selected?.id || ''}
+              onChange={(e) => setInquiryCategoryId(e.target.value)}
               className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black"
             >
-              {INQUIRY_CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.label}
                 </option>
@@ -167,14 +173,12 @@ export function PartnersPageCopy() {
         </div>
       </section>
 
-      {/* Trusted by — same partners/ collection as homepage marquee */}
       <PartnersLogosGrid
         eyebrow={pc.trustedByLabel}
         headline={pc.trustedBySubLabel}
         description={pc.trustedByDescription}
       />
 
-      {/* Get in touch form at bottom */}
       <GetInTouchForm />
     </div>
   )

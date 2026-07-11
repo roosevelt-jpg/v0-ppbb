@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { requireAdminFromRequest, unauthorizedResponse } from '@/lib/admin-api-auth'
 
 /**
  * Contact form API.
- * New submissions go to `contactSubmissions` (Part 6D).
- * Legacy admin tools that still read `contact-messages` remain supported via GET/PUT/DELETE.
+ * Public POST → `contactSubmissions` (+ legacy dual-write).
+ * Admin GET/PUT/DELETE require Bearer token.
  */
+
+const ALLOWED_SOURCES = new Set(['partners', 'contact', 'website'])
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, phone, subject, message } = body
+    const { name, email, phone, subject, message, source: rawSource } = body
 
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
@@ -20,28 +23,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const source =
+      typeof rawSource === 'string' && ALLOWED_SOURCES.has(rawSource.trim().toLowerCase())
+        ? rawSource.trim().toLowerCase()
+        : 'website'
+
     const db = getAdminDb()
     const now = new Date()
 
     const contactData = sanitizeForFirestore({
-      name: String(name).trim(),
-      email: String(email).trim().toLowerCase(),
-      phone: phone ? String(phone).trim() : '',
-      subject: String(subject).trim(),
-      message: String(message).trim(),
+      name: String(name).trim().slice(0, 200),
+      email: String(email).trim().toLowerCase().slice(0, 320),
+      phone: phone ? String(phone).trim().slice(0, 40) : '',
+      subject: String(subject).trim().slice(0, 200),
+      message: String(message).trim().slice(0, 10000),
+      source,
       submittedAt: now,
       status: 'unread',
       createdAt: now,
     })
 
-    // Canonical collection for Part 6D admin table
     const docRef = await db.collection('contactSubmissions').add(contactData)
 
-    // Dual-write legacy collection so /admin/contact-requests stays usable
     try {
       await db.collection('contact-messages').add({
         ...contactData,
-        id: docRef.id,
+        submissionId: docRef.id,
       })
     } catch (legacyErr) {
       console.warn('[v0] Legacy contact-messages write skipped:', legacyErr)
@@ -49,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: { id: docRef.id, ...contactData },
+      data: { id: docRef.id },
       message: 'Message received successfully',
     })
   } catch (error) {
@@ -63,11 +70,14 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) return unauthorizedResponse()
+
     const db = getAdminDb()
     const status = request.nextUrl.searchParams.get('status')
+    const subject = request.nextUrl.searchParams.get('subject')
     const source = request.nextUrl.searchParams.get('source') || 'submissions'
 
-    // Prefer contactSubmissions (6D); fall back to legacy for contact-requests page
     if (source === 'legacy') {
       let query = db.collection('contact-messages').orderBy('createdAt', 'desc')
       if (status) {
@@ -100,13 +110,19 @@ export async function GET(request: NextRequest) {
         phone: data.phone || '',
         subject: data.subject || '',
         message: data.message || '',
+        source: data.source || 'website',
         submittedAt: data.submittedAt?.toDate?.() || data.submittedAt || null,
         status: data.status || 'unread',
+        response: data.response || '',
+        respondedAt: data.respondedAt?.toDate?.() || data.respondedAt || null,
       }
     })
 
     if (status && status !== 'all') {
-      submissions = submissions.filter((s) => s.subject === status)
+      submissions = submissions.filter((s) => s.status === status)
+    }
+    if (subject && subject !== 'all') {
+      submissions = submissions.filter((s) => s.subject === subject)
     }
 
     return NextResponse.json({ success: true, data: submissions })
@@ -121,6 +137,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) return unauthorizedResponse()
+
     const db = getAdminDb()
     const body = await request.json()
     const { id, status, response, collection: col } = body
@@ -142,6 +161,22 @@ export async function PUT(request: NextRequest) {
     const collectionName = col === 'contactSubmissions' ? 'contactSubmissions' : 'contact-messages'
     await db.collection(collectionName).doc(id).set(updateData, { merge: true })
 
+    // Keep both collections in sync when updating submissions
+    if (collectionName === 'contactSubmissions') {
+      try {
+        const legacySnap = await db
+          .collection('contact-messages')
+          .where('submissionId', '==', id)
+          .limit(1)
+          .get()
+        if (!legacySnap.empty) {
+          await legacySnap.docs[0].ref.set(updateData, { merge: true })
+        }
+      } catch {
+        /* legacy sync optional */
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Message updated successfully',
@@ -157,6 +192,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) return unauthorizedResponse()
+
     const db = getAdminDb()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
@@ -168,6 +206,21 @@ export async function DELETE(request: NextRequest) {
 
     const collectionName = source === 'submissions' ? 'contactSubmissions' : 'contact-messages'
     await db.collection(collectionName).doc(id).delete()
+
+    if (collectionName === 'contactSubmissions') {
+      try {
+        const legacySnap = await db
+          .collection('contact-messages')
+          .where('submissionId', '==', id)
+          .get()
+        const batch = db.batch()
+        legacySnap.docs.forEach((d) => batch.delete(d.ref))
+        if (!legacySnap.empty) await batch.commit()
+      } catch {
+        /* optional */
+      }
+    }
+
     return NextResponse.json({ success: true, message: 'Message deleted' })
   } catch (error) {
     console.error('[v0] Contact message delete error:', error)

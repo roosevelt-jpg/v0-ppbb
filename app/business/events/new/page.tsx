@@ -14,6 +14,11 @@ import { GoogleMapPin } from '@/components/google-map-pin'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { EventHostingFields } from '@/components/events/event-hosting-fields'
 import type { EventCoupon, EventRecurrence, TicketType } from '@/lib/event-types'
+import {
+  subscribeToEventsConfig,
+  DEFAULT_EVENTS_CONFIG,
+  type EventsCategory,
+} from '@/lib/events-config'
 
 export default function NewEventPage() {
   return (
@@ -41,7 +46,7 @@ function BusinessEventForm() {
   const [formData, setFormData] = React.useState({
     title: '',
     description: '',
-    category: 'general',
+    category: DEFAULT_EVENTS_CONFIG.categories[0]?.id || 'social',
     genderRestriction: 'mixed',
     locationName: '',
     locationAddress: '',
@@ -69,7 +74,10 @@ function BusinessEventForm() {
     recurrence: null as EventRecurrence | null,
   })
 
+  const [categories, setCategories] = React.useState<EventsCategory[]>(DEFAULT_EVENTS_CONFIG.categories)
   const [uploadingBanner, setUploadingBanner] = React.useState(false)
+
+  React.useEffect(() => subscribeToEventsConfig((cfg) => setCategories(cfg.categories)), [])
 
   const [saving, setSaving] = React.useState(false)
   const [loading, setLoading] = React.useState(isEditing)
@@ -380,10 +388,11 @@ function BusinessEventForm() {
                       fontSize: '14px',
                     }}
                   >
-                    <option>general</option>
-                    <option>workshop</option>
-                    <option>gala</option>
-                    <option>seminar</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

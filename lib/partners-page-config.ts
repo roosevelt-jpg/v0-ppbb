@@ -8,6 +8,17 @@ export interface PartnersTrack {
   description: string
 }
 
+export interface PartnersInquiryCategory {
+  id: string
+  label: string
+  /** Linked custom form id from Admin → Forms */
+  formId: string
+  /** Public slug — used for /forms/{slug} */
+  formSlug: string
+  /** Optional external URL override (used if set; otherwise formSlug) */
+  formUrl: string
+}
+
 export interface PartnersPageConfig {
   eyebrow: string
   headline: string
@@ -24,6 +35,7 @@ export interface PartnersPageConfig {
   inquiryHeadline: string
   inquiryBody: string
   inquiryCTA: string
+  inquiryCategories: PartnersInquiryCategory[]
   trustedByLabel: string
   trustedBySubLabel: string
   trustedByDescription: string
@@ -66,6 +78,29 @@ export const DEFAULT_PARTNERS_PAGE_CONFIG: PartnersPageConfig = {
   inquiryHeadline: 'Tell us what you have in mind.',
   inquiryBody: 'Brief us on your vision and our partnerships team will respond within 48 hours.',
   inquiryCTA: 'Start a conversation',
+  inquiryCategories: [
+    {
+      id: 'partnerships',
+      label: 'Partnerships',
+      formId: '',
+      formSlug: '',
+      formUrl: '',
+    },
+    {
+      id: 'sponsorship',
+      label: 'Sponsorship',
+      formId: '',
+      formSlug: '',
+      formUrl: '',
+    },
+    {
+      id: 'charity-support',
+      label: 'Seeking Charity Support',
+      formId: '',
+      formSlug: '',
+      formUrl: '',
+    },
+  ],
   trustedByLabel: 'TRUSTED BY',
   trustedBySubLabel: 'Previous sponsors & partners.',
   trustedByDescription:
@@ -74,6 +109,14 @@ export const DEFAULT_PARTNERS_PAGE_CONFIG: PartnersPageConfig = {
 
 export const DEFAULT_PARTNERS_CONFIG: PartnersPlatformConfig = {
   pageConfig: DEFAULT_PARTNERS_PAGE_CONFIG,
+}
+
+export function getInquiryCategoryHref(category: PartnersInquiryCategory): string | null {
+  const external = category.formUrl?.trim()
+  if (external) return external
+  const slug = category.formSlug?.trim()
+  if (slug) return `/forms/${slug}`
+  return null
 }
 
 function mergeTracks(data: unknown): PartnersTrack[] {
@@ -89,6 +132,31 @@ function mergeTracks(data: unknown): PartnersTrack[] {
     })
     .filter((t) => t.title.trim().length > 0 || t.description.trim().length > 0)
   return merged.length > 0 ? merged : DEFAULT_PARTNERS_PAGE_CONFIG.tracks
+}
+
+function mergeInquiryCategories(data: unknown): PartnersInquiryCategory[] {
+  const defaults = DEFAULT_PARTNERS_PAGE_CONFIG.inquiryCategories
+  if (!Array.isArray(data) || data.length === 0) return defaults
+  const merged = data
+    .filter((item) => item && typeof item === 'object')
+    .map((item, index) => {
+      const c = item as Partial<PartnersInquiryCategory>
+      const fallback = defaults[index] || defaults[0]
+      return {
+        id:
+          typeof c.id === 'string' && c.id.trim()
+            ? c.id.trim()
+            : fallback?.id || `inquiry-${index}`,
+        label:
+          typeof c.label === 'string' && c.label.trim()
+            ? c.label.trim()
+            : fallback?.label || 'Inquiry',
+        formId: typeof c.formId === 'string' ? c.formId : '',
+        formSlug: typeof c.formSlug === 'string' ? c.formSlug : '',
+        formUrl: typeof c.formUrl === 'string' ? c.formUrl : '',
+      }
+    })
+  return merged.length > 0 ? merged : defaults
 }
 
 function mergePageConfig(data: unknown): PartnersPageConfig {
@@ -129,6 +197,7 @@ function mergePageConfig(data: unknown): PartnersPageConfig {
       typeof d.inquiryHeadline === 'string' ? d.inquiryHeadline : defaults.inquiryHeadline,
     inquiryBody: typeof d.inquiryBody === 'string' ? d.inquiryBody : defaults.inquiryBody,
     inquiryCTA: typeof d.inquiryCTA === 'string' ? d.inquiryCTA : defaults.inquiryCTA,
+    inquiryCategories: mergeInquiryCategories(d.inquiryCategories),
     trustedByLabel:
       typeof d.trustedByLabel === 'string' ? d.trustedByLabel : defaults.trustedByLabel,
     trustedBySubLabel:

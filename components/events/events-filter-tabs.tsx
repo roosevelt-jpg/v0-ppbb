@@ -2,12 +2,11 @@
 
 import React from 'react'
 import type { EventsFilterTab } from '@/lib/events-config'
-import type { EventsAudienceFilter } from '@/lib/event-utils'
 
 interface EventsFilterTabsProps {
   tabs: EventsFilterTab[]
-  active: EventsAudienceFilter
-  onChange: (filter: EventsAudienceFilter) => void
+  active: string
+  onChange: (filter: string) => void
 }
 
 export function EventsFilterTabs({ tabs, active, onChange }: EventsFilterTabsProps) {

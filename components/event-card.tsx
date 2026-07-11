@@ -2,15 +2,17 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Calendar, MapPin, Users, Download } from 'lucide-react'
+import { Calendar, MapPin, Users, Download, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
+import { getEventTimeRangeLabel } from '@/lib/event-utils'
 
 type EventCardEvent = Record<string, unknown> & {
   id?: string
   slug?: string
   title?: string
   description?: string
+  category?: string
   date?: unknown
   time?: string
   endTime?: string
@@ -46,13 +48,7 @@ function toDate(value: unknown): Date | null {
 }
 
 function getTimeLabel(event: EventCardEvent): string {
-  if (typeof event.time === 'string' && event.time.trim()) return event.time.trim()
-  if (typeof event.startTime === 'string' && (event.startTime as string).trim()) {
-    return (event.startTime as string).trim()
-  }
-  const start = toDate(event.startDate) || toDate(event.date)
-  if (!start) return ''
-  return start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  return getEventTimeRangeLabel(event as Parameters<typeof getEventTimeRangeLabel>[0])
 }
 
 function getLocationLabel(event: EventCardEvent): string {
@@ -175,16 +171,24 @@ END:VCALENDAR`
           </div>
         )}
 
-        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">{title}</h3>
+        <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2">{title}</h3>
+        {typeof event.category === 'string' && event.category.trim() ? (
+          <p className="text-sm font-medium text-neutral-700 mb-2 capitalize">
+            {event.category.replace(/-/g, ' ')}
+          </p>
+        ) : null}
 
         <div className="space-y-2 mb-4 text-sm">
           <div className="flex items-start gap-2 text-gray-700">
             <Calendar size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
-            <span>
-              {start ? format(start, 'MMM d, yyyy') : 'Date TBA'}
-              {timeLabel ? ` at ${timeLabel}` : ''}
-            </span>
+            <span>{start ? format(start, 'MMM d, yyyy') : 'Date TBA'}</span>
           </div>
+          {timeLabel ? (
+            <div className="flex items-start gap-2 text-gray-700">
+              <Clock size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
+              <span>{timeLabel}</span>
+            </div>
+          ) : null}
           <div className="flex items-start gap-2 text-gray-700">
             <MapPin size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
             <span className="line-clamp-1">{locationLabel}</span>

@@ -19,16 +19,24 @@ import {
   DEFAULT_PARTNERS_CONFIG,
   PartnersPlatformConfig,
   PartnersTrack,
+  PartnersInquiryCategory,
 } from '@/lib/partners-page-config'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
+import { subscribeToForms } from '@/lib/form-builder-queries'
+import type { CustomForm } from '@/lib/form-builder-types'
+import { getPublicFormPath } from '@/lib/form-builder-utils'
 
 export default function AdminCmsPartnersPage() {
   const [config, setConfig] = useState<PartnersPlatformConfig>(DEFAULT_PARTNERS_CONFIG)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [forms, setForms] = useState<CustomForm[]>([])
 
   useEffect(() => subscribeToPartnersConfig(setConfig), [])
+  useEffect(() => subscribeToForms(setForms), [])
+
+  const activeForms = forms.filter((f) => f.status === 'active' && f.slug)
 
   const persistConfig = async (nextConfig: PartnersPlatformConfig) => {
     const res = await fetch('/api/platform-config/partners', {
@@ -149,6 +157,46 @@ export default function AdminCmsPartnersPage() {
     })
   }
 
+  const updateInquiryCategory = (
+    index: number,
+    patch: Partial<PartnersInquiryCategory>
+  ) => {
+    setConfig((prev) => {
+      const inquiryCategories = [...prev.pageConfig.inquiryCategories]
+      inquiryCategories[index] = { ...inquiryCategories[index], ...patch }
+      return { ...prev, pageConfig: { ...prev.pageConfig, inquiryCategories } }
+    })
+  }
+
+  const addInquiryCategory = () => {
+    setConfig((prev) => ({
+      ...prev,
+      pageConfig: {
+        ...prev.pageConfig,
+        inquiryCategories: [
+          ...prev.pageConfig.inquiryCategories,
+          {
+            id: `inquiry-${Date.now()}`,
+            label: 'New category',
+            formId: '',
+            formSlug: '',
+            formUrl: '',
+          },
+        ],
+      },
+    }))
+  }
+
+  const removeInquiryCategory = (index: number) => {
+    setConfig((prev) => ({
+      ...prev,
+      pageConfig: {
+        ...prev.pageConfig,
+        inquiryCategories: prev.pageConfig.inquiryCategories.filter((_, i) => i !== index),
+      },
+    }))
+  }
+
   const pc = config.pageConfig
 
   return (
@@ -158,8 +206,8 @@ export default function AdminCmsPartnersPage() {
           <div>
             <h1 className="font-headline text-3xl font-bold text-neutral-900">Partners Page</h1>
             <p className="text-sm text-neutral-600 mt-1 font-body">
-              Edit public /partners copy, sponsorship deck PDF, tracks, and inquiry labels. Logos
-              grid and inquiry form are managed in later CMS batches.
+              Edit public /partners copy, sponsorship deck PDF, tracks, and map inquiry categories
+              to Admin → Forms.
             </p>
           </div>
           <Button
@@ -452,6 +500,116 @@ export default function AdminCmsPartnersPage() {
                 className="w-full min-h-24"
               />
             </div>
+          </div>
+
+          <div className="pt-4 border-t border-neutral-200 space-y-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <h3 className="font-semibold text-sm">Inquiry categories → forms</h3>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Create forms under Admin → Forms, copy the public link (or pick the form here).
+                  “Start a conversation” opens that form for the selected category.
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={addInquiryCategory}
+                className="bg-black text-white hover:bg-gray-800 text-xs min-h-[36px]"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add category
+              </Button>
+            </div>
+
+            {pc.inquiryCategories.map((cat, i) => (
+              <div
+                key={cat.id}
+                className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end p-3 border rounded-lg"
+              >
+                <div className="md:col-span-3">
+                  <label className="text-xs font-medium">Label</label>
+                  <input
+                    type="text"
+                    value={cat.label}
+                    onChange={(e) => updateInquiryCategory(i, { label: e.target.value })}
+                    className="w-full min-h-[44px]"
+                  />
+                </div>
+                <div className="md:col-span-4">
+                  <label className="text-xs font-medium">Linked form</label>
+                  <select
+                    value={
+                      cat.formId ||
+                      activeForms.find((f) => f.slug === cat.formSlug)?.id ||
+                      ''
+                    }
+                    onChange={(e) => {
+                      const form = activeForms.find((f) => f.id === e.target.value)
+                      updateInquiryCategory(i, {
+                        formId: form?.id || '',
+                        formSlug: form?.slug || '',
+                        formUrl: '',
+                      })
+                    }}
+                    className="w-full min-h-[44px]"
+                  >
+                    <option value="">Select an active form…</option>
+                    {activeForms.map((form) => (
+                      <option key={form.id} value={form.id}>
+                        {form.title} ({getPublicFormPath(form.slug!)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-4">
+                  <label className="text-xs font-medium">Or paste form / external URL</label>
+                  <input
+                    type="text"
+                    value={
+                      cat.formUrl || (cat.formSlug ? getPublicFormPath(cat.formSlug) : '')
+                    }
+                    onChange={(e) => {
+                      const value = e.target.value.trim()
+                      const slugMatch = value.match(/\/forms\/([^/?#]+)/i)
+                      if (slugMatch) {
+                        const form = activeForms.find((f) => f.slug === slugMatch[1])
+                        updateInquiryCategory(i, {
+                          formUrl: '',
+                          formSlug: slugMatch[1],
+                          formId: form?.id || '',
+                        })
+                      } else {
+                        updateInquiryCategory(i, {
+                          formUrl: value,
+                          formSlug: '',
+                          formId: '',
+                        })
+                      }
+                    }}
+                    className="w-full min-h-[44px]"
+                    placeholder="/forms/your-form-slug or https://…"
+                  />
+                </div>
+                <div className="md:col-span-1">
+                  <button
+                    type="button"
+                    onClick={() => removeInquiryCategory(i)}
+                    className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                    aria-label="Remove category"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {activeForms.length === 0 && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                No active forms with a public slug yet. Create and activate a form under{' '}
+                <a href="/admin/forms" className="underline font-medium">
+                  Admin → Forms
+                </a>
+                , then link it here.
+              </p>
+            )}
           </div>
         </Card>
 

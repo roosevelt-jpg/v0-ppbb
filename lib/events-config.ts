@@ -2,7 +2,6 @@
 
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
-import type { EventsAudienceFilter } from '@/lib/event-utils'
 
 export interface EventsPageConfig {
   eyebrow: string
@@ -23,8 +22,9 @@ export interface EventsCategory {
   color: string
 }
 
+/** Public /events filter tab — driven by CMS categories (+ ALL). */
 export interface EventsFilterTab {
-  id: EventsAudienceFilter
+  id: string
   label: string
 }
 
@@ -44,26 +44,47 @@ export const DEFAULT_EVENTS_CONFIG: EventsPlatformConfig = {
     whatsappLink: '',
     lineupHeadingTemplate: '{MONTH} LINEUP',
     lineupCountTemplate: '{count} events this month',
-    emptyLineupMessage: 'No events scheduled this month. Check back soon or join our WhatsApp channel for updates.',
+    emptyLineupMessage:
+      'No events scheduled this month. Check back soon or join our WhatsApp channel for updates.',
     registerButtonLabel: 'Register',
     detailsButtonLabel: 'Details',
   },
   categories: [
-    { id: 'charity', name: 'Charity Day', color: '#BE123C' },
-    { id: 'sisters', name: 'Sisters Circle', color: '#DB2777' },
-    { id: 'brothers', name: 'Brothers Night', color: '#4F46E5' },
-    { id: 'family', name: 'Family Day', color: '#059669' },
-    { id: 'mixed', name: 'Community', color: '#2563EB' },
+    { id: 'tech', name: 'Tech', color: '#0EA5E9' },
+    { id: 'education', name: 'Education', color: '#7C3AED' },
+    { id: 'social', name: 'Social', color: '#DB2777' },
+    { id: 'business', name: 'Business', color: '#0F766E' },
+    { id: 'games', name: 'Games', color: '#EA580C' },
+    { id: 'charity', name: 'Charity', color: '#BE123C' },
+    { id: 'sisters', name: 'Sisters', color: '#DB2777' },
+    { id: 'brothers', name: 'Brothers', color: '#4F46E5' },
+    { id: 'family', name: 'Family', color: '#059669' },
+    { id: 'mixed', name: 'Mixed', color: '#2563EB' },
     { id: 'workshop', name: 'Workshop', color: '#D97706' },
   ],
-  filterTabs: [
-    { id: 'all', label: 'ALL' },
-    { id: 'sisters', label: 'SISTERS' },
-    { id: 'brothers', label: 'BROTHERS' },
-    { id: 'mixed', label: 'MIXED' },
-    { id: 'family', label: 'FAMILY' },
-  ],
+  filterTabs: [],
   pbCommissionPercent: 10,
+}
+
+export function slugifyCategoryId(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/** Build public filter tabs from CMS categories (always includes ALL). */
+export function buildCategoryFilterTabs(categories: EventsCategory[]): EventsFilterTab[] {
+  return [
+    { id: 'all', label: 'ALL' },
+    ...categories
+      .filter((c) => c.id.trim() && c.name.trim())
+      .map((c) => ({
+        id: c.id.trim(),
+        label: c.name.trim().toUpperCase(),
+      })),
+  ]
 }
 
 function mergePageConfig(data: unknown): EventsPageConfig {
@@ -87,51 +108,63 @@ function mergePageConfig(data: unknown): EventsPageConfig {
     emptyLineupMessage:
       typeof d.emptyLineupMessage === 'string' ? d.emptyLineupMessage : defaults.emptyLineupMessage,
     registerButtonLabel:
-      typeof d.registerButtonLabel === 'string' ? d.registerButtonLabel : defaults.registerButtonLabel,
+      typeof d.registerButtonLabel === 'string'
+        ? d.registerButtonLabel
+        : defaults.registerButtonLabel,
     detailsButtonLabel:
-      typeof d.detailsButtonLabel === 'string' ? d.detailsButtonLabel : defaults.detailsButtonLabel,
+      typeof d.detailsButtonLabel === 'string'
+        ? d.detailsButtonLabel
+        : defaults.detailsButtonLabel,
   }
 }
+
+const LEGACY_CATEGORY_IDS = new Set([
+  'charity',
+  'sisters',
+  'brothers',
+  'family',
+  'mixed',
+  'workshop',
+])
 
 function mergeCategories(data: unknown): EventsCategory[] {
   if (!Array.isArray(data)) return DEFAULT_EVENTS_CONFIG.categories
   const merged = data
     .filter((item) => item && typeof item.id === 'string' && typeof item.name === 'string')
     .map((item, i) => ({
-      id: item.id,
-      name: item.name,
+      id: item.id.trim() || slugifyCategoryId(item.name) || `category-${i + 1}`,
+      name: item.name.trim() || 'Category',
       color:
-        typeof item.color === 'string'
+        typeof item.color === 'string' && item.color.trim()
           ? item.color
           : DEFAULT_EVENTS_CONFIG.categories[i]?.color || '#111111',
     }))
-  return merged.length > 0 ? merged : DEFAULT_EVENTS_CONFIG.categories
-}
+  if (merged.length === 0) return DEFAULT_EVENTS_CONFIG.categories
 
-function mergeFilterTabs(data: unknown): EventsFilterTab[] {
-  if (!Array.isArray(data)) return DEFAULT_EVENTS_CONFIG.filterTabs
-  const validIds = new Set(['all', 'sisters', 'brothers', 'mixed', 'family'])
-  const merged = data
-    .filter(
-      (item) =>
-        item &&
-        typeof item.id === 'string' &&
-        validIds.has(item.id) &&
-        typeof item.label === 'string'
-    )
-    .map((item) => ({
-      id: item.id as EventsAudienceFilter,
-      label: item.label,
-    }))
-  return merged.length > 0 ? merged : DEFAULT_EVENTS_CONFIG.filterTabs
+  // Upgrade legacy audience-only category lists to the expanded topic set once
+  const ids = new Set(merged.map((c) => c.id.toLowerCase()))
+  const isLegacyOnly =
+    merged.length <= 6 && [...ids].every((id) => LEGACY_CATEGORY_IDS.has(id))
+  if (isLegacyOnly) {
+    const byId = new Map(merged.map((c) => [c.id.toLowerCase(), c]))
+    return DEFAULT_EVENTS_CONFIG.categories.map((def) => byId.get(def.id) || def)
+  }
+
+  return merged
 }
 
 function mergeEventsConfig(data: Record<string, unknown> | undefined): EventsPlatformConfig {
-  if (!data) return DEFAULT_EVENTS_CONFIG
+  if (!data) {
+    return {
+      ...DEFAULT_EVENTS_CONFIG,
+      filterTabs: buildCategoryFilterTabs(DEFAULT_EVENTS_CONFIG.categories),
+    }
+  }
+  const categories = mergeCategories(data.categories)
   return {
     pageConfig: mergePageConfig(data.pageConfig),
-    categories: mergeCategories(data.categories),
-    filterTabs: mergeFilterTabs(data.filterTabs),
+    categories,
+    filterTabs: buildCategoryFilterTabs(categories),
     pbCommissionPercent:
       typeof data.pbCommissionPercent === 'number'
         ? data.pbCommissionPercent
@@ -162,7 +195,12 @@ export function subscribeToEventsConfig(
   const loadFallback = async () => {
     const data = await fetchEventsConfigFromApi()
     if (data) apply(data)
-    else if (!cancelled) callback(DEFAULT_EVENTS_CONFIG)
+    else if (!cancelled) {
+      callback({
+        ...DEFAULT_EVENTS_CONFIG,
+        filterTabs: buildCategoryFilterTabs(DEFAULT_EVENTS_CONFIG.categories),
+      })
+    }
   }
 
   try {
@@ -188,23 +226,13 @@ export function subscribeToEventsConfig(
   }
 }
 
-export function getCategoryColor(
-  categories: EventsCategory[],
-  categoryId: string
-): string {
-  const match = categories.find(
-    (c) => c.id.toLowerCase() === categoryId.toLowerCase()
-  )
+export function getCategoryColor(categories: EventsCategory[], categoryId: string): string {
+  const match = categories.find((c) => c.id.toLowerCase() === categoryId.toLowerCase())
   return match?.color || '#111111'
 }
 
-export function getCategoryName(
-  categories: EventsCategory[],
-  categoryId: string
-): string {
-  const match = categories.find(
-    (c) => c.id.toLowerCase() === categoryId.toLowerCase()
-  )
+export function getCategoryName(categories: EventsCategory[], categoryId: string): string {
+  const match = categories.find((c) => c.id.toLowerCase() === categoryId.toLowerCase())
   return match?.name || categoryId
 }
 

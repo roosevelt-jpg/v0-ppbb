@@ -10,6 +10,8 @@ import {
   DEFAULT_EVENTS_CONFIG,
   EventsPlatformConfig,
   EventsCategory,
+  slugifyCategoryId,
+  buildCategoryFilterTabs,
 } from '@/lib/events-config'
 
 export default function AdminCmsEventsPage() {
@@ -23,14 +25,19 @@ export default function AdminCmsEventsPage() {
     setSaving(true)
     setMessage(null)
     try {
+      const payload: EventsPlatformConfig = {
+        ...config,
+        filterTabs: buildCategoryFilterTabs(config.categories),
+      }
       const res = await fetch('/api/platform-config/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(payload),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Save failed')
-      setMessage({ type: 'success', text: 'Events page saved. Changes are live instantly.' })
+      setConfig(payload)
+      setMessage({ type: 'success', text: 'Events page saved. Filter tags are live instantly.' })
     } catch (error: unknown) {
       setMessage({
         type: 'error',
@@ -44,26 +51,42 @@ export default function AdminCmsEventsPage() {
   const updateCategory = (index: number, field: keyof EventsCategory, value: string) => {
     setConfig((prev) => {
       const categories = [...prev.categories]
-      categories[index] = { ...categories[index], [field]: value }
-      return { ...prev, categories }
+      const next = { ...categories[index], [field]: value }
+      if (field === 'name') {
+        const previousSlug = slugifyCategoryId(categories[index].name)
+        if (!categories[index].id || categories[index].id === previousSlug) {
+          next.id = slugifyCategoryId(value) || categories[index].id
+        }
+      }
+      categories[index] = next
+      return {
+        ...prev,
+        categories,
+        filterTabs: buildCategoryFilterTabs(categories),
+      }
     })
   }
 
   const addCategory = () => {
-    setConfig((prev) => ({
-      ...prev,
-      categories: [
+    setConfig((prev) => {
+      const name = 'New category'
+      const categories = [
         ...prev.categories,
-        { id: `category-${prev.categories.length + 1}`, name: 'New category', color: '#111111' },
-      ],
-    }))
+        {
+          id: slugifyCategoryId(name) || `category-${prev.categories.length + 1}`,
+          name,
+          color: '#111111',
+        },
+      ]
+      return { ...prev, categories, filterTabs: buildCategoryFilterTabs(categories) }
+    })
   }
 
   const removeCategory = (index: number) => {
-    setConfig((prev) => ({
-      ...prev,
-      categories: prev.categories.filter((_, i) => i !== index),
-    }))
+    setConfig((prev) => {
+      const categories = prev.categories.filter((_, i) => i !== index)
+      return { ...prev, categories, filterTabs: buildCategoryFilterTabs(categories) }
+    })
   }
 
   return (
@@ -73,8 +96,9 @@ export default function AdminCmsEventsPage() {
           <div>
             <h1 className="font-headline text-3xl font-bold text-neutral-900">Events Page</h1>
             <p className="text-sm text-neutral-600 mt-1">
-              Edit public /events page copy, filter labels, and category colours. Event records are
-              managed at{' '}
+              Edit public /events copy and category filter tags (Tech, Education, Social, …). These
+              categories power the public filter bar, calendar colours, and event cards. Event
+              records are managed at{' '}
               <a href="/admin/events" className="underline font-medium">
                 /admin/events
               </a>
@@ -266,7 +290,13 @@ export default function AdminCmsEventsPage() {
 
         <Card className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h2 className="font-headline text-xl font-bold">Categories (calendar dot colours)</h2>
+            <div>
+              <h2 className="font-headline text-xl font-bold">Category filter tags</h2>
+              <p className="text-xs text-neutral-500 mt-1">
+                These appear on /events as filter buttons (ALL + each tag). Assign one when creating
+                an event so cards, calendar dots, and filters stay in sync.
+              </p>
+            </div>
             <Button
               type="button"
               onClick={addCategory}
@@ -282,21 +312,23 @@ export default function AdminCmsEventsPage() {
                 className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end p-3 border rounded-lg"
               >
                 <div className="sm:col-span-3">
-                  <label className="text-xs font-medium">ID</label>
+                  <label className="text-xs font-medium">ID (slug)</label>
                   <input
                     type="text"
                     value={category.id}
                     onChange={(e) => updateCategory(i, 'id', e.target.value)}
-                    className="w-full"
+                    className="w-full min-h-[44px]"
+                    placeholder="tech"
                   />
                 </div>
                 <div className="sm:col-span-4">
-                  <label className="text-xs font-medium">Name</label>
+                  <label className="text-xs font-medium">Filter label</label>
                   <input
                     type="text"
                     value={category.name}
                     onChange={(e) => updateCategory(i, 'name', e.target.value)}
-                    className="w-full"
+                    className="w-full min-h-[44px]"
+                    placeholder="Tech"
                   />
                 </div>
                 <div className="sm:col-span-3">
@@ -312,7 +344,7 @@ export default function AdminCmsEventsPage() {
                       type="text"
                       value={category.color}
                       onChange={(e) => updateCategory(i, 'color', e.target.value)}
-                      className="w-full"
+                      className="w-full min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -329,6 +361,12 @@ export default function AdminCmsEventsPage() {
               </div>
             ))}
           </div>
+          {config.filterTabs.length > 1 && (
+            <p className="text-xs text-neutral-500">
+              Live filters:{' '}
+              {config.filterTabs.map((t) => t.label).join(' · ')}
+            </p>
+          )}
         </Card>
       </div>
     </AdminPageLayout>

@@ -11,54 +11,68 @@ import { subscribeToPublishedEvents } from '@/lib/event-queries'
 import {
   subscribeToEventsConfig,
   DEFAULT_EVENTS_CONFIG,
+  buildCategoryFilterTabs,
   EventsPlatformConfig,
 } from '@/lib/events-config'
 import {
-  matchesAudienceFilter,
+  matchesCategoryFilter,
   isSameMonth,
   getEventStartDate,
-  type EventsAudienceFilter,
   type NormalizedEvent,
 } from '@/lib/event-utils'
 import { isSameDay } from 'date-fns'
 
 export default function EventsPage() {
-  const [config, setConfig] = useState<EventsPlatformConfig>(DEFAULT_EVENTS_CONFIG)
+  const [config, setConfig] = useState<EventsPlatformConfig>(() => ({
+    ...DEFAULT_EVENTS_CONFIG,
+    filterTabs: buildCategoryFilterTabs(DEFAULT_EVENTS_CONFIG.categories),
+  }))
   const [events, setEvents] = useState<NormalizedEvent[]>([])
   const [configReady, setConfigReady] = useState(false)
   const [eventsReady, setEventsReady] = useState(false)
-  const [audienceFilter, setAudienceFilter] = useState<EventsAudienceFilter>('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
   const [calendarMonth, setCalendarMonth] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
-  useEffect(() => subscribeToEventsConfig((data) => {
-    setConfig(data)
-    setConfigReady(true)
-  }), [])
+  useEffect(
+    () =>
+      subscribeToEventsConfig((data) => {
+        setConfig(data)
+        setConfigReady(true)
+      }),
+    []
+  )
 
-  useEffect(() => subscribeToPublishedEvents((data) => {
-    setEvents(data)
-    setEventsReady(true)
-  }), [])
+  useEffect(
+    () =>
+      subscribeToPublishedEvents((data) => {
+        setEvents(data)
+        setEventsReady(true)
+      }),
+    []
+  )
 
-  const audienceFilteredEvents = useMemo(
-    () => events.filter((event) => matchesAudienceFilter(event, audienceFilter)),
-    [events, audienceFilter]
+  useEffect(() => {
+    const valid = new Set(config.filterTabs.map((t) => t.id))
+    if (!valid.has(categoryFilter)) setCategoryFilter('all')
+  }, [config.filterTabs, categoryFilter])
+
+  const categoryFilteredEvents = useMemo(
+    () => events.filter((event) => matchesCategoryFilter(event, categoryFilter)),
+    [events, categoryFilter]
   )
 
   const monthEvents = useMemo(
     () =>
-      audienceFilteredEvents.filter((event) =>
+      categoryFilteredEvents.filter((event) =>
         isSameMonth(getEventStartDate(event), calendarMonth)
       ),
-    [audienceFilteredEvents, calendarMonth]
+    [categoryFilteredEvents, calendarMonth]
   )
 
   const lineupEvents = useMemo(() => {
     const base = selectedDate
-      ? monthEvents.filter((event) =>
-          isSameDay(getEventStartDate(event), selectedDate)
-        )
+      ? monthEvents.filter((event) => isSameDay(getEventStartDate(event), selectedDate))
       : monthEvents
     return [...base].sort(
       (a, b) => getEventStartDate(a).getTime() - getEventStartDate(b).getTime()
@@ -77,9 +91,9 @@ export default function EventsPage() {
           {configReady && (
             <EventsFilterTabs
               tabs={config.filterTabs}
-              active={audienceFilter}
+              active={categoryFilter}
               onChange={(filter) => {
-                setAudienceFilter(filter)
+                setCategoryFilter(filter)
                 setSelectedDate(null)
               }}
             />
@@ -92,7 +106,7 @@ export default function EventsPage() {
                 setCalendarMonth(month)
                 setSelectedDate(null)
               }}
-              events={audienceFilteredEvents}
+              events={categoryFilteredEvents}
               categories={config.categories}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
