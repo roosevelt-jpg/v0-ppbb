@@ -258,21 +258,56 @@ export default function AdminSetup() {
       const firstName = nameParts[0] || 'Admin'
       const lastName = nameParts.slice(1).join(' ') || 'User'
 
-      let firebaseUser
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, accountEmail, password)
-        firebaseUser = userCredential.user
-      } catch (createErr: unknown) {
-        const code =
-          createErr && typeof createErr === 'object' && 'code' in createErr
-            ? String((createErr as { code: string }).code)
-            : ''
-        if (code === 'auth/email-already-in-use') {
+      // Prefer sign-in first: invited users often already have Auth from a failed earlier attempt
+      let firebaseUser = auth.currentUser
+      const authCode = (err: unknown) =>
+        err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
+
+      if (firebaseUser?.email?.toLowerCase() === accountEmail) {
+        // Already signed in as this invitee
+      } else {
+        try {
           const signedIn = await signInWithEmailAndPassword(auth, accountEmail, password)
           firebaseUser = signedIn.user
-        } else {
-          throw createErr
+        } catch (signInErr: unknown) {
+          const signInCode = authCode(signInErr)
+          if (
+            signInCode === 'auth/user-not-found' ||
+            signInCode === 'auth/invalid-credential' ||
+            signInCode === 'auth/wrong-password' ||
+            signInCode === 'auth/invalid-login-credentials'
+          ) {
+            // If credentials invalid, try create (new account) — unless email clearly exists
+            try {
+              const created = await createUserWithEmailAndPassword(auth, accountEmail, password)
+              firebaseUser = created.user
+            } catch (createErr: unknown) {
+              const createCode = authCode(createErr)
+              if (createCode === 'auth/email-already-in-use') {
+                throw new Error(
+                  'This email already has a password account. Enter the same password you used the first time and click Finish setup again. If you forgot it, ask a super admin to reset it in Firebase Auth.'
+                )
+              }
+              // First sign-in failed for another reason and create also failed
+              if (
+                signInCode === 'auth/wrong-password' ||
+                signInCode === 'auth/invalid-credential' ||
+                signInCode === 'auth/invalid-login-credentials'
+              ) {
+                throw new Error(
+                  'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to reset it.'
+                )
+              }
+              throw createErr
+            }
+          } else {
+            throw signInErr
+          }
         }
+      }
+
+      if (!firebaseUser) {
+        throw new Error('Could not sign in or create the account. Please try again.')
       }
 
       if (isEmergencyCode) {
@@ -303,14 +338,18 @@ export default function AdminSetup() {
       console.error('[v0] Account creation error:', err)
       const code =
         err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
-      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+      if (
+        code === 'auth/wrong-password' ||
+        code === 'auth/invalid-credential' ||
+        code === 'auth/invalid-login-credentials'
+      ) {
         setError(
-          'This email already has an account, but the password did not match. Use the same password you created earlier, or reset it in Firebase Auth.'
+          'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to reset it in Firebase Auth.'
         )
       } else if (err instanceof Error && err.message) {
         setError(err.message)
       } else {
-        setError('Failed to create account. Please try again.')
+        setError('Failed to finish admin setup. Please try again.')
       }
     } finally {
       setLoading(false)
@@ -457,8 +496,8 @@ export default function AdminSetup() {
               </h2>
               <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
                 {inviteData?.recovery
-                  ? 'Finish creating your admin profile with the same email and password.'
-                  : 'Create your admin account password'}
+                  ? 'Your login already exists from an earlier attempt. Enter the same password and finish setup — we will create your admin profile.'
+                  : 'Create your admin account password. If you already tried once, use the same password and continue.'}
               </p>
 
               <form
@@ -566,16 +605,6 @@ export default function AdminSetup() {
                     }}
                   >
                     {error}
-                    {error.toLowerCase().includes('already') && (
-                      <p style={{ marginTop: '10px' }}>
-                        <Link
-                          href={adminLoginHref}
-                          style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}
-                        >
-                          Sign in with your existing password →
-                        </Link>
-                      </p>
-                    )}
                   </div>
                 )}
 
@@ -596,7 +625,11 @@ export default function AdminSetup() {
                     opacity: loading ? 0.6 : 1,
                   }}
                 >
-                  {loading ? 'Creating account...' : 'Create Account'}
+                  {loading
+                    ? 'Finishing setup…'
+                    : inviteData?.recovery
+                      ? 'Finish setup'
+                      : 'Create account & finish setup'}
                 </button>
 
                 <button
