@@ -53,7 +53,8 @@ export const DEFAULT_CERTIFICATE_TEMPLATE: Omit<CertificateTemplate, 'id'> = {
     'This is to certify that {memberName} has generously contributed {hours} hours of volunteer service to our community, demonstrating compassion, dedication, and faith in action.',
   hoursRequired: 10,
   accentColor: '#111111',
-  logoURL: '',
+  logoURL:
+    'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bblack%5D-9KcTa1PocHznEBM4QR6dN4R2eseFlT.png',
   signatories: [
     { name: 'Founder Name', title: 'Founder', signatureURL: '' },
   ],

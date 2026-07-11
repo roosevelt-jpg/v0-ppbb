@@ -59,17 +59,18 @@ export async function GET() {
       process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY ||
       envMaps
 
+    // Integrations vault is the source of truth (Admin → Integrations → Google Maps).
     const data = {
       ...DEFAULT_CONFIG,
       ...(raw || {}),
       googleMapsApiKey:
-        asString(raw?.googleMapsApiKey) ||
         fromIntegrations.googleMapsApiKey ||
+        asString(raw?.googleMapsApiKey) ||
         envMaps ||
         '',
       googlePlacesApiKey:
-        asString(raw?.googlePlacesApiKey) ||
         fromIntegrations.googlePlacesApiKey ||
+        asString(raw?.googlePlacesApiKey) ||
         envPlaces ||
         '',
     }

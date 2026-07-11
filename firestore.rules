@@ -101,6 +101,11 @@ service cloud.firestore {
       allow read: if true; // Public read for active FAQs
       allow create, update, delete: if isAdmin();
     }
+
+    // Chatbot knowledge snippets — admin-fed facts/links for AI chat context
+    match /chatbotKnowledge/{docId} {
+      allow read, write: if isAdmin();
+    }
     
     // Policies - Public read (PolicyInitializer + policy pages), admin write
     match /policies/{document=**} {

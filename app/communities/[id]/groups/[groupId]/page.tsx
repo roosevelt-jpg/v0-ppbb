@@ -142,7 +142,8 @@ export default function GroupChatPage() {
 
         setIsMember(true)
         setMemberStatus(status)
-        setCanSendMessages(isActiveMember && memberCanChat(status))
+        // Platform admins and group owners can chat even without a member doc
+        setCanSendMessages((isActiveMember && memberCanChat(status)) || ownerOrAdmin)
 
         const messagesRef = collection(
           db,

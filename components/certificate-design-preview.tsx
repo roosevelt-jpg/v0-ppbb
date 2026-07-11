@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { CertificateSignatory } from '@/lib/certificate-templates'
+import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/logo-manager'
 
 export type CertificatePreviewData = {
   title: string
@@ -24,6 +25,7 @@ type CertificateDesignPreviewProps = {
 
 export function CertificateDesignPreview({ data, className = '', id }: CertificateDesignPreviewProps) {
   const accent = data.accentColor || '#111111'
+  const logoSrc = data.logoURL?.trim() || DEFAULT_LOGO_ON_LIGHT_BG
   const signatories = data.signatories?.length
     ? data.signatories
     : [{ name: 'Founder', title: 'Founder', signatureURL: '' }]
@@ -42,17 +44,12 @@ export function CertificateDesignPreview({ data, className = '', id }: Certifica
         }}
       />
       <div className="relative px-8 py-10 sm:px-12 sm:py-14 text-center">
-        {data.logoURL ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.logoURL} alt="" className="h-14 mx-auto mb-6 object-contain" />
-        ) : (
-          <div
-            className="w-14 h-14 mx-auto mb-6 rounded-full flex items-center justify-center text-white text-xl font-serif"
-            style={{ backgroundColor: accent }}
-          >
-            PB
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          alt="Passive Blessings"
+          className="h-16 sm:h-20 mx-auto mb-6 object-contain max-w-[220px]"
+        />
 
         <p className="text-xs uppercase tracking-[0.25em] text-neutral-500 mb-2">{data.subtitle}</p>
         <h2 className="font-serif text-2xl sm:text-3xl font-bold text-neutral-900 mb-6">{data.title}</h2>

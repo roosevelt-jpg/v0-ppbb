@@ -77,13 +77,81 @@ export async function POST(request: NextRequest) {
       requiresApproval: requiresApproval === true,
       capacity: typeof body.capacity === 'number' ? body.capacity : null,
       status: groupStatus,
-      memberCount: 0,
-      createdBy,
+      memberCount: createdBy ? 1 : 0,
+      createdBy: createdBy || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     })
 
     const docRef = await db.collection('communities').doc(communityId).collection('groups').add(payload)
+
+    // Creator is always an active group member (business/admin owners can chat immediately)
+    if (createdBy) {
+      let creatorName = 'Owner'
+      let creatorEmail = ''
+      let creatorPhoto = ''
+      try {
+        const userSnap = await db.collection('users').doc(String(createdBy)).get()
+        const u = userSnap.data() || {}
+        creatorName =
+          String(u.displayName || u.firstName || u.name || body.createdByName || 'Owner')
+        creatorEmail = String(u.email || body.createdByEmail || '')
+        creatorPhoto = String(u.photoURL || u.profilePictureURL || '')
+      } catch {
+        // non-fatal
+      }
+
+      await docRef.collection('members').add(
+        sanitizeForFirestore({
+          userId: String(createdBy),
+          userName: creatorName,
+          userEmail: creatorEmail,
+          userGender: '',
+          userPhoto: creatorPhoto,
+          joinedAt: Timestamp.now(),
+          role: 'admin',
+          isActive: true,
+          joinStatus: 'active',
+          memberStatus: 'active',
+        })
+      )
+
+      // Ensure creator is also a community member so later joins/chat checks pass
+      const communityMembers = await db
+        .collection('communities')
+        .doc(communityId)
+        .collection('members')
+        .where('userId', '==', String(createdBy))
+        .limit(1)
+        .get()
+
+      if (communityMembers.empty) {
+        await db
+          .collection('communities')
+          .doc(communityId)
+          .collection('members')
+          .add(
+            sanitizeForFirestore({
+              userId: String(createdBy),
+              userName: creatorName,
+              userEmail: creatorEmail,
+              userGender: '',
+              userPhoto: creatorPhoto,
+              joinedAt: Timestamp.now(),
+              role: 'admin',
+              isActive: true,
+              memberStatus: 'active',
+            })
+          )
+        await db
+          .collection('communities')
+          .doc(communityId)
+          .update({
+            memberCount: (community.memberCount || 0) + 1,
+            updatedAt: Timestamp.now(),
+          })
+      }
+    }
 
     try {
       await db

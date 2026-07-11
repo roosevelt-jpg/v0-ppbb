@@ -70,7 +70,7 @@ export function EventHostingFields({
   return (
     <div className="space-y-6 border border-neutral-200 rounded-xl p-4 bg-neutral-50">
       <div>
-        <h3 className="font-semibold text-neutral-900">Ticketing & capacity (Luma-style)</h3>
+        <h3 className="font-semibold text-neutral-900">Ticketing & capacity</h3>
         <p className="text-xs text-neutral-500 mt-1">
           Multiple ticket types, waitlist, approval, coupons, and cohosts.
         </p>
@@ -123,7 +123,7 @@ export function EventHostingFields({
             <button
               type="button"
               onClick={() => removeType(i)}
-              className="text-red-500 p-2"
+              className="inline-flex items-center justify-center p-2 rounded-lg bg-black !text-white hover:bg-neutral-900 shadow-none min-h-[40px] min-w-[40px]"
               aria-label="Remove ticket type"
             >
               <Trash2 className="h-4 w-4" />
@@ -133,7 +133,7 @@ export function EventHostingFields({
         <button
           type="button"
           onClick={addType}
-          className="inline-flex items-center gap-1 text-sm px-3 py-1.5 border rounded-lg bg-white"
+          className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg bg-black !text-white hover:bg-neutral-900 shadow-none font-medium"
         >
           <Plus className="h-4 w-4" /> Add ticket type
         </button>
@@ -208,7 +208,7 @@ export function EventHostingFields({
             />
             <button
               type="button"
-              className="text-red-500 text-sm"
+              className="inline-flex items-center justify-center text-sm px-3 py-1.5 rounded-lg bg-black !text-white hover:bg-neutral-900 shadow-none"
               onClick={() => onChange({ coupons: coupons.filter((_, j) => j !== i) })}
             >
               Remove
@@ -217,7 +217,7 @@ export function EventHostingFields({
         ))}
         <button
           type="button"
-          className="text-sm underline"
+          className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg bg-black !text-white hover:bg-neutral-900 shadow-none font-medium"
           onClick={() =>
             onChange({
               coupons: [...coupons, { code: '', percentOff: 10, amountOff: null, usedCount: 0 }],

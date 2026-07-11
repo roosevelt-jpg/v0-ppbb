@@ -8,6 +8,7 @@ interface FAQ {
   category: string
   order: number
   status: 'published' | 'draft'
+  isActive?: boolean
   createdAt?: Date
   updatedAt?: Date
 }
@@ -59,12 +60,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const resolvedStatus = status === 'published' ? 'published' : 'draft'
     const faqData: FAQ = {
       question,
       answer,
       category,
       order: order || 0,
-      status: status || 'draft',
+      status: resolvedStatus,
+      isActive: resolvedStatus === 'published',
       updatedAt: new Date(),
     }
 

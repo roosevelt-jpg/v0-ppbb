@@ -12,7 +12,7 @@ import { PricingPlan } from '@/lib/pricing-types'
 import { getPlanIncludedItems } from '@/lib/pricing-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export const dynamic = 'force-dynamic'
@@ -396,7 +396,7 @@ export default function PricingManagementPage() {
             <button
               type="button"
               onClick={handleCancel}
-              className={`${BUTTON_SECONDARY} flex-1`}
+              className={`${BUTTON_PRIMARY} !text-white flex-1`}
             >
               Cancel
             </button>
@@ -447,7 +447,7 @@ export default function PricingManagementPage() {
                 <button
                   type="button"
                   onClick={() => handleEditPlan(plan)}
-                  className={`${BUTTON_SECONDARY} flex-1 flex items-center justify-center gap-2 text-sm`}
+                  className={`${BUTTON_PRIMARY} !text-white flex-1 flex items-center justify-center gap-2 text-sm`}
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
@@ -455,7 +455,7 @@ export default function PricingManagementPage() {
                 <button
                   type="button"
                   onClick={() => handleDeletePlan(plan.id)}
-                  className={`${BUTTON_DANGER} flex-1 flex items-center justify-center gap-2 text-sm`}
+                  className={`${BUTTON_PRIMARY} !text-white flex-1 flex items-center justify-center gap-2 text-sm`}
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete

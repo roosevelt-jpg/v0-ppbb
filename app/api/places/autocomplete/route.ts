@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resolveGooglePlacesApiKey } from '@/lib/resolve-google-places-key'
+import { listGooglePlacesApiKeyCandidates } from '@/lib/resolve-google-places-key'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,49 +20,66 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, predictions: [] })
     }
 
-    const apiKey = await resolveGooglePlacesApiKey()
-    if (!apiKey) {
+    const apiKeys = await listGooglePlacesApiKeyCandidates()
+    if (apiKeys.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Google Places API key is not configured on the server.',
+          error:
+            'Google Maps API key is not configured. Add it under Admin → Integrations → Google Maps API.',
           predictions: [],
         },
         { status: 503 }
       )
     }
 
-    const params = new URLSearchParams({
-      input,
-      key: apiKey,
-    })
-
     const components = buildCountryComponents(request.nextUrl.searchParams.get('countries'))
-    if (components) {
-      params.set('components', components)
-    }
+    let lastError = 'Places autocomplete failed'
 
-    const googleRes = await fetch(
-      `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`
-    )
-    const data = await googleRes.json()
-
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      return NextResponse.json({
-        success: false,
-        error: data.error_message || data.status || 'Places autocomplete failed',
-        predictions: [],
+    for (const apiKey of apiKeys) {
+      const params = new URLSearchParams({
+        input,
+        key: apiKey,
       })
+      if (components) {
+        params.set('components', components)
+      }
+
+      const googleRes = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`
+      )
+      const data = await googleRes.json()
+
+      if (data.status === 'OK' || data.status === 'ZERO_RESULTS') {
+        const predictions = (data.predictions || []).map((prediction: any) => ({
+          placeId: prediction.place_id,
+          mainText: prediction.structured_formatting?.main_text || prediction.description,
+          secondaryText: prediction.structured_formatting?.secondary_text || '',
+          description: prediction.description || '',
+        }))
+
+        return NextResponse.json({ success: true, predictions })
+      }
+
+      lastError = data.error_message || data.status || lastError
+
+      // Try next candidate for key/billing/restriction failures
+      if (
+        data.status === 'REQUEST_DENIED' ||
+        data.status === 'INVALID_REQUEST' ||
+        data.status === 'OVER_QUERY_LIMIT'
+      ) {
+        continue
+      }
+
+      break
     }
 
-    const predictions = (data.predictions || []).map((prediction: any) => ({
-      placeId: prediction.place_id,
-      mainText: prediction.structured_formatting?.main_text || prediction.description,
-      secondaryText: prediction.structured_formatting?.secondary_text || '',
-      description: prediction.description || '',
-    }))
-
-    return NextResponse.json({ success: true, predictions })
+    return NextResponse.json({
+      success: false,
+      error: lastError,
+      predictions: [],
+    })
   } catch (error) {
     console.error('[v0] Places autocomplete proxy error:', error)
     return NextResponse.json(

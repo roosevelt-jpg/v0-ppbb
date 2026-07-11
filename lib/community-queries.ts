@@ -19,6 +19,7 @@ import {
   increment,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import type { Community, Group, Message, GroupMember, CommunityMember } from './community-types'
 import { triggerCommunityNotification } from '@/lib/community-notifications-client'
 import {
@@ -165,7 +166,8 @@ export function subscribeToUserCommunities(
 // GROUP SUBSCRIPTIONS
 export function subscribeToCommunityGroups(
   communityId: string,
-  onData: (groups: Group[]) => void
+  onData: (groups: Group[]) => void,
+  viewerUserId?: string | null
 ) {
   try {
     const unsubscribe = onSnapshot(
@@ -175,15 +177,21 @@ export function subscribeToCommunityGroups(
       ),
       (snapshot) => {
         const groups = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
+          .map((docSnap) => ({
+            id: docSnap.id,
             communityId,
-            ...doc.data(),
-            genderRestriction: normalizeGenderRestriction(doc.data().genderRestriction),
-            createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt,
-            updatedAt: doc.data().updatedAt?.toDate?.() || doc.data().updatedAt,
+            ...docSnap.data(),
+            genderRestriction: normalizeGenderRestriction(docSnap.data().genderRestriction),
+            createdAt: docSnap.data().createdAt?.toDate?.() || docSnap.data().createdAt,
+            updatedAt: docSnap.data().updatedAt?.toDate?.() || docSnap.data().updatedAt,
           })) as Group[]
-        onData(groups.filter((g) => isGroupVisible(g.status)))
+        onData(
+          groups.filter(
+            (g) =>
+              isGroupVisible(g.status) ||
+              (Boolean(viewerUserId) && g.createdBy === viewerUserId)
+          )
+        )
       },
       (error) => {
         console.error('[v0] Error in subscribeToCommunityGroups:', error)
@@ -418,17 +426,20 @@ export async function joinCommunity(
       return
     }
 
-    await addDoc(collection(db, 'communities', communityId, 'members'), {
-      userId,
-      userName,
-      userEmail,
-      userGender,
-      userPhoto,
-      joinedAt: Timestamp.now(),
-      role: 'member',
-      isActive: true,
-      memberStatus: 'active',
-    })
+    await addDoc(
+      collection(db, 'communities', communityId, 'members'),
+      sanitizeForFirestore({
+        userId,
+        userName: userName || '',
+        userEmail: userEmail || '',
+        userGender: userGender || '',
+        userPhoto: userPhoto || '',
+        joinedAt: Timestamp.now(),
+        role: 'member',
+        isActive: true,
+        memberStatus: 'active',
+      })
+    )
 
     await updateDoc(communityRef, {
       memberCount: increment(1),
@@ -538,19 +549,6 @@ export async function joinGroup(
       throw new Error('This community is not available yet.')
     }
 
-    const communityMemberSnap = await getDocs(
-      query(collection(db, 'communities', communityId, 'members'), where('userId', '==', userId))
-    )
-    if (communityMemberSnap.empty) {
-      throw new Error('Join the community first before joining a group.')
-    }
-    const communityMember = communityMemberSnap.docs[0].data()
-    if (communityMember.memberStatus === 'banned') throw new Error('You are banned from this community.')
-    if (communityMember.memberStatus === 'suspended') throw new Error('Your membership is suspended.')
-    if (!memberCanChat(communityMember.memberStatus)) {
-      throw new Error('Your community membership is not active.')
-    }
-
     const groupRef = doc(db, 'communities', communityId, 'groups', groupId)
     const groupSnap = await getDoc(groupRef)
     if (!groupSnap.exists()) {
@@ -558,14 +556,58 @@ export async function joinGroup(
     }
 
     const groupData = groupSnap.data()
-    if (!isGroupVisible(groupData.status)) {
+    const isCreator =
+      groupData.createdBy === userId ||
+      community.createdBy === userId ||
+      community.businessId === userId
+
+    // Creators can enter their own group even while it awaits admin approval
+    if (!isCreator && !isGroupVisible(groupData.status)) {
       throw new Error('This group is pending admin approval.')
     }
 
-    const genderCheck = canJoinByGenderRestriction(groupData.genderRestriction, userGender)
-    if (!genderCheck.allowed) throw new Error(genderCheck.reason || 'Gender restriction applies')
+    const communityMemberSnap = await getDocs(
+      query(collection(db, 'communities', communityId, 'members'), where('userId', '==', userId))
+    )
 
-    const requiresApproval = groupData.requiresApproval === true
+    if (communityMemberSnap.empty) {
+      if (!isCreator) {
+        throw new Error('Join the community first before joining a group.')
+      }
+      // Auto-enroll group/community creator as a community member
+      await addDoc(
+        collection(db, 'communities', communityId, 'members'),
+        sanitizeForFirestore({
+          userId,
+          userName: userName || '',
+          userEmail: userEmail || '',
+          userGender: userGender || '',
+          userPhoto: userPhoto || '',
+          joinedAt: Timestamp.now(),
+          role: 'admin',
+          isActive: true,
+          memberStatus: 'active',
+        })
+      )
+      await updateDoc(communityRef, {
+        memberCount: increment(1),
+        updatedAt: Timestamp.now(),
+      })
+    } else {
+      const communityMember = communityMemberSnap.docs[0].data()
+      if (communityMember.memberStatus === 'banned') throw new Error('You are banned from this community.')
+      if (communityMember.memberStatus === 'suspended') throw new Error('Your membership is suspended.')
+      if (!isCreator && !memberCanChat(communityMember.memberStatus)) {
+        throw new Error('Your community membership is not active.')
+      }
+    }
+
+    if (!isCreator) {
+      const genderCheck = canJoinByGenderRestriction(groupData.genderRestriction, userGender)
+      if (!genderCheck.allowed) throw new Error(genderCheck.reason || 'Gender restriction applies')
+    }
+
+    const requiresApproval = !isCreator && groupData.requiresApproval === true
     const joinStatus = requiresApproval ? 'pending' : 'active'
 
     const existing = await getDocs(
@@ -580,18 +622,21 @@ export async function joinGroup(
       return (row.joinStatus as 'active' | 'pending') || 'active'
     }
 
-    await addDoc(collection(db, 'communities', communityId, 'groups', groupId, 'members'), {
-      userId,
-      userName,
-      userEmail,
-      userGender,
-      userPhoto,
-      joinedAt: Timestamp.now(),
-      role: 'member',
-      isActive: joinStatus === 'active',
-      joinStatus,
-      memberStatus: 'active',
-    })
+    await addDoc(
+      collection(db, 'communities', communityId, 'groups', groupId, 'members'),
+      sanitizeForFirestore({
+        userId,
+        userName: userName || '',
+        userEmail: userEmail || '',
+        userGender: userGender || '',
+        userPhoto: userPhoto || '',
+        joinedAt: Timestamp.now(),
+        role: isCreator ? 'admin' : 'member',
+        isActive: joinStatus === 'active',
+        joinStatus,
+        memberStatus: 'active',
+      })
+    )
 
     if (joinStatus === 'active') {
       await updateDoc(groupRef, {

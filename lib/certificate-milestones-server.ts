@@ -123,7 +123,9 @@ export async function evaluateCertificateMilestonesForUser(userId: string): Prom
         hoursRequired: template.hoursRequired,
         credentialId,
         accentColor: template.accentColor || '#111111',
-        logoURL: template.logoURL || '',
+        logoURL:
+          template.logoURL ||
+          'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PB%20ORIGINAL%20LOGO%20%5Bblack%5D-9KcTa1PocHznEBM4QR6dN4R2eseFlT.png',
         signatories,
         issuedAt: now,
         createdAt: now,

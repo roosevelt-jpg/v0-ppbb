@@ -11,6 +11,11 @@ import {
 } from '@/lib/transparency-config'
 import { Save, CheckCircle2, AlertCircle, Plus, Trash2, ExternalLink } from 'lucide-react'
 
+const btnPrimary =
+  'inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 shadow-none min-h-[36px]'
+const btnIcon =
+  'inline-flex items-center justify-center p-2 bg-black !text-white rounded-lg hover:bg-neutral-900 shadow-none min-h-[44px] min-w-[44px]'
+
 export default function AdminCmsTransparencyPage() {
   const [config, setConfig] = useState<TransparencyConfig>(DEFAULT_TRANSPARENCY_CONFIG)
   const [saving, setSaving] = useState(false)
@@ -112,7 +117,7 @@ export default function AdminCmsTransparencyPage() {
           <Link
             href="/transparency"
             target="_blank"
-            className="inline-flex items-center gap-1.5 text-[#3498db] hover:underline"
+            className={`${btnPrimary} !text-white no-underline hover:!text-white`}
           >
             Open live page <ExternalLink className="w-3.5 h-3.5" />
           </Link>
@@ -187,11 +192,7 @@ export default function AdminCmsTransparencyPage() {
               <label className="block text-xs uppercase tracking-wider text-neutral-500">
                 Privacy bullets
               </label>
-              <button
-                type="button"
-                onClick={addBullet}
-                className="inline-flex items-center gap-1 text-xs font-medium text-[#111]"
-              >
+              <button type="button" onClick={addBullet} className={btnPrimary}>
                 <Plus className="w-3.5 h-3.5" /> Add bullet
               </button>
             </div>
@@ -206,7 +207,7 @@ export default function AdminCmsTransparencyPage() {
                 <button
                   type="button"
                   onClick={() => removeBullet(index)}
-                  className="px-2 text-red-600"
+                  className={btnIcon}
                   aria-label="Remove bullet"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -229,11 +230,7 @@ export default function AdminCmsTransparencyPage() {
           {field('getInvolvedTitle', 'Get involved box title')}
           <div className="flex items-center justify-between">
             <p className="text-xs uppercase tracking-wider text-neutral-500">Get involved items</p>
-            <button
-              type="button"
-              onClick={addGetInvolved}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#111]"
-            >
+            <button type="button" onClick={addGetInvolved} className={btnPrimary}>
               <Plus className="w-3.5 h-3.5" /> Add item
             </button>
           </div>
@@ -259,7 +256,7 @@ export default function AdminCmsTransparencyPage() {
                 <button
                   type="button"
                   onClick={() => removeGetInvolved(index)}
-                  className="px-2 pt-3 text-red-600"
+                  className={btnIcon}
                   aria-label="Remove item"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -273,7 +270,7 @@ export default function AdminCmsTransparencyPage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#111111] text-white rounded-lg text-sm font-medium hover:bg-[#333333] disabled:opacity-60 min-h-[44px]"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-black !text-white rounded-lg text-sm font-medium hover:bg-neutral-900 disabled:opacity-60 min-h-[44px]"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving…' : 'Save transparency page'}

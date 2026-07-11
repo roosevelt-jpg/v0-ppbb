@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { toPublicMemberProfile } from '@/lib/user-settings'
+import { assertCanUseGroup } from '@/lib/group-access-server'
 
 /**
  * List active group members with privacy-aware profiles.
@@ -25,18 +26,13 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const db = getAdminDb()
-    const groupRef = db.collection('communities').doc(communityId).collection('groups').doc(groupId)
-    const groupSnap = await groupRef.get()
-    if (!groupSnap.exists) {
-      return NextResponse.json({ success: false, error: 'Group not found' }, { status: 404 })
+    const access = await assertCanUseGroup(communityId, groupId, uid)
+    if (!access.ok) {
+      return NextResponse.json({ success: false, error: access.error }, { status: access.status })
     }
 
-    const requesterSnap = await groupRef.collection('members').where('userId', '==', uid).limit(1).get()
-    const isCreator = groupSnap.data()?.createdBy === uid
-    if (requesterSnap.empty && !isCreator) {
-      return NextResponse.json({ success: false, error: 'Not a group member' }, { status: 403 })
-    }
+    const db = getAdminDb()
+    const groupRef = db.collection('communities').doc(communityId).collection('groups').doc(groupId)
 
     const membersSnap = await groupRef.collection('members').get()
     const roster = []

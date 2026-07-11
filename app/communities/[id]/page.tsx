@@ -31,7 +31,7 @@ export default function CommunityDetailPage() {
 
     const unsubGroups = subscribeToCommunityGroups(communityId, (data) => {
       setGroups(data)
-    })
+    }, user?.id)
 
     let unsubMemberships = () => {}
     if (user?.id) {
@@ -59,13 +59,13 @@ export default function CommunityDetailPage() {
         user.id,
         user.displayName || '',
         user.email || '',
-        user.gender,
-        user.photoURL
+        user.gender || '',
+        user.photoURL || ''
       )
       setUserGroups((prev) => ({ ...prev, [group.id!]: status }))
     } catch (error) {
       console.error('[v0] Error joining group:', error)
-      alert('Failed to join group')
+      alert(error instanceof Error ? error.message : 'Failed to join group')
     } finally {
       setJoiningGroup(null)
     }
@@ -206,10 +206,11 @@ export default function CommunityDetailPage() {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               {groups.map((group) => {
                 const membership = userGroups[group.id!]
-                const isMember = membership === 'active'
-                const isPending = membership === 'pending'
+                const isCreator = Boolean(user?.id && group.createdBy === user.id)
+                const isMember = membership === 'active' || isCreator
+                const isPending = membership === 'pending' && !isCreator
                 const genderCheck = canJoinByGenderRestriction(group.genderRestriction, user?.gender)
-                const isRestricted = !genderCheck.allowed
+                const isRestricted = !isCreator && !genderCheck.allowed
 
                 return (
                   <div
