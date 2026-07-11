@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const apiKey = await resolveAnthropicApiKey()
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'Anthropic API key not configured. Add it in Admin → Integrations.' },
+        { error: 'Anthropic API key not configured. Set ANTHROPIC_API_KEY in the server environment if newsletter AI is needed.' },
         { status: 500 }
       )
     }

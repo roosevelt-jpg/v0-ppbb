@@ -368,25 +368,6 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'secretToken', label: 'Secret Token', type: 'password', required: false, encrypt: true },
     ],
   },
-  anthropic: {
-    id: 'anthropic',
-    name: 'Anthropic (Claude API)',
-    category: 'backend',
-    description: 'Powers the site chatbot via Claude',
-    icon: '🤖',
-    fields: [
-      {
-        name: 'apiKey',
-        label: 'API Key',
-        type: 'password',
-        required: true,
-        encrypt: true,
-        placeholder: 'sk-ant-...',
-        help: 'Create an API key at console.anthropic.com',
-      },
-    ],
-    docs: 'https://docs.anthropic.com/en/api/getting-started',
-  },
 }
 
 export function getServiceDefinition(serviceId: string): IntegrationService | null {
