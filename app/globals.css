@@ -4,9 +4,51 @@
 
 @custom-variant dark (&:is(.dark *));
 
-::-webkit-scrollbar { display: none; }
-* { scrollbar-width: none; }
-body { -ms-overflow-style: none; }
+/* Hide scrollbars on the public marketing site only (content-guard pages).
+   Dashboard/admin/business keep usable scrollbars for tables and overflow. */
+html[data-public-content-guard='1'] ::-webkit-scrollbar { display: none; }
+html[data-public-content-guard='1'] * { scrollbar-width: none; }
+html[data-public-content-guard='1'] body { -ms-overflow-style: none; }
+
+/* Shared horizontal scroll for tables/cards across all dashboards */
+.table-scroll,
+.admin-table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #888888 #e4e1da;
+}
+
+.table-scroll::-webkit-scrollbar,
+.admin-table-scroll::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb,
+.admin-table-scroll::-webkit-scrollbar-thumb {
+  background-color: #888888;
+  border-radius: 4px;
+}
+
+.table-scroll::-webkit-scrollbar-track,
+.admin-table-scroll::-webkit-scrollbar-track {
+  background-color: #e4e1da;
+  border-radius: 4px;
+}
+
+/* Cards: never force overflow outside viewport */
+.card,
+[data-dashboard-surface] .rounded-lg,
+[data-dashboard-surface] .rounded-xl,
+[data-dashboard-surface] .rounded-2xl {
+  max-width: 100%;
+  min-width: 0;
+}
 
 /* Public site content deterrence — inactive on /dashboard, /business, /admin, /sponsor */
 html[data-public-content-guard='1'] body {
@@ -458,31 +500,4 @@ input[type='checkbox'] {
 
 .partners-marquee-track:hover {
   animation-play-state: paused;
-}
-
-/* Admin tables: visible horizontal scrollbar (global CSS hides scrollbars elsewhere) */
-.admin-table-scroll {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  scrollbar-width: thin;
-  scrollbar-color: #888888 #e4e1da;
-}
-
-.admin-table-scroll::-webkit-scrollbar {
-  display: block;
-  height: 8px;
-}
-
-.admin-table-scroll::-webkit-scrollbar-thumb {
-  background-color: #888888;
-  border-radius: 4px;
-}
-
-.admin-table-scroll::-webkit-scrollbar-track {
-  background-color: #e4e1da;
-  border-radius: 4px;
 }

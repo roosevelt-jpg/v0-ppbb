@@ -265,7 +265,7 @@ export default function LeadsPage() {
           description="Leads are generated when members view your profile, listings, or opportunities."
         />
       ) : (
-        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto">
+        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto table-scroll">
           <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="border-b text-left text-xs uppercase text-neutral-500">

@@ -84,7 +84,7 @@ export default function FormsPage() {
     return (
       <AdminPageLayout title="Custom Forms" subtitle="Loading…">
         <div className="space-y-6 animate-pulse">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-20 bg-neutral-200 rounded-lg" />
             ))}
@@ -115,7 +115,7 @@ export default function FormsPage() {
 
       {/* Statistics Cards */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="p-4">
             <p className="text-sm text-gray-600">Total Forms</p>
             <p className="text-2xl font-bold mt-2">{stats.totalForms}</p>

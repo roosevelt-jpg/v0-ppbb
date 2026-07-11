@@ -77,7 +77,7 @@ export default function Analytics() {
         <p className="text-neutral-500">Loading analytics…</p>
       ) : (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Jobs posted</p><p className="text-2xl font-bold">{stats?.opportunitiesPosted || 0}</p></Card>
             <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Offers posted</p><p className="text-2xl font-bold">{stats?.offersPosted || 0}</p></Card>
             <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Total leads</p><p className="text-2xl font-bold">{stats?.leadsGenerated || 0}</p></Card>
@@ -101,7 +101,7 @@ export default function Analytics() {
 
           <Card className="p-6 border-[#e4e1da]">
             <h3 className="font-semibold mb-4">Job board performance</h3>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto table-scroll">
               <table className="w-full min-w-[480px] text-sm">
                 <thead><tr className="border-b"><th className="text-left py-2">Job</th><th className="text-left py-2">Applications</th><th className="text-left py-2">Status</th></tr></thead>
                 <tbody>
@@ -119,7 +119,7 @@ export default function Analytics() {
 
           <Card className="p-6 border-[#e4e1da]">
             <h3 className="font-semibold mb-4">Marketplace performance</h3>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto table-scroll">
               <table className="w-full min-w-[480px] text-sm">
                 <thead><tr className="border-b"><th className="text-left py-2">Offer</th><th className="text-left py-2">Views</th><th className="text-left py-2">Purchases</th></tr></thead>
                 <tbody>

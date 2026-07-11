@@ -82,7 +82,7 @@ export default function DashboardLayout({
       <MemberSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <main className="flex-1 min-w-0 overflow-auto flex flex-col">
         <MemberHeader open={sidebarOpen} setOpen={setSidebarOpen} />
-        <div className="flex-1 min-w-0 overflow-auto" data-dashboard-surface="light">
+        <div className="flex-1 min-w-0 overflow-auto overflow-x-hidden" data-dashboard-surface="light">
           <DashboardErrorBoundary key={pathname}>{children}</DashboardErrorBoundary>
         </div>
       </main>

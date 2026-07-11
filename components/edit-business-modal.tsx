@@ -135,7 +135,7 @@ export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: Edit
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium">Owner Name</label>
             <input
@@ -158,7 +158,7 @@ export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: Edit
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium">Phone</label>
             <input
@@ -222,7 +222,7 @@ export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: Edit
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-medium">Commission/Revenue Share %</label>
             <input

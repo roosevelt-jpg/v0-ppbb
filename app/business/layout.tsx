@@ -193,7 +193,7 @@ export default function BusinessLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex flex-1 flex-col overflow-hidden">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <DashboardTopBar
           title={pageTitle}
           welcome={welcome}
@@ -203,7 +203,7 @@ export default function BusinessLayout({
         />
 
         {/* Content — always light surface so cards stay white with black text */}
-        <div className="flex-1 overflow-auto" data-dashboard-surface="light">
+        <div className="min-w-0 flex-1 overflow-auto overflow-x-hidden" data-dashboard-surface="light">
           <DashboardErrorBoundary
             key={pathname}
             homeHref="/business/dashboard"

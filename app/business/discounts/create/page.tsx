@@ -80,7 +80,7 @@ export default function CreateDiscountPage() {
           <input value={form.discountCode} onChange={(e) => setForm({ ...form, discountCode: e.target.value })} className="flex-1 min-h-[44px] px-3 border rounded-lg font-mono" />
           <button type="button" onClick={() => setForm({ ...form, discountCode: generateCode() })} className="px-3 border rounded-lg text-sm">Regenerate</button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Type</label>
             <select value={form.discountType} onChange={(e) => setForm({ ...form, discountType: e.target.value as 'percent' | 'fixed' })} className="w-full min-h-[44px] px-3 border rounded-lg">

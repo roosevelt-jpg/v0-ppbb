@@ -159,11 +159,20 @@ export const adminMenuItems = [
   { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: PieChart, group: 'Configuration' },
 ]
 
-export function AdminSidebar() {
+export function AdminSidebar({
+  mobileOpen,
+  onMobileOpenChange,
+}: {
+  mobileOpen?: boolean
+  onMobileOpenChange?: (open: boolean) => void
+} = {}) {
   const pathname = usePathname()
   const router = useRouter()
   const { user } = useAuth()
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+  const [internalMobileOpen, setInternalMobileOpen] = React.useState(false)
+  const mobileMenuOpen = mobileOpen ?? internalMobileOpen
+  const setMobileMenuOpen = onMobileOpenChange ?? setInternalMobileOpen
+  const showFab = mobileOpen === undefined && onMobileOpenChange === undefined
 
   const visibleMenuItems = React.useMemo(
     () => filterAdminMenuByPermissions(adminMenuItems, user),
@@ -251,15 +260,19 @@ export function AdminSidebar() {
         </nav>
       </aside>
 
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 flex items-center justify-center min-h-[48px] min-w-[48px] p-3 rounded-lg transition-colors"
-        style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
-        aria-label="Toggle menu"
-      >
-        <Menu size={24} />
-      </button>
+      {/* Mobile Menu Button — only when parent does not provide a top-bar toggle */}
+      {showFab ? (
+        <button
+          type="button"
+          data-dashboard-control
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="lg:hidden fixed bottom-6 left-4 z-40 flex items-center justify-center min-h-[48px] min-w-[48px] p-3 rounded-lg transition-colors"
+          style={{ backgroundColor: '#111111', color: '#f7f6f2' }}
+          aria-label="Toggle menu"
+        >
+          <Menu size={24} />
+        </button>
+      ) : null}
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (

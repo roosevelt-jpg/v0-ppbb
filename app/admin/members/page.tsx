@@ -74,28 +74,28 @@ export default function AdminMembersPage() {
         <h2 className="text-2xl font-bold text-black">All Members</h2>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
             <p className="text-sm text-gray-600">Total Members</p>
             <p className="text-2xl font-bold text-black">{memberCount}</p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
             <p className="text-sm text-gray-600">Volunteers</p>
             <p className="text-2xl font-bold text-black">{volunteerCount}</p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
             <p className="text-sm text-gray-600">Businesses</p>
             <p className="text-2xl font-bold text-black">{businessCount}</p>
           </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
             <p className="text-sm text-gray-600">Sponsors</p>
             <p className="text-2xl font-bold text-black">{sponsorCount}</p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-4">
-          <div className="flex gap-2">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="flex gap-2 overflow-x-auto pb-1 min-w-0">
             {['all', 'member', 'volunteer', 'business', 'sponsor'].map(type => (
               <button
                 key={type}
@@ -103,7 +103,7 @@ export default function AdminMembersPage() {
                   setUserType(type)
                   setLoading(true)
                 }}
-                className={`px-4 py-2 rounded font-medium text-sm transition-colors ${
+                className={`px-4 py-2 rounded font-medium text-sm transition-colors whitespace-nowrap shrink-0 ${
                   userType === type
                     ? 'bg-black text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -114,8 +114,8 @@ export default function AdminMembersPage() {
             ))}
           </div>
 
-          <div className="flex-1 flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-4">
-            <Search size={18} className="text-gray-400" />
+          <div className="flex-1 flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-4 min-w-0">
+            <Search size={18} className="text-gray-400 shrink-0" />
             <input
               type="text"
               placeholder="Search by name, email, or location..."

@@ -39,7 +39,7 @@ export default function EventsFinancePage() {
   return (
     <AdminPageLayout title="Events Finance">
       <div className="space-y-6">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
             <p className="text-xs text-gray-600">Total Revenue</p>
             <p className="text-2xl font-bold mt-2">AED {totalRevenue.toFixed(2)}</p>

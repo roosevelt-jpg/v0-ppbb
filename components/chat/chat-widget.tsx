@@ -257,7 +257,7 @@ export function ChatWidget() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-64 h-80 sm:w-80 sm:h-[430px] bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200 max-w-[calc(100vw-32px)]">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[min(20rem,calc(100vw-2rem))] h-[min(26.875rem,calc(100dvh-6rem))] sm:w-80 bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200">
           {/* Header */}
           <div className="flex items-center justify-between p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">

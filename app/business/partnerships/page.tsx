@@ -124,7 +124,7 @@ export default function PartnershipsPage() {
           }
         />
       ) : (
-        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto">
+        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto table-scroll">
           <table className="w-full text-sm min-w-[800px]">
             <thead>
               <tr className="border-b text-left text-xs uppercase text-neutral-500">

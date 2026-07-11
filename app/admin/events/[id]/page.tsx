@@ -166,7 +166,7 @@ export default function EventDetailPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '16px' }}>
             <p className="text-xs text-gray-600">Date</p>
             <p className="text-sm font-semibold mt-1">{format(new Date(event.startDate), 'MMM dd, yyyy')}</p>

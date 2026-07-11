@@ -190,13 +190,13 @@ export function Navbar() {
 
   return (
     <nav className="w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
-      <div className="hidden md:block px-4 sm:px-6 lg:px-8 py-4">
+      <div className="hidden lg:block px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 lg:gap-8 min-h-[112px]">
           <div className="flex-shrink-0">
             <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
 
-          <div className="flex-1 flex items-center justify-center gap-6 lg:gap-8">
+          <div className="flex-1 flex items-center justify-center gap-4 xl:gap-8 min-w-0 overflow-x-auto">
             {visibleLinks.map((item) => renderNavItem(item))}
             {topLevelHeaderPages.map((page) => (
               <Link
@@ -218,14 +218,14 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2 min-h-[88px]">
+      <div className="lg:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2 min-h-[88px]">
         <SiteLogo background="dark" variant="navbar" href="/" />
         <div className="flex items-center gap-2">
           <LanguageSwitcherWithFlags onDark />
           <ThemeToggle onDark />
           <ProfileMenuButton />
           <button
-            className="p-2 -mr-2 text-white"
+            className="p-2 -mr-2 text-white min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -235,7 +235,7 @@ export function Navbar() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-neutral-800 dark:bg-neutral-900 border-t border-neutral-700 max-h-96 overflow-y-auto">
+        <div className="lg:hidden bg-neutral-800 dark:bg-neutral-900 border-t border-neutral-700 max-h-[min(24rem,70dvh)] overflow-y-auto">
           {visibleLinks.map((item) => renderNavItem(item, true))}
           {topLevelHeaderPages.map((page) => (
             <Link

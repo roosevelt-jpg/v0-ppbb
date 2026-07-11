@@ -104,7 +104,7 @@ export default function Payments() {
             <p className="text-neutral-500">No payments yet</p>
           </Card>
         ) : (
-          <Card className="p-4 sm:p-6 border-[#e4e1da] overflow-x-auto">
+          <Card className="p-4 sm:p-6 border-[#e4e1da] overflow-x-auto table-scroll">
             <table className="w-full border-collapse min-w-[480px]">
               <thead>
                 <tr className="border-b border-[#e4e1da]">

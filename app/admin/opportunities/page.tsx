@@ -316,7 +316,7 @@ export default function AdminOpportunitiesPage() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard label="Total Posted" value={stats.total} />
           <StatCard label="Published" value={stats.published} />
           <StatCard label="Applications This Month" value={stats.appsThisMonth} />

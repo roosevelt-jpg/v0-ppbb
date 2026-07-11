@@ -112,7 +112,7 @@ export function EditDonationModal({ open, onOpenChange, donation, onSuccess }: E
       }
     >
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-neutral-700">Donor Name</label>
             <input
@@ -134,7 +134,7 @@ export function EditDonationModal({ open, onOpenChange, donation, onSuccess }: E
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-neutral-700 flex items-center gap-1">
               <DollarSign className="w-4 h-4" />
@@ -184,7 +184,7 @@ export function EditDonationModal({ open, onOpenChange, donation, onSuccess }: E
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-neutral-700">Status</label>
             <select

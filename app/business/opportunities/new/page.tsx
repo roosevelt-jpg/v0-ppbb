@@ -274,7 +274,7 @@ export default function NewOpportunity() {
             </div>
 
             {/* Salary and Duration */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Salary (AED) or Hourly Rate
@@ -318,7 +318,7 @@ export default function NewOpportunity() {
             </div>
 
             {/* Hours Per Week and Remote */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Hours Per Week

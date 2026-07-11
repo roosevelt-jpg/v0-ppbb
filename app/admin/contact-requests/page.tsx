@@ -136,26 +136,26 @@ export default function ContactRequestsPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 min-w-0">
           <p className="text-sm text-gray-600">Total Messages</p>
           <p className="text-3xl font-bold mt-2">{messages.length}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 min-w-0">
           <p className="text-sm text-gray-600">Unread</p>
           <p className="text-3xl font-bold mt-2 text-red-600">{unreadCount}</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 min-w-0">
           <p className="text-sm text-gray-600">Resolved</p>
           <p className="text-3xl font-bold mt-2 text-green-600">{resolvedCount}</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Messages List */}
-        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200">
+        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 min-w-0">
           {/* Filter Tabs */}
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-gray-200 overflow-x-auto">
             {(['all', 'unread', 'read', 'resolved'] as const).map((f) => (
               <button
                 key={f}
@@ -163,7 +163,7 @@ export default function ContactRequestsPage() {
                   setFilter(f)
                   setSelectedMessage(null)
                 }}
-                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors !min-h-0 !rounded-none !shadow-none hover:!shadow-none ${
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors !min-h-0 !rounded-none !shadow-none hover:!shadow-none whitespace-nowrap shrink-0 ${
                   filter === f
                     ? '!bg-black !text-white border-b-2 border-black'
                     : '!bg-white !text-gray-600 hover:!text-gray-900 hover:!bg-gray-50'

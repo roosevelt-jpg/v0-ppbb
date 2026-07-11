@@ -85,7 +85,7 @@ export default function BusinessDiscountsPage() {
               </div>
             ))}
           </div>
-          <div className="hidden md:block overflow-x-auto bg-white border border-[#e4e1da] rounded-lg">
+          <div className="hidden md:block overflow-x-auto table-scroll bg-white border border-[#e4e1da] rounded-lg">
           <table className="w-full min-w-[640px]">
             <thead className="bg-neutral-50 border-b">
               <tr>

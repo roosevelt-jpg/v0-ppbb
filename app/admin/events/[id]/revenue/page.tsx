@@ -52,7 +52,7 @@ export default function EventRevenuePage() {
       <div className="max-w-5xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold">{event.title} - Revenue</h1>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
             <p className="text-xs text-gray-600 font-medium">Total Revenue</p>
             <p className="text-2xl font-bold mt-2">AED {totalRevenue.toFixed(2)}</p>

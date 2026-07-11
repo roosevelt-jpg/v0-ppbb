@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { Menu, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { hasAdminAccess } from '@/lib/roles'
 import { canAccessAdminPath } from '@/lib/admin-invite-permissions'
@@ -20,6 +21,7 @@ export default function AdminLayout({
   const router = useRouter()
   const pathname = usePathname()
   const { user, firebaseUser, loading } = useAuth()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isSetupPage = pathname === '/admin/setup'
   const isLoginPage = pathname === '/admin/login'
@@ -186,7 +188,7 @@ export default function AdminLayout({
   // For other admin pages, render with sidebar
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <AdminSidebar />
+      <AdminSidebar mobileOpen={mobileMenuOpen} onMobileOpenChange={setMobileMenuOpen} />
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <DashboardTopBar
@@ -194,6 +196,17 @@ export default function AdminLayout({
           welcome={welcome}
           onLogout={handleLogout}
           logoutLabel="Logout"
+          trailing={
+            <button
+              type="button"
+              data-dashboard-control
+              onClick={() => setMobileMenuOpen((o) => !o)}
+              className="lg:hidden inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-md bg-transparent text-neutral-700 hover:bg-neutral-100"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          }
         />
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background" data-dashboard-surface="light">

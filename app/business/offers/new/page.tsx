@@ -295,7 +295,7 @@ export default function NewOffer() {
             </div>
 
             {/* Pricing */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Price (AED) *
@@ -338,7 +338,7 @@ export default function NewOffer() {
             </div>
 
             {/* Discount and Valid Until */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Discount %

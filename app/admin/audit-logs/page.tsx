@@ -15,7 +15,7 @@ import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 function AuditLogsSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="h-20 bg-neutral-200 rounded-lg" />
         <div className="h-20 bg-neutral-200 rounded-lg" />
       </div>
