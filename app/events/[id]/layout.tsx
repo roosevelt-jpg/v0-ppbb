@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { getShareLogoUrl, getSiteUrl } from '@/lib/site-metadata'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,10 +11,16 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
+  const site = getSiteUrl()
+  const fallbackImage = `${site}/opengraph-image`
+
   try {
     const snap = await getAdminDb().collection('events').doc(id).get()
     if (!snap.exists) {
-      return { title: 'Event | Passive Blessings' }
+      return {
+        title: 'Event',
+        openGraph: { images: [{ url: fallbackImage, width: 1200, height: 630 }] },
+      }
     }
     const data = snap.data()!
     const title = (data.title as string) || 'Event'
@@ -24,29 +31,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       (data.bannerURL as string) ||
       (data.bannerImage as string) ||
       (data.bannerImageUrl as string) ||
-      undefined
-    const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+      fallbackImage
     const url = `${site}/events/${id}`
 
     return {
-      title: `${title} | Passive Blessings`,
+      title,
       description,
       openGraph: {
         title,
         description,
         type: 'website',
         url,
-        images: image ? [{ url: image }] : [],
+        siteName: 'Passive Blessings',
+        images: [
+          { url: image, alt: title },
+          { url: getShareLogoUrl(), alt: 'Passive Blessings logo' },
+        ],
       },
       twitter: {
         card: 'summary_large_image',
         title,
         description,
-        images: image ? [image] : [],
+        images: [image],
       },
     }
   } catch {
-    return { title: 'Event | Passive Blessings' }
+    return {
+      title: 'Event',
+      openGraph: { images: [{ url: fallbackImage, width: 1200, height: 630 }] },
+    }
   }
 }
 

@@ -7,6 +7,12 @@ import { ChatWidget } from '@/components/chat/chat-widget'
 import { EUDataProtectionPopup } from '@/components/eu-data-protection-popup'
 import { PublicExtras } from '@/components/public-extras'
 import { PublicContentGuard } from '@/components/content-protection'
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  getShareLogoUrl,
+  getSiteUrl,
+} from '@/lib/site-metadata'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -21,9 +27,17 @@ const cormorantGaramond = Cormorant_Garamond({
   style: ['normal', 'italic'],
 })
 
+const siteUrl = getSiteUrl()
+const shareLogo = getShareLogoUrl()
+
 export const metadata: Metadata = {
-  title: 'Passive Blessings',
-  description: 'Community platform for events, volunteering, and community support',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,9 +49,30 @@ export const metadata: Metadata = {
     apple: '/api/favicon',
   },
   openGraph: {
-    title: 'Passive Blessings',
-    description: 'Community platform for events, volunteering, and community support',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     type: 'website',
+    locale: 'en_AE',
+    url: siteUrl,
+    siteName: SITE_NAME,
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: SITE_NAME,
+      },
+      {
+        url: shareLogo,
+        alt: `${SITE_NAME} logo`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    images: ['/opengraph-image'],
   },
 }
 
@@ -54,13 +89,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: siteUrl,
+    logo: shareLogo,
+    image: `${siteUrl}/opengraph-image`,
+    description: SITE_DESCRIPTION,
+  }
+
   return (
     <html lang="en" className={`${inter.variable} ${cormorantGaramond.variable}`} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Passive Blessings" />
+        <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </head>
       <body className="font-body antialiased bg-background text-foreground">
         <Providers>{children}</Providers>

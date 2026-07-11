@@ -15,8 +15,9 @@ export const BLOCKED_AI_AND_SCRAPER_AGENTS = [
   'bytespider',
   'ccbot',
   'cohere-ai',
+  // Keep Meta/WhatsApp/Facebook link-preview crawlers allowed (not listed here):
+  // facebookexternalhit, facebot, whatsapp
   'meta-externalagent',
-  'facebookexternalhit',
   'amazonbot',
   'applebot-extended',
   'diffbot',
