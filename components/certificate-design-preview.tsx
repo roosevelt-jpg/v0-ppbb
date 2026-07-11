@@ -48,7 +48,7 @@ export function CertificateDesignPreview({ data, className = '', id }: Certifica
         <img
           src={logoSrc}
           alt="Passive Blessings"
-          className="h-16 sm:h-20 mx-auto mb-6 object-contain max-w-[220px]"
+          className="h-28 sm:h-36 md:h-40 mx-auto mb-6 object-contain max-w-[min(100%,320px)] w-auto"
         />
 
         <p className="text-xs uppercase tracking-[0.25em] text-neutral-500 mb-2">{data.subtitle}</p>
