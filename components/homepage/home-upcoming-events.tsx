@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import {
   subscribeToHomepage,
@@ -12,7 +12,7 @@ import {
 import EventCard from '@/components/event-card'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Calendar } from 'lucide-react'
-import type { Event } from '@/lib/types'
+import { resolveEventHostFromUserData, hostFromEventDoc } from '@/lib/event-host'
 
 function EventsSkeleton() {
   return (
@@ -40,11 +40,14 @@ function toEventDate(value: unknown): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed
 }
 
+type CardEvent = Record<string, unknown> & { id: string; date?: Date }
+
 export function HomeUpcomingEvents() {
   const [config, setConfig] = useState<HomepageConfig>(DEFAULT_HOMEPAGE)
-  const [events, setEvents] = useState<Event[]>([])
+  const [events, setEvents] = useState<CardEvent[]>([])
   const [configReady, setConfigReady] = useState(false)
   const [eventsReady, setEventsReady] = useState(false)
+  const [hostEnrichKey, setHostEnrichKey] = useState('')
 
   useEffect(() => subscribeToHomepage((data) => {
     setConfig(data)
@@ -62,7 +65,7 @@ export function HomeUpcomingEvents() {
         now.setHours(0, 0, 0, 0)
         const mapped = snapshot.docs
           .map((docSnap) => {
-            const data = docSnap.data()
+            const data = docSnap.data() as Record<string, unknown>
             const date =
               toEventDate(data.date) ||
               toEventDate(data.startDate) ||
@@ -71,7 +74,7 @@ export function HomeUpcomingEvents() {
               id: docSnap.id,
               ...data,
               date,
-            } as Event
+            } as CardEvent
           })
           .filter((event) => {
             const eventDate = toEventDate(event.date)
@@ -80,6 +83,7 @@ export function HomeUpcomingEvents() {
           .sort((a, b) => toEventDate(a.date)!.getTime() - toEventDate(b.date)!.getTime())
         setEvents(mapped.slice(0, maxFetch))
         setEventsReady(true)
+        setHostEnrichKey(mapped.map((e) => e.id).join(','))
       },
       () => {
         setEvents([])
@@ -89,6 +93,62 @@ export function HomeUpcomingEvents() {
 
     return unsub
   }, [config.eventsSection.maxEventsToShow])
+
+  // Backfill host branding for older events missing denormalized fields
+  useEffect(() => {
+    if (!hostEnrichKey) return
+    let cancelled = false
+    const run = async () => {
+      const needsHost = events.filter((e) => !hostFromEventDoc(e) && typeof e.createdBy === 'string')
+      if (needsHost.length === 0) return
+
+      const byUser = new Map<string, ReturnType<typeof resolveEventHostFromUserData>>()
+      const uniqueIds = Array.from(new Set(needsHost.map((e) => String(e.createdBy))))
+
+      await Promise.all(
+        uniqueIds.map(async (uid) => {
+          try {
+            const snap = await getDoc(doc(db, 'users', uid))
+            const role = snap.exists()
+              ? String((snap.data() as { role?: string }).role || 'business')
+              : 'business'
+            byUser.set(
+              uid,
+              resolveEventHostFromUserData(
+                uid,
+                snap.exists() ? (snap.data() as Record<string, unknown>) : undefined,
+                role.includes('admin') ? 'admin' : 'business'
+              )
+            )
+          } catch {
+            /* ignore */
+          }
+        })
+      )
+
+      if (cancelled) return
+      setEvents((prev) =>
+        prev.map((e) => {
+          if (hostFromEventDoc(e) || typeof e.createdBy !== 'string') return e
+          const host = byUser.get(String(e.createdBy))
+          if (!host) return e
+          return {
+            ...e,
+            businessId: host.businessId,
+            businessName: host.businessName,
+            ownerName: host.ownerName,
+            businessLogoUrl: host.businessLogoUrl,
+          }
+        })
+      )
+    }
+    void run()
+    return () => {
+      cancelled = true
+    }
+    // Only re-run when the event id set changes, not on every host enrichment
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostEnrichKey])
 
   const displayEvents = useMemo(
     () => events.slice(0, config.eventsSection.maxEventsToShow),

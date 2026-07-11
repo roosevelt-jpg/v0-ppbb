@@ -8,11 +8,11 @@ import type { EventsPageConfig, EventsCategory } from '@/lib/events-config'
 import { getCategoryColor, getCategoryName } from '@/lib/events-config'
 import type { NormalizedEvent } from '@/lib/event-utils'
 import {
-  formatPricingLabel,
   getEventStartDate,
   getEventTimeLabel,
   getGenderBadgeLabel,
 } from '@/lib/event-utils'
+import { getEventPriceCornerLabel } from '@/lib/event-host'
 
 interface EventLineupCardProps {
   event: NormalizedEvent
@@ -25,7 +25,17 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
   const categoryColor = getCategoryColor(categories, event.category)
   const categoryName = getCategoryName(categories, event.category)
   const genderLabel = getGenderBadgeLabel(event.genderRestriction)
-  const pricingLabel = formatPricingLabel(event)
+  const priceCorner = getEventPriceCornerLabel(event as unknown as Record<string, unknown>)
+  const businessName = typeof (event as { businessName?: string }).businessName === 'string'
+    ? (event as { businessName?: string }).businessName
+    : ''
+  const ownerName = typeof (event as { ownerName?: string }).ownerName === 'string'
+    ? (event as { ownerName?: string }).ownerName
+    : ''
+  const logoUrl =
+    typeof (event as { businessLogoUrl?: string }).businessLogoUrl === 'string'
+      ? (event as { businessLogoUrl?: string }).businessLogoUrl
+      : ''
 
   return (
     <article className="bg-white rounded-xl border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full">
@@ -52,9 +62,36 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
             {genderLabel}
           </span>
         </div>
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded text-[0.65rem] sm:text-xs font-semibold bg-black text-white">
+          {priceCorner}
+        </div>
       </div>
 
       <div className="p-4 sm:p-5 flex flex-col flex-1 min-w-0">
+        {(logoUrl || businessName || ownerName) && (
+          <div className="flex items-center gap-2.5 mb-3 min-w-0">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={businessName || 'Host'}
+                className="h-9 w-9 rounded-full object-cover border border-neutral-200 shrink-0 bg-white"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                {(businessName || ownerName || 'E').charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              {businessName ? (
+                <p className="text-sm font-semibold text-foreground truncate">{businessName}</p>
+              ) : null}
+              {ownerName && ownerName !== businessName ? (
+                <p className="text-xs text-muted-foreground truncate">{ownerName}</p>
+              ) : null}
+            </div>
+          </div>
+        )}
+
         <h3 className="font-headline text-lg sm:text-xl font-bold text-foreground break-words mb-3">
           {event.title}
         </h3>
@@ -75,7 +112,7 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
         </div>
 
         {event.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {event.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
@@ -86,8 +123,6 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
             ))}
           </div>
         )}
-
-        <p className="font-body text-sm font-semibold text-foreground mb-4">{pricingLabel}</p>
 
         <div className="mt-auto flex flex-col sm:flex-row gap-2">
           <Link

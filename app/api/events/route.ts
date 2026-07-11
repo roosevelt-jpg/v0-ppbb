@@ -106,7 +106,8 @@ export async function POST(request: NextRequest) {
     }
 
     const userSnap = await db.collection('users').doc(uid).get()
-    const userRoleData = (userSnap.data() as { role?: string; roles?: string[] }) || null
+    const userData = (userSnap.data() as Record<string, unknown>) || {}
+    const userRoleData = (userData as { role?: string; roles?: string[] }) || null
 
     if (!hasAdminAccessServer(userRoleData) && !hasBusinessAccessServer(userRoleData)) {
       return NextResponse.json(
@@ -116,6 +117,8 @@ export async function POST(request: NextRequest) {
     }
 
     const createdByRole = hasAdminAccessServer(userRoleData) ? 'admin' : 'business'
+    const { resolveEventHostFromUserData } = await import('@/lib/event-host')
+    const host = resolveEventHostFromUserData(uid, userData, createdByRole)
 
     const locationName = body.locationName || body.location
     const startDate = body.startDate || body.date
@@ -207,6 +210,10 @@ export async function POST(request: NextRequest) {
 
       createdBy: uid,
       createdByRole,
+      businessId: host.businessId,
+      businessName: host.businessName,
+      ownerName: host.ownerName,
+      businessLogoUrl: host.businessLogoUrl,
       submittedAt: isPending ? Timestamp.now() : null,
       approvedBy: isPublished && !isBusiness ? uid : null,
       approvedAt: isPublished && !isBusiness ? Timestamp.now() : null,
