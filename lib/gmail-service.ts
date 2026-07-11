@@ -7,32 +7,58 @@ import nodemailer from 'nodemailer'
 import { SiteSettings } from './types'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { mergeGlobalSettings } from '@/lib/global-settings'
+import { getIntegrationServer } from '@/lib/integrations/handlers-server'
+import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
+
+function getPublicSiteUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+}
 
 /**
- * Load Gmail SMTP credentials from integrations collection
+ * Load Gmail SMTP credentials from Integrations vault (decrypted)
+ * with optional env fallback.
  */
-export async function getGmailSmtpConfig() {
+export async function getGmailSmtpConfig(): Promise<{
+  gmailEmail: string
+  gmailAppPassword: string
+  fromName: string
+} | null> {
   try {
-    const db = getAdminDb()
-    const integrationDoc = await db.collection('integrations').doc('dev-user-001_gmailSmtp').get()
-    
-    if (!integrationDoc.exists) {
-      console.warn('[v0] Gmail SMTP integration not found in Firestore')
-      return null
+    const integration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'gmailSmtp')
+    const email = integration?.credentials?.gmailEmail?.trim()
+    const appPassword = integration?.credentials?.gmailAppPassword?.trim()
+    if (email && appPassword) {
+      console.log('[v0] Loaded decrypted Gmail SMTP from integrations vault')
+      return {
+        gmailEmail: email,
+        gmailAppPassword: appPassword,
+        fromName: integration.credentials.fromName?.trim() || 'Passive Blessings',
+      }
     }
-
-    const data = integrationDoc.data()
-    console.log('[v0] Loaded Gmail SMTP config from integrations')
-    
-    return {
-      gmailEmail: data?.credentials?.gmailEmail,
-      gmailAppPassword: data?.credentials?.gmailAppPassword,
-      fromName: data?.credentials?.fromName,
-    }
+    console.warn('[v0] Gmail SMTP integration missing email or app password')
   } catch (error) {
-    console.error('[v0] Failed to load Gmail SMTP from integrations:', error instanceof Error ? error.message : String(error))
-    return null
+    console.error(
+      '[v0] Failed to load Gmail SMTP from integrations:',
+      error instanceof Error ? error.message : String(error)
+    )
   }
+
+  const envEmail = process.env.GMAIL_USER?.trim() || process.env.GMAIL_EMAIL?.trim()
+  const envPassword = process.env.GMAIL_APP_PASSWORD?.trim()
+  if (envEmail && envPassword) {
+    console.log('[v0] Using Gmail SMTP from environment variables')
+    return {
+      gmailEmail: envEmail,
+      gmailAppPassword: envPassword,
+      fromName: process.env.GMAIL_FROM_NAME?.trim() || 'Passive Blessings',
+    }
+  }
+
+  return null
 }
 
 /**
@@ -58,7 +84,7 @@ export const createGmailTransporter = (emailConfig?: SiteSettings['emailConfig']
       service: 'gmail',
       auth: {
         user: emailConfig.gmailEmail,
-        pass: emailConfig.gmailAppPassword, // Gmail App Password (not regular password)
+        pass: emailConfig.gmailAppPassword,
       },
     })
 
@@ -120,9 +146,13 @@ function buildInviterSignatureHtml(invitedBy: NonNullable<AdminInviteDetails['in
         </td>
         <td valign="top" style="font-family:Arial,'Segoe UI',sans-serif;">
           <p style="margin:0 0 4px 0;font-size:15px;font-weight:bold;color:#111111;">
-            Invited by ${invitedBy.name}, ${invitedBy.roleLabel} at Passive Blessings
+            ${invitedBy.name}
+          </p>
+          <p style="margin:0 0 6px 0;font-size:13px;color:#444444;font-weight:600;">
+            ${invitedBy.roleLabel} · Passive Blessings
           </p>
           <p style="margin:0;font-size:13px;color:#666666;line-height:1.5;">
+            Welcome to the team. Please complete your admin setup with the access code above.
             If you have questions about this invitation, reply to this email or contact your inviter directly.
           </p>
         </td>
@@ -133,18 +163,22 @@ function buildInviterSignatureHtml(invitedBy: NonNullable<AdminInviteDetails['in
 
 /** Dark logo for light email backgrounds — reads platformConfig/globalSettings.logoUrlDark */
 export async function getEmailBrandLogoUrl(): Promise<string> {
+  const site = getPublicSiteUrl()
   try {
     const db = getAdminDb()
     const snap = await db.collection('platformConfig').doc('globalSettings').get()
     const settings = mergeGlobalSettings(snap.data() as Record<string, unknown> | undefined)
-    if (settings.logoUrlDark) return settings.logoUrlDark
+    if (settings.logoUrlDark) {
+      const logo = settings.logoUrlDark.trim()
+      if (/^https?:\/\//i.test(logo)) return logo
+      return `${site}${logo.startsWith('/') ? '' : '/'}${logo}`
+    }
   } catch (error) {
     console.warn(
       '[v0] Failed to load email logo from Firestore:',
       error instanceof Error ? error.message : String(error)
     )
   }
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
   return `${site}/images/pb-logo-black.png`
 }
 
@@ -337,6 +371,40 @@ export const sendAdminInviteEmail = async (
     })
     throw error
   }
+}
+
+/**
+ * Full invite send: load vault credentials → transporter → branded email.
+ */
+export async function dispatchAdminInviteEmail(
+  details: Omit<AdminInviteDetails, 'setupUrl' | 'fromName'> & {
+    setupUrl?: string
+    fromName?: string
+  }
+): Promise<{ success: true; messageId?: string }> {
+  const gmailConfig = await getGmailSmtpConfig()
+  if (!gmailConfig) {
+    throw new Error(
+      'Email service not configured. Please configure Gmail SMTP in Admin → Integrations.'
+    )
+  }
+
+  const transporter = createGmailTransporter({
+    enabled: true,
+    gmailEmail: gmailConfig.gmailEmail,
+    gmailAppPassword: gmailConfig.gmailAppPassword,
+  } as SiteSettings['emailConfig'])
+
+  if (!transporter) {
+    throw new Error('Failed to initialize Gmail SMTP. Check your Gmail App Password.')
+  }
+
+  const setupUrl = details.setupUrl || `${getPublicSiteUrl()}/admin/setup`
+  return sendAdminInviteEmail(transporter, gmailConfig.gmailEmail, {
+    ...details,
+    setupUrl,
+    fromName: details.fromName || gmailConfig.fromName,
+  })
 }
 
 /**

@@ -124,14 +124,25 @@ export default function AdminManagementPage() {
       })
       if (json.success) {
         console.log('[v0] Access code created:', {
-          code: json.data?.accessCode,
+          code: json.data?.accessCode || json.data?.code,
           permissions: json.data?.permissions,
+          emailSent: json.emailSent,
+          emailError: json.emailError,
         })
         setCodes([json.data, ...codes])
         setAdminEmail('')
         setAdminName('')
         setSelectedPermissions([])
-        alert('✓ Access code generated and invitation email sent to ' + adminEmail)
+        if (json.emailSent) {
+          alert(`✓ Invitation emailed to ${adminEmail} with access code and setup link.`)
+        } else {
+          alert(
+            `Access code was created, but the email was NOT sent.\n\n${
+              json.emailError || json.message || 'Check Admin → Integrations → Gmail SMTP.'
+            }\n\nYou can still copy the code from the list below and share it manually.`
+          )
+        }
+        await loadData()
       } else {
         alert('Error: ' + (json.error || 'Failed to generate code'))
       }
@@ -312,31 +323,46 @@ export default function AdminManagementPage() {
             ) : (
               <div className="space-y-3">
                 {codes.map((code: any) => (
-                  <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <code className="font-mono font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">
                           {visibleCodes.has(code.id) ? code.code : '••••••'}
                         </code>
                         <button
+                          type="button"
                           onClick={() => toggleCodeVisibility(code.id)}
                           className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+                          aria-label="Toggle code visibility"
                         >
                           {visibleCodes.has(code.id) ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleCopyCode(code.code)}
                           className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+                          aria-label="Copy code"
                         >
                           <Copy size={16} />
                         </button>
                       </div>
-                      <div className="flex flex-col gap-1 text-xs text-gray-500">
+                      <div className="flex flex-col gap-0.5 text-xs text-gray-600">
+                        {(code.adminName || code.adminEmail) && (
+                          <p className="font-medium text-gray-900 truncate">
+                            {code.adminName || 'Invitee'}
+                            {code.adminEmail ? ` · ${code.adminEmail}` : ''}
+                          </p>
+                        )}
+                        {(code.adminRole || code.role) && (
+                          <p className="capitalize">
+                            Role: {String(code.adminRole || code.role).replace(/_/g, ' ')}
+                          </p>
+                        )}
                         <p>Generated: {format(new Date(code.createdAt), 'MMM dd, yyyy h:mm a')}</p>
                         <p>Expires: {format(new Date(code.expiresAt), 'MMM dd, yyyy')}</p>
                       </div>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    <span className={`shrink-0 px-2 py-1 rounded text-xs font-medium ${
                       code.used || code.isUsed ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
                     }`}>
                       {code.used || code.isUsed ? 'Used' : 'Unused'}

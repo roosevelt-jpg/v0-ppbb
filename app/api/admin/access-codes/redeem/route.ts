@@ -5,7 +5,8 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 const COLLECTION = 'adminAccessCodes'
 
 /**
- * Mark an access code as used after successful admin account setup.
+ * Mark an access code as used after successful admin account setup,
+ * and sync the admin into admin-users for the Management dashboard.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +28,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Access code not found' }, { status: 404 })
     }
 
+    const codeData = snap.data() || {}
+    const role =
+      (typeof codeData.adminRole === 'string' && codeData.adminRole) ||
+      (typeof codeData.role === 'string' && codeData.role) ||
+      'admin'
+    const permissions = Array.isArray(codeData.permissions)
+      ? codeData.permissions
+      : ['full_access']
+    const name =
+      (typeof codeData.adminName === 'string' && codeData.adminName) ||
+      String(email).split('@')[0]
+
     await ref.update(
       sanitizeForFirestore({
         isUsed: true,
@@ -37,6 +50,31 @@ export async function POST(request: NextRequest) {
         redeemedUserId: userId || null,
       })
     )
+
+    if (userId) {
+      const adminRecord = sanitizeForFirestore({
+        email: String(email).toLowerCase(),
+        name,
+        role,
+        permissions,
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: null,
+        accessCodeId: codeId,
+      })
+      await db.collection('admin-users').doc(String(userId)).set(adminRecord, { merge: true })
+      await db.collection('adminUsers').doc(String(userId)).set(
+        sanitizeForFirestore({
+          email: String(email).toLowerCase(),
+          role,
+          permissions,
+          active: true,
+          updatedAt: new Date(),
+        }),
+        { merge: true }
+      )
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

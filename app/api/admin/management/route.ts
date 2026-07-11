@@ -4,6 +4,7 @@ import { getUserDisplayName, getUserProfilePictureURL, getUserInitials } from '@
 import { auditFromApiRequest } from '@/lib/audit-log-server'
 import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
 import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
+import { dispatchAdminInviteEmail } from '@/lib/gmail-service'
 import crypto from 'crypto'
 
 function formatInviteRoleLabel(role: string): string {
@@ -185,44 +186,31 @@ export async function POST(request: NextRequest) {
         throw dbError
       }
 
-      // If sendEmail is true, trigger the email sending
+      // Send branded invite email via Gmail SMTP (Integrations vault)
+      let emailSent = false
+      let emailError: string | null = null
       if (sendEmail) {
-        console.log('[v0] Triggering email send to:', adminEmail)
+        console.log('[v0] Sending invite email in-process to:', adminEmail)
         try {
           const invitedBy = invitedByUserId ? await loadInviterProfile(invitedByUserId) : null
-          const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'}/api/email/send-admin-invite`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              accessCode: code,
-              adminEmail,
-              adminName,
-              role,
-              expiresAt: expiresAt.toISOString(),
-              permissions: accessCodeData.permissions,
-              invitedBy,
-            }),
+          await dispatchAdminInviteEmail({
+            accessCode: code,
+            adminEmail,
+            adminName,
+            role,
+            expiresAt,
+            permissions: accessCodeData.permissions,
+            invitedBy: invitedBy || undefined,
           })
-          
-          const emailData = await emailResponse.json()
-          console.log('[v0] Email API response:', {
-            status: emailResponse.status,
-            success: emailData.success,
-            message: emailData.message,
-            error: emailData.error,
-          })
-          
-          if (!emailResponse.ok) {
-            console.error('[v0] Email API returned error:', emailData.error || 'Unknown error')
-          } else {
-            console.log('[v0] Email sent successfully to:', adminEmail)
-          }
-        } catch (emailError) {
-          console.error('[v0] Failed to send email:', {
-            error: emailError instanceof Error ? emailError.message : String(emailError),
+          emailSent = true
+          console.log('[v0] Invite email sent successfully to:', adminEmail)
+        } catch (emailErr) {
+          emailError =
+            emailErr instanceof Error ? emailErr.message : 'Failed to send invitation email'
+          console.error('[v0] Failed to send invite email:', {
+            error: emailError,
             email: adminEmail,
           })
-          // Don't fail the entire operation if email fails
         }
       }
 
@@ -239,13 +227,24 @@ export async function POST(request: NextRequest) {
           entityType: 'admin',
           entityName: adminName,
           status: 'success',
-          details: `Role: ${role}; Code sent: ${!!sendEmail}`,
+          details: `Role: ${role}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
         })
       }
 
       return NextResponse.json({
         success: true,
-        data: { id: docRef.id, ...accessCodeData },
+        emailSent,
+        emailError,
+        data: {
+          id: docRef.id,
+          accessCode: code,
+          ...accessCodeData,
+        },
+        message: emailSent
+          ? `Access code generated and invitation emailed to ${adminEmail}`
+          : sendEmail
+            ? `Access code generated, but email failed: ${emailError || 'unknown error'}`
+            : 'Access code generated',
       })
     }
 
