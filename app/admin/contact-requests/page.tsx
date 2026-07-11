@@ -186,16 +186,19 @@ export default function ContactRequestsPage() {
               {messages.map((msg) => (
                 <button
                   key={msg.id}
+                  type="button"
                   onClick={() => setSelectedMessage(msg)}
-                  className={`w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors ${
-                    selectedMessage?.id === msg.id ? 'bg-blue-50' : ''
+                  className={`w-full text-left px-6 py-4 !rounded-none !shadow-none hover:!shadow-none transition-colors !min-h-0 ${
+                    selectedMessage?.id === msg.id
+                      ? '!bg-gray-200 hover:!bg-gray-200'
+                      : '!bg-gray-100 hover:!bg-gray-200'
                   } ${msg.status === 'unread' ? 'font-semibold' : ''}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-black truncate">{msg.name}</p>
-                      <p className="text-sm text-gray-600 truncate">{msg.subject}</p>
-                      <p className="text-xs text-gray-500 mt-1">{msg.email}</p>
+                      <p className="text-sm font-medium !text-black truncate">{msg.name}</p>
+                      <p className="text-sm !text-black/80 truncate">{msg.subject}</p>
+                      <p className="text-xs !text-black/60 mt-1">{msg.email}</p>
                     </div>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold flex-shrink-0 ${
