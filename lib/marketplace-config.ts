@@ -12,6 +12,9 @@ export interface MarketplacePageConfig {
   eyebrow: string
   headline: string
   body: string
+  /** WhatsApp channel/group URL — admin-managed; falls back to Global Settings if empty */
+  whatsappLink: string
+  whatsappButtonLabel: string
   membershipEyebrow: string
   membershipHeadline: string
   membershipBody: string
@@ -31,6 +34,8 @@ export const DEFAULT_MARKETPLACE_PAGE_CONFIG: MarketplacePageConfig = {
   eyebrow: 'ENTERPRISE & MARKETPLACE',
   headline: 'Where halal business and community meet.',
   body: 'Our marketplace and directory exist to help member-owned businesses find customers, mentors and opportunity inside their own community.',
+  whatsappLink: '',
+  whatsappButtonLabel: 'Join Our Whatsapp',
   membershipEyebrow: 'MEMBERSHIP',
   membershipHeadline: 'AED 300 / month.',
   membershipBody:
@@ -82,6 +87,11 @@ function mergePageConfig(data: unknown): MarketplacePageConfig {
     eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : defaults.eyebrow,
     headline: typeof d.headline === 'string' ? d.headline : defaults.headline,
     body: typeof d.body === 'string' ? d.body : defaults.body,
+    whatsappLink: typeof d.whatsappLink === 'string' ? d.whatsappLink : defaults.whatsappLink,
+    whatsappButtonLabel:
+      typeof d.whatsappButtonLabel === 'string' && d.whatsappButtonLabel.trim()
+        ? d.whatsappButtonLabel
+        : defaults.whatsappButtonLabel,
     membershipEyebrow:
       typeof d.membershipEyebrow === 'string' ? d.membershipEyebrow : defaults.membershipEyebrow,
     membershipHeadline:

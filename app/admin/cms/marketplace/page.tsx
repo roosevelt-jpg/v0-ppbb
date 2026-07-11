@@ -215,6 +215,30 @@ export default function AdminCmsMarketplacePage() {
                 className="w-full min-h-24"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">WhatsApp channel URL</label>
+              <input
+                type="url"
+                value={pc.whatsappLink}
+                onChange={(e) => updatePage('whatsappLink', e.target.value)}
+                className="w-full"
+                placeholder="https://whatsapp.com/channel/..."
+              />
+              <p className="text-xs text-neutral-500 mt-1">
+                Powers the black “Join Our Whatsapp” button under the hero. Leave empty to use
+                Global Settings → WhatsApp channel URL.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">WhatsApp button label</label>
+              <input
+                type="text"
+                value={pc.whatsappButtonLabel}
+                onChange={(e) => updatePage('whatsappButtonLabel', e.target.value)}
+                className="w-full"
+                placeholder="Join Our Whatsapp"
+              />
+            </div>
           </div>
         </Card>
 

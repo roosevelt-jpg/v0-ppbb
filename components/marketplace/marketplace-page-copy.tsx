@@ -6,10 +6,12 @@ import {
   DEFAULT_MARKETPLACE_CONFIG,
   MarketplacePlatformConfig,
 } from '@/lib/marketplace-config'
+import { subscribeToGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/platform-config'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 export function MarketplacePageCopy() {
   const [config, setConfig] = useState<MarketplacePlatformConfig>(DEFAULT_MARKETPLACE_CONFIG)
+  const [globalWhatsapp, setGlobalWhatsapp] = useState(DEFAULT_GLOBAL_SETTINGS.whatsappLink)
   const [ready, setReady] = useState(false)
 
   useEffect(
@@ -21,6 +23,8 @@ export function MarketplacePageCopy() {
     []
   )
 
+  useEffect(() => subscribeToGlobalSettings((s) => setGlobalWhatsapp(s.whatsappLink || '')), [])
+
   if (!ready) {
     return (
       <div className="space-y-10 sm:space-y-14 animate-pulse">
@@ -28,6 +32,7 @@ export function MarketplacePageCopy() {
           <div className="h-3 w-48 bg-neutral-200 rounded" />
           <div className="h-10 w-full max-w-[40rem] bg-neutral-200 rounded" />
           <div className="h-16 w-full max-w-[36rem] bg-neutral-200 rounded" />
+          <div className="h-11 w-48 bg-neutral-200 rounded" />
         </section>
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="h-48 bg-neutral-200 rounded-lg" />
@@ -38,6 +43,8 @@ export function MarketplacePageCopy() {
   }
 
   const { pageConfig: pc } = config
+  const whatsappHref = (pc.whatsappLink || globalWhatsapp || '').trim()
+  const whatsappLabel = pc.whatsappButtonLabel || 'Join Our Whatsapp'
 
   return (
     <div className="space-y-10 sm:space-y-14 md:space-y-16">
@@ -47,9 +54,19 @@ export function MarketplacePageCopy() {
         <h1 className="font-headline text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-foreground break-words max-w-[42rem]">
           {pc.headline}
         </h1>
-        <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-[42rem] break-words">
+        <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-[42rem] break-words mb-6">
           {pc.body}
         </p>
+        {whatsappHref ? (
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-neutral-800 transition-colors"
+          >
+            {whatsappLabel}
+          </a>
+        ) : null}
       </section>
 
       {/* Membership */}
