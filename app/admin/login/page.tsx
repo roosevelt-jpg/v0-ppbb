@@ -5,11 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/logo-manager'
 import { useAuth } from '@/lib/auth-context'
-import { loginUser, logoutUser } from '@/lib/auth'
+import { logoutUser } from '@/lib/auth'
 import { hasAdminAccess } from '@/lib/roles'
-import { auth } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
+import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'
 import { recordAdminAudit } from '@/lib/admin-audit'
 import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
+import type { User } from '@/lib/types'
 
 function AdminLoginForm() {
   const router = useRouter()
@@ -35,30 +38,23 @@ function AdminLoginForm() {
     setLoading(true)
 
     try {
-      const { user: profile, error: loginError } = await loginUser(email.trim(), password)
+      // Do NOT use loginUser() here — it auto-creates a member profile when missing,
+      // which permanently blocks invited admins who still need /admin/setup redeem.
+      await setPersistence(auth, browserLocalPersistence)
+      const credential = await signInWithEmailAndPassword(auth, email.trim(), password)
+      await credential.user.getIdToken(true)
 
-      if (loginError) {
-        void recordAdminAudit({
-          adminId: 'unauthenticated',
-          adminEmail: email.trim().toLowerCase(),
-          adminName: email.trim(),
-          adminRole: 'unknown',
-          actionType: 'login_failed',
-          action: 'Admin login failed',
-          entityType: 'auth',
-          status: 'failed',
-          failureReason: loginError,
-        })
-        setError(loginError)
+      const snap = await getDoc(doc(db, 'users', credential.user.uid))
+      if (!snap.exists()) {
+        await logoutUser()
+        setError(
+          'Your login works, but your admin profile was never created. Open Admin Setup, enter your access code again, and finish with this same email and password.'
+        )
         setLoading(false)
         return
       }
 
-      if (!profile) {
-        setError('Sign in succeeded but no user profile was found.')
-        setLoading(false)
-        return
-      }
+      const profile = { id: snap.id, ...snap.data() } as User
 
       if (!hasAdminAccess(profile)) {
         void recordAdminAudit({
@@ -78,7 +74,6 @@ function AdminLoginForm() {
         return
       }
 
-      // Brief pause so auth-context onSnapshot can attach before /admin guard runs
       if (!auth.currentUser) {
         setError('Session could not be established. Please try again.')
         setLoading(false)
@@ -100,6 +95,16 @@ function AdminLoginForm() {
       router.replace(safeReturnUrl)
     } catch (err) {
       console.error('[v0] Admin login error:', err)
+      const message =
+        err && typeof err === 'object' && 'code' in err
+          ? String((err as { code: string }).code).includes('credential') ||
+            String((err as { code: string }).code).includes('password') ||
+            String((err as { code: string }).code).includes('user-not-found')
+            ? 'Invalid email or password.'
+            : err instanceof Error
+              ? err.message
+              : 'An unexpected error occurred. Please try again.'
+          : 'An unexpected error occurred. Please try again.'
       void recordAdminAudit({
         adminId: 'unauthenticated',
         adminEmail: email.trim().toLowerCase(),
@@ -109,9 +114,9 @@ function AdminLoginForm() {
         action: 'Admin login error',
         entityType: 'auth',
         status: 'failed',
-        failureReason: err instanceof Error ? err.message : 'Unexpected error',
+        failureReason: message,
       })
-      setError('An unexpected error occurred. Please try again.')
+      setError(message)
       setLoading(false)
     }
   }

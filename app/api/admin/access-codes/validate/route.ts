@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import {
+  findInviteByCode,
+  findUserIdByEmail,
+} from '@/lib/admin-invite-server'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { hasAdminAccessServer } from '@/lib/roles-server'
 
-const COLLECTION = 'adminAccessCodes'
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 /**
- * Validate an invite access code without marking it used (setup step 1).
+ * Validate an invite access code (setup step 1).
+ * Allows recovery when the code was marked used but the users profile is still missing.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -15,49 +22,61 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Access code is required' }, { status: 400 })
     }
 
-    const db = getAdminDb()
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('code', '==', code)
-      .limit(1)
-      .get()
-
-    if (snapshot.empty) {
+    const invite = await findInviteByCode(code)
+    if (!invite) {
       return NextResponse.json(
-        { success: false, error: 'Invalid or already used access code' },
+        { success: false, error: 'Invalid access code' },
         { status: 401 }
       )
     }
 
-    const docSnap = snapshot.docs[0]
-    const data = docSnap.data()
-
-    const isUsed = data.isUsed === true || data.used === true || data.status === 'used'
-    if (isUsed) {
+    if (invite.expiresAt && new Date() > invite.expiresAt) {
       return NextResponse.json(
-        { success: false, error: 'This access code has already been used' },
+        { success: false, error: 'Access code has expired. Ask a super admin for a new invite.' },
         { status: 401 }
       )
     }
 
-    const expiresAt = data.expiresAt?.toDate?.() || new Date(data.expiresAt)
-    if (expiresAt && new Date() > expiresAt) {
-      return NextResponse.json(
-        { success: false, error: 'Access code has expired' },
-        { status: 401 }
-      )
+    let recovery = false
+    if (invite.isUsed) {
+      const profileUid =
+        invite.redeemedUserId ||
+        (invite.adminEmail ? await findUserIdByEmail(invite.adminEmail) : null)
+
+      let hasCompleteAdminProfile = false
+      if (profileUid) {
+        const userSnap = await getAdminDb().collection('users').doc(profileUid).get()
+        if (userSnap.exists && hasAdminAccessServer(userSnap.data() || {})) {
+          hasCompleteAdminProfile = true
+        }
+      }
+
+      if (hasCompleteAdminProfile) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'This access code has already been used. Sign in at Admin Login with your email and password.',
+          },
+          { status: 401 }
+        )
+      }
+
+      // Used code but admin profile missing (or only a member stub) — allow finish setup
+      recovery = true
     }
 
     return NextResponse.json({
       success: true,
       data: {
-        id: docSnap.id,
-        code,
-        adminEmail: data.adminEmail || data.email || '',
-        adminName: data.adminName || '',
-        adminRole: data.adminRole || data.role || 'admin',
-        permissions: Array.isArray(data.permissions) ? data.permissions : ['full_access'],
-        expiresAt: expiresAt?.toISOString?.() || expiresAt,
+        id: invite.id,
+        code: invite.code,
+        adminEmail: invite.adminEmail,
+        adminName: invite.adminName,
+        adminRole: invite.adminRole,
+        permissions: invite.permissions,
+        expiresAt: invite.expiresAt?.toISOString() || null,
+        recovery,
       },
     })
   } catch (error) {

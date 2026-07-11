@@ -108,11 +108,27 @@ export default function AdminLayout({
   if (!loading && !isPublicAdminPage && firebaseUser && !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center max-w-md px-4">
+        <div className="text-center max-w-md px-4 space-y-4">
           <p className="text-red-500 font-semibold text-lg">Profile not found</p>
-          <p className="text-muted-foreground mt-2">
-            Your account is signed in but no user profile was found. Contact support — do not create a new account.
+          <p className="text-muted-foreground">
+            Your account is signed in but no user profile was found. If you were invited as an admin,
+            finish setup with your access code (same password) so your profile can be created.
           </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center">
+            <a
+              href="/admin/setup"
+              className="inline-flex items-center justify-center px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium min-h-[44px]"
+            >
+              Complete admin setup
+            </a>
+            <button
+              type="button"
+              onClick={() => void handleLogout()}
+              className="inline-flex items-center justify-center px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium min-h-[44px]"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
     )

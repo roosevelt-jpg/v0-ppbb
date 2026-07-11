@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Copy, Trash2, Plus, Eye, EyeOff } from 'lucide-react'
+import { Copy, Trash2, Plus, Eye, EyeOff, Mail } from 'lucide-react'
 import { format } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
@@ -18,6 +18,7 @@ export default function AdminManagementPage() {
   const [loading, setLoading] = React.useState(true)
   const [visibleCodes, setVisibleCodes] = React.useState<Set<string>>(new Set())
   const [generatingCode, setGeneratingCode] = React.useState(false)
+  const [resendingId, setResendingId] = React.useState<string | null>(null)
   const [adminEmail, setAdminEmail] = React.useState('')
   const [adminName, setAdminName] = React.useState('')
   const [adminRole, setAdminRole] = React.useState('admin')
@@ -156,6 +157,58 @@ export default function AdminManagementPage() {
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code)
+  }
+
+  const handleResendInvite = async (code: {
+    id: string
+    adminEmail?: string
+    adminName?: string
+    used?: boolean
+    isUsed?: boolean
+  }) => {
+    if (!code?.id) return
+    if (!code.adminEmail) {
+      alert('This invite has no email address to resend to.')
+      return
+    }
+
+    const used = Boolean(code.used || code.isUsed)
+    const ok = confirm(
+      used
+        ? `Resend invitation to ${code.adminEmail}?\n\nThis code is marked used. They can still finish setup if their admin profile is incomplete.`
+        : `Resend invitation email to ${code.adminEmail}?`
+    )
+    if (!ok) return
+
+    setResendingId(code.id)
+    try {
+      const res = await fetch('/api/admin/management', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'resend-invite',
+          codeId: code.id,
+          invitedByUserId: firebaseUser?.uid || '',
+          extendExpiry: true,
+        }),
+      })
+      const json = await res.json()
+      if (json.success && json.emailSent) {
+        alert(`✓ Invitation resent to ${code.adminEmail}`)
+        await loadData()
+      } else {
+        alert(
+          `Could not resend invite.\n\n${
+            json.emailError || json.error || json.message || 'Check Admin → Integrations → Gmail SMTP.'
+          }`
+        )
+      }
+    } catch (error) {
+      console.error('[v0] Error resending invite:', error)
+      alert('Failed to resend invite: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    } finally {
+      setResendingId(null)
+    }
   }
 
   const toggleCodeVisibility = (id: string) => {
@@ -362,11 +415,28 @@ export default function AdminManagementPage() {
                         <p>Expires: {format(new Date(code.expiresAt), 'MMM dd, yyyy')}</p>
                       </div>
                     </div>
-                    <span className={`shrink-0 px-2 py-1 rounded text-xs font-medium ${
-                      code.used || code.isUsed ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
-                    }`}>
-                      {code.used || code.isUsed ? 'Used' : 'Unused'}
-                    </span>
+                    <div className="shrink-0 flex flex-col items-end gap-2">
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          code.used || code.isUsed
+                            ? 'bg-gray-100 text-gray-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
+                        {code.used || code.isUsed ? 'Used' : 'Unused'}
+                      </span>
+                      {code.adminEmail ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleResendInvite(code)}
+                          disabled={resendingId === code.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[36px]"
+                        >
+                          <Mail size={14} />
+                          {resendingId === code.id ? 'Sending…' : 'Resend invite'}
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 ))}
               </div>

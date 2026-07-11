@@ -248,6 +248,116 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    if (action === 'resend-invite') {
+      const { codeId, invitedByUserId, extendExpiry } = data
+      if (!codeId) {
+        return NextResponse.json(
+          { success: false, error: 'codeId is required' },
+          { status: 400 }
+        )
+      }
+
+      const codeRef = getAdminDb().collection('adminAccessCodes').doc(String(codeId))
+      const codeSnap = await codeRef.get()
+      if (!codeSnap.exists) {
+        return NextResponse.json(
+          { success: false, error: 'Access code not found' },
+          { status: 404 }
+        )
+      }
+
+      const codeData = codeSnap.data() || {}
+      const accessCode = String(codeData.code || '').trim().toUpperCase()
+      const adminEmail = String(codeData.adminEmail || codeData.email || '')
+        .trim()
+        .toLowerCase()
+      const adminName = String(codeData.adminName || adminEmail.split('@')[0] || 'Admin')
+      const role = String(codeData.adminRole || codeData.role || 'admin')
+      const permissions = Array.isArray(codeData.permissions)
+        ? codeData.permissions
+        : ['full_access']
+
+      if (!accessCode || !adminEmail) {
+        return NextResponse.json(
+          { success: false, error: 'Invite is missing email or access code' },
+          { status: 400 }
+        )
+      }
+
+      let expiresAt =
+        codeData.expiresAt?.toDate?.() ||
+        (codeData.expiresAt ? new Date(codeData.expiresAt) : null)
+
+      // Extend unused (or recovery) invites so the resent link stays valid
+      if (extendExpiry !== false) {
+        expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+        await codeRef.update({
+          expiresAt,
+          lastResentAt: new Date(),
+          updatedAt: new Date(),
+        })
+      } else {
+        await codeRef.update({
+          lastResentAt: new Date(),
+          updatedAt: new Date(),
+        })
+      }
+
+      let emailSent = false
+      let emailError: string | null = null
+      try {
+        const invitedBy = invitedByUserId ? await loadInviterProfile(invitedByUserId) : null
+        await dispatchAdminInviteEmail({
+          accessCode,
+          adminEmail,
+          adminName,
+          role,
+          expiresAt: expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000),
+          permissions,
+          invitedBy: invitedBy || undefined,
+        })
+        emailSent = true
+      } catch (emailErr) {
+        emailError =
+          emailErr instanceof Error ? emailErr.message : 'Failed to send invitation email'
+      }
+
+      if (invitedByUserId) {
+        const inviterSnap = await getAdminDb().collection('users').doc(invitedByUserId).get()
+        const inviter = inviterSnap.data() as Record<string, unknown> | undefined
+        await auditFromApiRequest(request, {
+          adminId: invitedByUserId,
+          adminEmail: String(inviter?.email || 'unknown'),
+          adminName: getUserDisplayName(inviter as Parameters<typeof getUserDisplayName>[0]),
+          adminRole: formatAdminRoleLabel(String(inviter?.role || 'admin')),
+          actionType: 'update',
+          action: `Resent admin invitation to ${adminEmail}`,
+          entityType: 'admin',
+          entityId: String(codeId),
+          entityName: adminName,
+          status: emailSent ? 'success' : 'failed',
+          details: `Role: ${role}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
+        })
+      }
+
+      return NextResponse.json({
+        success: emailSent,
+        emailSent,
+        emailError,
+        data: {
+          id: codeId,
+          code: accessCode,
+          adminEmail,
+          adminName,
+          expiresAt,
+        },
+        message: emailSent
+          ? `Invitation resent to ${adminEmail}`
+          : `Failed to resend invite: ${emailError || 'unknown error'}`,
+        error: emailSent ? undefined : emailError || 'Failed to resend invite',
+      })
+    }
+
     if (action === 'create-admin') {
       // Called after user signs up with access code
       const { email, name, role, accessCodeId } = data

@@ -1,86 +1,139 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyIdToken } from '@/lib/admin-access-server'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { hasAdminAccessServer } from '@/lib/roles-server'
+import {
+  findInviteByCode,
+  findInviteById,
+  markInviteUsed,
+  normalizeInviteEmail,
+  upsertAdminUserProfile,
+} from '@/lib/admin-invite-server'
 
-const COLLECTION = 'adminAccessCodes'
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 /**
- * Mark an access code as used after successful admin account setup,
- * and sync the admin into admin-users for the Management dashboard.
+ * Finalize admin setup:
+ * 1) Create users/{uid} via Admin SDK (client cannot create admin roles)
+ * 2) Sync admin-users / adminUsers
+ * 3) Mark invite used
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { codeId, email, userId } = body
+    const {
+      codeId,
+      code,
+      email,
+      userId,
+      firstName,
+      lastName,
+      role: bodyRole,
+      permissions: bodyPermissions,
+    } = body
 
-    if (!codeId || !email) {
+    const authHeader = request.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    const tokenUid = token ? await verifyIdToken(token) : null
+    const resolvedUserId = tokenUid || (typeof userId === 'string' ? userId : null)
+
+    if (!resolvedUserId) {
       return NextResponse.json(
-        { success: false, error: 'Missing codeId or email' },
-        { status: 400 }
+        { success: false, error: 'Authenticated user id is required. Sign in again and retry.' },
+        { status: 401 }
       )
     }
 
-    const db = getAdminDb()
-    const ref = db.collection(COLLECTION).doc(codeId)
-    const snap = await ref.get()
-
-    if (!snap.exists) {
-      return NextResponse.json({ success: false, error: 'Access code not found' }, { status: 404 })
+    const requestEmail = normalizeInviteEmail(email)
+    if (!requestEmail) {
+      return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 })
     }
 
-    const codeData = snap.data() || {}
+    let invite =
+      (typeof codeId === 'string' && codeId ? await findInviteById(codeId) : null) ||
+      (typeof code === 'string' && code ? await findInviteByCode(code) : null)
+
+    if (!invite) {
+      return NextResponse.json(
+        { success: false, error: 'Access code invitation not found' },
+        { status: 404 }
+      )
+    }
+
+    if (invite.adminEmail && invite.adminEmail !== requestEmail) {
+      return NextResponse.json(
+        { success: false, error: 'Email does not match this invitation' },
+        { status: 403 }
+      )
+    }
+
+    if (invite.expiresAt && new Date() > invite.expiresAt && !invite.isUsed) {
+      return NextResponse.json(
+        { success: false, error: 'Access code has expired' },
+        { status: 401 }
+      )
+    }
+
+    if (invite.isUsed) {
+      const userSnap = await getAdminDb().collection('users').doc(resolvedUserId).get()
+      const hasAdminProfile =
+        userSnap.exists && hasAdminAccessServer(userSnap.data() || {})
+      const sameRedeemer =
+        !invite.redeemedUserId || invite.redeemedUserId === resolvedUserId
+
+      if (hasAdminProfile && sameRedeemer) {
+        return NextResponse.json({ success: true, userId: resolvedUserId, alreadyComplete: true })
+      }
+
+      if (!sameRedeemer && invite.redeemedUserId) {
+        // Another auth uid already redeemed — only allow if that uid still has no admin profile
+        const otherSnap = await getAdminDb().collection('users').doc(invite.redeemedUserId).get()
+        if (otherSnap.exists && hasAdminAccessServer(otherSnap.data() || {})) {
+          return NextResponse.json(
+            { success: false, error: 'This access code has already been used by another account' },
+            { status: 409 }
+          )
+        }
+      }
+      // Recovery: continue to upsert admin profile
+    }
+
     const role =
-      (typeof codeData.adminRole === 'string' && codeData.adminRole) ||
-      (typeof codeData.role === 'string' && codeData.role) ||
-      'admin'
-    const permissions = Array.isArray(codeData.permissions)
-      ? codeData.permissions
-      : ['full_access']
-    const name =
-      (typeof codeData.adminName === 'string' && codeData.adminName) ||
-      String(email).split('@')[0]
+      (typeof bodyRole === 'string' && bodyRole) || invite.adminRole || 'admin'
+    const permissions = Array.isArray(bodyPermissions)
+      ? bodyPermissions
+      : invite.permissions
 
-    await ref.update(
-      sanitizeForFirestore({
-        isUsed: true,
-        used: true,
-        status: 'used',
-        usedBy: String(email).toLowerCase(),
-        usedAt: new Date(),
-        redeemedUserId: userId || null,
-      })
-    )
+    // Profile FIRST — never burn the invite before users/{uid} exists
+    await upsertAdminUserProfile({
+      uid: resolvedUserId,
+      email: requestEmail,
+      firstName: typeof firstName === 'string' ? firstName : undefined,
+      lastName: typeof lastName === 'string' ? lastName : undefined,
+      name: invite.adminName,
+      role,
+      permissions,
+      accessCodeId: invite.id,
+    })
 
-    if (userId) {
-      const adminRecord = sanitizeForFirestore({
-        email: String(email).toLowerCase(),
-        name,
-        role,
-        permissions,
-        status: 'active',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        lastLogin: null,
-        accessCodeId: codeId,
-      })
-      await db.collection('admin-users').doc(String(userId)).set(adminRecord, { merge: true })
-      await db.collection('adminUsers').doc(String(userId)).set(
-        sanitizeForFirestore({
-          email: String(email).toLowerCase(),
-          role,
-          permissions,
-          active: true,
-          updatedAt: new Date(),
-        }),
-        { merge: true }
-      )
-    }
+    await markInviteUsed({
+      codeId: invite.id,
+      email: requestEmail,
+      userId: resolvedUserId,
+    })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, userId: resolvedUserId })
   } catch (error) {
     console.error('[v0] Access code redeem error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to redeem access code' },
+      {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create admin profile. Please try again.',
+      },
       { status: 500 }
     )
   }

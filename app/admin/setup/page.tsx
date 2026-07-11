@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { auth, db } from '@/lib/firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
+import { auth } from '@/lib/firebase'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import Link from 'next/link'
 import { SiteLogo } from '@/components/site-logo'
 import { useAuth } from '@/lib/auth-context'
@@ -12,15 +11,38 @@ import { hasAdminAccess } from '@/lib/roles'
 
 interface InviteData {
   id: string
+  code: string
   adminEmail: string
   adminName: string
   adminRole: string
   permissions: string[]
+  recovery?: boolean
+}
+
+const INVITE_STORAGE_KEY = 'pb_admin_invite_setup'
+
+function loadStoredInvite(): InviteData | null {
+  try {
+    const raw = sessionStorage.getItem(INVITE_STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as InviteData
+  } catch {
+    return null
+  }
+}
+
+function storeInvite(data: InviteData | null) {
+  try {
+    if (!data) sessionStorage.removeItem(INVITE_STORAGE_KEY)
+    else sessionStorage.setItem(INVITE_STORAGE_KEY, JSON.stringify(data))
+  } catch {
+    // ignore
+  }
 }
 
 export default function AdminSetup() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, refreshUser } = useAuth()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [accessCode, setAccessCode] = useState('')
   const [inviteData, setInviteData] = useState<InviteData | null>(null)
@@ -31,9 +53,20 @@ export default function AdminSetup() {
   const [error, setError] = useState('')
   const [isEmergencyCode, setIsEmergencyCode] = useState(false)
 
-  // Existing admins should sign in — setup is invite-only for new accounts
+  useEffect(() => {
+    const stored = loadStoredInvite()
+    if (stored?.id) {
+      setInviteData(stored)
+      setAccessCode(stored.code || '')
+      setEmail(stored.adminEmail || '')
+      setIsEmergencyCode(false)
+      setStep(2)
+    }
+  }, [])
+
   useEffect(() => {
     if (!authLoading && user && hasAdminAccess(user)) {
+      storeInvite(null)
       router.replace('/admin')
     }
   }, [authLoading, user, router])
@@ -53,15 +86,16 @@ export default function AdminSetup() {
 
     try {
       const code = accessCode.trim().toUpperCase()
-
       const ADMIN_ACCESS_CODE = process.env.NEXT_PUBLIC_ADMIN_ACCESS_CODE || 'PB-ADMIN-2025'
-      const hardcodedCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025']
+      const hardcodedCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025'].map((c) =>
+        String(c).toUpperCase()
+      )
 
       if (hardcodedCodes.includes(code)) {
         setIsEmergencyCode(true)
         setInviteData(null)
+        storeInvite(null)
         setStep(2)
-        setLoading(false)
         return
       }
 
@@ -74,14 +108,29 @@ export default function AdminSetup() {
 
       if (!res.ok || !json.success) {
         setError(json.error || 'Invalid access code. Please try again.')
-        setLoading(false)
         return
       }
 
+      const data: InviteData = {
+        id: json.data.id,
+        code: json.data.code || code,
+        adminEmail: json.data.adminEmail || '',
+        adminName: json.data.adminName || '',
+        adminRole: json.data.adminRole || 'admin',
+        permissions: Array.isArray(json.data.permissions)
+          ? json.data.permissions
+          : ['full_access'],
+        recovery: Boolean(json.data.recovery),
+      }
+
       setIsEmergencyCode(false)
-      setInviteData(json.data)
-      setEmail(json.data.adminEmail || '')
+      setInviteData(data)
+      storeInvite(data)
+      setEmail(data.adminEmail)
       setStep(2)
+      if (data.recovery) {
+        setError('')
+      }
     } catch (err) {
       console.error('[v0] Access code validation error:', err)
       setError('An error occurred. Please try again.')
@@ -90,11 +139,86 @@ export default function AdminSetup() {
     }
   }
 
+  const finalizeInviteProfile = async (
+    firebaseUser: { uid: string; getIdToken: (force?: boolean) => Promise<string> },
+    accountEmail: string,
+    role: string,
+    permissions: string[],
+    firstName: string,
+    lastName: string
+  ) => {
+    if (!inviteData?.id) {
+      throw new Error('Missing invitation data. Go back to Step 1 and re-enter your access code.')
+    }
+
+    const token = await firebaseUser.getIdToken(true)
+    const redeemRes = await fetch('/api/admin/access-codes/redeem', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        codeId: inviteData.id,
+        code: inviteData.code || accessCode.trim().toUpperCase(),
+        email: accountEmail,
+        userId: firebaseUser.uid,
+        firstName,
+        lastName,
+        role,
+        permissions,
+      }),
+    })
+
+    let redeemJson: { success?: boolean; error?: string } = {}
+    try {
+      redeemJson = await redeemRes.json()
+    } catch {
+      throw new Error('Server returned an invalid response while creating your admin profile.')
+    }
+
+    if (!redeemRes.ok || !redeemJson.success) {
+      throw new Error(redeemJson.error || 'Failed to finalize admin profile')
+    }
+  }
+
+  const finalizeEmergencyProfile = async (
+    firebaseUser: { uid: string; getIdToken: (force?: boolean) => Promise<string> },
+    accountEmail: string,
+    role: string,
+    permissions: string[],
+    firstName: string,
+    lastName: string
+  ) => {
+    const token = await firebaseUser.getIdToken(true)
+    const res = await fetch('/api/admin/access-codes/bootstrap', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        bootstrapKey: accessCode.trim().toUpperCase(),
+        email: accountEmail,
+        role,
+        permissions,
+        firstName,
+        lastName,
+      }),
+    })
+    const json = await res.json()
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Failed to bootstrap admin profile')
+    }
+  }
+
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    const accountEmail = (isEmergencyCode ? email : inviteData?.adminEmail || email).trim().toLowerCase()
+    const accountEmail = (isEmergencyCode ? email : inviteData?.adminEmail || email)
+      .trim()
+      .toLowerCase()
 
     if (!accountEmail) {
       setError('Email is required')
@@ -112,13 +236,14 @@ export default function AdminSetup() {
       setError('Passwords do not match')
       return
     }
+    if (!isEmergencyCode && !inviteData?.id) {
+      setError('Access code invitation is missing. Go back to Step 1.')
+      return
+    }
 
     setLoading(true)
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, accountEmail, password)
-      const firebaseUser = userCredential.user
-
       const role = isEmergencyCode
         ? accountEmail === 'roosevelt@myflynai.com'
           ? 'super_admin'
@@ -126,46 +251,64 @@ export default function AdminSetup() {
         : inviteData?.adminRole || 'admin'
 
       const permissions = isEmergencyCode
-        ? role === 'super_admin'
-          ? ['full_access']
-          : ['full_access']
+        ? ['full_access']
         : inviteData?.permissions || ['full_access']
 
       const nameParts = (inviteData?.adminName || 'Admin User').trim().split(/\s+/)
       const firstName = nameParts[0] || 'Admin'
       const lastName = nameParts.slice(1).join(' ') || 'User'
 
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
-        id: firebaseUser.uid,
-        email: accountEmail,
-        firstName,
-        lastName,
-        role,
-        permissions,
-        active: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-
-      if (inviteData?.id) {
-        await fetch('/api/admin/access-codes/redeem', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            codeId: inviteData.id,
-            email: accountEmail,
-            userId: firebaseUser.uid,
-          }),
-        })
+      let firebaseUser
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, accountEmail, password)
+        firebaseUser = userCredential.user
+      } catch (createErr: unknown) {
+        const code =
+          createErr && typeof createErr === 'object' && 'code' in createErr
+            ? String((createErr as { code: string }).code)
+            : ''
+        if (code === 'auth/email-already-in-use') {
+          const signedIn = await signInWithEmailAndPassword(auth, accountEmail, password)
+          firebaseUser = signedIn.user
+        } else {
+          throw createErr
+        }
       }
 
+      if (isEmergencyCode) {
+        await finalizeEmergencyProfile(
+          firebaseUser,
+          accountEmail,
+          role,
+          permissions,
+          firstName,
+          lastName
+        )
+      } else {
+        await finalizeInviteProfile(
+          firebaseUser,
+          accountEmail,
+          role,
+          permissions,
+          firstName,
+          lastName
+        )
+      }
+
+      await refreshUser()
+      storeInvite(null)
       setStep(3)
-      setTimeout(() => router.push('/admin'), 2000)
+      setTimeout(() => router.push('/admin'), 1500)
     } catch (err: unknown) {
       console.error('[v0] Account creation error:', err)
-      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
-      if (code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists.')
+      const code =
+        err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        setError(
+          'This email already has an account, but the password did not match. Use the same password you created earlier, or reset it in Firebase Auth.'
+        )
+      } else if (err instanceof Error && err.message) {
+        setError(err.message)
       } else {
         setError('Failed to create account. Please try again.')
       }
@@ -175,7 +318,15 @@ export default function AdminSetup() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+      }}
+    >
       <div style={{ width: '100%', maxWidth: '600px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
@@ -211,14 +362,27 @@ export default function AdminSetup() {
         >
           {step === 1 && (
             <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>Step 1 of 3</h2>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
+                Step 1 of 3
+              </h2>
               <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
                 Enter your admin access code to continue
               </p>
 
-              <form onSubmit={handleAccessCodeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <form
+                onSubmit={handleAccessCodeSubmit}
+                style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+              >
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#000' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginBottom: '10px',
+                      color: '#000',
+                    }}
+                  >
                     Access Code
                   </label>
                   <input
@@ -239,7 +403,16 @@ export default function AdminSetup() {
                 </div>
 
                 {error && (
-                  <div style={{ padding: '15px', backgroundColor: '#fee', border: '1px solid #fcc', borderRadius: '8px', color: '#c00', fontSize: '14px' }}>
+                  <div
+                    style={{
+                      padding: '15px',
+                      backgroundColor: '#fee',
+                      border: '1px solid #fcc',
+                      borderRadius: '8px',
+                      color: '#c00',
+                      fontSize: '14px',
+                    }}
+                  >
                     {error}
                   </div>
                 )}
@@ -266,7 +439,10 @@ export default function AdminSetup() {
 
                 <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
                   Already have an admin account?{' '}
-                  <Link href={adminLoginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                  <Link
+                    href={adminLoginHref}
+                    style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}
+                  >
                     Sign in here
                   </Link>
                 </p>
@@ -276,14 +452,29 @@ export default function AdminSetup() {
 
           {step === 2 && (
             <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>Step 2 of 3</h2>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
+                Step 2 of 3
+              </h2>
               <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
-                Create your admin account password
+                {inviteData?.recovery
+                  ? 'Finish creating your admin profile with the same email and password.'
+                  : 'Create your admin account password'}
               </p>
 
-              <form onSubmit={handleCreateAccount} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <form
+                onSubmit={handleCreateAccount}
+                style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+              >
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#000' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginBottom: '10px',
+                      color: '#000',
+                    }}
+                  >
                     Email Address
                   </label>
                   <input
@@ -306,7 +497,15 @@ export default function AdminSetup() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#000' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginBottom: '10px',
+                      color: '#000',
+                    }}
+                  >
                     Password
                   </label>
                   <input
@@ -327,7 +526,15 @@ export default function AdminSetup() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#000' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginBottom: '10px',
+                      color: '#000',
+                    }}
+                  >
                     Confirm Password
                   </label>
                   <input
@@ -348,11 +555,23 @@ export default function AdminSetup() {
                 </div>
 
                 {error && (
-                  <div style={{ padding: '15px', backgroundColor: '#fee', border: '1px solid #fcc', borderRadius: '8px', color: '#c00', fontSize: '14px' }}>
+                  <div
+                    style={{
+                      padding: '15px',
+                      backgroundColor: '#fee',
+                      border: '1px solid #fcc',
+                      borderRadius: '8px',
+                      color: '#c00',
+                      fontSize: '14px',
+                    }}
+                  >
                     {error}
-                    {error.includes('already exists') && (
+                    {error.toLowerCase().includes('already') && (
                       <p style={{ marginTop: '10px' }}>
-                        <Link href={adminLoginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
+                        <Link
+                          href={adminLoginHref}
+                          style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}
+                        >
                           Sign in with your existing password →
                         </Link>
                       </p>
@@ -380,20 +599,34 @@ export default function AdminSetup() {
                   {loading ? 'Creating account...' : 'Create Account'}
                 </button>
 
-                <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
-                  Already have an admin account?{' '}
-                  <Link href={adminLoginHref} style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}>
-                    Sign in here
-                  </Link>
-                  {' '}(do not create a new account)
-                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(1)
+                    setError('')
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    fontSize: '14px',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    minHeight: '44px',
+                  }}
+                >
+                  Back to access code
+                </button>
               </form>
             </div>
           )}
 
           {step === 3 && (
             <div style={{ textAlign: 'center' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>Step 3 of 3</h2>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
+                Step 3 of 3
+              </h2>
               <p style={{ fontSize: '16px', color: '#666', marginBottom: '20px', lineHeight: '1.5' }}>
                 Your admin account is ready. Redirecting to the dashboard…
               </p>
