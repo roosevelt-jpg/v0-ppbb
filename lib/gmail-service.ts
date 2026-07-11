@@ -467,6 +467,89 @@ export async function sendCertificateMilestoneEmail(
 }
 
 /**
+ * Send a password-reset email with an Admin SDK–generated link (super-admin flow).
+ */
+export async function dispatchAdminPasswordResetEmail(details: {
+  to: string
+  adminName?: string
+  resetLink: string
+}): Promise<{ success: true; messageId?: string }> {
+  const gmailConfig = await getGmailSmtpConfig()
+  if (!gmailConfig) {
+    throw new Error(
+      'Email service not configured. Please configure Gmail SMTP in Admin → Integrations.'
+    )
+  }
+
+  const transporter = createGmailTransporter({
+    enabled: true,
+    gmailEmail: gmailConfig.gmailEmail,
+    gmailAppPassword: gmailConfig.gmailAppPassword,
+  } as SiteSettings['emailConfig'])
+
+  if (!transporter) {
+    throw new Error('Failed to initialize Gmail SMTP. Check your Gmail App Password.')
+  }
+
+  const name = details.adminName?.trim() || 'there'
+  const loginUrl = `${getPublicSiteUrl()}/admin/login`
+  const subject = 'Reset your Passive Blessings admin password'
+  const text = `Hi ${name},
+
+A super admin requested a password reset for your Passive Blessings admin account.
+
+Open this link to choose a new password:
+${details.resetLink}
+
+After resetting, sign in at:
+${loginUrl}
+
+If you did not expect this email, contact your Passive Blessings administrator.`
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <body style="margin:0;padding:0;font-family:Georgia,serif;background:#f7f6f2;">
+        <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
+          <div style="background:#fff;border:3px solid #111;padding:32px;border-radius:4px;">
+            <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#888;">Passive Blessings</p>
+            <h1 style="margin:0 0 16px 0;font-size:22px;color:#111;">Reset your admin password</h1>
+            <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">Hi ${name},</p>
+            <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">
+              A super admin requested a password reset for your admin account.
+            </p>
+            <p style="margin:24px 0;">
+              <a href="${details.resetLink}"
+                 style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;font-weight:600;border-radius:6px;">
+                Choose a new password
+              </a>
+            </p>
+            <p style="margin:0 0 14px 0;line-height:1.6;color:#666;font-size:14px;">
+              After resetting, sign in at
+              <a href="${loginUrl}" style="color:#111;">${loginUrl}</a>
+            </p>
+            <p style="margin:0;line-height:1.6;color:#999;font-size:13px;">
+              If you did not expect this email, contact your Passive Blessings administrator.
+            </p>
+          </div>
+          <p style="margin:16px 0 0 0;font-size:11px;color:#999;text-align:center;">© ${new Date().getFullYear()} Passive Blessings</p>
+        </div>
+      </body>
+    </html>
+  `
+
+  const info = await transporter.sendMail({
+    from: `"${gmailConfig.fromName || 'Passive Blessings'}" <${gmailConfig.gmailEmail}>`,
+    to: details.to,
+    subject,
+    html,
+    text,
+  })
+
+  return { success: true, messageId: info.messageId }
+}
+
+/**
  * Verify Gmail credentials are valid
  */
 export const verifyGmailCredentials = async (

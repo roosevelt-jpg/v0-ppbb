@@ -285,7 +285,7 @@ export default function AdminSetup() {
               const createCode = authCode(createErr)
               if (createCode === 'auth/email-already-in-use') {
                 throw new Error(
-                  'This email already has a password account. Enter the same password you used the first time and click Finish setup again. If you forgot it, ask a super admin to reset it in Firebase Auth.'
+                  'This email already has a password account. Enter the same password you used the first time and click Finish setup again. If you forgot it, ask a super admin to send a password reset from Admin → Management.'
                 )
               }
               // First sign-in failed for another reason and create also failed
@@ -295,7 +295,7 @@ export default function AdminSetup() {
                 signInCode === 'auth/invalid-login-credentials'
               ) {
                 throw new Error(
-                  'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to reset it.'
+                  'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to send a password reset from Admin → Management.'
                 )
               }
               throw createErr
@@ -344,7 +344,7 @@ export default function AdminSetup() {
         code === 'auth/invalid-login-credentials'
       ) {
         setError(
-          'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to reset it in Firebase Auth.'
+          'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to send a password reset from Admin → Management.'
         )
       } else if (err instanceof Error && err.message) {
         setError(err.message)

@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Copy, Trash2, Plus, Eye, EyeOff, Mail } from 'lucide-react'
+import { Copy, Trash2, Plus, Eye, EyeOff, Mail, KeyRound } from 'lucide-react'
 import { format } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
@@ -19,6 +19,7 @@ export default function AdminManagementPage() {
   const [visibleCodes, setVisibleCodes] = React.useState<Set<string>>(new Set())
   const [generatingCode, setGeneratingCode] = React.useState(false)
   const [resendingId, setResendingId] = React.useState<string | null>(null)
+  const [resettingEmail, setResettingEmail] = React.useState<string | null>(null)
   const [adminEmail, setAdminEmail] = React.useState('')
   const [adminName, setAdminName] = React.useState('')
   const [adminRole, setAdminRole] = React.useState('admin')
@@ -208,6 +209,58 @@ export default function AdminManagementPage() {
       alert('Failed to resend invite: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setResendingId(null)
+    }
+  }
+
+  const handleSendPasswordReset = async (email?: string, adminName?: string) => {
+    const targetEmail = String(email || '').trim().toLowerCase()
+    if (!targetEmail) {
+      alert('No email address available for password reset.')
+      return
+    }
+    if (!firebaseUser) {
+      alert('Sign in again, then retry sending the password reset.')
+      return
+    }
+
+    const ok = confirm(
+      `Send a password reset email to ${targetEmail}?\n\nThey will receive a link to choose a new password, then can sign in at Admin Login or finish /admin/setup.`
+    )
+    if (!ok) return
+
+    setResettingEmail(targetEmail)
+    try {
+      const token = await firebaseUser.getIdToken()
+      const res = await fetch('/api/admin/management', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          action: 'send-password-reset',
+          email: targetEmail,
+          adminName: adminName || '',
+        }),
+      })
+      const json = await res.json()
+      if (json.success && json.emailSent) {
+        alert(`✓ Password reset email sent to ${targetEmail}`)
+      } else {
+        alert(
+          `Could not send password reset.\n\n${
+            json.emailError || json.error || json.message || 'Check Admin → Integrations → Gmail SMTP.'
+          }`
+        )
+      }
+    } catch (error) {
+      console.error('[v0] Error sending password reset:', error)
+      alert(
+        'Failed to send password reset: ' +
+          (error instanceof Error ? error.message : 'Unknown error')
+      )
+    } finally {
+      setResettingEmail(null)
     }
   }
 
@@ -426,15 +479,31 @@ export default function AdminManagementPage() {
                         {code.used || code.isUsed ? 'Used' : 'Unused'}
                       </span>
                       {code.adminEmail ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleResendInvite(code)}
-                          disabled={resendingId === code.id}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[36px]"
-                        >
-                          <Mail size={14} />
-                          {resendingId === code.id ? 'Sending…' : 'Resend invite'}
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => void handleResendInvite(code)}
+                            disabled={resendingId === code.id}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[36px]"
+                          >
+                            <Mail size={14} />
+                            {resendingId === code.id ? 'Sending…' : 'Resend invite'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void handleSendPasswordReset(code.adminEmail, code.adminName)
+                            }
+                            disabled={resettingEmail === String(code.adminEmail).trim().toLowerCase()}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[36px]"
+                            title="Email a password reset link (super admin)"
+                          >
+                            <KeyRound size={14} />
+                            {resettingEmail === String(code.adminEmail).trim().toLowerCase()
+                              ? 'Sending…'
+                              : 'Reset password'}
+                          </button>
+                        </>
                       ) : null}
                     </div>
                   </div>
@@ -490,12 +559,31 @@ export default function AdminManagementPage() {
                           {admin.createdAt ? format(new Date(admin.createdAt), 'MMM dd, yyyy') : '-'}
                         </td>
                         <td className="px-6 py-3">
-                          <button
-                            onClick={() => handleDeleteAdmin(admin.id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            {admin.email ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  void handleSendPasswordReset(admin.email, admin.name)
+                                }
+                                disabled={
+                                  resettingEmail === String(admin.email).trim().toLowerCase()
+                                }
+                                className="p-1 text-black hover:bg-gray-100 rounded"
+                                title="Send password reset email"
+                              >
+                                <KeyRound size={16} />
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAdmin(admin.id)}
+                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              title="Remove admin"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

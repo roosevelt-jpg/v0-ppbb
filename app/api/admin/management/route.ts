@@ -4,8 +4,68 @@ import { getUserDisplayName, getUserProfilePictureURL, getUserInitials } from '@
 import { auditFromApiRequest } from '@/lib/audit-log-server'
 import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
 import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
-import { dispatchAdminInviteEmail } from '@/lib/gmail-service'
+import {
+  dispatchAdminInviteEmail,
+  dispatchAdminPasswordResetEmail,
+} from '@/lib/gmail-service'
+import { getUserProfileData, verifyIdToken } from '@/lib/admin-access-server'
 import crypto from 'crypto'
+
+function getPublicSiteUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+}
+
+async function requireSuperAdmin(request: NextRequest): Promise<
+  | { ok: true; uid: string; email: string; name: string; role: string }
+  | { ok: false; response: NextResponse }
+> {
+  const authHeader = request.headers.get('authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: 'Sign in required' },
+        { status: 401 }
+      ),
+    }
+  }
+
+  const uid = await verifyIdToken(token)
+  if (!uid) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: 'Invalid session' },
+        { status: 401 }
+      ),
+    }
+  }
+
+  const profile = await getUserProfileData(uid)
+  const role = typeof profile?.role === 'string' ? profile.role : ''
+  if (role !== 'super_admin') {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, error: 'Only super admins can reset admin passwords' },
+        { status: 403 }
+      ),
+    }
+  }
+
+  return {
+    ok: true,
+    uid,
+    email: String(profile?.email || 'unknown'),
+    name: getUserDisplayName(profile as Parameters<typeof getUserDisplayName>[0]),
+    role,
+  }
+}
 
 function formatInviteRoleLabel(role: string): string {
   const labels: Record<string, string> = {
@@ -356,6 +416,84 @@ export async function POST(request: NextRequest) {
           : `Failed to resend invite: ${emailError || 'unknown error'}`,
         error: emailSent ? undefined : emailError || 'Failed to resend invite',
       })
+    }
+
+    if (action === 'send-password-reset') {
+      const authz = await requireSuperAdmin(request)
+      if (!authz.ok) return authz.response
+
+      const email = String(data.email || '')
+        .trim()
+        .toLowerCase()
+      if (!email || !email.includes('@')) {
+        return NextResponse.json(
+          { success: false, error: 'A valid email address is required' },
+          { status: 400 }
+        )
+      }
+
+      const adminName =
+        typeof data.adminName === 'string' && data.adminName.trim()
+          ? data.adminName.trim()
+          : email.split('@')[0] || 'Admin'
+
+      try {
+        const { getAuth } = await import('firebase-admin/auth')
+        const { getAdminApp } = await import('@/lib/firebase-admin')
+        const auth = getAuth(getAdminApp())
+
+        try {
+          await auth.getUserByEmail(email)
+        } catch {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                'No Firebase login exists for this email yet. Resend the invite and have them finish /admin/setup first.',
+            },
+            { status: 404 }
+          )
+        }
+
+        const resetLink = await auth.generatePasswordResetLink(email, {
+          url: `${getPublicSiteUrl()}/admin/login`,
+          handleCodeInApp: false,
+        })
+
+        await dispatchAdminPasswordResetEmail({
+          to: email,
+          adminName,
+          resetLink,
+        })
+
+        await auditFromApiRequest(request, {
+          adminId: authz.uid,
+          adminEmail: authz.email,
+          adminName: authz.name,
+          adminRole: formatAdminRoleLabel(authz.role),
+          actionType: 'update',
+          action: `Sent password reset email to ${email}`,
+          entityType: 'admin',
+          entityId: email,
+          entityName: adminName,
+          status: 'success',
+          details: 'Password reset link emailed via Admin Management',
+        })
+
+        return NextResponse.json({
+          success: true,
+          emailSent: true,
+          message: `Password reset email sent to ${email}`,
+        })
+      } catch (resetErr) {
+        const message =
+          resetErr instanceof Error ? resetErr.message : 'Failed to send password reset email'
+        console.error('[v0] Admin password reset error:', resetErr)
+        return NextResponse.json(
+          { success: false, error: message, emailError: message },
+          { status: 500 }
+        )
+      }
     }
 
     if (action === 'create-admin') {
