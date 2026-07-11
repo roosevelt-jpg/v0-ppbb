@@ -14,7 +14,6 @@ import {
   getWelcomeFirstName,
 } from '@/lib/dashboard-page-titles'
 import { getUserDisplayName } from '@/lib/user-profile'
-import { ContentProtection } from '@/components/content-protection'
 import {
   BarChart3,
   Briefcase,
@@ -205,15 +204,13 @@ export default function BusinessLayout({
 
         {/* Content — always light surface so cards stay white with black text */}
         <div className="flex-1 overflow-auto" data-dashboard-surface="light">
-          <ContentProtection>
-            <DashboardErrorBoundary
-              key={pathname}
-              homeHref="/business/dashboard"
-              homeLabel="Go to Business Dashboard"
-            >
-              {children}
-            </DashboardErrorBoundary>
-          </ContentProtection>
+          <DashboardErrorBoundary
+            key={pathname}
+            homeHref="/business/dashboard"
+            homeLabel="Go to Business Dashboard"
+          >
+            {children}
+          </DashboardErrorBoundary>
         </div>
       </main>
     </div>

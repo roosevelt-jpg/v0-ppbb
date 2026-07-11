@@ -11,7 +11,6 @@ import { getAdminPageTitle, getWelcomeFirstName } from '@/lib/dashboard-page-tit
 import { logoutUser } from '@/lib/auth'
 import { recordAdminAuditFromUser } from '@/lib/admin-audit'
 import { getUserDisplayName } from '@/lib/user-profile'
-import { ContentProtection } from '@/components/content-protection'
 
 export default function AdminLayout({
   children,
@@ -182,11 +181,9 @@ export default function AdminLayout({
         />
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background" data-dashboard-surface="light">
-          <ContentProtection>
-            <div className="p-4 sm:p-6 lg:p-8 max-w-[80rem] mx-auto w-full min-w-0">
-              {children}
-            </div>
-          </ContentProtection>
+          <div className="p-4 sm:p-6 lg:p-8 max-w-[80rem] mx-auto w-full min-w-0">
+            {children}
+          </div>
         </main>
       </div>
     </div>

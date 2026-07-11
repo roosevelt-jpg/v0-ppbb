@@ -6,6 +6,7 @@ import { Providers } from './providers'
 import { ChatWidget } from '@/components/chat/chat-widget'
 import { EUDataProtectionPopup } from '@/components/eu-data-protection-popup'
 import { PublicExtras } from '@/components/public-extras'
+import { PublicContentGuard } from '@/components/content-protection'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -63,6 +64,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground">
         <Providers>{children}</Providers>
+        <PublicContentGuard />
         <PublicExtras />
         <EUDataProtectionPopup />
         <ChatWidget />

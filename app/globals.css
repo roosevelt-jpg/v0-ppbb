@@ -8,6 +8,36 @@
 * { scrollbar-width: none; }
 body { -ms-overflow-style: none; }
 
+/* Public site content deterrence — inactive on /dashboard, /business, /admin, /sponsor */
+html[data-public-content-guard='1'] body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html[data-public-content-guard='1'] input,
+html[data-public-content-guard='1'] textarea,
+html[data-public-content-guard='1'] select,
+html[data-public-content-guard='1'] [contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+html[data-public-content-guard='1'] img,
+html[data-public-content-guard='1'] video,
+html[data-public-content-guard='1'] picture,
+html[data-public-content-guard='1'] canvas {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: auto;
+}
+
+html[data-public-content-guard='1'] img::selection,
+html[data-public-content-guard='1'] video::selection {
+  background: transparent;
+}
+
 /* RTL layout when Arabic / Urdu selected */
 html[dir='rtl'] body {
   text-align: right;
