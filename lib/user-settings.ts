@@ -14,8 +14,18 @@ export type NotificationPreferenceKey =
 export type NotificationPreferences = Record<NotificationPreferenceKey, boolean>
 
 export type PrivacySettings = {
+  /** Allow others to open your full community profile */
   showProfileToCommunity: boolean
+  /** Appear in the public/business member directory */
   showInMemberDirectory: boolean
+  /** Show avatar in group chat / forum */
+  showAvatarInGroups: boolean
+  /** Show real name in group chat / forum (otherwise “Member”) */
+  showRealNameInGroups: boolean
+  /** Include bio on your community profile */
+  showBioOnProfile: boolean
+  /** Include location on your community profile */
+  showLocationOnProfile: boolean
 }
 
 export type UserAccountStatus = 'active' | 'deleted' | 'suspended'
@@ -33,6 +43,10 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
 export const DEFAULT_PRIVACY_SETTINGS: PrivacySettings = {
   showProfileToCommunity: true,
   showInMemberDirectory: true,
+  showAvatarInGroups: true,
+  showRealNameInGroups: true,
+  showBioOnProfile: true,
+  showLocationOnProfile: true,
 }
 
 export { DEFAULT_FCM_SETTINGS }
@@ -163,6 +177,16 @@ export type PublicMemberProfile = {
   bio?: string
   profilePictureURL?: string | null
   hidden?: boolean
+  canViewFullProfile?: boolean
+  showAvatar?: boolean
+  showRealName?: boolean
+}
+
+export type GroupChatIdentity = {
+  id: string
+  displayName: string
+  profilePictureURL: string | null
+  canOpenProfile: boolean
 }
 
 export function toPublicMemberProfile(
@@ -170,33 +194,68 @@ export function toPublicMemberProfile(
   data: UserLike | null | undefined,
   viewerId?: string | null
 ): PublicMemberProfile {
-  const visible = canShowProfileToCommunity({ ...data, id: userId }, viewerId)
+  const isSelf = Boolean(viewerId && userId === viewerId)
+  const privacy = mergePrivacySettings(data?.privacySettings)
+  const visible = isSelf || canShowProfileToCommunity({ ...data, id: userId }, viewerId)
+
   if (!visible) {
     return {
       id: userId,
       displayName: 'Private member',
       hidden: true,
+      canViewFullProfile: false,
+      showAvatar: false,
+      showRealName: false,
+      profilePictureURL: null,
     }
   }
 
   const firstName = data?.firstName
   const lastName = data?.lastName
-  const displayName =
+  const fullName =
     `${firstName || ''} ${lastName || ''}`.trim() ||
     (data as { name?: string })?.name?.trim() ||
     'Member'
 
+  const showRealName = isSelf || privacy.showRealNameInGroups
+  const showAvatar = isSelf || privacy.showAvatarInGroups
+  const showBio = isSelf || privacy.showBioOnProfile
+  const showLocation = isSelf || privacy.showLocationOnProfile
+
   return {
     id: userId,
-    firstName,
-    lastName,
-    displayName,
-    location: formatUserLocationDisplay(
-      data?.location as LocationData | string | undefined,
-      (data as { locationLabel?: string })?.locationLabel
-    ),
-    bio: data?.bio,
-    profilePictureURL: data?.profilePictureURL || data?.avatarUrl || null,
+    firstName: showRealName ? firstName : undefined,
+    lastName: showRealName ? lastName : undefined,
+    displayName: showRealName ? fullName : 'Member',
+    location: showLocation
+      ? formatUserLocationDisplay(
+          data?.location as LocationData | string | undefined,
+          (data as { locationLabel?: string })?.locationLabel
+        )
+      : undefined,
+    bio: showBio ? data?.bio : undefined,
+    profilePictureURL: showAvatar
+      ? data?.profilePictureURL || data?.avatarUrl || null
+      : null,
+    hidden: false,
+    canViewFullProfile: true,
+    showAvatar,
+    showRealName,
+  }
+}
+
+/** Live display identity for group chat / forum (respects privacy). */
+export function toGroupChatIdentity(
+  userId: string,
+  data: UserLike | null | undefined,
+  viewerId?: string | null
+): GroupChatIdentity {
+  const profile = toPublicMemberProfile(userId, data, viewerId)
+  return {
+    id: userId,
+    displayName: profile.displayName,
+    profilePictureURL: profile.profilePictureURL || null,
+    canOpenProfile: profile.canViewFullProfile === true && profile.hidden !== true,
   }
 }
 

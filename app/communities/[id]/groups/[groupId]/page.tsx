@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/auth-context'
 import { canApproveGroupMembers, hasAdminAccess } from '@/lib/roles'
 import { ChevronLeft, Send, Upload, Download, FileText, Play, Smile, Trash2, Edit2, Check, X } from 'lucide-react'
 import Link from 'next/link'
-import { db } from '@/lib/firebase'
+import { db, auth } from '@/lib/firebase'
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, getDocs } from 'firebase/firestore'
 import { uploadGroupFile, getFileType } from '@/lib/firebase-storage'
 import { format } from 'date-fns'
@@ -17,6 +17,16 @@ import EmojiPicker from 'emoji-picker-react'
 import { addEmojiReaction, removeEmojiReaction, editMessage, deleteMessage, markMessageAsRead } from '@/lib/chat-utils'
 import { memberCanChat } from '@/lib/community-governance'
 import { triggerCommunityNotification } from '@/lib/community-notifications-client'
+import { getUserDisplayName, getUserProfilePictureURL } from '@/lib/user-profile'
+import {
+  mergePrivacySettings,
+  toGroupChatIdentity,
+  type GroupChatIdentity,
+  type PublicMemberProfile,
+} from '@/lib/user-settings'
+import { MemberProfileModal } from '@/components/communities/member-profile-modal'
+import { GroupForumPanel } from '@/components/communities/group-forum-panel'
+import { GroupMembersPanel } from '@/components/communities/group-members-panel'
 
 interface Message {
   id: string
@@ -79,6 +89,11 @@ export default function GroupChatPage() {
   const [pendingLoading, setPendingLoading] = React.useState(false)
   const [actingMemberId, setActingMemberId] = React.useState<string | null>(null)
   const [showPending, setShowPending] = React.useState(true)
+  const [activeTab, setActiveTab] = React.useState<'chat' | 'forum' | 'members'>('chat')
+  const [identities, setIdentities] = React.useState<Record<string, GroupChatIdentity>>({})
+  const [profileOpen, setProfileOpen] = React.useState(false)
+  const [profileLoading, setProfileLoading] = React.useState(false)
+  const [viewedProfile, setViewedProfile] = React.useState<PublicMemberProfile | null>(null)
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
   // Pending approval UI: group creator OR platform admin (API already enforces the same).
@@ -228,8 +243,75 @@ export default function GroupChatPage() {
 
   // Auto-scroll to latest message
   React.useEffect(() => {
+    if (activeTab !== 'chat') return
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, activeTab])
+
+  // Resolve privacy-aware names/avatars for chat senders
+  React.useEffect(() => {
+    const ids = [...new Set(messages.map((m) => m.senderId).filter(Boolean))]
+    if (!ids.length || !user?.id) return
+    let cancelled = false
+    const load = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        const res = await fetch('/api/members/batch-public-profiles', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ ids, viewerId: user.id, mode: 'chat' }),
+        })
+        const json = await res.json()
+        if (!cancelled && json.success && json.data) {
+          setIdentities((prev) => ({ ...prev, ...json.data }))
+        }
+      } catch (error) {
+        console.warn('[v0] Failed to resolve chat identities:', error)
+      }
+    }
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [messages, user?.id])
+
+  const openMemberProfile = async (memberId: string) => {
+    if (!memberId || memberId === user?.id) {
+      // Still allow viewing own profile card
+    }
+    setProfileOpen(true)
+    setProfileLoading(true)
+    setViewedProfile(null)
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      const qs = user?.id ? `?viewerId=${encodeURIComponent(user.id)}` : ''
+      const res = await fetch(`/api/members/${memberId}/public-profile${qs}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        cache: 'no-store',
+      })
+      const json = await res.json()
+      if (json.success) setViewedProfile(json.data)
+      else setViewedProfile({ id: memberId, displayName: 'Private member', hidden: true })
+    } catch {
+      setViewedProfile({ id: memberId, displayName: 'Private member', hidden: true })
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  const resolveOutgoingIdentity = () => {
+    if (!user) return { name: 'Anonymous', avatar: '' }
+    const privacy = mergePrivacySettings(user.privacySettings)
+    const identity = toGroupChatIdentity(user.id, user, user.id)
+    return {
+      name: privacy.showRealNameInGroups ? identity.displayName || getUserDisplayName(user) : 'Member',
+      avatar: privacy.showAvatarInGroups
+        ? identity.profilePictureURL || getUserProfilePictureURL(user) || ''
+        : '',
+    }
+  }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -237,10 +319,11 @@ export default function GroupChatPage() {
 
     setSending(true)
     try {
+      const outgoing = resolveOutgoingIdentity()
       await addDoc(collection(db, `communities/${communityId}/groups/${groupId}/messages`), {
         senderId: user.id,
-        senderName: user.displayName || 'Anonymous',
-        senderAvatar: user.photoURL || '',
+        senderName: outgoing.name,
+        senderAvatar: outgoing.avatar,
         text: newMessage,
         sentAt: serverTimestamp(),
       })
@@ -268,14 +351,15 @@ export default function GroupChatPage() {
     try {
       const fileURL = await uploadGroupFile(communityId, groupId, file)
       const fileType = getFileType(file)
+      const outgoing = resolveOutgoingIdentity()
 
       const preview =
         fileType === 'image' ? '📷 Photo' : fileType === 'video' ? '🎬 Video' : `📎 ${file.name}`
 
       await addDoc(collection(db, `communities/${communityId}/groups/${groupId}/messages`), {
         senderId: user.id,
-        senderName: user.displayName || 'Anonymous',
-        senderAvatar: user.photoURL || '',
+        senderName: outgoing.name,
+        senderAvatar: outgoing.avatar,
         fileURL,
         fileType,
         sentAt: serverTimestamp(),
@@ -394,18 +478,40 @@ export default function GroupChatPage() {
             </button>
             <div className="min-w-0">
               <h1 className="text-xl font-bold text-black truncate">{group?.name}</h1>
-              <p className="text-sm text-gray-600">{messages.length} messages</p>
+              <p className="text-sm text-gray-600">
+                {activeTab === 'chat'
+                  ? `${messages.length} messages`
+                  : activeTab === 'forum'
+                    ? 'Group forum'
+                    : 'Members'}
+              </p>
             </div>
           </div>
-          {showPendingPanel && (
-            <button
-              type="button"
-              onClick={() => setShowPending((v) => !v)}
-              className="px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 min-h-[44px]"
-            >
-              Pending Members ({pendingMembers.length})
-            </button>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {(['chat', 'forum', 'members'] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium min-h-[44px] capitalize ${
+                  activeTab === tab
+                    ? 'bg-black text-white'
+                    : 'bg-white text-black border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+            {showPendingPanel && (
+              <button
+                type="button"
+                onClick={() => setShowPending((v) => !v)}
+                className="px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 min-h-[44px]"
+              >
+                Pending Members ({pendingMembers.length})
+              </button>
+            )}
+          </div>
         </div>
 
         {showPendingPanel && showPending && (
@@ -479,6 +585,8 @@ export default function GroupChatPage() {
         )}
 
         {/* Messages Area */}
+        {activeTab === 'chat' && (
+        <>
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
@@ -488,23 +596,50 @@ export default function GroupChatPage() {
             messages.map((msg) => {
               const isOwn = msg.senderId === user?.id
               const isEditing = editingId === msg.id
+              const identity = identities[msg.senderId]
+              const displayName = identity?.displayName || msg.senderName || 'Member'
+              const displayAvatar = identity
+                ? identity.profilePictureURL
+                : msg.senderAvatar
+              const canOpen = identity?.canOpenProfile === true
               return (
                 <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-xs lg:max-w-md space-y-1`}>
                     <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-2 items-end group`}>
-                      {!isOwn && msg.senderAvatar && (
-                        <img
-                          src={msg.senderAvatar}
-                          alt={msg.senderName}
-                          className="w-8 h-8 rounded-full flex-shrink-0"
-                        />
+                      {!isOwn && (
+                        <button
+                          type="button"
+                          disabled={!canOpen}
+                          onClick={() => canOpen && void openMemberProfile(msg.senderId)}
+                          className={canOpen ? 'shrink-0' : 'shrink-0 cursor-default'}
+                          aria-label={canOpen ? `View ${displayName}` : displayName}
+                        >
+                          {displayAvatar ? (
+                            <img
+                              src={displayAvatar}
+                              alt={displayName}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-neutral-200 text-xs font-bold flex items-center justify-center">
+                              {displayName.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </button>
                       )}
                       
                       <div className="flex-1">
                         {!isOwn && (
-                          <p className="text-xs font-medium text-gray-600 mb-1 px-2">
-                            {msg.senderName}
-                          </p>
+                          <button
+                            type="button"
+                            disabled={!canOpen}
+                            onClick={() => canOpen && void openMemberProfile(msg.senderId)}
+                            className={`text-xs font-medium text-gray-600 mb-1 px-2 ${
+                              canOpen ? 'hover:underline' : 'cursor-default'
+                            }`}
+                          >
+                            {displayName}
+                          </button>
                         )}
                         
                         {/* Message Bubble */}
@@ -747,7 +882,40 @@ export default function GroupChatPage() {
             </button>
           </div>
         </form>
+        </>
+        )}
+
+        {activeTab === 'forum' && (
+          <div className="flex-1 overflow-y-auto bg-gray-50">
+            <GroupForumPanel
+              communityId={communityId}
+              groupId={groupId}
+              currentUserId={user?.id}
+              onOpenProfile={(id) => void openMemberProfile(id)}
+            />
+          </div>
+        )}
+
+        {activeTab === 'members' && (
+          <div className="flex-1 overflow-y-auto bg-gray-50">
+            <GroupMembersPanel
+              communityId={communityId}
+              groupId={groupId}
+              onOpenProfile={(id) => void openMemberProfile(id)}
+            />
+          </div>
+        )}
       </main>
+
+      <MemberProfileModal
+        open={profileOpen}
+        loading={profileLoading}
+        profile={viewedProfile}
+        onClose={() => {
+          setProfileOpen(false)
+          setViewedProfile(null)
+        }}
+      />
 
       <Footer />
     </div>

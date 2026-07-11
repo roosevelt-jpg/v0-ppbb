@@ -674,8 +674,10 @@ function SettingsContent() {
                   className="mt-1 w-4 h-4 accent-black"
                 />
                 <div>
-                  <p className="font-medium text-sm">Show profile to community members</p>
-                  <p className="text-xs text-neutral-500">Let members see your profile in groups</p>
+                  <p className="font-medium text-sm">Allow others to open my full profile</p>
+                  <p className="text-xs text-neutral-500">
+                    Members can view your profile card from groups, chat, and the forum
+                  </p>
                 </div>
               </label>
               <label className="flex items-start gap-3 cursor-pointer">
@@ -693,6 +695,82 @@ function SettingsContent() {
                 <div>
                   <p className="font-medium text-sm">Show in member directory</p>
                   <p className="text-xs text-neutral-500">Appear in the public member directory</p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.showRealNameInGroups}
+                  onChange={(e) =>
+                    setPrivacySettings({
+                      ...privacySettings,
+                      showRealNameInGroups: e.target.checked,
+                    })
+                  }
+                  className="mt-1 w-4 h-4 accent-black"
+                />
+                <div>
+                  <p className="font-medium text-sm">Show my real name in groups</p>
+                  <p className="text-xs text-neutral-500">
+                    If off, others see “Member” instead of your name in chat and forum
+                  </p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.showAvatarInGroups}
+                  onChange={(e) =>
+                    setPrivacySettings({
+                      ...privacySettings,
+                      showAvatarInGroups: e.target.checked,
+                    })
+                  }
+                  className="mt-1 w-4 h-4 accent-black"
+                />
+                <div>
+                  <p className="font-medium text-sm">Show my photo in groups</p>
+                  <p className="text-xs text-neutral-500">
+                    Control avatar visibility in chat, forum, and member lists
+                  </p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.showBioOnProfile}
+                  onChange={(e) =>
+                    setPrivacySettings({
+                      ...privacySettings,
+                      showBioOnProfile: e.target.checked,
+                    })
+                  }
+                  className="mt-1 w-4 h-4 accent-black"
+                />
+                <div>
+                  <p className="font-medium text-sm">Show bio on my profile</p>
+                  <p className="text-xs text-neutral-500">
+                    Include your about text when someone opens your profile
+                  </p>
+                </div>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={privacySettings.showLocationOnProfile}
+                  onChange={(e) =>
+                    setPrivacySettings({
+                      ...privacySettings,
+                      showLocationOnProfile: e.target.checked,
+                    })
+                  }
+                  className="mt-1 w-4 h-4 accent-black"
+                />
+                <div>
+                  <p className="font-medium text-sm">Show location on my profile</p>
+                  <p className="text-xs text-neutral-500">
+                    Include your location when someone opens your profile
+                  </p>
                 </div>
               </label>
               <div className="flex flex-wrap gap-3">
@@ -719,12 +797,28 @@ function SettingsContent() {
           ) : (
             <div className="flex flex-col gap-3">
               <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
-                <span>Show profile to community</span>
+                <span>Full profile visible</span>
                 <span>{privacySettings.showProfileToCommunity ? 'On' : 'Off'}</span>
               </div>
               <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
                 <span>Show in member directory</span>
                 <span>{privacySettings.showInMemberDirectory ? 'On' : 'Off'}</span>
+              </div>
+              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+                <span>Real name in groups</span>
+                <span>{privacySettings.showRealNameInGroups ? 'On' : 'Off'}</span>
+              </div>
+              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+                <span>Photo in groups</span>
+                <span>{privacySettings.showAvatarInGroups ? 'On' : 'Off'}</span>
+              </div>
+              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+                <span>Bio on profile</span>
+                <span>{privacySettings.showBioOnProfile ? 'On' : 'Off'}</span>
+              </div>
+              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+                <span>Location on profile</span>
+                <span>{privacySettings.showLocationOnProfile ? 'On' : 'Off'}</span>
               </div>
               <button
                 type="button"
