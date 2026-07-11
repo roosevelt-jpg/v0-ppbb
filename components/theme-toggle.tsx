@@ -4,7 +4,14 @@ import React from 'react'
 import { useTheme } from '@/components/theme-provider'
 import { Sun, Moon } from 'lucide-react'
 
-export function ThemeToggle({ compact = false }: { compact?: boolean }) {
+export function ThemeToggle({
+  compact = false,
+  /** White icons for dark navbar backgrounds */
+  onDark = false,
+}: {
+  compact?: boolean
+  onDark?: boolean
+}) {
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
@@ -18,9 +25,13 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
 
   const isDark = resolvedTheme === 'dark'
   const iconClass = compact ? 'h-2.5 w-2.5' : 'h-4 w-4'
-  const buttonClass = compact
-    ? 'relative inline-flex items-center justify-center min-h-[28px] min-w-[28px] rounded-md p-1 bg-transparent text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors'
-    : 'relative inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 bg-transparent text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors'
+  const buttonClass = onDark
+    ? compact
+      ? 'relative inline-flex items-center justify-center min-h-[28px] min-w-[28px] rounded-md p-1 bg-transparent text-white hover:text-white hover:bg-white/10 transition-colors'
+      : 'relative inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 bg-transparent text-white hover:text-white hover:bg-white/10 transition-colors'
+    : compact
+      ? 'relative inline-flex items-center justify-center min-h-[28px] min-w-[28px] rounded-md p-1 bg-transparent text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors'
+      : 'relative inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg p-2 bg-transparent text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors'
 
   return (
     <button

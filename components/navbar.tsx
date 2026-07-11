@@ -210,8 +210,8 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <LanguageSwitcherWithFlags />
-            <ThemeToggle />
+            <LanguageSwitcherWithFlags onDark />
+            <ThemeToggle onDark />
             <ProfileMenuButton />
             {authActions}
           </div>
@@ -221,8 +221,8 @@ export function Navbar() {
       <div className="md:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2 min-h-[88px]">
         <SiteLogo background="dark" variant="navbar" href="/" />
         <div className="flex items-center gap-2">
-          <LanguageSwitcherWithFlags />
-          <ThemeToggle />
+          <LanguageSwitcherWithFlags onDark />
+          <ThemeToggle onDark />
           <ProfileMenuButton />
           <button
             className="p-2 -mr-2 text-white"
@@ -249,7 +249,7 @@ export function Navbar() {
           ))}
 
           <div className="border-t border-neutral-700 px-4 py-3">
-            <LanguageSwitcherWithFlags />
+            <LanguageSwitcherWithFlags mobile onDark />
           </div>
 
           <div className="border-t border-neutral-700">
