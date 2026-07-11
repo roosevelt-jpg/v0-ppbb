@@ -68,7 +68,7 @@ export function ChatWidget() {
         setMessages([
           {
             role: 'assistant',
-            content: 'Hello! I&apos;m here to help. Ask me anything about Passive Blessings!',
+            content: "Hello! I'm here to help. Ask me anything about Passive Blessings!",
             timestamp: new Date(),
           },
         ])
@@ -79,7 +79,7 @@ export function ChatWidget() {
       setMessages([
         {
           role: 'assistant',
-          content: 'Sorry, I&apos;m having trouble connecting. Please try again in a moment.',
+          content: "Sorry, I'm having trouble connecting. Please try again in a moment.",
           timestamp: new Date(),
         },
       ])
@@ -264,7 +264,16 @@ export function ChatWidget() {
               <ChatbotAvatar size={36} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 p-0.5" />
               <div className="min-w-0">
                 <h3 className="font-semibold text-sm sm:text-base truncate">PB Assistant</h3>
-                <p className="text-[10px] opacity-60 font-light">By FLYN.AI</p>
+                <p className="text-[10px] opacity-60 font-light">
+                  <a
+                    href="https://myflynai.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:opacity-100 hover:underline underline-offset-2 text-inherit"
+                  >
+                    By FLYN.AI
+                  </a>
+                </p>
               </div>
             </div>
             <button
