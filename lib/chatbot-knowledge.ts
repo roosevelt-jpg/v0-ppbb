@@ -9,6 +9,8 @@ export interface ChatbotKnowledgeItem {
   alwaysInclude: boolean
   status: ChatbotKnowledgeStatus
   sortOrder: number
+  /** Original uploaded file name when created from a training doc */
+  sourceFileName?: string
   updatedAt?: string
   updatedBy?: string
   createdAt?: string
@@ -22,6 +24,7 @@ export type ChatbotKnowledgeInput = {
   alwaysInclude?: boolean
   status?: ChatbotKnowledgeStatus
   sortOrder?: number
+  sourceFileName?: string
 }
 
 export function parseTriggers(triggers: string): string[] {
@@ -32,7 +35,10 @@ export function parseTriggers(triggers: string): string[] {
 }
 
 /** Score how well a knowledge item matches the user message (0 = no match). */
-export function scoreKnowledgeMatch(userMessage: string, item: Pick<ChatbotKnowledgeItem, 'title' | 'content' | 'triggers'>): number {
+export function scoreKnowledgeMatch(
+  userMessage: string,
+  item: Pick<ChatbotKnowledgeItem, 'title' | 'content' | 'triggers' | 'sourceFileName'>
+): number {
   const lower = userMessage.toLowerCase()
   const keywords = lower.split(/\s+/).filter((w) => w.length > 2)
   let score = 0
@@ -44,10 +50,18 @@ export function scoreKnowledgeMatch(userMessage: string, item: Pick<ChatbotKnowl
     }
   }
 
-  const haystack = `${item.title} ${item.content}`.toLowerCase()
+  const haystack = `${item.title} ${item.sourceFileName || ''} ${item.content}`.toLowerCase()
   for (const keyword of keywords) {
     if (haystack.includes(keyword)) score += 5
+    if (item.title.toLowerCase().includes(keyword)) score += 4
     if (triggerList.some((t) => t.includes(keyword) || keyword.includes(t))) score += 8
+  }
+
+  // Phrase overlap: consecutive bigrams from the question appearing in the doc
+  const words = keywords
+  for (let i = 0; i < words.length - 1; i++) {
+    const bigram = `${words[i]} ${words[i + 1]}`
+    if (haystack.includes(bigram)) score += 12
   }
 
   return score
@@ -66,6 +80,10 @@ export function normalizeKnowledgeDoc(
     alwaysInclude: Boolean(data.alwaysInclude),
     status,
     sortOrder: typeof data.sortOrder === 'number' ? data.sortOrder : Number(data.sortOrder) || 0,
+    sourceFileName:
+      typeof data.sourceFileName === 'string' && data.sourceFileName.trim()
+        ? data.sourceFileName.trim()
+        : undefined,
     updatedAt:
       typeof data.updatedAt === 'string'
         ? data.updatedAt

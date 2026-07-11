@@ -215,14 +215,14 @@ export default function AdminChatbotPage() {
               Chatbot Management
             </h1>
             <p className="text-neutral-600 mt-1 font-body">
-              Manage support chats and feed the bot facts, WhatsApp links, and contact lines
+              Manage support chats. The bot answers from FAQs and AI training docs (no Anthropic API).
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
           {tabBtn('conversations', 'Conversations')}
-          {tabBtn('knowledge', 'Knowledge')}
+          {tabBtn('knowledge', 'Training docs')}
         </div>
 
         {tab === 'knowledge' ? (

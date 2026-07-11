@@ -63,6 +63,10 @@ export async function POST(request: NextRequest) {
       alwaysInclude: Boolean(body.alwaysInclude),
       status,
       sortOrder: typeof body.sortOrder === 'number' ? body.sortOrder : Number(body.sortOrder) || 0,
+      sourceFileName:
+        typeof body.sourceFileName === 'string' && body.sourceFileName.trim()
+          ? body.sourceFileName.trim()
+          : null,
       updatedAt: FieldValue.serverTimestamp(),
       updatedBy: uid,
     })

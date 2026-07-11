@@ -16,6 +16,10 @@ interface Message {
     question: string
     category: string
   }
+  knowledgeSource?: {
+    id: string
+    title: string
+  }
 }
 
 export function ChatWidget() {
@@ -158,6 +162,7 @@ export function ChatWidget() {
             content: chatData.message,
             timestamp: new Date(),
             faqSource: chatData.faqSource,
+            knowledgeSource: chatData.knowledgeSource,
           }
           setMessages(prev => [...prev, assistantMessage])
         }
@@ -211,6 +216,7 @@ export function ChatWidget() {
           content: data.message,
           timestamp: new Date(),
           faqSource: data.faqSource,
+          knowledgeSource: data.knowledgeSource,
         }
         setMessages(prev => [...prev, assistantMessage])
       } else {
@@ -295,11 +301,17 @@ export function ChatWidget() {
                       {message.content}
                     </p>
                   </div>
-                  {/* FAQ Source Badge */}
+                  {/* Source badge */}
                   {message.faqSource && (
                     <div className="mt-1 text-xs text-neutral-600 italic flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />
-                      From: {message.faqSource.category}
+                      From FAQ: {message.faqSource.category || message.faqSource.question}
+                    </div>
+                  )}
+                  {!message.faqSource && message.knowledgeSource && (
+                    <div className="mt-1 text-xs text-neutral-600 italic flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      From: {message.knowledgeSource.title}
                     </div>
                   )}
                 </div>
