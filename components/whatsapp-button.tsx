@@ -28,7 +28,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Join our WhatsApp channel"
-      className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 bg-[#25D366] text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 hover:bg-[#20bd5a]"
+      className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 bg-black text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 hover:bg-neutral-900"
     >
       <WhatsAppIcon />
     </a>

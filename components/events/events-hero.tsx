@@ -59,7 +59,7 @@ export function EventsHero() {
             href={whatsappHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#25D366] text-white rounded-lg font-body text-sm font-semibold hover:bg-[#20bd5a] transition-colors"
+            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-neutral-900 transition-colors"
           >
             <WhatsAppIcon className="w-5 h-5" />
             {pageConfig.whatsappButtonLabel}
