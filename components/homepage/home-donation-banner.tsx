@@ -8,37 +8,69 @@ import {
   HomepageConfig,
   HomepageBannerButton,
 } from '@/lib/homepage-config'
+import { subscribeToGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/platform-config'
 
-function BannerButton({ button, textColor }: { button: HomepageBannerButton; textColor: string }) {
+function isWhatsAppBannerButton(button: HomepageBannerButton): boolean {
+  const label = button.label.toLowerCase()
+  const href = button.href.toLowerCase()
+  return (
+    href === '__whatsapp__' ||
+    href.includes('whatsapp') ||
+    label.includes('whatsapp') ||
+    label.includes('contact us')
+  )
+}
+
+function BannerButton({
+  button,
+  textColor,
+  whatsappHref,
+}: {
+  button: HomepageBannerButton
+  textColor: string
+  whatsappHref: string
+}) {
+  const useWhatsApp = isWhatsAppBannerButton(button)
+  const href = useWhatsApp && whatsappHref ? whatsappHref : button.href
+  const label = useWhatsApp ? 'Join Our Whatsapp' : button.label
+  const style = useWhatsApp ? 'primary' : button.style
+  const external = useWhatsApp || /^https?:\/\//i.test(href)
+
   const base =
     'inline-flex items-center justify-center font-body text-sm font-semibold transition-colors min-h-[44px] px-5 py-3 rounded-lg'
 
-  if (button.style === 'primary') {
-    return (
-      <Link href={button.href} className={`${base} bg-black text-white hover:bg-gray-800`}>
-        {button.label}
-      </Link>
-    )
+  if (useWhatsApp && !whatsappHref) {
+    return null
   }
 
-  if (button.style === 'secondary') {
+  const className =
+    style === 'primary'
+      ? `${base} bg-black text-white hover:bg-gray-800`
+      : style === 'secondary'
+        ? `${base} bg-white text-black border border-gray-300 hover:bg-gray-50`
+        : `${base} underline underline-offset-4 hover:opacity-80`
+
+  if (external) {
     return (
-      <Link
-        href={button.href}
-        className={`${base} bg-white text-black border border-gray-300 hover:bg-gray-50`}
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        style={style === 'text' ? { color: textColor } : undefined}
       >
-        {button.label}
-      </Link>
+        {label}
+      </a>
     )
   }
 
   return (
     <Link
-      href={button.href}
-      className={`${base} underline underline-offset-4 hover:opacity-80`}
-      style={{ color: textColor }}
+      href={href}
+      className={className}
+      style={style === 'text' ? { color: textColor } : undefined}
     >
-      {button.label}
+      {label}
     </Link>
   )
 }
@@ -53,6 +85,7 @@ function BannerSkeleton() {
 
 export function HomeDonationBanner() {
   const [config, setConfig] = useState<HomepageConfig>(DEFAULT_HOMEPAGE)
+  const [whatsappHref, setWhatsappHref] = useState(DEFAULT_GLOBAL_SETTINGS.whatsappLink)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -62,6 +95,8 @@ export function HomeDonationBanner() {
     })
     return unsub
   }, [])
+
+  useEffect(() => subscribeToGlobalSettings((s) => setWhatsappHref(s.whatsappLink || '')), [])
 
   if (!ready) return <BannerSkeleton />
 
@@ -85,7 +120,12 @@ export function HomeDonationBanner() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
           {donationBanner.buttons.map((button, i) => (
-            <BannerButton key={`${button.href}-${i}`} button={button} textColor={donationBanner.textColor} />
+            <BannerButton
+              key={`${button.href}-${i}`}
+              button={button}
+              textColor={donationBanner.textColor}
+              whatsappHref={whatsappHref}
+            />
           ))}
         </div>
       </div>

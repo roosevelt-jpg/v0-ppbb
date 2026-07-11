@@ -240,7 +240,7 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
     buttons: [
       { label: 'Volunteer', href: '/volunteer', style: 'primary' },
       { label: 'Donate', href: '/donate', style: 'secondary' },
-      { label: 'Contact us →', href: '/partners', style: 'text' },
+      { label: 'Join Our Whatsapp', href: '__whatsapp__', style: 'primary' },
     ],
   },
   socialFeeds: {

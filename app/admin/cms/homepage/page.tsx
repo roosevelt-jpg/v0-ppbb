@@ -970,7 +970,12 @@ export default function AdminCmsHomepagePage() {
                     value={btn.href}
                     onChange={(e) => updateBannerButton(i, 'href', e.target.value)}
                     className="w-full"
+                    placeholder="/path or __whatsapp__"
                   />
+                  <p className="text-[10px] text-neutral-500 mt-1">
+                    Use <code>__whatsapp__</code> (or label “Join Our Whatsapp”) to open the Global
+                    Settings WhatsApp channel URL.
+                  </p>
                 </div>
                 <div className="md:col-span-3">
                   <label className="text-xs font-medium">Style</label>
