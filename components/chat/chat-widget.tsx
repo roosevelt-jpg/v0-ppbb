@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
+import { LinkifiedText } from '@/components/chat/linkified-text'
 import { isDashboardRoute } from '@/lib/dashboard-routes'
 import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
 
@@ -306,8 +307,8 @@ export function ChatWidget() {
                       display: 'block',
                     }}
                   >
-                    <p className="leading-relaxed" style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-                      {message.content}
+                    <p className="leading-relaxed" style={{ wordBreak: 'break-word' }}>
+                      <LinkifiedText text={message.content} onDark={message.role === 'user'} />
                     </p>
                   </div>
                   {/* Source badge */}

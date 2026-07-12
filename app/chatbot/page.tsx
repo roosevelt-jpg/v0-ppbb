@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
+import { LinkifiedText } from '@/components/chat/linkified-text'
 import { FAQ } from '@/lib/types'
 import { getAllFAQs, searchFAQs } from '@/lib/faq-queries'
 import { Send } from 'lucide-react'
@@ -164,7 +165,9 @@ export default function ChatBotPage() {
                   wordWrap: 'break-word',
                 }}
               >
-                {message.content}
+                {message.content ? (
+                  <LinkifiedText text={message.content} onDark={message.type === 'user'} />
+                ) : null}
               </div>
             </div>
           ))}

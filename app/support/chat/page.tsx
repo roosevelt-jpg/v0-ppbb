@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { MessageCircle, Send, Search, Trash2, Plus } from 'lucide-react'
 import Link from 'next/link'
+import { LinkifiedText } from '@/components/chat/linkified-text'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -233,7 +234,12 @@ export default function ChatPage() {
                           : 'bg-neutral-100 text-neutral-900 rounded-bl-none'
                       }`}
                     >
-                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <p className="text-sm leading-relaxed">
+                        <LinkifiedText
+                          text={message.content}
+                          onDark={message.role === 'user'}
+                        />
+                      </p>
                       <p className="text-xs opacity-70 mt-1">
                         {message.timestamp.toLocaleTimeString([], {
                           hour: '2-digit',

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
+import { LinkifiedText } from '@/components/chat/linkified-text'
 import { ChatbotKnowledgePanel } from '@/components/admin/chatbot-knowledge-panel'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore'
@@ -363,7 +364,9 @@ export default function AdminChatbotPage() {
                                 : 'bg-neutral-100 text-neutral-900'
                             }`}
                           >
-                            <p>{message.content}</p>
+                            <p>
+                              <LinkifiedText text={message.content} />
+                            </p>
                             <p className="text-xs opacity-70 mt-1">
                               {message.timestamp.toLocaleTimeString()}
                             </p>
