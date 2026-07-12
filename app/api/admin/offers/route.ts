@@ -104,6 +104,116 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const adminUid = await requireAdmin(request)
+    if (!adminUid) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const title = typeof body.title === 'string' ? body.title.trim() : ''
+    if (!title) {
+      return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 })
+    }
+
+    const categoryRaw = String(body.category || 'merchandise').trim()
+    const categoryNormalized =
+      categoryRaw.toLowerCase() === 'merchandise' ||
+      categoryRaw.toLowerCase() === 'merch' ||
+      categoryRaw.toLowerCase() === 'product'
+        ? categoryRaw.toLowerCase() === 'product'
+          ? 'product'
+          : 'merchandise'
+        : categoryRaw.toLowerCase() || 'merchandise'
+
+    const imageURLs: string[] = Array.isArray(body.imageURLs)
+      ? body.imageURLs.filter((u: unknown) => typeof u === 'string' && (u as string).trim())
+      : []
+    const singleImage =
+      (typeof body.imageUrl === 'string' && body.imageUrl) ||
+      (typeof body.imageURL === 'string' && body.imageURL) ||
+      ''
+    if (singleImage && !imageURLs.includes(singleImage)) {
+      imageURLs.unshift(singleImage)
+    }
+    const primaryImage = imageURLs[0] || ''
+
+    const price =
+      typeof body.price === 'number'
+        ? body.price
+        : body.price != null && body.price !== ''
+          ? Number(body.price)
+          : null
+
+    const now = Timestamp.now()
+    const db = getAdminDb()
+    const ref = db.collection('offers').doc()
+    const id = ref.id
+
+    const businessId = 'passive-blessings'
+    const businessName = 'Passive Blessings'
+    const status = body.status === 'draft' ? 'draft' : 'published'
+
+    const offer = sanitizeForFirestore({
+      id,
+      businessId,
+      businessName,
+      ownerType: 'platform',
+      createdBy: adminUid,
+      title,
+      type: body.type || 'product',
+      description: typeof body.description === 'string' ? body.description : '',
+      category: categoryNormalized,
+      variant: typeof body.variant === 'string' ? body.variant.trim() : '',
+      price: Number.isFinite(price as number) ? price : null,
+      originalPrice:
+        typeof body.originalPrice === 'number'
+          ? body.originalPrice
+          : body.originalPrice != null && body.originalPrice !== ''
+            ? Number(body.originalPrice)
+            : null,
+      currency: typeof body.currency === 'string' && body.currency ? body.currency : 'AED',
+      imageURL: primaryImage || null,
+      imageUrl: primaryImage || null,
+      images: imageURLs,
+      imageURLs,
+      isAvailable: status === 'published',
+      isFeatured: Boolean(body.isFeatured),
+      isMemberOnly: Boolean(body.isMemberOnly),
+      status,
+      views: 0,
+      conversions: 0,
+      approvedAt: status === 'published' ? now : null,
+      approvedBy: status === 'published' ? adminUid : null,
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    await ref.set(offer)
+    await db.collection('businessOffers').doc(id).set(
+      sanitizeForFirestore({
+        ...offer,
+        status: status === 'published' ? 'active' : status,
+      })
+    )
+
+    await auditAdminApiAction(request, adminUid, {
+      actionType: 'create',
+      action: `Created PB marketplace product: ${title}`,
+      entityType: 'offer',
+      entityId: id,
+      entityName: title,
+      status: 'success',
+    })
+
+    return NextResponse.json({ success: true, data: { id, status } })
+  } catch (error) {
+    console.error('[admin/offers] POST error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to create product' }, { status: 500 })
+  }
+}
+
 export async function PATCH(request: NextRequest) {
   try {
     const adminUid = await requireAdmin(request)

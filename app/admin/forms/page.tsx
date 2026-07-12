@@ -18,7 +18,7 @@ import {
   FILTER_PILL_INACTIVE,
 } from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
-import { Plus, Edit2, Eye, Trash2, Copy, Check } from 'lucide-react'
+import { Plus, Edit2, Eye, Trash2, Copy, Check, RefreshCw } from 'lucide-react'
 import { deleteForm } from '@/lib/form-builder-queries'
 import { getPublicFormPath } from '@/lib/form-builder-utils'
 
@@ -28,6 +28,7 @@ export default function FormsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     let unsub = () => {}
@@ -47,6 +48,20 @@ export default function FormsPage() {
     void loadData()
     return () => unsub()
   }, [])
+
+  const syncPbTemplates = async () => {
+    setSyncing(true)
+    try {
+      await createDefaultForms()
+      alert(
+        'PB form templates synced:\n• Partnership Inquiry\n• Volunteer with PB (Unpaid Service)\n• Community Feedback\n• Charity Support Request\n\nOpen any form to edit fields or dropdown options.'
+      )
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Sync failed')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   const copyPublicUrl = async (form: CustomForm) => {
     if (!form.slug || form.status !== 'active') return
@@ -107,10 +122,21 @@ export default function FormsPage() {
           <h1 className="text-3xl font-bold">Custom Forms</h1>
           <p className="text-gray-600 mt-1">Create and manage custom forms for different purposes</p>
         </div>
-        <Link href="/admin/forms/new" className={`inline-flex items-center gap-2 ${BUTTON_PRIMARY}`}>
-          <Plus className="h-4 w-4" />
-          Create Form
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => void syncPbTemplates()}
+            disabled={syncing}
+            className={`inline-flex items-center gap-2 ${BUTTON_SECONDARY} disabled:opacity-50`}
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing…' : 'Sync PB templates'}
+          </button>
+          <Link href="/admin/forms/new" className={`inline-flex items-center gap-2 ${BUTTON_PRIMARY}`}>
+            <Plus className="h-4 w-4" />
+            Create Form
+          </Link>
+        </div>
       </div>
 
       {/* Statistics Cards */}

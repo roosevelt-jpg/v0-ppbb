@@ -7,7 +7,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import { collection, onSnapshot } from 'firebase/firestore'
-import { CheckCircle2, Trash2, Star, Tag } from 'lucide-react'
+import { CheckCircle2, Trash2, Star, Tag, Plus, X } from 'lucide-react'
 
 type OfferRow = {
   id: string
@@ -43,7 +43,32 @@ export default function AdminMarketplacePage() {
   const [loading, setLoading] = React.useState(true)
   const [actingId, setActingId] = React.useState<string | null>(null)
   const [section, setSection] = React.useState<'offers' | 'discounts'>('offers')
-  const [filter, setFilter] = React.useState<'all' | 'pending_approval' | 'published'>('all')
+  const [filter, setFilter] = React.useState<'all' | 'pending_approval' | 'published' | 'pb'>('all')
+  const [showCreate, setShowCreate] = React.useState(false)
+  const [creating, setCreating] = React.useState(false)
+  const [createForm, setCreateForm] = React.useState({
+    title: '',
+    description: '',
+    price: '',
+    originalPrice: '',
+    category: 'merchandise',
+    variant: '',
+    imageURL: '',
+    publishNow: true,
+  })
+
+  const resetCreateForm = () => {
+    setCreateForm({
+      title: '',
+      description: '',
+      price: '',
+      originalPrice: '',
+      category: 'merchandise',
+      variant: '',
+      imageURL: '',
+      publishNow: true,
+    })
+  }
 
   React.useEffect(() => {
     const map = new Map<string, OfferRow>()
@@ -120,6 +145,12 @@ export default function AdminMarketplacePage() {
 
   const filtered = offers.filter((o) => {
     const s = (o.status || '').toLowerCase()
+    if (filter === 'pb') {
+      return (
+        o.businessId === 'passive-blessings' ||
+        (o.businessName || '').toLowerCase().includes('passive blessings')
+      )
+    }
     if (filter === 'pending_approval') return s === 'pending_approval' || s === 'draft'
     if (filter === 'published') return s === 'published' || s === 'active' || s === 'open'
     return true
@@ -171,33 +202,198 @@ export default function AdminMarketplacePage() {
     }
   }
 
+  const createPbProduct = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!createForm.title.trim()) {
+      alert('Title is required')
+      return
+    }
+    setCreating(true)
+    try {
+      const json = await adminApiFetch('/api/admin/offers', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: createForm.title.trim(),
+          description: createForm.description.trim(),
+          price: createForm.price === '' ? null : Number(createForm.price),
+          originalPrice: createForm.originalPrice === '' ? null : Number(createForm.originalPrice),
+          category: createForm.category,
+          type: 'product',
+          variant: createForm.variant.trim(),
+          imageURL: createForm.imageURL.trim(),
+          status: createForm.publishNow ? 'published' : 'draft',
+        }),
+      })
+      if (!json.success) {
+        alert(json.error || 'Failed to create product')
+        return
+      }
+      setShowCreate(false)
+      resetCreateForm()
+      setFilter('pb')
+      setSection('offers')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to create product')
+    } finally {
+      setCreating(false)
+    }
+  }
+
   return (
-    <AdminPageLayout title="Marketplace Moderation" subtitle="Approve offers and member discounts">
+    <AdminPageLayout
+      title="Marketplace"
+      subtitle="Moderate business offers, and list Passive Blessings products for the shop"
+    >
       <div className="space-y-6">
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setSection('offers')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] ${
-              section === 'offers' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
-            }`}
-          >
-            Offers
-          </button>
-          <button
-            type="button"
-            onClick={() => setSection('discounts')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center gap-2 ${
-              section === 'discounts' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
-            }`}
-          >
-            <Tag size={16} />
-            Discounts
-          </button>
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+          <p>
+            <strong>Marketplace</strong> is the community directory of business offers & discounts.
+            <strong> PB products</strong> (hoodies, gifts, merch) also live here — use{' '}
+            <strong>Add PB product</strong> so they appear on <code className="text-xs">/shop</code>{' '}
+            when category is Merchandise and status is Published.
+          </p>
         </div>
 
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setSection('offers')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] ${
+                section === 'offers' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
+              }`}
+            >
+              Offers
+            </button>
+            <button
+              type="button"
+              onClick={() => setSection('discounts')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center gap-2 ${
+                section === 'discounts' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
+              }`}
+            >
+              <Tag size={16} />
+              Discounts
+            </button>
+          </div>
+          {section === 'offers' && (
+            <button
+              type="button"
+              onClick={() => setShowCreate((v) => !v)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white"
+            >
+              {showCreate ? <X size={16} /> : <Plus size={16} />}
+              {showCreate ? 'Cancel' : 'Add PB product'}
+            </button>
+          )}
+        </div>
+
+        {showCreate && section === 'offers' && (
+          <form
+            onSubmit={createPbProduct}
+            className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 space-y-4"
+          >
+            <div>
+              <h3 className="font-semibold text-neutral-900">New Passive Blessings product</h3>
+              <p className="text-xs text-neutral-500 mt-1">
+                Seller will be listed as Passive Blessings. Merchandise items show on the public shop.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <label className="text-sm sm:col-span-2">
+                Title *
+                <input
+                  required
+                  value={createForm.title}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Community Hoodie — Black"
+                />
+              </label>
+              <label className="text-sm sm:col-span-2">
+                Description
+                <textarea
+                  value={createForm.description}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm min-h-[80px]"
+                  placeholder="Product details…"
+                />
+              </label>
+              <label className="text-sm">
+                Price (AED)
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={createForm.price}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, price: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="text-sm">
+                Compare-at price (optional)
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={createForm.originalPrice}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, originalPrice: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="text-sm">
+                Category
+                <select
+                  value={createForm.category}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, category: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="merchandise">Merchandise (shows on /shop)</option>
+                  <option value="product">Product (marketplace)</option>
+                  <option value="service">Service</option>
+                  <option value="education">Education</option>
+                </select>
+              </label>
+              <label className="text-sm">
+                Variant (size / colour)
+                <input
+                  value={createForm.variant}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, variant: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Black / M"
+                />
+              </label>
+              <label className="text-sm sm:col-span-2">
+                Image URL
+                <input
+                  value={createForm.imageURL}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, imageURL: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="https://…"
+                />
+              </label>
+              <label className="text-sm flex items-center gap-2 sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={createForm.publishNow}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, publishNow: e.target.checked }))}
+                />
+                Publish immediately (live on shop/marketplace)
+              </label>
+            </div>
+            <button
+              type="submit"
+              disabled={creating}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-black text-white text-sm font-semibold disabled:opacity-50 min-h-[44px]"
+            >
+              <Plus size={16} />
+              {creating ? 'Creating…' : 'Create PB product'}
+            </button>
+          </form>
+        )}
+
         <div className="flex flex-wrap gap-2">
-          {(['all', 'pending_approval', 'published'] as const).map((tab) => (
+          {(['all', 'pending_approval', 'published', 'pb'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -206,7 +402,13 @@ export default function AdminMarketplacePage() {
                 filter === tab ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
               }`}
             >
-              {tab === 'all' ? 'All' : tab === 'pending_approval' ? 'Pending' : 'Published'}
+              {tab === 'all'
+                ? 'All'
+                : tab === 'pending_approval'
+                  ? 'Pending'
+                  : tab === 'published'
+                    ? 'Published'
+                    : 'PB products'}
             </button>
           ))}
         </div>

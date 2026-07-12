@@ -32,6 +32,27 @@ const EMERGENCY_OPTIONS = [
   { value: 'critical', label: 'Critical' },
 ] as const
 
+const SUPPORT_TYPE_OPTIONS = [
+  'Financial Assistance',
+  'Medical Support',
+  'Education Support',
+  'Rent / Housing',
+  'Food Support',
+  'Emergency Relief',
+  'Other',
+] as const
+
+const EMIRATE_OPTIONS = [
+  'Dubai',
+  'Abu Dhabi',
+  'Sharjah',
+  'Ajman',
+  'Umm Al Quwain',
+  'Ras Al Khaimah',
+  'Fujairah',
+  'Other',
+] as const
+
 const CONSENT_LABEL =
   "I consent to Passive Blessings collecting and storing this data in accordance with UAE data protection laws and the platform's privacy policy."
 
@@ -109,6 +130,11 @@ export function BeneficiarySupportForm({
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [email, setEmail] = useState('')
+  const [nationality, setNationality] = useState('')
+  const [emirate, setEmirate] = useState('')
+  const [familySize, setFamilySize] = useState('')
+  const [supportType, setSupportType] = useState('')
+  const [amountNeeded, setAmountNeeded] = useState('')
   const [reason, setReason] = useState('')
   const [emergencyLevel, setEmergencyLevel] = useState('')
   const [referralSource, setReferralSource] = useState('')
@@ -137,6 +163,9 @@ export function BeneficiarySupportForm({
     if (!fullName.trim()) next.fullName = 'Full name is required'
     if (!phoneNumber.trim()) next.phoneNumber = 'Phone number is required'
     if (!email.trim() || !email.includes('@')) next.email = 'A valid email address is required'
+    if (!nationality.trim()) next.nationality = 'Nationality is required'
+    if (!emirate) next.emirate = 'Please select your emirate / area'
+    if (!supportType) next.supportType = 'Please select the type of support needed'
     if (!emiratesId) next.emiratesId = 'Emirates ID upload is required'
     if (!passport) next.passport = 'Passport copy upload is required'
     if (!visa) next.visa = 'Visa copy upload is required'
@@ -152,6 +181,9 @@ export function BeneficiarySupportForm({
     fullName,
     phoneNumber,
     email,
+    nationality,
+    emirate,
+    supportType,
     emiratesId,
     passport,
     visa,
@@ -190,6 +222,11 @@ export function BeneficiarySupportForm({
       fd.append('fullName', fullName.trim())
       fd.append('phoneNumber', phoneNumber.trim())
       fd.append('email', email.trim())
+      fd.append('nationality', nationality.trim())
+      fd.append('emirate', emirate)
+      fd.append('familySize', familySize.trim())
+      fd.append('supportType', supportType)
+      fd.append('amountNeeded', amountNeeded.trim())
       fd.append('reason', reason.trim())
       fd.append('emergencyLevel', emergencyLevel)
       fd.append('referralSource', referralSource.trim())
@@ -391,6 +428,94 @@ export function BeneficiarySupportForm({
             {touched && currentErrors.email ? (
               <p className={errorClass}>{currentErrors.email}</p>
             ) : null}
+          </div>
+          <div>
+            <label htmlFor="nationality" className={labelClass}>
+              Nationality <span className="text-red-600">*</span>
+            </label>
+            <input
+              id="nationality"
+              className={`${inputClass} ${currentErrors.nationality && touched ? 'border-red-500' : ''}`}
+              value={nationality}
+              onChange={(e) => setNationality(e.target.value)}
+            />
+            {touched && currentErrors.nationality ? (
+              <p className={errorClass}>{currentErrors.nationality}</p>
+            ) : null}
+          </div>
+          <div>
+            <label htmlFor="emirate" className={labelClass}>
+              Current Emirate / Area <span className="text-red-600">*</span>
+            </label>
+            <select
+              id="emirate"
+              className={`${inputClass} ${currentErrors.emirate && touched ? 'border-red-500' : ''}`}
+              value={emirate}
+              onChange={(e) => setEmirate(e.target.value)}
+            >
+              <option value="">Select…</option>
+              {EMIRATE_OPTIONS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+            {touched && currentErrors.emirate ? (
+              <p className={errorClass}>{currentErrors.emirate}</p>
+            ) : null}
+          </div>
+          <div>
+            <label htmlFor="familySize" className={labelClass}>
+              Household size (optional)
+            </label>
+            <input
+              id="familySize"
+              type="number"
+              min={1}
+              className={inputClass}
+              value={familySize}
+              onChange={(e) => setFamilySize(e.target.value)}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h3 className="text-xs uppercase tracking-wider text-neutral-500">Support needed</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="supportType" className={labelClass}>
+              Type of Support Needed <span className="text-red-600">*</span>
+            </label>
+            <select
+              id="supportType"
+              className={`${inputClass} ${currentErrors.supportType && touched ? 'border-red-500' : ''}`}
+              value={supportType}
+              onChange={(e) => setSupportType(e.target.value)}
+            >
+              <option value="">Select…</option>
+              {SUPPORT_TYPE_OPTIONS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+            {touched && currentErrors.supportType ? (
+              <p className={errorClass}>{currentErrors.supportType}</p>
+            ) : null}
+          </div>
+          <div>
+            <label htmlFor="amountNeeded" className={labelClass}>
+              Amount Needed (AED, optional)
+            </label>
+            <input
+              id="amountNeeded"
+              type="number"
+              min={0}
+              className={inputClass}
+              value={amountNeeded}
+              onChange={(e) => setAmountNeeded(e.target.value)}
+            />
           </div>
         </div>
       </section>

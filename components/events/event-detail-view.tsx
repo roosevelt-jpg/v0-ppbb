@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import type { Event, TicketType } from '@/lib/event-types'
-import { toEventDate } from '@/lib/event-utils'
+import { getEventBannerURL, toEventDate } from '@/lib/event-utils'
 
 interface EventDetailViewProps {
   event: Event
@@ -67,6 +67,8 @@ export function EventDetailView({
   const selected =
     ticketTypes.find((t) => t.id === selectedTicketId) || ticketTypes[0] || null
 
+  const bannerSrc = getEventBannerURL(event as unknown as Record<string, unknown>)
+
   return (
     <div className="min-h-screen bg-gray-50">
       {previewMode && (
@@ -75,12 +77,12 @@ export function EventDetailView({
         </div>
       )}
 
-      {event.bannerURL && (
+      {bannerSrc ? (
         <div className="w-full h-48 sm:h-64 lg:h-96 relative overflow-hidden">
-          <img src={event.bannerURL} alt={event.title} className="w-full h-full object-cover" />
+          <img src={bannerSrc} alt={event.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
-      )}
+      ) : null}
 
       <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">
         {error && (

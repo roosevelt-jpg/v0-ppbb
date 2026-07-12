@@ -86,11 +86,19 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
         ? event.registered
         : 0
   const capacity =
-    typeof event.maxAttendees === 'number'
+    typeof event.maxAttendees === 'number' && event.maxAttendees > 0
       ? event.maxAttendees
-      : typeof event.capacity === 'number'
+      : typeof event.capacity === 'number' && event.capacity > 0
         ? event.capacity
-        : null
+        : Array.isArray(event.ticketTypes)
+          ? (() => {
+              const caps = (event.ticketTypes as { capacity?: number | null }[])
+                .map((t) => t.capacity)
+                .filter((c): c is number => typeof c === 'number' && c > 0)
+              return caps.length ? caps.reduce((a, b) => a + b, 0) : null
+            })()
+          : null
+  const isFull = capacity != null && attending >= capacity
 
   const href = `/events/${event.id || event.slug || ''}`
 
@@ -143,6 +151,11 @@ END:VCALENDAR`
         <div className="absolute top-3 right-3 px-2.5 py-1 rounded text-xs font-semibold bg-black text-white shadow-sm">
           {priceLabel}
         </div>
+        {isFull ? (
+          <div className="absolute top-3 left-3 px-2.5 py-1 rounded text-xs font-semibold bg-red-600 text-white shadow-sm">
+            Full
+          </div>
+        ) : null}
       </div>
 
       <div className="p-4 flex-1 flex flex-col">
@@ -196,7 +209,11 @@ END:VCALENDAR`
           <div className="flex items-start gap-2 text-gray-700">
             <Users size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
             <span>
-              {capacity != null ? `${attending}/${capacity} attending` : `${attending} attending`}
+              {capacity != null
+                ? isFull
+                  ? `${attending}/${capacity} attending · Full`
+                  : `${attending}/${capacity} attending`
+                : `${attending} attending`}
             </span>
           </div>
         </div>

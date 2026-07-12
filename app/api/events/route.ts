@@ -198,7 +198,17 @@ export async function POST(request: NextRequest) {
       seriesId: body.seriesId || null,
 
       bannerURL: body.bannerURL || body.bannerImageUrl || body.bannerImage || '',
-      maxAttendees: body.maxAttendees || null,
+      bannerImage: body.bannerURL || body.bannerImageUrl || body.bannerImage || '',
+      bannerImageUrl: body.bannerURL || body.bannerImageUrl || body.bannerImage || '',
+      maxAttendees: (() => {
+        const explicit = Number(body.maxAttendees)
+        if (Number.isFinite(explicit) && explicit > 0) return explicit
+        const tickets = Array.isArray(body.ticketTypes) ? body.ticketTypes : []
+        const caps = tickets
+          .map((t: { capacity?: unknown }) => Number(t?.capacity))
+          .filter((n: number) => Number.isFinite(n) && n > 0)
+        return caps.length ? caps.reduce((a: number, b: number) => a + b, 0) : null
+      })(),
       currentAttendees: 0,
 
       totalRevenue: 0,
@@ -320,6 +330,23 @@ export async function PUT(request: NextRequest) {
         ...t,
         requireApproval: false,
       }))
+      if (updates.maxAttendees == null || updates.maxAttendees === '' || Number(updates.maxAttendees) <= 0) {
+        const caps = (updates.ticketTypes as { capacity?: unknown }[])
+          .map((t) => Number(t.capacity))
+          .filter((n) => Number.isFinite(n) && n > 0)
+        if (caps.length) {
+          updates.maxAttendees = caps.reduce((a, b) => a + b, 0)
+        }
+      }
+    }
+
+    if (updates.maxAttendees === '' || updates.maxAttendees === 0) {
+      updates.maxAttendees = null
+    }
+
+    if (typeof updates.bannerURL === 'string') {
+      updates.bannerImage = updates.bannerURL
+      updates.bannerImageUrl = updates.bannerURL
     }
 
     updates.updatedAt = Timestamp.now()

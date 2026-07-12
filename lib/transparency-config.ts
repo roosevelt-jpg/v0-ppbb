@@ -91,7 +91,7 @@ export const DEFAULT_TRANSPARENCY_CONFIG: TransparencyConfig = {
   donateLabel: 'Donate Now',
   donateHref: '/dashboard/donations',
   joinLabel: 'Join Our Community',
-  joinHref: '/signup',
+  joinHref: '/join',
   getInvolvedTitle: 'Get Involved',
   getInvolvedItems: [
     { title: 'Donate', description: 'Support our causes and help those in need' },

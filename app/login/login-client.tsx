@@ -326,7 +326,7 @@ export default function LoginPage() {
 
           <div className="text-center mt-3">
             <span className="text-xs text-neutral-600">New here? </span>
-            <Link href="/signup" className="text-xs font-semibold text-neutral-900 hover:underline">
+            <Link href="/join" className="text-xs font-semibold text-neutral-900 hover:underline">
               Create account
             </Link>
           </div>

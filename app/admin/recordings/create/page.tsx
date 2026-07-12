@@ -58,11 +58,11 @@ export default function CreateRecordingPage() {
       if (thumbnailFile) {
         const fd = new FormData()
         fd.append('file', thumbnailFile)
-        fd.append('path', 'recordings/thumbnail')
+        fd.append('folder', 'recordings/thumbnails')
         const res = await fetch('/api/upload', { method: 'POST', body: fd })
         const json = await res.json()
         if (!json.success) throw new Error(json.error)
-        thumbnailUrl = json.data.url
+        thumbnailUrl = json.url || json.data?.url
       }
 
       const res = await fetch('/api/recordings', {

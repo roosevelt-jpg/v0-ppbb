@@ -351,172 +351,57 @@ export async function getFormStatistics(): Promise<FormStatistics> {
 
 export async function createDefaultForms() {
   try {
-    const defaultForms = [
-      {
-        title: 'Charity Support Request',
-        description: 'Apply for financial support from our charity program',
-        category: 'charity' as const,
-        createdBy: 'system',
-        status: 'active' as const,
-        sections: [
-          {
-            title: 'Personal Information',
-            description: 'Tell us about yourself',
-            fields: [
-              {
-                id: 'fullName',
-                type: 'text' as const,
-                label: 'Full Name',
-                required: true,
-                order: 1,
-              },
-              {
-                id: 'email',
-                type: 'email' as const,
-                label: 'Email Address',
-                required: true,
-                order: 2,
-              },
-              {
-                id: 'phone',
-                type: 'phone' as const,
-                label: 'Phone Number',
-                required: true,
-                order: 3,
-              },
-            ],
-            order: 1,
-          },
-          {
-            title: 'Support Details',
-            description: 'Describe your support needs',
-            fields: [
-              {
-                id: 'requestType',
-                type: 'select' as const,
-                label: 'Type of Support Needed',
-                required: true,
-                options: [
-                  { id: '1', label: 'Financial Assistance', value: 'financial' },
-                  { id: '2', label: 'Medical Support', value: 'medical' },
-                  { id: '3', label: 'Education Support', value: 'education' },
-                  { id: '4', label: 'Emergency Relief', value: 'emergency' },
-                ],
-                order: 1,
-              },
-              {
-                id: 'description',
-                type: 'textarea' as const,
-                label: 'Describe Your Situation',
-                required: true,
-                order: 2,
-              },
-              {
-                id: 'amount',
-                type: 'number' as const,
-                label: 'Amount Needed (AED)',
-                required: false,
-                order: 3,
-              },
-            ],
-            order: 2,
-          },
-        ],
-      },
-      {
-        title: 'Event Registration',
-        description: 'Register for upcoming community events',
-        category: 'event' as const,
-        createdBy: 'system',
-        status: 'active' as const,
-        sections: [
-          {
-            title: 'Attendee Information',
-            fields: [
-              {
-                id: 'name',
-                type: 'text' as const,
-                label: 'Full Name',
-                required: true,
-                order: 1,
-              },
-              {
-                id: 'email',
-                type: 'email' as const,
-                label: 'Email',
-                required: true,
-                order: 2,
-              },
-              {
-                id: 'guests',
-                type: 'number' as const,
-                label: 'Number of Guests',
-                required: false,
-                order: 3,
-              },
-            ],
-            order: 1,
-          },
-        ],
-      },
-      {
-        title: 'Volunteer Application',
-        description: 'Join our volunteer program',
-        category: 'volunteer' as const,
-        createdBy: 'system',
-        status: 'active' as const,
-        sections: [
-          {
-            title: 'Volunteer Details',
-            fields: [
-              {
-                id: 'name',
-                type: 'text' as const,
-                label: 'Full Name',
-                required: true,
-                order: 1,
-              },
-              {
-                id: 'experience',
-                type: 'textarea' as const,
-                label: 'Volunteer Experience',
-                required: false,
-                order: 2,
-              },
-              {
-                id: 'interests',
-                type: 'multiselect' as const,
-                label: 'Areas of Interest',
-                required: true,
-                options: [
-                  { id: '1', label: 'Community Support', value: 'community' },
-                  { id: '2', label: 'Education', value: 'education' },
-                  { id: '3', label: 'Healthcare', value: 'healthcare' },
-                ],
-                order: 3,
-              },
-            ],
-            order: 1,
-          },
-        ],
-      },
-    ]
+    const { PB_FORM_TEMPLATES } = await import('@/lib/pb-forms-seed')
 
-    for (const form of defaultForms) {
+    for (const form of PB_FORM_TEMPLATES) {
       const formRef = collection(db, 'customForms')
-      const existingForm = await getDocs(
-        query(formRef, where('title', '==', form.title))
-      )
+      const existingForm = await getDocs(query(formRef, where('title', '==', form.title)))
+
+      const slug =
+        form.slug ||
+        (await generateUniqueFormSlug(form.title, existingForm.docs[0]?.id))
+
+      const payload = sanitizeForFirestore({
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        sections: form.sections,
+        status: form.status,
+        slug,
+        bannerImageUrl: form.bannerImageUrl || '',
+        updatedAt: new Date(),
+      })
 
       if (existingForm.empty) {
-        const slug = slugifyFormTitle(form.title)
-        await addDoc(formRef, sanitizeForFirestore({
-          ...form,
-          slug,
+        await addDoc(formRef, {
+          ...payload,
+          createdBy: 'system',
           submissionCount: 0,
           createdAt: new Date(),
+        })
+      } else {
+        // Refresh template fields so dropdown/multiselect options stay in sync
+        await updateDoc(existingForm.docs[0].ref, payload)
+      }
+    }
+
+    // Remove / replace legacy short volunteer title if present without the new one
+    const legacyVolunteer = await getDocs(
+      query(collection(db, 'customForms'), where('title', '==', 'Volunteer Application'))
+    )
+    if (!legacyVolunteer.empty) {
+      const hasNew = await getDocs(
+        query(
+          collection(db, 'customForms'),
+          where('title', '==', 'Volunteer with PB (Unpaid Service)')
+        )
+      )
+      if (!hasNew.empty) {
+        // Keep legacy unless empty of submissions — leave as inactive rename
+        await updateDoc(legacyVolunteer.docs[0].ref, {
+          status: 'archived',
           updatedAt: new Date(),
-        }))
+        })
       }
     }
   } catch (error) {

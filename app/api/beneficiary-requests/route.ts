@@ -138,6 +138,11 @@ export async function POST(request: NextRequest) {
     const fullName = String(form.get('fullName') || '').trim()
     const phoneNumber = String(form.get('phoneNumber') || '').trim()
     const email = String(form.get('email') || '').trim()
+    const nationality = String(form.get('nationality') || '').trim()
+    const emirate = String(form.get('emirate') || '').trim()
+    const familySizeRaw = String(form.get('familySize') || '').trim()
+    const supportType = String(form.get('supportType') || '').trim()
+    const amountNeededRaw = String(form.get('amountNeeded') || '').trim()
     const reason = String(form.get('reason') || '').trim()
     const emergencyLevelRaw = String(form.get('emergencyLevel') || '').trim().toLowerCase()
     const referralSource = String(form.get('referralSource') || '').trim()
@@ -156,6 +161,9 @@ export async function POST(request: NextRequest) {
     if (!fullName) errors.push('Full name is required')
     if (!phoneNumber) errors.push('Phone number is required')
     if (!email || !email.includes('@')) errors.push('A valid email is required')
+    if (!nationality) errors.push('Nationality is required')
+    if (!emirate) errors.push('Emirate / area is required')
+    if (!supportType) errors.push('Type of support is required')
     if (!reason) errors.push('Reason for request is required')
     if (!EMERGENCY_LEVELS.has(emergencyLevelRaw)) {
       errors.push('Emergency level must be Low, Medium, High, or Critical')
@@ -236,8 +244,13 @@ export async function POST(request: NextRequest) {
         name: fullName,
         phoneNumber,
         email,
+        nationality,
+        currentEmirateArea: emirate,
+        familySize: familySizeRaw ? Number(familySizeRaw) || null : null,
+        supportType,
+        amountNeeded: amountNeededRaw ? Number(amountNeededRaw) || null : null,
         reason,
-        reasonCategory: 'support',
+        reasonCategory: supportType || 'support',
         emergencyLevel,
         referralSource: referralSource || null,
 

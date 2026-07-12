@@ -15,6 +15,8 @@ type EventHostingFieldsProps = {
   isFeatured: boolean
   cohostEmails: string
   recurrence: EventRecurrence | null
+  /** Event-wide guest / attendance cap (null = unlimited) */
+  maxAttendees?: number | null
   onChange: (patch: {
     ticketTypes?: TicketType[]
     coupons?: EventCoupon[]
@@ -24,6 +26,7 @@ type EventHostingFieldsProps = {
     isFeatured?: boolean
     cohostEmails?: string
     recurrence?: EventRecurrence | null
+    maxAttendees?: number | null
   }) => void
 }
 
@@ -37,6 +40,7 @@ export function EventHostingFields({
   isFeatured,
   cohostEmails,
   recurrence,
+  maxAttendees = null,
   onChange,
 }: EventHostingFieldsProps) {
   const types = ticketTypes.length
@@ -45,7 +49,25 @@ export function EventHostingFields({
 
   const updateType = (index: number, patch: Partial<TicketType>) => {
     const next = types.map((t, i) => (i === index ? { ...t, ...patch } : t))
-    onChange({ ticketTypes: next })
+    // Single ticket type: keep event guest cap in sync with ticket capacity
+    const extra: { ticketTypes: TicketType[]; maxAttendees?: number | null } = {
+      ticketTypes: next,
+    }
+    if (next.length === 1 && 'capacity' in patch) {
+      extra.maxAttendees =
+        typeof patch.capacity === 'number' && patch.capacity > 0 ? patch.capacity : null
+    }
+    onChange(extra)
+  }
+
+  const setGuestCap = (raw: string) => {
+    const cap = raw === '' ? null : Math.max(0, Number(raw) || 0)
+    const nextCap = cap && cap > 0 ? cap : null
+    const nextTypes =
+      types.length === 1
+        ? types.map((t, i) => (i === 0 ? { ...t, capacity: nextCap } : t))
+        : types
+    onChange({ maxAttendees: nextCap, ticketTypes: nextTypes })
   }
 
   const addType = () => {
@@ -67,16 +89,44 @@ export function EventHostingFields({
     onChange({ coupons: next })
   }
 
+  const guestCapValue =
+    typeof maxAttendees === 'number' && maxAttendees > 0
+      ? maxAttendees
+      : types.length === 1 && typeof types[0].capacity === 'number' && types[0].capacity > 0
+        ? types[0].capacity
+        : ''
+
   return (
     <div className="space-y-6 border border-neutral-200 rounded-xl p-4 bg-neutral-50">
       <div>
         <h3 className="font-semibold text-neutral-900">Ticketing & capacity</h3>
         <p className="text-xs text-neutral-500 mt-1">
-          Multiple ticket types, waitlist, approval, coupons, and cohosts.
+          Set a guest cap so listings show how full the event is. Leave blank for unlimited.
+        </p>
+      </div>
+
+      <div className="bg-white border border-neutral-200 rounded-lg p-4 space-y-2">
+        <label className="block text-sm font-medium text-neutral-900">
+          Guest cap (max attendees)
+        </label>
+        <input
+          type="number"
+          min={1}
+          value={guestCapValue}
+          placeholder="e.g. 30 — leave empty for unlimited"
+          onChange={(e) => setGuestCap(e.target.value)}
+          className="w-full max-w-xs border rounded-md px-3 py-2 text-sm"
+        />
+        <p className="text-xs text-neutral-500">
+          Public cards show <strong>0/{guestCapValue || '∞'} attending</strong>. When full,
+          registration stops or waitlist applies if enabled below.
         </p>
       </div>
 
       <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          Ticket types
+        </p>
         {types.map((t, i) => (
           <div key={t.id || i} className="grid sm:grid-cols-5 gap-2 items-end bg-white p-3 rounded-lg border">
             <label className="text-xs sm:col-span-2">
@@ -98,7 +148,7 @@ export function EventHostingFields({
               />
             </label>
             <label className="text-xs">
-              Capacity
+              Ticket cap
               <input
                 type="number"
                 min={0}

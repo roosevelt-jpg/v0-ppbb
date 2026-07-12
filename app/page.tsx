@@ -17,11 +17,18 @@ import { HomeSocialFeeds } from '@/components/homepage/home-social-feeds'
 import { HomeTestimonials } from '@/components/homepage/home-testimonials'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
+import {
+  CharityCase,
+  normalizeCharityCase,
+  progressPercent,
+  truncateAtWord,
+  mergeCharityCaseLists,
+} from '@/lib/charity-cases'
 
 export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
-  const [causes, setCauses] = useState<any[]>([])
+  const [causes, setCauses] = useState<CharityCase[]>([])
   const [sponsors, setSponsors] = useState<any[]>([])
   const [news, setNews] = useState<any[]>([])
 
@@ -29,12 +36,53 @@ export default function HomePage() {
     const unsubscribers: (() => void)[] = []
 
     try {
-      const causesQuery = query(collection(db, 'causes'), where('status', '==', 'active'), limit(3))
+      let fromCases: CharityCase[] = []
+      let fromLegacy: CharityCase[] = []
+      let casesReady = false
+      let legacyReady = false
+
+      const merge = () => {
+        if (!casesReady || !legacyReady) return
+        setCauses(
+          mergeCharityCaseLists(fromCases, fromLegacy)
+            .filter((c) => c.status === 'active')
+            .slice(0, 3)
+        )
+      }
+
       unsubscribers.push(
         onSnapshot(
-          causesQuery,
-          (snapshot) => setCauses(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))),
-          (error) => console.error('Causes listener error:', error)
+          query(collection(db, 'charityCases'), where('status', '==', 'active'), limit(6)),
+          (snapshot) => {
+            fromCases = snapshot.docs.map((d) =>
+              normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'charityCases')
+            )
+            casesReady = true
+            merge()
+          },
+          (error) => {
+            console.error('Causes listener error:', error)
+            casesReady = true
+            merge()
+          }
+        )
+      )
+
+      unsubscribers.push(
+        onSnapshot(
+          query(collection(db, 'causes'), where('status', '==', 'active'), limit(6)),
+          (snapshot) => {
+            fromLegacy = snapshot.docs.map((d) =>
+              normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'causes')
+            )
+            legacyReady = true
+            merge()
+          },
+          (error) => {
+            console.error('Legacy causes listener error:', error)
+            legacyReady = true
+            merge()
+          }
         )
       )
 
@@ -90,21 +138,23 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {causes.map((cause) => {
-                const percentage = (cause.currentAmount / cause.goalAmount) * 100
+                const percentage = progressPercent(cause.amountRaised, cause.targetAmount)
                 return (
                   <div key={cause.id} className="bg-white rounded-lg overflow-hidden border border-[#e4e1da]">
-                    {cause.image && (
-                      <img src={cause.image} alt={cause.title} className="w-full h-32 sm:h-40 object-cover" />
-                    )}
+                    {cause.bannerImage ? (
+                      <img src={cause.bannerImage} alt={cause.title} className="w-full h-32 sm:h-40 object-cover" />
+                    ) : null}
                     <div className="p-3 sm:p-4">
                       <h3 className="font-bold text-base sm:text-lg mb-1">{cause.title}</h3>
-                      <p className="text-xs sm:text-sm text-[#888888] mb-2 line-clamp-2">{cause.description}</p>
+                      <p className="text-xs sm:text-sm text-[#888888] mb-2 line-clamp-2">
+                        {truncateAtWord(cause.description, 120)}
+                      </p>
 
                       <div className="mb-2">
                         <div className="flex justify-between text-xs mb-1">
-                          <span>AED {(cause.currentAmount || 0).toLocaleString()}</span>
+                          <span>AED {cause.amountRaised.toLocaleString()}</span>
                           <span className="text-[#888888]">
-                            of AED {(cause.goalAmount || 0).toLocaleString()}
+                            of AED {cause.targetAmount.toLocaleString()}
                           </span>
                         </div>
                         <div className="w-full bg-[#e4e1da] rounded-full h-1.5">

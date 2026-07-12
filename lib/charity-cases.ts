@@ -29,20 +29,33 @@ export interface CharityCase {
   status: CharityCaseStatus
   partnerId: string
   partnerName?: string
+  /** Which Firestore collection this row was loaded from */
+  sourceCollection?: 'charityCases' | 'causes'
   createdAt?: unknown
   updatedAt?: unknown
 }
 
-export function normalizeCharityCase(id: string, data: Record<string, unknown>): CharityCase {
-  const statusRaw = String(data.status || 'draft')
-  const status = (['draft', 'active', 'completed', 'archived'].includes(statusRaw)
-    ? statusRaw
+export function normalizeCharityCase(
+  id: string,
+  data: Record<string, unknown>,
+  sourceCollection: 'charityCases' | 'causes' = 'charityCases'
+): CharityCase {
+  const statusRaw = String(data.status || 'draft').toLowerCase()
+  // Legacy causes sometimes used published / open
+  const statusNormalized =
+    statusRaw === 'published' || statusRaw === 'open' || statusRaw === 'live'
+      ? 'active'
+      : statusRaw
+  const status = (['draft', 'active', 'completed', 'archived'].includes(statusNormalized)
+    ? statusNormalized
     : 'draft') as CharityCaseStatus
 
   const amountRaised = Number(
-    data.amountRaised ?? data.currentAmount ?? data.collectedAmount ?? 0
+    data.amountRaised ?? data.currentAmount ?? data.collectedAmount ?? data.raised ?? 0
   )
-  const targetAmount = Number(data.targetAmount ?? 0)
+  const targetAmount = Number(
+    data.targetAmount ?? data.goalAmount ?? data.goal ?? data.target ?? 0
+  )
 
   return {
     id,
@@ -51,13 +64,31 @@ export function normalizeCharityCase(id: string, data: Record<string, unknown>):
     description: String(data.description || ''),
     targetAmount: Number.isFinite(targetAmount) ? targetAmount : 0,
     amountRaised: Number.isFinite(amountRaised) ? amountRaised : 0,
-    bannerImage: String(data.bannerImage || data.image || ''),
+    bannerImage: String(
+      data.bannerImage || data.image || data.imageUrl || data.bannerURL || ''
+    ),
     status,
     partnerId: String(data.partnerId || ''),
     partnerName: data.partnerName ? String(data.partnerName) : undefined,
+    sourceCollection,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
+}
+
+/** Merge charityCases + legacy causes; charityCases wins on same id. */
+export function mergeCharityCaseLists(
+  canonical: CharityCase[],
+  legacy: CharityCase[]
+): CharityCase[] {
+  const byId = new Map<string, CharityCase>()
+  for (const c of legacy) byId.set(c.id, c)
+  for (const c of canonical) byId.set(c.id, c)
+  return Array.from(byId.values()).sort((a, b) => {
+    const aMs = (a.createdAt as { toMillis?: () => number })?.toMillis?.() || 0
+    const bMs = (b.createdAt as { toMillis?: () => number })?.toMillis?.() || 0
+    return bMs - aMs
+  })
 }
 
 /** Truncate description at a word boundary. */

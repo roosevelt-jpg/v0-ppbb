@@ -11,9 +11,11 @@ import {
   doc,
   serverTimestamp,
   updateDoc,
+  setDoc,
+  getDocs,
 } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
-import { Upload, HeartHandshake, Archive } from 'lucide-react'
+import { Upload, HeartHandshake, Archive, RefreshCw } from 'lucide-react'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import {
@@ -22,6 +24,7 @@ import {
   normalizeCharityCase,
   progressPercent,
   CharityCaseStatus,
+  mergeCharityCaseLists,
 } from '@/lib/charity-cases'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
@@ -46,29 +49,55 @@ export default function CharityCasesPage() {
   const [partners, setPartners] = React.useState<PartnerOption[]>([])
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
+  const [importing, setImporting] = React.useState(false)
   const [editing, setEditing] = React.useState<CharityCase | null>(null)
   const [bannerFile, setBannerFile] = React.useState<File | null>(null)
   const [editBannerFile, setEditBannerFile] = React.useState<File | null>(null)
   const [form, setForm] = React.useState(emptyForm)
   const [error, setError] = React.useState('')
+  const [filter, setFilter] = React.useState<'all' | 'active' | 'draft' | 'archived'>('all')
 
   React.useEffect(() => {
+    let fromCases: CharityCase[] = []
+    let fromLegacy: CharityCase[] = []
+    let casesReady = false
+    let legacyReady = false
+
+    const merge = () => {
+      if (!casesReady || !legacyReady) return
+      setCases(mergeCharityCaseLists(fromCases, fromLegacy))
+      setLoading(false)
+    }
+
     const unsubCases = onSnapshot(
       collection(db, 'charityCases'),
       (snapshot) => {
-        const data = snapshot.docs
-          .map((d) => normalizeCharityCase(d.id, d.data() as Record<string, unknown>))
-          .sort((a, b) => {
-            const aMs = (a.createdAt as { toMillis?: () => number })?.toMillis?.() || 0
-            const bMs = (b.createdAt as { toMillis?: () => number })?.toMillis?.() || 0
-            return bMs - aMs
-          })
-        setCases(data)
-        setLoading(false)
+        fromCases = snapshot.docs.map((d) =>
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'charityCases')
+        )
+        casesReady = true
+        merge()
       },
       (err) => {
-        console.error('[admin/charity] snapshot error:', err)
-        setLoading(false)
+        console.error('[admin/charity] charityCases error:', err)
+        casesReady = true
+        merge()
+      }
+    )
+
+    const unsubLegacy = onSnapshot(
+      collection(db, 'causes'),
+      (snapshot) => {
+        fromLegacy = snapshot.docs.map((d) =>
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'causes')
+        )
+        legacyReady = true
+        merge()
+      },
+      (err) => {
+        console.error('[admin/charity] causes (legacy) error:', err)
+        legacyReady = true
+        merge()
       }
     )
 
@@ -83,9 +112,61 @@ export default function CharityCasesPage() {
 
     return () => {
       unsubCases()
+      unsubLegacy()
       unsubPartners()
     }
   }, [])
+
+  const collectionFor = (c: CharityCase) =>
+    c.sourceCollection === 'causes' ? 'causes' : 'charityCases'
+
+  const importLegacyCauses = async () => {
+    setImporting(true)
+    setError('')
+    try {
+      const legacySnap = await getDocs(collection(db, 'causes'))
+      let imported = 0
+      for (const d of legacySnap.docs) {
+        const data = d.data() as Record<string, unknown>
+        const normalized = normalizeCharityCase(d.id, data, 'causes')
+        await setDoc(
+          doc(db, 'charityCases', d.id),
+          sanitizeForFirestore({
+            title: normalized.title,
+            description: normalized.description,
+            category: normalized.category,
+            targetAmount: normalized.targetAmount,
+            amountRaised: normalized.amountRaised,
+            bannerImage: normalized.bannerImage,
+            status: normalized.status,
+            partnerId: normalized.partnerId || null,
+            partnerName: normalized.partnerName || null,
+            migratedFrom: 'causes',
+            createdAt: data.createdAt || serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          }),
+          { merge: true }
+        )
+        imported += 1
+      }
+      audit({
+        actionType: 'update',
+        action: `Imported ${imported} legacy cause(s) into charityCases`,
+        entityType: 'beneficiary',
+        status: 'success',
+      })
+      alert(
+        imported
+          ? `Imported ${imported} cause(s) into Charity Cases. You can edit them here.`
+          : 'No legacy causes found to import.'
+      )
+    } catch (err) {
+      console.error(err)
+      setError(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setImporting(false)
+    }
+  }
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -148,12 +229,20 @@ export default function CharityCasesPage() {
       }
 
       await updateDoc(
-        doc(db, 'charityCases', editing.id),
+        doc(db, collectionFor(editing), editing.id),
         sanitizeForFirestore({
           title: editing.title.trim(),
           description: editing.description.trim(),
           category: editing.category,
           targetAmount: Number(editing.targetAmount) || 0,
+          // Keep legacy field names in sync when editing old causes docs
+          ...(collectionFor(editing) === 'causes'
+            ? {
+                goalAmount: Number(editing.targetAmount) || 0,
+                currentAmount: Number(editing.amountRaised) || 0,
+                image: bannerImage,
+              }
+            : {}),
           bannerImage,
           status: editing.status,
           partnerId: editing.partnerId || null,
@@ -180,8 +269,9 @@ export default function CharityCasesPage() {
 
   const setStatus = async (id: string, status: CharityCaseStatus) => {
     const item = cases.find((c) => c.id === id)
+    if (!item) return
     await updateDoc(
-      doc(db, 'charityCases', id),
+      doc(db, collectionFor(item), id),
       sanitizeForFirestore({ status, updatedAt: serverTimestamp() })
     )
     audit({
@@ -197,7 +287,8 @@ export default function CharityCasesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Permanently delete this cause?')) return
     const item = cases.find((c) => c.id === id)
-    await deleteDoc(doc(db, 'charityCases', id))
+    if (!item) return
+    await deleteDoc(doc(db, collectionFor(item), id))
     audit({
       actionType: 'delete',
       action: `Deleted charity cause: ${item?.title || id}`,
@@ -207,6 +298,17 @@ export default function CharityCasesPage() {
       status: 'success',
     })
   }
+
+  const filteredCases = cases.filter((c) => {
+    if (filter === 'all') return true
+    if (filter === 'active') return c.status === 'active'
+    if (filter === 'draft') return c.status === 'draft'
+    if (filter === 'archived') return c.status === 'archived' || c.status === 'completed'
+    return true
+  })
+
+  const activeCount = cases.filter((c) => c.status === 'active').length
+  const legacyCount = cases.filter((c) => c.sourceCollection === 'causes').length
 
   const inputClass =
     'w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-neutral-900'
@@ -325,12 +427,54 @@ export default function CharityCasesPage() {
         </div>
 
         <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
-          <h2
-            className="text-lg mb-4"
-            style={{ fontFamily: 'Cormorant Garamond, serif' }}
-          >
-            All Causes
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+            <div>
+              <h2
+                className="text-lg"
+                style={{ fontFamily: 'Cormorant Garamond, serif' }}
+              >
+                All Causes
+              </h2>
+              <p className="text-sm text-neutral-500 mt-1">
+                {cases.length} total · {activeCount} active
+                {legacyCount > 0 ? ` · ${legacyCount} from legacy list` : ''}
+              </p>
+            </div>
+            {legacyCount > 0 && (
+              <button
+                type="button"
+                disabled={importing}
+                onClick={() => void importLegacyCauses()}
+                className={`${btnSecondary} inline-flex items-center gap-2 disabled:opacity-50`}
+              >
+                <RefreshCw className={`w-4 h-4 ${importing ? 'animate-spin' : ''}`} />
+                {importing ? 'Importing…' : 'Import legacy into Charity Cases'}
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-4">
+            {(['all', 'active', 'draft', 'archived'] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFilter(tab)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium min-h-[40px] ${
+                  filter === tab
+                    ? 'bg-black text-white'
+                    : 'bg-white border border-neutral-300 text-black'
+                }`}
+              >
+                {tab === 'all'
+                  ? 'All'
+                  : tab === 'active'
+                    ? 'Active'
+                    : tab === 'draft'
+                      ? 'Draft'
+                      : 'Archived'}
+              </button>
+            ))}
+          </div>
 
           {loading ? (
             <div className="space-y-3 animate-pulse">
@@ -338,10 +482,12 @@ export default function CharityCasesPage() {
                 <div key={i} className="h-16 bg-neutral-100 rounded" />
               ))}
             </div>
-          ) : cases.length === 0 ? (
+          ) : filteredCases.length === 0 ? (
             <div className="text-center py-12">
               <HeartHandshake className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-              <p className="text-neutral-600 mb-1">No charity cases yet</p>
+              <p className="text-neutral-600 mb-1">
+                {cases.length === 0 ? 'No charity cases yet' : 'No causes in this filter'}
+              </p>
               <p className="text-sm text-neutral-500">
                 Create a cause above and set status to Active to publish on /donate.
               </p>
@@ -350,10 +496,10 @@ export default function CharityCasesPage() {
             <>
               {/* Mobile cards */}
               <div className="md:hidden space-y-4">
-                {cases.map((c) => {
+                {filteredCases.map((c) => {
                   const pct = progressPercent(c.amountRaised, c.targetAmount)
                   return (
-                    <div key={c.id} className="border border-neutral-200 rounded-lg p-4 space-y-3">
+                    <div key={`${c.sourceCollection}-${c.id}`} className="border border-neutral-200 rounded-lg p-4 space-y-3">
                       <div className="flex gap-3">
                         {c.bannerImage ? (
                           <img
@@ -368,6 +514,7 @@ export default function CharityCasesPage() {
                           <p className="font-semibold text-neutral-900 truncate">{c.title}</p>
                           <p className="text-xs text-neutral-500 uppercase tracking-wide">
                             {c.category} · {c.status}
+                            {c.sourceCollection === 'causes' ? ' · legacy' : ''}
                           </p>
                           <p className="text-xs text-neutral-600 mt-1">
                             AED {c.amountRaised.toLocaleString()} / {c.targetAmount.toLocaleString()} (
@@ -421,12 +568,12 @@ export default function CharityCasesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {cases.map((c) => {
+                    {filteredCases.map((c) => {
                       const pct = progressPercent(c.amountRaised, c.targetAmount)
                       const created =
                         (c.createdAt as { toDate?: () => Date })?.toDate?.() || null
                       return (
-                        <tr key={c.id} className="border-b border-neutral-100 align-top">
+                        <tr key={`${c.sourceCollection}-${c.id}`} className="border-b border-neutral-100 align-top">
                           <td className="py-3 pr-3">
                             <div className="flex gap-2 items-center">
                               {c.bannerImage ? (
@@ -436,7 +583,14 @@ export default function CharityCasesPage() {
                                   className="w-10 h-10 object-cover rounded"
                                 />
                               ) : null}
-                              <span className="font-medium">{c.title}</span>
+                              <div>
+                                <span className="font-medium">{c.title}</span>
+                                {c.sourceCollection === 'causes' ? (
+                                  <span className="ml-2 text-[10px] uppercase tracking-wide text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                                    Legacy
+                                  </span>
+                                ) : null}
+                              </div>
                             </div>
                           </td>
                           <td className="py-3 pr-3">{c.category}</td>

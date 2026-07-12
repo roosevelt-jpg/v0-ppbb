@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/lib/firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { Loader2, Eye, EyeOff, MapPin } from 'lucide-react'
+import { Check, Loader2, Eye, EyeOff, MapPin } from 'lucide-react'
 import { SiteLogo } from '@/components/site-logo'
 import { SearchableSelect } from '@/components/searchable-select'
 import { COUNTRY_OPTIONS } from '@/lib/countries'
@@ -15,11 +15,27 @@ import { UAE_EMIRATES, UAE_CITIES_BY_EMIRATE, isUaeCountry } from '@/lib/signup-
 import { getUserLocation } from '@/lib/geolocation'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import type { LocationData } from '@/lib/types'
+import type { PricingPlan } from '@/lib/pricing-types'
+import {
+  formatPlanPriceDetailed,
+  getPlanIncludedItems,
+  inferSignupTypeFromPlan,
+} from '@/lib/pricing-utils'
+import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 
 const STEPS = [
-  { id: 1, label: 'Personal info & account' },
-  { id: 2, label: 'Verify & activate' },
-  { id: 3, label: 'Complete profile' },
+  { id: 1, label: 'Choose membership' },
+  { id: 2, label: 'Personal info & account' },
+  { id: 3, label: 'Verify & activate' },
+  { id: 4, label: 'Complete profile' },
+  { id: 5, label: 'Subscribe to plan' },
+]
+
+const DEFAULT_SIDEBAR_PERKS = [
+  'Support community causes and charities',
+  'Connect with like-minded people',
+  'Volunteer or sponsor opportunities',
+  'Access exclusive member benefits',
 ]
 
 const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
@@ -28,7 +44,6 @@ const COUNTRY_SELECT_OPTIONS = COUNTRY_OPTIONS.map((c) => ({ value: c.name, labe
 const NATIONALITY_OPTIONS = COUNTRY_OPTIONS.map((c) => ({ value: c.name, label: c.name }))
 
 export default function SignupClient() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
@@ -39,6 +54,7 @@ export default function SignupClient() {
 
   const [formData, setFormData] = useState({
     memberType: searchParams.get('type') === 'business' ? 'business' : 'member',
+    planId: searchParams.get('plan') || '',
     firstName: '',
     lastName: '',
     email: '',
@@ -68,13 +84,95 @@ export default function SignupClient() {
     businessDescription: '',
   })
 
+  const [planName, setPlanName] = useState('')
+  const [plans, setPlans] = useState<PricingPlan[]>([])
+  const [plansLoading, setPlansLoading] = useState(true)
+  const [createdUserId, setCreatedUserId] = useState<string | null>(null)
+  const [checkingOut, setCheckingOut] = useState(false)
+
+  useEffect(() => {
+    const q = query(collection(db, 'pricingPlans'), where('active', '==', true))
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const list = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as PricingPlan))
+          .sort((a, b) => (a.order || 0) - (b.order || 0))
+        setPlans(list)
+        setPlansLoading(false)
+      },
+      () => setPlansLoading(false)
+    )
+    return () => unsub()
+  }, [])
+
   useEffect(() => {
     if (searchParams.get('type') === 'business') {
       setFormData((prev) =>
         prev.memberType === 'business' ? prev : { ...prev, memberType: 'business' }
       )
     }
+    const planId = searchParams.get('plan') || ''
+    if (planId) {
+      setFormData((prev) => (prev.planId === planId ? prev : { ...prev, planId }))
+      setCurrentStep((s) => (s === 1 ? 2 : s))
+    }
   }, [searchParams])
+
+  useEffect(() => {
+    const planId = formData.planId || searchParams.get('plan')
+    if (!planId) {
+      setPlanName('')
+      return
+    }
+    const fromList = plans.find((p) => p.id === planId)
+    if (fromList) {
+      setPlanName(fromList.name)
+      const nextType = inferSignupTypeFromPlan(fromList)
+      setFormData((prev) =>
+        prev.planId === planId && prev.memberType === nextType
+          ? prev
+          : { ...prev, planId, memberType: nextType }
+      )
+      return
+    }
+    getDoc(doc(db, 'pricingPlans', planId))
+      .then((snap) => {
+        if (!snap.exists()) return
+        const data = snap.data() as PricingPlan
+        setPlanName(String(data?.name || ''))
+        const nextType = inferSignupTypeFromPlan(data)
+        setFormData((prev) =>
+          prev.planId === planId && prev.memberType === nextType
+            ? prev
+            : { ...prev, planId, memberType: nextType }
+        )
+      })
+      .catch(() => {})
+  }, [formData.planId, plans, searchParams])
+
+  const selectedPlan = useMemo(
+    () => plans.find((p) => p.id === formData.planId) || null,
+    [plans, formData.planId]
+  )
+
+  const sidebarPerks = useMemo(() => {
+    if (selectedPlan) {
+      const items = getPlanIncludedItems(selectedPlan)
+      if (items.length) return items
+    }
+    return DEFAULT_SIDEBAR_PERKS
+  }, [selectedPlan])
+
+  const selectPlan = (plan: PricingPlan) => {
+    setFormData((prev) => ({
+      ...prev,
+      planId: plan.id,
+      memberType: inferSignupTypeFromPlan(plan),
+    }))
+    setPlanName(plan.name)
+    setError('')
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as any
@@ -136,8 +234,16 @@ export default function SignupClient() {
 
   const validateStep = async (step: number): Promise<boolean> => {
     setError('')
-    
+
     if (step === 1) {
+      if (!formData.planId) {
+        setError('Please choose a membership package to continue')
+        return false
+      }
+      return true
+    }
+    
+    if (step === 2) {
       if (!formData.firstName.trim()) {
         setError('First name is required')
         return false
@@ -196,7 +302,7 @@ export default function SignupClient() {
       }
     }
 
-    if (step === 2) {
+    if (step === 3) {
       if (!formData.phone.trim()) {
         setError('Phone number is required')
         return false
@@ -226,7 +332,7 @@ export default function SignupClient() {
       }
     }
 
-    if (step === 3 && formData.memberType === 'business') {
+    if (step === 4 && formData.memberType === 'business') {
       if (!formData.businessName.trim()) {
         setError('Business name is required')
         return false
@@ -237,6 +343,13 @@ export default function SignupClient() {
       }
       if (!formData.businessLocation.trim()) {
         setError('Business location is required')
+        return false
+      }
+    }
+
+    if (step === 5) {
+      if (!formData.planId) {
+        setError('Please select a membership tier to subscribe')
         return false
       }
     }
@@ -252,9 +365,53 @@ export default function SignupClient() {
     }
   }
 
+  const handleSubscribe = async () => {
+    if (!(await validateStep(5))) return
+    const userId = createdUserId || auth.currentUser?.uid
+    if (!userId || !formData.planId) {
+      setError('Account or plan missing. Please go back and complete signup.')
+      return
+    }
+    setCheckingOut(true)
+    setError('')
+    try {
+      const plan = selectedPlan || plans.find((p) => p.id === formData.planId)
+      const gateway = (plan?.paymentGateway as 'stripe' | 'paypal' | 'ziina') || 'stripe'
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: formData.planId,
+          userId,
+          gateway,
+          referralCode: getReferralCodeFromDocument(),
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.checkoutUrl) {
+        throw new Error(data.error || 'Checkout failed')
+      }
+      window.location.href = data.checkoutUrl
+    } catch (err) {
+      console.error('[signup] checkout:', err)
+      setError(err instanceof Error ? err.message : 'Failed to start checkout')
+      setCheckingOut(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (currentStep === 5) {
+      await handleSubscribe()
+      return
+    }
+    if (currentStep !== 4) return
     if (!(await validateStep(currentStep))) return
+
+    if (createdUserId || auth.currentUser) {
+      setCurrentStep(5)
+      return
+    }
 
     setIsLoading(true)
     setError('')
@@ -320,7 +477,8 @@ export default function SignupClient() {
         profileComplete: true,
         status: 'active',
         active: true,
-        membershipTier: 'standard',
+        membershipTier: formData.planId || planName || 'standard',
+        membershipPlanId: formData.planId || null,
         volunteeredHours: 0,
         volunteerHours: 0,
         totalDonated: 0,
@@ -387,9 +545,9 @@ export default function SignupClient() {
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)
 
-      // Redirect to success page — user can sign in from there
+      setCreatedUserId(firebaseUser.uid)
       setError('')
-      router.push('/signup/success')
+      setCurrentStep(5)
     } catch (err: any) {
       console.error('[v0] Signup error:', err)
       if (err.code === 'auth/email-already-in-use') {
@@ -446,18 +604,111 @@ export default function SignupClient() {
               <div style={{ marginBottom: '1rem' }}>
                 {currentStep === 1 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.25rem' }}>
+                      Choose your membership
+                    </h2>
+                    <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>
+                      Membership is paid — pick a package first. You&apos;ll create your account next, then subscribe at the end.
+                    </p>
+                    {plansLoading ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', padding: '1.5rem 0' }}>
+                        <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                        Loading packages…
+                      </div>
+                    ) : plans.length === 0 ? (
+                      <p style={{ fontSize: '0.875rem', color: '#991b1b' }}>
+                        No membership packages are available right now. Please check back soon.
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {plans.map((plan) => {
+                          const items = getPlanIncludedItems(plan).slice(0, 4)
+                          const { amount, period } = formatPlanPriceDetailed(plan)
+                          const selected = formData.planId === plan.id
+                          return (
+                            <button
+                              key={plan.id}
+                              type="button"
+                              onClick={() => selectPlan(plan)}
+                              style={{
+                                textAlign: 'left',
+                                padding: '1rem',
+                                border: `2px solid ${selected ? '#111111' : '#e4e1da'}`,
+                                borderRadius: '0.75rem',
+                                backgroundColor: selected ? '#f7f6f2' : '#fff',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                                  {plan.icon ? <span style={{ fontSize: '1.5rem' }}>{plan.icon}</span> : null}
+                                  <div>
+                                    <p style={{ fontWeight: 700, color: '#111', fontSize: '1rem' }}>{plan.name}</p>
+                                    {plan.description ? (
+                                      <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', lineHeight: 1.4 }}>
+                                        {plan.description.length > 120
+                                          ? `${plan.description.slice(0, 120)}…`
+                                          : plan.description}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                </div>
+                                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                  <p style={{ fontWeight: 700, fontSize: '1rem', color: '#111' }}>{amount}</p>
+                                  <p style={{ fontSize: '0.7rem', color: '#888' }}>/{period}</p>
+                                </div>
+                              </div>
+                              {items.length > 0 && (
+                                <ul style={{ marginTop: '0.75rem', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                  {items.map((item) => (
+                                    <li key={item} style={{ fontSize: '0.75rem', color: '#555', display: 'flex', gap: '0.35rem' }}>
+                                      <Check size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                                      {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                              {selected && (
+                                <p style={{ marginTop: '0.75rem', fontSize: '0.7rem', fontWeight: 700, color: '#111' }}>
+                                  Selected ✓
+                                </p>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {currentStep === 2 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Create your account</h2>
+
+                    {formData.planId && (
+                      <div style={{ padding: '0.75rem 1rem', backgroundColor: '#f7f6f2', border: '1.5px solid #111111', borderRadius: '0.5rem', marginBottom: '0.25rem' }}>
+                        <p style={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', color: '#666', marginBottom: '0.25rem' }}>Selected package</p>
+                        <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#111111' }}>{planName || 'Membership plan'}</p>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(1)}
+                          style={{ fontSize: '0.75rem', color: '#666', textDecoration: 'underline', marginTop: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                        >
+                          Change package
+                        </button>
+                      </div>
+                    )}
                     
                     {/* User Type */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>I want to join as</label>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Joining as</label>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                         {[
                           { value: 'member', label: 'Member', desc: 'Join our community & participate in activities' },
                           { value: 'business', label: 'Business', desc: 'Company partnerships & corporate engagement' },
                         ].map(option => (
-                          <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff' }}>
-                            <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }} />
+                          <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'default', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff', opacity: formData.memberType !== option.value ? 0.45 : 1 }}>
+                            <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} disabled style={{ width: '16px', height: '16px', flexShrink: 0 }} />
                             <div style={{ marginLeft: '0.625rem', flex: 1 }}>
                               <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111111' }}>{option.label}</p>
                               <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.125rem' }}>{option.desc}</p>
@@ -465,6 +716,7 @@ export default function SignupClient() {
                           </label>
                         ))}
                       </div>
+                      <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.35rem' }}>Set by your membership package</p>
                     </div>
 
                     {/* Name Fields */}
@@ -566,7 +818,7 @@ export default function SignupClient() {
                   </div>
                 )}
 
-                {currentStep === 2 && (
+                {currentStep === 3 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Location & profile</h2>
 
@@ -729,19 +981,23 @@ export default function SignupClient() {
                   </div>
                 )}
 
-                {currentStep === 3 && formData.memberType === 'member' && (
+                {currentStep === 4 && formData.memberType === 'member' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>All set!</h2>
-                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>Your member account has been created successfully. Complete your signup to access your dashboard.</p>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Almost there</h2>
+                    <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>
+                      Create your account next, then choose your tier and subscribe to activate membership.
+                    </p>
                     
-                    <div style={{ padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem', border: '1px solid #bbf7d0' }}>
-                      <p style={{ fontSize: '0.875rem', color: '#166534', fontWeight: 600 }}>Welcome to Passive Blessings!</p>
-                      <p style={{ fontSize: '0.875rem', color: '#166534', marginTop: '0.5rem' }}>You can become a volunteer or sponsor by filling out forms from your member dashboard.</p>
+                    <div style={{ padding: '1rem', backgroundColor: '#f7f6f2', borderRadius: '0.5rem', border: '1px solid #e4e1da' }}>
+                      <p style={{ fontSize: '0.875rem', color: '#111', fontWeight: 600 }}>Selected: {planName || 'Membership'}</p>
+                      <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
+                        Payment happens on the next step after your account is created.
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {currentStep === 3 && formData.memberType === 'business' && (
+                {currentStep === 4 && formData.memberType === 'business' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Business profile</h2>
                     <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '1rem' }}>Complete your business information to activate your business account.</p>
@@ -817,6 +1073,52 @@ export default function SignupClient() {
                     </div>
                   </div>
                 )}
+
+                {currentStep === 5 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.25rem' }}>
+                      Select your tier & subscribe
+                    </h2>
+                    <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>
+                      Your account is ready. Confirm a membership tier and complete payment to activate access.
+                    </p>
+                    {plans.map((plan) => {
+                      const { amount, period } = formatPlanPriceDetailed(plan)
+                      const selected = formData.planId === plan.id
+                      return (
+                        <button
+                          key={plan.id}
+                          type="button"
+                          onClick={() => selectPlan(plan)}
+                          style={{
+                            textAlign: 'left',
+                            padding: '1rem',
+                            border: `2px solid ${selected ? '#111111' : '#e4e1da'}`,
+                            borderRadius: '0.75rem',
+                            backgroundColor: selected ? '#f7f6f2' : '#fff',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
+                            <div>
+                              <p style={{ fontWeight: 700, color: '#111' }}>
+                                {plan.icon ? `${plan.icon} ` : ''}
+                                {plan.name}
+                              </p>
+                              <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>
+                                {getPlanIncludedItems(plan).slice(0, 3).join(' · ') || plan.description || ''}
+                              </p>
+                            </div>
+                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                              <p style={{ fontWeight: 700 }}>{amount}</p>
+                              <p style={{ fontSize: '0.7rem', color: '#888' }}>/{period}</p>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Navigation Buttons */}
@@ -824,7 +1126,7 @@ export default function SignupClient() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                  disabled={currentStep === 1 || isLoading}
+                  disabled={currentStep === 1 || currentStep === 5 || isLoading || checkingOut}
                   style={{
                     flex: 1,
                     padding: '0.75rem',
@@ -836,13 +1138,13 @@ export default function SignupClient() {
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.2s',
-                    opacity: currentStep === 1 || isLoading ? 0.5 : 1,
+                    opacity: currentStep === 1 || currentStep === 5 || isLoading || checkingOut ? 0.5 : 1,
                   }}
                 >
                   Back
                 </button>
 
-                {currentStep < STEPS.length ? (
+                {currentStep < 4 ? (
                   <button
                     type="button"
                     onClick={() => handleStepChange(currentStep + 1)}
@@ -867,7 +1169,7 @@ export default function SignupClient() {
                     {isLoading && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
                     Next
                   </button>
-                ) : (
+                ) : currentStep === 4 ? (
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -894,7 +1196,38 @@ export default function SignupClient() {
                         Creating account...
                       </>
                     ) : (
-                      'Create Account'
+                      'Create account'
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubscribe}
+                    disabled={checkingOut || !formData.planId}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      border: 'none',
+                      backgroundColor: '#111111',
+                      color: '#ffffff',
+                      borderRadius: '0.375rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      opacity: checkingOut || !formData.planId ? 0.7 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    {checkingOut ? (
+                      <>
+                        <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        Redirecting to payment…
+                      </>
+                    ) : (
+                      'Subscribe & pay'
                     )}
                   </button>
                 )}
@@ -907,17 +1240,26 @@ export default function SignupClient() {
           </div>
         </div>
 
-        {/* Right Info Column */}
+        {/* Right Info Column — matches selected package */}
         <div className="hidden lg:flex lg:flex-col lg:justify-center lg:w-[380px] flex-shrink-0 bg-[#f7f6f2] p-8">
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#111111' }}>Why join Passive Blessings?</h3>
+          <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#111111' }}>
+            {selectedPlan ? selectedPlan.name : 'Why join Passive Blessings?'}
+          </h3>
+          {selectedPlan ? (
+            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.25rem' }}>
+              {(() => {
+                const { amount, period } = formatPlanPriceDetailed(selectedPlan)
+                return `${amount} per ${period}`
+              })()}
+            </p>
+          ) : (
+            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.25rem' }}>
+              Choose a membership package to see what&apos;s included.
+            </p>
+          )}
           <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {[
-              'Support community causes and charities',
-              'Connect with like-minded people',
-              'Volunteer or sponsor opportunities',
-              'Access exclusive member benefits',
-            ].map((item, i) => (
-              <li key={i} style={{ display: 'flex', gap: '0.75rem', fontSize: '0.875rem', color: '#666' }}>
+            {sidebarPerks.map((item, i) => (
+              <li key={`${i}-${item}`} style={{ display: 'flex', gap: '0.75rem', fontSize: '0.875rem', color: '#666' }}>
                 <span style={{ fontWeight: 'bold', color: '#111111' }}>✓</span>
                 {item}
               </li>

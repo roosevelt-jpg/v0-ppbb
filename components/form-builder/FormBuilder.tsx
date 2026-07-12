@@ -84,6 +84,11 @@ export default function FormBuilder({
   }
 
   const addFieldToSection = (sectionId: string, fieldType: FormFieldType) => {
+    const needsOptions =
+      fieldType === 'select' ||
+      fieldType === 'multiselect' ||
+      fieldType === 'radio' ||
+      fieldType === 'checkbox'
     const updatedSections = currentForm.sections.map(section => {
       if (section.id === sectionId) {
         const newField: FormField = {
@@ -92,6 +97,14 @@ export default function FormBuilder({
           label: 'New Field',
           required: false,
           order: section.fields.length + 1,
+          ...(needsOptions
+            ? {
+                options: [
+                  { id: `opt-${Date.now()}-1`, label: 'Option 1', value: 'option-1' },
+                  { id: `opt-${Date.now()}-2`, label: 'Option 2', value: 'option-2' },
+                ],
+              }
+            : {}),
         }
         return {
           ...section,
@@ -116,6 +129,50 @@ export default function FormBuilder({
       return section
     })
     setCurrentForm({ ...currentForm, sections: updatedSections })
+  }
+
+  const addOption = (sectionId: string, fieldId: string) => {
+    const section = currentForm.sections.find((s) => s.id === sectionId)
+    const field = section?.fields.find((f) => f.id === fieldId)
+    if (!field) return
+    const n = (field.options?.length || 0) + 1
+    const id = `opt-${Date.now()}-${n}`
+    updateField(sectionId, fieldId, {
+      options: [
+        ...(field.options || []),
+        { id, label: `Option ${n}`, value: `option-${n}` },
+      ],
+    })
+  }
+
+  const updateOption = (
+    sectionId: string,
+    fieldId: string,
+    optionId: string,
+    label: string
+  ) => {
+    const section = currentForm.sections.find((s) => s.id === sectionId)
+    const field = section?.fields.find((f) => f.id === fieldId)
+    if (!field) return
+    const value = label
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || optionId
+    updateField(sectionId, fieldId, {
+      options: (field.options || []).map((opt) =>
+        opt.id === optionId ? { ...opt, label, value } : opt
+      ),
+    })
+  }
+
+  const removeOption = (sectionId: string, fieldId: string, optionId: string) => {
+    const section = currentForm.sections.find((s) => s.id === sectionId)
+    const field = section?.fields.find((f) => f.id === fieldId)
+    if (!field) return
+    updateField(sectionId, fieldId, {
+      options: (field.options || []).filter((opt) => opt.id !== optionId),
+    })
   }
 
   const deleteField = (sectionId: string, fieldId: string) => {
@@ -337,17 +394,46 @@ export default function FormBuilder({
                         </div>
                       </div>
 
-                      {/* Field Options */}
+                      {/* Field Options — editable for dropdown / multi / radio / checkbox */}
                       {(field.type === 'select' ||
                         field.type === 'multiselect' ||
                         field.type === 'radio' ||
                         field.type === 'checkbox') && (
-                        <div className="mt-2 pt-2 border-t space-y-1">
+                        <div className="mt-3 pt-3 border-t space-y-2" onClick={(e) => e.stopPropagation()}>
+                          <p className="text-xs font-semibold text-neutral-700">
+                            Choices
+                            {field.type === 'multiselect' ? ' (multi-select)' : ''}
+                          </p>
                           {(field.options || []).map((opt, idx) => (
-                            <div key={opt.id} className="text-xs">
-                              {opt.label}
+                            <div key={opt.id} className="flex items-center gap-2">
+                              <span className="text-xs text-neutral-400 w-5 shrink-0">{idx + 1}.</span>
+                              <Input
+                                value={opt.label}
+                                onChange={(e) =>
+                                  updateOption(section.id, field.id, opt.id, e.target.value)
+                                }
+                                placeholder={`Option ${idx + 1}`}
+                                className="text-sm flex-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeOption(section.id, field.id, opt.id)}
+                                className={BUTTON_ICON_DANGER}
+                                title="Remove option"
+                                disabled={(field.options || []).length <= 1}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
                             </div>
                           ))}
+                          <button
+                            type="button"
+                            onClick={() => addOption(section.id, field.id)}
+                            className={`${BUTTON_SECONDARY} text-xs py-1.5 px-3 inline-flex items-center gap-1`}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Add option
+                          </button>
                         </div>
                       )}
 

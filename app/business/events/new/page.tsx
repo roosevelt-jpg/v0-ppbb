@@ -941,7 +941,23 @@ function BusinessEventForm() {
             isFeatured={formData.isFeatured}
             cohostEmails={formData.cohostEmails}
             recurrence={formData.recurrence}
-            onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
+            maxAttendees={
+              formData.maxAttendees === '' || formData.maxAttendees == null
+                ? null
+                : Number(formData.maxAttendees) || null
+            }
+            onChange={(patch) =>
+              setFormData((prev) => ({
+                ...prev,
+                ...patch,
+                ...(patch.maxAttendees !== undefined
+                  ? {
+                      maxAttendees:
+                        patch.maxAttendees == null ? '' : String(patch.maxAttendees),
+                    }
+                  : {}),
+              }))
+            }
           />
 
           <div

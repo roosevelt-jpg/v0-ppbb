@@ -9,32 +9,66 @@ import {
   normalizeCharityCase,
   progressPercent,
   truncateAtWord,
+  mergeCharityCaseLists,
 } from '@/lib/charity-cases'
 import { ArrowRight, Heart, HandHeart } from 'lucide-react'
 
 /**
- * Part 10A — Active charity causes for members (charityCases status == active).
- * Donate Now continues the Part 7A /donate flow.
+ * Part 10A — Active charity causes for members.
+ * Merges charityCases + legacy causes so older posts still appear.
  */
 export default function MemberCharityCausesPage() {
   const [causes, setCauses] = useState<CharityCase[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const q = query(collection(db, 'charityCases'), where('status', '==', 'active'))
-    const unsub = onSnapshot(
-      q,
+    let fromCases: CharityCase[] = []
+    let fromLegacy: CharityCase[] = []
+    let casesReady = false
+    let legacyReady = false
+
+    const merge = () => {
+      if (!casesReady || !legacyReady) return
+      setCauses(
+        mergeCharityCaseLists(fromCases, fromLegacy).filter((c) => c.status === 'active')
+      )
+      setLoading(false)
+    }
+
+    const unsubCases = onSnapshot(
+      query(collection(db, 'charityCases'), where('status', '==', 'active')),
       (snap) => {
-        setCauses(
-          snap.docs.map((d) =>
-            normalizeCharityCase(d.id, d.data() as Record<string, unknown>)
-          )
+        fromCases = snap.docs.map((d) =>
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'charityCases')
         )
-        setLoading(false)
+        casesReady = true
+        merge()
       },
-      () => setLoading(false)
+      () => {
+        casesReady = true
+        merge()
+      }
     )
-    return () => unsub()
+
+    const unsubLegacy = onSnapshot(
+      query(collection(db, 'causes'), where('status', '==', 'active')),
+      (snap) => {
+        fromLegacy = snap.docs.map((d) =>
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'causes')
+        )
+        legacyReady = true
+        merge()
+      },
+      () => {
+        legacyReady = true
+        merge()
+      }
+    )
+
+    return () => {
+      unsubCases()
+      unsubLegacy()
+    }
   }, [])
 
   return (

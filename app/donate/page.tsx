@@ -17,6 +17,7 @@ import {
   normalizeCharityCase,
   truncateAtWord,
   progressPercent,
+  mergeCharityCaseLists,
 } from '@/lib/charity-cases'
 
 interface CharityPartner {
@@ -69,10 +70,7 @@ export default function DonationPage() {
 
     const mergeAndSet = () => {
       if (!casesSnapDone || !legacySnapDone) return
-      const byId = new Map<string, CharityCase>()
-      for (const c of fromLegacy) byId.set(c.id, c)
-      for (const c of fromCases) byId.set(c.id, c) // charityCases wins on id collision
-      setCauses(Array.from(byId.values()))
+      setCauses(mergeCharityCaseLists(fromCases, fromLegacy))
       causesLoaded = true
       checkDone()
     }
@@ -81,7 +79,7 @@ export default function DonationPage() {
       query(collection(db, 'charityCases'), where('status', '==', 'active')),
       (snapshot) => {
         fromCases = snapshot.docs.map((d) =>
-          normalizeCharityCase(d.id, d.data() as Record<string, unknown>)
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'charityCases')
         )
         casesSnapDone = true
         mergeAndSet()
@@ -97,7 +95,7 @@ export default function DonationPage() {
       query(collection(db, 'causes'), where('status', '==', 'active')),
       (snapshot) => {
         fromLegacy = snapshot.docs.map((d) =>
-          normalizeCharityCase(d.id, d.data() as Record<string, unknown>)
+          normalizeCharityCase(d.id, d.data() as Record<string, unknown>, 'causes')
         )
         legacySnapDone = true
         mergeAndSet()

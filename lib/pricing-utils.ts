@@ -76,3 +76,34 @@ export function countMembersForPlan(
 export function getPlanDisplayLabel(plan: PricingPlan): string {
   return plan.name
 }
+
+/** Infer signup role from plan name (Individual → member, Business → business). */
+export function inferSignupTypeFromPlan(
+  plan: Pick<PricingPlan, 'name'>
+): 'member' | 'business' {
+  const name = String(plan.name || '').toLowerCase()
+  if (
+    name.includes('business') ||
+    name.includes('partner') ||
+    name.includes('corporate') ||
+    name.includes('company')
+  ) {
+    return 'business'
+  }
+  return 'member'
+}
+
+export function formatPlanPriceDetailed(
+  plan: Pick<PricingPlan, 'price' | 'currency' | 'billingPeriod'>
+): { amount: string; period: string } {
+  const amount = (Number(plan.price) || 0) / 100
+  const currency = String(plan.currency || 'AED').toUpperCase()
+  const period = plan.billingPeriod === 'yearly' ? 'yearly' : 'monthly'
+  return {
+    amount: `${currency} ${amount.toLocaleString(undefined, {
+      minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: 2,
+    })}`,
+    period,
+  }
+}

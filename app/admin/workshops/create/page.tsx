@@ -59,11 +59,11 @@ export default function CreateWorkshopPage() {
       if (imageFile) {
         const fd = new FormData()
         fd.append('file', imageFile)
-        fd.append('path', 'workshops/banner')
+        fd.append('folder', 'workshops/banners')
         const res = await fetch('/api/upload', { method: 'POST', body: fd })
         const json = await res.json()
         if (!json.success) throw new Error(json.error)
-        imageUrl = json.data.url
+        imageUrl = json.url || json.data?.url
       }
 
       const res = await fetch('/api/workshops', {

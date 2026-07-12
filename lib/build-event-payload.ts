@@ -108,6 +108,17 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     ? ticketTypes[0]?.price ?? form.price
     : 0
 
+  const resolveMaxAttendees = (): number | null => {
+    if (typeof form.maxAttendees === 'number' && form.maxAttendees > 0) {
+      return form.maxAttendees
+    }
+    const caps = ticketTypes
+      .map((t) => t.capacity)
+      .filter((c): c is number => typeof c === 'number' && c > 0)
+    if (caps.length === 0) return null
+    return caps.reduce((sum, c) => sum + c, 0)
+  }
+
   return {
     title: form.title.trim(),
     description: form.description.trim(),
@@ -131,7 +142,10 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     revenueModel: form.isPaid ? 'pb_full' : null,
     paymentGateway: form.isPaid ? form.paymentGateway || 'stripe' : null,
     bannerURL: form.bannerURL || '',
-    maxAttendees: form.maxAttendees ?? null,
+    // Keep legacy aliases in sync so older readers don't keep a stale charity/shared banner
+    bannerImage: form.bannerURL || '',
+    bannerImageUrl: form.bannerURL || '',
+    maxAttendees: resolveMaxAttendees(),
     status: form.status as EventStatus,
     createdBy: form.createdBy || 'admin',
     createdByRole: form.createdByRole || 'admin',
@@ -219,6 +233,7 @@ export function mapEventDocToAdminForm(
     locationLng: typeof data.locationLng === 'number' ? data.locationLng : 0,
     bannerURL:
       (typeof data.bannerURL === 'string' && data.bannerURL) ||
+      (typeof data.bannerImage === 'string' && data.bannerImage) ||
       (typeof data.bannerImageUrl === 'string' && data.bannerImageUrl) ||
       '',
     isPaid,

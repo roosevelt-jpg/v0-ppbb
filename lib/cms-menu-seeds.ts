@@ -21,8 +21,8 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
   { slug: 'nav-charity-request', title: 'Charity Support Request', menuLabel: 'Charity Support Request', menuLocation: 'footer-quicklinks', menuOrder: 7, showInMenu: true, status: 'published', externalHref: '/dashboard/charity-requests?apply=1', content: '' },
   { slug: 'nav-faq', title: 'FAQ', menuLabel: 'FAQ', menuLocation: 'footer-quicklinks', menuOrder: 8, showInMenu: true, status: 'published', externalHref: '/faq', content: '' },
   // Footer — Get Involved
-  { slug: 'nav-join', title: 'Join Community', menuLabel: 'Join Community', menuLocation: 'footer-getinvolved', menuOrder: 0, showInMenu: true, status: 'published', externalHref: '/signup', content: '' },
-  { slug: 'nav-volunteer', title: 'Volunteer', menuLabel: 'Volunteer', menuLocation: 'footer-getinvolved', menuOrder: 1, showInMenu: true, status: 'published', externalHref: '/signup', content: '' },
+  { slug: 'nav-join', title: 'Join Community', menuLabel: 'Join Community', menuLocation: 'footer-getinvolved', menuOrder: 0, showInMenu: true, status: 'published', externalHref: '/join', content: '' },
+  { slug: 'nav-volunteer', title: 'Volunteer', menuLabel: 'Volunteer', menuLocation: 'footer-getinvolved', menuOrder: 1, showInMenu: true, status: 'published', externalHref: '/join', content: '' },
   { slug: 'nav-workshops', title: 'Workshops', menuLabel: 'Workshops', menuLocation: 'footer-getinvolved', menuOrder: 2, showInMenu: true, status: 'published', externalHref: '/workshops', content: '' },
   { slug: 'nav-recordings', title: 'Recordings', menuLabel: 'Recordings', menuLocation: 'footer-getinvolved', menuOrder: 3, showInMenu: true, status: 'published', externalHref: '/recordings', content: '' },
   { slug: 'nav-donate', title: 'Donate', menuLabel: 'Donate', menuLocation: 'footer-getinvolved', menuOrder: 4, showInMenu: true, status: 'published', externalHref: '/donate', content: '' },

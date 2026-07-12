@@ -196,7 +196,8 @@ function CreateEventForm() {
     try {
       const fd = new FormData()
       fd.append('file', imageFile)
-      fd.append('path', 'events/banner')
+      // Unique object per upload — a fixed path reused the same URL + year-long CDN cache
+      fd.append('folder', 'events/banners')
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Upload failed')
@@ -622,6 +623,7 @@ function CreateEventForm() {
             isFeatured={formData.isFeatured}
             cohostEmails={formData.cohostEmails}
             recurrence={formData.recurrence}
+            maxAttendees={formData.maxAttendees ?? null}
             onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
           />
 
