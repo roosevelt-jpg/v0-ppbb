@@ -78,7 +78,7 @@ export function EventHostingFields({
 
       <div className="space-y-3">
         {types.map((t, i) => (
-          <div key={t.id || i} className="grid sm:grid-cols-6 gap-2 items-end bg-white p-3 rounded-lg border">
+          <div key={t.id || i} className="grid sm:grid-cols-5 gap-2 items-end bg-white p-3 rounded-lg border">
             <label className="text-xs sm:col-span-2">
               Name
               <input
@@ -112,14 +112,6 @@ export function EventHostingFields({
                 className="mt-1 w-full border rounded-md px-2 py-1.5 text-sm"
               />
             </label>
-            <label className="text-xs flex items-center gap-2 mt-5">
-              <input
-                type="checkbox"
-                checked={Boolean(t.requireApproval)}
-                onChange={(e) => updateType(i, { requireApproval: e.target.checked })}
-              />
-              Approve
-            </label>
             <button
               type="button"
               onClick={() => removeType(i)}
@@ -140,13 +132,19 @@ export function EventHostingFields({
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">
-        <label className="text-sm flex items-center gap-2">
+        <label className="text-sm flex items-start gap-2">
           <input
             type="checkbox"
+            className="mt-1"
             checked={requireApproval}
             onChange={(e) => onChange({ requireApproval: e.target.checked })}
           />
-          Require host approval for all registrations
+          <span>
+            Require host approval for all registrations
+            <span className="block text-xs text-neutral-500 mt-0.5">
+              When off, guests are confirmed immediately. When on, review them under Attendees.
+            </span>
+          </span>
         </label>
         <label className="text-sm flex items-center gap-2">
           <input

@@ -321,6 +321,7 @@ export async function promoteNextWaitlisted(eventId: string): Promise<string | n
     .get()
   if (snap.empty) return null
   const doc = snap.docs[0]
+  const data = doc.data()
   const code = generateCheckInCode()
   const token = generateQrToken()
   await doc.ref.update({
@@ -328,7 +329,7 @@ export async function promoteNextWaitlisted(eventId: string): Promise<string | n
     waitlistPosition: null,
     checkInCode: code,
     qrToken: token,
-    paymentStatus: doc.data().paymentStatus === 'pending' ? 'pending' : doc.data().paymentStatus || 'free',
+    paymentStatus: data.paymentStatus === 'pending' ? 'pending' : data.paymentStatus || 'free',
   })
   await getAdminDb()
     .collection('events')
@@ -338,5 +339,20 @@ export async function promoteNextWaitlisted(eventId: string): Promise<string | n
       waitlistCount: FieldValue.increment(-1),
       updatedAt: Timestamp.now(),
     })
+
+  if (data.userEmail) {
+    const eventDoc = await getAdminDb().collection('events').doc(eventId).get()
+    const eventTitle = String(eventDoc.data()?.title || 'Event')
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.passive-blessings.com'
+    const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+    void sendEventRegistrationEmail({
+      to: String(data.userEmail),
+      eventTitle,
+      eventUrl: `${origin}/events/${eventId}`,
+      status: 'confirmed',
+      checkInCode: code,
+    })
+  }
+
   return doc.id
 }

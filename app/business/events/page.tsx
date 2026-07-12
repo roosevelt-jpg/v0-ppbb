@@ -203,9 +203,9 @@ export default function BusinessEventsPage() {
                       fontSize: 12,
                       fontWeight: 600,
                     }}
-                    title="Guests & Check-in"
+                    title="Attendees & Check-in"
                   >
-                    Guests
+                    Attendees
                   </button>
                   <button
                     onClick={() => handleDelete(event.id!)}

@@ -148,8 +148,11 @@ export function EventGuestManager({
           </Link>
           <h1 className="text-2xl font-bold text-black mt-1 flex items-center gap-2">
             <Users className="h-6 w-6" />
-            Guests {eventTitle ? `· ${eventTitle}` : ''}
+            Attendees {eventTitle ? `· ${eventTitle}` : ''}
           </h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            Pending registrations appear under the <strong>pending</strong> filter. Approve them here.
+          </p>
         </div>
         <button
           type="button"
@@ -264,15 +267,15 @@ export function EventGuestManager({
       </div>
 
       {loading ? (
-        <p className="text-neutral-500">Loading guests…</p>
+        <p className="text-neutral-500">Loading attendees…</p>
       ) : guests.length === 0 ? (
-        <p className="text-neutral-500">No guests yet.</p>
+        <p className="text-neutral-500">No attendees yet.</p>
       ) : (
         <div className="overflow-x-auto border rounded-xl bg-white">
           <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-neutral-50 border-b">
               <tr>
-                <th className="text-left p-3">Guest</th>
+                <th className="text-left p-3">Attendee</th>
                 <th className="text-left p-3">Ticket</th>
                 <th className="text-left p-3">Status</th>
                 <th className="text-left p-3">Code</th>

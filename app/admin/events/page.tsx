@@ -303,6 +303,13 @@ function EventsPageContent() {
                           <Edit2 size={14} className="mr-1" />
                           Edit
                         </Link>
+                        <Link
+                          href={`/admin/events/${event.id}/guests`}
+                          className="px-2 py-1 text-xs bg-black !text-white rounded font-medium hover:bg-gray-900 min-h-[36px] inline-flex items-center"
+                          title="Attendees & Check-in"
+                        >
+                          Attendees
+                        </Link>
                         {event.status === 'pending_approval' && (
                           <>
                             <button

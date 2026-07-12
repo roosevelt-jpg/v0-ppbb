@@ -79,7 +79,8 @@ function normalizeTicketTypes(
       id: t.id || `tt_${Math.random().toString(36).slice(2, 9)}`,
       soldCount: typeof t.soldCount === 'number' ? t.soldCount : 0,
       isActive: t.isActive !== false,
-      requireApproval: Boolean(t.requireApproval),
+      // Approval is event-level only; do not keep stale per-ticket flags
+      requireApproval: false,
       currency: t.currency || form.currency || 'AED',
     }))
   }

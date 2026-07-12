@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
     const isPaid = price > 0 && registrationType !== 'free'
     const full = isEventFull(event, ticket)
     const enableWaitlist = Boolean(event.enableWaitlist)
-    const requireApproval = Boolean(event.requireApproval) || Boolean(ticket.requireApproval)
+    // Event-level only (per-ticket Approve was removed — it caused false "pending" states)
+    const requireApproval = Boolean(event.requireApproval)
 
     let status: 'confirmed' | 'pending' | 'waitlisted' = 'confirmed'
     let waitlistPosition: number | null = null

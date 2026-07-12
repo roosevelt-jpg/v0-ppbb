@@ -181,7 +181,12 @@ export async function POST(request: NextRequest) {
       pbCommissionOverride: body.pbCommissionOverride || false,
       paymentGateway: body.paymentGateway || null,
 
-      ticketTypes: body.ticketTypes || [],
+      ticketTypes: Array.isArray(body.ticketTypes)
+        ? body.ticketTypes.map((t: Record<string, unknown>) => ({
+            ...t,
+            requireApproval: false,
+          }))
+        : [],
       coupons: body.coupons || [],
       requireApproval: Boolean(body.requireApproval),
       enableWaitlist: body.enableWaitlist !== false,
@@ -308,6 +313,13 @@ export async function PUT(request: NextRequest) {
     if (updates.status === 'published' && !updates.publishedAt) {
       updates.publishedAt = Timestamp.now()
       updates.approvedAt = Timestamp.now()
+    }
+
+    if (Array.isArray(updates.ticketTypes)) {
+      updates.ticketTypes = (updates.ticketTypes as Record<string, unknown>[]).map((t) => ({
+        ...t,
+        requireApproval: false,
+      }))
     }
 
     updates.updatedAt = Timestamp.now()

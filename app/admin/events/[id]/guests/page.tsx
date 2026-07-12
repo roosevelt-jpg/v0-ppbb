@@ -20,7 +20,7 @@ export default function AdminEventGuestsPage() {
   }, [eventId])
 
   return (
-    <AdminPageLayout title="Event Guests">
+    <AdminPageLayout title="Event Attendees">
       <EventGuestManager
         eventId={eventId}
         eventTitle={title}

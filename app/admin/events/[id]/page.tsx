@@ -348,7 +348,7 @@ export default function EventDetailPage() {
                   fontWeight: 500,
                 }}
               >
-                Guests & Check-in
+                Attendees & Check-in
               </button>
               {event.status === 'published' && (
                 <button

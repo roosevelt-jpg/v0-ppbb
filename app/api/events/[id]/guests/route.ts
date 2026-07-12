@@ -131,18 +131,36 @@ export async function POST(request: NextRequest, context: Ctx) {
     if (action === 'approve') {
       const code = generateCheckInCode()
       const token = generateQrToken()
+      const data = doc.data()!
       await ref.update({
         status: 'confirmed',
         checkInCode: code,
         qrToken: token,
-        paymentStatus: doc.data()?.paymentStatus === 'pending' && (doc.data()?.amountPaid || 0) > 0
+        paymentStatus: data.paymentStatus === 'pending' && (data.amountPaid || 0) > 0
           ? 'pending'
-          : doc.data()?.paymentStatus || 'free',
+          : data.paymentStatus || 'free',
       })
       await getAdminDb()
         .collection('events')
         .doc(eventId)
         .update({ currentAttendees: FieldValue.increment(1), updatedAt: Timestamp.now() })
+
+      const origin =
+        request.headers.get('origin') ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        'https://www.passive-blessings.com'
+      if (data.userEmail) {
+        const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+        void sendEventRegistrationEmail({
+          to: String(data.userEmail),
+          eventTitle: String(event.title || 'Event'),
+          eventUrl: `${origin}/events/${eventId}`,
+          status: 'confirmed',
+          checkInCode: code,
+        })
+      }
+
       return NextResponse.json({ success: true })
     }
 
