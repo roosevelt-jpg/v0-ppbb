@@ -642,7 +642,6 @@ function BusinessEventForm() {
                 />
               </div>
             </div>
-            </div>
             <div className="mt-4">
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
                 Timezone
