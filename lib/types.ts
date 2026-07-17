@@ -1012,6 +1012,7 @@ export interface JobApplication {
   applicantEducation?: string
   applicantExperience?: string
   applicantVolunteerHours?: number
+  applicantSkills?: string[]
   status: 'pending' | 'reviewing' | 'shortlisted' | 'accepted' | 'rejected'
   createdAt: Date
   updatedAt: Date

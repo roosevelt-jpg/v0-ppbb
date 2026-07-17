@@ -2,16 +2,21 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Briefcase, BadgeCheck, MapPin, Percent, ShoppingBag, Store } from 'lucide-react'
+import { Briefcase, BadgeCheck, MapPin, Percent, Phone, ShoppingBag, Store } from 'lucide-react'
 import type { DirectoryBusinessCardData } from '@/lib/marketplace-directory'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
+import { useAuth } from '@/lib/auth-context'
 
 interface BusinessDirectoryCardProps {
   business: DirectoryBusinessCardData
 }
 
 export function BusinessDirectoryCard({ business }: BusinessDirectoryCardProps) {
+  const { user } = useAuth()
   const initial = (business.name.trim().charAt(0) || 'B').toUpperCase()
+  const isLoggedInMember = Boolean(user)
+  const phone = (business.phone || '').trim()
+  const canCall = isLoggedInMember && phone.length > 0
 
   return (
     <article className="flex flex-col h-full min-w-0 border border-[#e4e1da] rounded-lg p-5 sm:p-6 bg-white">
@@ -105,12 +110,30 @@ export function BusinessDirectoryCard({ business }: BusinessDirectoryCardProps) 
           )}
         </div>
 
-        <Link
-          href={`/directory/${business.id}`}
-          className="inline-flex w-full items-center justify-center min-h-[44px] px-4 py-2.5 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
-        >
-          Learn More / Support
-        </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {canCall ? (
+            <a
+              href={`tel:${phone.replace(/\s+/g, '')}`}
+              className="inline-flex w-full items-center justify-center min-h-[44px] px-4 py-2.5 border border-black text-black rounded-lg font-body text-sm font-semibold hover:bg-neutral-50 transition-colors gap-1.5"
+            >
+              <Phone className="w-4 h-4" />
+              Call / Book
+            </a>
+          ) : (
+            <Link
+              href={isLoggedInMember ? `/directory/${business.id}` : `/login?redirect=/directory/${business.id}`}
+              className="inline-flex w-full items-center justify-center min-h-[44px] px-4 py-2.5 border border-black text-black rounded-lg font-body text-sm font-semibold hover:bg-neutral-50 transition-colors"
+            >
+              {isLoggedInMember ? 'Message' : 'Sign in to Call / Book'}
+            </Link>
+          )}
+          <Link
+            href={`/directory/${business.id}`}
+            className="inline-flex w-full items-center justify-center min-h-[44px] px-4 py-2.5 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
+          >
+            Learn More
+          </Link>
+        </div>
       </div>
     </article>
   )

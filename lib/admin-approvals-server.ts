@@ -15,6 +15,8 @@ export type ApprovalItemType =
   | 'community'
   | 'group'
   | 'partnership'
+  | 'contact'
+  | 'form_submission'
 
 export type ApprovalItem = {
   id: string
@@ -73,6 +75,8 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
     db.collection('partnerships').where('status', '==', 'pending').limit(100).get(),
     db.collection('communities').where('status', '==', 'pending_approval').limit(100).get(),
     db.collectionGroup('groups').where('status', '==', 'pending_approval').limit(100).get(),
+    db.collection('contactSubmissions').where('status', '==', 'unread').limit(100).get(),
+    db.collection('formSubmissions').where('status', '==', 'pending').limit(100).get(),
   ])
 
   const snap = (index: number) =>
@@ -91,6 +95,8 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
   const partnershipsSnap = snap(10)
   const communitiesSnap = snap(11)
   const groupsSnap = snap(12)
+  const contactSnap = snap(13)
+  const formSubmissionsSnap = snap(14)
 
   for (const failed of results) {
     if (failed.status === 'rejected') {
@@ -277,6 +283,33 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
     })
   }
 
+  for (const doc of contactSnap.docs) {
+    const d = doc.data()
+    const category = String(d.category || d.inquiryType || 'other')
+    add({
+      id: doc.id,
+      type: 'contact',
+      title: String(d.subject || d.name || 'Contact inquiry'),
+      description: `${category}: ${String(d.message || d.body || '').slice(0, 180)}`,
+      submittedBy: String(d.email || d.name || ''),
+      createdAt: toIso(d.submittedAt || d.createdAt),
+      href: '/admin/contact-submissions',
+    })
+  }
+
+  for (const doc of formSubmissionsSnap.docs) {
+    const d = doc.data()
+    add({
+      id: doc.id,
+      type: 'form_submission',
+      title: String(d.formTitle || d.formName || 'Form submission'),
+      description: String(d.summary || d.email || '').slice(0, 200),
+      submittedBy: String(d.email || d.submittedBy || d.userId || ''),
+      createdAt: toIso(d.submittedAt || d.createdAt),
+      href: d.formId ? `/admin/forms/${d.formId}` : '/admin/forms',
+    })
+  }
+
   items.sort((a, b) => {
     const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0
     const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0
@@ -443,6 +476,26 @@ export async function processApprovalAction(
         status: action === 'approve' ? 'active' : 'archived',
         approvedBy: action === 'approve' ? adminUid : undefined,
         approvedAt: action === 'approve' ? now : undefined,
+        updatedAt: now,
+      })
+      return { success: true }
+    }
+
+    if (type === 'contact') {
+      await db.collection('contactSubmissions').doc(id).update({
+        status: action === 'approve' ? 'read' : 'archived',
+        reviewedAt: now,
+        reviewedBy: adminUid,
+        updatedAt: now,
+      })
+      return { success: true }
+    }
+
+    if (type === 'form_submission') {
+      await db.collection('formSubmissions').doc(id).update({
+        status: action === 'approve' ? 'approved' : 'rejected',
+        reviewedAt: now,
+        reviewedBy: adminUid,
         updatedAt: now,
       })
       return { success: true }

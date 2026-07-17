@@ -638,6 +638,8 @@ export default function AdminCmsPartnersPage() {
                         location: '',
                         partnerNames: '',
                         imageURL: '',
+                        ctaLabel: 'Learn more',
+                        ctaHref: '',
                       },
                     ],
                   },
@@ -753,6 +755,32 @@ export default function AdminCmsPartnersPage() {
                       }
                       e.target.value = ''
                     }}
+                  />
+                  <input
+                    type="text"
+                    value={project.ctaLabel || ''}
+                    placeholder="CTA label"
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], ctaLabel: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px] px-3 border rounded-lg"
+                  />
+                  <input
+                    type="url"
+                    value={project.ctaHref || ''}
+                    placeholder="CTA link (https://…)"
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], ctaHref: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px] px-3 border rounded-lg"
                   />
                   <button
                     type="button"

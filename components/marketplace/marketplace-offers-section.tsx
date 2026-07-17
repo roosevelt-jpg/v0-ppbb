@@ -8,40 +8,19 @@ import {
   subscribeToAllOffers,
   type DirectoryOffer,
 } from '@/lib/marketplace-directory'
+import {
+  OFFER_MARKETPLACE_TABS,
+  matchesOfferMarketplaceTab,
+  type OfferMarketplaceTabId,
+} from '@/lib/offer-categories'
 import { useAuth } from '@/lib/auth-context'
 
-const OFFER_TABS = [
-  { id: 'all', label: 'ALL' },
-  { id: 'service', label: 'SERVICES' },
-  { id: 'product', label: 'PRODUCTS' },
-  { id: 'technology', label: 'TECHNOLOGY' },
-  { id: 'retail', label: 'RETAIL' },
-  { id: 'health-wellness', label: 'HEALTH' },
-  { id: 'coaching', label: 'COACHING' },
-  { id: 'consulting', label: 'CONSULTING' },
-  { id: 'education', label: 'EDUCATION' },
-  { id: 'merchandise', label: 'MERCHANDISE' },
-  { id: 'donations-purchases', label: 'DONATIONS-PURCHASES' },
-] as const
+const OFFER_TABS = OFFER_MARKETPLACE_TABS
 
-type OfferTab = (typeof OFFER_TABS)[number]['id']
+type OfferTab = OfferMarketplaceTabId
 
 function matchesTab(offer: DirectoryOffer, tab: OfferTab): boolean {
-  if (tab === 'all') return true
-  const type = (offer.type || '').toLowerCase()
-  const category = (offer.category || '').toLowerCase()
-  if (tab === 'service') return type === 'service'
-  if (tab === 'product') return type === 'product' || type === 'discount'
-  if (tab === 'technology') return category.includes('technology') || category.includes('tech')
-  if (tab === 'retail') return category.includes('retail')
-  if (tab === 'health-wellness')
-    return category.includes('health') || category.includes('wellness')
-  if (tab === 'coaching') return category.includes('coach')
-  if (tab === 'consulting') return category.includes('consult')
-  if (tab === 'education') return category.includes('education') || category.includes('course')
-  if (tab === 'merchandise') return category.includes('merch') || category.includes('merchandise')
-  if (tab === 'donations-purchases') return category.includes('donation') || type === 'offer'
-  return true
+  return matchesOfferMarketplaceTab(offer, tab)
 }
 
 function OfferCardSkeleton() {

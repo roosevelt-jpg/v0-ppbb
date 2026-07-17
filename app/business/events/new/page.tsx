@@ -42,6 +42,7 @@ function BusinessEventForm() {
 
   const [bannerProgress, setBannerProgress] = React.useState(0)
   const [speakerUploading, setSpeakerUploading] = React.useState<number | null>(null)
+  const [galleryUploading, setGalleryUploading] = React.useState(false)
 
   const [formData, setFormData] = React.useState({
     title: '',
@@ -61,6 +62,7 @@ function BusinessEventForm() {
     currency: 'AED',
     timezone: 'Asia/Dubai',
     bannerURL: '',
+    galleryURLs: [] as string[],
     tags: [] as string[],
     speakers: [] as { name: string; title: string; bio: string; photoURL: string; link: string }[],
     agenda: [] as { time: string; title: string; description: string; speaker: string; durationMinutes: number }[],
@@ -140,6 +142,7 @@ function BusinessEventForm() {
           currency: event.currency || 'AED',
           timezone: event.timezone || 'Asia/Dubai',
           bannerURL: event.bannerURL || '',
+          galleryURLs: Array.isArray(event.galleryURLs) ? event.galleryURLs : [],
           tags: Array.isArray(event.tags) ? event.tags : [],
           speakers: Array.isArray(event.speakers) ? event.speakers : [],
           agenda: Array.isArray(event.agenda) ? event.agenda : [],
@@ -200,6 +203,7 @@ function BusinessEventForm() {
         locationLat: formData.locationLat || null,
         locationLng: formData.locationLng || null,
         bannerURL: formData.bannerURL || null,
+        galleryURLs: formData.galleryURLs || [],
         tags: formData.tags || [],
         speakers: formData.speakers || [],
         agenda: (formData.agenda || []).map((a: any, i: number) => ({
@@ -487,6 +491,71 @@ function BusinessEventForm() {
                 className="w-full max-h-48 object-cover rounded-lg border"
               />
             )}
+          </div>
+
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+              Photo gallery slideshow
+            </h2>
+            <p className="text-sm text-neutral-500 mb-3">
+              Previous event images shown beside the description on the public event page (max 12).
+            </p>
+            {formData.galleryURLs.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.galleryURLs.map((url) => (
+                  <div key={url} className="relative">
+                    <img src={url} alt="" className="h-20 w-28 object-cover rounded border" />
+                    <button
+                      type="button"
+                      className="absolute -top-2 -right-2 bg-black text-white rounded-full p-0.5"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          galleryURLs: prev.galleryURLs.filter((u) => u !== url),
+                        }))
+                      }
+                      aria-label="Remove gallery image"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            <label className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium">
+              <Upload className="w-4 h-4" />
+              {galleryUploading ? 'Uploading…' : 'Upload gallery images'}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={galleryUploading || formData.galleryURLs.length >= 12}
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files || [])
+                  if (!files.length || !user) return
+                  setGalleryUploading(true)
+                  try {
+                    const uploaded: string[] = []
+                    for (const file of files) {
+                      const url = await uploadImageToFirebase(file, `events/${user.id}/gallery`, {
+                        preset: 'content',
+                      })
+                      uploaded.push(url)
+                    }
+                    setFormData((prev) => ({
+                      ...prev,
+                      galleryURLs: [...prev.galleryURLs, ...uploaded].slice(0, 12),
+                    }))
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : 'Gallery upload failed')
+                  } finally {
+                    setGalleryUploading(false)
+                    e.target.value = ''
+                  }
+                }}
+              />
+            </label>
           </div>
 
           <div>

@@ -95,6 +95,7 @@ export function OpportunityApplyModal({
         experience?: string
         volunteeredHours?: number
         volunteerHours?: number
+        skills?: string[]
       }
       const locationLabel =
         profile.locationLabel ||
@@ -114,6 +115,9 @@ export function OpportunityApplyModal({
           education: profile.education || '',
           experience: profile.experience || '',
           volunteerHours: Number(profile.volunteeredHours ?? profile.volunteerHours ?? 0) || 0,
+          skills: Array.isArray(profile.skills)
+            ? profile.skills.map((s) => String(s)).filter(Boolean)
+            : [],
         },
         coverLetter,
         resumeUrl

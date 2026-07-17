@@ -32,6 +32,7 @@ export default function AdminCmsLearningPage() {
   const [form, setForm] = useState({
     title: '',
     description: '',
+    author: '',
     category: 'meditation' as LearningResourceCategory,
     type: 'article' as LearningResourceType,
     url: '',
@@ -74,6 +75,7 @@ export default function AdminCmsLearningPage() {
       await addDoc(collection(db, 'learningResources'), {
         title: form.title.trim(),
         description: form.description.trim(),
+        author: form.author.trim() || null,
         category: form.category,
         type: form.type,
         url: form.url.trim() || null,
@@ -86,6 +88,7 @@ export default function AdminCmsLearningPage() {
       setForm({
         title: '',
         description: '',
+        author: '',
         category: form.category,
         type: 'article',
         url: '',
@@ -164,6 +167,15 @@ export default function AdminCmsLearningPage() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Author</label>
+              <input
+                value={form.author}
+                onChange={(e) => setForm({ ...form, author: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="Optional author name"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

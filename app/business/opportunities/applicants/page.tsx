@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { getBusinessApplications, updateApplicationStatus } from '@/lib/business-queries'
 import { JobApplication } from '@/lib/types'
-import { ArrowLeft, Mail, Phone, FileText, MapPin, Clock, GraduationCap, Briefcase } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, FileText, MapPin, Clock, GraduationCap, Briefcase, Sparkles } from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 
@@ -34,6 +34,7 @@ type EnrichedApp = JobApplication & {
   profileEducation?: string
   profileExperience?: string
   profileHours?: number
+  profileSkills?: string[]
 }
 
 export default function BusinessApplicants() {
@@ -92,6 +93,11 @@ export default function BusinessApplicants() {
               profileEducation: String(d.education || d.highestEducation || ''),
               profileExperience: String(d.experience || d.workExperience || ''),
               profileHours: Number(d.volunteeredHours ?? d.volunteerHours ?? 0) || 0,
+              profileSkills: Array.isArray(d.skills)
+                ? (d.skills as unknown[]).map((s) => String(s)).filter(Boolean)
+                : typeof d.skills === 'string' && d.skills
+                  ? d.skills.split(',').map((s) => s.trim()).filter(Boolean)
+                  : [],
             }
           } catch {
             return base
@@ -185,6 +191,10 @@ export default function BusinessApplicants() {
               const experience = app.applicantExperience || app.profileExperience || ''
               const hours =
                 app.applicantVolunteerHours ?? app.profileHours ?? undefined
+              const skills =
+                (app.applicantSkills && app.applicantSkills.length > 0
+                  ? app.applicantSkills
+                  : app.profileSkills) || []
               return (
                 <div
                   key={app.id}
@@ -235,6 +245,19 @@ export default function BusinessApplicants() {
                             </span>
                           ) : null}
                         </div>
+                        {skills.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5 mt-2">
+                            {skills.slice(0, 8).map((skill) => (
+                              <span
+                                key={skill}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 text-xs"
+                              >
+                                <Sparkles className="w-3 h-3" />
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
                         <div className="flex flex-wrap gap-4 mt-2 text-sm" style={{ color: '#555555' }}>
                           <a
                             href={`mailto:${app.applicantEmail}`}

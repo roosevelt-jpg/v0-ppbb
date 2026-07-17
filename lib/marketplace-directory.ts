@@ -14,19 +14,33 @@ export type MarketplaceDirectoryFilter =
   | 'all'
   | 'services'
   | 'products'
-  | 'coaching'
-  | 'consulting'
-  | 'education'
-  | 'merchandise'
+  | 'technology'
+  | 'hr'
+  | 'retail'
+  | 'real-estate'
+  | 'automotive'
+  | 'fb'
+  | 'hospitality'
+  | 'health-fitness'
+  | 'consultancy'
+  | 'business'
+  | 'other'
 
 export const MARKETPLACE_DIRECTORY_TABS: { id: MarketplaceDirectoryFilter; label: string }[] = [
   { id: 'all', label: 'ALL' },
   { id: 'services', label: 'SERVICES' },
   { id: 'products', label: 'PRODUCTS' },
-  { id: 'coaching', label: 'COACHING' },
-  { id: 'consulting', label: 'CONSULTING' },
-  { id: 'education', label: 'EDUCATION' },
-  { id: 'merchandise', label: 'MERCHANDISE' },
+  { id: 'technology', label: 'TECHNOLOGY' },
+  { id: 'hr', label: 'HR' },
+  { id: 'retail', label: 'RETAIL' },
+  { id: 'real-estate', label: 'REAL ESTATE' },
+  { id: 'automotive', label: 'AUTOMOTIVE' },
+  { id: 'fb', label: 'F&B' },
+  { id: 'hospitality', label: 'HOSPITALITY' },
+  { id: 'health-fitness', label: 'HEALTH & FITNESS' },
+  { id: 'consultancy', label: 'CONSULTANCY' },
+  { id: 'business', label: 'BUSINESS' },
+  { id: 'other', label: 'OTHER' },
 ]
 
 export interface DirectoryBusiness {
@@ -264,10 +278,17 @@ function businessMatchesFilter(
   const needles: Record<Exclude<MarketplaceDirectoryFilter, 'all'>, string[]> = {
     services: ['service', 'services'],
     products: ['product', 'products'],
-    coaching: ['coach', 'coaching'],
-    consulting: ['consult', 'consulting'],
-    education: ['education', 'learning', 'course'],
-    merchandise: ['merchandise', 'merch', 'goods'],
+    technology: ['technology', 'tech'],
+    hr: ['hr', 'human resources'],
+    retail: ['retail'],
+    'real-estate': ['real-estate', 'real estate', 'realestate'],
+    automotive: ['automotive', 'auto'],
+    fb: ['fb', 'f&b', 'food', 'beverage'],
+    hospitality: ['hospitality'],
+    'health-fitness': ['health', 'fitness', 'wellness'],
+    consultancy: ['consultancy', 'consulting', 'consult'],
+    business: ['business'],
+    other: ['other'],
   }
 
   return needles[filter].some((needle) => haystack.includes(needle))

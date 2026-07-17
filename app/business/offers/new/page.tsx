@@ -188,7 +188,6 @@ export default function NewOffer() {
                 >
                   <option value="product">Product</option>
                   <option value="service">Service</option>
-                  <option value="discount">Discount</option>
                 </select>
               </div>
               <div>
@@ -210,25 +209,16 @@ export default function NewOffer() {
                   }}
                 >
                   <option value="">Select industry category</option>
+                  <option value="technology">Technology</option>
                   <option value="hr">HR</option>
+                  <option value="retail">Retail</option>
+                  <option value="real-estate">Real Estate</option>
                   <option value="automotive">Automotive</option>
+                  <option value="fb">F&B</option>
                   <option value="hospitality">Hospitality</option>
                   <option value="health-fitness">Health & Fitness</option>
                   <option value="consultancy">Consultancy</option>
                   <option value="business">Business</option>
-                  <option value="technology">Technology</option>
-                  <option value="retail">Retail</option>
-                  <option value="food-beverage">Food & Beverage</option>
-                  <option value="education">Education</option>
-                  <option value="professional-services">Professional Services</option>
-                  <option value="finance">Finance</option>
-                  <option value="real-estate">Real Estate</option>
-                  <option value="creative-media">Creative / Media</option>
-                  <option value="coaching">Coaching</option>
-                  <option value="consulting">Consulting</option>
-                  <option value="merchandise">Merchandise (Shop)</option>
-                  <option value="books">Books</option>
-                  <option value="courses">Courses</option>
                   <option value="other">Other</option>
                 </select>
               </div>

@@ -25,6 +25,8 @@ const TYPE_LABELS: Record<string, string> = {
   community: 'Community',
   group: 'Group',
   partnership: 'Partnership',
+  contact: 'Contact',
+  form_submission: 'Form',
 }
 
 export default function ApprovalsPage() {
@@ -34,10 +36,25 @@ export default function ApprovalsPage() {
   const [selectedItem, setSelectedItem] = React.useState<ApprovalItem | null>(null)
   const [detailsOpen, setDetailsOpen] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
-  const [tab, setTab] = React.useState<'listings' | 'forms'>('listings')
+  const [tab, setTab] = React.useState<'listings' | 'forms'>('forms')
 
-  const FORM_TYPES = new Set(['partnership', 'beneficiary', 'donation'])
-  const LISTING_TYPES = new Set(['business', 'offer', 'job', 'discount', 'event', 'vendor', 'community', 'group'])
+  const FORM_TYPES = new Set([
+    'partnership',
+    'beneficiary',
+    'donation',
+    'contact',
+    'form_submission',
+  ])
+  const LISTING_TYPES = new Set([
+    'business',
+    'offer',
+    'job',
+    'discount',
+    'event',
+    'vendor',
+    'community',
+    'group',
+  ])
 
   const loadApprovals = React.useCallback(async () => {
     setLoading(true)
@@ -185,16 +202,6 @@ export default function ApprovalsPage() {
             Form inquiries
           </button>
         </div>
-        <p className="text-xs text-neutral-500">
-          Contact &amp; custom form inboxes:{' '}
-          <Link href="/admin/contact-submissions" className="underline">
-            Contact submissions
-          </Link>
-          {' · '}
-          <Link href="/admin/forms" className="underline">
-            Custom forms
-          </Link>
-        </p>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-neutral-600">

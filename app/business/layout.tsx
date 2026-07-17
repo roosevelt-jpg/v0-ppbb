@@ -33,6 +33,7 @@ import {
   MessageSquare,
   Megaphone,
   Crown,
+  Award,
 } from 'lucide-react'
 
 const businessMenuItems = [
@@ -51,6 +52,7 @@ const businessMenuItems = [
   { label: 'Partnerships & Requests', href: '/business/partnerships', icon: Heart },
   { label: 'Advertise', href: '/business/advertise', icon: Megaphone },
   { label: 'Communities', href: '/business/communities', icon: Users2 },
+  { label: 'Certificates', href: '/business/certificates', icon: Award },
   { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },
   { label: 'Membership', href: '/business/membership', icon: Crown },
 ]

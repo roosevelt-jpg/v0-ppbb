@@ -27,6 +27,8 @@ export interface PartnersFeaturedProject {
   location: string
   partnerNames: string
   imageURL: string
+  ctaLabel: string
+  ctaHref: string
 }
 
 export interface PartnersPageConfig {
@@ -185,6 +187,8 @@ function mergeFeaturedProjects(data: unknown): PartnersFeaturedProject[] {
         location: typeof p.location === 'string' ? p.location : '',
         partnerNames: typeof p.partnerNames === 'string' ? p.partnerNames : '',
         imageURL: typeof p.imageURL === 'string' ? p.imageURL : '',
+        ctaLabel: typeof p.ctaLabel === 'string' ? p.ctaLabel : '',
+        ctaHref: typeof p.ctaHref === 'string' ? p.ctaHref : '',
       }
     })
     .filter((p) => p.title.trim().length > 0)

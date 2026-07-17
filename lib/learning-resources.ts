@@ -19,6 +19,7 @@ export interface LearningResource {
   description: string
   category: LearningResourceCategory
   type: LearningResourceType
+  author?: string
   url?: string
   fileUrl?: string
   duration?: string
@@ -67,6 +68,7 @@ function normalize(id: string, data: Record<string, unknown>): LearningResource 
     description: String(data.description || ''),
     category: validCategory,
     type: validType,
+    author: data.author ? String(data.author) : undefined,
     url: data.url ? String(data.url) : undefined,
     fileUrl: data.fileUrl ? String(data.fileUrl) : undefined,
     duration: data.duration ? String(data.duration) : undefined,

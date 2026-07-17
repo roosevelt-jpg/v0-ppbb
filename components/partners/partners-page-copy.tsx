@@ -220,6 +220,14 @@ export function PartnersPageCopy() {
                       Partners: {project.partnerNames}
                     </p>
                   ) : null}
+                  {project.ctaHref ? (
+                    <a
+                      href={project.ctaHref}
+                      className="inline-flex mt-2 items-center justify-center min-h-[40px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
+                    >
+                      {project.ctaLabel || 'Learn more'}
+                    </a>
+                  ) : null}
                 </div>
               </article>
             ))}

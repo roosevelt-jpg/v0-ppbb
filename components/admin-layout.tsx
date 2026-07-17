@@ -47,7 +47,6 @@ import {
   Building,
   UsersRound,
   Presentation,
-  ClipboardCheck,
   Receipt,
   Wallet,
   Tags,
@@ -89,8 +88,6 @@ export const adminMenuItems = [
   { label: 'Members', href: '/admin/members', icon: UserCircle, group: 'Users' },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
   { label: 'Businesses', href: '/admin/businesses', icon: Building, group: 'Users' },
-  { label: 'Vendor Applications', href: '/admin/vendor-applications', icon: ClipboardCheck, group: 'Users' },
-
   // Community & Events
   { label: 'Community', href: '/admin/communities', icon: UsersRound, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
@@ -104,7 +101,6 @@ export const adminMenuItems = [
   { label: 'Donations', href: '/admin/donations', icon: DollarSign, group: 'Charity' },
   { label: 'Charity Partners', href: '/admin/charity-partners', icon: Landmark, group: 'Charity' },
   { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },
-  { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: ClipboardCheck, group: 'Charity' },
 
   // Finance
   { label: 'Donation Tracking', href: '/admin/finance/donations', icon: Receipt, group: 'Finance' },
@@ -112,13 +108,12 @@ export const adminMenuItems = [
   { label: 'Business Referrals', href: '/admin/finance/referrals', icon: Share2, group: 'Finance' },
   { label: 'Referrals Overview', href: '/admin/referrals', icon: Share2, group: 'Finance' },
 
-  // Memberships & Commerce
+  // Memberships & Commerce — form inquiries + listings live under Approvals (FEEDBACK)
   { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },
   { label: 'Pricing Plans', href: '/admin/pricing', icon: Tags, group: 'Memberships' },
   { label: 'Approvals', href: '/admin/approvals', icon: BadgeCheck, group: 'Memberships' },
 
   // Communication & Support
-  { label: 'Contact Submissions', href: '/admin/contact-submissions', icon: Inbox, group: 'Communication' },
   { label: 'Newsletters', href: '/admin/newsletters', icon: Mail, group: 'Communication' },
   { label: 'Moderation', href: '/admin/moderation', icon: ShieldCheck, group: 'Communication' },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap, group: 'Communication' },
@@ -143,7 +138,7 @@ export const adminMenuItems = [
   { label: 'Team Members', href: '/admin/team', icon: Users, group: 'CMS' },
   { label: 'Testimonials', href: '/admin/cms/testimonials', icon: MessageSquareQuote, group: 'CMS' },
   { label: 'Partners & Logos', href: '/admin/partners', icon: Building2, group: 'CMS' },
-  { label: 'Custom Forms', href: '/admin/forms', icon: ClipboardList, group: 'Content' },
+  { label: 'Form Builder', href: '/admin/forms', icon: ClipboardList, group: 'Content' },
   { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },
   { label: 'Policies', href: '/admin/policies', icon: ScrollText, group: 'Content' },
   { label: 'EU Data Protection', href: '/admin/eu-data-protection', icon: Shield, group: 'Content' },

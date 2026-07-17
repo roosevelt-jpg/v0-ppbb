@@ -128,37 +128,39 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
-              Get Involved
-            </h3>
-            <ul className="space-y-2">
-              {getInvolvedLinks.map((link) => {
-                const gate =
-                  BUSINESS_GATE_LABELS.has(link.label) ||
-                  link.href.includes('/join?type=business') ||
-                  link.href.startsWith('/business/')
-                return (
-                  <li key={link.id}>
-                    {gate ? (
-                      <BusinessFeatureLink
-                        featureLabel={link.label}
-                        href={link.href}
-                        className="text-sm hover:text-white transition-colors text-left"
-                        style={{ color: '#888888' }}
-                      >
-                        {link.label}
-                      </BusinessFeatureLink>
-                    ) : (
-                      <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
-                        {link.label}
-                      </Link>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
+          {getInvolvedLinks.length > 0 ? (
+            <div>
+              <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
+                Get Involved
+              </h3>
+              <ul className="space-y-2">
+                {getInvolvedLinks.map((link) => {
+                  const gate =
+                    BUSINESS_GATE_LABELS.has(link.label) ||
+                    link.href.includes('/join?type=business') ||
+                    link.href.startsWith('/business/')
+                  return (
+                    <li key={link.id}>
+                      {gate ? (
+                        <BusinessFeatureLink
+                          featureLabel={link.label}
+                          href={link.href}
+                          className="text-sm hover:text-white transition-colors text-left"
+                          style={{ color: '#888888' }}
+                        >
+                          {link.label}
+                        </BusinessFeatureLink>
+                      ) : (
+                        <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
+                          {link.label}
+                        </Link>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ) : null}
 
           <div>
             <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>

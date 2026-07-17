@@ -1094,6 +1094,7 @@ export async function applyToOpportunity(
     education?: string
     experience?: string
     volunteerHours?: number
+    skills?: string[]
   },
   coverLetter?: string,
   resumeUrl?: string
@@ -1117,6 +1118,7 @@ export async function applyToOpportunity(
     applicantExperience: applicant.experience || '',
     applicantVolunteerHours:
       typeof applicant.volunteerHours === 'number' ? applicant.volunteerHours : undefined,
+    applicantSkills: Array.isArray(applicant.skills) ? applicant.skills.filter(Boolean) : [],
     coverLetter: coverLetter || '',
     resumeUrl: resumeUrl || '',
     status: 'pending',
