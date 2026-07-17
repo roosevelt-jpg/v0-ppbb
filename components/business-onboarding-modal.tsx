@@ -242,7 +242,7 @@ export function BusinessOnboardingModal({
                           services: prev.services.filter((_, i) => i !== index),
                         }))
                       }
-                      className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center bg-red-600 text-white rounded-lg"
+                      className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center bg-black !text-white rounded-lg"
                       aria-label="Remove service"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -317,7 +317,7 @@ export function BusinessOnboardingModal({
                           productImages: prev.productImages.filter((u) => u !== url),
                         }))
                       }
-                      className="absolute top-1 right-1 bg-red-600 text-white rounded p-1"
+                      className="absolute top-1 right-1 bg-black !text-white rounded p-1"
                       aria-label="Remove image"
                     >
                       <Trash2 className="w-3 h-3" />

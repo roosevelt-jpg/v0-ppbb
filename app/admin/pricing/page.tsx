@@ -356,7 +356,7 @@ export default function PricingManagementPage() {
                   <button
                     type="button"
                     onClick={() => handleRemoveIncludedItem(idx)}
-                    className="text-red-600 hover:text-red-700 shrink-0"
+                    className="bg-black !text-white hover:bg-neutral-800 shrink-0"
                     aria-label="Remove item"
                   >
                     <X className="w-4 h-4" />

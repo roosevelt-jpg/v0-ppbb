@@ -162,7 +162,7 @@ export default function PartnershipsPage() {
                           <button
                             type="button"
                             onClick={() => handleWithdraw(req.id)}
-                            className="text-xs text-red-600 underline"
+                            className="text-xs bg-black !text-white px-2 py-1 rounded-md no-underline"
                           >
                             Withdraw
                           </button>

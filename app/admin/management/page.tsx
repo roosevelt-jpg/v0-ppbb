@@ -580,7 +580,7 @@ export default function AdminManagementPage() {
                             <button
                               type="button"
                               onClick={() => handleDeleteAdmin(admin.id)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
+                              className="p-1 bg-black !text-white hover:bg-neutral-800 rounded"
                               title="Remove admin"
                             >
                               <Trash2 size={16} />

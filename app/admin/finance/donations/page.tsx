@@ -243,7 +243,7 @@ export default function FinanceDonationsPage() {
           type="button"
           disabled={busy || VERIFIED.has(st)}
           onClick={() => runAction(s.id, 'reject')}
-          className="min-h-[44px] px-3 bg-red-600 text-white rounded text-xs font-semibold disabled:opacity-40"
+          className="min-h-[44px] px-3 bg-black !text-white rounded text-xs font-semibold disabled:opacity-40"
         >
           Reject
         </button>

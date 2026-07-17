@@ -69,7 +69,7 @@ export default function BusinessDiscountsPage() {
                   <button
                     type="button"
                     onClick={() => void deleteBusinessDiscount(d.id)}
-                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-red-600 hover:bg-red-50 rounded shrink-0"
+                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center bg-black !text-white hover:bg-neutral-800 rounded shrink-0"
                     aria-label="Delete discount"
                   >
                     <Trash2 size={16} />
@@ -108,7 +108,7 @@ export default function BusinessDiscountsPage() {
                   <td className="px-4 py-3 text-sm">{d.usageCount}{d.usageLimit != null ? ` / ${d.usageLimit}` : ''}</td>
                   <td className="px-4 py-3 text-sm capitalize">{d.status.replace(/_/g, ' ')}</td>
                   <td className="px-4 py-3 text-right">
-                    <button type="button" onClick={() => void deleteBusinessDiscount(d.id)} className="p-2 text-red-600 hover:bg-red-50 rounded">
+                    <button type="button" onClick={() => void deleteBusinessDiscount(d.id)} className="pb-compact-btn h-6 w-6 min-h-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 inline-flex items-center justify-center rounded">
                       <Trash2 size={16} />
                     </button>
                   </td>

@@ -482,7 +482,7 @@ export default function AdminCmsEventsPage() {
                   <button
                     type="button"
                     onClick={() => removeCategory(i)}
-                    className="flex items-center justify-center min-h-[44px] w-full p-2 bg-red-600 text-white rounded"
+                    className="flex items-center justify-center pb-compact-btn h-7 min-h-0 w-auto px-2 p-0 bg-black !text-white rounded"
                     aria-label="Remove category"
                   >
                     <Trash2 className="w-4 h-4" />

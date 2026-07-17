@@ -234,7 +234,7 @@ export default function AdminCmsNavigationPage() {
                   <button
                     type="button"
                     onClick={() => removeLink(index)}
-                    className="p-2 bg-red-600 text-white shadow-none min-h-0 hover:bg-red-700"
+                    className="p-2 bg-black !text-white shadow-none min-h-0 hover:bg-neutral-800"
                     aria-label="Remove link"
                   >
                     <Trash2 className="w-4 h-4" />

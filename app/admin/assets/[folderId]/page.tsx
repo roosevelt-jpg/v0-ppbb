@@ -216,7 +216,7 @@ export default function AdminAssetFolderPage() {
               <button
                 type="button"
                 onClick={handleDeleteFolder}
-                className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm"
+                className="px-4 py-2 bg-black !text-white border-0 rounded-lg text-sm"
               >
                 Delete folder
               </button>

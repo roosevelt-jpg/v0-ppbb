@@ -293,7 +293,7 @@ export default function BusinessCommunitiesPage() {
                       <button
                         type="button"
                         onClick={() => handleDelete(community.id)}
-                        className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-red-600 hover:bg-neutral-200"
+                        className="min-h-[44px] min-w-[44px] px-3 bg-black rounded-md !text-white hover:bg-neutral-800"
                         aria-label="Delete community"
                       >
                         <Trash2 size={16} className="mx-auto" />

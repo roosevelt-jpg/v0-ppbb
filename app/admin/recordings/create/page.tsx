@@ -256,7 +256,7 @@ export default function CreateRecordingPage() {
                         setThumbnailFile(null)
                         setThumbnailPreview('')
                       }}
-                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full"
+                      className="absolute top-2 right-2 p-1 bg-black !text-white rounded-full"
                     >
                       <X size={16} />
                     </button>

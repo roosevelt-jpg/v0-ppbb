@@ -291,7 +291,7 @@ export default function MyEventsPage() {
                     <button
                       type="button"
                       onClick={() => handleCancel(event.id!)}
-                      className="self-start !bg-red-600 !text-white px-3 py-2 rounded-lg text-sm"
+                      className="self-start !bg-black !text-white px-3 py-2 rounded-lg text-sm"
                       aria-label="Cancel registration"
                     >
                       <Trash2 size={16} />

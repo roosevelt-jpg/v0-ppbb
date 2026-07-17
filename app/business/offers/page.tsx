@@ -191,7 +191,7 @@ export default function BusinessOffers() {
                     onClick={() => handleDelete(offer.id)}
                     variant="outline"
                     size="sm"
-                    className="min-h-[44px] flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                    className="min-h-[44px] flex-1 bg-black !text-white border-0 hover:bg-neutral-800"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
