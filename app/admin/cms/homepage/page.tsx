@@ -417,7 +417,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'up')}
                         disabled={i === 0}
-                        className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
+                        className="flex items-center justify-center pb-compact-btn h-7 w-7 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-4 [&_svg]:w-4"
                         aria-label="Move up"
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -426,7 +426,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'down')}
                         disabled={i === config.hero.images.length - 1}
-                        className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
+                        className="flex items-center justify-center pb-compact-btn h-7 w-7 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-4 [&_svg]:w-4"
                         aria-label="Move down"
                       >
                         <ChevronDown className="w-4 h-4" />
@@ -434,7 +434,7 @@ export default function AdminCmsHomepagePage() {
                       <button
                         type="button"
                         onClick={() => removeHeroImage(img.id)}
-                        className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 bg-black text-white rounded inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
+                        className="flex items-center justify-center pb-compact-btn h-7 w-7 min-h-0 min-w-0 p-0 bg-black text-white rounded inline-flex items-center justify-center [&_svg]:h-4 [&_svg]:w-4"
                         aria-label="Remove image"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -703,7 +703,7 @@ export default function AdminCmsHomepagePage() {
                       type="button"
                       onClick={() => movePillar(i, 'up')}
                       disabled={i === 0}
-                      className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
+                      className="flex items-center justify-center pb-compact-btn h-7 w-7 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-4 [&_svg]:w-4"
                       aria-label="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -712,7 +712,7 @@ export default function AdminCmsHomepagePage() {
                       type="button"
                       onClick={() => movePillar(i, 'down')}
                       disabled={i === config.pillars.items.length - 1}
-                      className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
+                      className="flex items-center justify-center pb-compact-btn h-7 w-7 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-4 [&_svg]:w-4"
                       aria-label="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />
