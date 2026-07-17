@@ -78,6 +78,7 @@ export function EditBusinessModal({ isOpen, onClose, business, onSuccess }: Edit
       onOpenChange={onClose}
       title="Edit Business"
       description={`Manage details for ${business?.name || 'Business'}`}
+      maxWidth="28rem"
       footer={
         <div className="flex gap-2 justify-between">
           <Button

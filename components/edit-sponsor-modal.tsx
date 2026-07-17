@@ -91,6 +91,7 @@ export function EditSponsorModal({ isOpen, onClose, sponsor, onSuccess }: EditSp
       onOpenChange={onClose}
       title="Edit Sponsor"
       description={`Manage details for ${sponsor?.name || 'Sponsor'}`}
+      maxWidth="28rem"
       footer={
         <div className="flex gap-2 justify-between">
           <Button

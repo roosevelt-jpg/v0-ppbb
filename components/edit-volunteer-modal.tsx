@@ -91,6 +91,7 @@ export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }:
       onOpenChange={onOpenChange}
       title="Edit Volunteer"
       description={`Manage volunteer profile for ${volunteer?.firstName || 'Volunteer'}`}
+      maxWidth="28rem"
       footer={
         <div className="flex gap-2 justify-between">
           <Button

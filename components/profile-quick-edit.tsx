@@ -300,7 +300,7 @@ interface ProfileMenuButtonProps {
 }
 
 /** Avatar button that opens profile quick-edit — for all logged-in users */
-export function ProfileMenuButton({ className = '', compact = false }: ProfileMenuButtonProps) {
+export function ProfileMenuButton({ className = '', compact = true }: ProfileMenuButtonProps) {
   const { user, loading } = useAuth()
   const [open, setOpen] = useState(false)
 

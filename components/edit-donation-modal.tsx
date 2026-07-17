@@ -93,6 +93,7 @@ export function EditDonationModal({
       onOpenChange={onOpenChange}
       title="Edit Donation"
       description={`Manage donation from ${donation?.donorName || 'Anonymous'}`}
+      maxWidth="28rem"
       footer={
         <div className="flex gap-2 justify-between w-full">
           <button

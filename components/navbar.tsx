@@ -209,7 +209,7 @@ export function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <LanguageSwitcherWithFlags onDark />
             <ThemeToggle onDark />
-            <ProfileMenuButton />
+            <ProfileMenuButton compact />
             {authActions}
           </div>
         </div>
@@ -220,7 +220,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <LanguageSwitcherWithFlags onDark />
           <ThemeToggle onDark />
-          <ProfileMenuButton />
+          <ProfileMenuButton compact />
           <button
             className="p-2 -mr-2 text-white min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

@@ -70,6 +70,7 @@ export function EditMemberModal({ open, onOpenChange, member, onSuccess }: EditM
       onOpenChange={onOpenChange}
       title="Edit Member"
       description={`Manage details for ${member?.name || 'Member'}`}
+      maxWidth="28rem"
       footer={
         <div className="flex gap-2 justify-between">
           <Button

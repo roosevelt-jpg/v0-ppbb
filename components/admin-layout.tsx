@@ -398,7 +398,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
       <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap justify-end">
         <LanguageSwitcherWithFlags />
         <ThemeToggle />
-        <ProfileMenuButton />
+        <ProfileMenuButton compact />
         
         {/* Message Notification Badge */}
         {unreadMessages > 0 && (

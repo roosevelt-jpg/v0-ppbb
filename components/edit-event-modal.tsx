@@ -77,6 +77,7 @@ export function EditEventModal({ open, onOpenChange, event, onSuccess }: EditEve
       onOpenChange={onOpenChange}
       title="Edit Event"
       description={`Manage event: ${event?.name || 'Event'}`}
+      maxWidth="28rem"
       footer={
         <div className="flex gap-2 justify-between">
           <Button

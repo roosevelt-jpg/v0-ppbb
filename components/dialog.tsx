@@ -11,9 +11,9 @@ interface DialogProps {
   description?: string
   children: React.ReactNode
   footer?: React.ReactNode
-  /** Max width of the dialog panel (default 600px). */
+  /** Max width of the dialog panel (default compact card). */
   maxWidth?: string
-  /** Tighter padding / typography for small forms (e.g. profile quick-edit). */
+  /** Tighter padding / typography (default on — denser cards across dashboards). */
   compact?: boolean
 }
 
@@ -24,8 +24,8 @@ export function Dialog({
   description,
   children,
   footer,
-  maxWidth = '600px',
-  compact = false,
+  maxWidth = '22rem',
+  compact = true,
 }: DialogProps) {
   if (!open) return null
 
