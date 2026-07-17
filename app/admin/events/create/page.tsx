@@ -4,9 +4,14 @@ export const dynamic = 'force-dynamic'
 
 import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Upload, ArrowLeft, Loader2, X, MapPin } from 'lucide-react'
+import { Upload, ArrowLeft, Loader2, X } from 'lucide-react'
 import Link from 'next/link'
-import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
+import {
+  AddressLocationPicker,
+  addressValueToEventFields,
+  eventFieldsToAddressValue,
+  type AddressLocationValue,
+} from '@/components/address-location-picker'
 import { useAuth } from '@/lib/auth-context'
 import {
   buildEventApiPayload,
@@ -467,62 +472,25 @@ function CreateEventForm() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-black">Location</h2>
             <p className="text-sm text-gray-600">
-              Start typing to get real-time location suggestions powered by Google Maps
+              Choose country / city, then search the venue address and drag the pin if needed.
             </p>
-
-            <GooglePlacesAutocomplete
-              value={formData.locationName}
-              onTextChange={(text) => {
+            <AddressLocationPicker
+              variant="venue"
+              value={eventFieldsToAddressValue(formData)}
+              onChange={(next: AddressLocationValue) => {
+                const fields = addressValueToEventFields(next)
                 setFormData((prev) => ({
                   ...prev,
-                  locationName: text,
-                  // Keep address in sync for free-text; Places selection overwrites with formatted address
-                  locationAddress: text,
+                  locationName: fields.locationName,
+                  locationAddress: fields.locationAddress,
+                  locationPlaceId: fields.locationPlaceId,
+                  locationLat: fields.locationLat,
+                  locationLng: fields.locationLng,
                 }))
               }}
-              onChange={(place) => {
-                const label = place.secondaryText
-                  ? `${place.mainText}, ${place.secondaryText}`
-                  : place.mainText
-                const isUrl =
-                  /^https?:\/\//i.test(label) ||
-                  /maps\.(google|app\.goo)/i.test(label)
-                setFormData((prev) => ({
-                  ...prev,
-                  // Prefer human-readable place name / formatted address — never store maps links as the name
-                  locationName: isUrl ? prev.locationName : place.mainText,
-                  locationAddress: isUrl ? prev.locationAddress : label,
-                  locationPlaceId: place.placeId.startsWith('manual-') ? '' : place.placeId,
-                  locationLat: place.lat || 0,
-                  locationLng: place.lng || 0,
-                }))
-              }}
-              countryRestrictions={['AE']}
-              placeholder="Search address (e.g. Dubai Marina) — not a Maps link"
+              showAutoDetect={false}
+              pinDraggable
             />
-
-            {formData.locationAddress && !/^https?:\/\//i.test(formData.locationAddress) && (
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
-                <MapPin size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-blue-900">
-                    {formData.locationAddress || formData.locationName}
-                  </p>
-                  {formData.locationLat !== 0 && formData.locationLng !== 0 && (
-                    <p className="text-blue-700 text-xs">
-                      Coordinates: {formData.locationLat.toFixed(4)}, {formData.locationLng.toFixed(4)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-            {(formData.locationName?.startsWith('http') ||
-              formData.locationAddress?.includes('maps.')) && (
-              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                Paste a place name or pick a Google suggestion — Maps links are not shown as the location
-                address on event cards.
-              </p>
-            )}
           </div>
 
           <div className="space-y-4">
@@ -539,7 +507,7 @@ function CreateEventForm() {
                       setImagePreview('')
                       handleChange('bannerURL', '')
                     }}
-                    className="absolute top-2 right-2 p-1 bg-red-600 !text-white rounded-full"
+                    className="absolute top-2 right-2 p-1 bg-black !text-white rounded-full"
                   >
                     <X size={16} />
                   </button>
@@ -574,7 +542,7 @@ function CreateEventForm() {
                           galleryURLs: prev.galleryURLs.filter((u) => u !== url),
                         }))
                       }
-                      className="absolute top-1 right-1 p-1 bg-red-600 !text-white rounded-full"
+                      className="absolute top-1 right-1 p-1 bg-black !text-white rounded-full"
                     >
                       <X size={14} />
                     </button>

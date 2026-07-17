@@ -132,7 +132,10 @@ export default function VolunteersPage() {
   }
 
   return (
-    <AdminPageLayout title="Volunteers" subtitle="Manage and track volunteers">
+    <AdminPageLayout
+      title="Volunteers"
+      subtitle="Individual members who volunteer or join the PB team"
+    >
       <div className="space-y-6">
         <AdminTable
           title="All Volunteers"

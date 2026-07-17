@@ -3,10 +3,25 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Briefcase, MessageCircle, Phone, Tag, UserPlus } from 'lucide-react'
+import {
+  ArrowLeft,
+  Briefcase,
+  Calendar,
+  ExternalLink,
+  Facebook,
+  Instagram,
+  Linkedin,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Sparkles,
+  Tag,
+  Twitter,
+  UserPlus,
+} from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
-import { auth } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 import {
   isActiveJob,
   isActiveOffer,
@@ -20,11 +35,42 @@ import {
 import { subscribeToActiveBusinessDiscounts, type BusinessDiscount } from '@/lib/business-discounts'
 import { RichTextContent } from '@/components/rich-text-content'
 import { collection, limit, onSnapshot, query, where } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { Calendar } from 'lucide-react'
+import { format } from 'date-fns'
 
 interface BusinessProfileViewProps {
   businessId: string
+}
+
+type ProfileEvent = {
+  id: string
+  title: string
+  startDate?: unknown
+  location?: string
+  imageURL?: string
+}
+
+function toDate(value: unknown): Date | null {
+  if (!value) return null
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    try {
+      const d = (value as { toDate: () => Date }).toDate()
+      return Number.isNaN(d.getTime()) ? null : d
+    } catch {
+      return null
+    }
+  }
+  const d = new Date(value as string | number)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+function OverviewRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-3 py-2.5 border-b border-neutral-100 last:border-0 text-sm">
+      <span className="text-neutral-500 shrink-0">{label}</span>
+      <span className="font-semibold text-neutral-900 text-right break-words">{value || '—'}</span>
+    </div>
+  )
 }
 
 export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
@@ -40,7 +86,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
   const [offersReady, setOffersReady] = useState(false)
   const [jobsReady, setJobsReady] = useState(false)
   const [discountsReady, setDiscountsReady] = useState(false)
-  const [events, setEvents] = useState<Array<{ id: string; title: string; startDate?: unknown; status?: string }>>([])
+  const [events, setEvents] = useState<ProfileEvent[]>([])
   const [eventsReady, setEventsReady] = useState(false)
   const [notFound, setNotFound] = useState(false)
   const [leadTracked, setLeadTracked] = useState(false)
@@ -84,28 +130,81 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
 
   useEffect(() => {
     if (!businessId) return
-    const q = query(
-      collection(db, 'events'),
-      where('businessId', '==', businessId),
-      where('status', '==', 'published'),
-      limit(12)
-    )
-    const unsub = onSnapshot(
-      q,
+    let byBusinessId: ProfileEvent[] = []
+    let byCreatedBy: ProfileEvent[] = []
+
+    const mapDocs = (docs: { id: string; data: () => Record<string, unknown> }[]) =>
+      docs.map((d) => {
+        const data = d.data()
+        return {
+          id: d.id,
+          title: String(data.title || 'Event'),
+          startDate: data.startDate || data.date || data.eventDate,
+          location:
+            typeof data.location === 'string'
+              ? data.location
+              : String(
+                  (data.location as { formattedAddress?: string } | undefined)?.formattedAddress ||
+                    data.locationLabel ||
+                    ''
+                ),
+          imageURL: String(data.imageURL || data.coverImage || data.bannerURL || ''),
+        }
+      })
+
+    const emit = () => {
+      const map = new Map<string, ProfileEvent>()
+      for (const ev of [...byBusinessId, ...byCreatedBy]) {
+        if (!map.has(ev.id)) map.set(ev.id, ev)
+      }
+      const merged = Array.from(map.values()).sort((a, b) => {
+        const at = toDate(a.startDate)?.getTime() || 0
+        const bt = toDate(b.startDate)?.getTime() || 0
+        return bt - at
+      })
+      setEvents(merged.slice(0, 8))
+      setEventsReady(true)
+    }
+
+    const unsubA = onSnapshot(
+      query(
+        collection(db, 'events'),
+        where('businessId', '==', businessId),
+        where('status', '==', 'published'),
+        limit(12)
+      ),
       (snap) => {
-        setEvents(
-          snap.docs.map((d) => ({
-            id: d.id,
-            title: String(d.data().title || 'Event'),
-            startDate: d.data().startDate,
-            status: d.data().status,
-          }))
-        )
-        setEventsReady(true)
+        byBusinessId = mapDocs(snap.docs)
+        emit()
       },
-      () => setEventsReady(true)
+      () => {
+        byBusinessId = []
+        emit()
+      }
     )
-    return () => unsub()
+
+    const unsubB = onSnapshot(
+      query(collection(db, 'events'), where('createdBy', '==', businessId), limit(12)),
+      (snap) => {
+        byCreatedBy = mapDocs(snap.docs).filter((ev) => {
+          const status = String(
+            (snap.docs.find((d) => d.id === ev.id)?.data() as { status?: string } | undefined)
+              ?.status || 'published'
+          ).toLowerCase()
+          return status === 'published' || status === 'active' || status === 'upcoming'
+        })
+        emit()
+      },
+      () => {
+        byCreatedBy = []
+        emit()
+      }
+    )
+
+    return () => {
+      unsubA()
+      unsubB()
+    }
   }, [businessId])
 
   useEffect(() => {
@@ -148,36 +247,26 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
   }
 
   const activeOffers = useMemo(() => offers.filter(isActiveOffer), [offers])
-  const activeJobs = useMemo(() => jobs.filter(isActiveJob), [jobs])
+  const activeJobs = useMemo(() => {
+    return [...jobs.filter(isActiveJob)].sort((a, b) => {
+      const at = a.publishedAt?.getTime() || 0
+      const bt = b.publishedAt?.getTime() || 0
+      return bt - at
+    })
+  }, [jobs])
+  const latestOffers = useMemo(() => activeOffers.slice(0, 8), [activeOffers])
+  const latestJobs = useMemo(() => activeJobs.slice(0, 8), [activeJobs])
   const memberDiscounts = useMemo(
     () => activeOffers.filter((o) => o.isMemberDiscount),
     [activeOffers]
   )
   const hasMemberDiscounts = memberDiscounts.length > 0 || discounts.length > 0
-  const salesOffers = useMemo(
-    () =>
-      activeOffers.filter(
-        (o) =>
-          o.type === 'product' ||
-          o.type === 'service' ||
-          o.type === 'sale' ||
-          !o.type ||
-          o.category.toLowerCase().includes('product') ||
-          o.category.toLowerCase().includes('service')
-      ),
-    [activeOffers]
-  )
-
-  const galleryImages = useMemo(() => {
-    const fromBusiness = business?.productImages || []
-    const fromOffers = activeOffers.flatMap((o) => o.images).filter(Boolean)
-    return Array.from(new Set([...fromBusiness, ...fromOffers]))
-  }, [business, activeOffers])
 
   const primaryPhone =
-    business?.phone ||
-    activeOffers.find((o) => o.phone)?.phone ||
-    ''
+    business?.phone || activeOffers.find((o) => o.phone)?.phone || ''
+
+  const lastJobPosted = latestJobs[0]?.publishedAt || null
+  const memberSince = business?.createdAt || null
 
   const loading = !businessReady || !offersReady || !jobsReady || !discountsReady || !eventsReady
 
@@ -192,11 +281,9 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
             <div className="h-4 w-1/3 bg-neutral-200 rounded" />
           </div>
         </div>
-        <div className="h-24 w-full bg-neutral-200 rounded" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="aspect-[4/3] bg-neutral-200 rounded-lg" />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-6">
+          <div className="h-48 bg-neutral-200 rounded-lg" />
+          <div className="h-64 bg-neutral-200 rounded-lg" />
         </div>
       </div>
     )
@@ -205,36 +292,40 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
   if (notFound || !business) {
     return (
       <div className="text-center py-16 px-4">
-        <h1 className="font-headline text-3xl font-bold text-foreground mb-3">
-          Business not found
-        </h1>
+        <h1 className="font-headline text-3xl font-bold text-foreground mb-3">Business not found</h1>
         <p className="font-body text-muted-foreground mb-6 max-w-md mx-auto">
           This listing may be pending approval or no longer active.
         </p>
         <Link
-          href="/marketplace"
-          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+          href="/directory"
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-[#111] text-white rounded-lg font-body text-sm font-semibold hover:bg-neutral-800"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to marketplace
+          Back to directory
         </Link>
       </div>
     )
   }
 
   const initial = (business.name.trim().charAt(0) || 'B').toUpperCase()
+  const websiteHref = business.website
+    ? business.website.startsWith('http')
+      ? business.website
+      : `https://${business.website}`
+    : ''
+  const social = business.socialLinks || {}
 
   return (
-    <div className="space-y-8 sm:space-y-10 min-w-0">
+    <div className="space-y-6 sm:space-y-8 min-w-0">
       <Link
-        href="/marketplace"
+        href="/directory"
         className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground min-h-[44px]"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to marketplace
+        Back to directory
       </Link>
 
-      {/* Banner + logo */}
+      {/* Banner + identity */}
       <div>
         <div className="relative w-full overflow-hidden rounded-lg aspect-[21/9] sm:aspect-[3/1] bg-neutral-100">
           {business.bannerURL ? (
@@ -245,10 +336,11 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
               className="absolute inset-0 w-full h-full object-cover"
             />
           ) : (
-            <div className="absolute inset-0 bg-[#f7f6f2]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100" />
           )}
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 sm:-mt-12 px-1 relative z-10">
+
+        <div className="flex flex-col lg:flex-row lg:items-end gap-4 -mt-10 sm:-mt-12 px-1 relative z-10">
           <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0">
             {business.logoURL ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -263,300 +355,439 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
               </div>
             )}
           </div>
+
           <div className="min-w-0 flex-1 pb-1">
-            <p className="eyebrow text-muted-foreground mb-1">
-              {business.category || 'Business'}
-            </p>
-            <h1 className="font-headline text-3xl sm:text-4xl font-bold text-foreground break-words">
+            <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 break-words">
               {business.name}
             </h1>
-            {business.ownerName && (
-              <p className="font-body text-sm text-muted-foreground mt-1">
-                {business.ownerName}
-              </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-600">
+              {business.location ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  {business.location}
+                </span>
+              ) : null}
+              {business.category ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 shrink-0" />
+                  {business.category}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end pb-1">
+            {websiteHref ? (
+              <div className="text-sm">
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+                  Website
+                </p>
+                <a
+                  href={websiteHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 font-semibold text-neutral-900 hover:underline break-all"
+                >
+                  {business.website.replace(/^https?:\/\//, '')}
+                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                </a>
+              </div>
+            ) : null}
+            {(social.facebook || social.twitter || social.linkedin || social.instagram) && (
+              <div className="text-sm">
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">
+                  Follow Company
+                </p>
+                <div className="flex items-center gap-2">
+                  {social.facebook ? (
+                    <a
+                      href={social.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                      aria-label="Facebook"
+                    >
+                      <Facebook className="w-4 h-4" />
+                    </a>
+                  ) : null}
+                  {social.twitter ? (
+                    <a
+                      href={social.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                      aria-label="Twitter"
+                    >
+                      <Twitter className="w-4 h-4" />
+                    </a>
+                  ) : null}
+                  {social.linkedin ? (
+                    <a
+                      href={social.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                      aria-label="LinkedIn"
+                    >
+                      <Linkedin className="w-4 h-4" />
+                    </a>
+                  ) : null}
+                  {social.instagram ? (
+                    <a
+                      href={social.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                      aria-label="Instagram"
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                  ) : null}
+                </div>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {business.description && (
-        <div className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-3xl break-words">
-          <RichTextContent html={business.description} />
-        </div>
-      )}
-
-      {business.services.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {business.services.map((service) => (
-            <span
-              key={service}
-              className="inline-flex items-center px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-800 font-body text-sm"
-            >
-              {service}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* CTAs */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={handleConnect}
-          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
-        >
-          <UserPlus className="w-4 h-4" />
-          {isLoggedInMember ? 'Connect' : 'Sign in to Connect'}
-        </button>
-        <button
-          type="button"
-          onClick={handleMessage}
-          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-white text-black border border-[#e4e1da] rounded-lg font-body text-sm font-semibold hover:bg-neutral-50"
-        >
-          <MessageCircle className="w-4 h-4" />
-          Message
-        </button>
-        {salesOffers.length > 0 && (
-          isLoggedInMember && primaryPhone ? (
-            <a
-              href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
-            >
-              <Phone className="w-4 h-4" />
-              Call / Book
-            </a>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                if (!isLoggedInMember) {
-                  router.push(`/login?returnUrl=/directory/${businessId}`)
-                  return
-                }
-                handleMessage()
-              }}
-              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
-            >
-              <Phone className="w-4 h-4" />
-              {isLoggedInMember ? 'Call / Book' : 'Sign in to Call / Book'}
-            </button>
-          )
-        )}
-        {activeJobs.length > 0 && (
-          <a
-            href="#jobs"
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-white text-black border border-[#e4e1da] rounded-lg font-body text-sm font-semibold hover:bg-neutral-50"
-          >
-            <Briefcase className="w-4 h-4" />
-            Apply
-          </a>
-        )}
-      </div>
-
-      {/* Gallery */}
-      {galleryImages.length > 0 && (
-        <section>
-          <h2 className="font-headline text-2xl font-bold text-foreground mb-4">
-            Products &amp; services
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-            {galleryImages.map((url) => (
-              <div
-                key={url}
-                className="relative aspect-[4/3] overflow-hidden rounded-lg bg-neutral-100"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 lg:gap-8">
+        {/* Main column */}
+        <div className="min-w-0 space-y-8">
+          {business.description ? (
+            <section>
+              <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-3">
+                About Company
+              </h2>
+              <div className="font-body text-sm sm:text-base text-neutral-600 leading-relaxed break-words">
+                <RichTextContent html={business.description} />
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            </section>
+          ) : null}
 
-      {/* Member discounts — logged-in only */}
-      {!authLoading && isLoggedInMember && hasMemberDiscounts && (
-        <section className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-4 sm:p-6">
-          <p className="eyebrow text-emerald-800 mb-2">MEMBER DISCOUNTS</p>
-          <h2 className="font-headline text-2xl font-bold text-foreground mb-4">
-            Exclusive for members
-          </h2>
-          <ul className="space-y-3">
-            {memberDiscounts.map((offer) => (
-              <li key={offer.id} className="font-body text-sm sm:text-base text-foreground">
-                <span className="font-semibold">{offer.title}</span>
-                {(offer.discountPercentage || offer.memberBenefit) && (
-                  <span className="text-emerald-800 ml-2">
-                    {offer.discountPercentage || offer.memberBenefit}% off
-                  </span>
-                )}
-                {offer.description && (
-                  <p className="text-muted-foreground mt-0.5">{offer.description}</p>
-                )}
-              </li>
-            ))}
-            {discounts.map((d) => (
-              <li key={d.id} className="font-body text-sm sm:text-base text-foreground">
-                <span className="font-semibold">{d.title}</span>
-                <span className="text-emerald-800 ml-2">
-                  {d.discountType === 'fixed' ? `${d.currency || 'AED'} ${d.discountValue}` : `${d.discountValue}%`} off
-                </span>
-                {d.discountCode && (
-                  <span className="ml-2 text-xs font-mono bg-white px-2 py-0.5 rounded border">{d.discountCode}</span>
-                )}
-                {d.description && <p className="text-muted-foreground mt-0.5">{d.description}</p>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {!authLoading && !isLoggedInMember && hasMemberDiscounts && (
-        <section className="rounded-lg border border-[#e4e1da] bg-[#f7f6f2] p-4 sm:p-6">
-          <p className="eyebrow text-muted-foreground mb-2">MEMBER DISCOUNTS</p>
-          <h2 className="font-headline text-xl font-bold text-foreground mb-2">
-            Member pricing available
-          </h2>
-          <p className="font-body text-sm text-muted-foreground mb-4">
-            Sign in to see PB member discounts for this business.
-          </p>
-          <Link
-            href={`/login?returnUrl=/directory/${businessId}`}
-            className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
-          >
-            Sign in
-          </Link>
-        </section>
-      )}
-
-      {/* All listings */}
-      <section id="listings" className="space-y-6 scroll-mt-24">
-        <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground">
-          Listings
-        </h2>
-
-        {activeOffers.length === 0 && activeJobs.length === 0 ? (
-          <p className="font-body text-muted-foreground">
-            No active listings from this business yet.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            {activeOffers.map((offer) => (
-              <article
-                key={offer.id}
-                className="border border-[#e4e1da] rounded-lg overflow-hidden bg-white flex flex-col"
-              >
-                {offer.imageURL ? (
-                  <div className="relative aspect-[16/10] bg-neutral-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={offer.imageURL}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  </div>
-                ) : null}
-                <div className="p-4 flex flex-col flex-1 gap-2">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex px-2 py-1 rounded bg-neutral-100 text-xs font-body font-semibold capitalize">
-                      {offer.type || offer.category || 'Offer'}
+          {business.services.length > 0 ? (
+            <section>
+              <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
+                Working Area
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {business.services.slice(0, 8).map((service, index) => (
+                  <article
+                    key={service}
+                    className="relative border border-neutral-200 rounded-lg bg-white p-4 sm:p-5"
+                  >
+                    <span className="absolute top-3 right-3 text-2xl font-bold text-neutral-200">
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                    {offer.isMemberDiscount && (
-                      <span className="inline-flex px-2 py-1 rounded bg-emerald-100 text-emerald-800 text-xs font-body font-semibold">
-                        Member discount
+                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-neutral-100 mb-3">
+                      <Sparkles className="w-4 h-4 text-neutral-700" />
+                    </div>
+                    <h3 className="font-semibold text-neutral-900 pr-8">{service}</h3>
+                    <p className="text-xs text-neutral-500 mt-1.5">
+                      Service offered by {business.name}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {/* Latest Jobs */}
+          <section id="jobs" className="scroll-mt-24">
+            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
+              Latest Jobs
+            </h2>
+            {latestJobs.length === 0 ? (
+              <p className="text-sm text-neutral-500">No open roles at the moment.</p>
+            ) : (
+              <div className="space-y-3">
+                {latestJobs.map((job) => (
+                  <article
+                    key={job.id}
+                    className="border border-neutral-200 rounded-lg bg-white p-4 sm:p-5 flex gap-3 sm:gap-4"
+                  >
+                    <div className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-md overflow-hidden bg-neutral-100 border border-neutral-200 shrink-0">
+                      {business.logoURL ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={business.logoURL}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center font-bold text-neutral-500">
+                          {initial}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-neutral-900 break-words">{job.title}</h3>
+                          <p className="text-xs text-neutral-500 mt-0.5">{business.name}</p>
+                        </div>
+                        <Link
+                          href={`/opportunities/${job.id}`}
+                          className="shrink-0 inline-flex items-center justify-center h-9 px-3 rounded-md bg-[#111] text-white text-xs font-semibold"
+                        >
+                          View
+                        </Link>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
+                        {(job.location || business.location) && (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {job.location || business.location}
+                          </span>
+                        )}
+                        {job.experience ? <span>Experience: {job.experience}</span> : null}
+                        {job.salary ? <span>Salary: {job.salary}</span> : null}
+                        {job.publishedAt ? (
+                          <span>Published: {format(job.publishedAt, 'dd MMM yyyy')}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Latest Offers / Products & Services */}
+          <section id="offers" className="scroll-mt-24">
+            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
+              Latest Offers
+            </h2>
+            <p className="text-sm text-neutral-500 mb-4 -mt-2">
+              Products and services from this business
+            </p>
+            {latestOffers.length === 0 ? (
+              <p className="text-sm text-neutral-500">No active offers yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {latestOffers.map((offer) => (
+                  <article
+                    key={offer.id}
+                    className="border border-neutral-200 rounded-lg overflow-hidden bg-white flex flex-col"
+                  >
+                    {offer.imageURL ? (
+                      <div className="relative aspect-[16/10] bg-neutral-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={offer.imageURL}
+                          alt=""
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : null}
+                    <div className="p-4 flex flex-col flex-1 gap-2">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="inline-flex px-2 py-0.5 rounded bg-neutral-100 text-[11px] font-semibold capitalize">
+                          {offer.type || offer.category || 'Offer'}
+                        </span>
+                        {offer.isMemberDiscount ? (
+                          <span className="inline-flex px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px] font-semibold">
+                            Member discount
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 className="font-bold text-neutral-900 break-words">{offer.title}</h3>
+                      {offer.description ? (
+                        <p className="text-sm text-neutral-500 line-clamp-2">{offer.description}</p>
+                      ) : null}
+                      <div className="mt-auto pt-2 flex items-center justify-between gap-2">
+                        {typeof offer.price === 'number' ? (
+                          <p className="font-semibold text-sm">
+                            AED {offer.price}
+                            {typeof offer.originalPrice === 'number' &&
+                            offer.originalPrice > offer.price ? (
+                              <span className="ml-2 text-neutral-400 line-through font-normal text-xs">
+                                AED {offer.originalPrice}
+                              </span>
+                            ) : null}
+                          </p>
+                        ) : (
+                          <span />
+                        )}
+                        <Link
+                          href={`/marketplace/${offer.id}`}
+                          className="inline-flex items-center justify-center h-8 px-3 rounded-md bg-[#111] text-white text-xs font-semibold"
+                        >
+                          View offer
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Latest Events */}
+          <section id="events" className="scroll-mt-24">
+            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
+              Latest Events
+            </h2>
+            {events.length === 0 ? (
+              <p className="text-sm text-neutral-500">No upcoming events listed.</p>
+            ) : (
+              <div className="space-y-3">
+                {events.map((ev) => {
+                  const start = toDate(ev.startDate)
+                  return (
+                    <article
+                      key={ev.id}
+                      className="border border-neutral-200 rounded-lg bg-white p-4 sm:p-5 flex gap-3 items-start"
+                    >
+                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-neutral-100 shrink-0">
+                        <Calendar className="w-4 h-4 text-neutral-700" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-bold text-neutral-900 break-words">{ev.title}</h3>
+                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-500">
+                          {start ? <span>{format(start, 'dd MMM yyyy')}</span> : null}
+                          {ev.location ? (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {ev.location}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <Link
+                        href={`/events/${ev.id}`}
+                        className="shrink-0 inline-flex items-center justify-center h-9 px-3 rounded-md bg-[#111] text-white text-xs font-semibold"
+                      >
+                        View
+                      </Link>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* Member discounts */}
+          {!authLoading && isLoggedInMember && hasMemberDiscounts ? (
+            <section className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-4 sm:p-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800 mb-2">
+                Member discounts
+              </p>
+              <h2 className="font-headline text-xl font-bold text-neutral-900 mb-3">
+                Exclusive for members
+              </h2>
+              <ul className="space-y-3">
+                {memberDiscounts.map((offer) => (
+                  <li key={offer.id} className="text-sm text-neutral-800">
+                    <span className="font-semibold">{offer.title}</span>
+                    {(offer.discountPercentage || offer.memberBenefit) && (
+                      <span className="text-emerald-800 ml-2">
+                        {offer.discountPercentage || offer.memberBenefit}% off
                       </span>
                     )}
-                  </div>
-                  <h3 className="font-headline text-lg font-bold text-foreground break-words">
-                    {offer.title}
-                  </h3>
-                  {offer.description && (
-                    <p className="font-body text-sm text-muted-foreground line-clamp-3">
-                      {offer.description}
-                    </p>
-                  )}
-                  {typeof offer.price === 'number' && (
-                    <p className="font-body font-semibold mt-auto pt-2">
-                      AED {offer.price}
-                      {typeof offer.originalPrice === 'number' && offer.originalPrice > offer.price ? (
-                        <span className="ml-2 text-neutral-400 line-through font-normal text-sm">
-                          AED {offer.originalPrice}
-                        </span>
-                      ) : null}
-                    </p>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+                  </li>
+                ))}
+                {discounts.map((d) => (
+                  <li key={d.id} className="text-sm text-neutral-800">
+                    <span className="font-semibold">{d.title}</span>
+                    <span className="text-emerald-800 ml-2">
+                      {d.discountType === 'fixed'
+                        ? `${d.currency || 'AED'} ${d.discountValue}`
+                        : `${d.discountValue}%`}{' '}
+                      off
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
-      {activeJobs.length > 0 && (
-        <section id="jobs" className="space-y-4 scroll-mt-24">
-          <h2 className="font-headline text-2xl font-bold text-foreground">Open roles</h2>
-          <div className="space-y-3">
-            {activeJobs.map((job) => (
-              <article
-                key={job.id}
-                className="border border-[#e4e1da] rounded-lg p-4 sm:p-5 bg-white"
+          {!authLoading && !isLoggedInMember && hasMemberDiscounts ? (
+            <section className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 sm:p-6">
+              <h2 className="font-headline text-lg font-bold text-neutral-900 mb-2">
+                Member pricing available
+              </h2>
+              <p className="text-sm text-neutral-500 mb-4">
+                Sign in to see PB member discounts for this business.
+              </p>
+              <Link
+                href={`/login?returnUrl=/directory/${businessId}`}
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-[#111] text-white rounded-lg text-sm font-semibold"
               >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="font-headline text-lg font-bold text-foreground break-words">
-                      {job.title}
-                    </h3>
-                    {(job.jobType || job.category) && (
-                      <p className="font-body text-xs text-muted-foreground mt-1 uppercase tracking-wide">
-                        {job.jobType || job.category}
-                      </p>
-                    )}
-                    {job.description && (
-                      <p className="font-body text-sm text-muted-foreground mt-2 line-clamp-3">
-                        {job.description}
-                      </p>
-                    )}
-                  </div>
-                  <Link
-                    href={`/opportunities/${job.id}`}
-                    className="inline-flex shrink-0 items-center justify-center min-h-[44px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
-                  >
-                    Apply
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+                Sign in
+              </Link>
+            </section>
+          ) : null}
+        </div>
 
-      {events.length > 0 && (
-        <section id="events" className="space-y-4 scroll-mt-24">
-          <h2 className="font-headline text-2xl font-bold text-foreground">Upcoming events</h2>
-          <div className="space-y-3">
-            {events.map((ev) => (
-              <article
-                key={ev.id}
-                className="border border-[#e4e1da] rounded-lg p-4 sm:p-5 bg-white flex items-start justify-between gap-3"
-              >
-                <div className="min-w-0 flex items-start gap-2">
-                  <Calendar className="w-4 h-4 mt-1 shrink-0" />
-                  <div>
-                    <h3 className="font-headline text-lg font-bold text-foreground break-words">
-                      {ev.title}
-                    </h3>
-                  </div>
-                </div>
-                <Link
-                  href={`/events/${ev.id}`}
-                  className="inline-flex shrink-0 items-center justify-center min-h-[44px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
-                >
-                  View
-                </Link>
-              </article>
-            ))}
+        {/* Sidebar */}
+        <aside className="space-y-4 lg:sticky lg:top-4 h-fit">
+          <div className="border border-neutral-200 rounded-lg bg-white p-4 sm:p-5">
+            <h2 className="font-bold text-neutral-900 mb-2">Company Overview</h2>
+            <OverviewRow label="Company Name" value={business.name} />
+            <OverviewRow label="Category" value={business.category || business.companyType} />
+            <OverviewRow label="Location" value={business.location} />
+            <OverviewRow
+              label="Member Since"
+              value={memberSince ? format(memberSince, 'dd MMM yyyy') : '—'}
+            />
+            <OverviewRow label="Company Size" value={business.teamSize || '—'} />
+            <OverviewRow label="Open Jobs" value={String(activeJobs.length)} />
+            <OverviewRow
+              label="Last Job Posted"
+              value={lastJobPosted ? format(lastJobPosted, 'dd MMM yyyy') : '—'}
+            />
+            <OverviewRow label="Active Offers" value={String(activeOffers.length)} />
           </div>
-        </section>
-      )}
+
+          <a
+            href="#jobs"
+            className="flex w-full items-center justify-center min-h-[48px] rounded-lg bg-[#111] text-white text-sm font-semibold hover:bg-neutral-800"
+          >
+            <Briefcase className="w-4 h-4 mr-2" />
+            Job Available {activeJobs.length}
+          </a>
+
+          {websiteHref ? (
+            <a
+              href={websiteHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center min-h-[48px] rounded-lg border border-neutral-300 bg-white text-neutral-900 text-sm font-semibold hover:bg-neutral-50"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Go to website
+            </a>
+          ) : null}
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={handleConnect}
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 bg-[#111] text-white rounded-lg text-sm font-semibold"
+            >
+              <UserPlus className="w-4 h-4" />
+              {isLoggedInMember ? 'Connect' : 'Sign in to Connect'}
+            </button>
+            <button
+              type="button"
+              onClick={handleMessage}
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-neutral-900 border border-neutral-300 rounded-lg text-sm font-semibold"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Message
+            </button>
+            {primaryPhone && isLoggedInMember ? (
+              <a
+                href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-neutral-900 border border-neutral-300 rounded-lg text-sm font-semibold"
+              >
+                <Phone className="w-4 h-4" />
+                Call / Book
+              </a>
+            ) : null}
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }

@@ -19,6 +19,35 @@ export const WORK_TYPE_OPTIONS = [
   { id: 'hybrid', label: 'Hybrid' },
 ] as const
 
+/** Role types for the public job search filter */
+export const ROLE_TYPE_FILTER_OPTIONS = [
+  { id: 'all', label: 'All role types' },
+  { id: 'full_time', label: 'Full Time' },
+  { id: 'part_time', label: 'Part Time' },
+  { id: 'contract', label: 'Contract' },
+  { id: 'freelance', label: 'Freelance / Gig' },
+  { id: 'internship', label: 'Internship' },
+  { id: 'volunteer', label: 'Volunteer' },
+  { id: 'training', label: 'Training' },
+] as const
+
+/** Shared industry list (matches business post form) */
+export const INDUSTRY_OPTIONS = [
+  'Technology',
+  'HR',
+  'Retail',
+  'Real Estate',
+  'Automotive',
+  'F&B',
+  'Hospitality',
+  'Health & Fitness',
+  'Consultancy',
+  'Business',
+  'Education',
+  'Nonprofit',
+  'Other',
+] as const
+
 export const UAE_LOCATION_OPTIONS = [
   'All locations',
   'Abu Dhabi',
@@ -96,12 +125,16 @@ export function getRoleType(opp: BusinessOpportunity): string {
   return (opp as { roleType?: string }).roleType || opp.type || 'job'
 }
 
-export function matchesOpportunityFilter(opp: BusinessOpportunity, filterId: string): boolean {
+export function matchesRoleTypeFilter(opp: BusinessOpportunity, filterId: string): boolean {
   if (filterId === 'all') return true
-  const tab = FILTER_TABS.find((t) => t.id === filterId)
-  if (!tab || !('roleTypes' in tab)) return opp.type === filterId
   const roleType = getRoleType(opp)
-  return tab.roleTypes.includes(roleType) || opp.type === filterId
+  if (filterId === 'freelance') {
+    return roleType === 'freelance' || roleType === 'gig' || opp.type === 'gig'
+  }
+  if (filterId === 'full_time') {
+    return roleType === 'full_time' || roleType === 'job' || opp.type === 'job'
+  }
+  return roleType === filterId || opp.type === filterId
 }
 
 export function opportunitySearchHaystack(opp: BusinessOpportunity): string {

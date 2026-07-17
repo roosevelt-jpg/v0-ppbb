@@ -9,6 +9,10 @@ interface PlacePrediction {
   secondaryText?: string
   lat?: number
   lng?: number
+  city?: string
+  state?: string
+  country?: string
+  countryCode?: string
 }
 
 interface GooglePlacesAutocompleteProps {
@@ -145,6 +149,10 @@ export default function GooglePlacesAutocomplete({
         secondaryText: data.place.city || prediction.secondaryText,
         lat: data.place.lat,
         lng: data.place.lng,
+        city: data.place.city || '',
+        state: data.place.state || '',
+        country: data.place.country || '',
+        countryCode: data.place.countryCode || '',
       })
     } catch {
       onChange({

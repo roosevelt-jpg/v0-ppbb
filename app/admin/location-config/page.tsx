@@ -127,7 +127,7 @@ export default function LocationConfigPage() {
         <div>
           <h1 className="text-3xl font-bold">Google Location API</h1>
           <p className="text-neutral-600 dark:text-neutral-400 mt-1">
-            Configure location services for user signup and profile management
+            Configure Maps/Places for signup, profiles, and event venue pins (admin + business)
           </p>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function LocationConfigPage() {
                 Enable Auto-Detection
               </label>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                Automatically detect user location during signup
+                Used by the shared address picker on signup and event forms (country default + Places search)
               </p>
             </div>
             <input

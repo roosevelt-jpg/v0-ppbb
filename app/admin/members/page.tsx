@@ -68,18 +68,22 @@ export default function AdminMembersPage() {
   }
 
   const allMembers = members
-  const memberCount = allMembers.filter((m) => m.role === 'member' || m.userType === 'member').length
+  const isBusinessAccount = (m: { role?: string; userType?: string }) =>
+    m.role === 'business' || m.userType === 'business'
+  const isSponsorAccount = (m: { role?: string; userType?: string }) =>
+    m.role === 'sponsor' || m.userType === 'sponsor'
+
+  const individualCount = allMembers.filter(
+    (m) => !isBusinessAccount(m) && !isSponsorAccount(m)
+  ).length
   const volunteerCount = allMembers.filter(
     (m) => m.role === 'volunteer' || m.userType === 'volunteer'
   ).length
-  const businessCount = allMembers.filter(
-    (m) => m.role === 'business' || m.userType === 'business'
-  ).length
-  const sponsorCount = allMembers.filter((m) => m.role === 'sponsor' || m.userType === 'sponsor').length
+  const businessCount = allMembers.filter((m) => isBusinessAccount(m)).length
 
   const displayMembers =
     userType === 'all'
-      ? allMembers
+      ? allMembers.filter((m) => !isBusinessAccount(m) && !isSponsorAccount(m))
       : allMembers.filter((m) => m.role === userType || m.userType === userType)
 
   const allVisibleSelected =
@@ -180,7 +184,10 @@ export default function AdminMembersPage() {
 
   if (loading) {
     return (
-      <AdminPageLayout title="Members">
+      <AdminPageLayout
+        title="Individual Members"
+        subtitle="Individuals can volunteer and join the PB team · Business members are managed separately"
+      >
         <div className="flex items-center justify-center py-12">
           <p className="text-gray-500">Loading members...</p>
         </div>
@@ -189,7 +196,10 @@ export default function AdminMembersPage() {
   }
 
   return (
-    <AdminPageLayout title="Members">
+    <AdminPageLayout
+      title="Individual Members"
+      subtitle="Individuals can volunteer and join the PB team · Business members live under Business Members"
+    >
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -212,41 +222,41 @@ export default function AdminMembersPage() {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
-            <p className="text-sm text-gray-600">Total Members</p>
-            <p className="text-2xl font-bold text-black">{memberCount}</p>
+            <p className="text-sm text-gray-600">Individual members</p>
+            <p className="text-2xl font-bold text-black">{individualCount}</p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
-            <p className="text-sm text-gray-600">Volunteers</p>
+            <p className="text-sm text-gray-600">Volunteers / PB team</p>
             <p className="text-2xl font-bold text-black">{volunteerCount}</p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
-            <p className="text-sm text-gray-600">Businesses</p>
+            <p className="text-sm text-gray-600">Business accounts (see Business Members)</p>
             <p className="text-2xl font-bold text-black">{businessCount}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
-            <p className="text-sm text-gray-600">Sponsors</p>
-            <p className="text-2xl font-bold text-black">{sponsorCount}</p>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="flex gap-2 overflow-x-auto pb-1 min-w-0">
-            {['all', 'member', 'volunteer', 'business', 'sponsor'].map((type) => (
+            {[
+              { id: 'all', label: 'All individuals' },
+              { id: 'member', label: 'Members' },
+              { id: 'volunteer', label: 'Volunteers' },
+            ].map((type) => (
               <button
-                key={type}
+                key={type.id}
                 onClick={() => {
-                  setUserType(type)
+                  setUserType(type.id)
                   setLoading(true)
                 }}
                 className={`px-4 py-2 rounded font-medium text-sm transition-colors whitespace-nowrap shrink-0 ${
-                  userType === type
+                  userType === type.id
                     ? 'bg-black text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type.label}
               </button>
             ))}
           </div>
@@ -292,10 +302,9 @@ export default function AdminMembersPage() {
                 className="mt-1 block min-h-[40px] rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white"
               >
                 <option value="">—</option>
-                <option value="member">Member</option>
-                <option value="volunteer">Volunteer</option>
-                <option value="business">Business</option>
-                <option value="sponsor">Sponsor</option>
+                <option value="member">Individual member</option>
+                <option value="volunteer">Volunteer / PB team</option>
+                <option value="business">Business member</option>
               </select>
             </label>
             <button

@@ -85,12 +85,15 @@ function DonationsContent() {
       case 'completed':
         return <CheckCircle className="w-5 h-5 text-green-600" />
       case 'pending':
+      case 'pending_verification':
+      case 'more_info_requested':
+      case 'resubmission_requested':
         return <Clock className="w-5 h-5 text-yellow-600" />
       case 'rejected':
       case 'refunded':
         return <XCircle className="w-5 h-5 text-red-600" />
       default:
-        return null
+        return <Clock className="w-5 h-5 text-neutral-400" />
     }
   }
 
@@ -148,6 +151,11 @@ function DonationsContent() {
                     </div>
                     {donation.partnerName ? (
                       <p className="text-sm text-neutral-500">Partner: {donation.partnerName}</p>
+                    ) : null}
+                    {(donation as { donationType?: string }).donationType ? (
+                      <p className="text-sm text-neutral-500 capitalize">
+                        Type: {(donation as { donationType?: string }).donationType}
+                      </p>
                     ) : null}
                     <p className="text-sm text-neutral-500">{parseDonationDate(donation)}</p>
                   </div>

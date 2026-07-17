@@ -11,13 +11,12 @@ export interface LocationData {
 }
 
 /**
- * Get user's current location using browser Geolocation API
- * Returns coordinates and attempts to reverse-geocode to address
+ * Browser geolocation + server reverse-geocode (uses Location Config / Integrations keys).
  */
 export async function getUserLocation(): Promise<LocationData | null> {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
-      console.error('[v0] Geolocation not supported')
+      console.error('[geolocation] not supported')
       resolve(null)
       return
     }
@@ -25,113 +24,66 @@ export async function getUserLocation(): Promise<LocationData | null> {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords
-        
         try {
-          // Use Google Geocoding API to reverse-geocode coordinates to address
-          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
-          
-          const response = await fetch(geocodeUrl)
+          const response = await fetch(
+            `/api/places/geocode?lat=${latitude}&lng=${longitude}`
+          )
           const data = await response.json()
-
-          if (data.results && data.results.length > 0) {
-            const result = data.results[0]
-            const addressComponents = result.address_components
-
-            let city = ''
-            let state = ''
-            let country = ''
-            let countryCode = ''
-
-            // Parse address components
-            addressComponents.forEach((component: any) => {
-              if (component.types.includes('locality')) city = component.long_name
-              if (component.types.includes('administrative_area_level_1')) state = component.long_name
-              if (component.types.includes('country')) {
-                country = component.long_name
-                countryCode = component.short_name
-              }
-            })
-
+          if (data.success && data.place) {
             resolve({
-              latitude,
-              longitude,
-              city,
-              state,
-              country,
-              countryCode,
-              address: result.formatted_address,
+              latitude: data.place.lat ?? latitude,
+              longitude: data.place.lng ?? longitude,
+              city: data.place.city || '',
+              state: data.place.state || '',
+              country: data.place.country || '',
+              countryCode: data.place.countryCode || '',
+              address: data.place.formattedAddress || '',
             })
-          } else {
-            resolve(null)
+            return
           }
+          resolve(null)
         } catch (error) {
-          console.error('[v0] Geocoding error:', error)
+          console.error('[geolocation] geocode error:', error)
           resolve(null)
         }
       },
       (error) => {
-        console.error('[v0] Geolocation error:', error.message)
+        console.error('[geolocation] error:', error.message)
         resolve(null)
-      }
+      },
+      { enableHighAccuracy: true, timeout: 12000 }
     )
   })
 }
 
-/**
- * Search for location using Google Places API
- */
+/** Places search via server proxy */
 export async function searchLocation(query: string): Promise<LocationData[]> {
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(query)}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
-    
-    const response = await fetch(url)
+    const params = new URLSearchParams({ input: query })
+    const response = await fetch(`/api/places/autocomplete?${params.toString()}`)
     const data = await response.json()
+    if (!data.success || !data.predictions?.length) return []
 
-    if (!data.predictions) return []
-
-    // Get place details for each prediction
     const locations: LocationData[] = []
-
     for (const prediction of data.predictions.slice(0, 5)) {
-      const placeDetailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
-      
-      const detailsResponse = await fetch(placeDetailsUrl)
-      const detailsData = await detailsResponse.json()
-
-      if (detailsData.result) {
-        const result = detailsData.result
-        const geometry = result.geometry
-        const addressComponents = result.address_components
-
-        let city = ''
-        let state = ''
-        let country = ''
-        let countryCode = ''
-
-        addressComponents.forEach((component: any) => {
-          if (component.types.includes('locality')) city = component.long_name
-          if (component.types.includes('administrative_area_level_1')) state = component.long_name
-          if (component.types.includes('country')) {
-            country = component.long_name
-            countryCode = component.short_name
-          }
-        })
-
-        locations.push({
-          latitude: geometry.location.lat,
-          longitude: geometry.location.lng,
-          city,
-          state,
-          country,
-          countryCode,
-          address: result.formatted_address,
-        })
-      }
+      const detailsRes = await fetch(
+        `/api/places/details?placeId=${encodeURIComponent(prediction.placeId)}`
+      )
+      const details = await detailsRes.json()
+      if (!details.success || !details.place) continue
+      locations.push({
+        latitude: details.place.lat || 0,
+        longitude: details.place.lng || 0,
+        city: details.place.city || '',
+        state: details.place.state || '',
+        country: details.place.country || '',
+        countryCode: details.place.countryCode || '',
+        address: details.place.formattedAddress || prediction.mainText || '',
+      })
     }
-
     return locations
   } catch (error) {
-    console.error('[v0] Location search error:', error)
+    console.error('[geolocation] search error:', error)
     return []
   }
 }

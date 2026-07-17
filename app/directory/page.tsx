@@ -7,13 +7,9 @@ import { BusinessDirectorySection } from '@/components/marketplace/business-dire
 
 export default function DirectoryPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#f5f5f5] flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold">Business Directory</h1>
-          <p className="text-muted-foreground mt-2">Discover verified businesses in the Passive Blessings community.</p>
-        </div>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <BusinessDirectorySection />
       </main>
       <Footer />

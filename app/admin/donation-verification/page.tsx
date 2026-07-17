@@ -16,6 +16,8 @@ type Submission = {
   referenceNumber?: string
   proofImage?: string
   status?: string
+  donationType?: string
+  partnerName?: string
   submittedAt?: { toDate?: () => Date }
   infoRequestMessage?: string
   rejectionReason?: string
@@ -104,7 +106,7 @@ export default function DonationVerificationPage() {
   const btnSecondary =
     'min-h-[44px] flex-1 bg-white text-black border border-neutral-300 hover:bg-neutral-50 py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
   const btnDanger =
-    'min-h-[44px] flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
+    'min-h-[44px] flex-1 bg-black hover:bg-neutral-800 !text-white py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
 
   const renderPendingRow = (submission: Submission) => {
     const when = submission.submittedAt?.toDate?.() || new Date()
@@ -119,6 +121,14 @@ export default function DonationVerificationPage() {
           <div className="min-w-0">
             <p className="font-semibold text-neutral-900">{submission.donorName || 'Donor'}</p>
             <p className="text-sm text-neutral-600">Cause: {submission.causeName || '—'}</p>
+            <p className="text-sm text-neutral-600">
+              Type:{' '}
+              {submission.donationType
+                ? String(submission.donationType).charAt(0).toUpperCase() +
+                  String(submission.donationType).slice(1)
+                : '—'}
+              {submission.partnerName ? ` · ${submission.partnerName}` : ''}
+            </p>
             <p className="text-sm text-neutral-600">
               Amount: AED {(submission.amount || 0).toLocaleString()}
             </p>

@@ -48,6 +48,8 @@ export interface DirectoryBusiness {
   name: string
   description: string
   category: string
+  /** Normalized company type (service / product / hybrid / etc.) */
+  companyType: string
   logoURL: string
   bannerURL: string
   ownerName: string
@@ -57,6 +59,14 @@ export interface DirectoryBusiness {
   email: string
   website: string
   location: string
+  teamSize: string
+  socialLinks: {
+    facebook?: string
+    instagram?: string
+    linkedin?: string
+    twitter?: string
+  }
+  createdAt?: Date | null
   isSponsor: boolean
   isApproved: boolean
   isActive: boolean
@@ -92,6 +102,10 @@ export interface DirectoryJob {
   category: string
   status: string
   jobType?: string
+  location?: string
+  experience?: string
+  salary?: string
+  publishedAt?: Date | null
 }
 
 export interface DirectoryBusinessCardData extends DirectoryBusiness {
@@ -136,6 +150,27 @@ export function normalizeDirectoryBusiness(
       ? normalizeStatus(data.status) === 'active'
       : data.isActive !== false && normalizeStatus(data.status) !== 'inactive' && normalizeStatus(data.status) !== 'suspended'
 
+  const companyType =
+    asString(data.companyType) ||
+    asString(data.businessType) ||
+    asString(data.type) ||
+    asString(data.category) ||
+    'other'
+
+  const socialRaw =
+    data.socialLinks && typeof data.socialLinks === 'object'
+      ? (data.socialLinks as Record<string, unknown>)
+      : {}
+
+  const createdAt =
+    data.createdAt && typeof data.createdAt === 'object' && 'toDate' in (data.createdAt as object)
+      ? (data.createdAt as { toDate: () => Date }).toDate()
+      : data.createdAt instanceof Date
+        ? data.createdAt
+        : data.createdAt
+          ? new Date(data.createdAt as string | number)
+          : null
+
   return {
     id,
     name:
@@ -145,6 +180,7 @@ export function normalizeDirectoryBusiness(
       'Untitled business',
     description: asString(data.description) || asString(data.oneLineDescription) || asString(data.tagline),
     category: asString(data.category) || asString(data.businessType) || asString(data.type),
+    companyType,
     logoURL: asString(data.logoURL) || asString(data.logo) || asString(data.logoUrl),
     bannerURL: asString(data.bannerURL) || asString(data.banner) || asString(data.bannerUrl),
     ownerName:
@@ -167,6 +203,14 @@ export function normalizeDirectoryBusiness(
         ? asString((data.locationData as { formattedAddress?: string }).formattedAddress) ||
           asString((data.locationData as { city?: string }).city)
         : ''),
+    teamSize: asString(data.teamSize) || asString(data.companySize) || asString(data.employees),
+    socialLinks: {
+      facebook: asString(socialRaw.facebook) || asString(data.facebook),
+      instagram: asString(socialRaw.instagram) || asString(data.instagram),
+      linkedin: asString(socialRaw.linkedin) || asString(data.linkedin),
+      twitter: asString(socialRaw.twitter) || asString(data.twitter) || asString(data.x),
+    },
+    createdAt: createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt : null,
     isSponsor:
       isTruthyFlag(data.isSponsor) ||
       isTruthyFlag(data.sponsor) ||
@@ -233,6 +277,35 @@ export function normalizeDirectoryJob(
   id: string,
   data: Record<string, unknown>
 ): DirectoryJob {
+  const salaryMin = typeof data.salaryMin === 'number' ? data.salaryMin : undefined
+  const salaryMax = typeof data.salaryMax === 'number' ? data.salaryMax : undefined
+  const compensation = asString(data.compensation) || asString(data.salary)
+  const salary =
+    compensation ||
+    (salaryMin != null || salaryMax != null
+      ? [salaryMin, salaryMax].filter((v) => v != null).join(' - ')
+      : '')
+
+  const locObj = data.location
+  const location =
+    asString(data.locationText) ||
+    asString(data.locationCity) ||
+    (typeof locObj === 'string' ? locObj : '') ||
+    (locObj && typeof locObj === 'object'
+      ? asString((locObj as { formattedAddress?: string; city?: string }).formattedAddress) ||
+        asString((locObj as { city?: string }).city)
+      : '')
+
+  const publishedRaw = data.createdAt || data.publishedAt || data.updatedAt
+  const publishedAt =
+    publishedRaw && typeof publishedRaw === 'object' && 'toDate' in (publishedRaw as object)
+      ? (publishedRaw as { toDate: () => Date }).toDate()
+      : publishedRaw instanceof Date
+        ? publishedRaw
+        : publishedRaw
+          ? new Date(publishedRaw as string | number)
+          : null
+
   return {
     id,
     businessId: asString(data.businessId),
@@ -240,7 +313,14 @@ export function normalizeDirectoryJob(
     description: asString(data.description),
     category: asString(data.category) || asString(data.jobType) || asString(data.type),
     status: normalizeStatus(data.status) || 'open',
-    jobType: asString(data.jobType) || asString(data.type),
+    jobType: asString(data.jobType) || asString(data.type) || asString(data.roleType),
+    location,
+    experience:
+      asString(data.experience) ||
+      asString(data.experienceLevel) ||
+      asString(data.experienceRequired),
+    salary,
+    publishedAt: publishedAt && !Number.isNaN(publishedAt.getTime()) ? publishedAt : null,
   }
 }
 
@@ -294,13 +374,80 @@ function businessMatchesFilter(
   return needles[filter].some((needle) => haystack.includes(needle))
 }
 
+export type DirectorySort = 'default' | 'name-asc' | 'name-desc' | 'jobs-desc'
+
+export interface DirectoryQueryOptions {
+  filter?: MarketplaceDirectoryFilter
+  searchTerm?: string
+  location?: string
+  companyType?: string
+  sort?: DirectorySort
+}
+
+export function buildDirectoryFacetCounts(businesses: DirectoryBusiness[]): {
+  categories: { id: MarketplaceDirectoryFilter; label: string; count: number }[]
+  locations: { id: string; label: string; count: number }[]
+  companyTypes: { id: string; label: string; count: number }[]
+} {
+  const categoryCounts = new Map<MarketplaceDirectoryFilter, number>()
+  for (const tab of MARKETPLACE_DIRECTORY_TABS) {
+    categoryCounts.set(tab.id, 0)
+  }
+  categoryCounts.set('all', businesses.length)
+
+  const locationCounts = new Map<string, number>()
+  const typeCounts = new Map<string, number>()
+
+  for (const business of businesses) {
+    for (const tab of MARKETPLACE_DIRECTORY_TABS) {
+      if (tab.id === 'all') continue
+      if (businessMatchesFilter(business, tab.id, false)) {
+        categoryCounts.set(tab.id, (categoryCounts.get(tab.id) || 0) + 1)
+      }
+    }
+    const loc = business.location.trim() || 'Unspecified'
+    locationCounts.set(loc, (locationCounts.get(loc) || 0) + 1)
+    const typeKey = (business.companyType || 'other').trim().toLowerCase() || 'other'
+    typeCounts.set(typeKey, (typeCounts.get(typeKey) || 0) + 1)
+  }
+
+  return {
+    categories: MARKETPLACE_DIRECTORY_TABS.map((tab) => ({
+      id: tab.id,
+      label: tab.label,
+      count: categoryCounts.get(tab.id) || 0,
+    })),
+    locations: Array.from(locationCounts.entries())
+      .map(([id, count]) => ({ id, label: id, count }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)),
+    companyTypes: Array.from(typeCounts.entries())
+      .map(([id, count]) => ({
+        id,
+        label: id.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        count,
+      }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)),
+  }
+}
+
 export function buildDirectoryCards(
   businesses: DirectoryBusiness[],
   offers: DirectoryOffer[],
   jobs: DirectoryJob[],
-  filter: MarketplaceDirectoryFilter,
-  searchTerm = ''
+  filterOrOptions: MarketplaceDirectoryFilter | DirectoryQueryOptions = 'all',
+  searchTermLegacy = ''
 ): DirectoryBusinessCardData[] {
+  const options: DirectoryQueryOptions =
+    typeof filterOrOptions === 'string'
+      ? { filter: filterOrOptions, searchTerm: searchTermLegacy }
+      : filterOrOptions
+
+  const filter = options.filter || 'all'
+  const searchTerm = options.searchTerm || ''
+  const locationFilter = (options.location || 'all').trim()
+  const companyTypeFilter = (options.companyType || 'all').trim().toLowerCase()
+  const sort = options.sort || 'default'
+
   const activeOffers = offers.filter(isActiveOffer)
   const activeJobs = jobs.filter(isActiveJob)
 
@@ -322,7 +469,15 @@ export function buildDirectoryCards(
 
   const term = searchTerm.trim().toLowerCase()
 
-  return businesses
+  // Deduplicate by business id
+  const seen = new Set<string>()
+  const uniqueBusinesses = businesses.filter((b) => {
+    if (!b.id || seen.has(b.id)) return false
+    seen.add(b.id)
+    return true
+  })
+
+  let cards = uniqueBusinesses
     .map((business) => {
       const businessOffers = offersByBusiness.get(business.id) || []
       const businessJobs = jobsByBusiness.get(business.id) || []
@@ -336,18 +491,39 @@ export function buildDirectoryCards(
     })
     .filter((business) => businessMatchesFilter(business, filter, business.hasMemberDiscount))
     .filter((business) => {
+      if (locationFilter === 'all' || !locationFilter) return true
+      const loc = business.location.trim() || 'Unspecified'
+      return loc === locationFilter
+    })
+    .filter((business) => {
+      if (companyTypeFilter === 'all' || !companyTypeFilter) return true
+      return (business.companyType || 'other').trim().toLowerCase() === companyTypeFilter
+    })
+    .filter((business) => {
       if (!term) return true
       const blob = [
         business.name,
         business.description,
         business.ownerName,
         business.category,
+        business.companyType,
+        business.location,
         ...business.services,
       ]
         .join(' ')
         .toLowerCase()
       return blob.includes(term)
     })
+
+  if (sort === 'name-asc') {
+    cards = [...cards].sort((a, b) => a.name.localeCompare(b.name))
+  } else if (sort === 'name-desc') {
+    cards = [...cards].sort((a, b) => b.name.localeCompare(a.name))
+  } else if (sort === 'jobs-desc') {
+    cards = [...cards].sort((a, b) => b.activeJobsCount - a.activeJobsCount || a.name.localeCompare(b.name))
+  }
+
+  return cards
 }
 
 /** Public directory: approved + active businesses only. */

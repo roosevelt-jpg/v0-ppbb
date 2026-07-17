@@ -19,12 +19,19 @@ import {
   progressPercent,
   mergeCharityCaseLists,
 } from '@/lib/charity-cases'
+import {
+  DONATION_PAYMENT_TYPES,
+  type DonationPaymentType,
+  resolvePartnerPaymentLink,
+} from '@/lib/donation-payment-links'
 
 interface CharityPartner {
   id: string
   name: string
   description?: string
   paymentLink?: string
+  zakatPaymentLink?: string
+  sadaqahPaymentLink?: string
   logo?: string
   status?: string
   isActive?: boolean
@@ -42,6 +49,8 @@ export default function DonationPage() {
   const [donationsConfig, setDonationsConfig] =
     useState<DonationsPlatformConfig>(DEFAULT_DONATIONS_CONFIG)
   const [selectedCause, setSelectedCause] = useState<CharityCase | null>(null)
+  const [selectedPartner, setSelectedPartner] = useState<CharityPartner | null>(null)
+  const [modalStep, setModalStep] = useState<'partner' | 'type'>('partner')
   const [loading, setLoading] = useState(true)
   const [causeFromQuery, setCauseFromQuery] = useState<string | null>(null)
 
@@ -147,22 +156,34 @@ export default function DonationPage() {
     if (match) setSelectedCause(match)
   }, [causeFromQuery, causes, selectedCause])
 
-  const resolvePaymentLink = (cause: CharityCase, partner?: CharityPartner | null) => {
-    if (partner?.paymentLink) return partner.paymentLink
+  const resolvePaymentLink = (
+    cause: CharityCase,
+    partner: CharityPartner | null | undefined,
+    donationType: DonationPaymentType
+  ) => {
+    const fallback = donationsConfig.beitAlKhairURL || ''
+    if (partner) {
+      return resolvePartnerPaymentLink(partner, donationType, fallback)
+    }
     if (cause.partnerId) {
       const assigned = partners.find((p) => p.id === cause.partnerId)
-      if (assigned?.paymentLink) return assigned.paymentLink
+      if (assigned) return resolvePartnerPaymentLink(assigned, donationType, fallback)
     }
-    return donationsConfig.beitAlKhairURL || ''
+    return fallback
   }
 
-  const buildConfirmHref = (cause: CharityCase, partner?: CharityPartner | null) => {
-    const paymentLink = resolvePaymentLink(cause, partner)
+  const buildConfirmHref = (
+    cause: CharityCase,
+    partner: CharityPartner | null | undefined,
+    donationType: DonationPaymentType
+  ) => {
+    const paymentLink = resolvePaymentLink(cause, partner, donationType)
     const params = new URLSearchParams({
       cause: cause.id,
       causeName: cause.title,
       causeDescription: cause.description.slice(0, 500),
       paymentLink,
+      donationType,
     })
     if (partner) {
       params.set('partner', partner.id)
@@ -171,6 +192,23 @@ export default function DonationPage() {
       params.set('partnerName', 'Beit Al Khair')
     }
     return `/donate-confirm?${params.toString()}`
+  }
+
+  const openDonateModal = (cause: CharityCase) => {
+    setSelectedCause(cause)
+    setSelectedPartner(null)
+    setModalStep('partner')
+  }
+
+  const closeDonateModal = () => {
+    setSelectedCause(null)
+    setSelectedPartner(null)
+    setModalStep('partner')
+  }
+
+  const choosePartner = (partner: CharityPartner | null) => {
+    setSelectedPartner(partner)
+    setModalStep('type')
   }
 
   if (loading) {
@@ -270,7 +308,7 @@ export default function DonationPage() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {causes.map((cause) => {
                   const pct = progressPercent(cause.amountRaised, cause.targetAmount)
                   return (
@@ -282,36 +320,36 @@ export default function DonationPage() {
                         <img
                           src={cause.bannerImage}
                           alt={cause.title}
-                          className="w-full h-44 sm:h-48 object-cover"
+                          className="w-full h-28 sm:h-32 object-cover"
                         />
                       ) : (
-                        <div className="w-full h-44 sm:h-48 bg-neutral-100 flex items-center justify-center">
-                          <Heart className="w-10 h-10 text-neutral-300" />
+                        <div className="w-full h-28 sm:h-32 bg-neutral-100 flex items-center justify-center">
+                          <Heart className="w-7 h-7 text-neutral-300" />
                         </div>
                       )}
-                      <div className="p-4 sm:p-5 flex flex-col flex-1">
+                      <div className="p-3 flex flex-col flex-1 gap-1.5">
                         <span
-                          className="inline-block self-start bg-neutral-100 text-neutral-800 text-[10px] tracking-wider uppercase font-semibold px-2.5 py-1 rounded mb-2"
+                          className="inline-block self-start bg-neutral-100 text-neutral-800 text-[10px] tracking-wider uppercase font-semibold px-2 py-0.5 rounded"
                           style={{ fontFamily: 'Inter, sans-serif' }}
                         >
                           {cause.category}
                         </span>
                         <h3
-                          className="text-lg sm:text-xl mb-2 text-neutral-900"
+                          className="text-base sm:text-lg leading-snug text-neutral-900 line-clamp-2"
                           style={{ fontFamily: 'Cormorant Garamond, serif' }}
                         >
                           {cause.title}
                         </h3>
                         <p
-                          className="text-neutral-600 text-sm mb-4 flex-1"
+                          className="text-neutral-600 text-xs leading-snug line-clamp-2 flex-1"
                           style={{ fontFamily: 'Inter, sans-serif' }}
                         >
-                          {truncateAtWord(cause.description)}
+                          {truncateAtWord(cause.description, 90)}
                         </p>
 
-                        <div className="mb-4">
+                        <div className="pt-1">
                           <div
-                            className="flex justify-between text-sm mb-1"
+                            className="flex justify-between text-xs mb-1"
                             style={{ fontFamily: 'Inter, sans-serif' }}
                           >
                             <span className="font-semibold">
@@ -321,22 +359,22 @@ export default function DonationPage() {
                               AED {cause.targetAmount.toLocaleString()}
                             </span>
                           </div>
-                          <div className="w-full bg-neutral-200 rounded-full h-2">
+                          <div className="w-full bg-neutral-200 rounded-full h-1.5">
                             <div
-                              className="bg-neutral-900 h-2 rounded-full transition-all"
+                              className="bg-neutral-900 h-1.5 rounded-full transition-all"
                               style={{ width: `${pct}%` }}
                             />
                           </div>
-                          <p className="text-xs text-neutral-500 mt-1">{pct}% funded</p>
+                          <p className="text-[10px] text-neutral-500 mt-0.5">{pct}% funded</p>
                         </div>
 
                         <button
                           type="button"
-                          onClick={() => setSelectedCause(cause)}
-                          className="w-full min-h-[44px] bg-black hover:bg-neutral-900 text-white py-2.5 rounded font-semibold flex items-center justify-center gap-2 text-sm"
+                          onClick={() => openDonateModal(cause)}
+                          className="w-full h-8 min-h-0 bg-black hover:bg-neutral-900 text-white rounded-md font-semibold flex items-center justify-center gap-1.5 text-[11px] mt-1"
                           style={{ fontFamily: 'Inter, sans-serif' }}
                         >
-                          Donate Now <ArrowRight className="w-4 h-4" />
+                          Donate Now <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -347,120 +385,184 @@ export default function DonationPage() {
           </div>
 
           {selectedCause && (
-            <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 overflow-y-auto">
-              <div className="bg-white rounded-t-2xl sm:rounded-lg shadow-xl max-w-2xl w-full max-h-[92vh] overflow-y-auto">
-                <div className="p-5 sm:p-6 border-b border-neutral-100">
+            <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-3 z-50 overflow-y-auto">
+              <div className="bg-white rounded-t-xl sm:rounded-lg shadow-xl max-w-md w-full max-h-[85vh] overflow-y-auto">
+                <div className="p-3.5 sm:p-4 border-b border-neutral-100">
                   <h2
-                    className="text-xl sm:text-2xl flex items-center gap-2 text-neutral-900"
+                    className="text-lg sm:text-xl flex items-center gap-2 text-neutral-900 leading-snug"
                     style={{ fontFamily: 'Cormorant Garamond, serif' }}
                   >
-                    <Heart className="w-5 h-5 text-red-500 shrink-0" />
+                    <Heart className="w-4 h-4 text-red-500 shrink-0" />
                     Donate to: {selectedCause.title}
                   </h2>
                   <p
-                    className="text-neutral-600 mt-2 text-sm sm:text-base"
+                    className="text-neutral-600 mt-1 text-xs line-clamp-2"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     {selectedCause.description}
                   </p>
                 </div>
 
-                <div className="p-5 sm:p-6 space-y-5" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">Select payment partner</h3>
-                    <p className="text-neutral-600 text-sm mb-4">
-                      You will enter your amount, then be redirected to an official partner to
-                      complete payment. Afterward, return here to upload proof.
-                    </p>
+                <div className="p-3.5 sm:p-4 space-y-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  {modalStep === 'partner' ? (
+                    <div>
+                      <h3 className="text-sm font-semibold mb-1">1. Select payment partner</h3>
+                      <p className="text-neutral-600 text-xs mb-2.5">
+                        Next you will choose Zakat or Sadaqah — each uses its own payment link.
+                      </p>
 
-                    {assignedPartner ? (
-                      <Link
-                        href={buildConfirmHref(selectedCause, assignedPartner)}
-                        className="block border-2 border-neutral-900 rounded-lg p-4 hover:bg-neutral-50 transition-all min-h-[44px]"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h4 className="font-bold">{assignedPartner.name}</h4>
-                            <p className="text-sm text-neutral-600 mt-1">
-                              {assignedPartner.description}
-                            </p>
-                            <span className="inline-block mt-2 text-xs bg-black text-white px-2 py-1 rounded">
-                              Primary partner for this cause
-                            </span>
-                          </div>
-                          <ArrowRight className="w-5 h-5 shrink-0" />
-                        </div>
-                      </Link>
-                    ) : partners.length > 0 ? (
-                      <div className="space-y-3">
-                        {partners.map((partner) => (
-                          <Link
-                            key={partner.id}
-                            href={buildConfirmHref(selectedCause, partner)}
-                            className="block border border-neutral-200 rounded-lg p-4 hover:border-neutral-900 hover:bg-neutral-50 transition-all min-h-[44px]"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div>
-                                <h4 className="font-bold">{partner.name}</h4>
-                                <p className="text-sm text-neutral-600">{partner.description}</p>
-                              </div>
-                              <ArrowRight className="w-5 h-5 shrink-0" />
+                      {assignedPartner ? (
+                        <button
+                          type="button"
+                          onClick={() => choosePartner(assignedPartner)}
+                          className="w-full text-left block border-2 border-neutral-900 rounded-md p-2.5 hover:bg-neutral-50 transition-all"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <h4 className="font-bold text-sm truncate">{assignedPartner.name}</h4>
+                              {assignedPartner.description ? (
+                                <p className="text-xs text-neutral-600 mt-0.5 line-clamp-1">
+                                  {assignedPartner.description}
+                                </p>
+                              ) : null}
+                              <span className="inline-block mt-1.5 text-[10px] bg-black text-white px-1.5 py-0.5 rounded">
+                                Primary partner for this cause
+                              </span>
                             </div>
-                          </Link>
-                        ))}
-                      </div>
-                    ) : fallbackUrl ? (
-                      <Link
-                        href={buildConfirmHref(selectedCause, null)}
-                        className="block border-2 border-neutral-900 rounded-lg p-4 hover:bg-neutral-50 transition-all min-h-[44px]"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h4 className="font-bold">Beit Al Khair</h4>
-                            <p className="text-sm text-neutral-600 mt-1">
-                              You will be redirected to our official payment partner.
-                            </p>
+                            <ArrowRight className="w-4 h-4 shrink-0" />
                           </div>
-                          <ArrowRight className="w-5 h-5 shrink-0" />
-                        </div>
-                      </Link>
-                    ) : (
-                      <div className="bg-amber-50 border border-amber-200 rounded p-4">
-                        <p className="text-amber-900 font-semibold mb-1">Payment link not configured</p>
-                        <p className="text-amber-800 text-sm">
-                          Please ask an admin to set a charity partner payment link or the Beit Al
-                          Khair URL in CMS → Donations.
-                        </p>
-                      </div>
-                    )}
-
-                    {assignedPartner && partners.filter((p) => p.id !== assignedPartner.id).length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        <p className="text-sm font-semibold text-neutral-600">Alternatives</p>
-                        {partners
-                          .filter((p) => p.id !== assignedPartner.id)
-                          .map((partner) => (
-                            <Link
+                        </button>
+                      ) : partners.length > 0 ? (
+                        <div className="space-y-2">
+                          {partners.map((partner) => (
+                            <button
                               key={partner.id}
-                              href={buildConfirmHref(selectedCause, partner)}
-                              className="block border rounded-lg p-3 hover:bg-neutral-50 min-h-[44px]"
+                              type="button"
+                              onClick={() => choosePartner(partner)}
+                              className="w-full text-left block border border-neutral-200 rounded-md p-2.5 hover:border-neutral-900 hover:bg-neutral-50 transition-all"
                             >
-                              <div className="flex justify-between items-center gap-2">
-                                <span className="font-medium text-sm">{partner.name}</span>
-                                <ArrowRight className="w-4 h-4" />
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
+                                  <h4 className="font-bold text-sm truncate">{partner.name}</h4>
+                                  {partner.description ? (
+                                    <p className="text-xs text-neutral-600 line-clamp-1">
+                                      {partner.description}
+                                    </p>
+                                  ) : null}
+                                </div>
+                                <ArrowRight className="w-4 h-4 shrink-0" />
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : fallbackUrl ? (
+                        <button
+                          type="button"
+                          onClick={() => choosePartner(null)}
+                          className="w-full text-left block border-2 border-neutral-900 rounded-md p-2.5 hover:bg-neutral-50 transition-all"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <h4 className="font-bold text-sm">Beit Al Khair</h4>
+                              <p className="text-xs text-neutral-600 mt-0.5">
+                                Official payment partner.
+                              </p>
+                            </div>
+                            <ArrowRight className="w-4 h-4 shrink-0" />
+                          </div>
+                        </button>
+                      ) : (
+                        <div className="bg-amber-50 border border-amber-200 rounded p-2.5">
+                          <p className="text-amber-900 font-semibold text-sm mb-0.5">
+                            Payment link not configured
+                          </p>
+                          <p className="text-amber-800 text-xs">
+                            Ask an admin to set Zakat/Sadaqah payment links on a charity partner.
+                          </p>
+                        </div>
+                      )}
+
+                      {assignedPartner &&
+                        partners.filter((p) => p.id !== assignedPartner.id).length > 0 && (
+                          <div className="mt-3 space-y-1.5">
+                            <p className="text-xs font-semibold text-neutral-600">Alternatives</p>
+                            {partners
+                              .filter((p) => p.id !== assignedPartner.id)
+                              .map((partner) => (
+                                <button
+                                  key={partner.id}
+                                  type="button"
+                                  onClick={() => choosePartner(partner)}
+                                  className="w-full text-left block border rounded-md px-2.5 py-2 hover:bg-neutral-50"
+                                >
+                                  <div className="flex justify-between items-center gap-2">
+                                    <span className="font-medium text-xs truncate">
+                                      {partner.name}
+                                    </span>
+                                    <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                                  </div>
+                                </button>
+                              ))}
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setModalStep('partner')}
+                        className="text-xs font-semibold text-neutral-600 underline mb-2"
+                      >
+                        ← Change partner
+                      </button>
+                      <h3 className="text-sm font-semibold mb-1">2. Zakat or Sadaqah?</h3>
+                      <p className="text-neutral-600 text-xs mb-2.5">
+                        {selectedPartner
+                          ? `Paying via ${selectedPartner.name}. Each type opens a different payment link.`
+                          : 'Choose the donation type to open the matching payment link.'}
+                      </p>
+                      <div className="space-y-2">
+                        {DONATION_PAYMENT_TYPES.map((t) => {
+                          const href = buildConfirmHref(selectedCause, selectedPartner, t.id)
+                          const link = resolvePaymentLink(selectedCause, selectedPartner, t.id)
+                          const disabled = !link
+                          return disabled ? (
+                            <div
+                              key={t.id}
+                              className="border border-neutral-200 rounded-md p-2.5 opacity-50"
+                            >
+                              <p className="font-bold text-sm">{t.label}</p>
+                              <p className="text-xs text-neutral-500">{t.description}</p>
+                              <p className="text-[10px] text-amber-700 mt-1">
+                                No payment link configured for this type
+                              </p>
+                            </div>
+                          ) : (
+                            <Link
+                              key={t.id}
+                              href={href}
+                              className="block border-2 border-neutral-900 rounded-md p-2.5 hover:bg-neutral-50 transition-all"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div>
+                                  <p className="font-bold text-sm">{t.label}</p>
+                                  <p className="text-xs text-neutral-600">{t.description}</p>
+                                </div>
+                                <ArrowRight className="w-4 h-4 shrink-0" />
                               </div>
                             </Link>
-                          ))}
+                          )
+                        })}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="p-5 sm:p-6 border-t bg-neutral-50">
+                <div className="p-3 sm:p-3.5 border-t bg-neutral-50">
                   <button
                     type="button"
-                    onClick={() => setSelectedCause(null)}
-                    className="w-full min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-100 py-2.5 rounded font-semibold text-sm"
+                    onClick={closeDonateModal}
+                    className="w-full h-8 min-h-0 bg-black hover:bg-neutral-800 text-white rounded-md font-semibold text-[11px]"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     Cancel

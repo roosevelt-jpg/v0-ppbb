@@ -11,10 +11,12 @@ import {
   Share2,
   CalendarPlus,
   Copy,
+  Download,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import type { Event, TicketType } from '@/lib/event-types'
 import { getEventBannerURL, getEventLocationLabel, toEventDate } from '@/lib/event-utils'
+import { buildGoogleCalendarUrl } from '@/lib/google-calendar'
 
 interface EventDetailViewProps {
   event: Event
@@ -364,12 +366,30 @@ export function EventDetailView({
                     <Share2 size={14} /> Share on WhatsApp
                   </a>
                   {event.id && (
-                    <a
-                      href={`/api/events/${event.id}/ics`}
-                      className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
-                    >
-                      <CalendarPlus size={14} /> Add to calendar
-                    </a>
+                    <>
+                      <a
+                        href={buildGoogleCalendarUrl({
+                          id: event.id,
+                          title: event.title,
+                          description: event.description,
+                          locationName: event.locationName,
+                          locationAddress: event.locationAddress,
+                          startDate: event.startDate,
+                          endDate: event.endDate,
+                        })}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                      >
+                        <CalendarPlus size={14} /> Add to Google Calendar
+                      </a>
+                      <a
+                        href={`/api/events/${event.id}/ics`}
+                        className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                      >
+                        <Download size={14} /> Download .ics
+                      </a>
+                    </>
                   )}
                 </div>
 

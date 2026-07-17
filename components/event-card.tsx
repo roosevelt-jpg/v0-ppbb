@@ -1,11 +1,13 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
-import { Calendar, MapPin, Users, Download } from 'lucide-react'
+import { Calendar, MapPin, Users, CalendarPlus } from 'lucide-react'
 import { format } from 'date-fns'
 import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
 import { getEventLocationLabel, getEventTimeRangeLabel } from '@/lib/event-utils'
+import { openGoogleCalendarForEvent } from '@/lib/google-calendar'
+import { auth } from '@/lib/firebase'
 
 type EventCardEvent = Record<string, unknown> & {
   id?: string
@@ -55,6 +57,7 @@ function formatLocationDisplay(label: string): string {
 }
 
 export default function EventCard({ event, showActions = true }: EventCardProps) {
+  const [adding, setAdding] = useState(false)
   const title = (typeof event.title === 'string' && event.title.trim()) || 'Untitled event'
   const description =
     typeof event.description === 'string' ? event.description.trim() : ''
@@ -100,38 +103,82 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
       ? event.category.replace(/-/g, ' ')
       : ''
 
-  const handleAddToCalendar = () => {
-    const startDate = start || new Date()
-    const dtstart = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-    const endDate = new Date(startDate)
-    if (typeof event.endTime === 'string' && event.endTime.includes(':')) {
-      const [endHour, endMin] = event.endTime.split(':')
-      endDate.setHours(parseInt(endHour, 10), parseInt(endMin, 10))
-    } else {
-      endDate.setHours(endDate.getHours() + 2)
-    }
-    const dtend = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Passive Blessings//Event//EN
-BEGIN:VEVENT
-UID:${event.id || 'event'}@passiveblessings.com
-DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTSTART:${dtstart}
-DTEND:${dtend}
-SUMMARY:${title}
-DESCRIPTION:${description || title}
-LOCATION:${getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])}
-END:VEVENT
-END:VCALENDAR`
+  const calendarPayload = {
+    id: typeof event.id === 'string' ? event.id : undefined,
+    title,
+    description,
+    location: getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0]),
+    locationName: typeof event.locationName === 'string' ? event.locationName : undefined,
+    locationAddress:
+      typeof event.locationAddress === 'string' ? (event.locationAddress as string) : undefined,
+    startDate: event.startDate,
+    endDate: event.endDate,
+    date: event.date,
+    time: typeof event.time === 'string' ? event.time : undefined,
+    startTime: typeof event.startTime === 'string' ? (event.startTime as string) : undefined,
+    endTime: typeof event.endTime === 'string' ? event.endTime : undefined,
+  }
 
-    const element = document.createElement('a')
-    element.setAttribute('href', 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent))
-    element.setAttribute('download', `${event.slug || event.id || 'event'}.ics`)
-    element.style.display = 'none'
-    document.body.appendChild(element)
-    element.click()
-    document.body.removeChild(element)
+  const handleAddToCalendar = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (adding) return
+    setAdding(true)
+
+    try {
+      const user = auth.currentUser
+      const eventId = typeof event.id === 'string' ? event.id : ''
+
+      // Prefer Calendar API when signed in + Google connected
+      if (user && eventId) {
+        try {
+          const token = await user.getIdToken()
+          const res = await fetch('/api/calendar/google/create-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ eventId }),
+          })
+          const data = (await res.json().catch(() => ({}))) as {
+            success?: boolean
+            htmlLink?: string | null
+            action?: string
+          }
+
+          if (res.ok && data.success) {
+            if (data.htmlLink) {
+              window.open(data.htmlLink, '_blank', 'noopener,noreferrer')
+            }
+            return
+          }
+
+          // Not connected — start OAuth, then also open template so they can still add now
+          if (data.action === 'connect') {
+            const state = encodeURIComponent(
+              JSON.stringify({
+                uid: user.uid,
+                eventId,
+                returnTo: typeof window !== 'undefined' ? window.location.href : '/events',
+              })
+            )
+            const authRes = await fetch(`/api/calendar/google/auth-url?state=${state}`)
+            const authData = (await authRes.json().catch(() => ({}))) as { authUrl?: string }
+            if (authData.authUrl) {
+              window.open(authData.authUrl, '_blank', 'noopener,noreferrer')
+            }
+          }
+        } catch {
+          /* fall through to Google Calendar template */
+        }
+      }
+
+      // Everyone else (and API fallback): open Google Calendar with event prefilled
+      openGoogleCalendarForEvent(calendarPayload)
+    } finally {
+      setAdding(false)
+    }
   }
 
   return (
@@ -149,7 +196,7 @@ END:VCALENDAR`
           {priceLabel}
         </div>
         {isFull ? (
-          <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-600 text-white">
+          <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black !text-white">
             Full
           </div>
         ) : category ? (
@@ -207,11 +254,12 @@ END:VCALENDAR`
             <button
               type="button"
               onClick={handleAddToCalendar}
-              className="pb-compact-btn inline-flex items-center justify-center h-7 w-7 rounded-md bg-black !text-white hover:bg-neutral-800"
-              title="Add to calendar"
-              aria-label="Add to calendar"
+              disabled={adding}
+              className="pb-compact-btn inline-flex items-center justify-center h-7 w-7 rounded-md bg-black !text-white hover:bg-neutral-800 disabled:opacity-60"
+              title="Add to Google Calendar"
+              aria-label="Add to Google Calendar"
             >
-              <Download size={12} className="text-white" strokeWidth={2.5} />
+              <CalendarPlus size={12} className="text-white" strokeWidth={2.5} />
             </button>
           </div>
         )}

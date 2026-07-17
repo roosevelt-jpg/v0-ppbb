@@ -13,8 +13,8 @@ const businessRoutes: TitleEntry[] = [
   { href: '/business/communities', title: 'Communities' },
   { href: '/business/advertise', title: 'Advertise' },
   { href: '/business/opportunities/new', title: 'Post Opportunity' },
-  { href: '/business/opportunities/applicants', title: 'Applicants' },
-  { href: '/business/opportunities', title: 'Posted Opportunities' },
+  { href: '/business/opportunities/applicants', title: 'Candidates' },
+  { href: '/business/opportunities', title: 'Job List' },
   { href: '/business/offers/new', title: 'Post Offer' },
   { href: '/business/offers', title: 'Posted Offers' },
   { href: '/business/leads', title: 'Leads & Conversions' },
@@ -30,6 +30,7 @@ const businessRoutes: TitleEntry[] = [
 ]
 
 const memberRoutes: TitleEntry[] = [
+  { href: '/directory', title: 'Business Directory' },
   { href: '/dashboard', title: 'Member Dashboard' },
   { href: '/dashboard/events', title: 'My Events' },
   { href: '/dashboard/donations', title: 'My Donations' },

@@ -33,6 +33,8 @@ type BusinessRow = {
   isActive: boolean
   isVerified: boolean
   featured: boolean
+  isSponsor?: boolean
+  isVendor?: boolean
   status: string
   referralCode?: string | null
   referralContributionPercent?: number | null
@@ -41,7 +43,7 @@ type BusinessRow = {
   createdAt: string | Date | null
 }
 
-type FilterTab = 'all' | 'pending' | 'approved' | 'suspended' | 'featured'
+type FilterTab = 'all' | 'pending' | 'approved' | 'suspended' | 'featured' | 'sponsors' | 'vendors'
 
 export default function BusinessesPage() {
   const { firebaseUser } = useAuth()
@@ -159,15 +161,17 @@ export default function BusinessesPage() {
   const tabs: { id: FilterTab; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'pending', label: 'Pending' },
-    { id: 'approved', label: 'Approved' },
+    { id: 'approved', label: 'In directory' },
+    { id: 'vendors', label: 'Vendors' },
+    { id: 'sponsors', label: 'Sponsors' },
     { id: 'suspended', label: 'Suspended' },
     { id: 'featured', label: 'Featured' },
   ]
 
   return (
     <AdminPageLayout
-      title="Businesses"
-      subtitle="Approve marketplace listings · Verify · Suspend · Feature · Delete"
+      title="Business Members"
+      subtitle="Directory businesses · Vendors serve PB events · Sponsor requests are reviewed under Sponsor Inquiries"
     >
       <div className="space-y-6 w-full min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -187,14 +191,30 @@ export default function BusinessesPage() {
               </button>
             ))}
           </div>
-          <Button
-            type="button"
-            onClick={() => void fetchBusinesses()}
-            className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              onClick={() => (window.location.href = '/admin/vendor-applications')}
+              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+            >
+              Vendor applications
+            </Button>
+            <Button
+              type="button"
+              onClick={() => (window.location.href = '/admin/partnerships')}
+              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+            >
+              Sponsor inquiries
+            </Button>
+            <Button
+              type="button"
+              onClick={() => void fetchBusinesses()}
+              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         <input
@@ -271,6 +291,16 @@ export default function BusinessesPage() {
                         {biz.featured && (
                           <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-violet-100 text-violet-800 inline-flex items-center gap-1">
                             <Star className="w-3 h-3" /> Featured
+                          </span>
+                        )}
+                        {biz.isVendor && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-sky-100 text-sky-800">
+                            Vendor
+                          </span>
+                        )}
+                        {biz.isSponsor && (
+                          <span className="text-xs font-body font-semibold px-2 py-1 rounded bg-amber-100 text-amber-900">
+                            Sponsor
                           </span>
                         )}
                       </div>
@@ -373,7 +403,7 @@ export default function BusinessesPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => void runAction(biz.id, 'delete')}
-                        className="bg-red-600 text-white hover:bg-red-700 min-h-[44px]"
+                        className="bg-black !text-white hover:bg-neutral-800 min-h-[44px]"
                       >
                         <Trash2 className="w-4 h-4 mr-1.5" />
                         Delete

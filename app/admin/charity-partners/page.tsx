@@ -31,6 +31,8 @@ export default function CharityPartnersPage() {
     description: '',
     website: '',
     paymentLink: '',
+    zakatPaymentLink: '',
+    sadaqahPaymentLink: '',
     logo: '',
     isActive: true,
     status: 'active',
@@ -54,7 +56,15 @@ export default function CharityPartnersPage() {
 
   const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newPartner.name.trim()) return
+    if (
+      !newPartner.name.trim() ||
+      (!newPartner.zakatPaymentLink.trim() &&
+        !newPartner.sadaqahPaymentLink.trim() &&
+        !newPartner.paymentLink.trim())
+    ) {
+      setUploadError('Add at least a Zakat or Sadaqah payment link (or a general fallback link).')
+      return
+    }
     setUploadError('')
 
     const ref = await addDoc(
@@ -63,7 +73,9 @@ export default function CharityPartnersPage() {
         name: newPartner.name.trim(),
         description: newPartner.description.trim(),
         website: newPartner.website || null,
-        paymentLink: newPartner.paymentLink.trim(),
+        paymentLink: newPartner.paymentLink.trim() || null,
+        zakatPaymentLink: newPartner.zakatPaymentLink.trim() || null,
+        sadaqahPaymentLink: newPartner.sadaqahPaymentLink.trim() || null,
         logo: newPartner.logo || null,
         isActive: newPartner.isActive,
         status: newPartner.isActive ? 'active' : 'inactive',
@@ -85,6 +97,8 @@ export default function CharityPartnersPage() {
       description: '',
       website: '',
       paymentLink: '',
+      zakatPaymentLink: '',
+      sadaqahPaymentLink: '',
       logo: '',
       isActive: true,
       status: 'active',
@@ -141,7 +155,9 @@ export default function CharityPartnersPage() {
         name: editingPartner.name,
         description: editingPartner.description || '',
         website: editingPartner.website || null,
-        paymentLink: editingPartner.paymentLink,
+        paymentLink: editingPartner.paymentLink || null,
+        zakatPaymentLink: editingPartner.zakatPaymentLink || null,
+        sadaqahPaymentLink: editingPartner.sadaqahPaymentLink || null,
         logo: editingPartner.logo || null,
         isActive,
         status: isActive ? 'active' : 'inactive',
@@ -186,7 +202,7 @@ export default function CharityPartnersPage() {
   const btnSecondary =
     'min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-50 px-4 py-2 rounded text-sm font-semibold'
   const btnDanger =
-    'min-h-[44px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold'
+    'min-h-[44px] bg-black hover:bg-neutral-800 !text-white px-3 py-2 rounded text-sm font-semibold'
 
   const isPartnerActive = (p: any) => p.isActive !== false && p.status !== 'inactive'
 
@@ -218,12 +234,29 @@ export default function CharityPartnersPage() {
             />
             <input
               type="url"
-              placeholder="Payment link URL *"
+              placeholder="Zakat payment link *"
+              value={newPartner.zakatPaymentLink}
+              onChange={(e) => setNewPartner({ ...newPartner, zakatPaymentLink: e.target.value })}
+              className={inputClass}
+            />
+            <input
+              type="url"
+              placeholder="Sadaqah payment link *"
+              value={newPartner.sadaqahPaymentLink}
+              onChange={(e) => setNewPartner({ ...newPartner, sadaqahPaymentLink: e.target.value })}
+              className={inputClass}
+            />
+            <input
+              type="url"
+              placeholder="General payment link (fallback, optional)"
               value={newPartner.paymentLink}
               onChange={(e) => setNewPartner({ ...newPartner, paymentLink: e.target.value })}
-              className={inputClass}
-              required
+              className={`${inputClass} md:col-span-2`}
             />
+            <p className="md:col-span-2 text-xs text-neutral-500 -mt-2">
+              Donors choose Zakat or Sadaqah before paying. Configure a separate URL for each; the
+              general link is used only if a type-specific link is missing.
+            </p>
             <div>
               <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                 Logo
@@ -334,7 +367,7 @@ export default function CharityPartnersPage() {
                   <thead>
                     <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 border-b">
                       <th className="py-3 pr-3">Name</th>
-                      <th className="py-3 pr-3">Payment link</th>
+                      <th className="py-3 pr-3">Zakat / Sadaqah links</th>
                       <th className="py-3 pr-3">Active</th>
                       <th className="py-3 pr-3">Added</th>
                       <th className="py-3">Actions</th>
@@ -351,19 +384,41 @@ export default function CharityPartnersPage() {
                             <span className="font-medium">{p.name}</span>
                           </div>
                         </td>
-                        <td className="py-3 pr-3 max-w-[200px] truncate">
-                          {p.paymentLink ? (
+                        <td className="py-3 pr-3 text-xs space-y-1">
+                          {p.zakatPaymentLink ? (
+                            <a
+                              href={p.zakatPaymentLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline block truncate max-w-[220px]"
+                            >
+                              Zakat
+                            </a>
+                          ) : (
+                            <span className="text-neutral-400 block">Zakat —</span>
+                          )}
+                          {p.sadaqahPaymentLink ? (
+                            <a
+                              href={p.sadaqahPaymentLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline block truncate max-w-[220px]"
+                            >
+                              Sadaqah
+                            </a>
+                          ) : (
+                            <span className="text-neutral-400 block">Sadaqah —</span>
+                          )}
+                          {!p.zakatPaymentLink && !p.sadaqahPaymentLink && p.paymentLink ? (
                             <a
                               href={p.paymentLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="underline"
+                              className="underline block truncate max-w-[220px]"
                             >
-                              Open link
+                              Fallback
                             </a>
-                          ) : (
-                            '—'
-                          )}
+                          ) : null}
                         </td>
                         <td className="py-3 pr-3">
                           <button
@@ -394,7 +449,7 @@ export default function CharityPartnersPage() {
                             </button>
                             <button
                               type="button"
-                              className="underline text-red-600"
+                              className="bg-black !text-white px-2 py-1 rounded-md no-underline"
                               onClick={() => handleDeletePartner(p.id)}
                             >
                               Delete
@@ -434,13 +489,30 @@ export default function CharityPartnersPage() {
               />
               <input
                 type="url"
-                placeholder="Payment link"
+                placeholder="Zakat payment link"
+                value={editingPartner.zakatPaymentLink || ''}
+                onChange={(e) =>
+                  setEditingPartner({ ...editingPartner, zakatPaymentLink: e.target.value })
+                }
+                className={inputClass}
+              />
+              <input
+                type="url"
+                placeholder="Sadaqah payment link"
+                value={editingPartner.sadaqahPaymentLink || ''}
+                onChange={(e) =>
+                  setEditingPartner({ ...editingPartner, sadaqahPaymentLink: e.target.value })
+                }
+                className={inputClass}
+              />
+              <input
+                type="url"
+                placeholder="General payment link (fallback)"
                 value={editingPartner.paymentLink || ''}
                 onChange={(e) =>
                   setEditingPartner({ ...editingPartner, paymentLink: e.target.value })
                 }
                 className={`${inputClass} md:col-span-2`}
-                required
               />
               <div className="md:col-span-2">
                 <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">

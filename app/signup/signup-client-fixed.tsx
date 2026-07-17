@@ -7,12 +7,15 @@ import { auth } from '@/lib/firebase'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { collection, doc, setDoc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { Check, Loader2, Eye, EyeOff, MapPin } from 'lucide-react'
+import { Check, Loader2, Eye, EyeOff } from 'lucide-react'
 import { SiteLogo } from '@/components/site-logo'
 import { SearchableSelect } from '@/components/searchable-select'
 import { COUNTRY_OPTIONS } from '@/lib/countries'
-import { UAE_EMIRATES, UAE_CITIES_BY_EMIRATE, isUaeCountry } from '@/lib/signup-locations'
-import { getUserLocation } from '@/lib/geolocation'
+import { isUaeCountry } from '@/lib/signup-locations'
+import {
+  AddressLocationPicker,
+  type AddressLocationValue,
+} from '@/components/address-location-picker'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import type { LocationData } from '@/lib/types'
 import type { PricingPlan } from '@/lib/pricing-types'
@@ -50,7 +53,6 @@ export default function SignupClient() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [detectingLocation, setDetectingLocation] = useState(false)
 
   const [formData, setFormData] = useState({
     memberType: searchParams.get('type') === 'business' ? 'business' : 'member',
@@ -68,6 +70,9 @@ export default function SignupClient() {
     customCity: '',
     address: '',
     countryCode: 'AE',
+    latitude: 0,
+    longitude: 0,
+    placeId: '',
     gender: '',
     dateOfBirth: '',
     skills: [] as string[],
@@ -89,6 +94,18 @@ export default function SignupClient() {
   const [plansLoading, setPlansLoading] = useState(true)
   const [createdUserId, setCreatedUserId] = useState<string | null>(null)
   const [checkingOut, setCheckingOut] = useState(false)
+  const [businessAddress, setBusinessAddress] = useState<AddressLocationValue>({
+    country: 'United Arab Emirates',
+    countryCode: 'AE',
+    emirate: 'Dubai',
+    city: 'Dubai',
+    customCity: '',
+    address: '',
+    venueName: '',
+    placeId: '',
+    lat: 0,
+    lng: 0,
+  })
 
   useEffect(() => {
     const q = query(collection(db, 'pricingPlans'), where('active', '==', true))
@@ -189,47 +206,6 @@ export default function SignupClient() {
         ? prev.skills.filter(s => s !== skill)
         : [...prev.skills, skill]
     }))
-  }
-
-  const handleDetectLocation = async () => {
-    setDetectingLocation(true)
-    setError('')
-    try {
-      const detected = await getUserLocation()
-      if (!detected) {
-        setError('Could not detect your location. Please select country and city manually.')
-        return
-      }
-
-      const matchedCountry = COUNTRY_OPTIONS.find(
-        (c) => c.code === detected.countryCode || c.name === detected.country
-      )
-
-      setFormData((prev) => {
-        const country = matchedCountry?.name || detected.country || prev.country
-        const uae = isUaeCountry(country)
-        const emirate = uae
-          ? UAE_EMIRATES.find((e) => detected.state?.includes(e) || detected.city?.includes(e)) || detected.state || prev.emirate
-          : prev.emirate
-        const city = detected.city || prev.city
-
-        return {
-          ...prev,
-          country,
-          countryCode: matchedCountry?.code || detected.countryCode || prev.countryCode,
-          emirate: uae ? emirate : prev.emirate,
-          city: uae ? city : city,
-          customCity: uae ? prev.customCity : city,
-          address: detected.address || prev.address,
-          consentLocation: true,
-        }
-      })
-    } catch (err) {
-      console.error('[v0] Geolocation detect failed:', err)
-      setError('Location detection failed. You can still enter your location manually.')
-    } finally {
-      setDetectingLocation(false)
-    }
   }
 
   const validateStep = async (step: number): Promise<boolean> => {
@@ -437,6 +413,8 @@ export default function SignupClient() {
         city: resolvedCity,
         state: isUaeCountry(formData.country) ? formData.emirate : undefined,
         address: formData.address || undefined,
+        latitude: formData.latitude || undefined,
+        longitude: formData.longitude || undefined,
       })
 
       // Update profile with display name
@@ -822,30 +800,6 @@ export default function SignupClient() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                     <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>Location & profile</h2>
 
-                    <button
-                      type="button"
-                      onClick={handleDetectLocation}
-                      disabled={detectingLocation}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        padding: '0.625rem',
-                        border: '1px solid #e4e1da',
-                        backgroundColor: '#ffffff',
-                        color: '#111111',
-                        borderRadius: '0.375rem',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        cursor: detectingLocation ? 'not-allowed' : 'pointer',
-                        opacity: detectingLocation ? 0.7 : 1,
-                      }}
-                    >
-                      <MapPin size={16} />
-                      {detectingLocation ? 'Detecting location…' : 'Use my current location (optional)'}
-                    </button>
-
                     {/* Phone */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Phone Number *</label>
@@ -858,88 +812,38 @@ export default function SignupClient() {
                       <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} max={new Date().toISOString().split('T')[0]} style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
                     </div>
 
-                    <SearchableSelect
-                      label="Country of residence"
-                      value={formData.country}
-                      options={COUNTRY_SELECT_OPTIONS}
-                      onChange={(value) => {
-                        const match = COUNTRY_OPTIONS.find((c) => c.name === value)
+                    <AddressLocationPicker
+                      variant="profile"
+                      value={{
+                        country: formData.country,
+                        countryCode: formData.countryCode,
+                        emirate: formData.emirate,
+                        city: formData.city,
+                        customCity: formData.customCity,
+                        address: formData.address,
+                        venueName: '',
+                        placeId: formData.placeId,
+                        lat: formData.latitude,
+                        lng: formData.longitude,
+                      }}
+                      onChange={(next: AddressLocationValue) => {
                         setFormData((prev) => ({
                           ...prev,
-                          country: value,
-                          countryCode: match?.code || prev.countryCode,
-                          emirate: isUaeCountry(value) ? prev.emirate || 'Dubai' : '',
-                          city: isUaeCountry(value) ? prev.city || 'Dubai' : '',
-                          customCity: isUaeCountry(value) ? '' : prev.customCity,
+                          country: next.country,
+                          countryCode: next.countryCode,
+                          emirate: next.emirate,
+                          city: next.city,
+                          customCity: next.customCity,
+                          address: next.address,
+                          placeId: next.placeId,
+                          latitude: next.lat,
+                          longitude: next.lng,
+                          consentLocation: prev.consentLocation || Boolean(next.address),
                         }))
                       }}
-                      placeholder="Search countries…"
-                      required
+                      showMapPin={Boolean(formData.latitude && formData.longitude)}
+                      pinDraggable={false}
                     />
-
-                    {isUaeCountry(formData.country) ? (
-                      <>
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Emirate *</label>
-                          <select
-                            name="emirate"
-                            value={formData.emirate}
-                            onChange={(e) => {
-                              const emirate = e.target.value
-                              const cities = UAE_CITIES_BY_EMIRATE[emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']
-                              setFormData((prev) => ({
-                                ...prev,
-                                emirate,
-                                city: cities[0] || prev.city,
-                              }))
-                            }}
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', backgroundColor: '#fff' }}
-                          >
-                            {UAE_EMIRATES.map((emirate) => (
-                              <option key={emirate} value={emirate}>{emirate}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>City / Area *</label>
-                          <select
-                            name="city"
-                            value={formData.city}
-                            onChange={handleInputChange}
-                            style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', backgroundColor: '#fff' }}
-                          >
-                            {(UAE_CITIES_BY_EMIRATE[formData.emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']).map((city) => (
-                              <option key={city} value={city}>{city}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </>
-                    ) : (
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>City *</label>
-                        <input
-                          type="text"
-                          name="customCity"
-                          value={formData.customCity}
-                          onChange={handleInputChange}
-                          placeholder="Enter your city"
-                          style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Street address (optional)</label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        placeholder="Building, street, or neighbourhood"
-                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }}
-                      />
-                    </div>
 
                     <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
                       <input
@@ -1050,13 +954,24 @@ export default function SignupClient() {
                     {/* Business Location */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Business Location *</label>
-                      <input 
-                        type="text" 
-                        name="businessLocation" 
-                        value={formData.businessLocation} 
-                        onChange={handleInputChange} 
-                        placeholder="City/Emirate or address" 
-                        style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} 
+                      <AddressLocationPicker
+                        variant="venue"
+                        value={businessAddress}
+                        onChange={(next) => {
+                          setBusinessAddress(next)
+                          setFormData((prev) => ({
+                            ...prev,
+                            businessLocation:
+                              next.address ||
+                              [next.venueName, next.city || next.customCity, next.emirate, next.country]
+                                .filter(Boolean)
+                                .join(', '),
+                          }))
+                        }}
+                        showAutoDetect={false}
+                        addressLabel="Business address"
+                        addressRequired
+                        pinDraggable
                       />
                     </div>
 

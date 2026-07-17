@@ -3,58 +3,53 @@ import { listGooglePlacesApiKeyCandidates } from '@/lib/resolve-google-places-ke
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Reverse-geocode lat/lng via Google Geocoding (server key).
+ */
 export async function GET(request: NextRequest) {
   try {
-    const placeId = request.nextUrl.searchParams.get('placeId')?.trim()
-    if (!placeId) {
-      return NextResponse.json({ success: false, error: 'placeId is required' }, { status: 400 })
+    const lat = Number(request.nextUrl.searchParams.get('lat'))
+    const lng = Number(request.nextUrl.searchParams.get('lng'))
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return NextResponse.json({ success: false, error: 'lat and lng are required' }, { status: 400 })
     }
 
     const apiKeys = await listGooglePlacesApiKeyCandidates()
     if (apiKeys.length === 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            'Google Maps API key is not configured. Add it under Admin → Integrations → Google Maps API.',
-        },
+        { success: false, error: 'Google Maps API key is not configured' },
         { status: 503 }
       )
     }
 
-    let lastError = 'Place details failed'
-
+    let lastError = 'Geocode failed'
     for (const apiKey of apiKeys) {
       const params = new URLSearchParams({
-        place_id: placeId,
+        latlng: `${lat},${lng}`,
         key: apiKey,
-        fields: 'geometry,formatted_address,address_components',
       })
-
       const googleRes = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?${params.toString()}`
+        `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`
       )
       const data = await googleRes.json()
 
-      if (data.status === 'OK' && data.result) {
-        const result = data.result
+      if (data.status === 'OK' && data.results?.[0]) {
+        const result = data.results[0]
         const components: Array<{ long_name: string; short_name: string; types: string[] }> =
           result.address_components || []
-
         const findType = (...types: string[]) =>
           components.find((c) => types.some((t) => c.types?.includes(t)))
 
-        const locality = findType('locality', 'postal_town', 'sublocality', 'sublocality_level_1')
+        const locality = findType('locality', 'postal_town', 'sublocality')
         const admin1 = findType('administrative_area_level_1')
         const countryComp = findType('country')
 
         return NextResponse.json({
           success: true,
           place: {
-            placeId,
             formattedAddress: result.formatted_address || '',
-            lat: result.geometry?.location?.lat ?? 0,
-            lng: result.geometry?.location?.lng ?? 0,
+            lat,
+            lng,
             city: locality?.long_name || '',
             state: admin1?.long_name || '',
             country: countryComp?.long_name || '',
@@ -64,25 +59,13 @@ export async function GET(request: NextRequest) {
       }
 
       lastError = data.error_message || data.status || lastError
-      if (
-        data.status === 'REQUEST_DENIED' ||
-        data.status === 'INVALID_REQUEST' ||
-        data.status === 'OVER_QUERY_LIMIT'
-      ) {
-        continue
-      }
+      if (data.status === 'REQUEST_DENIED' || data.status === 'OVER_QUERY_LIMIT') continue
       break
     }
 
-    return NextResponse.json({
-      success: false,
-      error: lastError,
-    })
+    return NextResponse.json({ success: false, error: lastError }, { status: 502 })
   } catch (error) {
-    console.error('[v0] Places details proxy error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch place details' },
-      { status: 500 }
-    )
+    console.error('[places/geocode]', error)
+    return NextResponse.json({ success: false, error: 'Geocode failed' }, { status: 500 })
   }
 }

@@ -39,10 +39,11 @@ import {
 const businessMenuItems = [
   { label: 'Dashboard', href: '/business/dashboard', icon: BarChart3 },
   { label: 'Business Profile', href: '/business/profile', icon: Users },
-  { label: 'Jobs & Gigs', href: '/business/opportunities', icon: Briefcase },
+  { label: 'Job List', href: '/business/opportunities', icon: Briefcase },
   { label: 'Products & Offers', href: '/business/offers', icon: ShoppingBag },
   { label: 'Member Discounts', href: '/business/discounts', icon: Tag },
   { label: 'Network / Connections', href: '/business/marketplace', icon: Users },
+  { label: 'Business Directory', href: '/directory', icon: ShoppingBag },
   { label: 'Messages', href: '/business/messages', icon: MessageSquare },
   { label: 'Leads & Conversions', href: '/business/leads', icon: Zap },
   { label: 'Referrals', href: '/business/referrals', icon: Share2 },

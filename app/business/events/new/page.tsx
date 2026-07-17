@@ -7,10 +7,14 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
-import { ChevronLeft, MapPin, Upload, Loader2, Plus, X } from 'lucide-react'
+import { ChevronLeft, Upload, Loader2, Plus, X } from 'lucide-react'
 import { toEventDate } from '@/lib/event-utils'
-import GooglePlacesAutocomplete from '@/components/google-places-autocomplete'
-import { GoogleMapPin } from '@/components/google-map-pin'
+import {
+  AddressLocationPicker,
+  addressValueToEventFields,
+  eventFieldsToAddressValue,
+  type AddressLocationValue,
+} from '@/components/address-location-picker'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { EventHostingFields } from '@/components/events/event-hosting-fields'
 import type { EventCoupon, EventRecurrence, TicketType } from '@/lib/event-types'
@@ -591,67 +595,26 @@ function BusinessEventForm() {
             <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
               Location
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
-                  Venue Name (optional display label)
-                </label>
-                <input
-                  type="text"
-                  value={formData.locationName}
-                  onChange={(e) => setFormData({ ...formData, locationName: e.target.value })}
-                  placeholder="e.g. Community Hall"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                  }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
-                  Event Location *
-                </label>
-                <GooglePlacesAutocomplete
-                  value={formData.locationAddress || formData.locationName}
-                  countryRestrictions={['AE']}
-                  placeholder="Start typing a venue or address..."
-                  onTextChange={(text) =>
-                    setFormData((p) => ({ ...p, locationAddress: text, locationName: p.locationName || text }))
-                  }
-                  onChange={(place) =>
-                    setFormData((p) => ({
-                      ...p,
-                      locationAddress: place.mainText,
-                      locationName: p.locationName || place.mainText,
-                      locationPlaceId: place.placeId,
-                      locationLat: place.lat ?? 0,
-                      locationLng: place.lng ?? 0,
-                    }))
-                  }
-                />
-                {formData.locationAddress && (
-                  <div className="mt-2 space-y-2">
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
-                      <MapPin size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-medium text-blue-900">{formData.locationAddress}</p>
-                        {formData.locationLat !== 0 && formData.locationLng !== 0 && (
-                          <p className="text-blue-700 text-xs">
-                            {formData.locationLat.toFixed(4)}, {formData.locationLng.toFixed(4)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    {formData.locationLat !== 0 && formData.locationLng !== 0 ? (
-                      <GoogleMapPin lat={formData.locationLat} lng={formData.locationLng} />
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            </div>
+            <p className="text-sm text-neutral-600 mb-3">
+              Select country / city, search the venue address, then drag the pin to the exact spot.
+            </p>
+            <AddressLocationPicker
+              variant="venue"
+              value={eventFieldsToAddressValue(formData)}
+              onChange={(next: AddressLocationValue) => {
+                const fields = addressValueToEventFields(next)
+                setFormData((p) => ({
+                  ...p,
+                  locationName: fields.locationName,
+                  locationAddress: fields.locationAddress,
+                  locationPlaceId: fields.locationPlaceId,
+                  locationLat: fields.locationLat,
+                  locationLng: fields.locationLng,
+                }))
+              }}
+              showAutoDetect={false}
+              pinDraggable
+            />
           </div>
 
           <div>
@@ -912,7 +875,7 @@ function BusinessEventForm() {
                         agenda: p.agenda.filter((_, i) => i !== idx),
                       }))
                     }
-                    className="ml-auto text-xs text-red-600"
+                    className="ml-auto text-xs bg-black !text-white px-2 py-1 rounded-md"
                   >
                     Remove
                   </button>

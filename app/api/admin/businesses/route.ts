@@ -67,6 +67,17 @@ function mapBusinessDoc(id: string, data: Record<string, unknown>) {
     isVerified: data.isVerified === true,
     featured: data.featured === true,
     status: asString(data.status) || (isApproved ? 'approved' : 'pending_review'),
+    isSponsor:
+      data.isSponsor === true ||
+      data.sponsor === true ||
+      String(data.tier || '').toLowerCase() === 'sponsor' ||
+      String(data.membership || '').toLowerCase() === 'sponsor' ||
+      String(data.partnershipType || '').toLowerCase().includes('sponsor'),
+    isVendor:
+      data.isVendor === true ||
+      data.vendor === true ||
+      String(data.vendorStatus || '').toLowerCase() === 'approved' ||
+      String(data.businessRole || '').toLowerCase() === 'vendor',
     referralCode: asString(data.referralCode) || null,
     referralContributionPercent:
       typeof data.referralContributionPercent === 'number'
@@ -169,6 +180,10 @@ export async function GET(request: NextRequest) {
       businesses = businesses.filter((b) => !b.isActive)
     } else if (status === 'featured') {
       businesses = businesses.filter((b) => b.featured)
+    } else if (status === 'sponsors') {
+      businesses = businesses.filter((b) => b.isSponsor === true)
+    } else if (status === 'vendors') {
+      businesses = businesses.filter((b) => b.isVendor === true)
     }
 
     if (search) {

@@ -84,16 +84,20 @@ export const adminMenuItems = [
   { label: 'Audit Logs', href: '/admin/audit-logs', icon: History, group: 'Security' },
   { label: 'Admin Management', href: '/admin/management', icon: UserCog, group: 'Security' },
 
-  // User Management
-  { label: 'Members', href: '/admin/members', icon: UserCircle, group: 'Users' },
+  // User Management — only two platform user types:
+  // Individual Members (can volunteer / join PB team) and Business Members
+  // (can apply as vendors for events; sponsor requests go to Inquiries, not a separate user tab)
+  { label: 'Individual Members', href: '/admin/members', icon: UserCircle, group: 'Users' },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
-  { label: 'Businesses', href: '/admin/businesses', icon: Building, group: 'Users' },
+  { label: 'Business Members', href: '/admin/businesses', icon: Building, group: 'Users' },
+  { label: 'Vendor Applications', href: '/admin/vendor-applications', icon: ClipboardList, group: 'Users' },
   // Community & Events
   { label: 'Community', href: '/admin/communities', icon: UsersRound, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
   { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
   { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },
-  { label: 'Partnerships', href: '/admin/partnerships', icon: Handshake, group: 'Community' },
+  { label: 'Sponsor Inquiries', href: '/admin/partnerships', icon: Handshake, group: 'Community' },
+  { label: 'Contact Inquiries', href: '/admin/contact-submissions', icon: Inbox, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
 
   // Charity & Support
@@ -402,7 +406,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
           <Link href="/admin/contact-submissions">
             <button className="relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors flex-shrink-0" style={{ backgroundColor: '#fff3e0', border: '2px solid #ff6b6b' }}>
               <Mail className="h-5 w-5" style={{ color: '#ff6b6b' }} />
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: '#ff6b6b' }}>
+              <span className="absolute -top-1 -right-1 bg-black !text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: '#ff6b6b' }}>
                 {unreadMessages}
               </span>
             </button>

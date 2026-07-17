@@ -77,7 +77,10 @@ export default function AdminVendorApplicationsPage() {
   }
 
   return (
-    <AdminPageLayout title="Vendor Applications" subtitle="Review new business vendor applications">
+    <AdminPageLayout
+      title="Vendor Applications"
+      subtitle="Business members apply here to serve Passive Blessings events — not a separate user type"
+    >
       {loading ? (
         <p className="text-gray-500 py-12 text-center">Loading applications…</p>
       ) : rows.length === 0 ? (

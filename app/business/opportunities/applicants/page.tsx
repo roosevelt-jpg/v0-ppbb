@@ -6,7 +6,17 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { getBusinessApplications, updateApplicationStatus } from '@/lib/business-queries'
 import { JobApplication } from '@/lib/types'
-import { ArrowLeft, Mail, Phone, FileText, MapPin, Clock, GraduationCap, Briefcase, Sparkles } from 'lucide-react'
+import {
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  GraduationCap,
+  Briefcase,
+  Search,
+  Download,
+} from 'lucide-react'
 import { db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 
@@ -28,13 +38,72 @@ const STATUS_STYLES: Record<JobApplication['status'], { bg: string; color: strin
   rejected: { bg: '#fee2e2', color: '#991b1b' },
 }
 
+type ActivityFilter = 'all' | '1h' | '24h' | '7d' | '14d' | '30d'
+
+const ACTIVITY_OPTIONS: { id: ActivityFilter; label: string; ms: number | null }[] = [
+  { id: '1h', label: 'Last Hour', ms: 60 * 60 * 1000 },
+  { id: '24h', label: 'Last 24 hours', ms: 24 * 60 * 60 * 1000 },
+  { id: '7d', label: 'Last 7 days', ms: 7 * 24 * 60 * 60 * 1000 },
+  { id: '14d', label: 'Last 14 days', ms: 14 * 24 * 60 * 60 * 1000 },
+  { id: '30d', label: 'Last 30 days', ms: 30 * 24 * 60 * 60 * 1000 },
+  { id: 'all', label: 'View All', ms: null },
+]
+
 type EnrichedApp = JobApplication & {
   profileTitle?: string
   profileLocation?: string
   profileEducation?: string
   profileExperience?: string
   profileHours?: number
+  profilePhoto?: string
   profileSkills?: string[]
+}
+
+function toMillis(value: unknown): number {
+  if (!value) return 0
+  if (typeof value === 'number') return value
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'object' && value !== null && 'toDate' in value) {
+    try {
+      return (value as { toDate: () => Date }).toDate().getTime()
+    } catch {
+      return 0
+    }
+  }
+  const parsed = Date.parse(String(value))
+  return Number.isNaN(parsed) ? 0 : parsed
+}
+
+function fileNameFromUrl(url: string, applicantName: string): string {
+  try {
+    const path = new URL(url).pathname
+    const base = path.split('/').pop() || ''
+    const decoded = decodeURIComponent(base.split('?')[0])
+    if (decoded && /\.(pdf|doc|docx)$/i.test(decoded)) return decoded
+  } catch {
+    /* ignore */
+  }
+  const safe = (applicantName || 'candidate').replace(/[^\w\-]+/g, '_').slice(0, 40)
+  return `${safe}-CV.pdf`
+}
+
+async function downloadCv(url: string, applicantName: string) {
+  const fileName = fileNameFromUrl(url, applicantName)
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('fetch failed')
+    const blob = await res.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = objectUrl
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(objectUrl)
+  } catch {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 }
 
 export default function BusinessApplicants() {
@@ -45,6 +114,21 @@ export default function BusinessApplicants() {
   const [applications, setApplications] = React.useState<EnrichedApp[]>([])
   const [loading, setLoading] = React.useState(true)
   const [filter, setFilter] = React.useState<'all' | JobApplication['status']>('all')
+  const [keyword, setKeyword] = React.useState('')
+  const [locationQuery, setLocationQuery] = React.useState('')
+  const [categoryId, setCategoryId] = React.useState(opportunityIdFilter || 'all')
+  const [activity, setActivity] = React.useState<ActivityFilter>('all')
+  const [downloadingId, setDownloadingId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    if (opportunityIdFilter) {
+      router.replace(`/business/opportunities/${opportunityIdFilter}`)
+    }
+  }, [opportunityIdFilter, router])
+
+  React.useEffect(() => {
+    if (opportunityIdFilter) setCategoryId(opportunityIdFilter)
+  }, [opportunityIdFilter])
 
   React.useEffect(() => {
     if (!user) return
@@ -52,17 +136,26 @@ export default function BusinessApplicants() {
       router.push('/login')
       return
     }
+    if (opportunityIdFilter) return
     void loadApplications()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, opportunityIdFilter])
 
   const loadApplications = async () => {
     if (!user) return
     setLoading(true)
     try {
       const apps = await getBusinessApplications(user.id)
+      // Deduplicate by application id (keep first)
+      const seen = new Set<string>()
+      const uniqueApps = apps.filter((app) => {
+        if (!app.id || seen.has(app.id)) return false
+        seen.add(app.id)
+        return true
+      })
+
       const enriched = await Promise.all(
-        apps.map(async (app) => {
+        uniqueApps.map(async (app) => {
           const base: EnrichedApp = { ...app }
           if (
             app.applicantTitle &&
@@ -93,6 +186,12 @@ export default function BusinessApplicants() {
               profileEducation: String(d.education || d.highestEducation || ''),
               profileExperience: String(d.experience || d.workExperience || ''),
               profileHours: Number(d.volunteeredHours ?? d.volunteerHours ?? 0) || 0,
+              profilePhoto:
+                String(d.photoURL || d.avatarUrl || d.profileImage || d.avatar || '') || undefined,
+              applicantAvatarUrl:
+                app.applicantAvatarUrl ||
+                String(d.photoURL || d.avatarUrl || d.profileImage || '') ||
+                undefined,
               profileSkills: Array.isArray(d.skills)
                 ? (d.skills as unknown[]).map((s) => String(s)).filter(Boolean)
                 : typeof d.skills === 'string' && d.skills
@@ -122,211 +221,342 @@ export default function BusinessApplicants() {
     }
   }
 
-  const filtered =
-    filter === 'all'
-      ? applications.filter((a) =>
-          opportunityIdFilter ? a.opportunityId === opportunityIdFilter : true
-        )
-      : applications.filter(
-          (a) =>
-            a.status === filter &&
-            (opportunityIdFilter ? a.opportunityId === opportunityIdFilter : true)
-        )
+  const handleDownloadCv = async (app: EnrichedApp) => {
+    if (!app.resumeUrl) return
+    setDownloadingId(app.id)
+    try {
+      await downloadCv(app.resumeUrl, app.applicantName || 'candidate')
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const opportunityOptions = React.useMemo(() => {
+    const map = new Map<string, string>()
+    for (const app of applications) {
+      if (app.opportunityId && !map.has(app.opportunityId)) {
+        map.set(app.opportunityId, app.opportunityTitle || 'Opportunity')
+      }
+    }
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }))
+  }, [applications])
+
+  const filtered = React.useMemo(() => {
+    const kw = keyword.trim().toLowerCase()
+    const locQ = locationQuery.trim().toLowerCase()
+    const activityOpt = ACTIVITY_OPTIONS.find((o) => o.id === activity)
+    const now = Date.now()
+
+    return applications.filter((a) => {
+      if (categoryId !== 'all' && a.opportunityId !== categoryId) return false
+      if (filter !== 'all' && a.status !== filter) return false
+
+      if (activityOpt?.ms != null) {
+        const appliedAt = toMillis(a.createdAt)
+        if (!appliedAt || now - appliedAt > activityOpt.ms) return false
+      }
+
+      const title = a.applicantTitle || a.profileTitle || ''
+      const location = a.applicantLocation || a.profileLocation || ''
+      const education = a.applicantEducation || a.profileEducation || ''
+      const experience = a.applicantExperience || a.profileExperience || ''
+
+      if (locQ && !location.toLowerCase().includes(locQ)) return false
+
+      if (kw) {
+        const haystack = [
+          a.applicantName,
+          a.applicantEmail,
+          title,
+          location,
+          education,
+          experience,
+          a.opportunityTitle,
+          ...(a.applicantSkills || a.profileSkills || []),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+        if (!haystack.includes(kw)) return false
+      }
+
+      return true
+    })
+  }, [applications, categoryId, filter, activity, keyword, locationQuery])
+
+  if (opportunityIdFilter) {
+    return (
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center text-neutral-500 text-sm">
+        Opening job applicants…
+      </div>
+    )
+  }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[#f5f5f5]">
+      <div className="bg-white border-b border-neutral-200 px-4 sm:px-8 py-6">
+        <div className="max-w-7xl mx-auto">
           <button
+            type="button"
             onClick={() => router.push('/business/opportunities')}
-            className="flex items-center gap-2 text-sm mb-4"
-            style={{ color: '#888888' }}
+            className="flex items-center gap-2 text-sm text-neutral-500 mb-3 hover:text-neutral-800"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Opportunities
           </button>
-          <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>Applicants</h1>
-          <p style={{ color: '#888888', marginTop: '8px' }}>
-            Review directory-style applicant cards and manage status
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Candidates</h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            Browse applicants, filter by activity, and download CVs
           </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-8">
-        <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', ...STATUS_OPTIONS] as const).map((opt) => (
-            <button
-              key={opt}
-              onClick={() => setFilter(opt)}
-              className="px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors"
-              style={{
-                backgroundColor: filter === opt ? '#111111' : '#ffffff',
-                color: filter === opt ? '#ffffff' : '#555555',
-                border: '1px solid #e4e1da',
-              }}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+          {/* Sidebar filters */}
+          <aside className="bg-[#eeeeee] rounded-lg p-5 h-fit lg:sticky lg:top-4">
+            <label className="block text-sm font-semibold text-neutral-800 mb-2">
+              Search Keywords
+            </label>
+            <div className="relative mb-5">
+              <input
+                type="search"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="Name, title, skills…"
+                className="w-full h-10 rounded-md border border-neutral-300 bg-white pl-3 pr-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            </div>
 
-        {loading ? (
-          <div className="text-center py-12" style={{ color: '#888888' }}>
-            Loading applicants...
-          </div>
-        ) : filtered.length === 0 ? (
-          <div
-            className="text-center py-12 rounded-xl"
-            style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', color: '#888888' }}
-          >
-            No applications {filter !== 'all' ? `with status "${filter}"` : 'yet'}.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filtered.map((app) => {
-              const statusStyle = STATUS_STYLES[app.status]
-              const title = app.applicantTitle || app.profileTitle || ''
-              const location = app.applicantLocation || app.profileLocation || ''
-              const education = app.applicantEducation || app.profileEducation || ''
-              const experience = app.applicantExperience || app.profileExperience || ''
-              const hours =
-                app.applicantVolunteerHours ?? app.profileHours ?? undefined
-              const skills =
-                (app.applicantSkills && app.applicantSkills.length > 0
-                  ? app.applicantSkills
-                  : app.profileSkills) || []
-              return (
-                <div
-                  key={app.id}
-                  className="rounded-xl p-6"
-                  style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da' }}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 min-w-0">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold shrink-0"
-                        style={{ backgroundColor: '#e4e1da', color: '#111111' }}
-                      >
-                        {app.applicantName?.charAt(0)?.toUpperCase() || '?'}
-                      </div>
-                      <div className="min-w-0">
-                        <h3 style={{ color: '#111111', fontWeight: 600, fontSize: '18px' }}>
-                          {app.applicantName}
-                        </h3>
-                        {title ? (
-                          <p className="text-sm text-neutral-600 mt-0.5">{title}</p>
-                        ) : null}
-                        <p style={{ color: '#888888', fontSize: '14px' }}>
-                          Applied for: {app.opportunityTitle}
-                        </p>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-neutral-600">
-                          {location ? (
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin className="w-3.5 h-3.5" />
-                              {location}
+            <label className="block text-sm font-semibold text-neutral-800 mb-2">Location</label>
+            <div className="relative mb-5">
+              <input
+                type="search"
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+                placeholder="City or emirate"
+                className="w-full h-10 rounded-md border border-neutral-300 bg-white pl-3 pr-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              />
+              <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            </div>
+
+            <label className="block text-sm font-semibold text-neutral-800 mb-2">Category</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 mb-5 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+            >
+              <option value="all">All Opportunities</option>
+              {opportunityOptions.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.title}
+                </option>
+              ))}
+            </select>
+
+            <label className="block text-sm font-semibold text-neutral-800 mb-2">Status</label>
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as typeof filter)}
+              className="w-full h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 mb-5 capitalize focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+            >
+              <option value="all">All Statuses</option>
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s} className="capitalize">
+                  {s}
+                </option>
+              ))}
+            </select>
+
+            <p className="text-sm font-semibold text-neutral-800 mb-3">Last Activity</p>
+            <ul className="space-y-2.5">
+              {ACTIVITY_OPTIONS.map((opt) => (
+                <li key={opt.id}>
+                  <label className="flex items-center gap-2.5 text-sm text-neutral-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="last-activity"
+                      checked={activity === opt.id}
+                      onChange={() => setActivity(opt.id)}
+                      className="accent-neutral-900"
+                    />
+                    <span className={activity === opt.id ? 'font-medium text-neutral-900' : ''}>
+                      {opt.label}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </aside>
+
+          {/* Results */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
+                {loading ? 'Loading…' : `${filtered.length} Candidate${filtered.length === 1 ? '' : 's'} Found`}
+              </h2>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-16 text-neutral-500">Loading candidates…</div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-16 rounded-lg bg-white border border-neutral-200 text-neutral-500">
+                No candidates match your filters.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {filtered.map((app) => {
+                  const statusStyle = STATUS_STYLES[app.status]
+                  const title = app.applicantTitle || app.profileTitle || '—'
+                  const location = app.applicantLocation || app.profileLocation || '—'
+                  const education = app.applicantEducation || app.profileEducation || '—'
+                  const experience = app.applicantExperience || app.profileExperience || '—'
+                  const hours = app.applicantVolunteerHours ?? app.profileHours ?? 0
+                  const photo = app.applicantAvatarUrl || app.profilePhoto
+
+                  return (
+                    <article
+                      key={app.id}
+                      className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5 flex flex-col gap-4"
+                    >
+                      <div className="flex gap-3 sm:gap-4 items-start">
+                        <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden bg-neutral-200 flex items-center justify-center">
+                          {photo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={photo}
+                              alt={app.applicantName || 'Candidate'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xl font-semibold text-neutral-700">
+                              {app.applicantName?.charAt(0)?.toUpperCase() || '?'}
                             </span>
-                          ) : null}
-                          {typeof hours === 'number' && hours > 0 ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              {hours} volunteer hrs
-                            </span>
-                          ) : null}
-                          {education ? (
-                            <span className="inline-flex items-center gap-1">
-                              <GraduationCap className="w-3.5 h-3.5" />
-                              {education}
-                            </span>
-                          ) : null}
-                          {experience ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Briefcase className="w-3.5 h-3.5" />
-                              {experience}
-                            </span>
-                          ) : null}
+                          )}
                         </div>
-                        {skills.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {skills.slice(0, 8).map((skill) => (
-                              <span
-                                key={skill}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 text-xs"
-                              >
-                                <Sparkles className="w-3 h-3" />
-                                {skill}
-                              </span>
-                            ))}
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h3 className="font-bold text-base sm:text-lg text-neutral-900 leading-snug truncate">
+                                {app.applicantName || 'Applicant'}
+                              </h3>
+                              <p className="text-sm font-medium text-neutral-600 mt-0.5 truncate">
+                                {title}
+                              </p>
+                            </div>
+                            <span
+                              className="shrink-0 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
+                              style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
+                            >
+                              {app.status}
+                            </span>
                           </div>
-                        ) : null}
-                        <div className="flex flex-wrap gap-4 mt-2 text-sm" style={{ color: '#555555' }}>
+
+                          <ul className="mt-2 space-y-1 text-xs sm:text-sm text-neutral-600">
+                            <li className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <span>
+                                Volunteer Hours :{' '}
+                                <span className="font-medium text-neutral-800">{hours}</span>
+                              </span>
+                            </li>
+                            <li className="flex items-center gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <span className="truncate">
+                                Location :{' '}
+                                <span className="font-medium text-neutral-800">{location}</span>
+                              </span>
+                            </li>
+                            <li className="flex items-center gap-1.5">
+                              <GraduationCap className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <span className="truncate">
+                                Education :{' '}
+                                <span className="font-medium text-neutral-800">{education}</span>
+                              </span>
+                            </li>
+                            <li className="flex items-center gap-1.5">
+                              <Briefcase className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <span className="truncate">
+                                Experience :{' '}
+                                <span className="font-medium text-neutral-800">{experience}</span>
+                              </span>
+                            </li>
+                          </ul>
+
+                          <p className="mt-2 text-[11px] text-neutral-400 truncate">
+                            Applied for: {app.opportunityTitle}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {app.resumeUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => void handleDownloadCv(app)}
+                            disabled={downloadingId === app.id}
+                            className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md bg-[#111] text-white text-xs font-semibold uppercase tracking-wide hover:bg-neutral-800 disabled:opacity-60"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            {downloadingId === app.id ? 'Downloading…' : 'View Resume'}
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center h-9 px-4 rounded-md bg-neutral-100 text-neutral-400 text-xs font-semibold uppercase tracking-wide">
+                            No CV
+                          </span>
+                        )}
+                        {app.applicantEmail ? (
                           <a
                             href={`mailto:${app.applicantEmail}`}
-                            className="flex items-center gap-1 hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-900"
                           >
                             <Mail className="w-3.5 h-3.5" />
-                            {app.applicantEmail}
+                            Email
                           </a>
-                          {app.applicantPhone && (
-                            <a
-                              href={`tel:${app.applicantPhone}`}
-                              className="flex items-center gap-1 hover:underline"
-                            >
-                              <Phone className="w-3.5 h-3.5" />
-                              {app.applicantPhone}
-                            </a>
-                          )}
-                          {app.resumeUrl && (
-                            <a
-                              href={app.resumeUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 hover:underline"
-                            >
-                              <FileText className="w-3.5 h-3.5" />
-                              Resume / CV
-                            </a>
-                          )}
-                        </div>
+                        ) : null}
+                        {app.applicantPhone ? (
+                          <a
+                            href={`tel:${app.applicantPhone}`}
+                            className="inline-flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-900"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            Call
+                          </a>
+                        ) : null}
                       </div>
-                    </div>
-                    <span
-                      className="px-3 py-1 rounded-full text-xs font-medium capitalize"
-                      style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
-                    >
-                      {app.status}
-                    </span>
-                  </div>
 
-                  {app.coverLetter && (
-                    <div
-                      className="mt-4 p-4 rounded-lg text-sm"
-                      style={{ backgroundColor: '#faf9f7', color: '#555555' }}
-                    >
-                      {app.coverLetter}
-                    </div>
-                  )}
+                      {app.coverLetter ? (
+                        <p className="text-xs text-neutral-600 bg-neutral-50 rounded-md p-3 line-clamp-3">
+                          {app.coverLetter}
+                        </p>
+                      ) : null}
 
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {STATUS_OPTIONS.map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => handleStatusChange(app.id, status)}
-                        disabled={app.status === status}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                        style={{
-                          backgroundColor: app.status === status ? '#111111' : '#f3f2ef',
-                          color: app.status === status ? '#ffffff' : '#555555',
-                        }}
-                      >
-                        {status}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+                      <div className="flex flex-wrap gap-1.5 pt-1 border-t border-neutral-100">
+                        {STATUS_OPTIONS.map((status) => (
+                          <button
+                            key={status}
+                            type="button"
+                            onClick={() => void handleStatusChange(app.id, status)}
+                            disabled={app.status === status}
+                            className="px-2.5 py-1 rounded text-[10px] font-semibold uppercase tracking-wide transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            style={{
+                              backgroundColor: app.status === status ? '#111111' : '#f3f2ef',
+                              color: app.status === status ? '#ffffff' : '#555555',
+                            }}
+                          >
+                            {status}
+                          </button>
+                        ))}
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   )

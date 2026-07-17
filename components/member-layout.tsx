@@ -20,6 +20,7 @@ import {
   Crown,
   Package,
   FolderOpen,
+  Store,
 } from 'lucide-react'
 import { logoutUser } from '@/lib/auth'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
@@ -40,6 +41,7 @@ const memberMenuItems = [
   { label: 'Charity Requests', href: '/dashboard/charity-requests', icon: HelpCircle },
   { label: 'Opportunities', href: '/dashboard/opportunities', icon: Users },
   { label: 'Marketplace', href: '/dashboard/marketplace', icon: ShoppingBag },
+  { label: 'Business Directory', href: '/directory', icon: Store },
   { label: 'Orders', href: '/dashboard/orders', icon: Package },
   { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { label: 'Learning', href: '/dashboard/learning', icon: BookOpen },

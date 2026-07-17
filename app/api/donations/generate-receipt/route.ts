@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminDb, getAdminBucket } from '@/lib/firebase-admin'
+import { FieldValue } from 'firebase-admin/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
 import { generateDonationReceipt } from '@/lib/pdf-receipt-generator'
 import { uploadBufferToPath } from '@/lib/storage-server'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +13,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Donation ID required' }, { status: 400 })
     }
 
-    // Get donation details from Firestore using Admin SDK
     const db = getAdminDb()
     const donationDoc = await db.collection('donationSubmissions').doc(donationId).get()
 
@@ -19,48 +20,72 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Donation not found' }, { status: 404 })
     }
 
-    const donation = donationDoc.data() as any
+    const donation = donationDoc.data() as Record<string, unknown>
+    const causeId = donation.causeId ? String(donation.causeId) : ''
 
-    // Get cause details
-    const causeDoc = await db.collection('causes').doc(donation.causeId).get()
-    const cause = causeDoc.data() || {}
+    let cause: Record<string, unknown> = {}
+    if (causeId) {
+      const caseSnap = await db.collection('charityCases').doc(causeId).get()
+      if (caseSnap.exists) cause = caseSnap.data() || {}
+      else {
+        const legacy = await db.collection('causes').doc(causeId).get()
+        if (legacy.exists) cause = legacy.data() || {}
+      }
+    }
 
-    // Get partner details
-    const partnerDoc = await db.collection('charityPartners').doc(donation.partnerId).get()
-    const partner = partnerDoc.data() || {}
+    const partnerId = donation.partnerId ? String(donation.partnerId) : ''
+    let partner: Record<string, unknown> = {}
+    if (partnerId) {
+      const partnerSnap = await db.collection('charityPartners').doc(partnerId).get()
+      if (partnerSnap.exists) partner = partnerSnap.data() || {}
+    }
 
-    // Generate PDF receipt
+    const donationType = donation.donationType ? String(donation.donationType) : ''
+    const categoryLabel = donationType
+      ? donationType.charAt(0).toUpperCase() + donationType.slice(1)
+      : String(cause.category || 'General')
+
     const receiptBuffer = await generateDonationReceipt({
       donationId,
-      donorName: donation.donorName || 'Valued Donor',
-      donorEmail: donation.donorEmail || 'donor@example.com',
-      amount: donation.amount,
+      donorName: String(donation.donorName || 'Valued Donor'),
+      donorEmail: String(donation.donorEmail || 'donor@example.com'),
+      amount: Number(donation.amount) || 0,
       currency: 'AED',
-      causeName: (cause as any).name || donation.causeName,
-      category: (cause as any).category || 'General',
-      partnerName: (partner as any).name || donation.partnerName,
-      referenceNumber: donation.referenceNumber,
-      verificationDate: donation.verifiedAt || new Date(),
-      notes: donation.notes,
+      causeName: String(cause.title || cause.name || donation.causeName || 'Cause'),
+      category: categoryLabel,
+      partnerName: String(partner.name || donation.partnerName || 'Partner'),
+      referenceNumber: String(donation.referenceNumber || ''),
+      verificationDate: (donation.verifiedAt as never) || new Date(),
+      notes: donation.notes ? String(donation.notes) : undefined,
       organizationName: 'Passive Blessings',
     })
 
-    // Upload PDF to Firebase Storage using Admin SDK
-    const timestamp = new Date().getTime()
+    const timestamp = Date.now()
     const path = `receipts/donation_${donationId}_${timestamp}.pdf`
 
     const result = await uploadBufferToPath(receiptBuffer, 'application/pdf', path, {
       donationId,
-      donorEmail: donation.donorEmail,
+      donorEmail: String(donation.donorEmail || ''),
     })
+
+    await donationDoc.ref.update(
+      sanitizeForFirestore({
+        receiptURL: result.url,
+        receiptGeneratedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+    )
 
     return NextResponse.json({
       success: true,
       receiptUrl: result.url,
       fileName: `donation_${donationId}_${timestamp}.pdf`,
     })
-  } catch (error: any) {
-    console.error('[v0] Error generating receipt:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    console.error('[generate-receipt]', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Receipt generation failed' },
+      { status: 500 }
+    )
   }
 }

@@ -228,7 +228,7 @@ export default function ContactSubmissionsPage() {
   return (
     <AdminPageLayout
       title="Contact Submissions"
-      subtitle="All website inquiries — Sponsorship/Partnership and Other"
+      subtitle="Website contact form · Sponsorship and partnership requests also appear under Sponsor Inquiries"
     >
       <div className="space-y-4 w-full min-w-0">
         <div className="flex flex-wrap gap-2">

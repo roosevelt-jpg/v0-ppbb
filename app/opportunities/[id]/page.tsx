@@ -21,8 +21,58 @@ import {
   opportunityMemberBlocksUser,
   daysUntilDeadline,
 } from '@/lib/opportunity-utils'
+import { isMapsOrWebUrl } from '@/lib/event-utils'
 import { format } from 'date-fns'
-import { ArrowLeft, Briefcase, MapPin, Building2, Share2, Copy, Check } from 'lucide-react'
+import {
+  ArrowLeft,
+  Briefcase,
+  MapPin,
+  Building2,
+  Share2,
+  Check,
+  Banknote,
+  Users,
+  Calendar,
+  CalendarCheck,
+  Layers,
+  Laptop,
+  Clock,
+} from 'lucide-react'
+
+function isMapsUrl(value: string): boolean {
+  return isMapsOrWebUrl(value)
+}
+
+function asLines(value: unknown): string[] {
+  if (!value) return []
+  if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean)
+  return String(value)
+    .split(/\n|•|\u2022/)
+    .map((s) => s.replace(/^[-–—*\s]+/, '').trim())
+    .filter(Boolean)
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  value: React.ReactNode
+}) {
+  return (
+    <div className="flex gap-3 py-3 border-b border-neutral-100 last:border-0">
+      <div className="w-9 h-9 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-neutral-700" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">{label}</p>
+        <div className="text-sm font-semibold text-neutral-900 mt-0.5 break-words">{value}</div>
+      </div>
+    </div>
+  )
+}
 
 export default function OpportunityDetailPage() {
   const params = useParams()
@@ -59,226 +109,305 @@ export default function OpportunityDetailPage() {
       : null
   const daysLeft = opportunity ? daysUntilDeadline(opportunity) : null
   const roleType = opportunity ? getRoleType(opportunity) : ''
+  const companyName = opportunity
+    ? opportunity.companyName || opportunity.businessName || 'Organization'
+    : ''
+  const posted = opportunity ? getPostedDate(opportunity) : null
+  const locationRaw = opportunity ? getOpportunityLocation(opportunity) : ''
+  const locationIsLink = locationRaw ? isMapsUrl(locationRaw) : false
+  const salary =
+    opportunity?.compensation ||
+    (opportunity?.salary ? `AED ${Number(opportunity.salary).toLocaleString()}` : null) ||
+    (opportunity as { salaryRange?: string } | null)?.salaryRange ||
+    'TBA'
+  const responsibilities = opportunity
+    ? asLines((opportunity as { responsibilities?: string | string[] }).responsibilities)
+    : []
+  const requirements = opportunity
+    ? asLines(opportunity.requirements).length
+      ? asLines(opportunity.requirements)
+      : []
+    : []
+  const suitability = opportunity?.suitableFor?.length
+    ? opportunity.suitableFor
+    : []
+  const deadline = opportunity ? toDate(opportunity.deadline) : null
+  const hiringBy = opportunity ? toDate((opportunity as { hiringBy?: unknown }).hiringBy) : null
+
+  const applyButton = !opportunity ? null : !user ? (
+    <Link
+      href={`/login?returnUrl=/opportunities/${id}`}
+      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto h-10 px-5 rounded-md bg-black !text-white text-sm font-semibold hover:bg-neutral-800"
+    >
+      Sign in to Apply
+    </Link>
+  ) : canApplyMember ? (
+    genderBlock || memberBlock ? (
+      <p className="text-sm text-neutral-600">{genderBlock || memberBlock}</p>
+    ) : (
+      <button
+        type="button"
+        onClick={() => setModalOpen(true)}
+        className="inline-flex items-center justify-center gap-2 w-full sm:w-auto h-10 px-5 rounded-md bg-black !text-white text-sm font-semibold hover:bg-neutral-800"
+      >
+        Apply Now →
+      </button>
+    )
+  ) : user.role === 'admin' || user.role === 'super_admin' ? (
+    <p className="text-sm text-neutral-500">Admin View</p>
+  ) : (
+    <p className="text-sm text-neutral-500 inline-flex items-center gap-2">
+      <Briefcase className="h-4 w-4" /> Posted by business account
+    </p>
+  )
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-neutral-50 flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <Link
             href="/opportunities"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 mb-4"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to Opportunities
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Opportunities
           </Link>
 
           {loading ? (
-            <p className="text-muted-foreground">Loading…</p>
+            <p className="text-neutral-500">Loading…</p>
           ) : !opportunity ? (
-            <p className="text-muted-foreground">Opportunity not found.</p>
+            <p className="text-neutral-500">Opportunity not found.</p>
           ) : (
-            <article className="space-y-6">
-              <header className="flex items-start gap-4">
-                {opportunity.businessLogoUrl ? (
-                  <img
-                    src={opportunity.businessLogoUrl}
-                    alt=""
-                    className="w-14 h-14 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-neutral-100 flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-neutral-400" />
+            <div className="space-y-5">
+              {/* Header — reference style */}
+              <header className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+                  <div className="shrink-0 flex flex-col items-start gap-2">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg border border-neutral-200 bg-white flex items-center justify-center overflow-hidden p-2">
+                      {opportunity.businessLogoUrl ? (
+                        <img
+                          src={opportunity.businessLogoUrl}
+                          alt=""
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      ) : (
+                        <Building2 className="w-10 h-10 text-neutral-300" />
+                      )}
+                    </div>
+                    <p className="text-xs font-semibold text-neutral-800 max-w-[7.5rem] leading-snug">
+                      {companyName}
+                    </p>
+                    {opportunity.businessId ? (
+                      <Link
+                        href={`/opportunities?businessId=${opportunity.businessId}`}
+                        className="text-[11px] font-semibold text-neutral-600 underline hover:text-neutral-900"
+                      >
+                        View all jobs →
+                      </Link>
+                    ) : null}
                   </div>
-                )}
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {opportunity.companyName || opportunity.businessName}
-                  </p>
-                  <h1 className="text-3xl font-bold text-foreground mt-1">{opportunity.title}</h1>
+
+                  <div className="min-w-0 flex-1">
+                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-black text-white">
+                      {ROLE_TYPE_LABELS[roleType] || roleType}
+                    </span>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mt-2 leading-tight">
+                      {opportunity.title}
+                    </h1>
+                    <p className="text-sm text-neutral-600 mt-1.5">
+                      Posted {posted ? format(posted, 'd MMMM yyyy') : 'recently'} by{' '}
+                      <span className="font-semibold text-neutral-900">{companyName}</span>
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-neutral-700">
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-neutral-500" />
+                        {locationIsLink ? (
+                          <a
+                            href={locationRaw}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-medium"
+                          >
+                            View map location
+                          </a>
+                        ) : (
+                          locationRaw || 'Location TBA'
+                        )}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Banknote className="w-4 h-4 text-neutral-500" />
+                        {salary}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Laptop className="w-4 h-4 text-neutral-500" />
+                        {getWorkTypeLabel(opportunity)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 flex flex-col gap-2 lg:items-stretch lg:min-w-[10rem]">
+                    {applyButton}
+                    <button
+                      type="button"
+                      onClick={shareLink}
+                      className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md border border-neutral-300 bg-white text-neutral-800 text-xs font-semibold hover:bg-neutral-50"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                      {copied ? 'Copied' : 'Share'}
+                    </button>
+                  </div>
                 </div>
               </header>
 
-              <div className="flex flex-wrap gap-2">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                  {ROLE_TYPE_LABELS[roleType] || roleType}
-                </span>
-                <span className="px-2 py-1 bg-teal-100 text-teal-800 text-xs rounded">
-                  {getWorkTypeLabel(opportunity)}
-                </span>
-                {getOpportunityLocation(opportunity) ? (
-                  <span className="px-2 py-1 bg-slate-100 text-xs rounded flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {getOpportunityLocation(opportunity)}
-                  </span>
-                ) : null}
-                {opportunity.category ? (
-                  <span className="px-2 py-1 bg-secondary text-xs rounded">{opportunity.category}</span>
-                ) : null}
-                {(opportunity.suitableFor || []).map((s) => (
-                  <span key={s} className="px-2 py-1 bg-lime-50 text-lime-800 text-xs rounded border border-lime-200">
-                    {s}
-                  </span>
-                ))}
-              </div>
-
-              <dl className="grid sm:grid-cols-2 gap-3 text-sm border rounded-lg p-4 bg-neutral-50">
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Company</dt>
-                  <dd className="font-medium">{opportunity.companyName || opportunity.businessName}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Role Type</dt>
-                  <dd className="font-medium">{ROLE_TYPE_LABELS[roleType] || roleType}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Work Type</dt>
-                  <dd className="font-medium">{getWorkTypeLabel(opportunity)}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Location</dt>
-                  <dd className="font-medium">{getOpportunityLocation(opportunity) || 'TBA'}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Salary / Compensation</dt>
-                  <dd className="font-medium">
-                    {opportunity.compensation ||
-                      (opportunity.salary ? `AED ${opportunity.salary}` : 'TBA')}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Industry / Category</dt>
-                  <dd className="font-medium">{opportunity.category || 'TBA'}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Application Deadline</dt>
-                  <dd className="font-medium">
-                    {toDate(opportunity.deadline)
-                      ? format(toDate(opportunity.deadline)!, 'MMM d, yyyy')
-                      : 'Open'}
-                    {daysLeft != null && daysLeft >= 0 ? ` (${daysLeft} days left)` : ''}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-muted-foreground">Hiring By</dt>
-                  <dd className="font-medium">
-                    {toDate((opportunity as { hiringBy?: unknown }).hiringBy)
-                      ? format(toDate((opportunity as { hiringBy?: unknown }).hiringBy)!, 'MMM d, yyyy')
-                      : 'TBA'}
-                  </dd>
-                </div>
-                {getPostedDate(opportunity) ? (
-                  <div>
-                    <dt className="text-xs uppercase text-muted-foreground">Date Posted</dt>
-                    <dd className="font-medium">{format(getPostedDate(opportunity)!, 'MMM d, yyyy')}</dd>
-                  </div>
-                ) : null}
-              </dl>
-
-              {(() => {
-                const resp = (opportunity as { responsibilities?: string | string[] }).responsibilities
-                const text = Array.isArray(resp) ? resp.join('\n') : resp
-                if (!text) return null
-                return (
-                  <section>
-                    <h2 className="text-lg font-semibold mb-2">Key Responsibilities</h2>
-                    <p className="whitespace-pre-wrap text-foreground text-sm">{text}</p>
+              {/* Body: description + sidebar */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div className="lg:col-span-2 space-y-5">
+                  <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                    <h2 className="text-lg font-bold text-neutral-900 mb-3">Job Description</h2>
+                    {opportunity.description ? (
+                      <div
+                        className="prose prose-sm max-w-none text-neutral-700"
+                        dangerouslySetInnerHTML={{
+                          __html: opportunity.description.includes('<')
+                            ? opportunity.description
+                            : `<p>${opportunity.description.replace(/\n/g, '<br>')}</p>`,
+                        }}
+                      />
+                    ) : (
+                      <p className="text-sm text-neutral-500">No description provided.</p>
+                    )}
                   </section>
-                )
-              })()}
 
-              <section>
-                <h2 className="text-lg font-semibold mb-2">Description</h2>
-                <div
-                  className="prose prose-sm max-w-none text-foreground"
-                  dangerouslySetInnerHTML={{
-                    __html: opportunity.description?.includes('<')
-                      ? opportunity.description
-                      : `<p>${(opportunity.description || '').replace(/\n/g, '<br>')}</p>`,
-                  }}
-                />
-              </section>
+                  <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                    <h2 className="text-lg font-bold text-neutral-900 mb-3">
+                      6. Key Responsibilities
+                    </h2>
+                    {responsibilities.length ? (
+                      <ul className="space-y-2 text-sm text-neutral-700">
+                        {responsibilities.map((item) => (
+                          <li key={item} className="flex gap-2">
+                            <span className="text-neutral-400 shrink-0">--</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-neutral-500">Not specified.</p>
+                    )}
+                  </section>
 
-              {opportunity.requirements?.length ? (
-                <section>
-                  <h2 className="text-lg font-semibold mb-2">Requirements / Skills Needed</h2>
-                  <ul className="list-disc pl-5 space-y-1 text-sm">
-                    {opportunity.requirements.map((r) => (
-                      <li key={r}>{r}</li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
+                  <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                    <h2 className="text-lg font-bold text-neutral-900 mb-3">
+                      7. Requirements / Skills Needed
+                    </h2>
+                    {requirements.length ? (
+                      <ul className="space-y-2 text-sm text-neutral-700">
+                        {requirements.map((item) => (
+                          <li key={item} className="flex gap-2">
+                            <span className="text-neutral-400 shrink-0">--</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-neutral-500">Not specified.</p>
+                    )}
+                  </section>
 
-              {opportunity.benefits?.length ? (
-                <section>
-                  <h2 className="text-lg font-semibold mb-2">Benefits</h2>
-                  <ul className="list-disc pl-5 space-y-1 text-sm">
-                    {opportunity.benefits.map((b) => (
-                      <li key={b}>{b}</li>
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
+                  {opportunity.benefits?.length ? (
+                    <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                      <h2 className="text-lg font-bold text-neutral-900 mb-3">Benefits</h2>
+                      <ul className="space-y-2 text-sm text-neutral-700">
+                        {opportunity.benefits.map((b) => (
+                          <li key={b} className="flex gap-2">
+                            <span className="text-neutral-400 shrink-0">--</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                </div>
 
-              <section>
-                <h2 className="text-lg font-semibold mb-2">Application process</h2>
-                <p className="text-sm text-muted-foreground capitalize">
-                  {(opportunity.applicationProcess || 'cv_upload').replace(/_/g, ' ')}
-                </p>
-                {opportunity.applicationURL &&
-                (opportunity.applicationProcess === 'external_link' ||
-                  opportunity.applicationProcess === 'both') ? (
-                  <a
-                    href={opportunity.applicationURL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 underline mt-1 inline-block"
-                  >
-                    Apply on company website →
-                  </a>
-                ) : null}
-              </section>
+                {/* Position Information sidebar */}
+                <aside className="lg:col-span-1">
+                  <div className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5 lg:sticky lg:top-4">
+                    <h2 className="text-base font-bold text-neutral-900 mb-1">
+                      Position Information
+                    </h2>
+                    <p className="text-xs text-neutral-500 mb-2">Work opportunity details</p>
 
-              <div className="flex flex-wrap gap-3 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={shareLink}
-                  className="inline-flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg text-sm"
-                >
-                  {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-                  {copied ? 'Link copied' : 'Share'}
-                </button>
-                {!user ? (
-                  <Link
-                    href={`/login?returnUrl=/opportunities/${id}`}
-                    className="!bg-black !text-white px-6 py-2.5 rounded-lg text-sm font-semibold"
-                  >
-                    Sign in to Apply
-                  </Link>
-                ) : canApplyMember ? (
-                  genderBlock || memberBlock ? (
-                    <span className="text-sm text-muted-foreground py-2">
-                      {genderBlock || memberBlock}
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setModalOpen(true)}
-                      className="!bg-black !text-white px-6 py-2.5 rounded-lg text-sm font-semibold"
-                    >
-                      Apply Now
-                    </button>
-                  )
-                ) : user.role === 'admin' || user.role === 'super_admin' ? (
-                  <span className="text-sm text-muted-foreground flex items-center gap-2 py-2">
-                    Admin View
-                  </span>
-                ) : (
-                  <span className="text-sm text-muted-foreground flex items-center gap-2 py-2">
-                    <Briefcase className="h-4 w-4" /> Posted by business account
-                  </span>
-                )}
+                    <InfoRow
+                      icon={Briefcase}
+                      label="1. Job Title"
+                      value={opportunity.title}
+                    />
+                    <InfoRow
+                      icon={Building2}
+                      label="2. Company / Organization"
+                      value={companyName}
+                    />
+                    <InfoRow
+                      icon={Clock}
+                      label="3. Role Type"
+                      value={ROLE_TYPE_LABELS[roleType] || roleType}
+                    />
+                    <InfoRow
+                      icon={Laptop}
+                      label="4. Work Type"
+                      value={getWorkTypeLabel(opportunity)}
+                    />
+                    <InfoRow
+                      icon={MapPin}
+                      label="5. Location"
+                      value={
+                        locationIsLink ? (
+                          <a
+                            href={locationRaw}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            Open map link
+                          </a>
+                        ) : (
+                          locationRaw || 'TBA'
+                        )
+                      }
+                    />
+                    <InfoRow icon={Banknote} label="8. Salary / Compensation" value={salary} />
+                    <InfoRow
+                      icon={Users}
+                      label="9. Suitability"
+                      value={suitability.length ? suitability.join(', ') : 'Open to all'}
+                    />
+                    <InfoRow
+                      icon={Calendar}
+                      label="10. Application Deadline"
+                      value={
+                        deadline
+                          ? `${format(deadline, 'MMM d, yyyy')}${
+                              daysLeft != null && daysLeft >= 0 ? ` (${daysLeft} days left)` : ''
+                            }`
+                          : 'Open'
+                      }
+                    />
+                    <InfoRow
+                      icon={CalendarCheck}
+                      label="11. Hiring By"
+                      value={hiringBy ? format(hiringBy, 'MMM d, yyyy') : 'TBA'}
+                    />
+                    <InfoRow
+                      icon={Layers}
+                      label="12. Industry / Category"
+                      value={opportunity.category || 'TBA'}
+                    />
+
+                    <div className="mt-4 pt-3 border-t border-neutral-100">{applyButton}</div>
+                  </div>
+                </aside>
               </div>
-            </article>
+            </div>
           )}
         </div>
       </main>

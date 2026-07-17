@@ -26,8 +26,8 @@ export default function OpportunitiesPage() {
               Jobs &amp; Opportunities
             </h1>
             <p className="text-lg text-muted-foreground text-pretty">
-              Discover jobs, internships, gigs, and volunteer roles posted by businesses in the
-              Passive Blessings community. Sign in to apply.
+              Discover jobs, internships, gigs, and volunteer roles. Use the filters below to search
+              by location, role type, work type, and industry — then apply when signed in.
             </p>
           </div>
           <Suspense fallback={<OpportunitiesLoading />}>

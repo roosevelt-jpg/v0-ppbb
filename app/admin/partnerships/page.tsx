@@ -108,8 +108,8 @@ export default function AdminPartnershipsPage() {
 
   return (
     <AdminPageLayout
-      title="Partnership Requests"
-      subtitle="Review partnership, campaign, and charity submissions"
+      title="Sponsor Inquiries"
+      subtitle="Business members request sponsorship for donation causes and projects here — not a separate user type"
     >
       {loading ? (
         <p className="text-gray-500 py-12 text-center">Loading requests…</p>

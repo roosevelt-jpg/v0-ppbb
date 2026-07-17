@@ -64,10 +64,18 @@ function ConfirmationInner() {
 
         <div className="space-y-3 pt-2">
           <a
+            href={`/api/events/${eventId}/google-calendar`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-neutral-800"
+          >
+            <CalendarPlus size={18} /> Add to Google Calendar
+          </a>
+          <a
             href={`/api/events/${eventId}/ics`}
             className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-100 text-black rounded-lg font-semibold hover:bg-neutral-200"
           >
-            <CalendarPlus size={18} /> Add to calendar (.ics)
+            <Download size={18} /> Download .ics
           </a>
           <Link
             href={`/events/${eventId}`}

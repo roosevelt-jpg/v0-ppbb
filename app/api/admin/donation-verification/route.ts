@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { FieldValue } from 'firebase-admin/firestore'
+import { FieldValue, type Firestore } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
+import { generateDonationReceipt } from '@/lib/pdf-receipt-generator'
+import { uploadBufferToPath } from '@/lib/storage-server'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get('authorization') || ''
@@ -15,9 +17,99 @@ async function requireAdmin(request: NextRequest): Promise<string | null> {
   return ok ? uid : null
 }
 
+async function notifyDonor(
+  db: Firestore,
+  userId: string,
+  title: string,
+  bodyText: string,
+  submissionId: string,
+  type = 'donation_update'
+) {
+  if (!userId) return
+  try {
+    await db.collection('users').doc(userId).collection('notifications').add(
+      sanitizeForFirestore({
+        type,
+        title,
+        message: bodyText,
+        submissionId,
+        read: false,
+        createdAt: FieldValue.serverTimestamp(),
+      })
+    )
+  } catch (err) {
+    console.warn('[donation-verification] donor notify failed:', err)
+  }
+}
+
+async function generateAndStoreReceipt(
+  db: Firestore,
+  submissionId: string,
+  data: Record<string, unknown>
+): Promise<string | null> {
+  try {
+    const causeId = data.causeId ? String(data.causeId) : ''
+    let cause: Record<string, unknown> = {}
+    if (causeId) {
+      const caseSnap = await db.collection('charityCases').doc(causeId).get()
+      if (caseSnap.exists) cause = caseSnap.data() || {}
+      else {
+        const legacy = await db.collection('causes').doc(causeId).get()
+        if (legacy.exists) cause = legacy.data() || {}
+      }
+    }
+
+    const partnerId = data.partnerId ? String(data.partnerId) : ''
+    let partner: Record<string, unknown> = {}
+    if (partnerId) {
+      const partnerSnap = await db.collection('charityPartners').doc(partnerId).get()
+      if (partnerSnap.exists) partner = partnerSnap.data() || {}
+    }
+
+    const verifiedAt = data.verifiedAt || new Date()
+    const receiptBuffer = await generateDonationReceipt({
+      donationId: submissionId,
+      donorName: String(data.donorName || 'Valued Donor'),
+      donorEmail: String(data.donorEmail || 'donor@example.com'),
+      amount: Number(data.amount) || 0,
+      currency: 'AED',
+      causeName: String(cause.title || cause.name || data.causeName || 'Cause'),
+      category: String(
+        data.donationType
+          ? String(data.donationType).charAt(0).toUpperCase() + String(data.donationType).slice(1)
+          : cause.category || 'General'
+      ),
+      partnerName: String(partner.name || data.partnerName || 'Partner'),
+      referenceNumber: String(data.referenceNumber || ''),
+      verificationDate: verifiedAt as never,
+      notes: data.notes ? String(data.notes) : undefined,
+      organizationName: 'Passive Blessings',
+    })
+
+    const timestamp = Date.now()
+    const path = `receipts/donation_${submissionId}_${timestamp}.pdf`
+    const result = await uploadBufferToPath(receiptBuffer, 'application/pdf', path, {
+      donationId: submissionId,
+      donorEmail: String(data.donorEmail || ''),
+    })
+
+    await db.collection('donationSubmissions').doc(submissionId).update(
+      sanitizeForFirestore({
+        receiptURL: result.url,
+        receiptGeneratedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      })
+    )
+
+    return result.url
+  } catch (err) {
+    console.warn('[donation-verification] receipt generation failed:', err)
+    return null
+  }
+}
+
 /**
  * Verify / reject / request-info on donationSubmissions.
- * Verify uses a Firestore transaction to increment charityCases.amountRaised.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -44,25 +136,9 @@ export async function POST(request: NextRequest) {
     const db = getAdminDb()
     const submissionRef = db.collection('donationSubmissions').doc(submissionId)
 
-    async function notifyDonor(userId: string, title: string, bodyText: string) {
-      if (!userId) return
-      try {
-        await db.collection('users').doc(userId).collection('notifications').add(
-          sanitizeForFirestore({
-            type: 'donation_resubmission',
-            title,
-            message: bodyText,
-            submissionId,
-            read: false,
-            createdAt: FieldValue.serverTimestamp(),
-          })
-        )
-      } catch (err) {
-        console.warn('[donation-verification] donor notify failed:', err)
-      }
-    }
-
     if (action === 'reject') {
+      const snap = await submissionRef.get()
+      const data = snap.data() || {}
       await submissionRef.update(
         sanitizeForFirestore({
           status: 'rejected',
@@ -71,6 +147,14 @@ export async function POST(request: NextRequest) {
           rejectedBy: adminUid,
           updatedAt: FieldValue.serverTimestamp(),
         })
+      )
+      await notifyDonor(
+        db,
+        String(data.userId || ''),
+        'Donation proof rejected',
+        reason || 'Your donation proof was rejected. Please contact support if you need help.',
+        submissionId,
+        'donation_rejected'
       )
       await auditAdminApiAction(request, adminUid, {
         actionType: 'reject',
@@ -81,6 +165,9 @@ export async function POST(request: NextRequest) {
         details: reason || '',
       })
       return NextResponse.json({ success: true })
+    }
+
+    if (action === 'request_info' || action === 'request_resubmission') {
       const snap = await submissionRef.get()
       const data = snap.data() || {}
       const userId = data.userId ? String(data.userId) : ''
@@ -89,7 +176,6 @@ export async function POST(request: NextRequest) {
 
       await submissionRef.update(
         sanitizeForFirestore({
-          // Part 13A uses resubmission_requested; Part 7B also treats more_info_* as pending
           status:
             action === 'request_resubmission' ? 'resubmission_requested' : 'more_info_requested',
           infoRequestMessage: note,
@@ -100,9 +186,12 @@ export async function POST(request: NextRequest) {
       )
 
       await notifyDonor(
+        db,
         userId,
         'Donation proof — resubmission requested',
-        note
+        note,
+        submissionId,
+        'donation_resubmission'
       )
       await auditAdminApiAction(request, adminUid, {
         actionType: 'update',
@@ -113,11 +202,17 @@ export async function POST(request: NextRequest) {
         details: note,
       })
       return NextResponse.json({ success: true })
+    }
+
+    if (action === 'verify') {
+      let verifiedData: Record<string, unknown> = {}
+      let userId = ''
+
       await db.runTransaction(async (tx) => {
-        // All reads must complete before any writes (Firestore transaction rule)
         const snap = await tx.get(submissionRef)
         if (!snap.exists) throw new Error('Submission not found')
         const data = snap.data() || {}
+        verifiedData = data
         const status = String(data.status || '')
         if (status === 'confirmed' || status === 'verified') {
           throw new Error('Already verified')
@@ -128,7 +223,7 @@ export async function POST(request: NextRequest) {
 
         const amount = Number(data.amount) || 0
         const causeId = data.causeId ? String(data.causeId) : ''
-        const userId = data.userId ? String(data.userId) : ''
+        userId = data.userId ? String(data.userId) : ''
 
         const causeRef = causeId ? db.collection('charityCases').doc(causeId) : null
         const legacyCauseRef = causeId ? db.collection('causes').doc(causeId) : null
@@ -140,7 +235,6 @@ export async function POST(request: NextRequest) {
         tx.update(
           submissionRef,
           sanitizeForFirestore({
-            // Part 13A canonical status; Part 7B UI already accepts "verified"
             status: 'verified',
             verifiedAt: FieldValue.serverTimestamp(),
             verifiedBy: adminUid,
@@ -170,17 +264,21 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      // Optional receipt generation (non-blocking for verification success)
-      try {
-        const origin = request.nextUrl.origin
-        await fetch(`${origin}/api/donations/generate-receipt`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ donationId: submissionId }),
-        })
-      } catch {
-        /* receipt is best-effort */
-      }
+      const receiptURL = await generateAndStoreReceipt(db, submissionId, {
+        ...verifiedData,
+        verifiedAt: new Date(),
+      })
+
+      await notifyDonor(
+        db,
+        userId,
+        'Donation verified',
+        receiptURL
+          ? 'Your donation was verified. Your receipt is ready on your donations dashboard.'
+          : 'Your donation was verified. Thank you for your support.',
+        submissionId,
+        'donation_verified'
+      )
 
       await auditAdminApiAction(request, adminUid, {
         actionType: 'approve',
@@ -190,7 +288,7 @@ export async function POST(request: NextRequest) {
         status: 'success',
       })
 
-      return NextResponse.json({ success: true })
+      return NextResponse.json({ success: true, receiptURL })
     }
 
     return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 })
