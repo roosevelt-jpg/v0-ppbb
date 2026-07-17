@@ -73,6 +73,7 @@ export default function NewOpportunity() {
     responsibilities: '',
     requirements: '',
     compensation: '',
+    category: '',
     suitableFor: [] as string[],
     deadline: '',
     hiringBy: '',
@@ -136,6 +137,7 @@ export default function NewOpportunity() {
           companyName: formData.companyName || user.businessProfile?.businessName || 'Unknown',
           businessName: user.businessProfile?.businessName || formData.companyName || 'Unknown',
           roleType: formData.roleType,
+          category: formData.category,
           type: formData.roleType === 'internship' || formData.roleType === 'volunteer'
             ? formData.roleType
             : formData.roleType === 'freelance' || formData.roleType === 'contract'
@@ -327,6 +329,37 @@ export default function NewOpportunity() {
                 placeholder="e.g., AED 5,000/month, Unpaid, Stipend"
                 style={fieldStyle}
               />
+            </div>
+
+            <div>
+              <label style={labelStyle}>12. Industry / Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                style={fieldStyle}
+              >
+                <option value="">Select industry…</option>
+                {[
+                  'Technology',
+                  'HR',
+                  'Retail',
+                  'Real Estate',
+                  'Automotive',
+                  'F&B',
+                  'Hospitality',
+                  'Health & Fitness',
+                  'Consultancy',
+                  'Business',
+                  'Education',
+                  'Nonprofit',
+                  'Other',
+                ].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

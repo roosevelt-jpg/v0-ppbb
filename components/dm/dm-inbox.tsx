@@ -66,14 +66,16 @@ export function DmInbox() {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const openedRef = useRef(false)
+  const openedKeyRef = useRef<string>('')
 
   useEffect(() => {
-    if (!userId || openedRef.current) return
+    if (!userId) return
     if (!threadParam && !toParam) return
     if (toParam === userId) return
 
-    openedRef.current = true
+    const key = `${threadParam || ''}|${toParam || ''}`
+    if (openedKeyRef.current === key && activeThreadId) return
+    openedKeyRef.current = key
 
     async function openFromParams() {
       if (threadParam) {
@@ -84,6 +86,24 @@ export function DmInbox() {
 
       setBootstrapping(true)
       try {
+        // Resolve businessId → owner user id when messaging a business profile
+        let recipientId = toParam
+        try {
+          const { doc: fsDoc, getDoc } = await import('firebase/firestore')
+          const { db } = await import('@/lib/firebase')
+          const bizSnap = await getDoc(fsDoc(db, 'businesses', toParam))
+          if (bizSnap.exists()) {
+            const data = bizSnap.data()
+            recipientId =
+              (typeof data.ownerId === 'string' && data.ownerId) ||
+              (typeof data.userId === 'string' && data.userId) ||
+              (typeof data.createdBy === 'string' && data.createdBy) ||
+              toParam
+          }
+        } catch {
+          /* treat as user id */
+        }
+
         const token = await auth.currentUser?.getIdToken()
         const res = await fetch('/api/dm/threads', {
           method: 'POST',
@@ -91,7 +111,7 @@ export function DmInbox() {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ recipientId: toParam }),
+          body: JSON.stringify({ recipientId }),
         })
         const json = await res.json()
         if (json.success && json.threadId) {
@@ -102,12 +122,12 @@ export function DmInbox() {
             sessionStorage.removeItem(`dm_draft_${toParam}`)
           }
         } else {
-          const recipientName = await resolveUserDisplayName(toParam)
+          const recipientName = await resolveUserDisplayName(recipientId)
           const senderName =
             `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
             user?.displayName ||
             'Member'
-          const threadId = await getOrCreateDmThread(userId, toParam, senderName, recipientName)
+          const threadId = await getOrCreateDmThread(userId, recipientId, senderName, recipientName)
           setActiveThreadId(threadId)
         }
       } finally {
@@ -116,7 +136,7 @@ export function DmInbox() {
     }
 
     void openFromParams()
-  }, [userId, toParam, threadParam, user])
+  }, [userId, toParam, threadParam, user, activeThreadId])
 
   const activeThread = threads.find((t) => t.id === activeThreadId)
 

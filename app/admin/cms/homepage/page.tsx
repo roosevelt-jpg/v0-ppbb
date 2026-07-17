@@ -1003,6 +1003,120 @@ export default function AdminCmsHomepagePage() {
           </div>
         </Card>
 
+        {/* Horizontal advertising strip */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Advertising banner</h2>
+          <p className="text-sm text-neutral-600">
+            Full-width horizontal promo under the hero (image or GIF). Used for paid business
+            advertising placements.
+          </p>
+          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input
+              type="checkbox"
+              checked={config.advertisingBanner?.enabled === true}
+              onChange={(e) =>
+                setConfig((p) => ({
+                  ...p,
+                  advertisingBanner: {
+                    ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
+                    enabled: e.target.checked,
+                  },
+                }))
+              }
+            />
+            Show advertising banner on homepage
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Image URL</label>
+              <input
+                type="url"
+                value={config.advertisingBanner?.imageURL || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    advertisingBanner: {
+                      ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
+                      imageURL: e.target.value,
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+              <input
+                type="file"
+                accept="image/*,image/gif"
+                className="mt-2 text-sm"
+                disabled={uploading === 'ad-banner'}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setUploading('ad-banner')
+                  try {
+                    const url = await uploadHomepageImage(file, 'homepage/ads')
+                    setConfig((p) => ({
+                      ...p,
+                      advertisingBanner: {
+                        ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
+                        imageURL: url,
+                        enabled: true,
+                      },
+                    }))
+                  } catch (err) {
+                    setMessage({
+                      type: 'error',
+                      text: err instanceof Error ? err.message : 'Upload failed',
+                    })
+                  } finally {
+                    setUploading(null)
+                    e.target.value = ''
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Link URL</label>
+              <input
+                type="text"
+                value={config.advertisingBanner?.href || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    advertisingBanner: {
+                      ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
+                      href: e.target.value,
+                    },
+                  }))
+                }
+                className="w-full"
+                placeholder="https://… or /path"
+              />
+              <label className="block text-sm font-medium mb-1 mt-3">Alt text</label>
+              <input
+                type="text"
+                value={config.advertisingBanner?.alt || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    advertisingBanner: {
+                      ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
+                      alt: e.target.value,
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+          {config.advertisingBanner?.imageURL ? (
+            <img
+              src={config.advertisingBanner.imageURL}
+              alt=""
+              className="w-full max-h-32 object-cover rounded border border-neutral-200"
+            />
+          ) : null}
+        </Card>
+
         {/* 2H Social feeds */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Social Feeds (2H)</h2>

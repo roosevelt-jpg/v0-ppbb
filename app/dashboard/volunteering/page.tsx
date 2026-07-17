@@ -44,6 +44,7 @@ export default function VolunteeringPage() {
     records: [] as VolunteerRecord[],
   })
   const [opportunities, setOpportunities] = React.useState<Record<string, unknown>[]>([])
+  const [charityEvents, setCharityEvents] = React.useState<Record<string, unknown>[]>([])
   const [applications, setApplications] = React.useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -64,11 +65,55 @@ export default function VolunteeringPage() {
           setOpportunities(
             opps
               .filter((o) => o.type === 'volunteer')
-              .map((o) => ({ id: o.id, title: o.title, businessName: o.businessName, description: o.description }))
+              .map((o) => ({
+                id: o.id,
+                title: o.title,
+                businessName: o.businessName,
+                description: o.description,
+                kind: 'job',
+              }))
           )
         }
       } catch (err) {
         console.error('[v0] Volunteer opportunities error:', err)
+      }
+    }
+
+    const loadCharityEvents = async () => {
+      try {
+        const res = await fetch('/api/events?status=published&limit=40')
+        const json = await res.json()
+        const rows = Array.isArray(json.data) ? json.data : []
+        const now = Date.now()
+        const charity = rows
+          .filter((e: Record<string, unknown>) => {
+            const cat = String(e.category || '').toLowerCase()
+            const tags = Array.isArray(e.tags) ? e.tags.map((t) => String(t).toLowerCase()) : []
+            const isCharity =
+              cat === 'charity' ||
+              cat.includes('charity') ||
+              tags.includes('fundraiser') ||
+              tags.includes('volunteer') ||
+              tags.includes('charity')
+            if (!isCharity) return false
+            const start =
+              e.startDate && typeof e.startDate === 'object' && 'seconds' in (e.startDate as object)
+                ? (e.startDate as { seconds: number }).seconds * 1000
+                : e.startDate
+                  ? new Date(String(e.startDate)).getTime()
+                  : 0
+            return !start || start >= now - 86400000
+          })
+          .map((e: Record<string, unknown>) => ({
+            id: e.id,
+            title: e.title,
+            businessName: e.locationName || e.location || 'Community event',
+            description: e.description,
+            kind: 'event',
+          }))
+        if (!cancelled) setCharityEvents(charity)
+      } catch (err) {
+        console.error('[v0] Charity events error:', err)
       }
     }
 
@@ -97,6 +142,7 @@ export default function VolunteeringPage() {
     }
 
     loadOpportunities()
+    loadCharityEvents()
     loadApplications()
 
     const q = query(collection(db, 'volunteerRecords'), where('userId', '==', user.id))
@@ -216,19 +262,41 @@ export default function VolunteeringPage() {
       </div>
 
       {activeTab === 'opportunities' ? (
-        opportunities.length === 0 ? (
+        opportunities.length === 0 && charityEvents.length === 0 ? (
           <DashboardEmptyState
             icon={<Briefcase className="w-12 h-12" />}
             title="No volunteering opportunities"
             description="No volunteering opportunities right now. Check back soon."
             action={
-              <Link href="/dashboard/opportunities" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold">
+              <Link href="/opportunities?type=volunteer" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold">
                 Browse Opportunities
               </Link>
             }
           />
         ) : (
           <div className="space-y-3">
+            {charityEvents.map((evt) => (
+              <Card key={`evt-${String(evt.id)}`} className="p-4 border border-neutral-200">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-semibold px-2 py-1 rounded bg-rose-100 text-rose-800">
+                      Charity event
+                    </span>
+                    <h3 className="font-semibold text-neutral-900 mt-2">{String(evt.title ?? 'Event')}</h3>
+                    <p className="text-sm text-neutral-500">{String(evt.businessName ?? '')}</p>
+                    {evt.description ? (
+                      <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(evt.description)}</p>
+                    ) : null}
+                  </div>
+                  <Link
+                    href={`/events/${String(evt.id)}`}
+                    className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
+                  >
+                    View & register
+                  </Link>
+                </div>
+              </Card>
+            ))}
             {opportunities.map((opp) => (
               <Card key={String(opp.id)} className="p-4 border border-neutral-200">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -241,7 +309,7 @@ export default function VolunteeringPage() {
                     ) : null}
                   </div>
                   <Link
-                    href="/dashboard/opportunities"
+                    href={`/opportunities/${String(opp.id)}`}
                     className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
                   >
                     Apply to Volunteer

@@ -87,7 +87,6 @@ export const adminMenuItems = [
   // User Management
   { label: 'Members', href: '/admin/members', icon: UserCircle, group: 'Users' },
   { label: 'Volunteers', href: '/admin/volunteers', icon: Heart, group: 'Users' },
-  { label: 'Sponsors', href: '/admin/sponsors', icon: Award, group: 'Users' },
   { label: 'Businesses', href: '/admin/businesses', icon: Building, group: 'Users' },
   { label: 'Vendor Applications', href: '/admin/vendor-applications', icon: ClipboardCheck, group: 'Users' },
 
@@ -97,7 +96,6 @@ export const adminMenuItems = [
   { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
   { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },
   { label: 'Partnerships', href: '/admin/partnerships', icon: Handshake, group: 'Community' },
-  { label: 'Workshops', href: '/admin/workshops', icon: Presentation, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
 
   // Charity & Support
@@ -119,7 +117,6 @@ export const adminMenuItems = [
   { label: 'Approvals', href: '/admin/approvals', icon: BadgeCheck, group: 'Memberships' },
 
   // Communication & Support
-  { label: 'Contact Requests', href: '/admin/contact-requests', icon: MessageSquare, group: 'Communication' },
   { label: 'Contact Submissions', href: '/admin/contact-submissions', icon: Inbox, group: 'Communication' },
   { label: 'Newsletters', href: '/admin/newsletters', icon: Mail, group: 'Communication' },
   { label: 'Moderation', href: '/admin/moderation', icon: ShieldCheck, group: 'Communication' },
@@ -363,8 +360,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
   }, [])
 
   React.useEffect(() => {
-    // Subscribe to unread messages
-    const q = query(collection(db, 'contactRequests'), where('read', '==', false))
+    const q = query(collection(db, 'contactSubmissions'), where('status', '==', 'unread'))
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -406,7 +402,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
         
         {/* Message Notification Badge */}
         {unreadMessages > 0 && (
-          <Link href="/admin/contact-requests">
+          <Link href="/admin/contact-submissions">
             <button className="relative flex items-center justify-center w-10 h-10 rounded-lg transition-colors flex-shrink-0" style={{ backgroundColor: '#fff3e0', border: '2px solid #ff6b6b' }}>
               <Mail className="h-5 w-5" style={{ color: '#ff6b6b' }} />
               <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style={{ backgroundColor: '#ff6b6b' }}>

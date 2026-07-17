@@ -289,6 +289,129 @@ export default function AdminCmsEventsPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Volunteer & ad banners</h2>
+          <p className="text-sm text-neutral-600">
+            Shown on the public /events page beside the lineup (volunteer promo + optional ad strip).
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Volunteer banner image URL</label>
+              <input
+                type="url"
+                value={config.pageConfig.volunteerBannerImageURL || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    pageConfig: { ...p.pageConfig, volunteerBannerImageURL: e.target.value },
+                  }))
+                }
+                className="w-full"
+                placeholder="https://…"
+              />
+              <input
+                type="file"
+                accept="image/*,image/gif"
+                className="mt-2 text-sm"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    fd.append('folder', 'cms/events')
+                    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                    const json = await res.json()
+                    if (!json.success) throw new Error(json.error || 'Upload failed')
+                    setConfig((p) => ({
+                      ...p,
+                      pageConfig: { ...p.pageConfig, volunteerBannerImageURL: json.url },
+                    }))
+                  } catch (err) {
+                    setMessage({
+                      type: 'error',
+                      text: err instanceof Error ? err.message : 'Upload failed',
+                    })
+                  }
+                  e.target.value = ''
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Volunteer banner link</label>
+              <input
+                type="text"
+                value={config.pageConfig.volunteerBannerHref || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    pageConfig: { ...p.pageConfig, volunteerBannerHref: e.target.value },
+                  }))
+                }
+                className="w-full"
+                placeholder="/forms/volunteer-with-pb"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Ad banner image URL</label>
+              <input
+                type="url"
+                value={config.pageConfig.adBannerImageURL || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    pageConfig: { ...p.pageConfig, adBannerImageURL: e.target.value },
+                  }))
+                }
+                className="w-full"
+                placeholder="https://…"
+              />
+              <input
+                type="file"
+                accept="image/*,image/gif"
+                className="mt-2 text-sm"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  try {
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    fd.append('folder', 'cms/events')
+                    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                    const json = await res.json()
+                    if (!json.success) throw new Error(json.error || 'Upload failed')
+                    setConfig((p) => ({
+                      ...p,
+                      pageConfig: { ...p.pageConfig, adBannerImageURL: json.url },
+                    }))
+                  } catch (err) {
+                    setMessage({
+                      type: 'error',
+                      text: err instanceof Error ? err.message : 'Upload failed',
+                    })
+                  }
+                  e.target.value = ''
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Ad banner link</label>
+              <input
+                type="text"
+                value={config.pageConfig.adBannerHref || ''}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    pageConfig: { ...p.pageConfig, adBannerHref: e.target.value },
+                  }))
+                }
+                className="w-full"
+                placeholder="https://… or /path"
+              />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Category filter tags</h2>

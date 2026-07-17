@@ -34,6 +34,10 @@ export default function ApprovalsPage() {
   const [selectedItem, setSelectedItem] = React.useState<ApprovalItem | null>(null)
   const [detailsOpen, setDetailsOpen] = React.useState(false)
   const [actionLoading, setActionLoading] = React.useState(false)
+  const [tab, setTab] = React.useState<'listings' | 'forms'>('listings')
+
+  const FORM_TYPES = new Set(['partnership', 'beneficiary', 'donation'])
+  const LISTING_TYPES = new Set(['business', 'offer', 'job', 'discount', 'event', 'vendor', 'community', 'group'])
 
   const loadApprovals = React.useCallback(async () => {
     setLoading(true)
@@ -57,6 +61,13 @@ export default function ApprovalsPage() {
   React.useEffect(() => {
     void loadApprovals()
   }, [loadApprovals])
+
+  const filteredItems = React.useMemo(() => {
+    if (tab === 'forms') {
+      return pendingItems.filter((i) => FORM_TYPES.has(i.type) || i.type === 'partnership')
+    }
+    return pendingItems.filter((i) => LISTING_TYPES.has(i.type) || !FORM_TYPES.has(i.type))
+  }, [pendingItems, tab])
 
   const runAction = async (item: ApprovalItem, action: 'approve' | 'reject') => {
     if (item.type === 'vendor' && action === 'approve') {
@@ -149,11 +160,47 @@ export default function ApprovalsPage() {
   ]
 
   return (
-    <AdminPageLayout title="Approvals" subtitle="Review and approve pending items across the platform">
+    <AdminPageLayout
+      title="Approvals"
+      subtitle="Two queues: form inquiries, and businesses / events / products"
+    >
       <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setTab('listings')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+              tab === 'listings' ? 'bg-black text-white' : 'bg-white border border-gray-300'
+            }`}
+          >
+            Businesses, events &amp; products
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('forms')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium ${
+              tab === 'forms' ? 'bg-black text-white' : 'bg-white border border-gray-300'
+            }`}
+          >
+            Form inquiries
+          </button>
+          <Link
+            href="/admin/contact-submissions"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 hover:bg-gray-50"
+          >
+            Contact submissions →
+          </Link>
+          <Link
+            href="/admin/forms"
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 hover:bg-gray-50"
+          >
+            Custom form inbox →
+          </Link>
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-neutral-600">
-            {loading ? 'Loading…' : `${pendingItems.length} item(s) awaiting review`}
+            {loading ? 'Loading…' : `${filteredItems.length} item(s) in this queue`}
           </p>
           <button
             type="button"
@@ -173,9 +220,9 @@ export default function ApprovalsPage() {
         ) : null}
 
         <AdminTable
-          title="Pending Approvals"
+          title={tab === 'forms' ? 'Form inquiries' : 'Listings awaiting review'}
           columns={columns}
-          data={pendingItems}
+          data={filteredItems}
           loading={loading}
           searchPlaceholder="Search pending items..."
           onEdit={(item) => {

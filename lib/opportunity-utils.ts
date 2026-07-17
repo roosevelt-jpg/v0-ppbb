@@ -6,10 +6,30 @@ export const ROLE_TYPE_LABELS: Record<string, string> = {
   freelance: 'Freelance',
   volunteer: 'Volunteer',
   internship: 'Internship',
+  training: 'Training',
   contract: 'Contract',
   job: 'Job',
   gig: 'Gig',
 }
+
+export const WORK_TYPE_OPTIONS = [
+  { id: 'all', label: 'All work types' },
+  { id: 'onsite', label: 'Onsite' },
+  { id: 'remote', label: 'Remote' },
+  { id: 'hybrid', label: 'Hybrid' },
+] as const
+
+export const UAE_LOCATION_OPTIONS = [
+  'All locations',
+  'Abu Dhabi',
+  'Dubai',
+  'Sharjah',
+  'Ajman',
+  'Umm Al Quwain',
+  'Ras Al Khaimah',
+  'Fujairah',
+  'Remote',
+] as const
 
 export const FILTER_TABS = [
   { id: 'all', label: 'All' },
@@ -17,8 +37,36 @@ export const FILTER_TABS = [
   { id: 'internship', label: 'Internship', roleTypes: ['internship'] },
   { id: 'gig', label: 'Gig', roleTypes: ['freelance', 'gig'] },
   { id: 'volunteer', label: 'Volunteer', roleTypes: ['volunteer'] },
+  { id: 'training', label: 'Training', roleTypes: ['training'] },
   { id: 'contract', label: 'Contract', roleTypes: ['contract'] },
 ] as const
+
+export function getWorkType(opp: BusinessOpportunity): string {
+  if (opp.remote || opp.locationType === 'remote') return 'remote'
+  const t = (opp.locationType || 'onsite').toLowerCase()
+  if (t === 'hybrid') return 'hybrid'
+  return 'onsite'
+}
+
+export function getWorkTypeLabel(opp: BusinessOpportunity): string {
+  const t = getWorkType(opp)
+  if (t === 'remote') return 'Remote'
+  if (t === 'hybrid') return 'Hybrid'
+  return 'Onsite'
+}
+
+export function getOpportunityLocation(opp: BusinessOpportunity): string {
+  if (getWorkType(opp) === 'remote') return 'Remote'
+  return (
+    (opp as { locationCity?: string }).locationCity ||
+    opp.locationText ||
+    ''
+  )
+}
+
+export function getPostedDate(opp: BusinessOpportunity): Date | null {
+  return toDate(opp.createdAt) || toDate((opp as { postedAt?: unknown }).postedAt)
+}
 
 export function toDate(value: unknown): Date | null {
   if (!value) return null

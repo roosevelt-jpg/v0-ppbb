@@ -30,6 +30,7 @@ import {
   Users2,
   Tag,
   FolderOpen,
+  MessageSquare,
 } from 'lucide-react'
 
 const businessMenuItems = [
@@ -39,6 +40,7 @@ const businessMenuItems = [
   { label: 'Products & Offers', href: '/business/offers', icon: ShoppingBag },
   { label: 'Member Discounts', href: '/business/discounts', icon: Tag },
   { label: 'Network / Connections', href: '/business/marketplace', icon: Users },
+  { label: 'Messages', href: '/business/messages', icon: MessageSquare },
   { label: 'Leads & Conversions', href: '/business/leads', icon: Zap },
   { label: 'Referrals', href: '/business/referrals', icon: Share2 },
   { label: 'Analytics', href: '/business/analytics', icon: TrendingUp },

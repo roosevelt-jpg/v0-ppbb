@@ -120,6 +120,10 @@ export function MarketplaceOfferDetail() {
         }
         throw new Error(json.error)
       }
+      if (!isPaid && json.sellerUserId) {
+        router.push(`/dashboard/messages?to=${encodeURIComponent(json.sellerUserId)}`)
+        return
+      }
       setMessage(isPaid ? 'Purchase recorded successfully!' : 'Enquiry sent to the business.')
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Request failed')

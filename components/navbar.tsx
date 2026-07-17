@@ -71,33 +71,49 @@ export function Navbar() {
   const authActions = authLoading ? null : user ? (
     <>
       <Link
-        href={getDashboardHref(user as User | BusinessProfile)}
+        href="/contact"
         className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
       >
-        Dashboard
+        Contact Us
       </Link>
-      <button
-        type="button"
-        onClick={handleSignOut}
-        disabled={signingOut}
-        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap bg-transparent shadow-none min-h-0"
-      >
-        {signingOut ? 'Signing out…' : 'Sign out'}
-      </button>
+      <div className="relative group">
+        <button
+          type="button"
+          className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap inline-flex items-center gap-1"
+        >
+          Dashboard <ChevronDown className="w-3.5 h-3.5" />
+        </button>
+        <div className="absolute right-0 top-full mt-1 hidden group-hover:block group-focus-within:block min-w-[160px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-50 py-1">
+          <Link
+            href={getDashboardHref(user as User | BusinessProfile)}
+            className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
+          >
+            Open dashboard
+          </Link>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="w-full text-left px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
+          >
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+        </div>
+      </div>
     </>
   ) : (
     <>
       <Link
-        href="/login"
+        href="/contact"
         className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
       >
-        {navConfig.signInLabel}
+        Contact
       </Link>
       <Link
-        href={navConfig.ctaButton.href}
+        href="/login"
         className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-white text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
       >
-        {navConfig.ctaButton.label}
+        {navConfig.signInLabel}
       </Link>
     </>
   )

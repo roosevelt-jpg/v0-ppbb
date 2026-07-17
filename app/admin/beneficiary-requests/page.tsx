@@ -480,6 +480,14 @@ export default function BeneficiaryRequestsAdmin() {
                       View {label}
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    data-dashboard-control
+                    className={`${btnSecondary} text-left text-xs`}
+                    onClick={() => void openSensitiveDoc(selected.id, 'supportingDocumentUrls')}
+                  >
+                    View supporting documents
+                  </button>
                 </div>
               )}
             </div>

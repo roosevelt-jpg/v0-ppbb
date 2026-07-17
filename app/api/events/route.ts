@@ -354,6 +354,13 @@ export async function PUT(request: NextRequest) {
       updates.bannerImageUrl = updates.bannerURL
     }
 
+    // Optionally push banner/title/description/location to future events in the same series
+    const applyFuture =
+      updates.recurrence &&
+      typeof updates.recurrence === 'object' &&
+      (updates.recurrence as { applyChangesToFuture?: boolean }).applyChangesToFuture === true
+    const seriesId = (updates.seriesId as string) || (existing.seriesId as string) || null
+
     updates.updatedAt = Timestamp.now()
     if (updates.lastEditedAt) {
       updates.lastEditedAt = Timestamp.now()
@@ -361,6 +368,48 @@ export async function PUT(request: NextRequest) {
 
     const sanitized = sanitizeForFirestore(updates)
     await db.collection('events').doc(id).update(sanitized)
+
+    if (applyFuture && seriesId) {
+      const nowStart = updates.startDate
+        ? new Date(updates.startDate as string | Date)
+        : existing.startDate?.toDate
+          ? existing.startDate.toDate()
+          : new Date()
+      const shared: Record<string, unknown> = {}
+      for (const key of [
+        'title',
+        'description',
+        'bannerURL',
+        'bannerImage',
+        'bannerImageUrl',
+        'locationName',
+        'locationAddress',
+        'locationPlaceId',
+        'locationLat',
+        'locationLng',
+        'category',
+        'genderRestriction',
+        'tags',
+      ] as const) {
+        if (key in sanitized) shared[key] = sanitized[key]
+      }
+      if (Object.keys(shared).length) {
+        shared.updatedAt = Timestamp.now()
+        const siblings = await db
+          .collection('events')
+          .where('seriesId', '==', seriesId)
+          .get()
+        const batch = db.batch()
+        siblings.docs.forEach((docSnap) => {
+          if (docSnap.id === id) return
+          const start = docSnap.data().startDate?.toDate?.() || new Date(docSnap.data().startDate)
+          if (start >= nowStart) {
+            batch.update(docSnap.ref, shared)
+          }
+        })
+        await batch.commit()
+      }
+    }
 
     const title = (existing.title as string) || 'Your event'
     const createdBy = (existing.createdBy as string) || ''

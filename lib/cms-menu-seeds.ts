@@ -8,27 +8,24 @@ export type MenuPageSeed = Omit<Page, 'id' | 'createdAt' | 'updatedAt' | 'keywor
   order?: number
 }
 
-/** Default footer / menu entries migrated from former hardcoded navbar & footer links */
+/**
+ * Footer links per FEEDBACK_P1.2 — single compact list (no separate Workshops tab;
+ * Educational Resources combines recordings + learning articles).
+ */
 export const CMS_MENU_SEEDS: MenuPageSeed[] = [
-  // Footer — Quick Links
-  { slug: 'nav-about', title: 'About Us', menuLabel: 'About Us', menuLocation: 'footer-quicklinks', menuOrder: 0, showInMenu: true, status: 'published', externalHref: '/about', content: '' },
+  { slug: 'nav-about', title: 'About us', menuLabel: 'About us', menuLocation: 'footer-quicklinks', menuOrder: 0, showInMenu: true, status: 'published', externalHref: '/about', content: '' },
   { slug: 'nav-transparency', title: 'Impact & Transparency', menuLabel: 'Impact & Transparency', menuLocation: 'footer-quicklinks', menuOrder: 1, showInMenu: true, status: 'published', externalHref: '/transparency', content: '' },
   { slug: 'nav-events', title: 'Events', menuLabel: 'Events', menuLocation: 'footer-quicklinks', menuOrder: 2, showInMenu: true, status: 'published', externalHref: '/events', content: '' },
   { slug: 'nav-marketplace', title: 'Marketplace', menuLabel: 'Marketplace', menuLocation: 'footer-quicklinks', menuOrder: 3, showInMenu: true, status: 'published', externalHref: '/marketplace', content: '' },
-  { slug: 'nav-shop', title: 'Shop', menuLabel: 'Shop', menuLocation: 'footer-quicklinks', menuOrder: 4, showInMenu: true, status: 'published', externalHref: '/shop', content: '' },
+  { slug: 'nav-shop', title: "PB's Merchandize", menuLabel: "PB's Merchandize", menuLocation: 'footer-quicklinks', menuOrder: 4, showInMenu: true, status: 'published', externalHref: '/shop', content: '' },
   { slug: 'nav-partners', title: 'Partners', menuLabel: 'Partners', menuLocation: 'footer-quicklinks', menuOrder: 5, showInMenu: true, status: 'published', externalHref: '/partners', content: '' },
-  { slug: 'nav-contact', title: 'Contact', menuLabel: 'Contact', menuLocation: 'footer-quicklinks', menuOrder: 6, showInMenu: true, status: 'published', externalHref: '/contact', content: '' },
-  { slug: 'nav-charity-request', title: 'Charity Support Request', menuLabel: 'Charity Support Request', menuLocation: 'footer-quicklinks', menuOrder: 7, showInMenu: true, status: 'published', externalHref: '/dashboard/charity-requests?apply=1', content: '' },
-  { slug: 'nav-faq', title: 'FAQ', menuLabel: 'FAQ', menuLocation: 'footer-quicklinks', menuOrder: 8, showInMenu: true, status: 'published', externalHref: '/faq', content: '' },
-  // Footer — Get Involved
-  { slug: 'nav-join', title: 'Join Community', menuLabel: 'Join Community', menuLocation: 'footer-getinvolved', menuOrder: 0, showInMenu: true, status: 'published', externalHref: '/join', content: '' },
-  { slug: 'nav-volunteer', title: 'Volunteer', menuLabel: 'Volunteer', menuLocation: 'footer-getinvolved', menuOrder: 1, showInMenu: true, status: 'published', externalHref: '/join', content: '' },
-  { slug: 'nav-workshops', title: 'Workshops', menuLabel: 'Workshops', menuLocation: 'footer-getinvolved', menuOrder: 2, showInMenu: true, status: 'published', externalHref: '/workshops', content: '' },
-  { slug: 'nav-recordings', title: 'Recordings', menuLabel: 'Recordings', menuLocation: 'footer-getinvolved', menuOrder: 3, showInMenu: true, status: 'published', externalHref: '/recordings', content: '' },
-  { slug: 'nav-donate', title: 'Donate', menuLabel: 'Donate', menuLocation: 'footer-getinvolved', menuOrder: 4, showInMenu: true, status: 'published', externalHref: '/donate', content: '' },
-  { slug: 'nav-start-business', title: 'Start Business', menuLabel: 'Start Business', menuLocation: 'footer-getinvolved', menuOrder: 5, showInMenu: true, status: 'published', externalHref: '/join?type=business', content: '' },
-  { slug: 'nav-host-event', title: 'Host Event', menuLabel: 'Host Event', menuLocation: 'footer-getinvolved', menuOrder: 6, showInMenu: true, status: 'published', externalHref: '/business/events/new', content: '' },
-  // Footer — Legal (CMS pages — edit content in Admin → Pages)
+  { slug: 'nav-community', title: 'Community', menuLabel: 'Community', menuLocation: 'footer-quicklinks', menuOrder: 6, showInMenu: true, status: 'published', externalHref: '/communities', content: '' },
+  { slug: 'nav-donate', title: 'Donate', menuLabel: 'Donate', menuLocation: 'footer-quicklinks', menuOrder: 7, showInMenu: true, status: 'published', externalHref: '/donate', content: '' },
+  { slug: 'nav-volunteer', title: 'Volunteer', menuLabel: 'Volunteer', menuLocation: 'footer-quicklinks', menuOrder: 8, showInMenu: true, status: 'published', externalHref: '/forms/volunteer-with-pb', content: '' },
+  { slug: 'nav-charity-request', title: 'Charity Support Request', menuLabel: 'Charity Support Request', menuLocation: 'footer-quicklinks', menuOrder: 9, showInMenu: true, status: 'published', externalHref: '/dashboard/charity-requests?apply=1', content: '' },
+  { slug: 'nav-educational', title: 'Educational Resources', menuLabel: 'Educational Resources', menuLocation: 'footer-quicklinks', menuOrder: 10, showInMenu: true, status: 'published', externalHref: '/educational-resources', content: '' },
+  { slug: 'nav-faq', title: 'FAQ', menuLabel: 'FAQ', menuLocation: 'footer-quicklinks', menuOrder: 11, showInMenu: true, status: 'published', externalHref: '/faq', content: '' },
+  // Legal
   {
     slug: 'privacy-policy',
     title: 'Privacy Policy',
@@ -68,16 +65,5 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     showInMenu: true,
     status: 'published',
     content: '<p>Manage this content in Admin → Pages (CMS).</p>',
-  },
-  {
-    slug: 'community-guidelines',
-    title: 'Community Guidelines',
-    menuLabel: 'Community Guidelines',
-    menuLocation: 'navbar',
-    menuOrder: 0,
-    showInMenu: true,
-    status: 'published',
-    headerSection: '/about',
-    content: '<p>Our community standards help everyone participate respectfully.</p>',
   },
 ]

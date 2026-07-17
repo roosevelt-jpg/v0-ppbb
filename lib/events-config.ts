@@ -14,6 +14,14 @@ export interface EventsPageConfig {
   emptyLineupMessage: string
   registerButtonLabel: string
   detailsButtonLabel: string
+  /** Volunteer promo banner on /events */
+  volunteerBannerImageURL?: string
+  volunteerBannerHref?: string
+  volunteerBannerAlt?: string
+  /** Horizontal advertising banner (admin-uploaded image/gif) */
+  adBannerImageURL?: string
+  adBannerHref?: string
+  adBannerAlt?: string
 }
 
 export interface EventsCategory {
@@ -48,6 +56,12 @@ export const DEFAULT_EVENTS_CONFIG: EventsPlatformConfig = {
       'No events scheduled this month. Check back soon or join our WhatsApp channel for updates.',
     registerButtonLabel: 'Register',
     detailsButtonLabel: 'Details',
+    volunteerBannerImageURL: '',
+    volunteerBannerHref: '/forms/volunteer-with-pb',
+    volunteerBannerAlt: 'Volunteer with Passive Blessings',
+    adBannerImageURL: '',
+    adBannerHref: '',
+    adBannerAlt: 'Advertisement',
   },
   categories: [
     { id: 'tech', name: 'Tech', color: '#0EA5E9' },
@@ -115,6 +129,20 @@ function mergePageConfig(data: unknown): EventsPageConfig {
       typeof d.detailsButtonLabel === 'string'
         ? d.detailsButtonLabel
         : defaults.detailsButtonLabel,
+    volunteerBannerImageURL:
+      typeof d.volunteerBannerImageURL === 'string'
+        ? d.volunteerBannerImageURL
+        : defaults.volunteerBannerImageURL,
+    volunteerBannerHref:
+      typeof d.volunteerBannerHref === 'string'
+        ? d.volunteerBannerHref
+        : defaults.volunteerBannerHref,
+    volunteerBannerAlt:
+      typeof d.volunteerBannerAlt === 'string' ? d.volunteerBannerAlt : defaults.volunteerBannerAlt,
+    adBannerImageURL:
+      typeof d.adBannerImageURL === 'string' ? d.adBannerImageURL : defaults.adBannerImageURL,
+    adBannerHref: typeof d.adBannerHref === 'string' ? d.adBannerHref : defaults.adBannerHref,
+    adBannerAlt: typeof d.adBannerAlt === 'string' ? d.adBannerAlt : defaults.adBannerAlt,
   }
 }
 

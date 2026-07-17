@@ -138,6 +138,12 @@ export async function parseUploadRequest(
     const form = await req.formData()
     const file = form.get('file') as File | null
     if (!file) throw new Error('No file provided')
+    const maxBytes = 25 * 1024 * 1024
+    if (typeof file.size === 'number' && file.size > maxBytes) {
+      throw new Error(
+        `File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum upload size is 25 MB.`
+      )
+    }
     // `type` is an alias some callers use to bucket uploads into a folder.
     const folder = (form.get('folder') as string) || (form.get('type') as string) || 'uploads'
     const pathRaw = (form.get('path') as string) || ''

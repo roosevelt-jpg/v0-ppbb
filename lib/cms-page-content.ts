@@ -42,3 +42,31 @@ export function stripDuplicateCmsHeadings(content: string, ...titles: string[]):
 
   return result
 }
+
+/**
+ * If content is plain text (or pasted text without block tags), wrap paragraphs
+ * so public pages don't collapse everything onto one line.
+ */
+export function ensureCmsParagraphs(content: string): string {
+  const raw = (content || '').trim()
+  if (!raw) return ''
+
+  // Already has block-level HTML — keep as rich content from the editor
+  if (/<(p|div|h[1-6]|ul|ol|li|br)\b/i.test(raw)) {
+    return raw
+  }
+
+  // Escape minimal HTML then convert newlines to paragraphs
+  const escaped = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
+  return escaped
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => `<p>${block.replace(/\n/g, '<br>')}</p>`)
+    .join('')
+}
+

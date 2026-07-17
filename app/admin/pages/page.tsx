@@ -19,7 +19,8 @@ import {
   type NavigationConfig,
 } from '@/lib/platform-config'
 import { getCmsPageHref } from '@/lib/cms-page-routes'
-import { stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
+import { RichTextEditor } from '@/components/rich-text-editor'
+import { ensureCmsParagraphs, stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,7 +52,11 @@ function menuLocationFromPlacement(
 function buildPagePayload(page: Page) {
   const title = page.title.trim()
   const seoTitle = page.seoTitle?.trim() || title
-  const content = stripDuplicateCmsHeadings(page.content || '', seoTitle, title)
+  const content = stripDuplicateCmsHeadings(
+    ensureCmsParagraphs(page.content || ''),
+    seoTitle,
+    title
+  )
 
   return {
     slug: page.slug.trim(),
@@ -303,16 +308,17 @@ export default function AdminPages() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Content</label>
-                <textarea
-                  value={editingPage.content}
-                  onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 h-40 font-mono text-sm"
-                  placeholder="Enter page body HTML (headings matching the title are hidden on the public page)"
-                />
-                <p className="text-xs text-neutral-500 mt-1">
-                  Body only — the page title above is shown automatically. Do not add a duplicate heading.
+                <label className="block text-sm font-medium mb-2">Page content</label>
+                <p className="text-xs text-neutral-500 mb-2">
+                  Paste plain text freely. Use the toolbar for bold, italics, lists, and links. Titles matching
+                  the page title are hidden automatically on the public page.
                 </p>
+                <RichTextEditor
+                  value={editingPage.content}
+                  onChange={(html) => setEditingPage({ ...editingPage, content: html })}
+                  placeholder="Write or paste page content…"
+                  minHeight={220}
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

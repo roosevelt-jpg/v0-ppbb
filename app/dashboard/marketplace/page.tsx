@@ -39,7 +39,16 @@ export default function MarketplacePage() {
   const filtered = useMemo(() => filterMarketplaceOffers(products, filter), [products, filter])
 
   const handleAddToCart = (product: BusinessOffer) => {
-    setCart((prev) => [...prev, { ...product, cartId: Date.now() }])
+    setCart((prev) => {
+      if (prev.some((item) => item.id === product.id)) {
+        return prev
+      }
+      return [...prev, { ...product, cartId: Date.now(), qty: 1 }]
+    })
+  }
+
+  const handleRemoveFromCart = (productId: string) => {
+    setCart((prev) => prev.filter((item) => item.id !== productId))
   }
 
   const totalPrice = cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0)
@@ -133,9 +142,11 @@ export default function MarketplacePage() {
                         <button
                           type="button"
                           onClick={() => handleAddToCart(product)}
-                          className="flex-1 !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-1"
+                          disabled={cart.some((c) => c.id === product.id)}
+                          className="flex-1 !bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-1 disabled:opacity-60"
                         >
-                          <ShoppingCart size={14} /> Buy Now
+                          <ShoppingCart size={14} />{' '}
+                          {cart.some((c) => c.id === product.id) ? 'In cart' : 'Buy Now'}
                         </button>
                       </div>
                     </div>
@@ -148,14 +159,30 @@ export default function MarketplacePage() {
       </div>
 
       {cart.length > 0 ? (
-        <Card className="p-4 mt-6 border border-neutral-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <p className="text-sm text-neutral-500">{cart.length} items in cart</p>
-            <p className="text-2xl font-bold text-neutral-900">AED {totalPrice.toLocaleString()}</p>
+        <Card className="p-4 mt-6 border border-neutral-200 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-sm text-neutral-500">{cart.length} items in cart</p>
+              <p className="text-2xl font-bold text-neutral-900">AED {totalPrice.toLocaleString()}</p>
+            </div>
+            <button type="button" className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold">
+              Proceed to Checkout
+            </button>
           </div>
-          <button type="button" className="!bg-black !text-white px-6 py-2 rounded-lg text-sm font-semibold">
-            Proceed to Checkout
-          </button>
+          <ul className="divide-y divide-neutral-200">
+            {cart.map((item) => (
+              <li key={item.id} className="py-2 flex items-center justify-between gap-3 text-sm">
+                <span className="font-medium text-neutral-900 truncate">{item.title}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFromCart(item.id)}
+                  className="text-red-600 hover:underline shrink-0"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
         </Card>
       ) : null}
     </DashboardPageShell>

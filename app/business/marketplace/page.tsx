@@ -68,7 +68,7 @@ export default function Marketplace() {
     if (message.trim()) {
       sessionStorage.setItem(`dm_draft_${selectedMember.id}`, message.trim())
     }
-    router.push(`/dashboard/messages?to=${selectedMember.id}`)
+    router.push(`/business/messages?to=${selectedMember.id}`)
   }
 
   if (!user || !hasBusinessAccess(user)) {

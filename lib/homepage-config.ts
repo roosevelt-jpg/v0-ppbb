@@ -121,6 +121,14 @@ export interface HomepageTestimonialsSection {
   heading: string
 }
 
+/** Full-width advertising strip (business / paid promo). */
+export interface HomepageAdvertisingBanner {
+  enabled: boolean
+  imageURL: string
+  href: string
+  alt: string
+}
+
 export interface HomepageConfig {
   hero: HomepageHero
   stats: HomepageStats
@@ -131,6 +139,7 @@ export interface HomepageConfig {
   donationBanner: HomepageDonationBanner
   socialFeeds: HomepageSocialFeeds
   testimonials: HomepageTestimonialsSection
+  advertisingBanner: HomepageAdvertisingBanner
 }
 
 export const DEFAULT_HOMEPAGE: HomepageConfig = {
@@ -258,6 +267,12 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
   },
   testimonials: {
     heading: 'Success Stories',
+  },
+  advertisingBanner: {
+    enabled: false,
+    imageURL: '',
+    href: '',
+    alt: 'Advertisement',
   },
 }
 
@@ -499,6 +514,17 @@ function mergeTestimonialsSection(data: unknown): HomepageTestimonialsSection {
   }
 }
 
+function mergeAdvertisingBanner(data: unknown): HomepageAdvertisingBanner {
+  const d = (data || {}) as Partial<HomepageAdvertisingBanner>
+  const defaults = DEFAULT_HOMEPAGE.advertisingBanner
+  return {
+    enabled: d.enabled === true,
+    imageURL: typeof d.imageURL === 'string' ? d.imageURL : defaults.imageURL,
+    href: typeof d.href === 'string' ? d.href : defaults.href,
+    alt: typeof d.alt === 'string' ? d.alt : defaults.alt,
+  }
+}
+
 function mergeHomepage(data: Record<string, unknown> | undefined): HomepageConfig {
   if (!data) return DEFAULT_HOMEPAGE
   return {
@@ -511,6 +537,7 @@ function mergeHomepage(data: Record<string, unknown> | undefined): HomepageConfi
     donationBanner: mergeDonationBanner(data.donationBanner),
     socialFeeds: mergeSocialFeeds(data.socialFeeds),
     testimonials: mergeTestimonialsSection(data.testimonials),
+    advertisingBanner: mergeAdvertisingBanner(data.advertisingBanner),
   }
 }
 

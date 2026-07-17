@@ -18,6 +18,9 @@ import {
 } from '@/lib/marketplace-directory'
 import { subscribeToActiveBusinessDiscounts, type BusinessDiscount } from '@/lib/business-discounts'
 import { RichTextContent } from '@/components/rich-text-content'
+import { collection, limit, onSnapshot, query, where } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { Calendar } from 'lucide-react'
 
 interface BusinessProfileViewProps {
   businessId: string
@@ -36,6 +39,8 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
   const [offersReady, setOffersReady] = useState(false)
   const [jobsReady, setJobsReady] = useState(false)
   const [discountsReady, setDiscountsReady] = useState(false)
+  const [events, setEvents] = useState<Array<{ id: string; title: string; startDate?: unknown; status?: string }>>([])
+  const [eventsReady, setEventsReady] = useState(false)
   const [notFound, setNotFound] = useState(false)
   const [leadTracked, setLeadTracked] = useState(false)
 
@@ -75,6 +80,32 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       }),
     [businessId]
   )
+
+  useEffect(() => {
+    if (!businessId) return
+    const q = query(
+      collection(db, 'events'),
+      where('businessId', '==', businessId),
+      where('status', '==', 'published'),
+      limit(12)
+    )
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setEvents(
+          snap.docs.map((d) => ({
+            id: d.id,
+            title: String(d.data().title || 'Event'),
+            startDate: d.data().startDate,
+            status: d.data().status,
+          }))
+        )
+        setEventsReady(true)
+      },
+      () => setEventsReady(true)
+    )
+    return () => unsub()
+  }, [businessId])
 
   useEffect(() => {
     if (!firebaseUser || leadTracked || !businessId) return
@@ -145,7 +176,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     activeOffers.find((o) => o.phone)?.phone ||
     ''
 
-  const loading = !businessReady || !offersReady || !jobsReady || !discountsReady
+  const loading = !businessReady || !offersReady || !jobsReady || !discountsReady || !eventsReady
 
   if (loading) {
     return (
@@ -482,6 +513,35 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                     Apply
                   </Link>
                 </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {events.length > 0 && (
+        <section id="events" className="space-y-4 scroll-mt-24">
+          <h2 className="font-headline text-2xl font-bold text-foreground">Upcoming events</h2>
+          <div className="space-y-3">
+            {events.map((ev) => (
+              <article
+                key={ev.id}
+                className="border border-[#e4e1da] rounded-lg p-4 sm:p-5 bg-white flex items-start justify-between gap-3"
+              >
+                <div className="min-w-0 flex items-start gap-2">
+                  <Calendar className="w-4 h-4 mt-1 shrink-0" />
+                  <div>
+                    <h3 className="font-headline text-lg font-bold text-foreground break-words">
+                      {ev.title}
+                    </h3>
+                  </div>
+                </div>
+                <Link
+                  href={`/events/${ev.id}`}
+                  className="inline-flex shrink-0 items-center justify-center min-h-[44px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+                >
+                  View
+                </Link>
               </article>
             ))}
           </div>

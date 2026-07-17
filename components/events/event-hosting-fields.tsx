@@ -348,6 +348,21 @@ export function EventHostingFields({
             All dates in the series share this event&apos;s banner by default. Edit any weekly occurrence
             later to set a unique banner for that date.
           </p>
+          <label className="text-sm flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={Boolean((recurrence as { applyChangesToFuture?: boolean }).applyChangesToFuture)}
+              onChange={(e) =>
+                onChange({
+                  recurrence: {
+                    ...recurrence,
+                    applyChangesToFuture: e.target.checked,
+                  } as EventRecurrence,
+                })
+              }
+            />
+            When editing this occurrence, apply changes to all future events in the series
+          </label>
           <div className="flex flex-wrap gap-2">
             {[3, 4, 6].map((months) => (
               <button

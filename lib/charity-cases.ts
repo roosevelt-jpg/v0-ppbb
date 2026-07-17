@@ -113,6 +113,9 @@ export const SENSITIVE_DOC_ROLES = new Set([
   'coordinator',
   'founder_admin', // maps to "founder" in existing adminUsers
   'manager', // maps to welfare/coordinator operational access
+  'admin',
+  'super_admin',
+  'superadmin',
 ])
 
 export const WELFARE_INVITE_ROLE_OPTIONS = [

@@ -33,6 +33,63 @@ function formatEventDate(value: unknown, pattern: string) {
   return date ? format(date, pattern) : 'TBA'
 }
 
+function EventGallerySlideshow({ urls, title }: { urls: string[]; title: string }) {
+  const [index, setIndex] = React.useState(0)
+  const safe = urls.filter(Boolean)
+  if (safe.length === 0) return null
+
+  React.useEffect(() => {
+    if (safe.length < 2) return
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % safe.length)
+    }, 4000)
+    return () => window.clearInterval(id)
+  }, [safe.length])
+
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 pt-6">
+      <div className="relative overflow-hidden rounded-lg bg-neutral-100 aspect-[16/9]">
+        <img
+          src={safe[index]}
+          alt={`${title} photo ${index + 1}`}
+          className="w-full h-full object-cover transition-opacity duration-500"
+        />
+        {safe.length > 1 ? (
+          <>
+            <button
+              type="button"
+              aria-label="Previous photo"
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-white px-3 py-2 rounded"
+              onClick={() => setIndex((i) => (i - 1 + safe.length) % safe.length)}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              aria-label="Next photo"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-white px-3 py-2 rounded"
+              onClick={() => setIndex((i) => (i + 1) % safe.length)}
+            >
+              ›
+            </button>
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+              {safe.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Go to photo ${i + 1}`}
+                  className={`h-2 w-2 rounded-full ${i === index ? 'bg-white' : 'bg-white/50'}`}
+                  onClick={() => setIndex(i)}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 export function EventDetailView({
   event,
   previewMode = false,
@@ -83,6 +140,10 @@ export function EventDetailView({
           <img src={bannerSrc} alt={event.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
+      ) : null}
+
+      {Array.isArray(event.galleryURLs) && event.galleryURLs.length > 0 ? (
+        <EventGallerySlideshow urls={event.galleryURLs} title={event.title} />
       ) : null}
 
       <div className="max-w-5xl mx-auto px-4 py-8 sm:py-12">

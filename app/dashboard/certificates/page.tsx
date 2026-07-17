@@ -22,6 +22,39 @@ export default function CertificatesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [previewId, setPreviewId] = useState<string | null>(null)
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState<string | null>(null)
+
+  const syncMilestones = async () => {
+    if (!user?.id) return
+    setSyncing(true)
+    setSyncMessage(null)
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) throw new Error('Sign in required')
+      const res = await fetch('/api/certificates/check-milestones', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: user.id }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Could not sync certificates')
+      const issuedList = Array.isArray(json.data?.issued) ? json.data.issued : []
+      const issued = issuedList.length
+      setSyncMessage(
+        issued > 0
+          ? `Issued ${issued} new certificate${issued === 1 ? '' : 's'}.`
+          : 'You’re up to date — no new milestones to issue.'
+      )
+    } catch (err) {
+      setSyncMessage(err instanceof Error ? err.message : 'Sync failed')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   useEffect(() => {
     if (authLoading) return
@@ -30,23 +63,7 @@ export default function CertificatesPage() {
       return
     }
 
-    void (async () => {
-      try {
-        const token = await auth.currentUser?.getIdToken()
-        if (token) {
-          await fetch('/api/certificates/check-milestones', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId: user.id }),
-          })
-        }
-      } catch {
-        /* non-blocking */
-      }
-    })()
+    void syncMilestones()
 
     let certDone = false
     let badgeDone = false
@@ -106,6 +123,17 @@ export default function CertificatesPage() {
 
   return (
     <DashboardPageShell title="Certificates" subtitle="Milestone certificates earned through volunteer service">
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => void syncMilestones()}
+          disabled={syncing}
+          className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+        >
+          {syncing ? 'Checking milestones…' : 'Issue / sync milestones'}
+        </button>
+        {syncMessage ? <p className="text-sm text-neutral-600">{syncMessage}</p> : null}
+      </div>
       <section className="mb-10">
         <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Badges</h2>
         {badges.length === 0 ? (

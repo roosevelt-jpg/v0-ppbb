@@ -50,9 +50,21 @@ function mapDoc(id: string, data: Record<string, unknown>): ContactSubmission {
 }
 
 function sourceLabel(source: string) {
-  if (source === 'partners') return 'Partners'
-  if (source === 'contact') return 'Contact page'
-  return 'Website'
+  if (source === 'partners') return 'Sponsorship / Partnership'
+  if (source === 'contact') return 'Other inquiry'
+  if (source === 'partnership' || source === 'sponsorship') return 'Sponsorship / Partnership'
+  return 'Other inquiry'
+}
+
+function categoryOf(item: ContactSubmission): 'partnership' | 'other' {
+  const s = `${item.source} ${item.subject}`.toLowerCase()
+  if (
+    item.source === 'partners' ||
+    /partner|sponsor|collaborat/i.test(s)
+  ) {
+    return 'partnership'
+  }
+  return 'other'
 }
 
 async function getAuthHeaders(): Promise<HeadersInit> {
@@ -69,6 +81,7 @@ export default function ContactSubmissionsPage() {
   const [search, setSearch] = useState('')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'partnership' | 'other'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selected, setSelected] = useState<ContactSubmission | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -125,6 +138,7 @@ export default function ContactSubmissionsPage() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
     return items.filter((item) => {
+      if (categoryFilter !== 'all' && categoryOf(item) !== categoryFilter) return false
       if (subjectFilter !== 'all' && item.subject !== subjectFilter) return false
       if (statusFilter !== 'all' && item.status !== statusFilter) return false
       if (!term) return true
@@ -133,7 +147,7 @@ export default function ContactSubmissionsPage() {
         .toLowerCase()
       return blob.includes(term)
     })
-  }, [items, search, subjectFilter, statusFilter])
+  }, [items, search, subjectFilter, statusFilter, categoryFilter])
 
   const unreadCount = items.filter((i) => i.status === 'unread').length
 
@@ -214,9 +228,30 @@ export default function ContactSubmissionsPage() {
   return (
     <AdminPageLayout
       title="Contact Submissions"
-      subtitle="Get in touch messages from /partners and /contact"
+      subtitle="All website inquiries — Sponsorship/Partnership and Other"
     >
       <div className="space-y-4 w-full min-w-0">
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ['all', 'All'],
+              ['partnership', 'Sponsorship / Partnership Inquiries'],
+              ['other', 'Other Inquiries'],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setCategoryFilter(id)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+                categoryFilter === id ? 'bg-black text-white' : 'bg-white border border-gray-300'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-wrap items-center gap-3 text-sm font-body text-neutral-600">
           <span>
             <strong className="text-neutral-900">{items.length}</strong> total

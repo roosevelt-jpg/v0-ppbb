@@ -13,6 +13,7 @@ import { HomeMission } from '@/components/homepage/home-mission'
 import { HomePillars } from '@/components/homepage/home-pillars'
 import { HomeUpcomingEvents } from '@/components/homepage/home-upcoming-events'
 import { HomeDonationBanner } from '@/components/homepage/home-donation-banner'
+import { HomeAdvertisingBanner } from '@/components/homepage/home-advertising-banner'
 import { HomeSocialFeeds } from '@/components/homepage/home-social-feeds'
 import { HomeTestimonials } from '@/components/homepage/home-testimonials'
 import { Button } from '@/components/ui/button'
@@ -119,6 +120,7 @@ export default function HomePage() {
       <Navbar />
 
       <HomeHero />
+      <HomeAdvertisingBanner />
       <HomeStatsBar />
       <PartnersMarquee />
       <HomeMission />
@@ -175,9 +177,45 @@ export default function HomePage() {
                 )
               })}
             </div>
+
+            <div className="text-center mt-5">
+              <Link href="/donate">
+                <Button size="sm" className="bg-[#111111] hover:bg-[#333333] text-white text-sm">
+                  View All Causes
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       )}
+
+      {/* Partnership inquiry CTA after Active Causes */}
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-white">
+        <div className="max-w-[72rem] mx-auto w-full min-w-0 grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold font-headline mb-2">
+              Partner with Passive Blessings
+            </h2>
+            <p className="text-sm sm:text-base text-[#666] mb-4">
+              Collaborate on community projects, sponsorships, and shared impact initiatives across the UAE.
+            </p>
+            <Link href="/partners">
+              <Button className="bg-[#111111] hover:bg-[#333333] text-white">
+                Partnership Inquiry
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+          <div className="rounded-lg overflow-hidden border border-[#e4e1da] bg-[#f7f6f2] min-h-[160px] flex items-center justify-center">
+            <img
+              src="/images/pb-logo-black.png"
+              alt="Passive Blessings partnership"
+              className="max-h-24 w-auto object-contain opacity-80"
+            />
+          </div>
+        </div>
+      </section>
 
       {/* SPONSORS & PARTNERS - Mobile First */}
       {sponsors.length > 0 && (
@@ -209,7 +247,7 @@ export default function HomePage() {
             </div>
 
             <div className="text-center mt-6 sm:mt-8">
-              <Link href="/dashboard/sponsor-profile">
+              <Link href="/partners">
                 <Button size="lg" className="bg-[#111111] hover:bg-[#333333] text-white">
                   Become a Partner
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -230,9 +268,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {news.map((article) => (
-                <div
+                <Link
                   key={article.id}
-                  className="bg-white rounded-lg overflow-hidden border border-[#e4e1da] hover:shadow-md transition-shadow"
+                  href={article.slug ? `/news/${article.slug}` : `/news/${article.id}`}
+                  className="bg-white rounded-lg overflow-hidden border border-[#e4e1da] hover:shadow-md transition-shadow block"
                 >
                   {article.image && (
                     <img src={article.image} alt={article.title} className="w-full h-40 sm:h-48 object-cover" />
@@ -247,8 +286,13 @@ export default function HomePage() {
                     <p className="text-xs sm:text-sm text-[#888888] mb-3 line-clamp-2">{article.summary}</p>
                     <p className="text-xs text-[#888888]">By {article.author}</p>
                   </div>
-                </div>
+                </Link>
               ))}
+            </div>
+            <div className="text-center mt-6">
+              <Link href="/news" className="text-sm font-semibold underline">
+                View all news →
+              </Link>
             </div>
           </div>
         </section>

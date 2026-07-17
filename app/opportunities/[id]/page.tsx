@@ -13,10 +13,15 @@ import { OpportunityApplyModal } from '@/components/opportunity-apply-modal'
 import {
   ROLE_TYPE_LABELS,
   getRoleType,
+  getWorkTypeLabel,
+  getOpportunityLocation,
+  getPostedDate,
+  toDate,
   opportunityGenderBlocksUser,
   opportunityMemberBlocksUser,
   daysUntilDeadline,
 } from '@/lib/opportunity-utils'
+import { format } from 'date-fns'
 import { ArrowLeft, Briefcase, MapPin, Building2, Share2, Copy, Check } from 'lucide-react'
 
 export default function OpportunityDetailPage() {
@@ -98,24 +103,15 @@ export default function OpportunityDetailPage() {
                   {ROLE_TYPE_LABELS[roleType] || roleType}
                 </span>
                 <span className="px-2 py-1 bg-teal-100 text-teal-800 text-xs rounded">
-                  {opportunity.remote || opportunity.locationType === 'remote'
-                    ? 'Remote'
-                    : opportunity.locationType || 'Onsite'}
+                  {getWorkTypeLabel(opportunity)}
                 </span>
-                {opportunity.locationCity ? (
+                {getOpportunityLocation(opportunity) ? (
                   <span className="px-2 py-1 bg-slate-100 text-xs rounded flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {opportunity.locationCity}
+                    <MapPin className="h-3 w-3" /> {getOpportunityLocation(opportunity)}
                   </span>
                 ) : null}
-                {opportunity.genderRestriction && opportunity.genderRestriction !== 'mixed' ? (
-                  <span className="px-2 py-1 bg-rose-100 text-rose-800 text-xs rounded capitalize">
-                    {opportunity.genderRestriction} only
-                  </span>
-                ) : null}
-                {opportunity.isMemberOnly ? (
-                  <span className="px-2 py-1 bg-violet-100 text-violet-800 text-xs rounded">
-                    Members Only
-                  </span>
+                {opportunity.category ? (
+                  <span className="px-2 py-1 bg-secondary text-xs rounded">{opportunity.category}</span>
                 ) : null}
                 {(opportunity.suitableFor || []).map((s) => (
                   <span key={s} className="px-2 py-1 bg-lime-50 text-lime-800 text-xs rounded border border-lime-200">
@@ -124,30 +120,86 @@ export default function OpportunityDetailPage() {
                 ))}
               </div>
 
-              {daysLeft !== null ? (
-                <p
-                  className={`text-sm font-medium ${
-                    daysLeft < 0 ? 'text-red-600' : 'text-amber-700'
-                  }`}
-                >
-                  {daysLeft < 0 ? 'Application deadline has passed' : `${daysLeft} days remaining to apply`}
-                </p>
-              ) : null}
+              <dl className="grid sm:grid-cols-2 gap-3 text-sm border rounded-lg p-4 bg-neutral-50">
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Company</dt>
+                  <dd className="font-medium">{opportunity.companyName || opportunity.businessName}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Role Type</dt>
+                  <dd className="font-medium">{ROLE_TYPE_LABELS[roleType] || roleType}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Work Type</dt>
+                  <dd className="font-medium">{getWorkTypeLabel(opportunity)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Location</dt>
+                  <dd className="font-medium">{getOpportunityLocation(opportunity) || 'TBA'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Salary / Compensation</dt>
+                  <dd className="font-medium">
+                    {opportunity.compensation ||
+                      (opportunity.salary ? `AED ${opportunity.salary}` : 'TBA')}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Industry / Category</dt>
+                  <dd className="font-medium">{opportunity.category || 'TBA'}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Application Deadline</dt>
+                  <dd className="font-medium">
+                    {toDate(opportunity.deadline)
+                      ? format(toDate(opportunity.deadline)!, 'MMM d, yyyy')
+                      : 'Open'}
+                    {daysLeft != null && daysLeft >= 0 ? ` (${daysLeft} days left)` : ''}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase text-muted-foreground">Hiring By</dt>
+                  <dd className="font-medium">
+                    {toDate((opportunity as { hiringBy?: unknown }).hiringBy)
+                      ? format(toDate((opportunity as { hiringBy?: unknown }).hiringBy)!, 'MMM d, yyyy')
+                      : 'TBA'}
+                  </dd>
+                </div>
+                {getPostedDate(opportunity) ? (
+                  <div>
+                    <dt className="text-xs uppercase text-muted-foreground">Date Posted</dt>
+                    <dd className="font-medium">{format(getPostedDate(opportunity)!, 'MMM d, yyyy')}</dd>
+                  </div>
+                ) : null}
+              </dl>
 
-              <p className="text-sm text-muted-foreground">
-                {opportunity.posterRelation === 'connector'
-                  ? 'Shared by a Connector'
-                  : 'Posted by an Employer'}
-              </p>
+              {(() => {
+                const resp = (opportunity as { responsibilities?: string | string[] }).responsibilities
+                const text = Array.isArray(resp) ? resp.join('\n') : resp
+                if (!text) return null
+                return (
+                  <section>
+                    <h2 className="text-lg font-semibold mb-2">Key Responsibilities</h2>
+                    <p className="whitespace-pre-wrap text-foreground text-sm">{text}</p>
+                  </section>
+                )
+              })()}
 
               <section>
                 <h2 className="text-lg font-semibold mb-2">Description</h2>
-                <p className="whitespace-pre-wrap text-foreground">{opportunity.description}</p>
+                <div
+                  className="prose prose-sm max-w-none text-foreground"
+                  dangerouslySetInnerHTML={{
+                    __html: opportunity.description?.includes('<')
+                      ? opportunity.description
+                      : `<p>${(opportunity.description || '').replace(/\n/g, '<br>')}</p>`,
+                  }}
+                />
               </section>
 
               {opportunity.requirements?.length ? (
                 <section>
-                  <h2 className="text-lg font-semibold mb-2">Requirements</h2>
+                  <h2 className="text-lg font-semibold mb-2">Requirements / Skills Needed</h2>
                   <ul className="list-disc pl-5 space-y-1 text-sm">
                     {opportunity.requirements.map((r) => (
                       <li key={r}>{r}</li>
@@ -165,15 +217,6 @@ export default function OpportunityDetailPage() {
                     ))}
                   </ul>
                 </section>
-              ) : null}
-
-              {opportunity.salary || opportunity.compensation ? (
-                <p className="text-sm">
-                  <strong>Compensation:</strong>{' '}
-                  {opportunity.salary
-                    ? `AED ${opportunity.salary}`
-                    : opportunity.compensation}
-                </p>
               ) : null}
 
               <section>

@@ -15,6 +15,7 @@ export default function MarketplacePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 w-full min-w-0 space-y-12 sm:space-y-16">
           <MarketplacePageCopy />
           <MarketplaceOffersSection />
+          {/* Directory at end of page per FEEDBACK_P1.2 */}
           <BusinessDirectorySection />
         </div>
       </main>

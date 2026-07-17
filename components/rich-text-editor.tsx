@@ -93,6 +93,22 @@ export function RichTextEditor({
         data-placeholder={placeholder}
         onInput={emitChange}
         onBlur={emitChange}
+        onPaste={(e) => {
+          const text = e.clipboardData.getData('text/plain')
+          if (!text) return
+          e.preventDefault()
+          const html = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .split(/\n\s*\n/)
+            .map((b) => b.trim())
+            .filter(Boolean)
+            .map((b) => `<p>${b.replace(/\n/g, '<br>')}</p>`)
+            .join('')
+          document.execCommand('insertHTML', false, html || text.replace(/\n/g, '<br>'))
+          emitChange()
+        }}
         className="px-3 py-2 text-sm outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-400 break-words [overflow-wrap:anywhere] w-full min-w-0"
         style={{ minHeight }}
         suppressContentEditableWarning

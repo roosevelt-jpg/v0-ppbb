@@ -28,7 +28,7 @@ export async function loadMarketplaceOffer(offerId: string) {
 
 export async function completeMarketplacePurchase(
   params: CompleteMarketplacePurchaseParams
-): Promise<{ purchaseId: string; orderId: string }> {
+): Promise<{ purchaseId: string; orderId: string; sellerUserId: string | null }> {
   const db = getAdminDb()
   const offerRow = await loadMarketplaceOffer(params.offerId)
   if (!offerRow) {
@@ -105,7 +105,25 @@ export async function completeMarketplacePurchase(
     /* canonical-only offer */
   }
 
+  let sellerUserId: string | null = null
   if (businessId) {
+    try {
+      const bizSnap = await db.collection('businesses').doc(businessId).get()
+      const biz = bizSnap.data() || {}
+      sellerUserId =
+        (typeof biz.ownerId === 'string' && biz.ownerId) ||
+        (typeof biz.userId === 'string' && biz.userId) ||
+        (typeof biz.createdBy === 'string' && biz.createdBy) ||
+        (typeof offer.ownerId === 'string' && offer.ownerId) ||
+        (typeof offer.createdBy === 'string' && offer.createdBy) ||
+        null
+    } catch {
+      sellerUserId =
+        (typeof offer.ownerId === 'string' && offer.ownerId) ||
+        (typeof offer.createdBy === 'string' && offer.createdBy) ||
+        null
+    }
+
     const leadPayload = sanitizeForFirestore({
       businessId,
       sourceType: mode === 'enquire' ? 'message' : 'offer_view',
@@ -119,8 +137,9 @@ export async function completeMarketplacePurchase(
     await db.collection('businessLeads').add(leadPayload)
     await db.collection('leads').add(leadPayload)
 
+    const pushTarget = sellerUserId || businessId
     void sendPushToUser(
-      businessId,
+      pushTarget,
       {
         title: mode === 'enquire' ? 'New enquiry' : 'New purchase',
         body: `${buyerName}: ${title}`,
@@ -128,7 +147,7 @@ export async function completeMarketplacePurchase(
       {
         type: 'marketplace_purchase',
         offerId: params.offerId,
-        click_action: '/business/leads',
+        click_action: mode === 'enquire' ? '/business/messages' : '/business/leads',
       }
     ).catch(console.error)
   }
@@ -144,7 +163,7 @@ export async function completeMarketplacePurchase(
     }).catch((err) => console.error('[referral] marketplace conversion:', err))
   }
 
-  return { purchaseId: purchaseRef.id, orderId: orderRef.id }
+  return { purchaseId: purchaseRef.id, orderId: orderRef.id, sellerUserId }
 }
 
 export async function createPendingMarketplaceOrder(params: {

@@ -25,6 +25,12 @@ export default function BusinessProfile() {
     businessWebsite: user?.businessProfile?.businessWebsite || '',
     businessEmail: user?.businessProfile?.businessEmail || '',
     businessPhone: user?.businessProfile?.businessPhone || '',
+    services:
+      Array.isArray((user?.businessProfile as { services?: string[] } | undefined)?.services)
+        ? ((user?.businessProfile as { services?: string[] }).services || []).join(', ')
+        : typeof (user?.businessProfile as { services?: string } | undefined)?.services === 'string'
+          ? String((user?.businessProfile as { services?: string }).services)
+          : '',
   })
 
   if (!user || (!hasBusinessAccess(user))) {
@@ -39,8 +45,15 @@ export default function BusinessProfile() {
   const handleSave = async () => {
     try {
       setIsSaving(true)
+      const services = formData.services
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
       await updateDoc(doc(db, 'users', user.id), {
-        businessProfile: formData,
+        businessProfile: {
+          ...formData,
+          services,
+        },
         updatedAt: new Date(),
       })
       setIsEditing(false)
@@ -140,6 +153,45 @@ export default function BusinessProfile() {
                   className="text-sm text-neutral-700"
                 />
               )}
+            </div>
+
+            {/* Services tags */}
+            <div>
+              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                Services / tags
+              </label>
+              <input
+                type="text"
+                name="services"
+                value={formData.services}
+                onChange={handleChange}
+                disabled={!isEditing}
+                placeholder="Comma-separated, e.g. Consulting, Catering, Mentorship"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '1px solid #e4e1da',
+                  borderRadius: '8px',
+                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
+                  color: '#111111',
+                }}
+              />
+              {!isEditing && formData.services ? (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.services
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                </div>
+              ) : null}
             </div>
 
             {/* Website */}

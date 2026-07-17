@@ -6,12 +6,10 @@ import {
   DEFAULT_MARKETPLACE_CONFIG,
   MarketplacePlatformConfig,
 } from '@/lib/marketplace-config'
-import { subscribeToGlobalSettings, DEFAULT_GLOBAL_SETTINGS } from '@/lib/platform-config'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
 export function MarketplacePageCopy() {
   const [config, setConfig] = useState<MarketplacePlatformConfig>(DEFAULT_MARKETPLACE_CONFIG)
-  const [globalWhatsapp, setGlobalWhatsapp] = useState(DEFAULT_GLOBAL_SETTINGS.whatsappLink)
   const [ready, setReady] = useState(false)
 
   useEffect(
@@ -22,8 +20,6 @@ export function MarketplacePageCopy() {
       }),
     []
   )
-
-  useEffect(() => subscribeToGlobalSettings((s) => setGlobalWhatsapp(s.whatsappLink || '')), [])
 
   if (!ready) {
     return (
@@ -43,30 +39,34 @@ export function MarketplacePageCopy() {
   }
 
   const { pageConfig: pc } = config
-  const whatsappHref = (pc.whatsappLink || globalWhatsapp || '').trim()
-  const whatsappLabel = pc.whatsappButtonLabel || 'Join Our Whatsapp'
 
   return (
     <div className="space-y-10 sm:space-y-14 md:space-y-16">
       {/* Hero */}
-      <section className="min-w-0">
-        <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.eyebrow}</p>
-        <h1 className="font-headline text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-foreground break-words max-w-[42rem]">
-          {pc.headline}
-        </h1>
-        <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-[42rem] break-words mb-6">
-          {pc.body}
-        </p>
-        {whatsappHref ? (
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
+      <section className="min-w-0 grid lg:grid-cols-2 gap-6 items-center">
+        <div>
+          <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.eyebrow}</p>
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold leading-tight mb-4 text-foreground break-words max-w-[42rem]">
+            {pc.headline}
+          </h1>
+          <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-[42rem] break-words mb-6">
+            {pc.body}
+          </p>
+          <BusinessFeatureLink
+            featureLabel="Join as Business Member"
+            href="/join?type=business"
             className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-neutral-800 transition-colors"
           >
-            {whatsappLabel}
-          </a>
-        ) : null}
+            Join as Business Member
+          </BusinessFeatureLink>
+        </div>
+        <div className="rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 min-h-[200px] flex items-center justify-center">
+          <img
+            src="/images/pb-logo-black.png"
+            alt=""
+            className="max-h-28 w-auto object-contain opacity-80"
+          />
+        </div>
       </section>
 
       {/* Membership */}

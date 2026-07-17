@@ -9,7 +9,6 @@ import {
   getInquiryCategoryHref,
 } from '@/lib/partners-page-config'
 import { PartnersLogosGrid } from '@/components/partners/partners-logos-grid'
-import { GetInTouchForm } from '@/components/partners/get-in-touch-form'
 
 export function PartnersPageCopy() {
   const router = useRouter()
@@ -179,7 +178,21 @@ export function PartnersPageCopy() {
         description={pc.trustedByDescription}
       />
 
-      <GetInTouchForm />
+      {/* Partnership projects feature block */}
+      <section className="min-w-0 space-y-4">
+        <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground">
+          Build alongside us
+        </h2>
+        <p className="font-body text-sm text-muted-foreground max-w-[42rem]">
+          Featured partnership projects — title, date, location, and partners. Manage featured
+          partners in Admin → CMS → Partners.
+        </p>
+        <PartnersLogosGrid
+          eyebrow="Featured projects"
+          headline="Recent collaborations"
+          description=""
+        />
+      </section>
     </div>
   )
 }

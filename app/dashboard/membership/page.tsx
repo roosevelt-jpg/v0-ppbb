@@ -28,6 +28,9 @@ export default function MembershipPage() {
     ziina: false,
   })
   const [statusBanner, setStatusBanner] = useState<string | null>(null)
+  const [subscription, setSubscription] = useState<Record<string, unknown> | null>(null)
+  const [invoices, setInvoices] = useState<Array<Record<string, unknown>>>([])
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -77,6 +80,41 @@ export default function MembershipPage() {
     return () => unsub()
   }, [authLoading, user?.id])
 
+  useEffect(() => {
+    if (!user?.id) return
+    const unsub = onSnapshot(
+      query(collection(db, 'subscriptions'), where('userId', '==', user.id)),
+      async (snap) => {
+        const docs = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((s) => s.status !== 'cancelled')
+          .sort((a, b) => {
+            const aT = (a as { updatedAt?: { toMillis?: () => number } }).updatedAt?.toMillis?.() || 0
+            const bT = (b as { updatedAt?: { toMillis?: () => number } }).updatedAt?.toMillis?.() || 0
+            return bT - aT
+          })
+        const active = docs[0] || null
+        setSubscription(active)
+        if (active?.id) {
+          try {
+            const { getDocs: getDocsFn } = await import('firebase/firestore')
+            const charges = await getDocsFn(collection(db, 'subscriptions', String(active.id), 'charges'))
+            setInvoices(charges.docs.map((c) => ({ id: c.id, ...c.data() })).slice(0, 12))
+          } catch {
+            setInvoices([])
+          }
+        } else {
+          setInvoices([])
+        }
+      },
+      () => {
+        setSubscription(null)
+        setInvoices([])
+      }
+    )
+    return () => unsub()
+  }, [user?.id])
+
   const resolveGateway = (plan: PricingPlan): 'stripe' | 'paypal' | 'ziina' => {
     const preferred = plan.paymentGateway || 'stripe'
     if (preferred === 'paypal' && gateways.paypal) return 'paypal'
@@ -116,6 +154,31 @@ export default function MembershipPage() {
     }
   }
 
+  const handleCancelRenewal = async () => {
+    if (!subscription?.id) {
+      alert('No active subscription found to cancel.')
+      return
+    }
+    if (!confirm('Stop automatic renewal? You keep access until the current period ends.')) return
+    setCancelling(true)
+    try {
+      const res = await fetch('/api/subscriptions/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscriptionId: subscription.stripeSubscriptionId || subscription.id,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) throw new Error(json.error || 'Cancel failed')
+      alert('Renewal cancelled. You retain access until the end of the paid period.')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Could not cancel renewal')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   if (authLoading || loading) return <DashboardSkeleton />
   if (error) return <DashboardErrorState message={error} />
 
@@ -133,26 +196,86 @@ export default function MembershipPage() {
     (typeof memberRecord.membershipTier === 'string' && memberRecord.membershipTier !== 'standard'
       ? memberRecord.membershipTier
       : null)
-  const renewDate = profile?.membershipRenewDate
-    ? new Date(profile.membershipRenewDate as string).toLocaleDateString()
-    : '—'
+  const renewRaw = profile?.membershipRenewDate
+  const renewDateObj =
+    renewRaw instanceof Date
+      ? renewRaw
+      : renewRaw && typeof renewRaw === 'object' && 'toDate' in (renewRaw as object)
+        ? (renewRaw as { toDate: () => Date }).toDate()
+        : renewRaw
+          ? new Date(renewRaw as string)
+          : null
+  const renewDate =
+    renewDateObj && !Number.isNaN(renewDateObj.getTime())
+      ? renewDateObj.toLocaleDateString()
+      : '—'
+  const monthsRemaining =
+    renewDateObj && !Number.isNaN(renewDateObj.getTime())
+      ? Math.max(
+          0,
+          Math.round(
+            (renewDateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)
+          )
+        )
+      : null
+
 
   return (
-    <DashboardPageShell title="Membership" subtitle="Your plan and available upgrades">
+    <DashboardPageShell title="Membership" subtitle="Your plan, renewal, and invoices">
       {statusBanner ? (
         <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
           {statusBanner}
         </Card>
       ) : null}
       {activePlanName ? (
-        <Card className="p-5 mb-8 border border-neutral-200 bg-neutral-50">
+        <Card className="p-5 mb-6 border border-neutral-200 bg-neutral-50 space-y-3">
           <div className="flex items-center gap-4">
             <Crown className="w-8 h-8 text-neutral-900" />
             <div>
               <h3 className="font-semibold">{activePlanName} Plan Active</h3>
               <p className="text-sm text-neutral-600">Renews on {renewDate}</p>
+              {monthsRemaining != null ? (
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  ~{monthsRemaining} month{monthsRemaining === 1 ? '' : 's'} remaining
+                </p>
+              ) : null}
             </div>
           </div>
+          <button
+            type="button"
+            disabled={cancelling || !subscription}
+            onClick={() => void handleCancelRenewal()}
+            className="text-sm border border-red-300 text-red-700 px-3 py-2 rounded-lg hover:bg-red-50 disabled:opacity-50"
+          >
+            {cancelling ? 'Cancelling…' : 'Stop automatic renewal'}
+          </button>
+        </Card>
+      ) : null}
+
+      {invoices.length > 0 ? (
+        <Card className="p-5 mb-8 border border-neutral-200">
+          <h3 className="font-semibold mb-3">Invoices / charges</h3>
+          <ul className="divide-y divide-neutral-200 text-sm">
+            {invoices.map((inv) => (
+              <li key={String(inv.id)} className="py-2 flex justify-between gap-3">
+                <span>
+                  {String(inv.description || inv.invoiceId || inv.id)}
+                  {inv.createdAt
+                    ? ` · ${new Date(
+                        typeof (inv.createdAt as { toDate?: () => Date }).toDate === 'function'
+                          ? (inv.createdAt as { toDate: () => Date }).toDate()
+                          : (inv.createdAt as string)
+                      ).toLocaleDateString()}`
+                    : ''}
+                </span>
+                <span className="font-medium shrink-0">
+                  {inv.amount != null
+                    ? `${inv.currency || 'AED'} ${Number(inv.amount) / (Number(inv.amount) > 1000 ? 100 : 1)}`
+                    : inv.status || 'paid'}
+                </span>
+              </li>
+            ))}
+          </ul>
         </Card>
       ) : null}
 

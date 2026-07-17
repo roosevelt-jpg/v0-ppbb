@@ -28,15 +28,14 @@ export interface NavigationConfig {
 
 export const DEFAULT_NAVIGATION: NavigationConfig = {
   links: [
-    { label: 'About us', href: '/about', order: 0, isVisible: true },
-    { label: 'Impact', href: '/transparency', order: 1, isVisible: true },
-    { label: 'Events', href: '/events', order: 2, isVisible: true },
-    { label: 'Marketplace', href: '/marketplace', order: 3, isVisible: true },
-    { label: 'Opportunities', href: '/opportunities', order: 4, isVisible: true },
+    { label: 'About Us', href: '/about', order: 0, isVisible: true },
+    { label: 'Events', href: '/events', order: 1, isVisible: true },
+    { label: 'Marketplace', href: '/marketplace', order: 2, isVisible: true },
+    { label: 'Opportunities', href: '/opportunities', order: 3, isVisible: true },
+    { label: 'Community', href: '/communities', order: 4, isVisible: true },
     { label: 'Partners', href: '/partners', order: 5, isVisible: true },
-    { label: 'Contact', href: '/contact', order: 6, isVisible: true },
   ],
-  ctaButton: { label: 'Join now', href: '/join' },
+  ctaButton: { label: 'Contact Us', href: '/contact' },
   signInLabel: 'Sign in',
   whatsappLink: '',
 }

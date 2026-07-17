@@ -42,9 +42,15 @@ export default function CreateRecordingPage() {
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (file.size > 25 * 1024 * 1024) {
+        setError('Thumbnail is too large. Maximum size is 25 MB.')
+        e.target.value = ''
+        return
+      }
+      setError(null)
       setThumbnailFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => setThumbnailPreview(e.target?.result as string)
+      reader.onload = (ev) => setThumbnailPreview(ev.target?.result as string)
       reader.readAsDataURL(file)
     }
   }

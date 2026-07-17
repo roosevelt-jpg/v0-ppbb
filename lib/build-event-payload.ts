@@ -20,6 +20,7 @@ export interface AdminEventFormInput {
   locationLat: number
   locationLng: number
   bannerURL: string
+  galleryURLs?: string[]
   isPaid: boolean
   price: number
   currency: string
@@ -149,6 +150,9 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     status: form.status as EventStatus,
     createdBy: form.createdBy || 'admin',
     createdByRole: form.createdByRole || 'admin',
+    galleryURLs: Array.isArray(form.galleryURLs)
+      ? form.galleryURLs.filter((u) => typeof u === 'string' && u.trim())
+      : [],
     ticketTypes,
     coupons: Array.isArray(form.coupons) ? form.coupons : [],
     requireApproval: Boolean(form.requireApproval),
@@ -236,6 +240,9 @@ export function mapEventDocToAdminForm(
       (typeof data.bannerImage === 'string' && data.bannerImage) ||
       (typeof data.bannerImageUrl === 'string' && data.bannerImageUrl) ||
       '',
+    galleryURLs: Array.isArray(data.galleryURLs)
+      ? data.galleryURLs.filter((u): u is string => typeof u === 'string' && Boolean(u))
+      : [],
     isPaid,
     price: typeof data.price === 'number' ? data.price : 0,
     currency: typeof data.currency === 'string' ? data.currency : 'AED',

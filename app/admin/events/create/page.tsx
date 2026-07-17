@@ -34,6 +34,7 @@ interface EventFormData {
   locationLat: number
   locationLng: number
   bannerURL: string
+  galleryURLs: string[]
   isPaid: boolean
   price: number
   currency: string
@@ -65,6 +66,7 @@ const EMPTY_FORM: EventFormData = {
   locationLat: 0,
   locationLng: 0,
   bannerURL: '',
+  galleryURLs: [],
   isPaid: false,
   price: 0,
   currency: 'AED',
@@ -107,6 +109,7 @@ function CreateEventForm() {
   const [loading, setLoading] = useState(isEditing)
   const [imagePreview, setImagePreview] = useState<string>('')
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [galleryUploading, setGalleryUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [approvalNotes, setApprovalNotes] = useState<string | null>(null)
   const [existingStatus, setExistingStatus] = useState<EventStatus | null>(null)
@@ -145,6 +148,7 @@ function CreateEventForm() {
           locationLat: mapped.locationLat,
           locationLng: mapped.locationLng,
           bannerURL: mapped.bannerURL,
+          galleryURLs: mapped.galleryURLs || [],
           isPaid: mapped.isPaid,
           price: mapped.price,
           currency: mapped.currency,
@@ -205,6 +209,34 @@ function CreateEventForm() {
     } catch (err) {
       console.error('[v0] Upload error:', err)
       throw err
+    }
+  }
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    setGalleryUploading(true)
+    setError(null)
+    try {
+      const uploaded: string[] = []
+      for (const file of files) {
+        const fd = new FormData()
+        fd.append('file', file)
+        fd.append('folder', 'events/gallery')
+        const res = await fetch('/api/upload', { method: 'POST', body: fd })
+        const json = await res.json()
+        if (!json.success || !json.url) throw new Error(json.error || 'Gallery upload failed')
+        uploaded.push(json.url)
+      }
+      setFormData((prev) => ({
+        ...prev,
+        galleryURLs: [...(prev.galleryURLs || []), ...uploaded].slice(0, 12),
+      }))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gallery upload failed')
+    } finally {
+      setGalleryUploading(false)
+      e.target.value = ''
     }
   }
 
@@ -521,6 +553,46 @@ function CreateEventForm() {
                 </label>
               )}
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-black">Gallery slideshow</h2>
+            <p className="text-sm text-neutral-600">
+              Extra photos shown as a slideshow on the public event page (up to 12).
+            </p>
+            {formData.galleryURLs.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {formData.galleryURLs.map((url) => (
+                  <div key={url} className="relative">
+                    <img src={url} alt="" className="w-full h-28 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          galleryURLs: prev.galleryURLs.filter((u) => u !== url),
+                        }))
+                      }
+                      className="absolute top-1 right-1 p-1 bg-red-600 !text-white rounded-full"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            <label className="inline-flex items-center gap-2 cursor-pointer border border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm">
+              <Upload size={16} />
+              {galleryUploading ? 'Uploading…' : 'Add gallery photos'}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={galleryUploading || formData.galleryURLs.length >= 12}
+                onChange={(e) => void handleGalleryUpload(e)}
+              />
+            </label>
           </div>
 
           <div className="space-y-4">

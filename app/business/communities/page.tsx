@@ -16,6 +16,8 @@ export default function BusinessCommunitiesPage() {
   const { user } = useAuth()
   const router = useRouter()
   const [communities, setCommunities] = React.useState<Community[]>([])
+  const [explore, setExplore] = React.useState<Community[]>([])
+  const [tab, setTab] = React.useState<'mine' | 'explore'>('mine')
   const [loading, setLoading] = React.useState(true)
   const [showApprovalsHint, setShowApprovalsHint] = React.useState(false)
 
@@ -39,6 +41,28 @@ export default function BusinessCommunitiesPage() {
     return () => unsubscribe()
   }, [user, router])
 
+  React.useEffect(() => {
+    if (!user || !hasBusinessAccess(user)) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { collection, getDocs, query, where, limit } = await import('firebase/firestore')
+        const snap = await getDocs(
+          query(collection(db, 'communities'), where('status', '==', 'active'), limit(40))
+        )
+        const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Community))
+        if (!cancelled) {
+          setExplore(rows.filter((c) => c.createdBy !== user.id))
+        }
+      } catch (err) {
+        console.error('[v0] Explore communities error:', err)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
   const handleDelete = async (communityId: string) => {
     if (!confirm('Delete this community?')) return
     try {
@@ -57,6 +81,8 @@ export default function BusinessCommunitiesPage() {
     )
   }
 
+  const list = tab === 'mine' ? communities : explore
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
       {/* Header */}
@@ -65,7 +91,7 @@ export default function BusinessCommunitiesPage() {
           <div>
             <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Communities</h1>
             <p style={{ color: '#888888', marginTop: '4px' }}>
-              Manage your business communities and groups
+              Manage your communities or explore others to join
             </p>
             {showApprovalsHint ? (
               <p
@@ -98,7 +124,34 @@ export default function BusinessCommunitiesPage() {
 
       {/* Content */}
       <div className="max-w-6xl mx-auto p-8">
-        {communities.length === 0 ? (
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button
+            type="button"
+            onClick={() => setTab('mine')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border ${
+              tab === 'mine' ? 'bg-black text-white border-black' : 'bg-white text-black border-neutral-300'
+            }`}
+          >
+            My communities
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('explore')}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold border ${
+              tab === 'explore' ? 'bg-black text-white border-black' : 'bg-white text-black border-neutral-300'
+            }`}
+          >
+            Explore
+          </button>
+          <a
+            href="/communities"
+            className="px-4 py-2 rounded-lg text-sm font-semibold border border-neutral-300 bg-white text-black"
+          >
+            Public directory
+          </a>
+        </div>
+
+        {list.length === 0 ? (
           <div
             style={{
               backgroundColor: '#ffffff',
@@ -108,24 +161,28 @@ export default function BusinessCommunitiesPage() {
               textAlign: 'center',
             }}
           >
-            <p style={{ color: '#888888', marginBottom: '16px' }}>No communities yet</p>
-            <button
-              onClick={() => router.push('/business/communities/create')}
-              style={{
-                backgroundColor: '#111111',
-                color: '#ffffff',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                fontWeight: 600,
-              }}
-              className="hover:bg-black"
-            >
-              Create Your First Community
-            </button>
+            <p style={{ color: '#888888', marginBottom: '16px' }}>
+              {tab === 'mine' ? 'No communities yet' : 'No other communities to explore right now'}
+            </p>
+            {tab === 'mine' ? (
+              <button
+                onClick={() => router.push('/business/communities/create')}
+                style={{
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                }}
+                className="hover:bg-black"
+              >
+                Create Your First Community
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {communities.map((community) => (
+            {list.map((community) => (
               <div
                 key={community.id}
                 style={{
@@ -145,7 +202,7 @@ export default function BusinessCommunitiesPage() {
                 <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
                   {community.name}
                 </h3>
-                {isPendingApproval(community.status) ? (
+                {tab === 'mine' && isPendingApproval(community.status) ? (
                   <span
                     style={{
                       display: 'inline-block',
@@ -161,7 +218,7 @@ export default function BusinessCommunitiesPage() {
                   >
                     Pending admin approval
                   </span>
-                ) : community.status === 'archived' ? (
+                ) : tab === 'mine' && community.status === 'archived' ? (
                   <span
                     style={{
                       display: 'inline-block',
@@ -212,9 +269,9 @@ export default function BusinessCommunitiesPage() {
                     onClick={() => router.push(`/communities/${community.id}`)}
                     className="flex-1 min-h-[44px] bg-neutral-900 text-white px-4 rounded-md text-sm font-semibold hover:bg-black"
                   >
-                    View
+                    {tab === 'explore' ? 'View / join' : 'View'}
                   </button>
-                  {!isPendingApproval(community.status) && community.status === 'active' && (
+                  {tab === 'mine' && !isPendingApproval(community.status) && community.status === 'active' && (
                     <button
                       type="button"
                       onClick={() => router.push(`/business/communities/${community.id}/groups/create`)}
@@ -223,22 +280,26 @@ export default function BusinessCommunitiesPage() {
                       Add Group
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/business/communities/create?edit=${community.id}`)}
-                    className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-neutral-900 hover:bg-neutral-200"
-                    aria-label="Edit community"
-                  >
-                    <Edit2 size={16} className="mx-auto" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(community.id)}
-                    className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-red-600 hover:bg-neutral-200"
-                    aria-label="Delete community"
-                  >
-                    <Trash2 size={16} className="mx-auto" />
-                  </button>
+                  {tab === 'mine' ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/business/communities/create?edit=${community.id}`)}
+                        className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-neutral-900 hover:bg-neutral-200"
+                        aria-label="Edit community"
+                      >
+                        <Edit2 size={16} className="mx-auto" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(community.id)}
+                        className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-red-600 hover:bg-neutral-200"
+                        aria-label="Delete community"
+                      >
+                        <Trash2 size={16} className="mx-auto" />
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
             ))}

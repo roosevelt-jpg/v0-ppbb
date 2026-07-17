@@ -75,6 +75,8 @@ export interface EventRecurrence {
   frequency: RecurrenceFrequency
   interval: number
   until?: string | null
+  /** When editing one occurrence, push shared fields to future series events */
+  applyChangesToFuture?: boolean
 }
 
 export interface Event {
@@ -122,6 +124,8 @@ export interface Event {
   showGuestList: boolean
 
   bannerURL: string
+  /** Optional photo gallery for past / event images (slideshow beside content) */
+  galleryURLs?: string[]
   maxAttendees: number | null
   currentAttendees: number
 

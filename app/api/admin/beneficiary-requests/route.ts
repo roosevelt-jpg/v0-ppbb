@@ -202,6 +202,32 @@ async function resolveDocumentUrl(
   data: Record<string, unknown>,
   key: string
 ): Promise<string | null> {
+  if (key === 'supportingDocumentUrls' || key === 'supportingDocuments') {
+    const arr = data.supportingDocumentUrls || data.supportingDocuments || data.supportingDocumentPaths
+    if (Array.isArray(arr) && arr.length > 0) {
+      const first = arr[0]
+      if (typeof first === 'string') {
+        if (first.startsWith('http')) return first
+        try {
+          return await getSignedReadUrl(first, 1)
+        } catch {
+          return null
+        }
+      }
+      if (first && typeof first === 'object') {
+        const n = first as Record<string, unknown>
+        if (typeof n.storagePath === 'string') {
+          try {
+            return await getSignedReadUrl(String(n.storagePath), 1)
+          } catch {
+            /* fall through */
+          }
+        }
+        if (typeof n.url === 'string') return n.url
+      }
+    }
+  }
+
   const pathField = DOC_KEY_TO_PATH[key]
   const storagePath = pathField && typeof data[pathField] === 'string' ? String(data[pathField]) : ''
   if (storagePath) {
