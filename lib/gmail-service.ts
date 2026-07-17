@@ -133,6 +133,33 @@ function formatInviteRoleLabel(role: string): string {
   return labels[role] || role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+const PERMISSION_LABELS: Record<string, string> = {
+  full_access: 'Full system access',
+  manage_members: 'Manage Members',
+  manage_events: 'Manage Events',
+  manage_admins: 'Manage Admins',
+  manage_settings: 'Manage Settings',
+  view_reports: 'View Reports',
+  view_analytics: 'View Analytics',
+  manage_content: 'Manage Content',
+  manage_integrations: 'Manage Integrations',
+  manage_beneficiary: 'Manage Beneficiary Requests',
+  manage_workshops: 'Manage Workshops',
+  manage_recordings: 'Manage Recordings',
+  manage_team: 'Manage Team',
+  manage_community: 'Manage Community',
+  manage_security: 'Manage Security',
+}
+
+function formatPermissionLabels(permissions: string[]): string {
+  if (!permissions.length || permissions.includes('full_access')) {
+    return '• Full system access'
+  }
+  return permissions
+    .map((p) => `• ${PERMISSION_LABELS[p] || p.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}`)
+    .join('<br>')
+}
+
 function buildInviterSignatureHtml(invitedBy: NonNullable<AdminInviteDetails['invitedBy']>): string {
   const avatarCell = invitedBy.profilePictureURL
     ? `<img src="${invitedBy.profilePictureURL}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #e0dfd9;" />`
@@ -193,9 +220,7 @@ export const sendAdminInviteEmail = async (
 
   const logoUrl = await getEmailBrandLogoUrl()
   const roleLabel = formatInviteRoleLabel(details.role)
-  const permissionsText = details.permissions.length > 0
-    ? details.permissions.map(p => `• ${p}`).join('<br>')
-    : '• Full system access'
+  const permissionsText = formatPermissionLabels(details.permissions)
 
   const html = `
     <!DOCTYPE html>
@@ -257,10 +282,10 @@ export const sendAdminInviteEmail = async (
 
           <!-- Access Code -->
           <div class="card">
-            <p><strong>Your Access Code:</strong></p>
+            <p><strong>Your 6-digit Access Code:</strong></p>
             <div class="access-code" style="background-color:#ffffff;border:2px solid #111111;padding:20px;margin:15px 0;border-radius:6px;text-align:center;">
-              <div class="code-label" style="font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Use this code to complete setup</div>
-              <div class="code-value" style="font-size:36px;font-family:'Courier New',monospace;letter-spacing:4px;color:#111111;font-weight:bold;">${details.accessCode}</div>
+              <div class="code-label" style="font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Enter this code on the admin setup page</div>
+              <div class="code-value" style="font-size:36px;font-family:'Courier New',monospace;letter-spacing:8px;color:#111111;font-weight:bold;">${details.accessCode}</div>
             </div>
           </div>
 
@@ -284,8 +309,8 @@ export const sendAdminInviteEmail = async (
 
             <div class="step">
               <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">2</span>
-              <strong>Enter Your Access Code</strong><br>
-              Paste the access code shown above on Step 1 of the setup form.
+              <strong>Enter Your 6-digit Access Code</strong><br>
+              Enter the code shown above on Step 1 of the setup form.
             </div>
 
             <div class="step">
@@ -473,6 +498,12 @@ export async function dispatchAdminPasswordResetEmail(details: {
   to: string
   adminName?: string
   resetLink: string
+  requestedBy?: {
+    name: string
+    roleLabel: string
+    profilePictureURL?: string | null
+    initials: string
+  }
 }): Promise<{ success: true; messageId?: string }> {
   const gmailConfig = await getGmailSmtpConfig()
   if (!gmailConfig) {
@@ -491,6 +522,7 @@ export async function dispatchAdminPasswordResetEmail(details: {
     throw new Error('Failed to initialize Gmail SMTP. Check your Gmail App Password.')
   }
 
+  const logoUrl = await getEmailBrandLogoUrl()
   const name = details.adminName?.trim() || 'there'
   const loginUrl = `${getPublicSiteUrl()}/admin/login`
   const subject = 'Reset your Passive Blessings admin password'
@@ -509,30 +541,34 @@ If you did not expect this email, contact your Passive Blessings administrator.`
   const html = `
     <!DOCTYPE html>
     <html>
-      <body style="margin:0;padding:0;font-family:Georgia,serif;background:#f7f6f2;">
+      <body style="margin:0;padding:0;font-family:Arial,'Segoe UI',sans-serif;background:#f7f6f2;color:#333;">
         <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
-          <div style="background:#fff;border:3px solid #111;padding:32px;border-radius:4px;">
-            <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#888;">Passive Blessings</p>
+          <div style="text-align:center;margin-bottom:24px;">
+            <img src="${logoUrl}" alt="Passive Blessings" width="180" style="display:block;max-width:180px;height:auto;margin:0 auto;border:0;">
+            <p style="margin:10px 0 0 0;font-size:14px;color:#666;">Admin Portal</p>
+          </div>
+          <div style="background:#fff;border:1px solid #e0dfd9;padding:28px;border-radius:8px;">
             <h1 style="margin:0 0 16px 0;font-size:22px;color:#111;">Reset your admin password</h1>
-            <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">Hi ${name},</p>
+            <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">Hi <strong>${name}</strong>,</p>
             <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">
-              A super admin requested a password reset for your admin account.
+              A super admin requested a password reset for your Passive Blessings admin account.
             </p>
             <p style="margin:24px 0;">
               <a href="${details.resetLink}"
-                 style="display:inline-block;padding:12px 20px;background:#111;color:#fff;text-decoration:none;font-weight:600;border-radius:6px;">
-                Choose a new password
+                 style="display:inline-block;padding:12px 24px;background:#111;color:#fff !important;text-decoration:none;font-weight:700;border-radius:6px;">
+                <span style="color:#fff !important;">Choose a new password</span>
               </a>
             </p>
             <p style="margin:0 0 14px 0;line-height:1.6;color:#666;font-size:14px;">
               After resetting, sign in at
               <a href="${loginUrl}" style="color:#111;">${loginUrl}</a>
             </p>
-            <p style="margin:0;line-height:1.6;color:#999;font-size:13px;">
+            ${details.requestedBy ? buildInviterSignatureHtml(details.requestedBy) : ''}
+            <p style="margin:16px 0 0 0;line-height:1.6;color:#999;font-size:13px;">
               If you did not expect this email, contact your Passive Blessings administrator.
             </p>
           </div>
-          <p style="margin:16px 0 0 0;font-size:11px;color:#999;text-align:center;">© ${new Date().getFullYear()} Passive Blessings</p>
+          <p style="margin:16px 0 0 0;font-size:11px;color:#999;text-align:center;">© ${new Date().getFullYear()} Passive Blessings. All rights reserved.</p>
         </div>
       </body>
     </html>

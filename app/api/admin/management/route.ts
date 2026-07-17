@@ -52,7 +52,7 @@ async function requireSuperAdmin(request: NextRequest): Promise<
     return {
       ok: false,
       response: NextResponse.json(
-        { success: false, error: 'Only super admins can reset admin passwords' },
+        { success: false, error: 'Only super admins can manage admin invitations' },
         { status: 403 }
       ),
     }
@@ -95,9 +95,19 @@ async function loadInviterProfile(userId: string) {
   }
 }
 
-// Generate a random access code
-function generateAccessCode(): string {
-  return crypto.randomBytes(6).toString('hex').toUpperCase()
+// Generate a unique 6-digit numeric access code
+async function generateUniqueAccessCode(): Promise<string> {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0')
+    const existing = await getAdminDb()
+      .collection('adminAccessCodes')
+      .where('code', '==', code)
+      .limit(1)
+      .get()
+    if (existing.empty) return code
+  }
+  // Extremely unlikely fallback
+  return String(Date.now()).slice(-6)
 }
 
 export async function GET(request: NextRequest) {
@@ -105,39 +115,73 @@ export async function GET(request: NextRequest) {
     const query = request.nextUrl.searchParams.get('query')
 
     if (query === 'admins') {
-      const snapshot = await getAdminDb().collection('admin-users').orderBy('createdAt', 'desc').get()
-      const admins = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          const data = docSnap.data()
-          let profilePictureURL = ''
-          let phone = typeof data.phone === 'string' ? data.phone : ''
-          if (typeof data.profilePictureURL === 'string') {
-            profilePictureURL = data.profilePictureURL
-          }
-          const userSnap = await getAdminDb().collection('users').doc(docSnap.id).get()
-          if (userSnap.exists) {
-            const u = userSnap.data() as Record<string, unknown>
-            profilePictureURL =
-              (typeof u.profilePictureURL === 'string' && u.profilePictureURL) ||
-              profilePictureURL ||
-              (typeof u.avatarUrl === 'string' && u.avatarUrl) ||
-              ''
-            phone =
-              (typeof u.phone === 'string' && u.phone) ||
-              phone ||
-              (typeof u.whatsappNumber === 'string' && u.whatsappNumber) ||
-              ''
-          }
-          return {
-            id: docSnap.id,
-            ...data,
-            profilePictureURL,
-            phone,
-            createdAt: data.createdAt?.toDate?.() || data.createdAt,
-            lastLogin: data.lastLogin?.toDate?.() || data.lastLogin,
-          }
+      const adminRoles = new Set([
+        'admin',
+        'super_admin',
+        'welfare',
+        'founder',
+        'coordinator',
+        'founder_admin',
+        'manager',
+        'moderator',
+      ])
+      const [adminUsersSnap, usersSnap] = await Promise.all([
+        getAdminDb().collection('admin-users').get(),
+        getAdminDb().collection('users').get(),
+      ])
+
+      const byId = new Map<string, Record<string, unknown>>()
+
+      for (const docSnap of adminUsersSnap.docs) {
+        const data = docSnap.data() as Record<string, unknown>
+        byId.set(docSnap.id, {
+          id: docSnap.id,
+          ...data,
+          createdAt: (data.createdAt as { toDate?: () => Date })?.toDate?.() || data.createdAt,
+          lastLogin: (data.lastLogin as { toDate?: () => Date })?.toDate?.() || data.lastLogin,
         })
-      )
+      }
+
+      for (const docSnap of usersSnap.docs) {
+        const u = docSnap.data() as Record<string, unknown>
+        const role = typeof u.role === 'string' ? u.role : ''
+        const roles = Array.isArray(u.roles) ? (u.roles as string[]) : []
+        const isAdmin =
+          adminRoles.has(role) || roles.some((r) => adminRoles.has(String(r)))
+        if (!isAdmin) continue
+
+        const existing = byId.get(docSnap.id) || { id: docSnap.id }
+        byId.set(docSnap.id, {
+          ...existing,
+          email: existing.email || u.email,
+          name:
+            existing.name ||
+            getUserDisplayName(u as Parameters<typeof getUserDisplayName>[0]),
+          role: existing.role || role,
+          permissions: existing.permissions || u.permissions || [],
+          profilePictureURL:
+            (typeof existing.profilePictureURL === 'string' && existing.profilePictureURL) ||
+            getUserProfilePictureURL(u as Parameters<typeof getUserProfilePictureURL>[0]) ||
+            '',
+          phone:
+            (typeof existing.phone === 'string' && existing.phone) ||
+            (typeof u.phone === 'string' && u.phone) ||
+            (typeof u.whatsappNumber === 'string' && u.whatsappNumber) ||
+            '',
+          createdAt:
+            existing.createdAt ||
+            (u.createdAt as { toDate?: () => Date })?.toDate?.() ||
+            u.createdAt,
+          status: existing.status || u.status || 'active',
+        })
+      }
+
+      const admins = Array.from(byId.values()).sort((a, b) => {
+        const aTime = a.createdAt ? new Date(a.createdAt as string | Date).getTime() : 0
+        const bTime = b.createdAt ? new Date(b.createdAt as string | Date).getTime() : 0
+        return bTime - aTime
+      })
+
       return NextResponse.json({ success: true, data: admins })
     }
 
@@ -183,7 +227,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (action === 'generate-access-code') {
-      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr, invitedByUserId } = data
+      const authz = await requireSuperAdmin(request)
+      if (!authz.ok) return authz.response
+
+      const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr } = data
       
       console.log('[v0] Processing generate-access-code with:', {
         adminName,
@@ -192,6 +239,7 @@ export async function POST(request: NextRequest) {
         permissions,
         sendEmail,
         hasExpiresAt: !!expiresAtStr,
+        invitedBy: authz.uid,
       })
 
       if (!adminEmail || !adminName || !role) {
@@ -201,16 +249,24 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
 
-      const code = generateAccessCode()
+      const normalizedEmail = String(adminEmail).trim().toLowerCase()
+      if (!normalizedEmail.includes('@')) {
+        return NextResponse.json(
+          { success: false, error: 'A valid email address is required' },
+          { status: 400 }
+        )
+      }
+
+      const code = await generateUniqueAccessCode()
       const expiresAt = expiresAtStr ? new Date(expiresAtStr) : new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours default
 
       const accessCodeData = {
         code,
-        adminName,
-        adminEmail,
+        adminName: String(adminName).trim(),
+        adminEmail: normalizedEmail,
         adminRole: role,
         role,
-        permissions: permissions || ['full_access'],
+        permissions: Array.isArray(permissions) && permissions.length > 0 ? permissions : ['full_access'],
         isUsed: false,
         used: false,
         status: 'active',
@@ -219,7 +275,7 @@ export async function POST(request: NextRequest) {
         createdAt: new Date(),
         expiresAt,
         sendEmail: !!sendEmail,
-        createdBy: invitedByUserId || 'management-api',
+        createdBy: authz.uid,
       }
 
       console.log('[v0] Saving access code to Firestore:', {
@@ -250,46 +306,52 @@ export async function POST(request: NextRequest) {
       let emailSent = false
       let emailError: string | null = null
       if (sendEmail) {
-        console.log('[v0] Sending invite email in-process to:', adminEmail)
+        console.log('[v0] Sending invite email in-process to:', normalizedEmail)
         try {
-          const invitedBy = invitedByUserId ? await loadInviterProfile(invitedByUserId) : null
+          const invitedBy = await loadInviterProfile(authz.uid)
           await dispatchAdminInviteEmail({
             accessCode: code,
-            adminEmail,
-            adminName,
+            adminEmail: normalizedEmail,
+            adminName: accessCodeData.adminName,
             role,
             expiresAt,
             permissions: accessCodeData.permissions,
-            invitedBy: invitedBy || undefined,
+            invitedBy: invitedBy || {
+              name: authz.name,
+              roleLabel: formatInviteRoleLabel(authz.role),
+              profilePictureURL: null,
+              initials: authz.name
+                .split(/\s+/)
+                .map((p) => p[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase() || 'SA',
+            },
           })
           emailSent = true
-          console.log('[v0] Invite email sent successfully to:', adminEmail)
+          console.log('[v0] Invite email sent successfully to:', normalizedEmail)
         } catch (emailErr) {
           emailError =
             emailErr instanceof Error ? emailErr.message : 'Failed to send invitation email'
           console.error('[v0] Failed to send invite email:', {
             error: emailError,
-            email: adminEmail,
+            email: normalizedEmail,
           })
         }
       }
 
-      if (invitedByUserId) {
-        const inviterSnap = await getAdminDb().collection('users').doc(invitedByUserId).get()
-        const inviter = inviterSnap.data() as Record<string, unknown> | undefined
-        await auditFromApiRequest(request, {
-          adminId: invitedByUserId,
-          adminEmail: String(inviter?.email || 'unknown'),
-          adminName: getUserDisplayName(inviter as Parameters<typeof getUserDisplayName>[0]),
-          adminRole: formatAdminRoleLabel(String(inviter?.role || 'admin')),
-          actionType: 'create',
-          action: `Generated admin invitation for ${adminEmail}`,
-          entityType: 'admin',
-          entityName: adminName,
-          status: 'success',
-          details: `Role: ${role}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
-        })
-      }
+      await auditFromApiRequest(request, {
+        adminId: authz.uid,
+        adminEmail: authz.email,
+        adminName: authz.name,
+        adminRole: formatAdminRoleLabel(authz.role),
+        actionType: 'create',
+        action: `Generated admin invitation for ${normalizedEmail}`,
+        entityType: 'admin',
+        entityName: accessCodeData.adminName,
+        status: 'success',
+        details: `Role: ${role}; Code: ${code}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
+      })
 
       return NextResponse.json({
         success: true,
@@ -301,7 +363,7 @@ export async function POST(request: NextRequest) {
           ...accessCodeData,
         },
         message: emailSent
-          ? `Access code generated and invitation emailed to ${adminEmail}`
+          ? `Access code generated and invitation emailed to ${normalizedEmail}`
           : sendEmail
             ? `Access code generated, but email failed: ${emailError || 'unknown error'}`
             : 'Access code generated',
@@ -309,7 +371,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'resend-invite') {
-      const { codeId, invitedByUserId, extendExpiry } = data
+      const authz = await requireSuperAdmin(request)
+      if (!authz.ok) return authz.response
+
+      const { codeId, extendExpiry } = data
       if (!codeId) {
         return NextResponse.json(
           { success: false, error: 'codeId is required' },
@@ -366,7 +431,7 @@ export async function POST(request: NextRequest) {
       let emailSent = false
       let emailError: string | null = null
       try {
-        const invitedBy = invitedByUserId ? await loadInviterProfile(invitedByUserId) : null
+        const invitedBy = await loadInviterProfile(authz.uid)
         await dispatchAdminInviteEmail({
           accessCode,
           adminEmail,
@@ -374,7 +439,17 @@ export async function POST(request: NextRequest) {
           role,
           expiresAt: expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000),
           permissions,
-          invitedBy: invitedBy || undefined,
+          invitedBy: invitedBy || {
+            name: authz.name,
+            roleLabel: formatInviteRoleLabel(authz.role),
+            profilePictureURL: null,
+            initials: authz.name
+              .split(/\s+/)
+              .map((p) => p[0])
+              .join('')
+              .slice(0, 2)
+              .toUpperCase() || 'SA',
+          },
         })
         emailSent = true
       } catch (emailErr) {
@@ -382,23 +457,19 @@ export async function POST(request: NextRequest) {
           emailErr instanceof Error ? emailErr.message : 'Failed to send invitation email'
       }
 
-      if (invitedByUserId) {
-        const inviterSnap = await getAdminDb().collection('users').doc(invitedByUserId).get()
-        const inviter = inviterSnap.data() as Record<string, unknown> | undefined
-        await auditFromApiRequest(request, {
-          adminId: invitedByUserId,
-          adminEmail: String(inviter?.email || 'unknown'),
-          adminName: getUserDisplayName(inviter as Parameters<typeof getUserDisplayName>[0]),
-          adminRole: formatAdminRoleLabel(String(inviter?.role || 'admin')),
-          actionType: 'update',
-          action: `Resent admin invitation to ${adminEmail}`,
-          entityType: 'admin',
-          entityId: String(codeId),
-          entityName: adminName,
-          status: emailSent ? 'success' : 'failed',
-          details: `Role: ${role}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
-        })
-      }
+      await auditFromApiRequest(request, {
+        adminId: authz.uid,
+        adminEmail: authz.email,
+        adminName: authz.name,
+        adminRole: formatAdminRoleLabel(authz.role),
+        actionType: 'update',
+        action: `Resent admin invitation to ${adminEmail}`,
+        entityType: 'admin',
+        entityId: String(codeId),
+        entityName: adminName,
+        status: emailSent ? 'success' : 'failed',
+        details: `Role: ${role}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
+      })
 
       return NextResponse.json({
         success: emailSent,
@@ -464,6 +535,17 @@ export async function POST(request: NextRequest) {
           to: email,
           adminName,
           resetLink,
+          requestedBy: {
+            name: authz.name,
+            roleLabel: formatInviteRoleLabel(authz.role),
+            profilePictureURL: (await loadInviterProfile(authz.uid))?.profilePictureURL || null,
+            initials: authz.name
+              .split(/\s+/)
+              .map((p) => p[0])
+              .join('')
+              .slice(0, 2)
+              .toUpperCase() || 'SA',
+          },
         })
 
         await auditFromApiRequest(request, {

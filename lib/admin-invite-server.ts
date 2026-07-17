@@ -117,6 +117,8 @@ export async function upsertAdminUserProfile(input: {
   const lastName =
     (input.lastName && input.lastName.trim()) || parts.slice(1).join(' ') || 'User'
   const now = new Date()
+  const existingUserSnap = await db.collection('users').doc(input.uid).get()
+  const existingUser = existingUserSnap.exists
 
   await db
     .collection('users')
@@ -134,11 +136,12 @@ export async function upsertAdminUserProfile(input: {
         active: true,
         status: 'active',
         updatedAt: now,
-        createdAt: now,
+        ...(existingUser ? {} : { createdAt: now }),
       }),
       { merge: true }
     )
 
+  const existingAdminSnap = await db.collection('admin-users').doc(input.uid).get()
   await db
     .collection('admin-users')
     .doc(input.uid)
@@ -150,8 +153,7 @@ export async function upsertAdminUserProfile(input: {
         permissions: input.permissions,
         status: 'active',
         updatedAt: now,
-        createdAt: now,
-        lastLogin: null,
+        ...(existingAdminSnap.exists ? {} : { createdAt: now, lastLogin: null }),
         accessCodeId: input.accessCodeId || null,
       }),
       { merge: true }

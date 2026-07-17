@@ -88,6 +88,10 @@ export default function AdminManagementPage() {
       alert('Please enter admin name')
       return
     }
+    if (!firebaseUser) {
+      alert('Sign in again as super admin, then retry.')
+      return
+    }
 
     // Calculate expiration (24 hours from now)
     const expiresAt = new Date()
@@ -95,18 +99,15 @@ export default function AdminManagementPage() {
 
     setGeneratingCode(true)
     const permissionsToSend = selectedPermissions.length > 0 ? selectedPermissions : ['full_access']
-    console.log('[v0] Generating access code with permissions:', {
-      adminName,
-      adminEmail,
-      role: adminRole,
-      selectedPermissions: selectedPermissions,
-      finalPermissions: permissionsToSend,
-    })
 
     try {
+      const token = await firebaseUser.getIdToken()
       const res = await fetch('/api/admin/management', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ 
           action: 'generate-access-code',
           adminName,
@@ -115,33 +116,23 @@ export default function AdminManagementPage() {
           permissions: permissionsToSend,
           sendEmail: true,
           expiresAt: expiresAt.toISOString(),
-          invitedByUserId: firebaseUser?.uid || '',
         }),
       })
       const json = await res.json()
-      console.log('[v0] Access code generation response:', {
-        success: json.success,
-        hasData: !!json.data,
-        error: json.error,
-      })
       if (json.success) {
-        console.log('[v0] Access code created:', {
-          code: json.data?.accessCode || json.data?.code,
-          permissions: json.data?.permissions,
-          emailSent: json.emailSent,
-          emailError: json.emailError,
-        })
         setCodes([json.data, ...codes])
         setAdminEmail('')
         setAdminName('')
         setSelectedPermissions([])
         if (json.emailSent) {
-          alert(`✓ Invitation emailed to ${adminEmail} with access code and setup link.`)
+          alert(
+            `✓ Invitation emailed to ${adminEmail}.\n\nThey will receive a branded Passive Blessings email with your signature and a 6-digit access code to complete /admin/setup.`
+          )
         } else {
           alert(
             `Access code was created, but the email was NOT sent.\n\n${
               json.emailError || json.message || 'Check Admin → Integrations → Gmail SMTP.'
-            }\n\nYou can still copy the code from the list below and share it manually.`
+            }\n\nYou can still copy the 6-digit code from the list below and share it manually.`
           )
         }
         await loadData()
@@ -183,13 +174,20 @@ export default function AdminManagementPage() {
 
     setResendingId(code.id)
     try {
+      if (!firebaseUser) {
+        alert('Sign in again as super admin, then retry.')
+        return
+      }
+      const token = await firebaseUser.getIdToken()
       const res = await fetch('/api/admin/management', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           action: 'resend-invite',
           codeId: code.id,
-          invitedByUserId: firebaseUser?.uid || '',
           extendExpiry: true,
         }),
       })
@@ -329,7 +327,11 @@ export default function AdminManagementPage() {
           <div className="space-y-4">
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <h3 className="font-bold text-gray-900 mb-4">Generate New Admin Invitation</h3>
-              <p className="text-sm text-gray-600 mb-4">Send an invitation to a new admin with an access code</p>
+              <p className="text-sm text-gray-600 mb-4">
+                Invite a new admin with a role and permissions. They receive a branded Passive Blessings
+                email signed by you, with a <strong>6-digit access code</strong> to complete setup at{' '}
+                <code className="text-xs bg-gray-100 px-1 rounded">/admin/setup</code>.
+              </p>
               
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

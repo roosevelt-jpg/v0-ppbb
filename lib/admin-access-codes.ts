@@ -16,15 +16,10 @@ export interface AdminUser {
 }
 
 /**
- * Generate a random alphanumeric access code
+ * Generate a 6-digit numeric access code
  */
 export function generateAccessCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let code = ''
-  for (let i = 0; i < 10; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return code
+  return String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0')
 }
 
 /**

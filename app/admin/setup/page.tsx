@@ -405,7 +405,7 @@ export default function AdminSetup() {
                 Step 1 of 3
               </h2>
               <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
-                Enter your admin access code to continue
+                Enter the 6-digit access code from your invitation email
               </p>
 
               <form
@@ -422,22 +422,28 @@ export default function AdminSetup() {
                       color: '#000',
                     }}
                   >
-                    Access Code
+                    6-digit Access Code
                   </label>
                   <input
-                    type="password"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
                     value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    placeholder="Enter access code"
+                    onChange={(e) => setAccessCode(e.target.value.replace(/\s+/g, '').toUpperCase())}
+                    placeholder="123456"
+                    maxLength={16}
                     style={{
                       width: '100%',
-                      padding: '12px',
-                      fontSize: '16px',
+                      padding: '14px 16px',
                       border: '1px solid #ddd',
                       borderRadius: '8px',
+                      fontSize: '20px',
+                      letterSpacing: '0.2em',
+                      fontFamily: 'ui-monospace, monospace',
                       boxSizing: 'border-box',
-                      fontFamily: 'inherit',
+                      textAlign: 'center',
                     }}
+                    required
                   />
                 </div>
 
