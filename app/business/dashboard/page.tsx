@@ -229,23 +229,23 @@ export default function BusinessDashboard() {
   }) => (
     <Card
       onClick={onClick}
-      className={`p-6 cursor-pointer hover:shadow-lg transition-all ${onClick ? '' : ''}`}
+      className={`pb-stat-card p-3 cursor-pointer hover:border-neutral-400 transition-colors ${onClick ? '' : ''}`}
       style={{
         backgroundColor: '#ffffff',
         borderColor: '#e4e1da',
       }}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p style={{ color: '#888888', fontSize: '14px' }}>{label}</p>
-          <p style={{ color: '#111111', fontSize: '28px', fontWeight: 600, marginTop: '8px' }}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">{label}</p>
+          <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 mt-1 truncate">
             {value}
           </p>
           {subtext && (
-            <p style={{ color: '#888888', fontSize: '12px', marginTop: '4px' }}>{subtext}</p>
+            <p className="text-[11px] text-neutral-500 mt-0.5 truncate">{subtext}</p>
           )}
         </div>
-        <Icon style={{ color: '#111111', opacity: 0.3 }} className="w-8 h-8" />
+        <Icon className="w-4 h-4 text-neutral-900 opacity-30 shrink-0" />
       </div>
     </Card>
   )
@@ -379,7 +379,7 @@ export default function BusinessDashboard() {
                         type="button"
                         disabled={busy}
                         onClick={() => handlePendingDecision(row, 'rejected')}
-                        className="bg-red-600 text-white hover:bg-red-700 min-h-[44px] w-full sm:w-auto"
+                        className="bg-black !text-white hover:bg-neutral-800 min-h-[44px] w-full sm:w-auto"
                         style={{ fontFamily: 'Inter, sans-serif' }}
                       >
                         Reject

@@ -52,9 +52,9 @@ export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex ite
 export const ACTION_ROW = 'flex flex-nowrap items-center gap-0.5 whitespace-nowrap'
 /** Compact back / navigation control */
 export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1.5 h-7 min-h-0 px-2.5 text-[11px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
-/** Filter / tab pills — compact black */
-export const FILTER_PILL_ACTIVE = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white ring-2 ring-black ring-offset-1 border-0 shadow-none`
-export const FILTER_PILL_INACTIVE = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white opacity-70 hover:opacity-100 border-0 shadow-none`
+/** Filter / tab pills — compact; inactive is outline so period filters stay readable */
+export const FILTER_PILL_ACTIVE = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white border border-black shadow-none`
+export const FILTER_PILL_INACTIVE = `${BUTTON_BASE} pb-compact-btn pb-filter-pill-inactive h-7 min-h-0 px-2.5 text-[11px] rounded-md !bg-white !text-black border border-neutral-300 hover:!bg-neutral-50 shadow-none`
 /** Up/down reorder controls — black square with white icon */
 export const BUTTON_REORDER = `${BUTTON_BASE} pb-compact-btn min-h-0 min-w-0 h-6 w-6 p-0 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0 [&_svg]:h-3 [&_svg]:w-3`
 /** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */
@@ -73,6 +73,18 @@ export const ADMIN_DETAIL_MODAL_PANEL =
 export const ADMIN_DETAIL_MODAL_CLOSE =
   'shrink-0 min-h-[26px] min-w-[26px] inline-flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100'
 
+/** Compact metric tile (Reporting / overview stats) */
+export const STAT_CARD =
+  'pb-stat-card bg-white border border-[#e4e1da] rounded-lg p-3 min-w-0'
+export const STAT_CARD_LABEL =
+  'pb-stat-label text-[10px] text-neutral-500 uppercase tracking-wide font-medium'
+export const STAT_CARD_VALUE =
+  'pb-stat-value text-xl font-bold text-neutral-900 mt-1 font-headline truncate'
+
+/** Compact report / action panel card */
+export const ACTION_CARD =
+  'pb-action-card bg-white border border-[#e4e1da] rounded-lg p-3 flex flex-col min-w-0'
+
 // Form styles
 export const INPUT_BASE = 'w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-base transition-all duration-200'
 export const INPUT_FOCUS = 'focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent'
@@ -84,8 +96,8 @@ export const FIELD_TRIGGER_RESET =
   '!min-h-0 !px-4 !py-2 !rounded-lg !font-normal !font-body !shadow-none hover:!shadow-none !bg-white !text-neutral-900 hover:!bg-white active:!bg-white'
 
 // Card styles
-export const CARD_BASE = 'bg-white border border-neutral-200 rounded-lg p-6 shadow-sm'
-export const CARD_COMPACT = 'bg-white border border-neutral-200 rounded-lg p-4 shadow-sm'
+export const CARD_BASE = 'bg-white border border-neutral-200 rounded-lg p-3 shadow-none'
+export const CARD_COMPACT = 'bg-white border border-neutral-200 rounded-lg p-2.5 shadow-none'
 
 // Grid layouts
 export const GRID_RESPONSIVE = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6'

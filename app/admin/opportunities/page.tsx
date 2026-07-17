@@ -187,17 +187,11 @@ export default function AdminOpportunitiesPage() {
   }
 
   const StatCard = ({ label, value }: { label: string; value: number }) => (
-    <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-5 min-w-0">
-      <p
-        className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
-        style={{ fontFamily: 'Inter, sans-serif' }}
-      >
+    <div className="pb-stat-card rounded-lg border border-[#e4e1da] bg-white p-3 min-w-0">
+      <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 mb-0.5">
         {label}
       </p>
-      <p
-        className="text-2xl sm:text-3xl text-neutral-900"
-        style={{ fontFamily: 'Cormorant Garamond, serif' }}
-      >
+      <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900">
         {loading ? '—' : value}
       </p>
     </div>

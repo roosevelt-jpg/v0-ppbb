@@ -176,12 +176,12 @@ function StatCard({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-lg px-3 py-3 text-left transition ring-offset-2 ${tone} ${
+      className={`pb-stat-card rounded-lg px-2.5 py-2 text-left transition ring-offset-1 ${tone} ${
         active ? 'ring-2 ring-neutral-900' : ''
       }`}
     >
-      <p className="text-2xl font-bold leading-none">{value}</p>
-      <p className="text-xs font-medium mt-1.5 opacity-90">{label}</p>
+      <p className="pb-stat-value text-lg font-bold leading-none">{value}</p>
+      <p className="pb-stat-label text-[10px] font-medium mt-1 opacity-90 uppercase tracking-wide">{label}</p>
     </button>
   )
 }

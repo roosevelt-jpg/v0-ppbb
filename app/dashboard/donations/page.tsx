@@ -102,18 +102,20 @@ function DonationsContent() {
 
   return (
     <DashboardPageShell title="My Donations" subtitle="Your giving history and impact">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card className="p-5 border border-neutral-200">
-          <p className="text-sm text-neutral-500">Total Donated</p>
-          <p className="text-3xl font-bold mt-1">AED {totalDonated.toLocaleString()}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-6">
+        <Card className="pb-stat-card p-3 border border-neutral-200">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">Total Donated</p>
+          <p className="pb-stat-value font-headline text-xl font-bold mt-1">
+            AED {totalDonated.toLocaleString()}
+          </p>
         </Card>
-        <Card className="p-5 border border-neutral-200">
-          <p className="text-sm text-neutral-500">Causes Supported</p>
-          <p className="text-3xl font-bold mt-1">{causesSupported}</p>
+        <Card className="pb-stat-card p-3 border border-neutral-200">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">Causes Supported</p>
+          <p className="pb-stat-value font-headline text-xl font-bold mt-1">{causesSupported}</p>
         </Card>
-        <Card className="p-5 border border-neutral-200">
-          <p className="text-sm text-neutral-500">Last Donation</p>
-          <p className="text-lg font-semibold mt-1">
+        <Card className="pb-stat-card p-3 border border-neutral-200">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">Last Donation</p>
+          <p className="pb-stat-value text-base font-semibold mt-1">
             {donations[0] ? parseDonationDate(donations[0]) : '—'}
           </p>
         </Card>

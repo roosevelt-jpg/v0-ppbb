@@ -230,7 +230,7 @@ export default function VolunteeringPage() {
 
   return (
     <DashboardPageShell title="Volunteering" subtitle="Give your time and skills to causes that matter">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-6">
         {[
           { label: 'Total Hours', value: volunteerData.totalHours, sub: 'All-time', icon: Clock },
           { label: 'This Year', value: volunteerData.thisYearHours, sub: String(new Date().getFullYear()), icon: TrendingUp },
@@ -238,14 +238,14 @@ export default function VolunteeringPage() {
         ].map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.label} className="p-5 border border-neutral-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-neutral-500">{stat.label}</p>
-                  <p className="text-3xl font-bold text-neutral-900">{stat.value}</p>
-                  <p className="text-xs text-neutral-400 mt-1">{stat.sub}</p>
+            <Card key={stat.label} className="pb-stat-card p-3 border border-neutral-200">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">{stat.label}</p>
+                  <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 mt-1">{stat.value}</p>
+                  <p className="text-[11px] text-neutral-400 mt-0.5">{stat.sub}</p>
                 </div>
-                <Icon className="w-10 h-10 text-neutral-200" />
+                <Icon className="w-5 h-5 text-neutral-300 shrink-0" />
               </div>
             </Card>
           )
