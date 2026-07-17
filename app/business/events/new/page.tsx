@@ -769,7 +769,7 @@ function BusinessEventForm() {
                           const url = await uploadImageToFirebase(
                             file,
                             `events/${user.id}/speakers`,
-                            { preset: 'avatar' }
+                            { preset: 'content' }
                           )
                           const speakers = [...formData.speakers]
                           speakers[idx] = { ...speakers[idx], photoURL: url }
@@ -982,7 +982,7 @@ function BusinessEventForm() {
             onChange={(patch) =>
               setFormData((prev) => ({
                 ...prev,
-                ...patch,
+                ...(patch as Partial<typeof prev>),
                 ...(patch.maxAttendees !== undefined
                   ? {
                       maxAttendees:
