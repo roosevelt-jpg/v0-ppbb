@@ -13,10 +13,24 @@ interface DialogProps {
   footer?: React.ReactNode
   /** Max width of the dialog panel (default 600px). */
   maxWidth?: string
+  /** Tighter padding / typography for small forms (e.g. profile quick-edit). */
+  compact?: boolean
 }
 
-export function Dialog({ open, onOpenChange, title, description, children, footer, maxWidth = '600px' }: DialogProps) {
+export function Dialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  footer,
+  maxWidth = '600px',
+  compact = false,
+}: DialogProps) {
   if (!open) return null
+
+  const pad = compact ? '14px 16px' : '24px'
+  const footerPad = compact ? '10px 16px' : '16px 24px'
 
   return (
     <>
@@ -34,9 +48,9 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         top: '50%',
         transform: 'translate(-50%, -50%)',
         zIndex: 50,
-        width: '90vw',
+        width: compact ? 'min(92vw, 20rem)' : '90vw',
         maxWidth,
-        maxHeight: '90vh',
+        maxHeight: compact ? '85vh' : '90vh',
         overflowY: 'auto',
         padding: '0',
       }}>
@@ -54,57 +68,61 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: '1px solid #e4e1da',
-            padding: '24px',
-            gap: '12px',
+            padding: pad,
+            gap: '10px',
           }}>
             <div>
               <h2 style={{
-                fontSize: '18px',
+                fontSize: compact ? '15px' : '18px',
                 fontWeight: '600',
                 color: '#111111',
                 margin: '0',
+                lineHeight: 1.3,
               }}>
                 {title}
               </h2>
               {description && (
                 <p style={{
-                  fontSize: '14px',
-                  marginTop: '4px',
+                  fontSize: compact ? '12px' : '14px',
+                  marginTop: compact ? '2px' : '4px',
                   color: '#888888',
                   margin: '0',
+                  lineHeight: 1.35,
                 }}>
                   {description}
                 </p>
               )}
             </div>
             <button
+              type="button"
               onClick={() => onOpenChange(false)}
+              aria-label="Close"
               style={{
-                background: 'none',
+                background: '#111111',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#aaa',
-                padding: '4px',
+                color: '#ffffff',
+                padding: compact ? '4px' : '6px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
+                borderRadius: '6px',
+                width: compact ? '28px' : '32px',
+                height: compact ? '28px' : '32px',
               }}
             >
-              <X className="h-5 w-5" />
+              <X className={compact ? 'h-4 w-4' : 'h-5 w-5'} />
             </button>
           </div>
 
           {/* Content */}
-          <div style={{ padding: '24px' }}>{children}</div>
+          <div style={{ padding: pad }}>{children}</div>
 
           {/* Footer */}
           {footer && <div style={{
             borderTop: '1px solid #e4e1da',
-            paddingLeft: '24px',
-            paddingRight: '24px',
-            paddingTop: '16px',
-            paddingBottom: '16px',
+            padding: footerPad,
           }}>{footer}</div>}
         </div>
       </div>

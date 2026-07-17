@@ -174,14 +174,16 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
       open={open}
       onOpenChange={onOpenChange}
       title="Edit profile"
-      description="Update your account details. Changes sync across the platform instantly."
-      maxWidth="400px"
+      description="Changes sync across the platform instantly."
+      maxWidth="20rem"
+      compact
       footer={
-        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+        <div className="flex flex-col-reverse sm:flex-row gap-1.5 sm:justify-end">
           <Button
             type="button"
+            variant="outline"
             onClick={() => onOpenChange(false)}
-            className="w-full sm:w-auto bg-white text-black border border-gray-300 hover:bg-gray-50 min-h-[44px] font-body"
+            className="w-full sm:w-auto font-body"
           >
             Cancel
           </Button>
@@ -189,17 +191,17 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
             type="button"
             onClick={() => void handleSave()}
             disabled={saving || uploading}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px] font-body"
+            className="w-full sm:w-auto font-body"
           >
             {saving ? 'Saving…' : 'Save changes'}
           </Button>
         </div>
       }
     >
-      <div className="space-y-5 font-body">
+      <div className="space-y-3 font-body">
         {message && (
           <p
-            className={`text-sm rounded-lg px-3 py-2 ${
+            className={`text-xs rounded-md px-2.5 py-1.5 ${
               message.type === 'success'
                 ? 'bg-green-50 text-green-800 border border-green-200'
                 : 'bg-red-50 text-red-800 border border-red-200'
@@ -209,20 +211,24 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
           </p>
         )}
 
-        <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
-          <p className="font-medium text-neutral-900">{fullName.trim() || getUserDisplayName(user)}</p>
-          <p className="text-sm text-neutral-600 mt-0.5 break-all">{email.trim() || user.email || '—'}</p>
+        <div className="rounded-md border border-neutral-200 bg-neutral-50 px-2.5 py-2">
+          <p className="text-sm font-medium text-neutral-900 truncate">
+            {fullName.trim() || getUserDisplayName(user)}
+          </p>
+          <p className="text-xs text-neutral-600 mt-0.5 break-all">
+            {email.trim() || user.email || '—'}
+          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <UserAvatar user={user} size="lg" imageUrl={pictureURL || null} name={fullName} />
-          <div className="w-full sm:flex-1">
-            <label className="eyebrow block text-neutral-600 mb-2">Profile photo</label>
-            <label className="pb-compact-btn inline-flex items-center gap-2 h-8 px-3 rounded-md border border-gray-300 bg-white text-black text-xs font-semibold cursor-pointer hover:bg-gray-50 w-full sm:w-auto justify-center">
+        <div className="flex items-center gap-3">
+          <UserAvatar user={user} size="md" imageUrl={pictureURL || null} name={fullName} />
+          <div className="min-w-0 flex-1">
+            <label className="eyebrow block text-neutral-600 mb-1 text-[10px]">Profile photo</label>
+            <label className="pb-compact-btn inline-flex items-center gap-1.5 rounded-md cursor-pointer w-full sm:w-auto justify-center">
               {uploading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Upload className="h-3.5 w-3.5" />
+                <Upload className="h-4 w-4" />
               )}
               {uploading ? 'Uploading…' : 'Upload photo'}
               <input
@@ -237,26 +243,25 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
                 }}
               />
             </label>
-            <p className="text-xs text-neutral-500 mt-1.5">Photo applies immediately after upload.</p>
           </div>
         </div>
 
         <div>
-          <label htmlFor="profile-name" className="eyebrow block text-neutral-600 mb-2">
+          <label htmlFor="profile-name" className="eyebrow block text-neutral-600 mb-1 text-[10px]">
             Name
           </label>
           <Input
             id="profile-name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="min-h-[44px] font-body"
+            className="h-8 min-h-0 text-sm font-body"
             placeholder="Your full name"
             autoComplete="name"
           />
         </div>
 
         <div>
-          <label htmlFor="profile-email" className="eyebrow block text-neutral-600 mb-2">
+          <label htmlFor="profile-email" className="eyebrow block text-neutral-600 mb-1 text-[10px]">
             Email
           </label>
           <Input
@@ -264,14 +269,14 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="min-h-[44px] font-body"
+            className="h-8 min-h-0 text-sm font-body"
             placeholder="you@example.com"
             autoComplete="email"
           />
         </div>
 
         <div>
-          <label htmlFor="profile-phone" className="eyebrow block text-neutral-600 mb-2">
+          <label htmlFor="profile-phone" className="eyebrow block text-neutral-600 mb-1 text-[10px]">
             Phone
           </label>
           <Input
@@ -279,7 +284,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="min-h-[44px] font-body"
+            className="h-8 min-h-0 text-sm font-body"
             placeholder="+971 50 000 0000"
             autoComplete="tel"
           />
