@@ -367,10 +367,10 @@ input[type='checkbox'] {
 
 /*
  * Platform-wide buttons: black bg + white text/icons (unlayered so it beats Tailwind utilities).
- * Opt-outs: theme/nav chrome, calendar days, rating stars, ghost/outline controls.
+ * Opt-outs: theme/nav chrome, calendar days, rating stars, ghost/outline, floating FABs.
  */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn),
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn),
 label.pb-compact-btn,
 a.pb-compact-btn,
 label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn),
@@ -381,8 +381,8 @@ label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) {
   font-family: var(--pb-font-button, var(--font-body));
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):hover,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):hover,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):hover,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):hover,
 label.pb-compact-btn:hover,
 a.pb-compact-btn:hover,
 label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):hover,
@@ -391,8 +391,8 @@ label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):h
   color: #ffffff !important;
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn) svg,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn) svg,
 label.pb-compact-btn svg,
 a.pb-compact-btn svg,
 label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) svg,
@@ -402,8 +402,8 @@ label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) s
 }
 
 /* Platform-wide compact CTA size (Admin / Member / Business + public forms using Button) */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn),
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn),
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-float-btn),
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-float-btn),
 a.pb-compact-btn,
 a.pb-outline-btn,
 label.pb-compact-btn,
@@ -426,10 +426,10 @@ label:has(> input[type='file'].sr-only) {
 }
 
 /* White icons/text on black CTAs must stay readable */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn) svg,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn) svg,
 a.pb-compact-btn svg,
-a.bg-black svg,
+a.bg-black:not(.pb-float-btn) svg,
 label.pb-compact-btn svg,
 label:has(> input[type='file'].hidden):not(.pb-outline-btn) svg,
 label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
@@ -442,9 +442,60 @@ label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
   stroke-width: 2.25 !important;
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):active,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):active {
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):active,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):active {
   opacity: 0.9;
+}
+
+/* Floating WhatsApp / chatbot FABs — large & readable */
+a.pb-float-btn,
+button.pb-float-btn {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+  min-width: 3.5rem !important;
+  min-height: 3.5rem !important;
+  max-height: none !important;
+  padding: 0 !important;
+  border-radius: 9999px !important;
+  line-height: 1 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+  font-size: inherit !important;
+}
+
+@media (min-width: 640px) {
+  a.pb-float-btn,
+  button.pb-float-btn {
+    width: 3.75rem !important;
+    height: 3.75rem !important;
+    min-width: 3.75rem !important;
+    min-height: 3.75rem !important;
+  }
+}
+
+a.pb-float-btn svg {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
+  color: #ffffff !important;
+}
+
+@media (min-width: 640px) {
+  a.pb-float-btn svg {
+    width: 2rem !important;
+    height: 2rem !important;
+    min-width: 2rem !important;
+    min-height: 2rem !important;
+  }
+}
+
+button.pb-float-btn img {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  object-fit: cover !important;
+  border-radius: 9999px !important;
 }
 
 /* Text / avatar / icon-only controls — never paint as black CTAs */
@@ -637,11 +688,11 @@ label:has(> input[type='file'].hidden) {
  * Compact controls across Admin / Member / Business dashboards.
  * Keeps brand black buttons but shrinks oversized pills, CTAs, and cards.
  */
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn),
 [data-dashboard-surface] a.pb-compact-btn,
-[data-dashboard-surface] a.bg-black,
+[data-dashboard-surface] a.bg-black:not(.pb-float-btn),
 [data-dashboard-surface] [data-dashboard-control],
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn),
 [data-dashboard-surface] label.pb-compact-btn,
 [data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
 [data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
@@ -661,10 +712,10 @@ label:has(> input[type='file'].hidden) {
   color: #ffffff !important;
 }
 
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn),
 [data-dashboard-surface] a.pb-compact-btn,
-[data-dashboard-surface] a.bg-black,
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] a.bg-black:not(.pb-float-btn),
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn),
 [data-dashboard-surface] label.pb-compact-btn,
 [data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
 [data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
@@ -672,11 +723,11 @@ label:has(> input[type='file'].hidden) {
   border-color: #111111 !important;
 }
 
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn) svg,
 [data-dashboard-surface] [data-dashboard-control] svg,
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn) svg,
 [data-dashboard-surface] a.pb-compact-btn svg,
-[data-dashboard-surface] a.bg-black svg,
+[data-dashboard-surface] a.bg-black:not(.pb-float-btn) svg,
 [data-dashboard-surface] label.pb-compact-btn svg,
 [data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn) svg,
 [data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
