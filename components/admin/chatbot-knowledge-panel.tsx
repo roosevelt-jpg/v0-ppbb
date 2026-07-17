@@ -407,18 +407,18 @@ export function ChatbotKnowledgePanel() {
                     <p className="text-xs text-neutral-500 mt-2">Triggers: {item.triggers}</p>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-2 shrink-0">
+                <div className="flex flex-nowrap items-center gap-1 shrink-0 whitespace-nowrap">
                   <button
                     type="button"
                     onClick={() => startEdit(item)}
-                    className={`${BUTTON_PRIMARY} !text-white text-sm`}
+                    className="h-8 px-2.5 rounded-md bg-black text-white text-xs font-semibold"
                   >
                     Edit
                   </button>
                   <button
                     type="button"
                     onClick={() => void toggleArchive(item)}
-                    className={`${BUTTON_PRIMARY} !text-white text-sm inline-flex items-center gap-1`}
+                    className="h-8 px-2.5 rounded-md bg-black text-white text-xs font-semibold inline-flex items-center gap-1"
                     title={item.status === 'active' ? 'Archive' : 'Restore'}
                   >
                     {item.status === 'active' ? (
@@ -431,7 +431,7 @@ export function ChatbotKnowledgePanel() {
                   <button
                     type="button"
                     onClick={() => void handleDelete(item.id)}
-                    className={`${BUTTON_PRIMARY} !text-white text-sm inline-flex items-center gap-1`}
+                    className="h-8 px-2.5 rounded-md bg-black text-white text-xs font-semibold inline-flex items-center gap-1"
                     aria-label="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Delete

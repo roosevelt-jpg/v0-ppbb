@@ -6,33 +6,34 @@ import { AdminTable } from '@/components/admin-table'
 import { EditDonationModal } from '@/components/edit-donation-modal'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
-import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
-import { Plus } from 'lucide-react'
-import { useAuth } from '@/lib/auth-context'
-import { getUserDisplayName } from '@/lib/user-profile'
 
 export default function DonationsPage() {
-  const { user } = useAuth()
   const [donations, setDonations] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [selectedDonation, setSelectedDonation] = React.useState<any>(null)
   const [editModalOpen, setEditModalOpen] = React.useState(false)
+  const [actingId, setActingId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, 'donations'),
       (snapshot) => {
-        const donationData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
+        const donationData = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
         })) as any[]
-        setDonations(donationData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
+        setDonations(
+          donationData.sort(
+            (a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+          )
+        )
         setLoading(false)
       },
       (error) => {
-        console.error('[v0] Error fetching donations:', error)
+        console.error('[admin/donations] Error fetching donations:', error)
         setLoading(false)
       }
     )
@@ -45,13 +46,17 @@ export default function DonationsPage() {
       key: 'donorName',
       label: 'Donor',
       width: '200px',
-      render: (value: any) => <span style={{ fontWeight: 500, color: '#111111' }}>{value || 'Anonymous'}</span>,
+      render: (value: any) => (
+        <span style={{ fontWeight: 500, color: '#111111' }}>{value || 'Anonymous'}</span>
+      ),
     },
     {
       key: 'amount',
       label: 'Amount (AED)',
       width: '150px',
-      render: (value: any) => <span style={{ fontWeight: 600, color: '#2e7d32' }}>{value || 0}</span>,
+      render: (value: any) => (
+        <span style={{ fontWeight: 600, color: '#2e7d32' }}>{value || 0}</span>
+      ),
     },
     {
       key: 'type',
@@ -76,8 +81,22 @@ export default function DonationsPage() {
       render: (value: any) => (
         <span
           style={{
-            backgroundColor: value === 'completed' ? '#e8f5e9' : value === 'pending' ? '#fff3e0' : '#ffebee',
-            color: value === 'completed' ? '#2e7d32' : value === 'pending' ? '#e65100' : '#c62828',
+            backgroundColor:
+              value === 'completed'
+                ? '#e8f5e9'
+                : value === 'pending'
+                  ? '#fff3e0'
+                  : value === 'archived'
+                    ? '#f5f5f5'
+                    : '#ffebee',
+            color:
+              value === 'completed'
+                ? '#2e7d32'
+                : value === 'pending'
+                  ? '#e65100'
+                  : value === 'archived'
+                    ? '#616161'
+                    : '#c62828',
             padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '12px',
@@ -95,7 +114,11 @@ export default function DonationsPage() {
       render: (value: any) => {
         if (!value) return '-'
         const date = value.toDate ? value.toDate() : new Date(value)
-        return <span style={{ color: '#888888' }}>{formatDistanceToNow(date, { addSuffix: true })}</span>
+        return (
+          <span style={{ color: '#888888' }}>
+            {formatDistanceToNow(date, { addSuffix: true })}
+          </span>
+        )
       },
     },
     {
@@ -122,58 +145,71 @@ export default function DonationsPage() {
     },
   ]
 
-  const totalDonations = donations.reduce((sum, d) => sum + (d.amount || 0), 0)
+  const visibleDonations = donations.filter((d) => d.status !== 'archived')
+  const totalDonations = visibleDonations.reduce((sum, d) => sum + (d.amount || 0), 0)
+
+  const runArchive = async (item: any) => {
+    if (!confirm('Archive this donation? It will be hidden from the main list.')) return
+    setActingId(item.id)
+    try {
+      const json = await adminApiFetch('/api/admin/donations', {
+        method: 'PATCH',
+        body: JSON.stringify({ id: item.id, action: 'archive' }),
+      })
+      if (!json.success) throw new Error(json.error || 'Archive failed')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to archive donation')
+    } finally {
+      setActingId(null)
+    }
+  }
+
+  const runDelete = async (item: any) => {
+    if (!confirm('Permanently delete this donation record? This cannot be undone.')) return
+    setActingId(item.id)
+    try {
+      const json = await adminApiFetch('/api/admin/donations', {
+        method: 'DELETE',
+        body: JSON.stringify({ id: item.id }),
+      })
+      if (!json.success) throw new Error(json.error || 'Delete failed')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete donation')
+    } finally {
+      setActingId(null)
+    }
+  }
 
   return (
     <AdminPageLayout title="Donations" subtitle="Manage and track all donations">
       <div className="space-y-6">
         <div className="bg-white border border-neutral-200 rounded-lg p-6">
-          <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">Total Donations</p>
-          <p className="text-4xl font-bold text-neutral-900 mt-2">AED {totalDonations.toLocaleString()}</p>
-          <p className="text-xs text-neutral-500 mt-2">{donations.length} total donations</p>
+          <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">
+            Total Donations
+          </p>
+          <p className="text-4xl font-bold text-neutral-900 mt-2">
+            AED {totalDonations.toLocaleString()}
+          </p>
+          <p className="text-xs text-neutral-500 mt-2">
+            {visibleDonations.length} donations
+            {actingId ? ' · updating…' : ''}
+          </p>
         </div>
 
         <AdminTable
           title="All Donations"
           columns={columns}
-          data={donations}
+          data={visibleDonations}
           loading={loading}
           searchPlaceholder="Search by donor name or case..."
           onEdit={(donation) => {
             setSelectedDonation(donation)
             setEditModalOpen(true)
           }}
-          onDelete={async (item) => {
-            if (confirm('Are you sure you want to delete this donation record?')) {
-              try {
-                const { updateDocument } = await import('@/lib/admin-queries')
-                await updateDocument(
-                  'donations',
-                  item.id,
-                  { status: 'cancelled', updatedAt: new Date() },
-                  user
-                    ? {
-                        adminId: user.id,
-                        adminEmail: user.email,
-                        adminName: getUserDisplayName(user),
-                        adminRole: user.role,
-                        actionType: 'delete',
-                        action: `Cancelled donation: ${item.id}`,
-                        entityType: 'donation',
-                        entityId: item.id,
-                        entityName: item.donorName,
-                      }
-                    : undefined
-                )
-              } catch (error) {
-                console.error('[v0] Error deleting donation:', error)
-                alert('Failed to delete donation')
-              }
-            }
-          }}
+          onArchive={(item) => void runArchive(item)}
+          onDelete={(item) => void runDelete(item)}
         />
 
-        {/* Edit Donation Modal */}
         <EditDonationModal
           open={editModalOpen}
           onOpenChange={setEditModalOpen}

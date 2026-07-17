@@ -18,6 +18,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Upload, HeartHandshake, Archive, RefreshCw } from 'lucide-react'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { ACTION_ROW, BUTTON_ROW_COMPACT } from '@/lib/admin-design-system'
 import {
   CAUSE_CATEGORIES,
   CharityCase,
@@ -315,9 +316,10 @@ export default function CharityCasesPage() {
   const btnPrimary =
     'min-h-[44px] bg-black hover:bg-neutral-900 text-white px-4 py-2 rounded text-sm font-semibold'
   const btnSecondary =
-    'min-h-[44px] bg-white text-black border border-neutral-300 hover:bg-neutral-50 px-4 py-2 rounded text-sm font-semibold'
+    'min-h-[44px] bg-black hover:bg-neutral-900 text-white px-4 py-2 rounded text-sm font-semibold'
   const btnDanger =
-    'min-h-[44px] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm font-semibold'
+    'min-h-[44px] bg-black hover:bg-neutral-900 text-white px-3 py-2 rounded text-sm font-semibold'
+  const rowBtn = BUTTON_ROW_COMPACT
 
   return (
     <AdminPageLayout
@@ -522,14 +524,14 @@ export default function CharityCasesPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <button type="button" className={btnSecondary} onClick={() => setEditing(c)}>
+                      <div className={ACTION_ROW}>
+                        <button type="button" className={rowBtn} onClick={() => setEditing(c)}>
                           Edit
                         </button>
-                        {c.status !== 'active' && (
+                        {c.status !== 'active' && c.status !== 'archived' && (
                           <button
                             type="button"
-                            className={btnPrimary}
+                            className={rowBtn}
                             onClick={() => setStatus(c.id, 'active')}
                           >
                             Publish
@@ -538,14 +540,23 @@ export default function CharityCasesPage() {
                         {c.status === 'active' && (
                           <button
                             type="button"
-                            className={btnSecondary}
+                            className={rowBtn}
                             onClick={() => setStatus(c.id, 'archived')}
                           >
-                            <Archive className="w-4 h-4 inline mr-1" />
+                            <Archive className="w-3.5 h-3.5" />
                             Archive
                           </button>
                         )}
-                        <button type="button" className={btnDanger} onClick={() => handleDelete(c.id)}>
+                        {c.status === 'archived' && (
+                          <button
+                            type="button"
+                            className={rowBtn}
+                            onClick={() => setStatus(c.id, 'draft')}
+                          >
+                            Restore
+                          </button>
+                        )}
+                        <button type="button" className={rowBtn} onClick={() => handleDelete(c.id)}>
                           Delete
                         </button>
                       </div>
@@ -623,19 +634,19 @@ export default function CharityCasesPage() {
                               ? formatDistanceToNow(created, { addSuffix: true })
                               : '—'}
                           </td>
-                          <td className="py-3">
-                            <div className="flex flex-wrap gap-2">
+                          <td className="py-3 whitespace-nowrap">
+                            <div className={ACTION_ROW}>
                               <button
                                 type="button"
-                                className="text-neutral-900 underline text-sm"
+                                className={rowBtn}
                                 onClick={() => setEditing(c)}
                               >
                                 Edit
                               </button>
-                              {c.status !== 'active' && (
+                              {c.status !== 'active' && c.status !== 'archived' && (
                                 <button
                                   type="button"
-                                  className="text-green-700 underline text-sm"
+                                  className={rowBtn}
                                   onClick={() => setStatus(c.id, 'active')}
                                 >
                                   Publish
@@ -644,15 +655,24 @@ export default function CharityCasesPage() {
                               {c.status === 'active' && (
                                 <button
                                   type="button"
-                                  className="text-neutral-600 underline text-sm"
+                                  className={rowBtn}
                                   onClick={() => setStatus(c.id, 'archived')}
                                 >
                                   Archive
                                 </button>
                               )}
+                              {c.status === 'archived' && (
+                                <button
+                                  type="button"
+                                  className={rowBtn}
+                                  onClick={() => setStatus(c.id, 'draft')}
+                                >
+                                  Restore
+                                </button>
+                              )}
                               <button
                                 type="button"
-                                className="text-red-600 underline text-sm"
+                                className={rowBtn}
                                 onClick={() => handleDelete(c.id)}
                               >
                                 Delete

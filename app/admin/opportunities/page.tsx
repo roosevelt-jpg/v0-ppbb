@@ -206,71 +206,70 @@ export default function AdminOpportunitiesPage() {
   const ActionButtons = ({ job, compact = false }: { job: AdminJob; compact?: boolean }) => {
     const busy = actingId === job.id
     const btn =
-      'inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded text-xs font-semibold disabled:opacity-50'
+      'pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 rounded-md text-xs font-semibold bg-black text-white hover:bg-neutral-800 disabled:opacity-50 shrink-0 [&_svg]:h-3 [&_svg]:w-3'
     return (
-      <div className={`flex flex-wrap gap-2 ${compact ? '' : ''}`} style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="flex flex-nowrap items-center gap-1 whitespace-nowrap" style={{ fontFamily: 'Inter, sans-serif' }}>
         <button
           type="button"
           disabled={busy}
           onClick={() => setViewJob(job)}
-          className={`${btn} bg-white text-black border border-neutral-300 px-3`}
+          className={`${btn} w-8`}
           aria-label="View"
+          title="View"
         >
-          <Eye className="w-4 h-4" />
-          {!compact ? <span className="ml-1.5 hidden xl:inline">View</span> : null}
+          <Eye className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => openEdit(job)}
-          className={`${btn} bg-white text-black border border-neutral-300 px-3`}
+          className={`${btn} w-8`}
           aria-label="Edit"
+          title="Edit"
         >
-          <Pencil className="w-4 h-4" />
-          {!compact ? <span className="ml-1.5 hidden xl:inline">Edit</span> : null}
+          <Pencil className="w-3.5 h-3.5" />
         </button>
         {job.status === 'pending_approval' ? (
           <button
             type="button"
             disabled={busy}
             onClick={() => runAction(job, 'approve')}
-            className={`${btn} bg-black text-white px-3`}
+            className={`${btn} px-2.5`}
+            title="Approve"
           >
-            <CheckCircle2 className="w-4 h-4" />
-            <span className="ml-1.5">Approve</span>
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            {!compact ? <span className="ml-1">Approve</span> : null}
           </button>
         ) : null}
         <button
           type="button"
           disabled={busy || job.status === 'closed'}
           onClick={() => runAction(job, 'close')}
-          className={`${btn} bg-white text-black border border-neutral-300 px-3`}
+          className={`${btn} w-8`}
           aria-label="Close"
+          title="Close"
         >
-          <Ban className="w-4 h-4" />
-          {!compact ? <span className="ml-1.5 hidden xl:inline">Close</span> : null}
+          <Ban className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => runAction(job, 'flag')}
-          className={`${btn} px-3 ${
-            job.flagged
-              ? 'bg-amber-100 text-amber-900 border border-amber-300'
-              : 'bg-white text-black border border-neutral-300'
-          }`}
+          className={`${btn} w-8`}
           aria-label="Flag"
+          title="Flag"
         >
-          <Flag className="w-4 h-4" />
+          <Flag className="w-3.5 h-3.5" />
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => runAction(job, 'delete')}
-          className={`${btn} bg-red-600 text-white px-3`}
+          className={`${btn} w-8`}
           aria-label="Delete"
+          title="Delete"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     )

@@ -11,7 +11,7 @@ import { adminApiFetch } from '@/lib/admin-api-client'
 import type { ApprovalItem } from '@/lib/admin-approvals-server'
 import { Check, X, ExternalLink, RefreshCw } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { BUTTON_PRIMARY, BUTTON_DANGER, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 const TYPE_LABELS: Record<string, string> = {
   beneficiary: 'Beneficiary',
@@ -186,8 +186,8 @@ export default function ApprovalsPage() {
           <button
             type="button"
             onClick={() => setTab('listings')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              tab === 'listings' ? 'bg-black text-white' : 'bg-white border border-gray-300'
+            className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white hover:bg-neutral-800 ${
+              tab === 'listings' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
             }`}
           >
             Businesses, events &amp; products
@@ -195,8 +195,8 @@ export default function ApprovalsPage() {
           <button
             type="button"
             onClick={() => setTab('forms')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium ${
-              tab === 'forms' ? 'bg-black text-white' : 'bg-white border border-gray-300'
+            className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white hover:bg-neutral-800 ${
+              tab === 'forms' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
             }`}
           >
             Form inquiries
@@ -211,7 +211,7 @@ export default function ApprovalsPage() {
             type="button"
             onClick={() => void loadApprovals()}
             disabled={loading}
-            className={`${BUTTON_SECONDARY} inline-flex items-center gap-2`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -247,19 +247,19 @@ export default function ApprovalsPage() {
                 type="button"
                 onClick={() => setDetailsOpen(false)}
                 disabled={actionLoading}
-                className={BUTTON_SECONDARY}
+                className={BUTTON_PRIMARY}
               >
                 Close
               </button>
               {selectedItem?.href ? (
-                <Link href={selectedItem.href} className={BUTTON_SECONDARY}>
+                <Link href={selectedItem.href} className={BUTTON_PRIMARY}>
                   Open full page
                 </Link>
               ) : null}
               <button
                 onClick={() => selectedItem && void runAction(selectedItem, 'reject')}
                 disabled={actionLoading || !selectedItem}
-                className={BUTTON_DANGER}
+                className={BUTTON_PRIMARY}
               >
                 <X className="h-4 w-4 mr-2" />
                 Reject

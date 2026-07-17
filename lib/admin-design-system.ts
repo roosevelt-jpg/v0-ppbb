@@ -38,16 +38,22 @@ export const ADMIN_RADIUS = {
 export const BUTTON_BASE = 'inline-flex items-center justify-center font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
 export const BUTTON_PRIMARY = `${BUTTON_BASE} bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 px-4 py-2 rounded-lg`
 export const BUTTON_SECONDARY = `${BUTTON_BASE} bg-white text-black border border-black hover:bg-neutral-50 active:bg-neutral-100 px-4 py-2 rounded-lg`
-export const BUTTON_DANGER = `${BUTTON_BASE} bg-red-600 text-white hover:bg-red-700 active:bg-red-800 px-4 py-2 rounded-lg`
-/** Icon-only table actions — black primary */
-export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white`
-/** Icon-only table actions — danger delete */
-export const BUTTON_ICON_DANGER = `${BUTTON_BASE} inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 active:bg-red-800 border-0 shadow-none [&_svg]:text-white`
+export const BUTTON_DANGER = `${BUTTON_BASE} bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 px-4 py-2 rounded-lg`
+/** Icon-only table actions — black primary (compact) */
+export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 p-0 rounded-md bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
+/** Icon-only table actions — same black style (delete/archive included) */
+export const BUTTON_ICON_DANGER = BUTTON_ICON_PRIMARY
+/** Compact icon actions for table rows (Edit / Archive / Delete on one line) */
+export const BUTTON_ICON_COMPACT = BUTTON_ICON_PRIMARY
+/** Compact text actions for table rows */
+export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center gap-0.5 h-6 min-h-0 px-2 text-[11px] font-semibold rounded-md bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none whitespace-nowrap shrink-0`
+/** Keep Edit/Archive/Delete on one horizontal line */
+export const ACTION_ROW = 'flex flex-nowrap items-center gap-0.5 whitespace-nowrap'
 /** Filter / tab pills */
 export const FILTER_PILL_ACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-black text-white border border-black'
 export const FILTER_PILL_INACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-white text-black border border-black hover:bg-neutral-50'
 /** Up/down reorder controls — black square with white icon */
-export const BUTTON_REORDER = `${BUTTON_BASE} min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0`
+export const BUTTON_REORDER = `${BUTTON_BASE} pb-compact-btn min-h-0 min-w-0 h-6 w-6 p-0 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0 [&_svg]:h-3 [&_svg]:w-3`
 /** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */
 export const BUTTON_SUCCESS = BUTTON_PRIMARY
 export const BUTTON_SMALL = 'px-3 py-1.5 text-sm'

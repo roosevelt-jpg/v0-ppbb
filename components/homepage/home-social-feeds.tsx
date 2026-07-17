@@ -9,6 +9,7 @@ import {
 } from '@/lib/homepage-config'
 import { YouTubeWidget } from '@/components/youtube-widget'
 import { YouTubeConfig } from '@/lib/types'
+import { getRotatedYouTubeVideos } from '@/lib/youtube-service'
 
 function SocialSkeleton() {
   return (
@@ -107,27 +108,32 @@ export function HomeSocialFeeds() {
     )
   }
 
-  const youtubeVideos = youtubeConfig?.videos.slice(0, socialFeeds.youtube.maxVideos) || []
+  const youtubeVideos = getRotatedYouTubeVideos(
+    youtubeConfig?.videos || [],
+    socialFeeds.youtube.maxVideos || youtubeConfig?.maxVideosDisplay || 4,
+    youtubeConfig?.refreshInterval || 24,
+    youtubeConfig?.rotationIndex,
+    youtubeConfig?.lastFetched as Date | string | undefined
+  )
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0 space-y-8">
         {showYoutube && (
           <div className="min-w-0">
-            <h2 className="font-headline text-2xl sm:text-3xl font-bold mb-4 break-words text-center">
-              {socialFeeds.youtube.heading}
-            </h2>
-            {youtubeVideos.length > 0 ? (
-              <YouTubeWidget videos={youtubeVideos} isLoading={youtubeLoading} />
+            {youtubeVideos.length > 0 || youtubeLoading ? (
+              <YouTubeWidget
+                videos={youtubeVideos}
+                isLoading={youtubeLoading}
+                heading={socialFeeds.youtube.heading}
+                channelId={youtubeConfig?.channelId}
+                marqueeSpeed={40}
+              />
             ) : (
               <PlaceholderBlock
                 icon={Play}
                 heading={socialFeeds.youtube.heading}
-                message={
-                  youtubeLoading
-                    ? 'Loading videos…'
-                    : 'Coming soon — social feeds will appear here.'
-                }
+                message="Coming soon — social feeds will appear here."
               />
             )}
           </div>

@@ -12,13 +12,14 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore'
-import { Users, AlertCircle, CheckCircle, Download } from 'lucide-react'
+import { Users, AlertCircle, CheckCircle, Download, Trash2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { AdminSelect } from '@/components/admin-select'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_ROW_COMPACT, ACTION_ROW } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import { PricingPlan } from '@/lib/pricing-types'
 import {
   countMembersForPlan,
@@ -30,6 +31,7 @@ import {
   memberMatchesPlan,
 } from '@/lib/pricing-utils'
 import { isExpiringsoon } from '@/lib/membership-utils'
+import { isAccountDeleted } from '@/lib/user-settings'
 
 type MembershipFilter = 'all' | 'expiring' | 'unassigned' | string
 
@@ -146,6 +148,43 @@ export default function MembershipPage() {
       setBulkTierTarget('')
     } catch (error) {
       console.error('[v0] Error applying bulk action:', error)
+      alert(error instanceof Error ? error.message : 'Bulk update failed')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedMembers)
+    if (ids.length === 0) return
+    if (
+      !confirm(
+        `Delete ${ids.length} selected member${ids.length === 1 ? '' : 's'}?\n\nThey will be removed from membership lists (soft-deleted).`
+      )
+    ) {
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      const json = await adminApiFetch('/api/members', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'bulk-delete', ids }),
+      })
+      if (!json.success) throw new Error(json.error || 'Delete failed')
+
+      audit({
+        actionType: 'delete',
+        action: `Bulk deleted ${ids.length} member(s) from Membership`,
+        entityType: 'member',
+        status: 'success',
+        details: `ids: ${ids.slice(0, 8).join(', ')}${ids.length > 8 ? '…' : ''}`,
+      })
+
+      setSelectedMembers(new Set())
+    } catch (error) {
+      console.error('[membership] bulk delete error:', error)
+      alert(error instanceof Error ? error.message : 'Failed to delete members')
     } finally {
       setIsProcessing(false)
     }
@@ -201,14 +240,19 @@ export default function MembershipPage() {
     return isExpiringsoon(date)
   }
 
+  const activeMembers = React.useMemo(
+    () => members.filter((m) => !isAccountDeleted(m)),
+    [members]
+  )
+
   const filteredMembers =
     filter === 'all'
-      ? members
+      ? activeMembers
       : filter === 'expiring'
-        ? members.filter(isMemberExpiring)
+        ? activeMembers.filter(isMemberExpiring)
         : filter === 'unassigned'
-          ? members.filter((m) => !memberHasAssignedPlan(m))
-          : members.filter((m) => {
+          ? activeMembers.filter((m) => !memberHasAssignedPlan(m))
+          : activeMembers.filter((m) => {
               const plan = plans.find((p) => p.id === filter)
               return plan ? memberMatchesPlan(m, plan) : false
             })
@@ -237,8 +281,8 @@ export default function MembershipPage() {
       }
     })
 
-  const activeMemberCount = members.filter((m) => m.active).length
-  const unassignedCount = countUnassignedMembers(members)
+  const activeMemberCount = activeMembers.filter((m) => m.active).length
+  const unassignedCount = countUnassignedMembers(activeMembers)
 
   const filterTabs: { key: MembershipFilter; label: string }[] = [
     { key: 'all', label: 'All Members' },
@@ -271,7 +315,7 @@ export default function MembershipPage() {
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Total Members</p>
-              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{members.length}</p>
+              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{activeMembers.length}</p>
               <p className="text-xs text-neutral-500 mt-1 font-body">{activeMemberCount} active</p>
             </div>
             <Users className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
@@ -295,7 +339,7 @@ export default function MembershipPage() {
       {plans.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {plans.map((plan) => {
-            const count = countMembersForPlan(members, plan)
+            const count = countMembersForPlan(activeMembers, plan)
             const accent = plan.color || '#111111'
             const items = getPlanIncludedItems(plan)
 
@@ -353,17 +397,21 @@ export default function MembershipPage() {
 
       {/* Bulk actions */}
       {selectedMembers.size > 0 && (
-        <Card className="p-4 sm:p-6 border border-neutral-300 bg-neutral-100">
+        <Card className="p-4 sm:p-6 border-2 border-black bg-white sticky top-2 z-20 shadow-md">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-neutral-900 font-body">{selectedMembers.size} members selected</h3>
-              <p className="text-sm text-neutral-600 mt-1 font-body">Apply bulk actions to selected members</p>
+              <h3 className="font-semibold text-neutral-900 font-body">
+                {selectedMembers.size} member{selectedMembers.size === 1 ? '' : 's'} selected
+              </h3>
+              <p className="text-sm text-neutral-600 mt-1 font-body">
+                Change tier or delete selected members
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+            <div className={`${ACTION_ROW} flex-wrap gap-2 w-full lg:w-auto`}>
               <select
                 value={bulkTierTarget}
                 onChange={(e) => setBulkTierTarget(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white font-body"
+                className="h-8 min-h-0 px-2.5 border border-neutral-300 rounded-md text-xs bg-white font-body"
               >
                 <option value="">Select target tier...</option>
                 {plans.map((plan) => (
@@ -373,17 +421,30 @@ export default function MembershipPage() {
                 ))}
               </select>
               <button
-                onClick={handleBulkAction}
+                type="button"
+                onClick={() => void handleBulkAction()}
                 disabled={!bulkTierTarget || isProcessing}
-                className={`${BUTTON_PRIMARY} w-full sm:w-auto disabled:bg-neutral-300 disabled:text-neutral-500 disabled:hover:bg-neutral-300`}
+                className={`${BUTTON_ROW_COMPACT} disabled:opacity-50`}
               >
-                {isProcessing ? 'Processing...' : 'Apply to All'}
+                {isProcessing ? 'Working…' : 'Apply tier'}
               </button>
               <button
-                onClick={() => setSelectedMembers(new Set())}
-                className={`${BUTTON_SECONDARY} w-full sm:w-auto`}
+                type="button"
+                onClick={() => void handleBulkDelete()}
+                disabled={isProcessing}
+                className={`${BUTTON_ROW_COMPACT} disabled:opacity-50`}
+                title="Delete selected"
               >
-                Clear Selection
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMembers(new Set())}
+                disabled={isProcessing}
+                className={`${BUTTON_ROW_COMPACT} disabled:opacity-50`}
+              >
+                Clear
               </button>
             </div>
           </div>
@@ -577,7 +638,7 @@ export default function MembershipPage() {
           </table>
         </div>
         <div className="px-4 sm:px-6 py-4 bg-neutral-50 border-t border-neutral-200 text-sm text-neutral-600 font-body">
-          Showing {filteredAndSearchedMembers.length} of {members.length} members
+          Showing {filteredAndSearchedMembers.length} of {activeMembers.length} members
         </div>
       </Card>
     </div>

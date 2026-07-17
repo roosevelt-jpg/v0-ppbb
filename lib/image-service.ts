@@ -127,6 +127,8 @@ export const CMS_IMAGE_PRESETS = {
   content: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024 },
   /** Homepage hero column — landscape 4:3 center-crop matches the hero frame */
   hero: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 4 / 3 },
+  /** Wide advertising / promo banners — landscape ~3:1, auto-resized */
+  banner: { maxDimension: 1920, maxBytes: 3 * 1024 * 1024, aspectRatio: 3 / 1 },
   /** About Story founder headshot — portrait 3:4 center-crop */
   founder: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 3 / 4 },
   /** Partner / logo thumbnails (flexible max) */

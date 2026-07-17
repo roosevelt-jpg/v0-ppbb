@@ -58,7 +58,7 @@ export function RichTextEditor({
               exec(cmd)
               emitChange()
             }}
-            className="min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
+            className="min-h-0 min-w-0 h-6 w-6 p-0 pb-compact-btn inline-flex items-center justify-center rounded hover:bg-neutral-200 bg-transparent text-neutral-800 shadow-none"
           >
             <Icon className="w-4 h-4" />
           </button>
@@ -71,7 +71,7 @@ export function RichTextEditor({
             exec('insertUnorderedList')
             emitChange()
           }}
-          className="min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
+          className="min-h-0 min-w-0 h-6 w-6 p-0 pb-compact-btn inline-flex items-center justify-center rounded hover:bg-neutral-200 bg-transparent text-neutral-800 shadow-none"
         >
           <List className="w-4 h-4" />
         </button>
@@ -80,7 +80,7 @@ export function RichTextEditor({
           title="Link"
           onMouseDown={(e) => e.preventDefault()}
           onClick={addLink}
-          className="min-h-[44px] min-w-[44px] sm:min-h-[36px] sm:min-w-[36px] inline-flex items-center justify-center rounded hover:bg-neutral-200"
+          className="min-h-0 min-w-0 h-6 w-6 p-0 pb-compact-btn inline-flex items-center justify-center rounded hover:bg-neutral-200 bg-transparent text-neutral-800 shadow-none"
         >
           <Link2 className="w-4 h-4" />
         </button>

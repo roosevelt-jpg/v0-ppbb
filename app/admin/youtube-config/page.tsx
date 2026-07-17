@@ -205,6 +205,9 @@ export default function YouTubeConfigPage() {
                 max="168"
                 className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
+              <p className="text-xs text-neutral-500 mt-1">
+                Every interval, the homepage rotates through your video pool — even if nothing new was uploaded.
+              </p>
             </div>
           </div>
 
@@ -222,22 +225,22 @@ export default function YouTubeConfigPage() {
           </div>
         </div>
 
-        <div className="flex gap-3 mt-8">
+        <div className="flex flex-wrap gap-2 mt-6">
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex-1 flex items-center justify-center gap-2 bg-black hover:bg-neutral-800 text-white py-3 rounded-lg font-semibold disabled:bg-neutral-400"
+            className="pb-compact-btn inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md bg-black text-white text-xs font-semibold hover:bg-neutral-800 disabled:bg-neutral-400"
           >
-            <Save className="w-5 h-5" />
+            <Save className="w-3.5 h-3.5" />
             {isSaving ? 'Saving...' : 'Save Configuration'}
           </button>
 
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || !formData.channelId || !formData.apiKey}
-            className="flex-1 flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold disabled:bg-neutral-400"
+            className="pb-compact-btn inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-md bg-black text-white text-xs font-semibold hover:bg-neutral-800 disabled:bg-neutral-400"
           >
-            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing ? 'Fetching...' : 'Fetch Videos Now'}
           </button>
         </div>
@@ -248,6 +251,12 @@ export default function YouTubeConfigPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
           <p className="text-sm text-blue-700">
             Last updated: {new Date(config.lastFetched).toLocaleString()}
+            {typeof config.rotationIndex === 'number' ? (
+              <> · Rotation index: {config.rotationIndex}</>
+            ) : null}
+          </p>
+          <p className="text-xs text-blue-600 mt-1">
+            Cached pool: {config.videos?.length || 0} videos · Showing {config.maxVideosDisplay} on the homepage (marquee)
           </p>
         </div>
       )}
@@ -255,12 +264,12 @@ export default function YouTubeConfigPage() {
       {/* Videos List */}
       <div>
         <h2 className="text-xl font-semibold mb-4">
-          Latest Videos ({config?.videos.length || 0})
+          Video Pool ({config?.videos.length || 0})
         </h2>
 
         {config?.videos && config.videos.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {config.videos.slice(0, config.maxVideosDisplay).map(video => (
+            {config.videos.map(video => (
               <a
                 key={video.id}
                 href={`https://www.youtube.com/watch?v=${video.videoId}`}

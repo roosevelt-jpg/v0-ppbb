@@ -340,7 +340,7 @@ input[type='checkbox'] {
     color: var(--pb-color-button-text, #ffffff);
   }
 
-  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]) {
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn) {
     @apply px-5 rounded-xl font-semibold text-sm active:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
     font-family: var(--pb-font-button, var(--font-body));
     background-color: var(--pb-color-button-bg, #111111);
@@ -350,8 +350,23 @@ input[type='checkbox'] {
     min-height: 36px;
   }
 
-  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):hover {
+  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):hover {
     background-color: var(--pb-color-button-hover, #333333);
+  }
+
+  /* Compact icon / rating controls — opt out of global CTA chrome */
+  button.pb-compact-btn,
+  button.pb-rating-btn {
+    min-height: 0 !important;
+    min-width: 0 !important;
+    padding: 0;
+    box-shadow: none !important;
+    font-weight: 600;
+  }
+
+  button.pb-compact-btn:hover,
+  button.pb-rating-btn:hover {
+    box-shadow: none !important;
   }
 
   button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):disabled { @apply opacity-50 cursor-not-allowed; }
@@ -499,5 +514,19 @@ input[type='checkbox'] {
 }
 
 .partners-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes youtube-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.youtube-marquee-track {
+  animation: youtube-marquee var(--youtube-marquee-duration, 40s) linear infinite;
+  width: max-content;
+}
+
+.youtube-marquee-track:hover {
   animation-play-state: paused;
 }

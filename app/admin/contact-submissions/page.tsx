@@ -243,8 +243,8 @@ export default function ContactSubmissionsPage() {
               key={id}
               type="button"
               onClick={() => setCategoryFilter(id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                categoryFilter === id ? 'bg-black text-white' : 'bg-white border border-gray-300'
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium min-h-[36px] bg-black text-white hover:bg-neutral-800 ${
+                categoryFilter === id ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
               }`}
             >
               {label}
@@ -376,7 +376,7 @@ export default function ContactSubmissionsPage() {
                             e.stopPropagation()
                             void handleDelete(item.id)
                           }}
-                          className="min-h-[36px] bg-red-600 text-white hover:bg-red-700"
+                          className="pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 bg-black text-white hover:bg-neutral-800"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>

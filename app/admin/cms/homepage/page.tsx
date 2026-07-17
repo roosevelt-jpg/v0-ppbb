@@ -17,8 +17,13 @@ import {
   HomepageBannerButton,
 } from '@/lib/homepage-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { CmsImageUpload } from '@/components/cms-image-upload'
 
-async function uploadHomepageImage(file: File, folder: string, preset: 'content' | 'hero' = 'content'): Promise<string> {
+async function uploadHomepageImage(
+  file: File,
+  folder: string,
+  preset: 'content' | 'hero' | 'banner' = 'content'
+): Promise<string> {
   return uploadImageToFirebase(file, folder, { preset })
 }
 
@@ -411,7 +416,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'up')}
                         disabled={i === 0}
-                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                        className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                         aria-label="Move up"
                       >
                         <ChevronUp className="w-4 h-4" />
@@ -420,7 +425,7 @@ export default function AdminCmsHomepagePage() {
                         type="button"
                         onClick={() => moveHeroImage(i, 'down')}
                         disabled={i === config.hero.images.length - 1}
-                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                        className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                         aria-label="Move down"
                       >
                         <ChevronDown className="w-4 h-4" />
@@ -428,7 +433,7 @@ export default function AdminCmsHomepagePage() {
                       <button
                         type="button"
                         onClick={() => removeHeroImage(img.id)}
-                        className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 bg-red-600 text-white rounded"
+                        className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 bg-black text-white rounded inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                         aria-label="Remove image"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -483,7 +488,7 @@ export default function AdminCmsHomepagePage() {
                   <button
                     type="button"
                     onClick={() => removeHeroButton(i)}
-                    className="p-2 bg-red-600 text-white rounded shadow-none min-h-0 w-full"
+                    className="p-2 pb-compact-btn bg-black text-white rounded shadow-none min-h-0 h-6 w-full"
                   >
                     <Trash2 className="w-4 h-4 mx-auto" />
                   </button>
@@ -697,7 +702,7 @@ export default function AdminCmsHomepagePage() {
                       type="button"
                       onClick={() => movePillar(i, 'up')}
                       disabled={i === 0}
-                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                      className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                       aria-label="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -706,7 +711,7 @@ export default function AdminCmsHomepagePage() {
                       type="button"
                       onClick={() => movePillar(i, 'down')}
                       disabled={i === config.pillars.items.length - 1}
-                      className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                      className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                       aria-label="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -993,7 +998,7 @@ export default function AdminCmsHomepagePage() {
                   <button
                     type="button"
                     onClick={() => removeBannerButton(i)}
-                    className="flex items-center justify-center min-h-[44px] w-full p-2 bg-red-600 text-white rounded"
+                    className="flex items-center justify-center pb-compact-btn h-6 min-h-0 w-full p-0 bg-black text-white rounded"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -1027,55 +1032,26 @@ export default function AdminCmsHomepagePage() {
             Show advertising banner on homepage
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CmsImageUpload
+              label="Banner image"
+              value={config.advertisingBanner?.imageURL || ''}
+              folder="homepage/ads"
+              preset="banner"
+              helpText="Upload an image or GIF (auto-resized for the homepage strip). Not a URL."
+              alt={config.advertisingBanner?.alt || 'Advertisement'}
+              onChange={(url) =>
+                setConfig((p) => ({
+                  ...p,
+                  advertisingBanner: {
+                    ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
+                    imageURL: url,
+                    enabled: url ? true : p.advertisingBanner?.enabled === true,
+                  },
+                }))
+              }
+            />
             <div>
-              <label className="block text-sm font-medium mb-1">Image URL</label>
-              <input
-                type="url"
-                value={config.advertisingBanner?.imageURL || ''}
-                onChange={(e) =>
-                  setConfig((p) => ({
-                    ...p,
-                    advertisingBanner: {
-                      ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
-                      imageURL: e.target.value,
-                    },
-                  }))
-                }
-                className="w-full"
-              />
-              <input
-                type="file"
-                accept="image/*,image/gif"
-                className="mt-2 text-sm"
-                disabled={uploading === 'ad-banner'}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  setUploading('ad-banner')
-                  try {
-                    const url = await uploadHomepageImage(file, 'homepage/ads')
-                    setConfig((p) => ({
-                      ...p,
-                      advertisingBanner: {
-                        ...(p.advertisingBanner || DEFAULT_HOMEPAGE.advertisingBanner),
-                        imageURL: url,
-                        enabled: true,
-                      },
-                    }))
-                  } catch (err) {
-                    setMessage({
-                      type: 'error',
-                      text: err instanceof Error ? err.message : 'Upload failed',
-                    })
-                  } finally {
-                    setUploading(null)
-                    e.target.value = ''
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Link URL</label>
+              <label className="block text-sm font-medium mb-1">Link URL (optional)</label>
               <input
                 type="text"
                 value={config.advertisingBanner?.href || ''}
@@ -1105,16 +1081,10 @@ export default function AdminCmsHomepagePage() {
                   }))
                 }
                 className="w-full"
+                placeholder="Advertisement"
               />
             </div>
           </div>
-          {config.advertisingBanner?.imageURL ? (
-            <img
-              src={config.advertisingBanner.imageURL}
-              alt=""
-              className="w-full max-h-32 object-cover rounded border border-neutral-200"
-            />
-          ) : null}
         </Card>
 
         {/* 2H Social feeds */}

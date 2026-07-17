@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 
 interface FAQ {
   id: string
@@ -14,62 +16,70 @@ interface FAQ {
   status: 'published' | 'draft'
 }
 
+function mapFaq(id: string, data: Record<string, unknown>): FAQ | null {
+  const status =
+    data.status === 'published' || data.isActive === true ? 'published' : 'draft'
+  if (status !== 'published') return null
+  return {
+    id,
+    question: String(data.question || ''),
+    answer: String(data.answer || ''),
+    category: String(data.category || 'General'),
+    order: typeof data.order === 'number' ? data.order : 0,
+    status,
+  }
+}
+
 export default function FAQPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([])
-  const [categories, setCategories] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    loadFAQs()
-  }, [selectedCategory])
-
-  const loadFAQs = async () => {
-    try {
-      setLoading(true)
-      setError('')
-      const url = selectedCategory
-        ? `/api/faqs?category=${encodeURIComponent(selectedCategory)}`
-        : '/api/faqs'
-
-      const res = await fetch(url, { cache: 'no-store' })
-      const json = await res.json()
-
-      if (json.success && Array.isArray(json.data)) {
-        setFaqs(json.data)
-        // Extract unique categories on first load
-        if (!selectedCategory) {
-          const uniqueCategories = [...new Set(json.data.map((faq: FAQ) => faq.category))]
-          setCategories(uniqueCategories)
-        }
-      } else {
-        setFaqs([])
+    const unsub = onSnapshot(
+      collection(db, 'faqs'),
+      (snap) => {
+        const rows = snap.docs
+          .map((d) => mapFaq(d.id, d.data() as Record<string, unknown>))
+          .filter((f): f is FAQ => f != null)
+          .sort((a, b) => a.order - b.order || a.question.localeCompare(b.question))
+        setFaqs(rows)
+        setLoading(false)
+        setError('')
+      },
+      (err) => {
+        console.error('[faq] snapshot error:', err)
+        setError('Failed to load FAQs. Please try again.')
+        setLoading(false)
       }
-    } catch (err) {
-      console.error('[v0] Error loading FAQs:', err)
-      setError('Failed to load FAQs. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+    )
+    return () => unsub()
+  }, [])
+
+  const categories = useMemo(
+    () => [...new Set(faqs.map((f) => f.category))].sort(),
+    [faqs]
+  )
+
+  const visible = selectedCategory
+    ? faqs.filter((f) => f.category === selectedCategory)
+    : faqs
 
   const toggleExpand = (id: string) => {
-    const newExpanded = new Set(expandedIds)
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id)
-    } else {
-      newExpanded.add(id)
-    }
-    setExpandedIds(newExpanded)
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
   }
 
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-white">
-        {/* Header */}
         <section className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 bg-gray-50">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-headline mb-4 text-black">
@@ -81,89 +91,68 @@ export default function FAQPage() {
           </div>
         </section>
 
-        {/* Category Filter */}
-        {categories.length > 0 && (
-          <section className="w-full px-4 sm:px-6 lg:px-8 py-8 bg-white border-b border-gray-200">
-            <div className="max-w-4xl mx-auto">
-              <p className="text-sm font-semibold text-gray-600 mb-4">Filter by category:</p>
-              <div className="flex flex-wrap gap-2">
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+          {categories.length > 0 ? (
+            <div className="flex flex-wrap gap-2 mb-8 justify-center">
+              <button
+                type="button"
+                onClick={() => setSelectedCategory(null)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium bg-black text-white ${
+                  selectedCategory === null ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
+                }`}
+              >
+                All
+              </button>
+              {categories.map((cat) => (
                 <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    !selectedCategory
-                      ? 'bg-black text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium bg-black text-white ${
+                    selectedCategory === cat ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
                   }`}
                 >
-                  All
+                  {cat}
                 </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                      selectedCategory === cat
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
-          </section>
-        )}
+          ) : null}
 
-        {/* FAQs Content */}
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-12">
-          <div className="max-w-4xl mx-auto">
-            {loading ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">Loading FAQs...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12 bg-red-50 rounded-lg p-6">
-                <p className="text-red-600">{error}</p>
-              </div>
-            ) : faqs.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No FAQs found. Check back soon!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {faqs.map((faq) => (
-                  <div
-                    key={faq.id}
-                    className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                  >
+          {error ? (
+            <p className="text-center text-red-600 text-sm">{error}</p>
+          ) : loading ? (
+            <p className="text-center text-gray-500">Loading FAQs…</p>
+          ) : visible.length === 0 ? (
+            <p className="text-center text-gray-500">No FAQs published yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {visible.map((faq) => {
+                const open = expandedIds.has(faq.id)
+                return (
+                  <div key={faq.id} className="border border-gray-200 rounded-lg overflow-hidden">
                     <button
+                      type="button"
                       onClick={() => toggleExpand(faq.id)}
-                      className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left"
+                      className="w-full flex items-center justify-between gap-3 px-4 py-4 text-left bg-white hover:bg-gray-50 !bg-white !text-black !shadow-none !min-h-0 !rounded-none !px-4"
+                      data-slot="button"
                     >
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-black">{faq.question}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{faq.category}</p>
-                      </div>
+                      <span className="font-semibold text-black">{faq.question}</span>
                       <ChevronDown
-                        className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 ml-4 ${
-                          expandedIds.has(faq.id) ? 'rotate-180' : ''
+                        className={`w-5 h-5 shrink-0 text-neutral-600 transition-transform ${
+                          open ? 'rotate-180' : ''
                         }`}
                       />
                     </button>
-
-                    {expandedIds.has(faq.id) && (
-                      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                          {faq.answer}
-                        </p>
+                    {open ? (
+                      <div className="px-4 pb-4 text-gray-700 text-sm leading-relaxed whitespace-pre-wrap border-t border-gray-100 pt-3">
+                        {faq.answer}
                       </div>
-                    )}
+                    ) : null}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </section>
       </main>
       <Footer />

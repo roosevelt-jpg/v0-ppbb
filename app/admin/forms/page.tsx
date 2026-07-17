@@ -12,8 +12,8 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import {
   BUTTON_PRIMARY,
   BUTTON_SECONDARY,
-  BUTTON_ICON_PRIMARY,
-  BUTTON_ICON_DANGER,
+  BUTTON_ICON_COMPACT,
+  ACTION_ROW,
   FILTER_PILL_ACTIVE,
   FILTER_PILL_INACTIVE,
 } from '@/lib/admin-design-system'
@@ -229,20 +229,20 @@ export default function FormsPage() {
                   ) : null}
                 </div>
 
-                <div className="flex gap-2 flex-shrink-0">
-                  <Link href={`/admin/forms/${form.id}/submissions`} className={BUTTON_ICON_PRIMARY} title="View Submissions">
-                    <Eye className="h-4 w-4" />
+                <div className={`${ACTION_ROW} flex-shrink-0`}>
+                  <Link href={`/admin/forms/${form.id}/submissions`} className={BUTTON_ICON_COMPACT} title="View Submissions">
+                    <Eye className="h-3.5 w-3.5" />
                   </Link>
-                  <Link href={`/admin/forms/${form.id}`} className={BUTTON_ICON_PRIMARY} title="Edit Form">
-                    <Edit2 className="h-4 w-4" />
+                  <Link href={`/admin/forms/${form.id}`} className={BUTTON_ICON_COMPACT} title="Edit Form">
+                    <Edit2 className="h-3.5 w-3.5" />
                   </Link>
                   <button
                     type="button"
                     onClick={() => handleDeleteForm(form.id)}
                     title="Delete Form"
-                    className={BUTTON_ICON_DANGER}
+                    className={BUTTON_ICON_COMPACT}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>

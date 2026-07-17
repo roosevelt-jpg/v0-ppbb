@@ -5,6 +5,7 @@ type ProfileUser = Pick<
   'firstName' | 'lastName' | 'email' | 'phone' | 'whatsappNumber' | 'profilePictureURL' | 'avatarUrl' | 'avatar'
 > & {
   name?: string
+  displayName?: string
   profilePicture?: string
 }
 
@@ -39,6 +40,7 @@ export function formatRecordPhoneDisplay(
 export function getUserDisplayName(user: ProfileUser | null | undefined): string {
   if (!user) return ''
   if (user.name?.trim()) return user.name.trim()
+  if (user.displayName?.trim()) return user.displayName.trim()
   const full = `${user.firstName || ''} ${user.lastName || ''}`.trim()
   if (full) return full
   return user.email?.split('@')[0] || 'User'

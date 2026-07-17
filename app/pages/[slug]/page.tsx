@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
+import { cmsContentToHtml } from '@/lib/cms-page-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +38,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug: stri
   }
 
   const title = page.seoTitle || page.title
-  const bodyHtml = stripDuplicateCmsHeadings(page.content || '', title, page.title)
+  const bodyHtml = cmsContentToHtml(page.content || '', title, page.title)
 
   return (
     <>
@@ -50,7 +50,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug: stri
             <p className="text-neutral-600 mb-8 font-body">{page.description}</p>
           ) : null}
           <article
-            className="prose prose-neutral max-w-none font-body cms-page-content"
+            className="prose prose-neutral max-w-none font-body cms-page-content [&_p]:mb-4 [&_p]:leading-relaxed [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_br]:block"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         </div>

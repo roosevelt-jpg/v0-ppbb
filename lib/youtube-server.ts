@@ -143,7 +143,10 @@ export async function saveAndRefreshYouTube(
   }
 
   const maxResults = partial.maxVideosDisplay || 4
-  const { videos, error } = await fetchLatestYouTubeVideos(channelId, apiKey, maxResults)
+  // Fetch a larger pool so we can rotate the visible set every refreshInterval
+  // even when the channel has not uploaded anything new.
+  const poolSize = Math.min(50, Math.max(maxResults * 5, 12))
+  const { videos, error } = await fetchLatestYouTubeVideos(channelId, apiKey, poolSize)
   if (error) {
     return { error: `Failed to fetch videos: ${error}` }
   }
@@ -152,6 +155,22 @@ export async function saveAndRefreshYouTube(
   const ref = db.collection(YOUTUBE_COLLECTION).doc(DOC_ID)
   const existing = await ref.get()
   const now = new Date()
+  const prevIndex =
+    existing.exists && typeof existing.data()?.rotationIndex === 'number'
+      ? Number(existing.data()?.rotationIndex)
+      : 0
+  // Advance the window on each refresh so the homepage cycles through the pool
+  // even when YouTube returns the same videos (no new uploads).
+  const hadPreviousPool =
+    existing.exists &&
+    Array.isArray(existing.data()?.videos) &&
+    (existing.data()?.videos?.length || 0) > 0
+  const nextIndex =
+    videos.length === 0
+      ? 0
+      : hadPreviousPool
+        ? (prevIndex + maxResults) % videos.length
+        : 0
 
   const config: any = {
     id: DOC_ID,
@@ -162,6 +181,7 @@ export async function saveAndRefreshYouTube(
     autoRefresh: partial.autoRefresh ?? true,
     isEnabled: partial.isEnabled ?? true,
     videos: videos.map((v) => ({ ...v, publishedAt: v.publishedAt.toISOString() })),
+    rotationIndex: nextIndex,
     lastFetched: now.toISOString(),
     updatedAt: now.toISOString(),
     createdAt: existing.exists ? existing.data()?.createdAt || now.toISOString() : now.toISOString(),

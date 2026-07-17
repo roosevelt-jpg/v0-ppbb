@@ -1,9 +1,14 @@
 'use client'
 
 import React from 'react'
-import { BUTTON_ICON_DANGER, BUTTON_ICON_PRIMARY, BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import {
+  BUTTON_ICON_COMPACT,
+  BUTTON_PRIMARY,
+  BUTTON_SECONDARY,
+  ACTION_ROW,
+} from '@/lib/admin-design-system'
 import { Card } from '@/components/ui/card'
-import { Plus, Search, Download, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Search, Download, Pencil, Trash2, Archive } from 'lucide-react'
 
 interface Column {
   key: string
@@ -18,6 +23,7 @@ interface AdminTableProps {
   data: any[]
   loading?: boolean
   onEdit?: (item: any) => void
+  onArchive?: (item: any) => void
   onDelete?: (item: any) => void
   onAdd?: () => void
   onExport?: () => void
@@ -52,7 +58,7 @@ function resolveTableMinWidth(columns: Column[], hasActions: boolean, override?:
     return sum + 140
   }, 0)
 
-  const actionsWidth = hasActions ? 180 : 0
+  const actionsWidth = hasActions ? 140 : 0
   return Math.max(columnTotal + actionsWidth, 720)
 }
 
@@ -62,6 +68,7 @@ export function AdminTable({
   data,
   loading = false,
   onEdit,
+  onArchive,
   onDelete,
   onAdd,
   onExport,
@@ -71,7 +78,7 @@ export function AdminTable({
 }: AdminTableProps) {
   const [searchTerm, setSearchTerm] = React.useState('')
 
-  const hasActions = showActionsColumn && Boolean(onEdit || onDelete)
+  const hasActions = showActionsColumn && Boolean(onEdit || onArchive || onDelete)
   const minWidth = resolveTableMinWidth(columns, hasActions, tableMinWidth)
 
   const filteredData = data.filter((item) =>
@@ -151,7 +158,7 @@ export function AdminTable({
                 ))}
                 {hasActions && (
                   <th
-                    className="px-4 sm:px-6 py-3 text-left text-xs font-medium whitespace-nowrap"
+                    className="px-3 py-3 text-left text-xs font-medium whitespace-nowrap w-[1%] "
                     style={{ color: '#888888' }}
                   >
                     Actions
@@ -191,28 +198,39 @@ export function AdminTable({
                       </td>
                     ))}
                     {hasActions && (
-                      <td className="px-4 sm:px-6 py-4 text-sm whitespace-nowrap">
-                        <div className="flex items-center gap-2">
+                      <td className="px-3 py-3 text-sm whitespace-nowrap w-[1%]">
+                        <div className={ACTION_ROW}>
                           {onEdit && (
                             <button
                               type="button"
                               onClick={() => onEdit(item)}
-                              className={BUTTON_ICON_PRIMARY}
+                              className={BUTTON_ICON_COMPACT}
                               aria-label="Edit"
                               title="Edit"
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil />
+                            </button>
+                          )}
+                          {onArchive && (
+                            <button
+                              type="button"
+                              onClick={() => onArchive(item)}
+                              className={BUTTON_ICON_COMPACT}
+                              aria-label="Archive"
+                              title="Archive"
+                            >
+                              <Archive />
                             </button>
                           )}
                           {onDelete && (
                             <button
                               type="button"
                               onClick={() => onDelete(item)}
-                              className={BUTTON_ICON_DANGER}
+                              className={BUTTON_ICON_COMPACT}
                               aria-label="Delete"
                               title="Delete"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 />
                             </button>
                           )}
                         </div>

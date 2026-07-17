@@ -457,15 +457,11 @@ export default function AdminPartnersLogosPage() {
                       ) : null}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-nowrap items-center gap-1">
                     <button
                       type="button"
                       onClick={() => toggleActive(partner)}
-                      className={`min-h-[44px] px-3 rounded text-xs font-semibold ${
-                        partner.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-neutral-100 text-neutral-600'
-                      }`}
+                      className="h-8 px-2.5 rounded-md text-xs font-semibold bg-black text-white whitespace-nowrap"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       {partner.isActive ? 'Active' : 'Hidden'}
@@ -473,7 +469,7 @@ export default function AdminPartnersLogosPage() {
                     <button
                       type="button"
                       onClick={() => openEdit(partner)}
-                      className="min-h-[44px] px-3 rounded bg-white text-black border border-neutral-300 text-xs font-semibold"
+                      className="h-8 px-2.5 rounded-md bg-black text-white text-xs font-semibold whitespace-nowrap"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       Edit
@@ -481,7 +477,7 @@ export default function AdminPartnersLogosPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(partner.id)}
-                      className="min-h-[44px] px-3 rounded bg-red-600 text-white text-xs font-semibold"
+                      className="h-8 px-2.5 rounded-md bg-black text-white text-xs font-semibold whitespace-nowrap"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       Delete
@@ -562,23 +558,25 @@ export default function AdminPartnersLogosPage() {
                         </button>
                       </td>
                       <td className="py-3 px-3">{partner.order}</td>
-                      <td className="py-3 px-3">
-                        <div className="flex gap-2">
+                      <td className="py-3 px-3 whitespace-nowrap">
+                        <div className="flex flex-nowrap items-center gap-1">
                           <button
                             type="button"
                             onClick={() => openEdit(partner)}
-                            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded bg-white text-black border border-neutral-300"
+                            className="pb-compact-btn inline-flex items-center justify-center h-6 w-6 rounded-md bg-black text-white [&_svg]:h-3 [&_svg]:w-3"
                             aria-label="Edit"
+                            title="Edit"
                           >
-                            <Pencil className="w-4 h-4" />
+                            <Pencil className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(partner.id)}
-                            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded bg-red-600 text-white"
+                            className="pb-compact-btn inline-flex items-center justify-center h-6 w-6 rounded-md bg-black text-white [&_svg]:h-3 [&_svg]:w-3"
                             aria-label="Delete"
+                            title="Delete"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>

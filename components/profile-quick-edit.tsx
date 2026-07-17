@@ -1,20 +1,17 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { updateEmail, updateProfile } from 'firebase/auth'
-import { doc, updateDoc } from 'firebase/firestore'
 import { Upload, Loader2, ChevronDown } from 'lucide-react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserAvatar } from '@/components/user-avatar'
 import { useAuth } from '@/lib/auth-context'
-import { auth, db } from '@/lib/firebase'
-import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { auth } from '@/lib/firebase'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import {
   getUserDisplayName,
   getUserProfilePictureURL,
-  splitFullName,
 } from '@/lib/user-profile'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { useAdminAudit } from '@/lib/use-admin-audit'
@@ -25,7 +22,7 @@ interface ProfileQuickEditProps {
 }
 
 export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) {
-  const { user, firebaseUser } = useAuth()
+  const { user, firebaseUser, refreshUser } = useAuth()
   const audit = useAdminAudit()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -44,6 +41,46 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
     setMessage(null)
   }, [open, user, firebaseUser])
 
+  const persistProfile = async (overrides?: {
+    fullName?: string
+    email?: string
+    phone?: string
+    profilePictureURL?: string
+  }) => {
+    const payload = {
+      fullName: (overrides?.fullName ?? fullName).trim(),
+      email: (overrides?.email ?? email).trim(),
+      phone: (overrides?.phone ?? phone).trim(),
+      profilePictureURL: (overrides?.profilePictureURL ?? pictureURL).trim(),
+    }
+
+    const result = await adminApiFetch<{
+      firstName: string
+      lastName: string
+      name: string
+      displayName: string
+      email: string
+      phone: string
+      profilePictureURL: string | null
+      avatarUrl: string | null
+    }>('/api/account/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    })
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to save profile')
+    }
+
+    // Refresh auth token so Auth claims/email stay in sync client-side
+    if (auth.currentUser) {
+      await auth.currentUser.reload()
+      await auth.currentUser.getIdToken(true)
+    }
+    await refreshUser()
+    return result
+  }
+
   const handlePhotoUpload = async (file: File) => {
     if (!firebaseUser) return
     setUploading(true)
@@ -54,7 +91,16 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
         maxDimension: 512,
       })
       setPictureURL(url)
-      setMessage({ type: 'success', text: 'Photo uploaded. Save to apply.' })
+      await persistProfile({ profilePictureURL: url })
+      setMessage({ type: 'success', text: 'Photo updated.' })
+      audit({
+        actionType: 'update',
+        action: 'Updated admin profile photo',
+        entityType: 'admin',
+        entityId: firebaseUser.uid,
+        entityName: fullName.trim() || getUserDisplayName(user),
+        status: 'success',
+      })
     } catch (error: unknown) {
       setMessage({
         type: 'error',
@@ -71,59 +117,22 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
     setMessage(null)
 
     try {
-      const { firstName, lastName } = splitFullName(fullName)
-      if (!firstName.trim()) {
-        throw new Error('Name is required')
-      }
-      if (!email.trim()) {
-        throw new Error('Email is required')
-      }
+      if (!fullName.trim()) throw new Error('Name is required')
+      if (!email.trim()) throw new Error('Email is required')
 
-      const uid = firebaseUser.uid
-      const firestoreUpdates = sanitizeForFirestore({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        profilePictureURL: pictureURL.trim(),
-        avatarUrl: pictureURL.trim(),
-        updatedAt: new Date(),
-      })
-
-      await updateDoc(doc(db, 'users', uid), firestoreUpdates)
+      await persistProfile()
 
       audit({
         actionType: 'update',
         action: 'Updated admin profile',
         entityType: 'admin',
-        entityId: uid,
+        entityId: firebaseUser.uid,
         entityName: fullName.trim(),
         status: 'success',
       })
 
-      const authUpdates: { displayName?: string; photoURL?: string } = {}
-      if (fullName.trim()) authUpdates.displayName = fullName.trim()
-      if (pictureURL.trim()) authUpdates.photoURL = pictureURL.trim()
-      if (Object.keys(authUpdates).length > 0 && auth.currentUser) {
-        await updateProfile(auth.currentUser, authUpdates)
-      }
-
-      const currentEmail = firebaseUser.email || user.email
-      if (email.trim() !== currentEmail && auth.currentUser) {
-        try {
-          await updateEmail(auth.currentUser, email.trim())
-        } catch {
-          setMessage({
-            type: 'error',
-            text: 'Profile saved, but email change requires recent sign-in. Sign out and sign in again, then retry.',
-          })
-          setSaving(false)
-          return
-        }
-      }
-
       setMessage({ type: 'success', text: 'Profile updated.' })
-      setTimeout(() => onOpenChange(false), 600)
+      setTimeout(() => onOpenChange(false), 500)
     } catch (error: unknown) {
       setMessage({
         type: 'error',
@@ -177,26 +186,26 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
         )}
 
         <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
-          <p className="font-medium text-neutral-900">{getUserDisplayName(user)}</p>
-          <p className="text-sm text-neutral-600 mt-0.5 break-all">{user.email || email || '—'}</p>
+          <p className="font-medium text-neutral-900">{fullName.trim() || getUserDisplayName(user)}</p>
+          <p className="text-sm text-neutral-600 mt-0.5 break-all">{email.trim() || user.email || '—'}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <UserAvatar user={user} size="lg" imageUrl={pictureURL || null} name={fullName} />
           <div className="w-full sm:flex-1">
             <label className="eyebrow block text-neutral-600 mb-2">Profile photo</label>
-            <label className="inline-flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg border border-gray-300 bg-white text-black text-sm font-medium cursor-pointer hover:bg-gray-50 w-full sm:w-auto justify-center">
+            <label className="pb-compact-btn inline-flex items-center gap-2 h-8 px-3 rounded-md border border-gray-300 bg-white text-black text-xs font-semibold cursor-pointer hover:bg-gray-50 w-full sm:w-auto justify-center">
               {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="h-4 w-4" />
+                <Upload className="h-3.5 w-3.5" />
               )}
               {uploading ? 'Uploading…' : 'Upload photo'}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="sr-only"
-                disabled={uploading}
+                disabled={uploading || saving}
                 onChange={(e) => {
                   const f = e.target.files?.[0]
                   if (f) void handlePhotoUpload(f)
@@ -204,6 +213,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
                 }}
               />
             </label>
+            <p className="text-xs text-neutral-500 mt-1.5">Photo applies immediately after upload.</p>
           </div>
         </div>
 
@@ -217,6 +227,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
             onChange={(e) => setFullName(e.target.value)}
             className="min-h-[44px] font-body"
             placeholder="Your full name"
+            autoComplete="name"
           />
         </div>
 
@@ -231,6 +242,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
             onChange={(e) => setEmail(e.target.value)}
             className="min-h-[44px] font-body"
             placeholder="you@example.com"
+            autoComplete="email"
           />
         </div>
 
@@ -245,6 +257,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
             onChange={(e) => setPhone(e.target.value)}
             className="min-h-[44px] font-body"
             placeholder="+971 50 000 0000"
+            autoComplete="tel"
           />
         </div>
       </div>

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { format } from 'date-fns'
 import { Plus, Trash2, Edit2, Eye, Music, Video } from 'lucide-react'
+import { ACTION_ROW, BUTTON_ICON_COMPACT } from '@/lib/admin-design-system'
 
 export default function AdminRecordingsPage() {
   const [recordings, setRecordings] = React.useState<any[]>([])
@@ -142,28 +143,35 @@ export default function AdminRecordingsPage() {
                     <td className="px-6 py-3 text-sm">
                       <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">Draft</span>
                     </td>
-                    <td className="px-6 py-3 text-sm space-x-2 flex">
+                    <td className="px-6 py-3 text-sm whitespace-nowrap">
+                      <div className={ACTION_ROW}>
                       <Link
                         href={`/admin/recordings/${recording.id}`}
-                        className="p-1 text-neutral-900 hover:bg-neutral-100 rounded"
+                        className={BUTTON_ICON_COMPACT}
                         title="Edit"
+                        aria-label="Edit"
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={14} />
                       </Link>
                       <button
+                        type="button"
                         onClick={() => handlePublish(recording.id)}
-                        className="p-1 text-neutral-900 hover:bg-neutral-100 rounded"
+                        className={BUTTON_ICON_COMPACT}
                         title="Publish"
+                        aria-label="Publish"
                       >
-                        <Eye size={16} />
+                        <Eye size={14} />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDelete(recording.id)}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                        className={BUTTON_ICON_COMPACT}
                         title="Delete"
+                        aria-label="Delete"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

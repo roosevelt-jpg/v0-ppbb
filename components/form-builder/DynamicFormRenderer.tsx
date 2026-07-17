@@ -367,20 +367,26 @@ export default function DynamicFormRenderer({
                   )}
 
                   {field.type === 'rating' && (
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((rating) => (
-                        <button
-                          key={rating}
-                          type="button"
-                          onClick={() => handleChange(field.id, rating)}
-                          className={`text-2xl min-h-[44px] min-w-[44px] ${
-                            responses[field.id] === rating ? 'text-amber-400' : 'text-neutral-300'
-                          }`}
-                          aria-label={`Rate ${rating}`}
-                        >
-                          ★
-                        </button>
-                      ))}
+                    <div className="flex flex-nowrap items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((rating) => {
+                        const selected = Number(responses[field.id]) === rating
+                        return (
+                          <button
+                            key={rating}
+                            type="button"
+                            onClick={() => handleChange(field.id, rating)}
+                            className={`pb-rating-btn pb-compact-btn inline-flex items-center justify-center h-6 w-6 rounded-full text-[11px] leading-none border-0 shadow-none ${
+                              selected
+                                ? 'bg-black text-white ring-2 ring-offset-1 ring-black'
+                                : 'bg-black text-white opacity-45 hover:opacity-80'
+                            }`}
+                            aria-label={`Rate ${rating}`}
+                            aria-pressed={selected}
+                          >
+                            ★
+                          </button>
+                        )
+                      })}
                     </div>
                   )}
 

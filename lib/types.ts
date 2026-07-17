@@ -940,8 +940,12 @@ export interface YouTubeConfig {
   maxVideosDisplay: number
   refreshInterval: number // in hours
   autoRefresh: boolean
+  isEnabled?: boolean
   lastFetched?: Date
+  /** Full cached pool from YouTube (rotated for homepage display) */
   videos: YouTubeVideo[]
+  /** Advances on each scheduled refresh so the visible set changes even without new uploads */
+  rotationIndex?: number
   createdAt: Date
   updatedAt: Date
 }

@@ -1,122 +1,177 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { verifyIdToken, getUserProfileData } from '@/lib/admin-access-server'
+import { hasAdminAccessServer } from '@/lib/roles-server'
 
-interface FAQ {
-  id?: string
+type FaqStatus = 'published' | 'draft'
+
+interface FaqRow {
+  id: string
   question: string
   answer: string
   category: string
   order: number
-  status: 'published' | 'draft'
-  isActive?: boolean
-  createdAt?: Date
-  updatedAt?: Date
+  status: FaqStatus
+  isActive: boolean
+  createdAt?: unknown
+  updatedAt?: unknown
 }
 
-// GET: Fetch all published FAQs (public) or all FAQs for admin
+async function requireAdmin(request: NextRequest): Promise<string | null> {
+  const authHeader = request.headers.get('authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) return null
+  const uid = await verifyIdToken(token)
+  if (!uid) return null
+  const profile = await getUserProfileData(uid)
+  if (!hasAdminAccessServer(profile || {})) return null
+  return uid
+}
+
+function mapDoc(id: string, data: Record<string, any>): FaqRow {
+  const status: FaqStatus =
+    data.status === 'published' || data.isActive === true ? 'published' : 'draft'
+  return {
+    id,
+    question: String(data.question || ''),
+    answer: String(data.answer || ''),
+    category: String(data.category || 'General'),
+    order: typeof data.order === 'number' ? data.order : 0,
+    status,
+    isActive: status === 'published',
+    createdAt: data.createdAt?.toDate?.() ?? data.createdAt ?? null,
+    updatedAt: data.updatedAt?.toDate?.() ?? data.updatedAt ?? null,
+  }
+}
+
+/** GET — public published FAQs; all FAQs when Authorization Bearer is admin */
 export async function GET(request: NextRequest) {
   try {
-    const isAdmin = request.headers.get('x-admin-auth') === 'true'
-    const category = request.nextUrl.searchParams.get('category')
+    const adminUid = await requireAdmin(request)
+    const category = request.nextUrl.searchParams.get('category')?.trim() || ''
 
-    let query = getAdminDb().collection('faqs')
+    const snap = await getAdminDb().collection('faqs').get()
+    let faqs = snap.docs.map((d) => mapDoc(d.id, d.data()))
 
-    if (!isAdmin) {
-      // Public: only published FAQs
-      query = query.where('status', '==', 'published')
+    if (!adminUid) {
+      faqs = faqs.filter((f) => f.status === 'published')
     }
 
     if (category) {
-      query = query.where('category', '==', category)
+      faqs = faqs.filter((f) => f.category === category)
     }
 
-    query = query.orderBy('order', 'asc')
-
-    const snapshot = await query.get()
-    const faqs: FAQ[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.(),
-      updatedAt: doc.data().updatedAt?.toDate?.(),
-    })) as FAQ[]
+    faqs.sort((a, b) => a.order - b.order || a.question.localeCompare(b.question))
 
     return NextResponse.json({ success: true, data: faqs })
   } catch (error) {
-    console.error('[v0] FAQ fetch error:', error)
+    console.error('[faqs] GET error:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch FAQs' }, { status: 500 })
   }
 }
 
-// POST: Create or update FAQ (admin only)
+/** POST — create or update (admin Bearer required) */
 export async function POST(request: NextRequest) {
   try {
+    const adminUid = await requireAdmin(request)
+    if (!adminUid) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
-    const { id, question, answer, category, order, status } = body
+    const question = typeof body.question === 'string' ? body.question.trim() : ''
+    const answer = typeof body.answer === 'string' ? body.answer.trim() : ''
+    const category = typeof body.category === 'string' ? body.category.trim() : ''
+    const id = typeof body.id === 'string' ? body.id.trim() : ''
 
     if (!question || !answer || !category) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
+        { success: false, error: 'Question, answer, and category are required' },
         { status: 400 }
       )
     }
 
-    const resolvedStatus = status === 'published' ? 'published' : 'draft'
-    const faqData: FAQ = {
+    const resolvedStatus: FaqStatus = body.status === 'published' ? 'published' : 'draft'
+    const order = Number.isFinite(Number(body.order)) ? Number(body.order) : 0
+
+    const faqData = {
       question,
       answer,
       category,
-      order: order || 0,
+      order,
       status: resolvedStatus,
       isActive: resolvedStatus === 'published',
-      updatedAt: new Date(),
+      updatedAt: FieldValue.serverTimestamp(),
+      updatedBy: adminUid,
     }
 
     if (id) {
-      // Update existing
-      await getAdminDb().collection('faqs').doc(id).update(faqData)
+      const ref = getAdminDb().collection('faqs').doc(id)
+      const existing = await ref.get()
+      if (!existing.exists) {
+        return NextResponse.json({ success: false, error: 'FAQ not found' }, { status: 404 })
+      }
+      await ref.set(faqData, { merge: true })
       return NextResponse.json({
         success: true,
-        data: { id, ...faqData },
+        data: { id, question, answer, category, order, status: resolvedStatus, isActive: resolvedStatus === 'published' },
         message: 'FAQ updated',
       })
-    } else {
-      // Create new
-      faqData.createdAt = new Date()
-      const docRef = await getAdminDb().collection('faqs').add(faqData)
-      return NextResponse.json({
-        success: true,
-        data: { id: docRef.id, ...faqData },
-        message: 'FAQ created',
-      })
     }
+
+    const docRef = await getAdminDb().collection('faqs').add({
+      ...faqData,
+      createdAt: FieldValue.serverTimestamp(),
+      createdBy: adminUid,
+    })
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: docRef.id,
+        question,
+        answer,
+        category,
+        order,
+        status: resolvedStatus,
+        isActive: resolvedStatus === 'published',
+      },
+      message: 'FAQ created',
+    })
   } catch (error) {
-    console.error('[v0] FAQ create/update error:', error)
+    console.error('[faqs] POST error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to save FAQ' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to save FAQ' },
       { status: 500 }
     )
   }
 }
 
-// DELETE: Remove FAQ (admin only)
+/** DELETE — remove FAQ (admin Bearer required) */
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Missing FAQ ID' },
-        { status: 400 }
-      )
+    const adminUid = await requireAdmin(request)
+    if (!adminUid) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    await getAdminDb().collection('faqs').doc(id).delete()
-    return NextResponse.json({ success: true, message: 'FAQ deleted' })
+    let faqId = request.nextUrl.searchParams.get('id')?.trim() || ''
+    if (!faqId) {
+      const body = await request.json().catch(() => ({}))
+      faqId = typeof body.id === 'string' ? body.id.trim() : ''
+    }
+
+    if (!faqId) {
+      return NextResponse.json({ success: false, error: 'Missing FAQ ID' }, { status: 400 })
+    }
+
+    await getAdminDb().collection('faqs').doc(faqId).delete()
+    return NextResponse.json({ success: true, message: 'FAQ deleted', id: faqId })
   } catch (error) {
-    console.error('[v0] FAQ delete error:', error)
+    console.error('[faqs] DELETE error:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to delete FAQ' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to delete FAQ' },
       { status: 500 }
     )
   }

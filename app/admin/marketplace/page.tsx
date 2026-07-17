@@ -7,7 +7,8 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import { collection, onSnapshot } from 'firebase/firestore'
-import { CheckCircle2, Trash2, Star, Tag, Plus, X } from 'lucide-react'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { CheckCircle2, Trash2, Star, Tag, Plus, X, Upload, Loader2 } from 'lucide-react'
 
 type OfferRow = {
   id: string
@@ -46,6 +47,7 @@ export default function AdminMarketplacePage() {
   const [filter, setFilter] = React.useState<'all' | 'pending_approval' | 'published' | 'pb'>('all')
   const [showCreate, setShowCreate] = React.useState(false)
   const [creating, setCreating] = React.useState(false)
+  const [uploadingImage, setUploadingImage] = React.useState(false)
   const [createForm, setCreateForm] = React.useState({
     title: '',
     description: '',
@@ -68,6 +70,31 @@ export default function AdminMarketplacePage() {
       imageURL: '',
       publishNow: true,
     })
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      alert('Please choose an image file (JPG, PNG, WebP, or GIF).')
+      e.target.value = ''
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image is too large. Maximum size is 10 MB.')
+      e.target.value = ''
+      return
+    }
+    setUploadingImage(true)
+    try {
+      const url = await uploadImageToFirebase(file, 'marketplace/pb-products', { preset: 'content' })
+      setCreateForm((f) => ({ ...f, imageURL: url }))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setUploadingImage(false)
+      e.target.value = ''
+    }
   }
 
   React.useEffect(() => {
@@ -259,8 +286,8 @@ export default function AdminMarketplacePage() {
             <button
               type="button"
               onClick={() => setSection('offers')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] ${
-                section === 'offers' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
+              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white ${
+                section === 'offers' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
               }`}
             >
               Offers
@@ -268,8 +295,8 @@ export default function AdminMarketplacePage() {
             <button
               type="button"
               onClick={() => setSection('discounts')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center gap-2 ${
-                section === 'discounts' ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
+              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center gap-2 bg-black text-white ${
+                section === 'discounts' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
               }`}
             >
               <Tag size={16} />
@@ -363,15 +390,49 @@ export default function AdminMarketplacePage() {
                   placeholder="Black / M"
                 />
               </label>
-              <label className="text-sm sm:col-span-2">
-                Image URL
-                <input
-                  value={createForm.imageURL}
-                  onChange={(e) => setCreateForm((f) => ({ ...f, imageURL: e.target.value }))}
-                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
-                  placeholder="https://…"
-                />
-              </label>
+              <div className="text-sm sm:col-span-2 space-y-2">
+                <span className="font-medium text-neutral-800">Product image</span>
+                <p className="text-xs text-neutral-500">
+                  Upload an image directly (not a link). JPG, PNG, WebP, or GIF up to 10 MB.
+                </p>
+                {createForm.imageURL ? (
+                  <div className="relative w-full max-w-xs">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={createForm.imageURL}
+                      alt="Product preview"
+                      className="w-full aspect-square object-cover rounded-lg border border-neutral-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCreateForm((f) => ({ ...f, imageURL: '' }))}
+                      className="absolute top-2 right-2 inline-flex items-center gap-1 min-h-[36px] px-3 rounded-lg bg-black text-white text-xs font-semibold"
+                    >
+                      <X size={14} />
+                      Remove
+                    </button>
+                  </div>
+                ) : null}
+                <label className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-black text-white text-sm font-semibold cursor-pointer hover:bg-neutral-900 disabled:opacity-50">
+                  {uploadingImage ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Upload size={16} />
+                  )}
+                  {uploadingImage
+                    ? 'Uploading…'
+                    : createForm.imageURL
+                      ? 'Replace image'
+                      : 'Upload image'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingImage || creating}
+                    onChange={(e) => void handleImageUpload(e)}
+                  />
+                </label>
+              </div>
               <label className="text-sm flex items-center gap-2 sm:col-span-2">
                 <input
                   type="checkbox"
@@ -383,7 +444,7 @@ export default function AdminMarketplacePage() {
             </div>
             <button
               type="submit"
-              disabled={creating}
+              disabled={creating || uploadingImage}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-black text-white text-sm font-semibold disabled:opacity-50 min-h-[44px]"
             >
               <Plus size={16} />
@@ -398,8 +459,8 @@ export default function AdminMarketplacePage() {
               key={tab}
               type="button"
               onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] ${
-                filter === tab ? 'bg-black text-white' : 'bg-white border border-gray-300 text-black'
+              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white ${
+                filter === tab ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
               }`}
             >
               {tab === 'all'
@@ -440,7 +501,7 @@ export default function AdminMarketplacePage() {
                           type="button"
                           disabled={actingId === row.id}
                           onClick={() => runDiscountAction(row.id, 'approve')}
-                          className="min-h-[44px] px-3 bg-green-600 text-white rounded text-xs font-medium disabled:opacity-50"
+                          className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                         >
                           Approve
                         </button>
@@ -451,7 +512,7 @@ export default function AdminMarketplacePage() {
                         onClick={() => {
                           if (confirm('Remove this discount?')) void runDiscountAction(row.id, 'remove')
                         }}
-                        className="min-h-[44px] px-3 bg-red-50 text-red-700 rounded text-xs font-medium disabled:opacity-50"
+                        className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                       >
                         Remove
                       </button>
@@ -491,7 +552,7 @@ export default function AdminMarketplacePage() {
                                 type="button"
                                 disabled={actingId === row.id}
                                 onClick={() => runDiscountAction(row.id, 'approve')}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium disabled:opacity-50"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                               >
                                 <CheckCircle2 size={14} />
                                 Approve
@@ -503,7 +564,7 @@ export default function AdminMarketplacePage() {
                               onClick={() => {
                                 if (confirm('Remove this discount?')) void runDiscountAction(row.id, 'remove')
                               }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded text-xs font-medium disabled:opacity-50"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                             >
                               <Trash2 size={14} />
                               Remove
@@ -539,7 +600,7 @@ export default function AdminMarketplacePage() {
                         type="button"
                         disabled={actingId === offer.id}
                         onClick={() => runAction(offer.id, 'approve')}
-                        className="min-h-[44px] px-3 bg-green-600 text-white rounded text-xs font-medium disabled:opacity-50"
+                        className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                       >
                         Approve
                       </button>
@@ -548,7 +609,7 @@ export default function AdminMarketplacePage() {
                       type="button"
                       disabled={actingId === offer.id}
                       onClick={() => runAction(offer.id, 'feature')}
-                      className="min-h-[44px] px-3 bg-amber-100 text-amber-800 rounded text-xs font-medium disabled:opacity-50"
+                      className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                     >
                       {offer.isFeatured ? 'Unfeature' : 'Feature'}
                     </button>
@@ -560,7 +621,7 @@ export default function AdminMarketplacePage() {
                           void runAction(offer.id, 'remove')
                         }
                       }}
-                      className="min-h-[44px] px-3 bg-red-50 text-red-700 rounded text-xs font-medium disabled:opacity-50"
+                      className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                     >
                       Remove
                     </button>
@@ -603,7 +664,7 @@ export default function AdminMarketplacePage() {
                               type="button"
                               disabled={actingId === offer.id}
                               onClick={() => runAction(offer.id, 'approve')}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded text-xs font-medium disabled:opacity-50"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                             >
                               <CheckCircle2 size={14} />
                               Approve
@@ -613,7 +674,7 @@ export default function AdminMarketplacePage() {
                             type="button"
                             disabled={actingId === offer.id}
                             onClick={() => runAction(offer.id, 'feature')}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-100 text-amber-800 rounded text-xs font-medium disabled:opacity-50"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                           >
                             <Star size={14} />
                             {offer.isFeatured ? 'Unfeature' : 'Feature'}
@@ -626,7 +687,7 @@ export default function AdminMarketplacePage() {
                                 void runAction(offer.id, 'remove')
                               }
                             }}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded text-xs font-medium disabled:opacity-50"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
                           >
                             <Trash2 size={14} />
                             Remove

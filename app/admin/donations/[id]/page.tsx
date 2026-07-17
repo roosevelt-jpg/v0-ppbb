@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, User, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function DonationDetailPage() {
@@ -59,7 +60,22 @@ export default function DonationDetailPage() {
     setError('')
     setSuccess('')
     try {
-      await updateDoc(doc(db, 'donations', donationId), formData)
+      const json = await adminApiFetch('/api/admin/donations', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          id: donationId,
+          donorName: formData.donorName || '',
+          donorEmail: formData.donorEmail || '',
+          amount: formData.amount,
+          type: formData.type || 'monetary',
+          purpose: formData.purpose || '',
+          notes: formData.notes || '',
+          status: formData.status || 'completed',
+          paymentMethod: formData.paymentMethod || 'bank-transfer',
+          targetCase: formData.targetCase || '',
+        }),
+      })
+      if (!json.success) throw new Error(json.error || 'Failed to update donation')
       audit({
         actionType: 'update',
         action: `Updated donation: ${donationId}`,
@@ -70,8 +86,8 @@ export default function DonationDetailPage() {
       setSuccess('Donation updated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
-      console.error('[v0] Error updating donation:', err)
-      setError('Failed to update donation')
+      console.error('[admin/donations] Error updating donation:', err)
+      setError(err instanceof Error ? err.message : 'Failed to update donation')
     } finally {
       setSaving(false)
     }

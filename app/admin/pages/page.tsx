@@ -10,8 +10,8 @@ import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 import {
   BUTTON_PRIMARY,
   BUTTON_SECONDARY,
-  BUTTON_ICON_PRIMARY,
-  BUTTON_ICON_DANGER,
+  BUTTON_ICON_COMPACT,
+  ACTION_ROW,
 } from '@/lib/admin-design-system'
 import {
   subscribeToNavigation,
@@ -19,8 +19,7 @@ import {
   type NavigationConfig,
 } from '@/lib/platform-config'
 import { getCmsPageHref } from '@/lib/cms-page-routes'
-import { RichTextEditor } from '@/components/rich-text-editor'
-import { ensureCmsParagraphs, stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
+import { ensureCmsParagraphs, htmlToPlainText, stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,8 +51,9 @@ function menuLocationFromPlacement(
 function buildPagePayload(page: Page) {
   const title = page.title.trim()
   const seoTitle = page.seoTitle?.trim() || title
+  // Store normalized paragraph HTML derived from plain text (line breaks preserved)
   const content = stripDuplicateCmsHeadings(
-    ensureCmsParagraphs(page.content || ''),
+    ensureCmsParagraphs(htmlToPlainText(page.content || '')),
     seoTitle,
     title
   )
@@ -110,7 +110,10 @@ export default function AdminPages() {
     .sort((a, b) => a.order - b.order)
 
   const openEditor = (page: Page, creating: boolean) => {
-    setEditingPage(page)
+    setEditingPage({
+      ...page,
+      content: htmlToPlainText(page.content || ''),
+    })
     setIsCreating(creating)
     setMenuPlacement(placementFromPage(page))
   }
@@ -232,35 +235,35 @@ export default function AdminPages() {
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{page.description}</p>
                 ) : null}
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className={`${ACTION_ROW} flex-shrink-0`}>
                 {page.status === 'published' ? (
-                  <Eye className="h-4 w-4 text-green-600" aria-hidden />
+                  <Eye className="h-3.5 w-3.5 text-green-600" aria-hidden />
                 ) : (
-                  <EyeOff className="h-4 w-4 text-neutral-500" aria-hidden />
+                  <EyeOff className="h-3.5 w-3.5 text-neutral-500" aria-hidden />
                 )}
                 <button
                   type="button"
                   title="Preview page"
                   onClick={() => handlePreview(page)}
-                  className={BUTTON_ICON_PRIMARY}
+                  className={BUTTON_ICON_COMPACT}
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3.5 w-3.5" />
                 </button>
                 <button
                   type="button"
                   title="Edit page"
                   onClick={() => openEditor(page, false)}
-                  className={BUTTON_ICON_PRIMARY}
+                  className={BUTTON_ICON_COMPACT}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3.5 w-3.5" />
                 </button>
                 <button
                   type="button"
                   title="Delete page"
                   onClick={() => handleDeletePage(page.id)}
-                  className={BUTTON_ICON_DANGER}
+                  className={BUTTON_ICON_COMPACT}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             </Card>
@@ -310,14 +313,15 @@ export default function AdminPages() {
               <div>
                 <label className="block text-sm font-medium mb-2">Page content</label>
                 <p className="text-xs text-neutral-500 mb-2">
-                  Paste plain text freely. Use the toolbar for bold, italics, lists, and links. Titles matching
-                  the page title are hidden automatically on the public page.
+                  Paste plain text here. Line breaks and blank lines become paragraphs on the public
+                  page. Do not paste HTML.
                 </p>
-                <RichTextEditor
+                <textarea
                   value={editingPage.content}
-                  onChange={(html) => setEditingPage({ ...editingPage, content: html })}
+                  onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
                   placeholder="Write or paste page content…"
-                  minHeight={220}
+                  rows={14}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-sm font-body leading-relaxed whitespace-pre-wrap"
                 />
               </div>
 

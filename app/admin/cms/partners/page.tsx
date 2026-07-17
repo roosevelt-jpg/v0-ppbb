@@ -22,6 +22,7 @@ import {
   PartnersInquiryCategory,
 } from '@/lib/partners-page-config'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
+import { CmsImageUpload } from '@/components/cms-image-upload'
 import { subscribeToForms } from '@/lib/form-builder-queries'
 import type { CustomForm } from '@/lib/form-builder-types'
 import { getPublicFormPath } from '@/lib/form-builder-utils'
@@ -619,30 +620,12 @@ export default function AdminCmsPartnersPage() {
             Shown beside “Partner with Passive Blessings” on the homepage. Falls back to the first
             featured project image if empty.
           </p>
-          <input
-            type="url"
+          <CmsImageUpload
+            label="Partnership image"
             value={pc.homepageCtaImageURL || ''}
-            onChange={(e) => updatePage('homepageCtaImageURL', e.target.value)}
-            className="w-full min-h-[44px] px-3 border rounded-lg"
-            placeholder="https://… image URL"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={async (e) => {
-              const file = e.target.files?.[0]
-              if (!file) return
-              try {
-                const url = await uploadFileToFirebase(file, 'partners/homepage-cta')
-                updatePage('homepageCtaImageURL', url)
-              } catch (err) {
-                setMessage({
-                  type: 'error',
-                  text: err instanceof Error ? err.message : 'Upload failed',
-                })
-              }
-              e.target.value = ''
-            }}
+            folder="partners/homepage-cta"
+            preset="content"
+            onChange={(url) => updatePage('homepageCtaImageURL', url)}
           />
         </Card>
 
@@ -752,43 +735,20 @@ export default function AdminCmsPartnersPage() {
                   className="w-full min-h-20"
                   placeholder="Brief description"
                 />
+                <CmsImageUpload
+                  label="Project photo"
+                  value={project.imageURL || ''}
+                  folder="partners/projects"
+                  preset="content"
+                  onChange={(url) =>
+                    setConfig((prev) => {
+                      const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                      featuredProjects[i] = { ...featuredProjects[i], imageURL: url }
+                      return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                    })
+                  }
+                />
                 <div className="flex flex-wrap items-center gap-3">
-                  <input
-                    type="url"
-                    value={project.imageURL}
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], imageURL: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="flex-1 min-h-[44px] min-w-[200px]"
-                    placeholder="Image URL"
-                  />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="text-sm"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (!file) return
-                      try {
-                        const url = await uploadFileToFirebase(file, 'partners/projects')
-                        setConfig((prev) => {
-                          const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                          featuredProjects[i] = { ...featuredProjects[i], imageURL: url }
-                          return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                        })
-                      } catch (err) {
-                        setMessage({
-                          type: 'error',
-                          text: err instanceof Error ? err.message : 'Upload failed',
-                        })
-                      }
-                      e.target.value = ''
-                    }}
-                  />
                   <input
                     type="text"
                     value={project.ctaLabel || ''}

@@ -14,7 +14,6 @@ import { db } from './firebase'
 import { YouTubeConfig, YouTubeVideo } from './types'
 
 const YOUTUBE_COLLECTION = 'youtubeConfig'
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 
 export async function getYouTubeConfig(): Promise<YouTubeConfig | null> {
   try {
@@ -65,8 +64,10 @@ export async function shouldRefreshYouTubeVideos(config: YouTubeConfig): Promise
 
     const now = Date.now()
     const timeSinceLastFetch = now - lastFetchedTime
-    
-    return timeSinceLastFetch > CACHE_DURATION
+    const intervalHours = Math.max(1, config.refreshInterval || 24)
+    const cacheDuration = intervalHours * 60 * 60 * 1000
+
+    return timeSinceLastFetch > cacheDuration
   } catch (error) {
     console.error('[v0] Error checking if refresh needed:', error)
     return false
@@ -183,4 +184,47 @@ export function formatViewCount(count: number): string {
     return `${(count / 1000).toFixed(1)}K`
   }
   return count.toString()
+}
+
+/**
+ * Pick which videos to show this period. Rotates through the cached pool every
+ * `refreshIntervalHours` so the homepage changes even when YouTube has no new uploads.
+ * Uses `rotationIndex` (advanced on each server refresh) plus elapsed intervals
+ * since `lastFetched` so rotation continues even if the cron job is delayed.
+ */
+export function getRotatedYouTubeVideos(
+  videos: YouTubeVideo[],
+  maxDisplay: number,
+  refreshIntervalHours = 24,
+  rotationIndex?: number,
+  lastFetched?: Date | string | null
+): YouTubeVideo[] {
+  if (!videos?.length) return []
+  const count = Math.max(1, Math.min(maxDisplay || 4, videos.length))
+  const periodMs = Math.max(1, refreshIntervalHours) * 60 * 60 * 1000
+  const base =
+    typeof rotationIndex === 'number' && Number.isFinite(rotationIndex)
+      ? rotationIndex
+      : 0
+
+  let extraSlots = 0
+  if (lastFetched) {
+    const t =
+      lastFetched instanceof Date
+        ? lastFetched.getTime()
+        : new Date(lastFetched).getTime()
+    if (!Number.isNaN(t)) {
+      extraSlots = Math.floor(Math.max(0, Date.now() - t) / periodMs)
+    }
+  } else {
+    extraSlots = Math.floor(Date.now() / periodMs)
+  }
+
+  const offset = (base + extraSlots * count) % videos.length
+
+  const out: YouTubeVideo[] = []
+  for (let i = 0; i < count; i++) {
+    out.push(videos[(offset + i) % videos.length])
+  }
+  return out
 }
