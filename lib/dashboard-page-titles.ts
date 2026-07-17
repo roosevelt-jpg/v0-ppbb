@@ -11,6 +11,7 @@ const businessRoutes: TitleEntry[] = [
   { href: '/business/communities/create', title: 'Create Community' },
   { href: '/business/communities/new', title: 'Create Community' },
   { href: '/business/communities', title: 'Communities' },
+  { href: '/business/advertise', title: 'Advertise' },
   { href: '/business/opportunities/new', title: 'Post Opportunity' },
   { href: '/business/opportunities/applicants', title: 'Applicants' },
   { href: '/business/opportunities', title: 'Posted Opportunities' },

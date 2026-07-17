@@ -51,6 +51,9 @@ export default function NewOffer() {
     try {
       const uploaded: string[] = []
       for (const file of Array.from(files).slice(0, 5 - imageURLs.length)) {
+        if (file.size > 25 * 1024 * 1024) {
+          throw new Error(`"${file.name}" is too large. Maximum image size is 25 MB.`)
+        }
         const url = await uploadImageToFirebase(file, `offers/${user.id}/images`, {
           preset: 'content',
           maxDimension: 1200,
@@ -169,7 +172,7 @@ export default function NewOffer() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Type *
+                  Listing type *
                 </label>
                 <select
                   name="type"
@@ -190,7 +193,7 @@ export default function NewOffer() {
               </div>
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Category *
+                  Industry category *
                 </label>
                 <select
                   name="category"
@@ -206,11 +209,20 @@ export default function NewOffer() {
                     minHeight: '44px',
                   }}
                 >
-                  <option value="">Select category</option>
-                  <option value="merchandise">Merchandise (shows on /shop when Published)</option>
-                  <option value="product">Product</option>
-                  <option value="service">Service</option>
-                  <option value="discount">Discount</option>
+                  <option value="">Select industry category</option>
+                  <option value="technology">Technology</option>
+                  <option value="retail">Retail</option>
+                  <option value="food-beverage">Food & Beverage</option>
+                  <option value="health-wellness">Health & Wellness</option>
+                  <option value="education">Education</option>
+                  <option value="professional-services">Professional Services</option>
+                  <option value="hr-recruitment">HR / Recruitment</option>
+                  <option value="finance">Finance</option>
+                  <option value="real-estate">Real Estate</option>
+                  <option value="creative-media">Creative / Media</option>
+                  <option value="coaching">Coaching</option>
+                  <option value="consulting">Consulting</option>
+                  <option value="merchandise">Merchandise (Shop)</option>
                   <option value="books">Books</option>
                   <option value="courses">Courses</option>
                   <option value="other">Other</option>

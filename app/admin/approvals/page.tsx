@@ -184,19 +184,17 @@ export default function ApprovalsPage() {
           >
             Form inquiries
           </button>
-          <Link
-            href="/admin/contact-submissions"
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 hover:bg-gray-50"
-          >
-            Contact submissions →
-          </Link>
-          <Link
-            href="/admin/forms"
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-white border border-gray-300 hover:bg-gray-50"
-          >
-            Custom form inbox →
-          </Link>
         </div>
+        <p className="text-xs text-neutral-500">
+          Contact &amp; custom form inboxes:{' '}
+          <Link href="/admin/contact-submissions" className="underline">
+            Contact submissions
+          </Link>
+          {' · '}
+          <Link href="/admin/forms" className="underline">
+            Custom forms
+          </Link>
+        </p>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-neutral-600">

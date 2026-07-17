@@ -31,6 +31,7 @@ import {
   Tag,
   FolderOpen,
   MessageSquare,
+  Megaphone,
 } from 'lucide-react'
 
 const businessMenuItems = [
@@ -47,6 +48,7 @@ const businessMenuItems = [
   { label: 'Networking Events', href: '/business/events', icon: Calendar },
   { label: 'Event Assets', href: '/business/assets', icon: FolderOpen },
   { label: 'Partnerships & Requests', href: '/business/partnerships', icon: Heart },
+  { label: 'Advertise', href: '/business/advertise', icon: Megaphone },
   { label: 'Communities', href: '/business/communities', icon: Users2 },
   { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },
 ]

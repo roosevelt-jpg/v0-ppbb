@@ -132,6 +132,25 @@ export async function POST(req: NextRequest) {
               idempotencyKey: `membership:${session.id}`,
             }).catch((err) => console.error('[referral] membership conversion:', err))
           }
+        } else if (
+          session.metadata?.type === 'advertising' &&
+          session.metadata.advertisingRequestId
+        ) {
+          const { getAdminDb } = await import('@/lib/firebase-admin')
+          const { Timestamp: AdminTs } = await import('firebase-admin/firestore')
+          const adminDb = getAdminDb()
+          await adminDb
+            .collection('advertisingRequests')
+            .doc(session.metadata.advertisingRequestId)
+            .set(
+              {
+                status: 'paid',
+                paidAt: AdminTs.now(),
+                stripeSessionId: session.id,
+                updatedAt: AdminTs.now(),
+              },
+              { merge: true }
+            )
         }
         break
       }

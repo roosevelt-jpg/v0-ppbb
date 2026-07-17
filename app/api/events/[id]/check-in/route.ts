@@ -73,6 +73,83 @@ export async function POST(request: NextRequest, context: Ctx) {
   }
 
   await doc.ref.update({ checkedInAt: Timestamp.now(), checkedInBy: uid })
+
+  // Charity / volunteer events: credit hours toward certificates on first check-in
+  try {
+    const event = eventDoc.data() || {}
+    const category = String(event.category || '').toLowerCase()
+    const tags = Array.isArray(event.tags)
+      ? event.tags.map((t: unknown) => String(t).toLowerCase())
+      : []
+    const isCharityVolunteer =
+      category === 'charity' ||
+      category.includes('charity') ||
+      tags.includes('charity') ||
+      tags.includes('fundraiser') ||
+      tags.includes('volunteer')
+
+    const guestUserId = typeof data.userId === 'string' ? data.userId : ''
+    if (isCharityVolunteer && guestUserId) {
+      const start = event.startDate?.toDate?.()
+        ? event.startDate.toDate()
+        : event.startDate
+          ? new Date(event.startDate)
+          : null
+      const end = event.endDate?.toDate?.()
+        ? event.endDate.toDate()
+        : event.endDate
+          ? new Date(event.endDate)
+          : null
+      let hours = 2
+      if (start && end && !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+        const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+        if (diff > 0 && diff <= 24) hours = Math.round(diff * 4) / 4
+      }
+
+      const existing = await db
+        .collection('volunteerRecords')
+        .where('userId', '==', guestUserId)
+        .where('registrationId', '==', doc.id)
+        .limit(1)
+        .get()
+
+      if (existing.empty) {
+        const { FieldValue } = await import('firebase-admin/firestore')
+        await db.collection('volunteerRecords').add({
+          userId: guestUserId,
+          eventId,
+          eventTitle: String(event.title || 'Charity event'),
+          registrationId: doc.id,
+          hours,
+          date: Timestamp.now(),
+          description: `Checked in at ${String(event.title || 'event')}`,
+          verified: true,
+          source: 'event_check_in',
+          createdAt: Timestamp.now(),
+        })
+        await db
+          .collection('users')
+          .doc(guestUserId)
+          .set(
+            {
+              volunteeredHours: FieldValue.increment(hours),
+              volunteerHours: FieldValue.increment(hours),
+              updatedAt: Timestamp.now(),
+            },
+            { merge: true }
+          )
+        const { evaluateCertificateMilestonesForUser } = await import(
+          '@/lib/certificate-milestones-server'
+        )
+        void evaluateCertificateMilestonesForUser(guestUserId).catch((err) =>
+          console.error('[check-in] certificate milestones:', err)
+        )
+      }
+    }
+  } catch (err) {
+    console.error('[check-in] volunteer hours credit failed:', err)
+  }
+
   return NextResponse.json({
     success: true,
     data: {

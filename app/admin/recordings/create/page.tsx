@@ -163,10 +163,14 @@ export default function CreateRecordingPage() {
                 type="url"
                 value={formData.url}
                 onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="https://..."
+                placeholder="https://… (YouTube, Vimeo, Drive, audio host)"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 required
               />
+              <p className="text-xs text-neutral-500 mt-1">
+                Paste a hosted media link (not a local file upload). Thumbnail images must be under 25 MB —
+                oversized uploads show a clear error.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

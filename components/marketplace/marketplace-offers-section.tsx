@@ -14,6 +14,9 @@ const OFFER_TABS = [
   { id: 'all', label: 'ALL' },
   { id: 'service', label: 'SERVICES' },
   { id: 'product', label: 'PRODUCTS' },
+  { id: 'technology', label: 'TECHNOLOGY' },
+  { id: 'retail', label: 'RETAIL' },
+  { id: 'health-wellness', label: 'HEALTH' },
   { id: 'coaching', label: 'COACHING' },
   { id: 'consulting', label: 'CONSULTING' },
   { id: 'education', label: 'EDUCATION' },
@@ -28,7 +31,11 @@ function matchesTab(offer: DirectoryOffer, tab: OfferTab): boolean {
   const type = (offer.type || '').toLowerCase()
   const category = (offer.category || '').toLowerCase()
   if (tab === 'service') return type === 'service'
-  if (tab === 'product') return type === 'product'
+  if (tab === 'product') return type === 'product' || type === 'discount'
+  if (tab === 'technology') return category.includes('technology') || category.includes('tech')
+  if (tab === 'retail') return category.includes('retail')
+  if (tab === 'health-wellness')
+    return category.includes('health') || category.includes('wellness')
   if (tab === 'coaching') return category.includes('coach')
   if (tab === 'consulting') return category.includes('consult')
   if (tab === 'education') return category.includes('education') || category.includes('course')

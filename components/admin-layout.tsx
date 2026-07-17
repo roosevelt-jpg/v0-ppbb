@@ -60,6 +60,7 @@ import {
   PieChart,
   BookOpen,
   FolderOpen,
+  Megaphone,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -126,6 +127,7 @@ export const adminMenuItems = [
   { label: 'Pages (CMS)', href: '/admin/pages', icon: LayoutTemplate, group: 'Content' },
   // Part 11 — CMS section order (do not scramble; Partners & Logos is logos collection)
   { label: 'Homepage', href: '/admin/cms/homepage', icon: Home, group: 'CMS' },
+  { label: 'Advertising', href: '/admin/cms/advertising', icon: Megaphone, group: 'CMS' },
   { label: 'About Page', href: '/admin/cms/about', icon: Info, group: 'CMS' },
   { label: 'Events Config', href: '/admin/cms/events', icon: CalendarCog, group: 'CMS' },
   { label: 'Marketplace Config', href: '/admin/cms/marketplace', icon: Store, group: 'CMS' },
