@@ -1,49 +1,152 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { isAccountDeleted } from '@/lib/user-settings'
+import { verifyIdToken, getUserProfileData } from '@/lib/admin-access-server'
+import { hasAdminAccessServer } from '@/lib/roles-server'
+
+async function requireAdmin(request: NextRequest): Promise<
+  | { ok: true; uid: string }
+  | { ok: false; response: NextResponse }
+> {
+  const authHeader = request.headers.get('authorization') || ''
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return {
+      ok: false,
+      response: NextResponse.json({ success: false, error: 'Sign in required' }, { status: 401 }),
+    }
+  }
+  const uid = await verifyIdToken(token)
+  if (!uid) {
+    return {
+      ok: false,
+      response: NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 }),
+    }
+  }
+  const profile = await getUserProfileData(uid)
+  if (!hasAdminAccessServer(profile || {})) {
+    return {
+      ok: false,
+      response: NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 }),
+    }
+  }
+  return { ok: true, uid }
+}
+
+function normalizeIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  return [...new Set(raw.filter((id): id is string => typeof id === 'string' && id.trim().length > 0))]
+    .map((id) => id.trim())
+    .slice(0, 200)
+}
+
+async function applyBulkUpdate(ids: string[], patch: Record<string, unknown>) {
+  const db = getAdminDb()
+  const chunks: string[][] = []
+  for (let i = 0; i < ids.length; i += 400) chunks.push(ids.slice(i, i + 400))
+
+  let updated = 0
+  for (const chunk of chunks) {
+    const batch = db.batch()
+    for (const id of chunk) {
+      batch.set(db.collection('users').doc(id), patch, { merge: true })
+      updated += 1
+    }
+    await batch.commit()
+  }
+  return updated
+}
+
+async function applyBulkDelete(ids: string[]) {
+  const db = getAdminDb()
+  const now = FieldValue.serverTimestamp()
+  const patch = {
+    status: 'deleted',
+    accountDeleted: true,
+    active: false,
+    deletedAt: now,
+    updatedAt: now,
+  }
+  const chunks: string[][] = []
+  for (let i = 0; i < ids.length; i += 400) chunks.push(ids.slice(i, i + 400))
+
+  let deleted = 0
+  for (const chunk of chunks) {
+    const batch = db.batch()
+    for (const id of chunk) {
+      batch.set(db.collection('users').doc(id), patch, { merge: true })
+      // Keep admin mirror in sync if present
+      batch.set(
+        db.collection('admin-users').doc(id),
+        { status: 'deleted', active: false, updatedAt: now },
+        { merge: true }
+      )
+      deleted += 1
+    }
+    await batch.commit()
+  }
+  return deleted
+}
 
 export async function GET(request: NextRequest) {
   try {
     const userType = request.nextUrl.searchParams.get('userType')
     const status = request.nextUrl.searchParams.get('status')
     const search = request.nextUrl.searchParams.get('search')
-    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '1000')
+    const limit = parseInt(request.nextUrl.searchParams.get('limit') || '1000', 10)
 
-    let query = getAdminDb().collection('users').orderBy('dateJoined', 'desc').limit(limit)
+    // Prefer dateJoined, fall back to unordered if the index/field is sparse
+    let snapshot
+    try {
+      snapshot = await getAdminDb()
+        .collection('users')
+        .orderBy('dateJoined', 'desc')
+        .limit(limit)
+        .get()
+    } catch {
+      snapshot = await getAdminDb().collection('users').limit(limit).get()
+    }
 
-    const snapshot = await query.get()
-    let members = snapshot.docs.map(doc => {
+    let members = snapshot.docs.map((doc) => {
       const data = doc.data()
-      const dateJoined = data.dateJoined?.toDate?.() || (data.dateJoined instanceof Date ? data.dateJoined : new Date(data.dateJoined))
-      const createdAt = data.createdAt?.toDate?.() || (data.createdAt instanceof Date ? data.createdAt : new Date(data.createdAt))
+      const dateJoined =
+        data.dateJoined?.toDate?.() ||
+        (data.dateJoined instanceof Date ? data.dateJoined : data.dateJoined ? new Date(data.dateJoined) : null)
+      const createdAt =
+        data.createdAt?.toDate?.() ||
+        (data.createdAt instanceof Date ? data.createdAt : data.createdAt ? new Date(data.createdAt) : null)
       return {
         id: doc.id,
         ...data,
-        dateJoined: dateJoined,
+        dateJoined,
         joinedAt: data.joinedAt?.toDate?.() || data.joinedAt,
-        createdAt: createdAt,
+        createdAt,
       }
     })
 
     members = members.filter((m) => !isAccountDeleted(m))
 
-    // Filter by user type (role in signup)
     if (userType) {
-      members = members.filter(m => m.role === userType || m.userType === userType)
+      members = members.filter((m) => m.role === userType || m.userType === userType)
     }
 
-    // Filter by status
     if (status) {
-      members = members.filter(m => m.status === status)
+      members = members.filter((m) => m.status === status)
     }
 
-    // Search by name, email, location
     if (search) {
       const searchLower = search.toLowerCase()
-      members = members.filter(m =>
-        (m.name?.toLowerCase().includes(searchLower)) ||
-        (m.email?.toLowerCase().includes(searchLower)) ||
-        (m.location?.city?.toLowerCase().includes(searchLower))
+      members = members.filter(
+        (m) =>
+          String(m.name || '').toLowerCase().includes(searchLower) ||
+          String(m.displayName || '').toLowerCase().includes(searchLower) ||
+          String(m.firstName || '').toLowerCase().includes(searchLower) ||
+          String(m.lastName || '').toLowerCase().includes(searchLower) ||
+          String(m.email || '').toLowerCase().includes(searchLower) ||
+          String(m.location?.city || m.location || m.emirate || '')
+            .toLowerCase()
+            .includes(searchLower)
       )
     }
 
@@ -54,17 +157,99 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const authz = await requireAdmin(request)
+    if (!authz.ok) return authz.response
+
+    const body = await request.json().catch(() => ({}))
+    const action = String(body.action || '')
+    const ids = normalizeIds(body.ids)
+
+    if (!ids.length) {
+      return NextResponse.json({ success: false, error: 'Select at least one member' }, { status: 400 })
+    }
+
+    if (action === 'bulk-delete') {
+      const deleted = await applyBulkDelete(ids)
+      return NextResponse.json({
+        success: true,
+        message: deleted === 1 ? 'Member deleted' : `Deleted ${deleted} members`,
+        count: deleted,
+      })
+    }
+
+    if (action === 'bulk-update') {
+      const allowed: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() }
+      if (typeof body.status === 'string' && body.status.trim()) {
+        allowed.status = body.status.trim()
+        if (body.status.trim() === 'active') {
+          allowed.active = true
+          allowed.accountDeleted = false
+        }
+        if (body.status.trim() === 'inactive' || body.status.trim() === 'suspended') {
+          allowed.active = false
+        }
+      }
+      if (typeof body.role === 'string' && body.role.trim()) {
+        allowed.role = body.role.trim()
+        allowed.userType = body.role.trim()
+      }
+      if (typeof body.userType === 'string' && body.userType.trim()) {
+        allowed.userType = body.userType.trim()
+        if (!allowed.role) allowed.role = body.userType.trim()
+      }
+
+      if (Object.keys(allowed).length <= 1) {
+        return NextResponse.json(
+          { success: false, error: 'Choose a status and/or role to apply' },
+          { status: 400 }
+        )
+      }
+
+      const updated = await applyBulkUpdate(ids, allowed)
+      return NextResponse.json({
+        success: true,
+        message: `Updated ${updated} members`,
+        count: updated,
+      })
+    }
+
+    return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 })
+  } catch (error) {
+    console.error('[v0] Members bulk POST error:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Bulk operation failed',
+      },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
+    const authz = await requireAdmin(request)
+    if (!authz.ok) return authz.response
+
     const body = await request.json()
     const { id, ids, ...updateData } = body
 
-    // Bulk update: { ids: string[], status?, role?, userType? }
+    // Bulk update (legacy path)
     if (Array.isArray(ids) && ids.length > 0) {
-      const db = getAdminDb()
-      const batch = db.batch()
-      const allowed: Record<string, unknown> = { updatedAt: new Date() }
-      if (typeof updateData.status === 'string') allowed.status = updateData.status
+      const normalized = normalizeIds(ids)
+      const allowed: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() }
+      if (typeof updateData.status === 'string') {
+        allowed.status = updateData.status
+        if (updateData.status === 'active') {
+          allowed.active = true
+          allowed.accountDeleted = false
+        }
+        if (updateData.status === 'inactive' || updateData.status === 'suspended') {
+          allowed.active = false
+        }
+      }
       if (typeof updateData.role === 'string') {
         allowed.role = updateData.role
         allowed.userType = updateData.role
@@ -73,21 +258,16 @@ export async function PUT(request: NextRequest) {
         allowed.userType = updateData.userType
         if (!allowed.role) allowed.role = updateData.userType
       }
-      for (const memberId of ids.slice(0, 200)) {
-        if (typeof memberId !== 'string' || !memberId) continue
-        batch.update(db.collection('users').doc(memberId), allowed)
-      }
-      await batch.commit()
-      return NextResponse.json({ success: true, message: `Updated ${ids.length} members` })
+      const updated = await applyBulkUpdate(normalized, allowed)
+      return NextResponse.json({ success: true, message: `Updated ${updated} members` })
     }
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing member ID' }, { status: 400 })
     }
 
-    updateData.updatedAt = new Date()
-
-    await getAdminDb().collection('users').doc(id).update(updateData)
+    updateData.updatedAt = FieldValue.serverTimestamp()
+    await getAdminDb().collection('users').doc(id).set(updateData, { merge: true })
 
     return NextResponse.json({ success: true, message: 'Member updated' })
   } catch (error) {
@@ -98,34 +278,23 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const authz = await requireAdmin(request)
+    if (!authz.ok) return authz.response
+
     const body = await request.json().catch(() => ({}))
-    const ids: string[] = Array.isArray(body.ids)
-      ? body.ids.filter((id: unknown) => typeof id === 'string' && id)
-      : typeof body.id === 'string'
-        ? [body.id]
-        : []
+    const ids = normalizeIds(
+      Array.isArray(body.ids) ? body.ids : typeof body.id === 'string' ? [body.id] : []
+    )
 
     if (!ids.length) {
       return NextResponse.json({ success: false, error: 'Missing member ID(s)' }, { status: 400 })
     }
 
-    const db = getAdminDb()
-    const batch = db.batch()
-    const now = new Date()
-    for (const id of ids.slice(0, 200)) {
-      // Soft-delete: mark deleted rather than wiping auth/history
-      batch.update(db.collection('users').doc(id), {
-        status: 'deleted',
-        accountDeleted: true,
-        deletedAt: now,
-        updatedAt: now,
-      })
-    }
-    await batch.commit()
-
+    const deleted = await applyBulkDelete(ids)
     return NextResponse.json({
       success: true,
-      message: ids.length === 1 ? 'Member deleted' : `Deleted ${ids.length} members`,
+      message: deleted === 1 ? 'Member deleted' : `Deleted ${deleted} members`,
+      count: deleted,
     })
   } catch (error) {
     console.error('[v0] Member delete error:', error)

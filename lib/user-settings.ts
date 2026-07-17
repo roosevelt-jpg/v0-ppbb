@@ -70,7 +70,11 @@ export function mergePrivacySettings(prefs?: Partial<PrivacySettings> | null): P
 
 export function isAccountDeleted(user?: UserLike | null): boolean {
   if (!user) return false
-  return user.status === 'deleted' || user.active === false
+  return (
+    user.status === 'deleted' ||
+    user.active === false ||
+    Boolean((user as { accountDeleted?: boolean }).accountDeleted)
+  )
 }
 
 export function formatUserLocationDisplay(

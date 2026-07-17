@@ -3,14 +3,16 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Search, Trash2 } from 'lucide-react'
+import { Search, Trash2, CheckSquare } from 'lucide-react'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
 import { profileFromMember } from '@/lib/admin-profile-view'
 import type { AdminProfileViewData } from '@/lib/admin-profile-view'
+import { useAuth } from '@/lib/auth-context'
 
 export default function AdminMembersPage() {
+  const { firebaseUser } = useAuth()
   const [members, setMembers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [userType, setUserType] = React.useState<string>('all')
@@ -21,17 +23,28 @@ export default function AdminMembersPage() {
   const [bulkBusy, setBulkBusy] = React.useState(false)
   const [bulkStatus, setBulkStatus] = React.useState('')
   const [bulkRole, setBulkRole] = React.useState('')
+  const [message, setMessage] = React.useState<string | null>(null)
 
   const openProfile = (member: Record<string, unknown>) => {
     setActiveProfile(profileFromMember(member))
     setProfileOpen(true)
   }
 
+  const getAuthHeaders = async (): Promise<HeadersInit> => {
+    const token = await firebaseUser?.getIdToken()
+    if (!token) throw new Error('Sign in again to manage members')
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    }
+  }
+
   React.useEffect(() => {
-    loadMembers()
+    void loadMembers({ clearSelection: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userType, search])
 
-  const loadMembers = async () => {
+  const loadMembers = async (opts?: { clearSelection?: boolean }) => {
     try {
       let query = '/api/members?'
       if (userType !== 'all') {
@@ -45,7 +58,7 @@ export default function AdminMembersPage() {
       const json = await res.json()
       if (json.success) {
         setMembers(json.data)
-        setSelectedIds(new Set())
+        if (opts?.clearSelection) setSelectedIds(new Set())
       }
     } catch (error) {
       console.error('[v0] Error fetching members:', error)
@@ -55,12 +68,19 @@ export default function AdminMembersPage() {
   }
 
   const allMembers = members
-  const memberCount = allMembers.filter(m => m.role === 'member' || m.userType === 'member').length
-  const volunteerCount = allMembers.filter(m => m.role === 'volunteer' || m.userType === 'volunteer').length
-  const businessCount = allMembers.filter(m => m.role === 'business' || m.userType === 'business').length
-  const sponsorCount = allMembers.filter(m => m.role === 'sponsor' || m.userType === 'sponsor').length
+  const memberCount = allMembers.filter((m) => m.role === 'member' || m.userType === 'member').length
+  const volunteerCount = allMembers.filter(
+    (m) => m.role === 'volunteer' || m.userType === 'volunteer'
+  ).length
+  const businessCount = allMembers.filter(
+    (m) => m.role === 'business' || m.userType === 'business'
+  ).length
+  const sponsorCount = allMembers.filter((m) => m.role === 'sponsor' || m.userType === 'sponsor').length
 
-  const displayMembers = userType === 'all' ? allMembers : allMembers.filter(m => m.role === userType || m.userType === userType)
+  const displayMembers =
+    userType === 'all'
+      ? allMembers
+      : allMembers.filter((m) => m.role === userType || m.userType === userType)
 
   const allVisibleSelected =
     displayMembers.length > 0 && displayMembers.every((m) => selectedIds.has(m.id))
@@ -100,20 +120,27 @@ export default function AdminMembersPage() {
     }
     if (!confirm(`Update ${selectedList.length} selected member(s)?`)) return
     setBulkBusy(true)
+    setMessage(null)
     try {
-      const payload: Record<string, unknown> = { ids: selectedList }
+      const headers = await getAuthHeaders()
+      const payload: Record<string, unknown> = {
+        action: 'bulk-update',
+        ids: selectedList,
+      }
       if (bulkStatus) payload.status = bulkStatus
       if (bulkRole) payload.role = bulkRole
       const res = await fetch('/api/members', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers,
         body: JSON.stringify(payload),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Update failed')
+      setMessage(json.message || `Updated ${selectedList.length} members`)
       setBulkStatus('')
       setBulkRole('')
-      await loadMembers()
+      setSelectedIds(new Set())
+      await loadMembers({ clearSelection: false })
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Bulk update failed')
     } finally {
@@ -125,21 +152,25 @@ export default function AdminMembersPage() {
     if (!selectedList.length) return
     if (
       !confirm(
-        `Delete ${selectedList.length} selected member(s)? They will be marked deleted and hidden from lists.`
+        `Delete ${selectedList.length} selected member(s)?\n\nThey will be removed from member lists (soft-deleted).`
       )
     ) {
       return
     }
     setBulkBusy(true)
+    setMessage(null)
     try {
+      const headers = await getAuthHeaders()
       const res = await fetch('/api/members', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selectedList }),
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action: 'bulk-delete', ids: selectedList }),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Delete failed')
-      await loadMembers()
+      setMessage(json.message || `Deleted ${selectedList.length} members`)
+      setSelectedIds(new Set())
+      await loadMembers({ clearSelection: false })
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Bulk delete failed')
     } finally {
@@ -160,7 +191,26 @@ export default function AdminMembersPage() {
   return (
     <AdminPageLayout title="Members">
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-black">All Members</h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-bold text-black">All Members</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Select one or more members to update their role/status or delete them.
+            </p>
+          </div>
+          {selectedList.length === 0 ? (
+            <p className="inline-flex items-center gap-2 text-sm text-gray-500">
+              <CheckSquare className="w-4 h-4" />
+              Use the checkboxes to multi-select
+            </p>
+          ) : null}
+        </div>
+
+        {message ? (
+          <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            {message}
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
@@ -183,7 +233,7 @@ export default function AdminMembersPage() {
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="flex gap-2 overflow-x-auto pb-1 min-w-0">
-            {['all', 'member', 'volunteer', 'business', 'sponsor'].map(type => (
+            {['all', 'member', 'volunteer', 'business', 'sponsor'].map((type) => (
               <button
                 key={type}
                 onClick={() => {
@@ -216,17 +266,17 @@ export default function AdminMembersPage() {
           </div>
         </div>
 
-        {selectedList.length > 0 && (
-          <div className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-neutral-50 p-4">
-            <p className="text-sm font-medium text-gray-800 w-full sm:w-auto">
-              {selectedList.length} selected
+        {selectedList.length > 0 ? (
+          <div className="sticky top-2 z-20 flex flex-wrap items-end gap-3 rounded-lg border-2 border-black bg-white p-4 shadow-md">
+            <p className="text-sm font-semibold text-black w-full sm:w-auto">
+              {selectedList.length} member{selectedList.length === 1 ? '' : 's'} selected
             </p>
             <label className="text-sm text-gray-700">
               Set status
               <select
                 value={bulkStatus}
                 onChange={(e) => setBulkStatus(e.target.value)}
-                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+                className="mt-1 block min-h-[40px] rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white"
               >
                 <option value="">—</option>
                 <option value="active">Active</option>
@@ -235,11 +285,11 @@ export default function AdminMembersPage() {
               </select>
             </label>
             <label className="text-sm text-gray-700">
-              Set role
+              Set type / role
               <select
                 value={bulkRole}
                 onChange={(e) => setBulkRole(e.target.value)}
-                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+                className="mt-1 block min-h-[40px] rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white"
               >
                 <option value="">—</option>
                 <option value="member">Member</option>
@@ -252,21 +302,29 @@ export default function AdminMembersPage() {
               type="button"
               disabled={bulkBusy}
               onClick={() => void runBulkUpdate()}
-              className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+              className="min-h-[40px] rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 disabled:opacity-50"
             >
-              Update selected
+              {bulkBusy ? 'Working…' : 'Update selected'}
             </button>
             <button
               type="button"
               disabled={bulkBusy}
               onClick={() => void runBulkDelete()}
-              className="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
             >
               <Trash2 size={14} />
-              Delete selected
+              {bulkBusy ? 'Working…' : 'Delete selected'}
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => setSelectedIds(new Set())}
+              className="min-h-[40px] rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Clear selection
             </button>
           </div>
-        )}
+        ) : null}
 
         {displayMembers.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -283,6 +341,7 @@ export default function AdminMembersPage() {
                       checked={allVisibleSelected}
                       onChange={toggleAllVisible}
                       aria-label="Select all visible members"
+                      className="h-4 w-4 accent-black"
                     />
                   </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
@@ -290,54 +349,79 @@ export default function AdminMembersPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Volunteer Hours</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                    Volunteer Hours
+                  </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Joined</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Profile</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
+                    Profile
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {displayMembers.map((member: any) => (
-                  <tr key={member.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(member.id)}
-                        onChange={() => toggleOne(member.id)}
-                        aria-label={`Select ${member.name || member.email || member.id}`}
-                      />
-                    </td>
-                    <td className="px-6 py-3 text-sm">
+                {displayMembers.map((member: any) => {
+                  const selected = selectedIds.has(member.id)
+                  return (
+                    <tr
+                      key={member.id}
+                      className={selected ? 'bg-neutral-100' : 'hover:bg-gray-50'}
+                    >
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => toggleOne(member.id)}
+                          aria-label={`Select ${member.name || member.email || member.id}`}
+                          className="h-4 w-4 accent-black"
+                        />
+                      </td>
+                      <td className="px-6 py-3 text-sm">
                         <AdminUserCell user={member} />
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-600 hidden md:table-cell">{member.email}</td>
-                    <td className="px-6 py-3 text-sm text-gray-600 whitespace-nowrap">
-                      {formatUserPhoneDisplay(member)}
-                    </td>
-                    <td className="px-6 py-3 text-sm">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
-                        {member.role || member.userType || 'member'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{member.location?.city || member.emirate || member.location || '-'}</td>
-                    <td className="px-6 py-3 text-sm">
-                      <span className="font-medium text-gray-900">{member.volunteerHours || 0} hrs</span>
-                    </td>
-                    <td className="px-6 py-3 text-sm">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        member.status === 'active' ? 'bg-neutral-900 text-white' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {member.status || 'active'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">
-                      {member.dateJoined ? new Date(member.dateJoined).toLocaleDateString() : member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : '-'}
-                    </td>
-                    <td className="px-6 py-3 text-sm whitespace-nowrap">
-                      <AdminViewProfileButton compact onClick={() => openProfile(member)} />
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600 hidden md:table-cell">
+                        {member.email}
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600 whitespace-nowrap">
+                        {formatUserPhoneDisplay(member)}
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
+                          {member.role || member.userType || 'member'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600">
+                        {member.location?.city || member.emirate || member.location || '-'}
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        <span className="font-medium text-gray-900">
+                          {member.volunteerHours || 0} hrs
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            member.status === 'active'
+                              ? 'bg-neutral-900 text-white'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {member.status || 'active'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600">
+                        {member.dateJoined
+                          ? new Date(member.dateJoined).toLocaleDateString()
+                          : member.joinedAt
+                            ? new Date(member.joinedAt).toLocaleDateString()
+                            : '-'}
+                      </td>
+                      <td className="px-6 py-3 text-sm whitespace-nowrap">
+                        <AdminViewProfileButton compact onClick={() => openProfile(member)} />
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
