@@ -731,7 +731,7 @@ export default function FinanceReferralsPage() {
                     >
                       <button
                         type="button"
-                        className="w-full flex items-start gap-2 text-left min-h-[44px]"
+                        className="w-full flex items-start gap-2 text-left"
                         onClick={() => setExpandedId(open ? null : a.id)}
                       >
                         {open ? (
@@ -794,7 +794,7 @@ export default function FinanceReferralsPage() {
                           type="button"
                           disabled={actingId === a.id || a.confirmed === 0}
                           onClick={() => markPaid(a.id, a.name)}
-                          className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-semibold disabled:opacity-40"
+                          className="h-7 min-h-0 px-3 bg-black text-white rounded text-xs font-semibold disabled:opacity-40"
                           title={
                             a.confirmed === 0
                               ? 'Requires confirmed status first'
@@ -850,7 +850,7 @@ export default function FinanceReferralsPage() {
                             <td className="px-3 py-3">
                               <button
                                 type="button"
-                                className="flex items-center gap-1.5 text-left hover:underline min-h-[44px]"
+                                className="flex items-center gap-1.5 text-left hover:underline"
                                 onClick={() => setExpandedId(open ? null : a.id)}
                               >
                                 {open ? (

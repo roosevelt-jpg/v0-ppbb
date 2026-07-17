@@ -111,7 +111,7 @@ export default function AdminVendorApplicationsPage() {
                     type="button"
                     disabled={actingId === row.id}
                     onClick={() => setStatus(row.id, 'approve')}
-                    className="flex-1 min-h-[44px] px-3 bg-green-600 text-white rounded text-sm font-medium disabled:opacity-50"
+                    className="flex-1 px-3 bg-green-600 text-white rounded text-sm font-medium disabled:opacity-50"
                   >
                     Approve
                   </button>
@@ -119,7 +119,7 @@ export default function AdminVendorApplicationsPage() {
                     type="button"
                     disabled={actingId === row.id}
                     onClick={() => setStatus(row.id, 'reject')}
-                    className="flex-1 min-h-[44px] px-3 bg-red-50 text-red-700 rounded text-sm font-medium disabled:opacity-50"
+                    className="flex-1 px-3 bg-red-50 text-red-700 rounded text-sm font-medium disabled:opacity-50"
                   >
                     Reject
                   </button>

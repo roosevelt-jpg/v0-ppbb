@@ -22,7 +22,12 @@ import {
   PartnersInquiryCategory,
 } from '@/lib/partners-page-config'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
-import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
+import {
+  BUTTON_ICON_PRIMARY,
+  BUTTON_LABEL_COMPACT,
+  BUTTON_PRIMARY,
+  BUTTON_ROW_COMPACT,
+} from '@/lib/admin-design-system'
 import { CmsImageUpload } from '@/components/cms-image-upload'
 import { subscribeToForms } from '@/lib/form-builder-queries'
 import type { CustomForm } from '@/lib/form-builder-types'
@@ -216,9 +221,9 @@ export default function AdminCmsPartnersPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className={BUTTON_PRIMARY}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-3 h-3 mr-1" />
             {saving ? 'Saving…' : 'Save partners page'}
           </Button>
         </div>
@@ -337,14 +342,14 @@ export default function AdminCmsPartnersPage() {
                       href={pc.sponsorshipDeckPDFUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center min-h-[44px] px-4 py-2 bg-white text-black border rounded-lg text-sm font-body hover:bg-neutral-50"
+                      className="h-7 min-h-0 inline-flex items-center px-4 py-2 bg-white text-black border rounded-lg text-sm font-body hover:bg-neutral-50"
                     >
                       Open current PDF
                     </a>
                     <Button
                       type="button"
                       onClick={handleRemovePdf}
-                      className="min-h-[44px] bg-black !text-white hover:bg-neutral-800"
+                      className="h-7 min-h-0 bg-black !text-white hover:bg-neutral-800"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Remove PDF
@@ -372,7 +377,7 @@ export default function AdminCmsPartnersPage() {
             <Button
               type="button"
               onClick={addTrack}
-              className="bg-white text-black border border-neutral-300 hover:bg-neutral-50 min-h-[44px]"
+              className="h-7 min-h-0 bg-white text-black border border-neutral-300 hover:bg-neutral-50"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add track
@@ -415,10 +420,10 @@ export default function AdminCmsPartnersPage() {
                       size="sm"
                       disabled={index === 0}
                       onClick={() => moveTrack(index, 'up')}
-                      className="min-h-[40px] bg-white text-black border"
+                      className="pb-outline-btn h-6 w-6 min-h-0 min-w-0 !p-0"
                       aria-label="Move up"
                     >
-                      <ChevronUp className="w-4 h-4" />
+                      <ChevronUp className="w-3 h-3" />
                     </Button>
                     <Button
                       type="button"
@@ -426,19 +431,19 @@ export default function AdminCmsPartnersPage() {
                       size="sm"
                       disabled={index === pc.tracks.length - 1}
                       onClick={() => moveTrack(index, 'down')}
-                      className="min-h-[40px] bg-white text-black border"
+                      className="pb-outline-btn h-6 w-6 min-h-0 min-w-0 !p-0"
                       aria-label="Move down"
                     >
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown className="w-3 h-3" />
                     </Button>
                     <Button
                       type="button"
                       size="sm"
                       onClick={() => removeTrack(index)}
-                      className="min-h-[40px] bg-black !text-white hover:bg-neutral-800"
+                      className={BUTTON_ICON_PRIMARY}
                       aria-label="Delete track"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
@@ -516,7 +521,7 @@ export default function AdminCmsPartnersPage() {
               <Button
                 type="button"
                 onClick={addInquiryCategory}
-                className="bg-black text-white hover:bg-gray-800 text-xs min-h-[36px]"
+                className={BUTTON_PRIMARY}
               >
                 <Plus className="w-3 h-3 mr-1" /> Add category
               </Button>
@@ -595,10 +600,10 @@ export default function AdminCmsPartnersPage() {
                   <button
                     type="button"
                     onClick={() => removeInquiryCategory(i)}
-                    className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-black !text-white hover:bg-neutral-800 border-0"
+                    className={`${BUTTON_ICON_PRIMARY} w-full`}
                     aria-label="Remove category"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -662,7 +667,7 @@ export default function AdminCmsPartnersPage() {
                   },
                 }))
               }
-              className="bg-black text-white hover:bg-gray-800 text-xs min-h-[44px]"
+              className="h-7 min-h-0 bg-black text-white hover:bg-gray-800 text-xs"
             >
               <Plus className="w-3 h-3 mr-1" /> Add project
             </Button>
@@ -789,9 +794,9 @@ export default function AdminCmsPartnersPage() {
                         },
                       }))
                     }
-                    className="min-h-[44px] px-3 rounded-lg bg-black !text-white border-0"
+                    className={BUTTON_ICON_PRIMARY}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -836,9 +841,9 @@ export default function AdminCmsPartnersPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className={BUTTON_PRIMARY}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-3 h-3 mr-1" />
             {saving ? 'Saving…' : 'Save partners page'}
           </Button>
         </div>

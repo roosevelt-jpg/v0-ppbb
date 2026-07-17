@@ -132,7 +132,7 @@ export default function AdminCmsShopPage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="min-h-[44px] inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white px-5 py-2.5 rounded text-sm font-semibold disabled:opacity-50"
+          className="h-7 min-h-0 inline-flex items-center gap-2 bg-black hover:bg-neutral-900 text-white px-5 py-2.5 rounded text-sm font-semibold disabled:opacity-50"
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
           <Save className="w-4 h-4" />

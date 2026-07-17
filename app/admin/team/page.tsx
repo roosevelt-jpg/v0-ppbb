@@ -288,7 +288,7 @@ export default function AdminTeamPage() {
             type="button"
             onClick={() => void handleSeedDefaults()}
             disabled={seeding}
-            className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
           >
             <Sparkles className="w-4 h-4 mr-2" />
             {seeding ? 'Seeding…' : 'Seed 7 default members'}
@@ -379,7 +379,7 @@ export default function AdminTeamPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Photo</label>
-                <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px]">
+                <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
                   <Upload className="w-4 h-4" />
                   {uploading === 'form' ? 'Uploading…' : 'Upload photo'}
                   <input
@@ -406,7 +406,7 @@ export default function AdminTeamPage() {
                 </div>
               </div>
               <div className="flex items-end">
-                <label className="flex items-center gap-2 text-sm cursor-pointer min-h-[44px]">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input
                     type="checkbox"
                     checked={form.isActive}
@@ -417,7 +417,7 @@ export default function AdminTeamPage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button type="submit" className="bg-black text-white hover:bg-gray-800 min-h-[44px]">
+              <Button type="submit" className="h-7 min-h-0 bg-black text-white hover:bg-gray-800">
                 <Plus className="w-4 h-4 mr-2" />
                 {editingId ? 'Save changes' : 'Add member'}
               </Button>
@@ -425,7 +425,7 @@ export default function AdminTeamPage() {
                 <Button
                   type="button"
                   onClick={resetForm}
-                  className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 min-h-[44px]"
+                  className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300"
                 >
                   Cancel
                 </Button>
@@ -468,7 +468,7 @@ export default function AdminTeamPage() {
                             {getTeamInitials(member.name)}
                           </div>
                         )}
-                        <label className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 border rounded cursor-pointer hover:bg-neutral-50">
+                        <label className="inline-flex items-center justify-center min-w-[44px] p-2 border rounded cursor-pointer hover:bg-neutral-50">
                           <Upload className="w-4 h-4" />
                           <input
                             type="file"
@@ -488,11 +488,7 @@ export default function AdminTeamPage() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(member)}
-                        className={`px-3 py-2 rounded text-xs font-medium min-h-[44px] ${
-                          member.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-neutral-100 text-neutral-600'
-                        }`}
+                        className={`px-3 py-2 rounded text-xs font-medium ${ member.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600' }`}
                       >
                         {member.isActive ? 'Active' : 'Hidden'}
                       </button>
@@ -520,7 +516,7 @@ export default function AdminTeamPage() {
                         <Button
                           type="button"
                           onClick={() => startEdit(member)}
-                          className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 min-h-[44px] text-xs"
+                          className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 text-xs"
                         >
                           Edit
                         </Button>

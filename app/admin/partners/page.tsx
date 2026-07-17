@@ -355,7 +355,7 @@ export default function AdminPartnersLogosPage() {
               type="button"
               onClick={handleSeedDefaults}
               disabled={seeding}
-              className="bg-white text-black border border-neutral-300 hover:bg-neutral-50 min-h-[44px]"
+              className="h-7 min-h-0 bg-white text-black border border-neutral-300 hover:bg-neutral-50"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               <Sparkles className="w-4 h-4 mr-2" />
@@ -364,7 +364,7 @@ export default function AdminPartnersLogosPage() {
             <Button
               type="button"
               onClick={openCreate}
-              className="bg-black text-white hover:bg-neutral-900 min-h-[44px]"
+              className="h-7 min-h-0 bg-black text-white hover:bg-neutral-900"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -419,7 +419,7 @@ export default function AdminPartnersLogosPage() {
                   <div className="flex items-start gap-3">
                     <button
                       type="button"
-                      className="mt-1 min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-neutral-400 cursor-grab"
+                      className="mt-1 min-w-[44px] inline-flex items-center justify-center text-neutral-400 cursor-grab"
                       aria-label="Drag to reorder"
                     >
                       <GripVertical className="w-5 h-5" />
@@ -548,11 +548,7 @@ export default function AdminPartnersLogosPage() {
                         <button
                           type="button"
                           onClick={() => toggleActive(partner)}
-                          className={`min-h-[44px] px-3 rounded text-xs font-semibold ${
-                            partner.isActive
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-neutral-100 text-neutral-600'
-                          }`}
+                          className={`px-3 rounded text-xs font-semibold ${ partner.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600' }`}
                         >
                           {partner.isActive ? 'Active' : 'Hidden'}
                         </button>
@@ -607,7 +603,7 @@ export default function AdminPartnersLogosPage() {
             <button
               type="button"
               onClick={closeModal}
-              className="absolute top-3 right-3 min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-neutral-500"
+              className="absolute top-3 right-3 min-w-[44px] inline-flex items-center justify-center text-neutral-500"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -637,7 +633,7 @@ export default function AdminPartnersLogosPage() {
                   Logo upload {editingId ? '' : '*'}
                 </label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <label className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 border border-neutral-300 rounded cursor-pointer hover:bg-neutral-50 bg-white text-black text-sm font-medium">
+                  <label className="h-7 min-h-0 inline-flex items-center justify-center gap-2 px-4 border border-neutral-300 rounded cursor-pointer hover:bg-neutral-50 bg-white text-black text-sm font-medium">
                     <Upload className="w-4 h-4" />
                     {uploading ? 'Uploading…' : 'Choose logo'}
                     <input
@@ -705,7 +701,7 @@ export default function AdminPartnersLogosPage() {
                   />
                 </div>
                 <div className="flex items-end">
-                  <label className="inline-flex items-center gap-3 min-h-[44px] cursor-pointer">
+                  <label className="inline-flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={form.isActive}
@@ -720,7 +716,7 @@ export default function AdminPartnersLogosPage() {
                 <button
                   type="submit"
                   disabled={saving || uploading}
-                  className="min-h-[44px] px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 disabled:opacity-60"
+                  className="h-7 min-h-0 px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 disabled:opacity-60"
                 >
                   {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add Partner'}
                 </button>

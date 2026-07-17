@@ -577,7 +577,7 @@ function ContactSubmissionsInner() {
                       type="button"
                       disabled={updatingId === selected.id}
                       onClick={() => void handleMarkResolved(selected.id)}
-                      className="w-full min-h-[44px] bg-black text-white hover:bg-gray-800"
+                      className="h-7 min-h-0 w-full bg-black text-white hover:bg-gray-800"
                     >
                       <Check className="w-4 h-4 mr-2" />
                       Mark resolved

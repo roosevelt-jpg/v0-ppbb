@@ -119,14 +119,14 @@ export default function AdminLayout({
           <div className="flex flex-col sm:flex-row gap-2 justify-center">
             <a
               href="/admin/setup"
-              className="inline-flex items-center justify-center px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium min-h-[44px]"
+              className="h-7 min-h-0 inline-flex items-center justify-center px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium"
             >
               Complete admin setup
             </a>
             <button
               type="button"
               onClick={() => void handleLogout()}
-              className="inline-flex items-center justify-center px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium min-h-[44px]"
+              className="h-7 min-h-0 inline-flex items-center justify-center px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium"
             >
               Sign out
             </button>

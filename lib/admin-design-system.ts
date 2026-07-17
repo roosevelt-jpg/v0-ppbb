@@ -52,9 +52,9 @@ export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex ite
 export const ACTION_ROW = 'flex flex-nowrap items-center gap-0.5 whitespace-nowrap'
 /** Compact back / navigation control */
 export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1.5 h-7 min-h-0 px-2.5 text-[11px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
-/** Filter / tab pills — compact; inactive is outline so period filters stay readable */
+/** Filter / tab pills — compact; inactive uses outline (not black-forced compact) */
 export const FILTER_PILL_ACTIVE = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white border border-black shadow-none`
-export const FILTER_PILL_INACTIVE = `${BUTTON_BASE} pb-compact-btn pb-filter-pill-inactive h-7 min-h-0 px-2.5 text-[11px] rounded-md !bg-white !text-black border border-neutral-300 hover:!bg-neutral-50 shadow-none`
+export const FILTER_PILL_INACTIVE = `${BUTTON_BASE} pb-outline-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md`
 /** Up/down reorder controls — black square with white icon */
 export const BUTTON_REORDER = `${BUTTON_BASE} pb-compact-btn min-h-0 min-w-0 h-6 w-6 p-0 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0 [&_svg]:h-3 [&_svg]:w-3`
 /** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */

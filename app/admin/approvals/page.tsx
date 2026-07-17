@@ -11,7 +11,7 @@ import { adminApiFetch } from '@/lib/admin-api-client'
 import type { ApprovalItem } from '@/lib/admin-approvals-server'
 import { Check, X, ExternalLink, RefreshCw } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
 
 const TYPE_LABELS: Record<string, string> = {
   beneficiary: 'Beneficiary',
@@ -186,18 +186,14 @@ export default function ApprovalsPage() {
           <button
             type="button"
             onClick={() => setTab('listings')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white hover:bg-neutral-800 ${
-              tab === 'listings' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
-            }`}
+            className={tab === 'listings' ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
           >
             Businesses, events &amp; products
           </button>
           <button
             type="button"
             onClick={() => setTab('forms')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white hover:bg-neutral-800 ${
-              tab === 'forms' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
-            }`}
+            className={tab === 'forms' ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
           >
             Form inquiries
           </button>
@@ -211,9 +207,9 @@ export default function ApprovalsPage() {
             type="button"
             onClick={() => void loadApprovals()}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white hover:bg-neutral-800 disabled:opacity-50"
+            className={`${BUTTON_PRIMARY} gap-1 disabled:opacity-50`}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>

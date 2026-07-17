@@ -272,7 +272,7 @@ export default function CharityPartnersPage() {
                 <img src={newPartner.logo} alt="" className="mt-2 h-10 object-contain" />
               ) : null}
             </div>
-            <label className="flex items-center gap-2 min-h-[44px] text-sm md:col-span-2">
+            <label className="flex items-center gap-2 text-sm md:col-span-2">
               <input
                 type="checkbox"
                 checked={newPartner.isActive}
@@ -530,7 +530,7 @@ export default function CharityPartnersPage() {
                   <img src={editingPartner.logo} alt="" className="mt-2 h-12 object-contain" />
                 ) : null}
               </div>
-              <label className="flex items-center gap-2 min-h-[44px] text-sm md:col-span-2">
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
                 <input
                   type="checkbox"
                   checked={isPartnerActive(editingPartner)}

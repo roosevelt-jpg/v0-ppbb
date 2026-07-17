@@ -28,7 +28,7 @@ export default function AdminDashboard() {
             <p className="text-xl sm:text-2xl font-bold text-neutral-900 break-words">{card.label}</p>
             <Link
               href={card.href}
-              className="inline-flex items-center mt-4 min-h-[44px] text-sm font-medium text-blue-600 hover:underline"
+              className="inline-flex items-center mt-4 text-sm font-medium text-blue-600 hover:underline"
             >
               Go to {card.title.replace(' Management', '').replace('Admin ', '')} →
             </Link>

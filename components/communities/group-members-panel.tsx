@@ -87,9 +87,9 @@ export function GroupMembersPanel({
                   type="button"
                   disabled={!canOpen}
                   onClick={() => canOpen && onOpenProfile(item.userId)}
-                  className={`w-full flex items-center gap-4 p-4 sm:p-5 rounded-2xl border border-[#e4e1da] bg-white text-left ${
-                    canOpen ? 'hover:bg-neutral-50' : 'opacity-80 cursor-default'
-                  }`}
+              className={`pb-ghost-btn w-full flex items-center gap-4 p-4 sm:p-5 rounded-2xl border border-[#e4e1da] bg-white text-left ${
+                canOpen ? 'hover:bg-neutral-50' : 'opacity-80 cursor-default'
+              }`}
                 >
                   {item.profile.profilePictureURL ? (
                     <img

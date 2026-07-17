@@ -129,11 +129,11 @@ export default function FormsPage() {
             disabled={syncing}
             className={`inline-flex items-center gap-2 ${BUTTON_SECONDARY} disabled:opacity-50`}
           >
-            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing…' : 'Sync PB templates'}
           </button>
-          <Link href="/admin/forms/new" className={`inline-flex items-center gap-2 ${BUTTON_PRIMARY}`}>
-            <Plus className="h-4 w-4" />
+          <Link href="/admin/forms/new" className={`inline-flex items-center gap-1.5 ${BUTTON_PRIMARY}`}>
+            <Plus className="h-3 w-3" />
             Create Form
           </Link>
         </div>

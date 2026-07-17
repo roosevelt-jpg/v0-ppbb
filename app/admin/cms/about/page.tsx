@@ -5,6 +5,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Save, AlertCircle, CheckCircle2, Upload, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
+import { BUTTON_PRIMARY, BUTTON_ROW_COMPACT } from '@/lib/admin-design-system'
 import {
   subscribeToAbout,
   DEFAULT_ABOUT,
@@ -226,9 +227,9 @@ export default function AdminCmsAboutPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className={BUTTON_PRIMARY}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-3 h-3 mr-1" />
             {saving ? 'Saving…' : 'Save about page'}
           </Button>
         </div>
@@ -376,7 +377,7 @@ export default function AdminCmsAboutPage() {
                 <Button
                   type="button"
                   onClick={addParagraph}
-                  className="bg-black text-white hover:bg-gray-800 text-xs min-h-[44px]"
+                  className="h-7 min-h-0 bg-black text-white hover:bg-gray-800 text-xs"
                 >
                   <Plus className="w-3 h-3 mr-1" /> Add
                 </Button>
@@ -628,7 +629,7 @@ export default function AdminCmsAboutPage() {
               <Button
                 type="button"
                 onClick={addValue}
-                className="bg-black text-white hover:bg-gray-800 text-xs min-h-[44px]"
+                className="h-7 min-h-0 bg-black text-white hover:bg-gray-800 text-xs"
               >
                 <Plus className="w-3 h-3 mr-1" /> Add value
               </Button>

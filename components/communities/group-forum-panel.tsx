@@ -210,7 +210,7 @@ export function GroupForumPanel({
       type="button"
       disabled={!canOpen}
       onClick={() => canOpen && onOpenProfile(userId)}
-      className={`inline-flex items-center gap-2.5 text-left ${
+      className={`pb-ghost-btn inline-flex items-center gap-2.5 text-left ${
         canOpen ? 'hover:underline' : 'cursor-default'
       }`}
     >
@@ -260,7 +260,7 @@ export function GroupForumPanel({
                 <button
                   type="button"
                   onClick={() => void toggleLike()}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#e4e1da] hover:bg-neutral-50 min-h-[40px] font-medium text-neutral-800"
+                  className="pb-outline-btn inline-flex items-center gap-1.5"
                 >
                   <ThumbsUp className="w-3.5 h-3.5" />
                   {activePost.likesCount || 0}
@@ -308,7 +308,7 @@ export function GroupForumPanel({
                   <button
                     type="submit"
                     disabled={saving || !commentText.trim()}
-                    className="min-h-[48px] px-5 bg-black text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+                    className="pb-compact-btn h-8 min-h-0 px-3 bg-black !text-white rounded-md text-[11px] font-semibold disabled:opacity-50"
                   >
                     Reply
                   </button>
@@ -332,10 +332,10 @@ export function GroupForumPanel({
           <button
             type="button"
             onClick={() => setShowComposer((v) => !v)}
-            className="inline-flex items-center gap-1.5 min-h-[44px] px-4 bg-black text-white rounded-xl text-sm font-semibold"
-          >
-            <Plus className="w-4 h-4" /> New post
-          </button>
+          className="inline-flex items-center gap-1.5 h-7 min-h-0 px-2.5 bg-black !text-white rounded-md text-[11px] font-semibold"
+        >
+          <Plus className="w-3.5 h-3.5" /> New post
+        </button>
         </div>
 
         {showComposer && (
@@ -361,7 +361,7 @@ export function GroupForumPanel({
             <button
               type="submit"
               disabled={saving}
-              className="min-h-[48px] px-5 bg-black text-white rounded-xl text-sm font-semibold disabled:opacity-50"
+              className="pb-compact-btn h-8 min-h-0 px-3 bg-black !text-white rounded-md text-[11px] font-semibold disabled:opacity-50"
             >
               {saving ? 'Posting…' : 'Publish'}
             </button>

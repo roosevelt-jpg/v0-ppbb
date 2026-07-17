@@ -235,7 +235,7 @@ export default function FinanceDonationsPage() {
           type="button"
           disabled={busy || !canVerify}
           onClick={() => runAction(s.id, 'verify')}
-          className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-semibold disabled:opacity-40"
+          className="h-7 min-h-0 px-3 bg-black text-white rounded text-xs font-semibold disabled:opacity-40"
         >
           Verify
         </button>
@@ -243,7 +243,7 @@ export default function FinanceDonationsPage() {
           type="button"
           disabled={busy || VERIFIED.has(st)}
           onClick={() => runAction(s.id, 'reject')}
-          className="min-h-[44px] px-3 bg-black !text-white rounded text-xs font-semibold disabled:opacity-40"
+          className="h-7 min-h-0 px-3 bg-black !text-white rounded text-xs font-semibold disabled:opacity-40"
         >
           Reject
         </button>
@@ -251,7 +251,7 @@ export default function FinanceDonationsPage() {
           type="button"
           disabled={busy || VERIFIED.has(st)}
           onClick={() => runAction(s.id, 'request_resubmission')}
-          className="min-h-[44px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40 inline-flex items-center gap-1"
+          className="h-7 min-h-0 px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40 inline-flex items-center gap-1"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Request Resubmission
@@ -282,7 +282,7 @@ export default function FinanceDonationsPage() {
           </p>
           <Link
             href="/admin/donation-verification"
-            className="inline-flex items-center gap-1 text-sm text-neutral-700 underline mt-2 min-h-[44px]"
+            className="inline-flex items-center gap-1 text-sm text-neutral-700 underline mt-2"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Open Charity Verification queue
@@ -346,7 +346,7 @@ export default function FinanceDonationsPage() {
             </p>
             <Link
               href="/donate"
-              className="inline-flex items-center justify-center min-h-[44px] px-5 bg-black text-white rounded text-sm font-semibold"
+              className="h-7 min-h-0 inline-flex items-center justify-center px-5 bg-black text-white rounded text-sm font-semibold"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               View public donate page

@@ -364,7 +364,7 @@ export default function AdminCmsGlobalSettingsPage() {
               Browser tab icon. Auto-resized to <strong>64×64</strong> PNG (PNG, JPG,
               WebP, GIF, ICO, or SVG).
             </p>
-            <label className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
+            <label className="h-7 min-h-0 inline-flex w-full items-center justify-center gap-2 px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
               <Upload className="w-4 h-4" />
               {uploading === 'favicon'
                 ? 'Uploading…'
@@ -519,7 +519,7 @@ export default function AdminCmsGlobalSettingsPage() {
             <button
               type="button"
               onClick={handleResetTheme}
-              className="min-h-[44px] px-4 !bg-white !text-black border border-neutral-300 rounded text-sm font-semibold hover:!bg-neutral-50 shrink-0"
+              className="px-4 !bg-white !text-black border border-neutral-300 rounded text-sm font-semibold hover:!bg-neutral-50 shrink-0"
             >
               Reset to defaults
             </button>
@@ -638,7 +638,7 @@ export default function AdminCmsGlobalSettingsPage() {
             </p>
             <button
               type="button"
-              className="!min-h-[44px] !px-5 !rounded-lg !text-sm !font-semibold !shadow-none"
+              className="! !px-5 !rounded-lg !text-sm !font-semibold !shadow-none"
               style={{
                 fontFamily:
                   SITE_FONT_OPTIONS.find(
@@ -677,7 +677,7 @@ export default function AdminCmsGlobalSettingsPage() {
           </p>
           <Link
             href="/admin/integrations"
-            className="inline-flex items-center gap-2 min-h-[44px] px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 w-full sm:w-auto justify-center"
+            className="h-7 min-h-0 inline-flex items-center gap-2 px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 w-full sm:w-auto justify-center"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             <Plug className="w-4 h-4" />
@@ -742,7 +742,7 @@ export default function AdminCmsGlobalSettingsPage() {
             type="button"
             onClick={handleSaveReferrals}
             disabled={savingReferrals}
-            className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
           >
             <Save className="w-4 h-4 mr-2" />
             {savingReferrals ? 'Saving…' : 'Save referral defaults'}
@@ -754,7 +754,7 @@ export default function AdminCmsGlobalSettingsPage() {
             type="button"
             onClick={() => void runMigration()}
             disabled={migrating}
-            className="min-h-[44px] px-5 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50 disabled:opacity-50"
+            className="h-7 min-h-0 px-5 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50 disabled:opacity-50"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             {migrating ? 'Migrating…' : 'Import from legacy settings'}
@@ -763,7 +763,7 @@ export default function AdminCmsGlobalSettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving…' : 'Save global settings'}

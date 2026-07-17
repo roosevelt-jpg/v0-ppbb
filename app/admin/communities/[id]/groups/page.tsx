@@ -93,7 +93,7 @@ export default function CommunityGroupsPage() {
           <h2 className="text-2xl font-bold text-black">Groups ({groups.length})</h2>
           <Link
             href={`/admin/communities/${communityId}/groups/create`}
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium min-h-[44px]"
+            className="h-7 min-h-0 flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium"
           >
             <Plus size={20} />
             Create Group

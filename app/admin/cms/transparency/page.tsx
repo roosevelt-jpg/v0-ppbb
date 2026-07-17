@@ -270,7 +270,7 @@ export default function AdminCmsTransparencyPage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-black !text-white rounded-lg text-sm font-medium hover:bg-neutral-900 disabled:opacity-60 min-h-[44px]"
+          className="h-7 min-h-0 inline-flex items-center gap-2 px-4 py-2.5 bg-black !text-white rounded-lg text-sm font-medium hover:bg-neutral-900 disabled:opacity-60"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Saving…' : 'Save transparency page'}

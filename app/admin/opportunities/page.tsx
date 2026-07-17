@@ -324,11 +324,7 @@ export default function AdminOpportunitiesPage() {
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className={`shrink-0 min-h-[44px] px-3 sm:px-4 rounded text-sm font-semibold whitespace-nowrap ${
-                  tab === t.id
-                    ? 'bg-black text-white'
-                    : 'bg-white text-black border border-neutral-300 hover:bg-neutral-50'
-                }`}
+                className={`h-7 min-h-0 shrink-0 px-3 sm:px-4 rounded text-sm font-semibold whitespace-nowrap ${ tab === t.id ? 'bg-black text-white' : 'bg-white text-black border border-neutral-300 hover:bg-neutral-50' }`}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {t.label}
@@ -369,7 +365,7 @@ export default function AdminOpportunitiesPage() {
             </p>
             <Link
               href="/admin/businesses"
-              className="inline-flex items-center justify-center min-h-[44px] px-5 bg-black text-white rounded text-sm font-semibold"
+              className="h-7 min-h-0 inline-flex items-center justify-center px-5 bg-black text-white rounded text-sm font-semibold"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Review businesses
@@ -473,7 +469,7 @@ export default function AdminOpportunitiesPage() {
             <button
               type="button"
               onClick={() => setViewJob(null)}
-              className="absolute top-3 right-3 min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+              className="absolute top-3 right-3 min-w-[44px] inline-flex items-center justify-center"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -534,7 +530,7 @@ export default function AdminOpportunitiesPage() {
             <button
               type="button"
               onClick={() => setEditJob(null)}
-              className="absolute top-3 right-3 min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+              className="absolute top-3 right-3 min-w-[44px] inline-flex items-center justify-center"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -582,7 +578,7 @@ export default function AdminOpportunitiesPage() {
                 <button
                   type="submit"
                   disabled={actingId === editJob.id}
-                  className="min-h-[44px] px-5 bg-black text-white rounded text-sm font-semibold disabled:opacity-50"
+                  className="h-7 min-h-0 px-5 bg-black text-white rounded text-sm font-semibold disabled:opacity-50"
                 >
                   Save changes
                 </button>

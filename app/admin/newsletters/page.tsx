@@ -537,7 +537,7 @@ export default function AdminNewslettersPage() {
                   <div>
                     <label className={`${TEXT_LABEL} block mb-3`}>Send Options</label>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                      <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
+                      <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
                           name="sendOption"
@@ -548,7 +548,7 @@ export default function AdminNewslettersPage() {
                         />
                         <span className="text-sm">Send Now</span>
                       </label>
-                      <label className="flex items-center gap-2 cursor-pointer min-h-[44px]">
+                      <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
                           name="sendOption"
@@ -746,7 +746,7 @@ export default function AdminNewslettersPage() {
               <button
                 type="button"
                 onClick={() => setPreviewOpen(false)}
-                className={`${BUTTON_SECONDARY} ${BUTTON_SMALL} !p-2 min-h-[44px] min-w-[44px]`}
+                className={`${BUTTON_SECONDARY} ${BUTTON_SMALL} !p-2 min-w-[44px]`}
                 aria-label="Close preview"
               >
                 <X className="w-4 h-4" />
@@ -785,7 +785,7 @@ export default function AdminNewslettersPage() {
               <button
                 type="button"
                 onClick={() => setAiModalOpen(false)}
-                className={`${BUTTON_SECONDARY} ${BUTTON_SMALL} !p-2 min-h-[44px] min-w-[44px]`}
+                className={`${BUTTON_SECONDARY} ${BUTTON_SMALL} !p-2 min-w-[44px]`}
               >
                 <X className="w-4 h-4" />
               </button>

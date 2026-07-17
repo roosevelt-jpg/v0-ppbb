@@ -50,7 +50,7 @@ export default function AdminGroupMessagesPage() {
           </p>
           <Link
             href="/admin/communities"
-            className="px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 min-h-[44px] inline-flex items-center"
+            className="h-7 min-h-0 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 inline-flex items-center"
           >
             Back to Community Management
           </Link>

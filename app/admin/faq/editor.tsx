@@ -149,14 +149,14 @@ export function FAQEditor({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 min-h-[44px] px-4 py-2 bg-black text-white rounded-lg font-semibold"
+              className="h-7 min-h-0 flex-1 px-4 py-2 bg-black text-white rounded-lg font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 min-h-[44px] px-4 py-2 bg-black text-white rounded-lg font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="h-7 min-h-0 flex-1 px-4 py-2 bg-black text-white rounded-lg font-semibold disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
               {loading ? 'Saving…' : 'Save FAQ'}

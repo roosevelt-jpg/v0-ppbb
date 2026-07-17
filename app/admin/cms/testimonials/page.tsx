@@ -313,7 +313,7 @@ export default function AdminCmsTestimonialsPage() {
             <Button
               type="submit"
               disabled={testimonials.length >= MAX_TESTIMONIALS}
-              className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+              className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add testimonial ({testimonials.length}/{MAX_TESTIMONIALS})
@@ -347,9 +347,7 @@ export default function AdminCmsTestimonialsPage() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(item)}
-                        className={`px-3 py-2 rounded text-xs font-medium min-h-[44px] min-w-[44px] ${
-                          item.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'
-                        }`}
+                        className={`px-3 py-2 rounded text-xs font-medium min-w-[44px] ${ item.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600' }`}
                       >
                         {item.isActive ? 'Active' : 'Hidden'}
                       </button>

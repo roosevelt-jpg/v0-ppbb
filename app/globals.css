@@ -367,41 +367,41 @@ input[type='checkbox'] {
 
 /*
  * Platform-wide buttons: black bg + white text/icons (unlayered so it beats Tailwind utilities).
- * Opt-outs: theme/nav chrome, calendar days, rating stars.
+ * Opt-outs: theme/nav chrome, calendar days, rating stars, ghost/outline controls.
  */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn),
-[data-slot='button']:not(.pb-rating-btn),
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
 label.pb-compact-btn,
 a.pb-compact-btn,
-label:has(> input[type='file'].sr-only),
-label:has(> input[type='file'].hidden) {
+label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn),
+label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) {
   background-color: #111111 !important;
   color: #ffffff !important;
   border-color: #111111 !important;
   font-family: var(--pb-font-button, var(--font-body));
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):hover,
-[data-slot='button']:not(.pb-rating-btn):hover,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):hover,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):hover,
 label.pb-compact-btn:hover,
 a.pb-compact-btn:hover,
-label:has(> input[type='file'].sr-only):hover,
-label:has(> input[type='file'].hidden):hover {
+label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):hover,
+label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):hover {
   background-color: #262626 !important;
   color: #ffffff !important;
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn) svg,
-[data-slot='button']:not(.pb-rating-btn) svg,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
 label.pb-compact-btn svg,
 a.pb-compact-btn svg,
-label:has(> input[type='file'].sr-only) svg,
-label:has(> input[type='file'].hidden) svg {
+label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) svg,
+label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) svg {
   color: #ffffff !important;
   stroke: currentColor !important;
 }
 
-button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn) {
+button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) {
   padding-left: 0.625rem;
   padding-right: 0.625rem;
   border-radius: 0.375rem;
@@ -412,8 +412,74 @@ button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-it
   transition: background-color 0.2s, opacity 0.2s;
 }
 
-button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):active {
+button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):active {
   opacity: 0.9;
+}
+
+/* Text / avatar / icon-only controls — never paint as black CTAs */
+button.pb-ghost-btn {
+  background-color: transparent !important;
+  color: inherit !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  font-weight: inherit;
+}
+
+button.pb-ghost-btn:hover {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+button.pb-ghost-btn svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* White outline secondary actions (Reject, inactive tabs) */
+button.pb-outline-btn,
+label.pb-outline-btn,
+a.pb-outline-btn {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #d4d4d4 !important;
+  box-shadow: none !important;
+  min-height: 28px !important;
+  padding: 0.25rem 0.625rem !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border-radius: 0.375rem !important;
+}
+
+button.pb-outline-btn:hover,
+label.pb-outline-btn:hover,
+a.pb-outline-btn:hover {
+  background-color: #f5f5f5 !important;
+  color: #111111 !important;
+}
+
+button.pb-outline-btn svg,
+label.pb-outline-btn svg,
+a.pb-outline-btn svg {
+  color: #111111 !important;
+  stroke: currentColor !important;
+}
+
+/* Ensure branded black CTAs always keep white labels/icons */
+button.bg-black,
+a.bg-black,
+button.pb-compact-btn,
+a.pb-compact-btn {
+  color: #ffffff !important;
+}
+
+button.bg-black svg,
+a.bg-black svg,
+button.pb-compact-btn svg,
+a.pb-compact-btn svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
 }
 
 button.pb-compact-btn,
@@ -532,29 +598,106 @@ label:has(> input[type='file'].hidden) {
  * Compact controls across Admin / Member / Business dashboards.
  * Keeps brand black buttons but shrinks oversized pills, CTAs, and cards.
  */
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn),
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
 [data-dashboard-surface] a.pb-compact-btn,
+[data-dashboard-surface] a.bg-black,
 [data-dashboard-surface] [data-dashboard-control],
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn) {
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] label.pb-compact-btn,
+[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
+[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
+  height: 28px !important;
   min-height: 28px !important;
-  padding-top: 0.25rem !important;
-  padding-bottom: 0.25rem !important;
+  max-height: 28px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   padding-left: 0.625rem !important;
   padding-right: 0.625rem !important;
   font-size: 11px !important;
-  line-height: 1.25 !important;
+  line-height: 28px !important;
   border-radius: 0.375rem !important;
   font-weight: 600 !important;
   gap: 0.25rem !important;
   box-shadow: none !important;
+  color: #ffffff !important;
 }
 
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn) svg,
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] a.pb-compact-btn,
+[data-dashboard-surface] a.bg-black,
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn),
+[data-dashboard-surface] label.pb-compact-btn,
+[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
+[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
+  background-color: #111111 !important;
+  border-color: #111111 !important;
+}
+
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
 [data-dashboard-surface] [data-dashboard-control] svg,
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn) svg,
-[data-dashboard-surface] a.pb-compact-btn svg {
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) svg,
+[data-dashboard-surface] a.pb-compact-btn svg,
+[data-dashboard-surface] a.bg-black svg,
+[data-dashboard-surface] label.pb-compact-btn svg,
+[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn) svg,
+[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
   width: 0.75rem !important;
   height: 0.75rem !important;
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+/* Force compact height even when pages still set min-h-[44px]/[36px]/[40px] on links/buttons */
+[data-dashboard-surface] a[class*='min-h-[44'],
+[data-dashboard-surface] a[class*='min-h-[40'],
+[data-dashboard-surface] a[class*='min-h-[36'],
+[data-dashboard-surface] button[class*='min-h-[44'],
+[data-dashboard-surface] button[class*='min-h-[40'],
+[data-dashboard-surface] button[class*='min-h-[36'],
+[data-dashboard-surface] [data-slot='button'][class*='min-h-[44'],
+[data-dashboard-surface] [data-slot='button'][class*='min-h-[40'],
+[data-dashboard-surface] [data-slot='button'][class*='min-h-[36'],
+[data-dashboard-surface] label[class*='min-h-[44'] {
+  min-height: 28px !important;
+  height: 28px !important;
+  max-height: 28px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 11px !important;
+  line-height: 28px !important;
+  border-radius: 0.375rem !important;
+}
+
+/* Outline / cancel links stay compact but white */
+[data-dashboard-surface] button.pb-outline-btn,
+[data-dashboard-surface] a.pb-outline-btn,
+[data-dashboard-surface] label.pb-outline-btn {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  padding: 0 0.625rem !important;
+  font-size: 11px !important;
+  line-height: 26px !important;
+  border-radius: 0.375rem !important;
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border: 1px solid #d4d4d4 !important;
+  box-shadow: none !important;
+}
+
+[data-dashboard-surface] button.pb-outline-btn svg,
+[data-dashboard-surface] a.pb-outline-btn svg,
+[data-dashboard-surface] label.pb-outline-btn svg {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  color: #111111 !important;
+}
+
+/* Kill pill (rounded-full) CTAs inside dashboards */
+[data-dashboard-surface] button.rounded-full:not(.pb-ghost-btn),
+[data-dashboard-surface] a.rounded-full:not(.pb-ghost-btn),
+[data-dashboard-surface] [data-slot='button'].rounded-full {
+  border-radius: 0.375rem !important;
 }
 
 /* Keep square icon actions compact (not stretched by padding rules) */
@@ -565,8 +708,10 @@ label:has(> input[type='file'].hidden) {
   width: 1.5rem !important;
   height: 1.5rem !important;
   min-height: 0 !important;
+  max-height: none !important;
   min-width: 0 !important;
   padding: 0 !important;
+  line-height: 1 !important;
 }
 
 [data-dashboard-surface] button.h-7.w-7,
@@ -574,8 +719,10 @@ label:has(> input[type='file'].hidden) {
   width: 1.75rem !important;
   height: 1.75rem !important;
   min-height: 0 !important;
+  max-height: none !important;
   min-width: 0 !important;
   padding: 0 !important;
+  line-height: 1 !important;
 }
 
 /* Metric / panel cards — tighter padding, no soft shadow */

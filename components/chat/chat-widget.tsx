@@ -250,10 +250,10 @@ export function ChatWidget() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 overflow-hidden bg-white border-2 border-neutral-600 p-1 min-h-[56px] min-w-[56px]"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 overflow-hidden bg-white border-2 border-neutral-600 p-0.5 min-h-0 min-w-0"
           aria-label="Open PB Assistant chat"
         >
-          <ChatbotAvatar size={56} className="w-full h-full" priority />
+          <ChatbotAvatar size={40} className="w-full h-full" priority />
         </button>
       )}
 

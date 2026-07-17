@@ -64,14 +64,14 @@ export default function AdminEventPreviewPage() {
           </button>
           <Link
             href={`/admin/events/create?id=${eventId}`}
-            className="px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 min-h-[44px] inline-flex items-center"
+            className="h-7 min-h-0 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 inline-flex items-center"
           >
             Edit Event
           </Link>
           <Link
             href={`/events/${eventId}`}
             target="_blank"
-            className="px-4 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 min-h-[44px] inline-flex items-center"
+            className="h-7 min-h-0 px-4 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 inline-flex items-center"
           >
             Open Public Page
           </Link>

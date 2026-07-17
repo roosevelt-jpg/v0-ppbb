@@ -163,7 +163,7 @@ export default function AdminCmsMarketplacePage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className="h-7 min-h-0 w-full sm:w-auto bg-black text-white hover:bg-gray-800"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving…' : 'Save marketplace page'}
@@ -370,7 +370,7 @@ export default function AdminCmsMarketplacePage() {
                       type="button"
                       variant="outline"
                       onClick={handleRemoveImage}
-                      className="min-h-[44px] w-fit bg-black !text-white border-black hover:bg-neutral-800 hover:text-white"
+                      className="h-7 min-h-0 w-fit bg-black !text-white border-black hover:bg-neutral-800 hover:text-white"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Remove image
@@ -393,7 +393,7 @@ export default function AdminCmsMarketplacePage() {
             <Button
               type="button"
               onClick={addBenefit}
-              className="bg-white text-black border border-neutral-300 hover:bg-neutral-50 min-h-[44px]"
+              className="h-7 min-h-0 bg-white text-black border border-neutral-300 hover:bg-neutral-50"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add benefit
@@ -490,7 +490,7 @@ export default function AdminCmsMarketplacePage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className="h-7 min-h-0 w-full sm:w-auto bg-black text-white hover:bg-gray-800"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving…' : 'Save marketplace page'}

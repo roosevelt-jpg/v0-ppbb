@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { auth } from '@/lib/firebase'
 import { uploadCommunityBanner, uploadCommunityIcon } from '@/lib/firebase-storage'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 function CreateCommunityForm() {
   const router = useRouter()
@@ -266,18 +267,18 @@ function CreateCommunityForm() {
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 font-medium"
+              className={`${BUTTON_PRIMARY} disabled:opacity-50`}
             >
               {loading ? 'Saving…' : editId ? 'Save Changes' : 'Create Community'}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-2 bg-gray-200 text-black rounded-lg hover:bg-gray-300 font-medium"
+              className="pb-outline-btn"
             >
               Cancel
             </button>

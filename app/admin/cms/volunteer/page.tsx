@@ -229,7 +229,7 @@ export default function AdminCmsVolunteerPage() {
               <button
                 type="button"
                 onClick={addPillar}
-                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50"
+                className="h-7 min-h-0 inline-flex items-center justify-center gap-2 px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <Plus className="w-4 h-4" />
@@ -243,7 +243,7 @@ export default function AdminCmsVolunteerPage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 disabled:opacity-60 w-full sm:w-auto"
+          className="h-7 min-h-0 inline-flex items-center justify-center gap-2 px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 disabled:opacity-60 w-full sm:w-auto"
           style={{ fontFamily: 'Inter, sans-serif' }}
         >
           <Save className="w-4 h-4" />

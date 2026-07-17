@@ -154,7 +154,7 @@ export default function IntegrationAnalyticsPage() {
                 <button
                   type="button"
                   onClick={() => void handleResolveAlert(alert.id)}
-                  className="p-2 rounded bg-white text-neutral-500 hover:text-neutral-800 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="p-2 rounded bg-white text-neutral-500 hover:text-neutral-800 min-w-[44px] flex items-center justify-center"
                   aria-label="Dismiss alert"
                 >
                   <X className="h-4 w-4" />

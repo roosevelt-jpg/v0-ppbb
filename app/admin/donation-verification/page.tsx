@@ -148,7 +148,7 @@ export default function DonationVerificationPage() {
                 href={submission.proofImage}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm underline mt-1 min-h-[44px]"
+                className="inline-flex items-center gap-1 text-sm underline mt-1"
               >
                 <ImageIcon className="w-4 h-4" />
                 View proof

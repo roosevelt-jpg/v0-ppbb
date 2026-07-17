@@ -174,7 +174,7 @@ export default function CreateRecordingPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                <label className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium">
+                <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium">
                   <Upload size={16} />
                   {uploadingMedia ? 'Uploading…' : 'Upload video / audio file'}
                   <input

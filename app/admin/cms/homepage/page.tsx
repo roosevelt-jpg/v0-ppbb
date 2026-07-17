@@ -238,7 +238,7 @@ export default function AdminCmsHomepagePage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full sm:w-auto bg-black text-white hover:bg-gray-800 min-h-[44px]"
+            className="h-7 min-h-0 w-full sm:w-auto bg-black text-white hover:bg-gray-800"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Saving…' : 'Save homepage'}

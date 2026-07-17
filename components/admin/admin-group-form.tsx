@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Upload } from 'lucide-react'
 import type { GroupType } from '@/lib/community-types'
 import { GENDER_RESTRICTION_OPTIONS, GROUP_TYPE_OPTIONS } from '@/lib/community-governance'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 export type AdminGroupFormValues = {
   name: string
@@ -151,29 +152,29 @@ export function AdminGroupForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Group Icon (optional)</label>
-        <div className="flex gap-4">
+        <div className="flex gap-3 items-center">
           {iconPreview ? (
-            <img src={iconPreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
+            <img src={iconPreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover" />
           ) : null}
-          <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-            <Upload size={18} className="mr-2" />
+          <label className="pb-outline-btn inline-flex items-center gap-1.5 cursor-pointer">
+            <Upload size={12} />
             Choose File
             <input type="file" accept="image/*" onChange={handleIconInput} disabled={loading} className="hidden" />
           </label>
         </div>
       </div>
 
-      <div className="flex gap-3 pt-4">
+      <div className="flex flex-wrap gap-2 pt-2">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 font-medium disabled:opacity-50 min-h-[44px]"
+          className={`${BUTTON_PRIMARY} disabled:opacity-50`}
         >
-          {loading ? 'Creating…' : submitLabel}
+          {loading ? 'Saving…' : submitLabel}
         </button>
         <Link
           href={cancelHref}
-          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-center flex items-center justify-center min-h-[44px]"
+          className="pb-outline-btn inline-flex items-center justify-center no-underline"
         >
           Cancel
         </Link>

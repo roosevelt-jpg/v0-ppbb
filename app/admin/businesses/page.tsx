@@ -183,11 +183,7 @@ export default function BusinessesPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilter(tab.id)}
-                className={`min-h-[44px] px-4 py-2 rounded-lg font-body text-sm font-semibold ${
-                  filter === tab.id
-                    ? 'bg-black text-white'
-                    : 'bg-white text-black border border-[#e4e1da] hover:bg-neutral-50'
-                }`}
+                className={`h-7 min-h-0 px-4 py-2 rounded-lg font-body text-sm font-semibold ${ filter === tab.id ? 'bg-black text-white' : 'bg-white text-black border border-[#e4e1da] hover:bg-neutral-50' }`}
               >
                 {tab.label}
               </button>
@@ -197,21 +193,21 @@ export default function BusinessesPage() {
             <Button
               type="button"
               onClick={() => (window.location.href = '/admin/vendor-applications')}
-              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+              className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
             >
               Vendor applications
             </Button>
             <Button
               type="button"
               onClick={() => (window.location.href = '/admin/contact-submissions?category=partnership')}
-              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+              className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
             >
               Sponsor inquiries
             </Button>
             <Button
               type="button"
               onClick={() => void fetchBusinesses()}
-              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+              className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -345,7 +341,7 @@ export default function BusinessesPage() {
                           type="button"
                           disabled={busy}
                           onClick={() => void runAction(biz.id, 'approve')}
-                          className="bg-black text-white hover:bg-gray-800 min-h-[44px]"
+                          className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
                         >
                           <CheckCircle2 className="w-4 h-4 mr-1.5" />
                           Approve
@@ -356,7 +352,7 @@ export default function BusinessesPage() {
                           type="button"
                           disabled={busy}
                           onClick={() => editReferralPercent(biz)}
-                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                          className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         >
                           Referral %
                         </Button>
@@ -365,7 +361,7 @@ export default function BusinessesPage() {
                         type="button"
                         disabled={busy || biz.isVerified}
                         onClick={() => void runAction(biz.id, 'verify')}
-                        className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                       >
                         <BadgeCheck className="w-4 h-4 mr-1.5" />
                         Verify
@@ -375,7 +371,7 @@ export default function BusinessesPage() {
                           type="button"
                           disabled={busy}
                           onClick={() => void runAction(biz.id, 'suspend')}
-                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                          className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         >
                           <Ban className="w-4 h-4 mr-1.5" />
                           Suspend
@@ -385,7 +381,7 @@ export default function BusinessesPage() {
                           type="button"
                           disabled={busy}
                           onClick={() => void runAction(biz.id, 'approve')}
-                          className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                          className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         >
                           Reactivate
                         </Button>
@@ -396,7 +392,7 @@ export default function BusinessesPage() {
                         onClick={() =>
                           void runAction(biz.id, biz.featured ? 'unfeature' : 'feature')
                         }
-                        className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                       >
                         <Star className="w-4 h-4 mr-1.5" />
                         {biz.featured ? 'Unfeature' : 'Feature'}
@@ -410,7 +406,7 @@ export default function BusinessesPage() {
                             biz.isSponsor ? 'unmark_sponsor' : 'mark_sponsor'
                           )
                         }
-                        className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         title="Blue tick on public directory cards"
                       >
                         <BadgeCheck className="w-4 h-4 mr-1.5 text-[#1D9BF0]" />
@@ -420,7 +416,7 @@ export default function BusinessesPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => void runAction(biz.id, 'delete')}
-                        className="bg-black !text-white hover:bg-neutral-800 min-h-[44px]"
+                        className="h-7 min-h-0 bg-black !text-white hover:bg-neutral-800"
                       >
                         <Trash2 className="w-4 h-4 mr-1.5" />
                         Delete

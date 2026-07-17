@@ -759,7 +759,7 @@ function CreateEventForm() {
                   type="button"
                   onClick={() => saveEvent('preserve')}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+                  className="h-7 min-h-0 flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 size={16} className="animate-spin" />}
                   Save Changes
@@ -768,7 +768,7 @@ function CreateEventForm() {
                   type="button"
                   onClick={() => saveEvent('published')}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+                  className="h-7 min-h-0 flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 size={16} className="animate-spin" />}
                   Save & Publish
@@ -780,7 +780,7 @@ function CreateEventForm() {
                   type="button"
                   onClick={() => saveEvent('draft')}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+                  className="h-7 min-h-0 flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 size={16} className="animate-spin" />}
                   Save as Draft
@@ -789,7 +789,7 @@ function CreateEventForm() {
                   type="button"
                   onClick={() => saveEvent('published')}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+                  className="h-7 min-h-0 flex-1 px-4 py-2 bg-black !text-white rounded-lg font-medium hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {saving && <Loader2 size={16} className="animate-spin" />}
                   Save & Publish
