@@ -39,7 +39,6 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [navConfig, setNavConfig] = useState<NavigationConfig>(DEFAULT_NAVIGATION)
   const [headerPages, setHeaderPages] = useState<Page[]>([])
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
@@ -69,53 +68,37 @@ export function Navbar() {
   }
 
   const authActions = authLoading ? null : user ? (
-    <>
-      <Link
-        href="/contact"
-        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
+    <div className="relative group">
+      <button
+        type="button"
+        className="pb-compact-btn px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap inline-flex items-center gap-1 !bg-transparent shadow-none min-h-0"
       >
-        Contact Us
-      </Link>
-      <div className="relative group">
+        Dashboard <ChevronDown className="w-3.5 h-3.5" />
+      </button>
+      <div className="absolute right-0 top-full mt-1 hidden group-hover:block group-focus-within:block min-w-[160px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-50 py-1">
+        <Link
+          href={getDashboardHref(user as User | BusinessProfile)}
+          className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
+        >
+          Open dashboard
+        </Link>
         <button
           type="button"
-          className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap inline-flex items-center gap-1"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="pb-compact-btn w-full text-left px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800 !bg-transparent shadow-none min-h-0"
         >
-          Dashboard <ChevronDown className="w-3.5 h-3.5" />
+          {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
-        <div className="absolute right-0 top-full mt-1 hidden group-hover:block group-focus-within:block min-w-[160px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-50 py-1">
-          <Link
-            href={getDashboardHref(user as User | BusinessProfile)}
-            className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
-          >
-            Open dashboard
-          </Link>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            disabled={signingOut}
-            className="w-full text-left px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
-          >
-            {signingOut ? 'Signing out…' : 'Sign out'}
-          </button>
-        </div>
       </div>
-    </>
+    </div>
   ) : (
-    <>
-      <Link
-        href="/contact"
-        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap"
-      >
-        Contact
-      </Link>
-      <Link
-        href="/login"
-        className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-white text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
-      >
-        {navConfig.signInLabel}
-      </Link>
-    </>
+    <Link
+      href="/login"
+      className="px-2 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-white text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
+    >
+      {navConfig.signInLabel}
+    </Link>
   )
 
   const renderNavItem = (item: { label: string; href: string }, mobile = false) => {
@@ -163,43 +146,41 @@ export function Navbar() {
       )
     }
 
+    // CSS hover/focus-within — avoids overflow clipping + fragile mouseleave state
     return (
-      <div
-        key={item.href}
-        className="relative"
-        onMouseEnter={() => setOpenDropdown(item.href)}
-        onMouseLeave={() => setOpenDropdown(null)}
-      >
-        <button
-          type="button"
-          className="inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap font-body bg-transparent shadow-none min-h-0 p-0"
-          onClick={() => setOpenDropdown(openDropdown === item.href ? null : item.href)}
-          aria-expanded={openDropdown === item.href}
+      <div key={item.href} className="relative group">
+        <Link
+          href={item.href}
+          className="pb-compact-btn inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap font-body !bg-transparent !text-neutral-300 hover:!text-white shadow-none min-h-0 p-0 h-auto"
+          aria-haspopup="menu"
         >
           {item.label}
-          <ChevronDown className="w-3.5 h-3.5" />
-        </button>
-        {openDropdown === item.href && (
-          <div className="absolute left-0 top-full pt-2 z-50 min-w-[12rem]">
-            <div className="rounded-lg border border-neutral-700 bg-neutral-900 shadow-lg py-1">
+          <ChevronDown className="w-3.5 h-3.5" aria-hidden />
+        </Link>
+        <div
+          role="menu"
+          className="absolute left-0 top-full pt-2 z-[100] min-w-[12rem] opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto transition-opacity"
+        >
+          <div className="rounded-lg border border-neutral-700 bg-neutral-900 shadow-lg py-1">
+            <Link
+              href={item.href}
+              role="menuitem"
+              className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800 hover:text-white"
+            >
+              {item.label}
+            </Link>
+            {children.map((child) => (
               <Link
-                href={item.href}
-                className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800 hover:text-white"
+                key={child.id}
+                href={getCmsPageHref(child)}
+                role="menuitem"
+                className="block px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
               >
-                {item.label}
+                {getCmsPageLabel(child)}
               </Link>
-              {children.map((child) => (
-                <Link
-                  key={child.id}
-                  href={getCmsPageHref(child)}
-                  className="block px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800 hover:text-white"
-                >
-                  {getCmsPageLabel(child)}
-                </Link>
-              ))}
-            </div>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     )
   }
@@ -212,7 +193,7 @@ export function Navbar() {
             <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
 
-          <div className="flex-1 flex items-center justify-center gap-4 xl:gap-8 min-w-0 overflow-x-auto">
+          <div className="flex-1 flex items-center justify-center gap-4 xl:gap-8 min-w-0 overflow-visible">
             {visibleLinks.map((item) => renderNavItem(item))}
             {topLevelHeaderPages.map((page) => (
               <Link

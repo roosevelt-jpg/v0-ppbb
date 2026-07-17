@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { Calendar, Clock, MapPin, Mic2 } from 'lucide-react'
+import { Calendar, MapPin } from 'lucide-react'
 import type { EventsPageConfig, EventsCategory } from '@/lib/events-config'
 import { getCategoryColor, getCategoryName } from '@/lib/events-config'
 import type { NormalizedEvent } from '@/lib/event-utils'
@@ -30,106 +30,90 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
   const businessName = host?.businessName || ''
   const ownerName = host?.ownerName || ''
   const logoUrl = host?.businessLogoUrl || ''
+  const timeLabel = getEventTimeRangeLabel(event)
+  const whenLabel = `${format(startDate, 'MMM d')}${timeLabel ? ` · ${timeLabel}` : ''}`
+  const location =
+    !event.locationName || /^https?:\/\//i.test(event.locationName)
+      ? event.locationName
+        ? 'View map'
+        : 'Location TBA'
+      : event.locationName
 
   return (
-    <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full max-w-sm mx-auto w-full md:max-w-none">
-      <div className="relative w-full aspect-[16/9] bg-neutral-100 overflow-hidden">
+    <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full w-full shadow-sm hover:shadow-md transition">
+      <div className="relative w-full h-24 bg-neutral-100 overflow-hidden shrink-0">
         {event.bannerURL ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={event.bannerURL}
             alt={event.title}
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
+          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground">
             No image
           </div>
         )}
-        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+        <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1 max-w-[70%]">
           <span
-            className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold text-white"
+            className="px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
             style={{ backgroundColor: categoryColor }}
           >
             {categoryName}
           </span>
-          <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold bg-black/75 text-white">
-            {genderLabel}
-          </span>
+          {genderLabel && genderLabel !== 'Mixed' ? (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black/75 text-white">
+              {genderLabel}
+            </span>
+          ) : null}
         </div>
-        <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[0.6rem] font-semibold bg-black text-white">
+        <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black text-white">
           {priceCorner}
         </div>
       </div>
 
-      <div className="p-3 sm:p-3.5 flex flex-col flex-1 min-w-0">
+      <div className="p-2.5 flex flex-col gap-1 flex-1 min-w-0">
         {(logoUrl || businessName || ownerName) && (
-          <div className="flex items-center gap-2 mb-2 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
             {logoUrl && businessName !== 'Admin' ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={logoUrl}
                 alt={businessName || 'Host'}
-                className="h-7 w-7 rounded-full object-cover border border-neutral-200 shrink-0 bg-white"
+                className="h-5 w-5 rounded-full object-cover border border-neutral-200 shrink-0 bg-white"
               />
             ) : (
-              <div className="h-7 w-7 rounded-full bg-neutral-900 text-white text-[0.65rem] font-bold flex items-center justify-center shrink-0">
+              <div className="h-5 w-5 rounded-full bg-neutral-900 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                 {(businessName || ownerName || 'A').charAt(0).toUpperCase()}
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate">
-                {businessName === 'Admin' ? 'Admin' : businessName || 'Host'}
-              </p>
-              {businessName !== 'Admin' && ownerName && ownerName !== businessName ? (
-                <p className="text-[0.65rem] text-muted-foreground truncate">{ownerName}</p>
-              ) : null}
-            </div>
+            <p className="text-[11px] font-medium text-neutral-600 truncate">
+              {businessName === 'Admin' ? 'Admin' : businessName || ownerName || 'Host'}
+            </p>
           </div>
         )}
 
-        <h3 className="font-headline text-base sm:text-lg font-bold text-foreground break-words mb-0.5 leading-snug">
+        <h3 className="font-headline text-sm font-bold text-foreground leading-tight line-clamp-2">
           {event.title}
         </h3>
-        <p
-          className="font-body text-xs font-medium mb-2 break-words"
-          style={{ color: categoryColor }}
-        >
-          {categoryName}
-        </p>
 
-        <div className="space-y-1.5 mb-2 text-xs text-muted-foreground">
-          <div className="flex items-start gap-1.5 min-w-0">
-            <Calendar className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span className="break-words">{format(startDate, 'EEE, MMM d, yyyy')}</span>
+        <div className="space-y-0.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 min-w-0">
+            <Calendar className="w-3 h-3 shrink-0" />
+            <span className="truncate">{whenLabel}</span>
           </div>
-          <div className="flex items-start gap-1.5 min-w-0">
-            <Clock className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span className="break-words">{getEventTimeRangeLabel(event)}</span>
+          <div className="flex items-center gap-1 min-w-0">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="truncate">{location}</span>
           </div>
-          <div className="flex items-start gap-1.5 min-w-0">
-            <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span className="break-words">{event.locationName}</span>
-          </div>
-          {Array.isArray(event.speakers) && event.speakers.length > 0 ? (
-            <div className="flex items-start gap-1.5 min-w-0">
-              <Mic2 className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-              <span className="break-words">
-                {event.speakers
-                  .map((s) => (typeof s === 'string' ? s : s?.name || ''))
-                  .filter(Boolean)
-                  .slice(0, 3)
-                  .join(', ')}
-                {event.speakers.length > 3 ? ` +${event.speakers.length - 3}` : ''}
-              </span>
-            </div>
-          ) : null}
         </div>
 
         {event.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {event.tags.slice(0, 3).map((tag) => (
+          <div className="flex flex-wrap gap-1">
+            {event.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="px-1.5 py-0.5 rounded-full bg-[#f7f6f2] text-[0.6rem] font-medium text-foreground capitalize"
+                className="px-1.5 py-0.5 rounded bg-[#f7f6f2] text-[10px] font-medium text-foreground capitalize"
               >
                 {tag.replace(/-/g, ' ')}
               </span>
@@ -137,16 +121,16 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           </div>
         )}
 
-        <div className="mt-auto flex gap-1.5">
+        <div className="mt-auto flex gap-1 pt-1.5">
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center justify-center min-h-[36px] flex-1 px-3 py-1.5 bg-black text-white rounded-md font-body text-xs font-semibold hover:bg-neutral-800 transition-colors text-center"
+            className="pb-compact-btn inline-flex items-center justify-center h-7 flex-1 px-2 bg-black !text-white rounded-md text-[11px] font-semibold hover:bg-neutral-800"
           >
             {pageConfig.registerButtonLabel}
           </Link>
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center justify-center min-h-[36px] flex-1 px-3 py-1.5 border border-[#e4e1da] rounded-md font-body text-xs font-semibold hover:bg-neutral-50 transition-colors text-center"
+            className="pb-compact-btn inline-flex items-center justify-center h-7 flex-1 px-2 bg-black !text-white rounded-md text-[11px] font-semibold hover:bg-neutral-800"
           >
             {pageConfig.detailsButtonLabel}
           </Link>

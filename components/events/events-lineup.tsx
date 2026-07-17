@@ -50,7 +50,7 @@ export function EventsLineup({
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-64 bg-neutral-200 rounded-lg animate-pulse" />
+            <div key={i} className="h-48 bg-neutral-200 rounded-lg animate-pulse" />
           ))}
         </div>
       ) : events.length === 0 ? (

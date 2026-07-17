@@ -22,7 +22,7 @@ function EventsSkeleton() {
         <div className="h-4 w-80 bg-neutral-200 rounded mb-10" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-56 bg-neutral-200 rounded-lg" />
+            <div key={i} className="h-48 bg-neutral-200 rounded-lg" />
           ))}
         </div>
       </div>

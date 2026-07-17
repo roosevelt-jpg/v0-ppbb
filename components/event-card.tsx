@@ -47,15 +47,6 @@ function toDate(value: unknown): Date | null {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
-function getTimeLabel(event: EventCardEvent): string {
-  return getEventTimeRangeLabel(event as Parameters<typeof getEventTimeRangeLabel>[0])
-}
-
-function getLocationLabel(event: EventCardEvent): string {
-  return getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])
-}
-
-/** Shorten long map URLs for compact cards */
 function formatLocationDisplay(label: string): string {
   const trimmed = label.trim()
   if (!trimmed) return 'Location TBA'
@@ -67,7 +58,6 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
   const title = (typeof event.title === 'string' && event.title.trim()) || 'Untitled event'
   const description =
     typeof event.description === 'string' ? event.description.trim() : ''
-  const showDescription = Boolean(description && description !== title)
 
   const banner =
     (typeof event.bannerURL === 'string' && event.bannerURL) ||
@@ -82,8 +72,10 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
   const logoUrl = host?.businessLogoUrl || ''
 
   const start = toDate(event.startDate) || toDate(event.date)
-  const timeLabel = getTimeLabel(event)
-  const locationLabel = formatLocationDisplay(getLocationLabel(event))
+  const timeLabel = getEventTimeRangeLabel(event as Parameters<typeof getEventTimeRangeLabel>[0])
+  const locationLabel = formatLocationDisplay(
+    getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])
+  )
   const attending =
     typeof event.currentAttendees === 'number'
       ? event.currentAttendees
@@ -95,17 +87,18 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
       ? event.maxAttendees
       : typeof event.capacity === 'number' && event.capacity > 0
         ? event.capacity
-        : Array.isArray(event.ticketTypes)
-          ? (() => {
-              const caps = (event.ticketTypes as { capacity?: number | null }[])
-                .map((t) => t.capacity)
-                .filter((c): c is number => typeof c === 'number' && c > 0)
-              return caps.length ? caps.reduce((a, b) => a + b, 0) : null
-            })()
-          : null
+        : null
   const isFull = capacity != null && attending >= capacity
 
   const href = `/events/${event.id || event.slug || ''}`
+  const datePart = start ? format(start, 'MMM d') : 'TBA'
+  const whenLabel = timeLabel ? `${datePart} · ${timeLabel}` : datePart
+  const attendeesLabel =
+    capacity != null ? `${attending}/${capacity}` : `${attending} attending`
+  const category =
+    typeof event.category === 'string' && event.category.trim()
+      ? event.category.replace(/-/g, ' ')
+      : ''
 
   const handleAddToCalendar = () => {
     const startDate = start || new Date()
@@ -128,7 +121,7 @@ DTSTART:${dtstart}
 DTEND:${dtend}
 SUMMARY:${title}
 DESCRIPTION:${description || title}
-LOCATION:${getLocationLabel(event)}
+LOCATION:${getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])}
 END:VEVENT
 END:VCALENDAR`
 
@@ -141,93 +134,70 @@ END:VCALENDAR`
     document.body.removeChild(element)
   }
 
-  const datePart = start ? format(start, 'MMM d, yyyy') : 'Date TBA'
-  const whenLabel = timeLabel ? `${datePart} · ${timeLabel}` : datePart
-  const attendeesLabel =
-    capacity != null
-      ? isFull
-        ? `${attending}/${capacity} · Full`
-        : `${attending}/${capacity} attending`
-      : `${attending} attending`
-
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden border border-gray-200 h-full flex flex-col">
-      {/* Shorter banner — fixed height instead of tall 16:9 block */}
-      <div className="relative w-full h-28 sm:h-32 bg-gray-200 overflow-hidden shrink-0">
+    <div className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden h-full flex flex-col shadow-sm hover:shadow-md transition">
+      <div className="relative w-full h-24 bg-neutral-100 overflow-hidden shrink-0">
         {banner ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={banner} alt={title} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-            <span className="text-gray-500 text-xs">No image</span>
+          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground">
+            No image
           </div>
         )}
-
-        <div className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-black text-white shadow-sm">
+        <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black text-white">
           {priceLabel}
         </div>
         {isFull ? (
-          <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-600 text-white shadow-sm">
+          <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-600 text-white">
             Full
+          </div>
+        ) : category ? (
+          <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black/70 text-white capitalize">
+            {category}
           </div>
         ) : null}
       </div>
 
-      <div className="p-3 flex-1 flex flex-col gap-1.5 min-h-0">
+      <div className="p-2.5 flex flex-col gap-1 flex-1 min-w-0">
         {(logoUrl || businessName || ownerName) && (
           <div className="flex items-center gap-1.5 min-w-0">
             {logoUrl && businessName !== 'Admin' ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={logoUrl}
-                alt={businessName || 'Host'}
-                className="h-6 w-6 rounded-full object-cover border border-neutral-200 shrink-0 bg-white"
+                alt=""
+                className="h-5 w-5 rounded-full object-cover border border-neutral-200 shrink-0"
               />
             ) : (
-              <div className="h-6 w-6 rounded-full bg-neutral-900 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+              <div className="h-5 w-5 rounded-full bg-neutral-900 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
                 {(businessName || ownerName || 'A').charAt(0).toUpperCase()}
               </div>
             )}
-            <p className="text-xs font-medium text-neutral-700 truncate min-w-0">
-              {businessName === 'Admin'
-                ? 'Admin'
-                : [businessName, ownerName !== businessName ? ownerName : null]
-                    .filter(Boolean)
-                    .join(' · ') || 'Host'}
+            <p className="text-[11px] font-medium text-neutral-600 truncate">
+              {businessName === 'Admin' ? 'Admin' : businessName || ownerName || 'Host'}
             </p>
           </div>
         )}
 
-        <div className="min-w-0">
-          <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-1">{title}</h3>
-          {typeof event.category === 'string' && event.category.trim() ? (
-            <p className="text-[11px] font-medium text-neutral-500 capitalize mt-0.5 truncate">
-              {event.category.replace(/-/g, ' ')}
-            </p>
-          ) : null}
-        </div>
+        <h3 className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{title}</h3>
 
-        <div className="space-y-1 text-[11px] text-gray-700">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Calendar size={12} className="shrink-0 text-neutral-900" />
+        <div className="space-y-0.5 text-[11px] text-neutral-600">
+          <div className="flex items-center gap-1 min-w-0">
+            <Calendar size={11} className="shrink-0" />
             <span className="truncate">{whenLabel}</span>
           </div>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <MapPin size={12} className="shrink-0 text-neutral-900" />
+          <div className="flex items-center gap-1 min-w-0">
+            <MapPin size={11} className="shrink-0" />
             <span className="truncate">{locationLabel}</span>
-          </div>
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Users size={12} className="shrink-0 text-neutral-900" />
-            <span className="truncate">{attendeesLabel}</span>
+            <span className="text-neutral-300 mx-0.5">·</span>
+            <Users size={11} className="shrink-0" />
+            <span className="truncate shrink-0">{attendeesLabel}</span>
           </div>
         </div>
 
-        {showDescription ? (
-          <p className="text-[11px] text-gray-600 line-clamp-1">{description}</p>
-        ) : null}
-
         {showActions && (
-          <div className="flex gap-1.5 mt-auto pt-2 border-t border-gray-100">
+          <div className="flex gap-1 mt-auto pt-1.5">
             <Link
               href={href}
               className="pb-compact-btn flex-1 inline-flex items-center justify-center h-7 px-2 rounded-md bg-black !text-white text-[11px] font-semibold hover:bg-neutral-800"

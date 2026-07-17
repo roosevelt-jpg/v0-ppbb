@@ -133,8 +133,8 @@ export default function EventsPage() {
                 setTimeScope('upcoming')
                 setSelectedDate(null)
               }}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold ${
-                timeScope === 'upcoming' ? 'bg-black text-white' : 'bg-white border border-gray-300'
+              className={`pb-compact-btn px-4 py-2 rounded-lg text-sm font-semibold bg-black !text-white hover:bg-neutral-800 ${
+                timeScope === 'upcoming' ? 'ring-2 ring-black ring-offset-2' : 'opacity-70'
               }`}
             >
               Upcoming
@@ -145,8 +145,8 @@ export default function EventsPage() {
                 setTimeScope('month')
                 setSelectedDate(null)
               }}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold ${
-                timeScope === 'month' ? 'bg-black text-white' : 'bg-white border border-gray-300'
+              className={`pb-compact-btn px-4 py-2 rounded-lg text-sm font-semibold bg-black !text-white hover:bg-neutral-800 ${
+                timeScope === 'month' ? 'ring-2 ring-black ring-offset-2' : 'opacity-70'
               }`}
             >
               This month
