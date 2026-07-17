@@ -340,72 +340,6 @@ input[type='checkbox'] {
     color: var(--pb-color-button-text, #ffffff);
   }
 
-  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn) {
-    @apply px-3 rounded-md font-semibold text-xs active:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
-    font-family: var(--pb-font-button, var(--font-body));
-    background-color: var(--pb-color-button-bg, #111111);
-    color: var(--pb-color-button-text, #ffffff);
-    font-size: 12px;
-    min-height: 28px;
-  }
-
-  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):hover {
-    background-color: var(--pb-color-button-hover, #333333);
-  }
-
-  /* Compact icon / rating controls — opt out of global CTA chrome */
-  button.pb-compact-btn,
-  button.pb-rating-btn,
-  label.pb-compact-btn {
-    min-height: 0 !important;
-    min-width: 0 !important;
-    box-shadow: none !important;
-    font-weight: 600;
-  }
-
-  button.pb-compact-btn,
-  button.pb-rating-btn {
-    padding: 0;
-  }
-
-  a.pb-compact-btn {
-    min-height: 0 !important;
-    box-shadow: none !important;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  button.pb-compact-btn:hover,
-  button.pb-rating-btn:hover,
-  a.pb-compact-btn:hover,
-  label.pb-compact-btn:hover {
-    box-shadow: none !important;
-  }
-
-  /* Admin link-buttons: force black bg / white text when using compact classes */
-  a.pb-compact-btn.bg-black,
-  label.pb-compact-btn.bg-black,
-  button.pb-compact-btn.bg-black {
-    background-color: #111111 !important;
-    color: #ffffff !important;
-  }
-  a.pb-compact-btn.bg-black:hover,
-  label.pb-compact-btn.bg-black:hover,
-  button.pb-compact-btn.bg-black:hover {
-    background-color: #262626 !important;
-    color: #ffffff !important;
-  }
-
-  button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):disabled { @apply opacity-50 cursor-not-allowed; }
-  button:not([data-slot='button']):not([data-dashboard-control]).secondary {
-    background-color: var(--pb-color-background, #f7f6f2);
-    color: var(--pb-color-foreground, #111111);
-    border: 2px solid var(--pb-color-border, #e4e1da);
-  }
-  button:not([data-slot='button']):not([data-dashboard-control]).secondary:hover {
-    background-color: var(--pb-color-border, #e4e1da);
-  }
-
   label {
     /* REMOVED uppercase and tracking — breaks form labels */
     @apply text-xs font-semibold text-charcoal;
@@ -429,6 +363,120 @@ input[type='checkbox'] {
   .badge-info    { @apply bg-info/10 text-info; }
 
   * { @apply transition-colors duration-200; }
+}
+
+/*
+ * Platform-wide buttons: black bg + white text/icons (unlayered so it beats Tailwind utilities).
+ * Opt-outs: theme/nav chrome, calendar days, rating stars.
+ */
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn),
+[data-slot='button']:not(.pb-rating-btn),
+label.pb-compact-btn,
+a.pb-compact-btn,
+label:has(> input[type='file'].sr-only),
+label:has(> input[type='file'].hidden) {
+  background-color: #111111 !important;
+  color: #ffffff !important;
+  border-color: #111111 !important;
+  font-family: var(--pb-font-button, var(--font-body));
+}
+
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):hover,
+[data-slot='button']:not(.pb-rating-btn):hover,
+label.pb-compact-btn:hover,
+a.pb-compact-btn:hover,
+label:has(> input[type='file'].sr-only):hover,
+label:has(> input[type='file'].hidden):hover {
+  background-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn) svg,
+[data-slot='button']:not(.pb-rating-btn) svg,
+label.pb-compact-btn svg,
+a.pb-compact-btn svg,
+label:has(> input[type='file'].sr-only) svg,
+label:has(> input[type='file'].hidden) svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn) {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 11px;
+  min-height: 28px;
+  box-shadow: none;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):active {
+  opacity: 0.9;
+}
+
+button.pb-compact-btn,
+button.pb-rating-btn,
+label.pb-compact-btn {
+  min-height: 0 !important;
+  min-width: 0 !important;
+  box-shadow: none !important;
+  font-weight: 600;
+}
+
+button.pb-rating-btn {
+  background-color: transparent !important;
+  color: inherit !important;
+  border-color: transparent !important;
+}
+
+button.pb-rating-btn svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+a.pb-compact-btn {
+  min-height: 0 !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+button.pb-compact-btn:hover,
+a.pb-compact-btn:hover,
+label.pb-compact-btn:hover {
+  box-shadow: none !important;
+}
+
+button:not([data-dashboard-control]):not([data-menu-item]):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button:not([data-dashboard-control]).secondary,
+[data-slot='button'].secondary {
+  background-color: #111111 !important;
+  color: #ffffff !important;
+  border: 1px solid #111111 !important;
+}
+
+button:not([data-dashboard-control]).secondary:hover,
+[data-slot='button'].secondary:hover {
+  background-color: #262626 !important;
+}
+
+label:has(> input[type='file'].sr-only),
+label:has(> input[type='file'].hidden) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 28px;
+  padding: 0 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* ── Admin layout fix ── */

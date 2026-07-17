@@ -25,6 +25,7 @@ import {
 } from 'firebase/firestore'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { adminApiFetch } from '@/lib/admin-api-client'
+import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
 import { CertificateDesignPreview } from '@/components/certificate-design-preview'
 import {
   DEFAULT_CERTIFICATE_TEMPLATE,
@@ -258,7 +259,7 @@ export default function AdminCmsCertificatesPage() {
                         e.stopPropagation()
                         void handleDelete(t.id)
                       }}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded"
+                      className="pb-compact-btn h-6 w-6 min-h-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 inline-flex items-center justify-center"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -339,7 +340,7 @@ export default function AdminCmsCertificatesPage() {
 
               <div>
                 <label className="block text-sm font-medium mb-1">Logo (optional)</label>
-                <label className="inline-flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer hover:bg-gray-50">
+                <label className={BUTTON_LABEL_COMPACT}>
                   <Upload size={16} />
                   {uploading === 'logo' ? 'Uploading…' : 'Upload logo'}
                   <input
@@ -406,7 +407,7 @@ export default function AdminCmsCertificatesPage() {
                     {form.signatories.length > 1 ? (
                       <button
                         type="button"
-                        className="text-xs text-red-600"
+                        className="pb-compact-btn h-7 min-h-0 px-2 text-[11px] rounded-md bg-black !text-white"
                         onClick={() =>
                           setForm((prev) => ({
                             ...prev,

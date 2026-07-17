@@ -21,6 +21,7 @@ import {
   MarketplaceBenefit,
 } from '@/lib/marketplace-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
 
 export default function AdminCmsMarketplacePage() {
   const [config, setConfig] = useState<MarketplacePlatformConfig>(DEFAULT_MARKETPLACE_CONFIG)
@@ -224,7 +225,7 @@ export default function AdminCmsMarketplacePage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={pc.heroImageURL} alt="" className="h-24 w-40 object-cover rounded border mb-2" />
               ) : null}
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit bg-white text-black">
+              <label className={BUTTON_LABEL_COMPACT}>
                 <Upload className="w-4 h-4" />
                 {uploading ? 'Uploading…' : 'Upload hero image'}
                 <input
@@ -349,7 +350,7 @@ export default function AdminCmsMarketplacePage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit bg-white text-black">
+                  <label className={BUTTON_LABEL_COMPACT}>
                     <Upload className="w-4 h-4" />
                     {uploading ? 'Uploading…' : 'Upload image'}
                     <input
@@ -369,7 +370,7 @@ export default function AdminCmsMarketplacePage() {
                       type="button"
                       variant="outline"
                       onClick={handleRemoveImage}
-                      className="min-h-[44px] w-fit bg-red-600 text-white border-red-600 hover:bg-red-700 hover:text-white"
+                      className="min-h-[44px] w-fit bg-black !text-white border-black hover:bg-neutral-800 hover:text-white"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Remove image
@@ -455,7 +456,7 @@ export default function AdminCmsMarketplacePage() {
                       type="button"
                       size="sm"
                       onClick={() => removeBenefit(index)}
-                      className="min-h-[40px] bg-red-600 text-white hover:bg-red-700"
+                      className="min-h-[40px] bg-black !text-white hover:bg-neutral-800"
                       aria-label="Delete benefit"
                     >
                       <Trash2 className="w-4 h-4" />

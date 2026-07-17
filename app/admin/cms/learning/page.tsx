@@ -309,7 +309,7 @@ export default function AdminCmsLearningPage() {
                   <button
                     type="button"
                     onClick={() => void handleDelete(resource.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    className="pb-compact-btn h-6 w-6 min-h-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 inline-flex items-center justify-center"
                     aria-label="Delete"
                   >
                     <Trash2 size={16} />

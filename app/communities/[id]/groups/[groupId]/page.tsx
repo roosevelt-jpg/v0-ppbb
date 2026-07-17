@@ -573,7 +573,7 @@ export default function GroupChatPage() {
                         type="button"
                         disabled={actingMemberId === member.id}
                         onClick={() => handleMemberDecision(member.id, 'rejected')}
-                        className="flex-1 sm:flex-none px-3 py-2 bg-red-600 !text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 min-h-[44px]"
+                        className="flex-1 sm:flex-none px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:opacity-50 min-h-[44px]"
                       >
                         Reject
                       </button>

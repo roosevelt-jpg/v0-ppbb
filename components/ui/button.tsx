@@ -8,16 +8,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
+        default: 'bg-black text-white hover:bg-neutral-800 [a]:hover:bg-neutral-800',
         outline:
-          'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
+          'border-black bg-black text-white hover:bg-neutral-800 hover:text-white aria-expanded:bg-neutral-800 aria-expanded:text-white',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
+          'bg-black text-white hover:bg-neutral-800 aria-expanded:bg-neutral-800 aria-expanded:text-white',
         ghost:
-          'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
+          'bg-black text-white hover:bg-neutral-800 aria-expanded:bg-neutral-800 aria-expanded:text-white',
         destructive:
-          'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'bg-black text-white hover:bg-neutral-800 focus-visible:border-black focus-visible:ring-neutral-400/30',
+        link: 'bg-transparent !text-neutral-900 underline-offset-4 hover:underline border-transparent',
       },
       size: {
         default:

@@ -22,6 +22,7 @@ import {
   PartnersInquiryCategory,
 } from '@/lib/partners-page-config'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
+import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
 import { CmsImageUpload } from '@/components/cms-image-upload'
 import { subscribeToForms } from '@/lib/form-builder-queries'
 import type { CustomForm } from '@/lib/form-builder-types'
@@ -315,7 +316,7 @@ export default function AdminCmsPartnersPage() {
                 Upload a PDF → Firebase Storage → URL stored in Firestore only.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 items-start">
-                <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm font-body min-h-[44px] bg-white text-black">
+                <label className={BUTTON_LABEL_COMPACT}>
                   <Upload className="w-4 h-4" />
                   {uploading ? 'Uploading…' : pc.sponsorshipDeckPDFUrl ? 'Replace PDF' : 'Upload PDF'}
                   <input
@@ -343,7 +344,7 @@ export default function AdminCmsPartnersPage() {
                     <Button
                       type="button"
                       onClick={handleRemovePdf}
-                      className="min-h-[44px] bg-red-600 text-white hover:bg-red-700"
+                      className="min-h-[44px] bg-black !text-white hover:bg-neutral-800"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Remove PDF
@@ -434,7 +435,7 @@ export default function AdminCmsPartnersPage() {
                       type="button"
                       size="sm"
                       onClick={() => removeTrack(index)}
-                      className="min-h-[40px] bg-red-600 text-white hover:bg-red-700"
+                      className="min-h-[40px] bg-black !text-white hover:bg-neutral-800"
                       aria-label="Delete track"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -594,7 +595,7 @@ export default function AdminCmsPartnersPage() {
                   <button
                     type="button"
                     onClick={() => removeInquiryCategory(i)}
-                    className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+                    className="w-full min-h-[44px] inline-flex items-center justify-center rounded-lg bg-black !text-white hover:bg-neutral-800 border-0"
                     aria-label="Remove category"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -788,7 +789,7 @@ export default function AdminCmsPartnersPage() {
                         },
                       }))
                     }
-                    className="min-h-[44px] px-3 rounded-lg border border-red-200 text-red-600"
+                    className="min-h-[44px] px-3 rounded-lg bg-black !text-white border-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

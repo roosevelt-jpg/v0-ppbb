@@ -13,6 +13,7 @@ import {
   AboutValueItem,
 } from '@/lib/about-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
 
 export default function AdminCmsAboutPage() {
   const [config, setConfig] = useState<AboutConfig>(DEFAULT_ABOUT)
@@ -342,7 +343,7 @@ export default function AdminCmsAboutPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit">
+                  <label className={BUTTON_LABEL_COMPACT}>
                     <Upload className="w-4 h-4" />
                     {uploading === 'founder' ? 'Uploading…' : 'Upload founder image'}
                     <input
@@ -361,7 +362,7 @@ export default function AdminCmsAboutPage() {
                     <button
                       type="button"
                       onClick={() => void handleRemoveFounderImage()}
-                      className="text-xs text-red-600 underline text-left min-h-[44px]"
+                      className="pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white hover:bg-neutral-800 text-left no-underline"
                     >
                       Remove image
                     </button>
@@ -494,7 +495,7 @@ export default function AdminCmsAboutPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit">
+                  <label className={BUTTON_LABEL_COMPACT}>
                     <Upload className="w-4 h-4" />
                     {uploading === 'missionVision' ? 'Uploading…' : 'Upload section image'}
                     <input
@@ -513,7 +514,7 @@ export default function AdminCmsAboutPage() {
                     <button
                       type="button"
                       onClick={() => void handleRemoveMissionVisionImage()}
-                      className="text-xs text-red-600 underline text-left min-h-[44px]"
+                      className="pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white hover:bg-neutral-800 text-left no-underline"
                     >
                       Remove image
                     </button>
@@ -656,7 +657,7 @@ export default function AdminCmsAboutPage() {
                   <button
                     type="button"
                     onClick={() => removeValue(i)}
-                    className="flex items-center justify-center min-h-[44px] w-full p-2 bg-red-600 text-white rounded"
+                    className="flex items-center justify-center pb-compact-btn h-7 min-h-0 w-auto px-2 p-0 bg-black !text-white rounded"
                     aria-label="Remove value"
                   >
                     <Trash2 className="w-4 h-4" />

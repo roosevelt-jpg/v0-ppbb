@@ -30,6 +30,7 @@ import {
 } from '@/lib/testimonials'
 import { useAuth } from '@/lib/auth-context'
 import { uploadFileToFirebase, uploadImageToFirebase } from '@/lib/upload-utils'
+import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function AdminCmsTestimonialsPage() {
@@ -276,7 +277,7 @@ export default function AdminCmsTestimonialsPage() {
             ) : (
               <div>
                 <label className="block text-sm font-medium mb-1">Video</label>
-                <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
+                <label className={BUTTON_LABEL_COMPACT}>
                   <Upload className="w-4 h-4" />
                   {uploading === 'video' ? 'Uploading…' : 'Upload video'}
                   <input
@@ -294,7 +295,7 @@ export default function AdminCmsTestimonialsPage() {
 
             <div>
               <label className="block text-sm font-medium mb-1">Avatar (optional)</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
+              <label className={BUTTON_LABEL_COMPACT}>
                 <Upload className="w-4 h-4" />
                 {uploading === 'avatar' ? 'Uploading…' : 'Upload avatar'}
                 <input

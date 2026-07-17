@@ -17,6 +17,7 @@ import {
   HomepageBannerButton,
 } from '@/lib/homepage-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
 import { CmsImageUpload } from '@/components/cms-image-upload'
 
 async function uploadHomepageImage(
@@ -296,7 +297,7 @@ export default function AdminCmsHomepagePage() {
           <div className="space-y-4 pt-2 border-t border-neutral-200">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h3 className="font-semibold text-sm">Hero images (slider)</h3>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
+              <label className={BUTTON_LABEL_COMPACT}>
                 <Upload className="w-4 h-4" />
                 {uploading === 'hero' ? 'Uploading…' : 'Add image'}
                 <input
@@ -637,7 +638,7 @@ export default function AdminCmsHomepagePage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Mission image</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50">
+              <label className={BUTTON_LABEL_COMPACT}>
                 <Upload className="w-4 h-4" />
                 {uploading === 'mission' ? 'Uploading…' : 'Upload image'}
                 <input
@@ -766,7 +767,7 @@ export default function AdminCmsHomepagePage() {
                   <div className="md:col-span-2">
                     <label className="text-xs font-medium">Image</label>
                     <div className="flex flex-wrap items-center gap-3 mt-1">
-                      <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm">
+                      <label className={BUTTON_LABEL_COMPACT}>
                         <Upload className="w-4 h-4" />
                         {uploading === `pillar-${i}` ? 'Uploading…' : 'Upload image'}
                         <input

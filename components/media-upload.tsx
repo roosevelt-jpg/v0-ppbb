@@ -150,7 +150,7 @@ export function MediaUpload({
 
                 <button
                   onClick={() => removeFile(index)}
-                  className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition"
+                  className="absolute top-1 right-1 bg-black hover:bg-neutral-800 !text-white p-1 rounded opacity-0 group-hover:opacity-100 transition"
                 >
                   <X className="w-3 h-3" />
                 </button>

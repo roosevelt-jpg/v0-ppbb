@@ -310,7 +310,7 @@ export default function AdminMembersPage() {
               type="button"
               disabled={bulkBusy}
               onClick={() => void runBulkDelete()}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-black px-4 py-2 text-sm font-semibold !text-white hover:bg-neutral-800 disabled:opacity-50"
             >
               <Trash2 size={14} />
               {bulkBusy ? 'Working…' : 'Delete selected'}

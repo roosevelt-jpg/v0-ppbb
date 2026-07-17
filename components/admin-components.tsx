@@ -133,13 +133,7 @@ export function AdminTable({
                             e.stopPropagation()
                             action.onClick(row)
                           }}
-                          className={`${BUTTON_SMALL} ${
-                            action.variant === 'danger'
-                              ? 'bg-red-600 text-white hover:bg-red-700'
-                              : action.variant === 'secondary'
-                              ? 'bg-neutral-200 text-neutral-900 hover:bg-neutral-300'
-                              : BUTTON_PRIMARY
-                          }`}
+                          className={BUTTON_PRIMARY}
                         >
                           {action.label}
                         </button>
