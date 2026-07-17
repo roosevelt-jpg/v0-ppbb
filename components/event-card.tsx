@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Calendar, MapPin, Users, Download, Clock } from 'lucide-react'
+import { Calendar, MapPin, Users, Download } from 'lucide-react'
 import { format } from 'date-fns'
 import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
 import { getEventLocationLabel, getEventTimeRangeLabel } from '@/lib/event-utils'
@@ -55,6 +55,14 @@ function getLocationLabel(event: EventCardEvent): string {
   return getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])
 }
 
+/** Shorten long map URLs for compact cards */
+function formatLocationDisplay(label: string): string {
+  const trimmed = label.trim()
+  if (!trimmed) return 'Location TBA'
+  if (/^https?:\/\//i.test(trimmed)) return 'View map'
+  return trimmed
+}
+
 export default function EventCard({ event, showActions = true }: EventCardProps) {
   const title = (typeof event.title === 'string' && event.title.trim()) || 'Untitled event'
   const description =
@@ -75,7 +83,7 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
 
   const start = toDate(event.startDate) || toDate(event.date)
   const timeLabel = getTimeLabel(event)
-  const locationLabel = getLocationLabel(event)
+  const locationLabel = formatLocationDisplay(getLocationLabel(event))
   const attending =
     typeof event.currentAttendees === 'number'
       ? event.currentAttendees
@@ -120,7 +128,7 @@ DTSTART:${dtstart}
 DTEND:${dtend}
 SUMMARY:${title}
 DESCRIPTION:${description || title}
-LOCATION:${locationLabel}
+LOCATION:${getLocationLabel(event)}
 END:VEVENT
 END:VCALENDAR`
 
@@ -133,110 +141,107 @@ END:VCALENDAR`
     document.body.removeChild(element)
   }
 
+  const datePart = start ? format(start, 'MMM d, yyyy') : 'Date TBA'
+  const whenLabel = timeLabel ? `${datePart} · ${timeLabel}` : datePart
+  const attendeesLabel =
+    capacity != null
+      ? isFull
+        ? `${attending}/${capacity} · Full`
+        : `${attending}/${capacity} attending`
+      : `${attending} attending`
+
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border border-gray-200 h-full flex flex-col">
-      <div className="relative w-full bg-gray-200 overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden border border-gray-200 h-full flex flex-col">
+      {/* Shorter banner — fixed height instead of tall 16:9 block */}
+      <div className="relative w-full h-28 sm:h-32 bg-gray-200 overflow-hidden shrink-0">
         {banner ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={banner} alt={title} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
-            <span className="text-gray-500 text-sm">No image</span>
+            <span className="text-gray-500 text-xs">No image</span>
           </div>
         )}
 
-        {/* Free / Price — banner top corner (not gender) */}
-        <div className="absolute top-3 right-3 px-2.5 py-1 rounded text-xs font-semibold bg-black text-white shadow-sm">
+        <div className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-black text-white shadow-sm">
           {priceLabel}
         </div>
         {isFull ? (
-          <div className="absolute top-3 left-3 px-2.5 py-1 rounded text-xs font-semibold bg-red-600 text-white shadow-sm">
+          <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-semibold bg-red-600 text-white shadow-sm">
             Full
           </div>
         ) : null}
       </div>
 
-      <div className="p-4 flex-1 flex flex-col">
-        {/* Host: Admin for PB events; business name only for business hosts */}
+      <div className="p-3 flex-1 flex flex-col gap-1.5 min-h-0">
         {(logoUrl || businessName || ownerName) && (
-          <div className="flex items-center gap-2.5 mb-3 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
             {logoUrl && businessName !== 'Admin' ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={logoUrl}
                 alt={businessName || 'Host'}
-                className="h-9 w-9 rounded-full object-cover border border-neutral-200 shrink-0 bg-white"
+                className="h-6 w-6 rounded-full object-cover border border-neutral-200 shrink-0 bg-white"
               />
             ) : (
-              <div className="h-9 w-9 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shrink-0">
+              <div className="h-6 w-6 rounded-full bg-neutral-900 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                 {(businessName || ownerName || 'A').charAt(0).toUpperCase()}
               </div>
             )}
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-neutral-900 truncate">
-                {businessName === 'Admin' ? 'Admin' : businessName || 'Host'}
-              </p>
-              {businessName !== 'Admin' && ownerName && ownerName !== businessName ? (
-                <p className="text-xs text-neutral-500 truncate">{ownerName}</p>
-              ) : null}
-            </div>
+            <p className="text-xs font-medium text-neutral-700 truncate min-w-0">
+              {businessName === 'Admin'
+                ? 'Admin'
+                : [businessName, ownerName !== businessName ? ownerName : null]
+                    .filter(Boolean)
+                    .join(' · ') || 'Host'}
+            </p>
           </div>
         )}
 
-        <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2">{title}</h3>
-        {typeof event.category === 'string' && event.category.trim() ? (
-          <p className="text-sm font-medium text-neutral-700 mb-2 capitalize">
-            {event.category.replace(/-/g, ' ')}
-          </p>
-        ) : null}
-
-        <div className="space-y-2 mb-4 text-sm">
-          <div className="flex items-start gap-2 text-gray-700">
-            <Calendar size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
-            <span>{start ? format(start, 'MMM d, yyyy') : 'Date TBA'}</span>
-          </div>
-          {timeLabel ? (
-            <div className="flex items-start gap-2 text-gray-700">
-              <Clock size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
-              <span>{timeLabel}</span>
-            </div>
+        <div className="min-w-0">
+          <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-1">{title}</h3>
+          {typeof event.category === 'string' && event.category.trim() ? (
+            <p className="text-[11px] font-medium text-neutral-500 capitalize mt-0.5 truncate">
+              {event.category.replace(/-/g, ' ')}
+            </p>
           ) : null}
-          <div className="flex items-start gap-2 text-gray-700">
-            <MapPin size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
-            <span className="line-clamp-1">{locationLabel}</span>
+        </div>
+
+        <div className="space-y-1 text-[11px] text-gray-700">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Calendar size={12} className="shrink-0 text-neutral-900" />
+            <span className="truncate">{whenLabel}</span>
           </div>
-          <div className="flex items-start gap-2 text-gray-700">
-            <Users size={16} className="flex-shrink-0 mt-0.5 text-neutral-900" />
-            <span>
-              {capacity != null
-                ? isFull
-                  ? `${attending}/${capacity} attending · Full`
-                  : `${attending}/${capacity} attending`
-                : `${attending} attending`}
-            </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <MapPin size={12} className="shrink-0 text-neutral-900" />
+            <span className="truncate">{locationLabel}</span>
+          </div>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Users size={12} className="shrink-0 text-neutral-900" />
+            <span className="truncate">{attendeesLabel}</span>
           </div>
         </div>
 
         {showDescription ? (
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-1">{description}</p>
-        ) : (
-          <div className="flex-1" />
-        )}
+          <p className="text-[11px] text-gray-600 line-clamp-1">{description}</p>
+        ) : null}
 
         {showActions && (
-          <div className="flex gap-2 pt-4 border-t border-gray-200">
+          <div className="flex gap-1.5 mt-auto pt-2 border-t border-gray-100">
             <Link
               href={href}
-              className="flex-1 px-3 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition text-center"
+              className="pb-compact-btn flex-1 inline-flex items-center justify-center h-7 px-2 rounded-md bg-black !text-white text-[11px] font-semibold hover:bg-neutral-800"
             >
               View Details
             </Link>
             <button
               type="button"
               onClick={handleAddToCalendar}
-              className="px-3 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition flex items-center justify-center min-w-[44px] min-h-[44px]"
+              className="pb-compact-btn inline-flex items-center justify-center h-7 w-7 rounded-md bg-black !text-white hover:bg-neutral-800"
               title="Add to calendar"
               aria-label="Add to calendar"
             >
-              <Download size={14} className="text-white" strokeWidth={2.5} />
+              <Download size={12} className="text-white" strokeWidth={2.5} />
             </button>
           </div>
         )}

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Quote } from 'lucide-react'
+import { Quote } from 'lucide-react'
 import {
   subscribeToHomepage,
   DEFAULT_HOMEPAGE,
@@ -48,6 +48,7 @@ function TestimonialSlide({ item }: { item: Testimonial }) {
       </p>
       <footer className="flex items-center gap-3">
         {item.avatarURL ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.avatarURL}
             alt=""
@@ -90,8 +91,6 @@ export function HomeTestimonials() {
   if (testimonials.length === 0) return null
 
   const current = testimonials[index]
-  const canPrev = index > 0
-  const canNext = index < testimonials.length - 1
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 overflow-x-hidden">
@@ -101,68 +100,26 @@ export function HomeTestimonials() {
         </h2>
 
         <div className="relative min-w-0">
-          <div className="sm:px-12 md:px-14">
-            <TestimonialSlide item={current} />
-          </div>
-
-          {testimonials.length > 1 && (
-            <>
-              <div className="flex sm:hidden justify-center gap-4 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setIndex((i) => Math.max(0, i - 1))}
-                  disabled={!canPrev}
-                  className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
-                  aria-label="Previous testimonial"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIndex((i) => Math.min(testimonials.length - 1, i + 1))}
-                  disabled={!canNext}
-                  className="flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
-                  aria-label="Next testimonial"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIndex((i) => Math.max(0, i - 1))}
-                disabled={!canPrev}
-                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
-                aria-label="Previous testimonial"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setIndex((i) => Math.min(testimonials.length - 1, i + 1))}
-                disabled={!canNext}
-                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 items-center justify-center min-h-[44px] min-w-[44px] rounded-full bg-white border border-[#e4e1da] shadow disabled:opacity-40"
-                aria-label="Next testimonial"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </>
-          )}
+          <TestimonialSlide item={current} />
         </div>
 
         {testimonials.length > 1 && (
-          <div className="flex justify-center gap-2 mt-6">
+          <div className="flex justify-center items-center gap-1.5 mt-4" role="tablist" aria-label="Success stories">
             {testimonials.map((t, i) => (
               <button
                 key={t.id}
                 type="button"
+                role="tab"
+                aria-selected={i === index}
                 onClick={() => setIndex(i)}
-                className={`min-h-[44px] min-w-[44px] flex items-center justify-center`}
+                className="pb-compact-btn inline-flex items-center justify-center h-4 w-4 min-h-0 min-w-0 p-0 rounded-full !bg-transparent hover:!bg-transparent shadow-none border-0"
                 aria-label={`Go to testimonial ${i + 1}`}
               >
                 <span
-                  className={`block h-2 w-2 rounded-full transition-colors ${
-                    i === index ? 'bg-black' : 'bg-neutral-300'
+                  className={`block rounded-full transition-all ${
+                    i === index
+                      ? 'h-1.5 w-1.5 bg-black'
+                      : 'h-1 w-1 bg-neutral-300'
                   }`}
                 />
               </button>
