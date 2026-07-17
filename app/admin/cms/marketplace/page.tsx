@@ -237,7 +237,7 @@ export default function AdminCmsMarketplacePage() {
                     if (!file) return
                     try {
                       setUploading(true)
-                      const url = await uploadFileToFirebase(file, 'marketplace/hero')
+                      const url = await uploadImageToFirebase(file, 'marketplace/hero')
                       updatePage('heroImageURL', url)
                     } catch (err) {
                       setMessage({
