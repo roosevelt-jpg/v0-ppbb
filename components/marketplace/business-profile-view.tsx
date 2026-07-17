@@ -314,7 +314,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
           Message
         </button>
         {salesOffers.length > 0 && (
-          primaryPhone ? (
+          isLoggedInMember && primaryPhone ? (
             <a
               href={`tel:${primaryPhone.replace(/\s+/g, '')}`}
               className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
@@ -323,13 +323,20 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
               Call / Book
             </a>
           ) : (
-            <a
-              href="#listings"
+            <button
+              type="button"
+              onClick={() => {
+                if (!isLoggedInMember) {
+                  router.push(`/login?returnUrl=/directory/${businessId}`)
+                  return
+                }
+                handleMessage()
+              }}
               className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
             >
-              <Tag className="w-4 h-4" />
-              Call / Book
-            </a>
+              <Phone className="w-4 h-4" />
+              {isLoggedInMember ? 'Call / Book' : 'Sign in to Call / Book'}
+            </button>
           )
         )}
         {activeJobs.length > 0 && (

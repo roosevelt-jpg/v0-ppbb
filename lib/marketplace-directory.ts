@@ -18,7 +18,6 @@ export type MarketplaceDirectoryFilter =
   | 'consulting'
   | 'education'
   | 'merchandise'
-  | 'discounts'
 
 export const MARKETPLACE_DIRECTORY_TABS: { id: MarketplaceDirectoryFilter; label: string }[] = [
   { id: 'all', label: 'ALL' },
@@ -28,7 +27,6 @@ export const MARKETPLACE_DIRECTORY_TABS: { id: MarketplaceDirectoryFilter; label
   { id: 'consulting', label: 'CONSULTING' },
   { id: 'education', label: 'EDUCATION' },
   { id: 'merchandise', label: 'MERCHANDISE' },
-  { id: 'discounts', label: 'DISCOUNTS' },
 ]
 
 export interface DirectoryBusiness {
@@ -44,6 +42,8 @@ export interface DirectoryBusiness {
   phone: string
   email: string
   website: string
+  location: string
+  isSponsor: boolean
   isApproved: boolean
   isActive: boolean
 }
@@ -144,6 +144,20 @@ export function normalizeDirectoryBusiness(
     phone: asString(data.phone) || asString(data.businessPhone) || asString(data.contact),
     email: asString(data.email),
     website: asString(data.website),
+    location:
+      asString(data.location) ||
+      asString(data.locationLabel) ||
+      asString(data.city) ||
+      asString(data.emirate) ||
+      (data.locationData && typeof data.locationData === 'object'
+        ? asString((data.locationData as { formattedAddress?: string }).formattedAddress) ||
+          asString((data.locationData as { city?: string }).city)
+        : ''),
+    isSponsor:
+      isTruthyFlag(data.isSponsor) ||
+      isTruthyFlag(data.sponsor) ||
+      normalizeStatus(data.membership) === 'sponsor' ||
+      normalizeStatus(data.tier) === 'sponsor',
     isApproved: isTruthyFlag(data.isApproved),
     isActive,
   }
@@ -238,7 +252,7 @@ function businessMatchesFilter(
   hasMemberDiscount: boolean
 ): boolean {
   if (filter === 'all') return true
-  if (filter === 'discounts') return hasMemberDiscount
+  void hasMemberDiscount
 
   const haystack = [
     business.category,
@@ -247,7 +261,7 @@ function businessMatchesFilter(
     .join(' ')
     .toLowerCase()
 
-  const needles: Record<Exclude<MarketplaceDirectoryFilter, 'all' | 'discounts'>, string[]> = {
+  const needles: Record<Exclude<MarketplaceDirectoryFilter, 'all'>, string[]> = {
     services: ['service', 'services'],
     products: ['product', 'products'],
     coaching: ['coach', 'coaching'],

@@ -210,13 +210,17 @@ export default function NewOffer() {
                   }}
                 >
                   <option value="">Select industry category</option>
+                  <option value="hr">HR</option>
+                  <option value="automotive">Automotive</option>
+                  <option value="hospitality">Hospitality</option>
+                  <option value="health-fitness">Health & Fitness</option>
+                  <option value="consultancy">Consultancy</option>
+                  <option value="business">Business</option>
                   <option value="technology">Technology</option>
                   <option value="retail">Retail</option>
                   <option value="food-beverage">Food & Beverage</option>
-                  <option value="health-wellness">Health & Wellness</option>
                   <option value="education">Education</option>
                   <option value="professional-services">Professional Services</option>
-                  <option value="hr-recruitment">HR / Recruitment</option>
                   <option value="finance">Finance</option>
                   <option value="real-estate">Real Estate</option>
                   <option value="creative-media">Creative / Media</option>

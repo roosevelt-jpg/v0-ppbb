@@ -32,6 +32,7 @@ import {
   FolderOpen,
   MessageSquare,
   Megaphone,
+  Crown,
 } from 'lucide-react'
 
 const businessMenuItems = [
@@ -51,6 +52,7 @@ const businessMenuItems = [
   { label: 'Advertise', href: '/business/advertise', icon: Megaphone },
   { label: 'Communities', href: '/business/communities', icon: Users2 },
   { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },
+  { label: 'Membership', href: '/business/membership', icon: Crown },
 ]
 
 function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {

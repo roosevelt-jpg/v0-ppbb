@@ -6,8 +6,9 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { getBusinessApplications, updateApplicationStatus } from '@/lib/business-queries'
 import { JobApplication } from '@/lib/types'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Mail, Phone, FileText } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, FileText, MapPin, Clock, GraduationCap, Briefcase } from 'lucide-react'
+import { db } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +28,20 @@ const STATUS_STYLES: Record<JobApplication['status'], { bg: string; color: strin
   rejected: { bg: '#fee2e2', color: '#991b1b' },
 }
 
+type EnrichedApp = JobApplication & {
+  profileTitle?: string
+  profileLocation?: string
+  profileEducation?: string
+  profileExperience?: string
+  profileHours?: number
+}
+
 export default function BusinessApplicants() {
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const opportunityIdFilter = searchParams.get('opportunityId')
-  const [applications, setApplications] = React.useState<JobApplication[]>([])
+  const [applications, setApplications] = React.useState<EnrichedApp[]>([])
   const [loading, setLoading] = React.useState(true)
   const [filter, setFilter] = React.useState<'all' | JobApplication['status']>('all')
 
@@ -42,7 +51,7 @@ export default function BusinessApplicants() {
       router.push('/login')
       return
     }
-    loadApplications()
+    void loadApplications()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
@@ -51,7 +60,45 @@ export default function BusinessApplicants() {
     setLoading(true)
     try {
       const apps = await getBusinessApplications(user.id)
-      setApplications(apps)
+      const enriched = await Promise.all(
+        apps.map(async (app) => {
+          const base: EnrichedApp = { ...app }
+          if (
+            app.applicantTitle &&
+            app.applicantLocation &&
+            app.applicantEducation &&
+            app.applicantExperience
+          ) {
+            return base
+          }
+          try {
+            const snap = await getDoc(doc(db, 'users', app.applicantId))
+            if (!snap.exists()) return base
+            const d = snap.data() as Record<string, unknown>
+            const loc =
+              (typeof d.locationLabel === 'string' && d.locationLabel) ||
+              (typeof d.location === 'string' && d.location) ||
+              (d.location && typeof d.location === 'object'
+                ? String(
+                    (d.location as { formattedAddress?: string; city?: string }).formattedAddress ||
+                      (d.location as { city?: string }).city ||
+                      ''
+                  )
+                : '')
+            return {
+              ...base,
+              profileTitle: String(d.jobTitle || d.title || d.profession || ''),
+              profileLocation: loc,
+              profileEducation: String(d.education || d.highestEducation || ''),
+              profileExperience: String(d.experience || d.workExperience || ''),
+              profileHours: Number(d.volunteeredHours ?? d.volunteerHours ?? 0) || 0,
+            }
+          } catch {
+            return base
+          }
+        })
+      )
+      setApplications(enriched)
     } catch (err) {
       console.error('[v0] Failed to load applications:', err)
     } finally {
@@ -59,18 +106,13 @@ export default function BusinessApplicants() {
     }
   }
 
-  const handleStatusChange = async (
-    appId: string,
-    status: JobApplication['status']
-  ) => {
-    setApplications((prev) =>
-      prev.map((a) => (a.id === appId ? { ...a, status } : a))
-    )
+  const handleStatusChange = async (appId: string, status: JobApplication['status']) => {
+    setApplications((prev) => prev.map((a) => (a.id === appId ? { ...a, status } : a)))
     try {
       await updateApplicationStatus(appId, status)
     } catch (err) {
       console.error('[v0] Failed to update status:', err)
-      loadApplications()
+      void loadApplications()
     }
   }
 
@@ -99,13 +141,12 @@ export default function BusinessApplicants() {
           </button>
           <h1 style={{ color: '#111111', fontSize: '32px', fontWeight: 700 }}>Applicants</h1>
           <p style={{ color: '#888888', marginTop: '8px' }}>
-            Review and manage applications to your opportunities
+            Review directory-style applicant cards and manage status
           </p>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto p-8">
-        {/* Filter tabs */}
         <div className="flex flex-wrap gap-2 mb-6">
           {(['all', ...STATUS_OPTIONS] as const).map((opt) => (
             <button
@@ -138,6 +179,12 @@ export default function BusinessApplicants() {
           <div className="space-y-4">
             {filtered.map((app) => {
               const statusStyle = STATUS_STYLES[app.status]
+              const title = app.applicantTitle || app.profileTitle || ''
+              const location = app.applicantLocation || app.profileLocation || ''
+              const education = app.applicantEducation || app.profileEducation || ''
+              const experience = app.applicantExperience || app.profileExperience || ''
+              const hours =
+                app.applicantVolunteerHours ?? app.profileHours ?? undefined
               return (
                 <div
                   key={app.id}
@@ -145,27 +192,62 @@ export default function BusinessApplicants() {
                   style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da' }}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-4 min-w-0">
                       <div
                         className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold shrink-0"
                         style={{ backgroundColor: '#e4e1da', color: '#111111' }}
                       >
                         {app.applicantName?.charAt(0)?.toUpperCase() || '?'}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h3 style={{ color: '#111111', fontWeight: 600, fontSize: '18px' }}>
                           {app.applicantName}
                         </h3>
+                        {title ? (
+                          <p className="text-sm text-neutral-600 mt-0.5">{title}</p>
+                        ) : null}
                         <p style={{ color: '#888888', fontSize: '14px' }}>
                           Applied for: {app.opportunityTitle}
                         </p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-neutral-600">
+                          {location ? (
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5" />
+                              {location}
+                            </span>
+                          ) : null}
+                          {typeof hours === 'number' && hours > 0 ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              {hours} volunteer hrs
+                            </span>
+                          ) : null}
+                          {education ? (
+                            <span className="inline-flex items-center gap-1">
+                              <GraduationCap className="w-3.5 h-3.5" />
+                              {education}
+                            </span>
+                          ) : null}
+                          {experience ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Briefcase className="w-3.5 h-3.5" />
+                              {experience}
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="flex flex-wrap gap-4 mt-2 text-sm" style={{ color: '#555555' }}>
-                          <a href={`mailto:${app.applicantEmail}`} className="flex items-center gap-1 hover:underline">
+                          <a
+                            href={`mailto:${app.applicantEmail}`}
+                            className="flex items-center gap-1 hover:underline"
+                          >
                             <Mail className="w-3.5 h-3.5" />
                             {app.applicantEmail}
                           </a>
                           {app.applicantPhone && (
-                            <a href={`tel:${app.applicantPhone}`} className="flex items-center gap-1 hover:underline">
+                            <a
+                              href={`tel:${app.applicantPhone}`}
+                              className="flex items-center gap-1 hover:underline"
+                            >
                               <Phone className="w-3.5 h-3.5" />
                               {app.applicantPhone}
                             </a>
@@ -178,7 +260,7 @@ export default function BusinessApplicants() {
                               className="flex items-center gap-1 hover:underline"
                             >
                               <FileText className="w-3.5 h-3.5" />
-                              Resume
+                              Resume / CV
                             </a>
                           )}
                         </div>

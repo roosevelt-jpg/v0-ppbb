@@ -181,17 +181,50 @@ export function PartnersPageCopy() {
       {/* Partnership projects feature block */}
       <section className="min-w-0 space-y-4">
         <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground">
-          Build alongside us
+          Featured partnership projects
         </h2>
         <p className="font-body text-sm text-muted-foreground max-w-[42rem]">
-          Featured partnership projects — title, date, location, and partners. Manage featured
-          partners in Admin → CMS → Partners.
+          Title, photo, brief, date, location, and partner names — managed in Admin → CMS → Partners.
         </p>
-        <PartnersLogosGrid
-          eyebrow="Featured projects"
-          headline="Recent collaborations"
-          description=""
-        />
+        {pc.featuredProjects.length === 0 ? (
+          <p className="text-sm text-neutral-500">Projects will appear here once published by admin.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pc.featuredProjects.map((project) => (
+              <article
+                key={project.id}
+                className="border border-[#e4e1da] rounded-lg overflow-hidden bg-white flex flex-col"
+              >
+                {project.imageURL ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={project.imageURL}
+                    alt=""
+                    className="w-full h-40 object-cover bg-neutral-100"
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-neutral-100" />
+                )}
+                <div className="p-4 space-y-2 flex-1">
+                  <h3 className="font-headline text-lg font-bold text-foreground break-words">
+                    {project.title}
+                  </h3>
+                  {project.brief ? (
+                    <p className="font-body text-sm text-muted-foreground line-clamp-3">{project.brief}</p>
+                  ) : null}
+                  <p className="text-xs text-neutral-500">
+                    {[project.date, project.location].filter(Boolean).join(' · ')}
+                  </p>
+                  {project.partnerNames ? (
+                    <p className="text-xs font-medium text-neutral-700">
+                      Partners: {project.partnerNames}
+                    </p>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   )

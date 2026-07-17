@@ -1006,6 +1006,12 @@ export interface JobApplication {
   applicantAvatarUrl?: string
   coverLetter?: string
   resumeUrl?: string
+  /** Profile snapshot for directory-style applicant cards */
+  applicantTitle?: string
+  applicantLocation?: string
+  applicantEducation?: string
+  applicantExperience?: string
+  applicantVolunteerHours?: number
   status: 'pending' | 'reviewing' | 'shortlisted' | 'accepted' | 'rejected'
   createdAt: Date
   updatedAt: Date

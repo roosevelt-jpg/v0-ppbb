@@ -86,6 +86,21 @@ export function OpportunityApplyModal({
     try {
       const fullName =
         `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+      const profile = user as {
+        jobTitle?: string
+        title?: string
+        locationLabel?: string
+        location?: { city?: string; formattedAddress?: string } | string
+        education?: string
+        experience?: string
+        volunteeredHours?: number
+        volunteerHours?: number
+      }
+      const locationLabel =
+        profile.locationLabel ||
+        (typeof profile.location === 'string'
+          ? profile.location
+          : profile.location?.formattedAddress || profile.location?.city || '')
       await applyToOpportunity(
         opportunity,
         {
@@ -94,6 +109,11 @@ export function OpportunityApplyModal({
           email: user.email,
           phone: user.phone,
           avatarUrl: user.avatarUrl,
+          title: profile.jobTitle || profile.title || '',
+          location: locationLabel,
+          education: profile.education || '',
+          experience: profile.experience || '',
+          volunteerHours: Number(profile.volunteeredHours ?? profile.volunteerHours ?? 0) || 0,
         },
         coverLetter,
         resumeUrl

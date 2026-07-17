@@ -614,6 +614,170 @@ export default function AdminCmsPartnersPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="font-headline text-xl font-bold">Featured partnership projects</h2>
+              <p className="text-xs text-neutral-500 mt-1">
+                Shown on the public Partners page with title, photo, brief, date, location, and partner names.
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() =>
+                setConfig((prev) => ({
+                  ...prev,
+                  pageConfig: {
+                    ...prev.pageConfig,
+                    featuredProjects: [
+                      ...(prev.pageConfig.featuredProjects || []),
+                      {
+                        id: `project-${Date.now()}`,
+                        title: 'New project',
+                        brief: '',
+                        date: '',
+                        location: '',
+                        partnerNames: '',
+                        imageURL: '',
+                      },
+                    ],
+                  },
+                }))
+              }
+              className="bg-black text-white hover:bg-gray-800 text-xs min-h-[44px]"
+            >
+              <Plus className="w-3 h-3 mr-1" /> Add project
+            </Button>
+          </div>
+          <div className="space-y-4">
+            {(pc.featuredProjects || []).map((project, i) => (
+              <div key={project.id} className="border border-neutral-200 rounded-lg p-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={project.title}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], title: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Project title"
+                  />
+                  <input
+                    type="text"
+                    value={project.partnerNames}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], partnerNames: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Partner names"
+                  />
+                  <input
+                    type="text"
+                    value={project.date}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], date: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Date (e.g. Jul 2026)"
+                  />
+                  <input
+                    type="text"
+                    value={project.location}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], location: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Location"
+                  />
+                </div>
+                <textarea
+                  value={project.brief}
+                  onChange={(e) =>
+                    setConfig((prev) => {
+                      const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                      featuredProjects[i] = { ...featuredProjects[i], brief: e.target.value }
+                      return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                    })
+                  }
+                  className="w-full min-h-20"
+                  placeholder="Brief description"
+                />
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="url"
+                    value={project.imageURL}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], imageURL: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="flex-1 min-h-[44px] min-w-[200px]"
+                    placeholder="Image URL"
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="text-sm"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      try {
+                        const url = await uploadFileToFirebase(file, 'partners/projects')
+                        setConfig((prev) => {
+                          const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                          featuredProjects[i] = { ...featuredProjects[i], imageURL: url }
+                          return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                        })
+                      } catch (err) {
+                        setMessage({
+                          type: 'error',
+                          text: err instanceof Error ? err.message : 'Upload failed',
+                        })
+                      }
+                      e.target.value = ''
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        pageConfig: {
+                          ...prev.pageConfig,
+                          featuredProjects: (prev.pageConfig.featuredProjects || []).filter(
+                            (_, idx) => idx !== i
+                          ),
+                        },
+                      }))
+                    }
+                    className="min-h-[44px] px-3 rounded-lg border border-red-200 text-red-600"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Trusted by</h2>
           <div className="grid grid-cols-1 gap-4">
             <div>

@@ -1089,6 +1089,11 @@ export async function applyToOpportunity(
     email: string
     phone?: string
     avatarUrl?: string
+    title?: string
+    location?: string
+    education?: string
+    experience?: string
+    volunteerHours?: number
   },
   coverLetter?: string,
   resumeUrl?: string
@@ -1106,6 +1111,12 @@ export async function applyToOpportunity(
     applicantEmail: applicant.email,
     applicantPhone: applicant.phone || '',
     applicantAvatarUrl: applicant.avatarUrl || '',
+    applicantTitle: applicant.title || '',
+    applicantLocation: applicant.location || '',
+    applicantEducation: applicant.education || '',
+    applicantExperience: applicant.experience || '',
+    applicantVolunteerHours:
+      typeof applicant.volunteerHours === 'number' ? applicant.volunteerHours : undefined,
     coverLetter: coverLetter || '',
     resumeUrl: resumeUrl || '',
     status: 'pending',

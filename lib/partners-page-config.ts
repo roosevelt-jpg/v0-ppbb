@@ -19,6 +19,16 @@ export interface PartnersInquiryCategory {
   formUrl: string
 }
 
+export interface PartnersFeaturedProject {
+  id: string
+  title: string
+  brief: string
+  date: string
+  location: string
+  partnerNames: string
+  imageURL: string
+}
+
 export interface PartnersPageConfig {
   eyebrow: string
   headline: string
@@ -39,6 +49,7 @@ export interface PartnersPageConfig {
   trustedByLabel: string
   trustedBySubLabel: string
   trustedByDescription: string
+  featuredProjects: PartnersFeaturedProject[]
 }
 
 export interface PartnersPlatformConfig {
@@ -105,6 +116,7 @@ export const DEFAULT_PARTNERS_PAGE_CONFIG: PartnersPageConfig = {
   trustedBySubLabel: 'Previous sponsors & partners.',
   trustedByDescription:
     'A selection of organisations that have supported, sponsored or collaborated with Passive Blessings.',
+  featuredProjects: [],
 }
 
 export const DEFAULT_PARTNERS_CONFIG: PartnersPlatformConfig = {
@@ -159,6 +171,25 @@ function mergeInquiryCategories(data: unknown): PartnersInquiryCategory[] {
   return merged.length > 0 ? merged : defaults
 }
 
+function mergeFeaturedProjects(data: unknown): PartnersFeaturedProject[] {
+  if (!Array.isArray(data)) return DEFAULT_PARTNERS_PAGE_CONFIG.featuredProjects
+  return data
+    .filter((item) => item && typeof item === 'object')
+    .map((item, index) => {
+      const p = item as Partial<PartnersFeaturedProject>
+      return {
+        id: typeof p.id === 'string' && p.id ? p.id : `project-${index}`,
+        title: typeof p.title === 'string' ? p.title : '',
+        brief: typeof p.brief === 'string' ? p.brief : '',
+        date: typeof p.date === 'string' ? p.date : '',
+        location: typeof p.location === 'string' ? p.location : '',
+        partnerNames: typeof p.partnerNames === 'string' ? p.partnerNames : '',
+        imageURL: typeof p.imageURL === 'string' ? p.imageURL : '',
+      }
+    })
+    .filter((p) => p.title.trim().length > 0)
+}
+
 function mergePageConfig(data: unknown): PartnersPageConfig {
   const d = (data || {}) as Partial<PartnersPageConfig>
   const defaults = DEFAULT_PARTNERS_PAGE_CONFIG
@@ -201,13 +232,12 @@ function mergePageConfig(data: unknown): PartnersPageConfig {
     trustedByLabel:
       typeof d.trustedByLabel === 'string' ? d.trustedByLabel : defaults.trustedByLabel,
     trustedBySubLabel:
-      typeof d.trustedBySubLabel === 'string'
-        ? d.trustedBySubLabel
-        : defaults.trustedBySubLabel,
+      typeof d.trustedBySubLabel === 'string' ? d.trustedBySubLabel : defaults.trustedBySubLabel,
     trustedByDescription:
       typeof d.trustedByDescription === 'string'
         ? d.trustedByDescription
         : defaults.trustedByDescription,
+    featuredProjects: mergeFeaturedProjects(d.featuredProjects),
   }
 }
 

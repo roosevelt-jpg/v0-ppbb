@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Briefcase, Percent, ShoppingBag, Store } from 'lucide-react'
+import { Briefcase, BadgeCheck, MapPin, Percent, ShoppingBag, Store } from 'lucide-react'
 import type { DirectoryBusinessCardData } from '@/lib/marketplace-directory'
 import { BusinessFeatureLink } from '@/components/business-feature-gate'
 
@@ -31,14 +31,29 @@ export function BusinessDirectoryCard({ business }: BusinessDirectoryCardProps) 
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-headline text-xl font-bold text-foreground leading-snug break-words">
+          <h3 className="font-headline text-xl font-bold text-foreground leading-snug break-words inline-flex items-center gap-1.5 flex-wrap">
             {business.name}
+            {business.isSponsor ? (
+              <span
+                title="Verified sponsor"
+                className="inline-flex items-center text-[#1D9BF0]"
+                aria-label="Verified sponsor"
+              >
+                <BadgeCheck className="w-5 h-5 fill-[#1D9BF0] text-white" />
+              </span>
+            ) : null}
           </h3>
           {business.ownerName && (
             <p className="font-body text-sm text-muted-foreground mt-0.5 break-words">
               {business.ownerName}
             </p>
           )}
+          {business.location ? (
+            <p className="font-body text-xs text-muted-foreground mt-1 inline-flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span className="break-words">{business.location}</span>
+            </p>
+          ) : null}
         </div>
       </div>
 

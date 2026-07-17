@@ -54,6 +54,7 @@ function BusinessEventForm() {
     locationLat: 0,
     locationLng: 0,
     startDate: '',
+    startTime: '09:00',
     endTime: '',
     pricingType: 'free',
     price: '',
@@ -110,9 +111,12 @@ function BusinessEventForm() {
         if (cancelled) return
 
         const start = toEventDate(event.startDate)
-        const startLocal = start
-          ? `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}T${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`
+        const startDate = start
+          ? `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
           : ''
+        const startTime = start
+          ? `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`
+          : '09:00'
         const end = toEventDate(event.endDate)
         const endTime = end
           ? `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`
@@ -128,7 +132,8 @@ function BusinessEventForm() {
           locationPlaceId: event.locationPlaceId || '',
           locationLat: event.locationLat ?? 0,
           locationLng: event.locationLng ?? 0,
-          startDate: startLocal,
+          startDate,
+          startTime,
           endTime,
           pricingType: event.pricingType === 'free' ? 'free' : 'paid_by_business',
           price: event.price != null ? String(event.price) : '',
@@ -178,8 +183,19 @@ function BusinessEventForm() {
         throw new Error('Please select a location from the suggestions')
       }
 
+      const startDateTime = formData.startTime
+        ? `${formData.startDate}T${formData.startTime}:00`
+        : `${formData.startDate}T09:00:00`
+      const endDateTime = formData.endTime
+        ? `${formData.startDate}T${formData.endTime}:00`
+        : startDateTime
+
       const body = {
         ...formData,
+        startDate: startDateTime,
+        endDate: endDateTime,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
         locationPlaceId: formData.locationPlaceId || null,
         locationLat: formData.locationLat || null,
         locationLng: formData.locationLng || null,
@@ -573,15 +589,32 @@ function BusinessEventForm() {
             <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
               Date & Time
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
                   Start Date *
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #e4e1da',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                  Start Time *
+                </label>
+                <input
+                  type="time"
+                  value={formData.startTime}
+                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                   style={{
                     width: '100%',
                     padding: '12px',
@@ -608,6 +641,7 @@ function BusinessEventForm() {
                   }}
                 />
               </div>
+            </div>
             </div>
             <div className="mt-4">
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
