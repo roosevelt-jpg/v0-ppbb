@@ -10,6 +10,11 @@ import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admi
 import { profileFromMember } from '@/lib/admin-profile-view'
 import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 import { useAuth } from '@/lib/auth-context'
+import {
+  BUTTON_PRIMARY,
+  FILTER_PILL_ACTIVE,
+  FILTER_PILL_INACTIVE,
+} from '@/lib/admin-design-system'
 
 export default function AdminMembersPage() {
   const { firebaseUser } = useAuth()
@@ -250,19 +255,15 @@ export default function AdminMembersPage() {
                   setUserType(type.id)
                   setLoading(true)
                 }}
-                className={`px-4 py-2 rounded font-medium text-sm transition-colors whitespace-nowrap shrink-0 ${
-                  userType === type.id
-                    ? 'bg-black text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                className={userType === type.id ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
               >
                 {type.label}
               </button>
             ))}
           </div>
 
-          <div className="flex-1 flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-4 min-w-0">
-            <Search size={18} className="text-gray-400 shrink-0" />
+          <div className="flex-1 flex items-center gap-2 bg-white rounded-md border border-gray-200 px-2.5 min-w-0 h-8">
+            <Search size={14} className="text-gray-400 shrink-0" />
             <input
               type="text"
               placeholder="Search by name, email, or location..."
@@ -271,22 +272,22 @@ export default function AdminMembersPage() {
                 setSearch(e.target.value)
                 setLoading(true)
               }}
-              className="flex-1 py-2 outline-none bg-transparent text-gray-700"
+              className="flex-1 py-1 outline-none bg-transparent text-xs text-gray-700"
             />
           </div>
         </div>
 
         {selectedList.length > 0 ? (
-          <div className="sticky top-2 z-20 flex flex-wrap items-end gap-3 rounded-lg border-2 border-black bg-white p-4 shadow-md">
-            <p className="text-sm font-semibold text-black w-full sm:w-auto">
+          <div className="sticky top-2 z-20 flex flex-wrap items-center gap-2 rounded-md border border-neutral-300 bg-white px-2.5 py-2 shadow-none">
+            <p className="text-[11px] font-semibold text-black w-full sm:w-auto">
               {selectedList.length} member{selectedList.length === 1 ? '' : 's'} selected
             </p>
-            <label className="text-sm text-gray-700">
+            <label className="text-[10px] font-medium text-neutral-600">
               Set status
               <select
                 value={bulkStatus}
                 onChange={(e) => setBulkStatus(e.target.value)}
-                className="mt-1 block min-h-[40px] rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white"
+                className="mt-0.5 block h-6 min-h-0 rounded-md border border-neutral-300 px-2 text-[11px] bg-white"
               >
                 <option value="">—</option>
                 <option value="active">Active</option>
@@ -294,12 +295,12 @@ export default function AdminMembersPage() {
                 <option value="suspended">Suspended</option>
               </select>
             </label>
-            <label className="text-sm text-gray-700">
+            <label className="text-[10px] font-medium text-neutral-600">
               Set type / role
               <select
                 value={bulkRole}
                 onChange={(e) => setBulkRole(e.target.value)}
-                className="mt-1 block min-h-[40px] rounded-md border border-gray-300 px-3 py-1.5 text-sm bg-white"
+                className="mt-0.5 block h-6 min-h-0 rounded-md border border-neutral-300 px-2 text-[11px] bg-white"
               >
                 <option value="">—</option>
                 <option value="member">Individual member</option>
@@ -311,7 +312,7 @@ export default function AdminMembersPage() {
               type="button"
               disabled={bulkBusy}
               onClick={() => void runBulkUpdate()}
-              className="min-h-[40px] rounded-md bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900 disabled:opacity-50"
+              className={`${BUTTON_PRIMARY} !text-white disabled:opacity-50`}
             >
               {bulkBusy ? 'Working…' : 'Update selected'}
             </button>
@@ -319,16 +320,16 @@ export default function AdminMembersPage() {
               type="button"
               disabled={bulkBusy}
               onClick={() => void runBulkDelete()}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-black px-4 py-2 text-sm font-semibold !text-white hover:bg-neutral-800 disabled:opacity-50"
+              className={`${BUTTON_PRIMARY} gap-1 !text-white disabled:opacity-50`}
             >
-              <Trash2 size={14} />
+              <Trash2 size={12} />
               {bulkBusy ? 'Working…' : 'Delete selected'}
             </button>
             <button
               type="button"
               disabled={bulkBusy}
               onClick={() => setSelectedIds(new Set())}
-              className="min-h-[40px] rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className={`${BUTTON_PRIMARY} !text-white disabled:opacity-50`}
             >
               Clear selection
             </button>
@@ -395,7 +396,7 @@ export default function AdminMembersPage() {
                         {formatUserPhoneDisplay(member)}
                       </td>
                       <td className="px-6 py-3 text-sm">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium capitalize">
+                        <span className="px-2 py-0.5 bg-neutral-100 text-neutral-900 rounded text-[10px] font-medium capitalize">
                           {member.role || member.userType || 'member'}
                         </span>
                       </td>
