@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
+  BadgeCheck,
   Briefcase,
   Calendar,
   ExternalLink,
@@ -14,13 +15,12 @@ import {
   MapPin,
   MessageCircle,
   Phone,
-  Sparkles,
   Tag,
   Twitter,
   UserPlus,
 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
-import { hasBusinessAccess } from '@/lib/roles'
+import { getDmInboxPath } from '@/lib/roles'
 import { auth, db } from '@/lib/firebase'
 import {
   isActiveJob,
@@ -132,6 +132,8 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     if (!businessId) return
     let byBusinessId: ProfileEvent[] = []
     let byCreatedBy: ProfileEvent[] = []
+    let byOwnerId: ProfileEvent[] = []
+    const ownerId = business?.ownerId || ''
 
     const mapDocs = (docs: { id: string; data: () => Record<string, unknown> }[]) =>
       docs.map((d) => {
@@ -152,9 +154,20 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
         }
       })
 
+    const isPublicEvent = (status: string) => {
+      const s = status.toLowerCase()
+      return (
+        s === 'published' ||
+        s === 'active' ||
+        s === 'upcoming' ||
+        s === 'open' ||
+        s === ''
+      )
+    }
+
     const emit = () => {
       const map = new Map<string, ProfileEvent>()
-      for (const ev of [...byBusinessId, ...byCreatedBy]) {
+      for (const ev of [...byBusinessId, ...byCreatedBy, ...byOwnerId]) {
         if (!map.has(ev.id)) map.set(ev.id, ev)
       }
       const merged = Array.from(map.values()).sort((a, b) => {
@@ -162,19 +175,17 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
         const bt = toDate(b.startDate)?.getTime() || 0
         return bt - at
       })
-      setEvents(merged.slice(0, 8))
+      setEvents(merged.slice(0, 12))
       setEventsReady(true)
     }
 
     const unsubA = onSnapshot(
-      query(
-        collection(db, 'events'),
-        where('businessId', '==', businessId),
-        where('status', '==', 'published'),
-        limit(12)
-      ),
+      query(collection(db, 'events'), where('businessId', '==', businessId), limit(20)),
       (snap) => {
-        byBusinessId = mapDocs(snap.docs)
+        byBusinessId = mapDocs(snap.docs).filter((ev) => {
+          const raw = snap.docs.find((d) => d.id === ev.id)?.data() as { status?: string } | undefined
+          return isPublicEvent(String(raw?.status || 'published'))
+        })
         emit()
       },
       () => {
@@ -184,14 +195,11 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     )
 
     const unsubB = onSnapshot(
-      query(collection(db, 'events'), where('createdBy', '==', businessId), limit(12)),
+      query(collection(db, 'events'), where('createdBy', '==', businessId), limit(20)),
       (snap) => {
         byCreatedBy = mapDocs(snap.docs).filter((ev) => {
-          const status = String(
-            (snap.docs.find((d) => d.id === ev.id)?.data() as { status?: string } | undefined)
-              ?.status || 'published'
-          ).toLowerCase()
-          return status === 'published' || status === 'active' || status === 'upcoming'
+          const raw = snap.docs.find((d) => d.id === ev.id)?.data() as { status?: string } | undefined
+          return isPublicEvent(String(raw?.status || 'published'))
         })
         emit()
       },
@@ -201,11 +209,38 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       }
     )
 
+    let unsubC: (() => void) | undefined
+    if (ownerId && ownerId !== businessId) {
+      unsubC = onSnapshot(
+        query(collection(db, 'events'), where('createdBy', '==', ownerId), limit(20)),
+        (snap) => {
+          byOwnerId = mapDocs(snap.docs).filter((ev) => {
+            const raw = snap.docs.find((d) => d.id === ev.id)?.data() as
+              | { status?: string; businessId?: string }
+              | undefined
+            if (!isPublicEvent(String(raw?.status || 'published'))) return false
+            // Prefer events tied to this business when businessId is set
+            if (raw?.businessId && raw.businessId !== businessId) return false
+            return true
+          })
+          emit()
+        },
+        () => {
+          byOwnerId = []
+          emit()
+        }
+      )
+    } else {
+      byOwnerId = []
+      emit()
+    }
+
     return () => {
       unsubA()
       unsubB()
+      unsubC?.()
     }
-  }, [businessId])
+  }, [businessId, business?.ownerId])
 
   useEffect(() => {
     if (!firebaseUser || leadTracked || !businessId) return
@@ -228,22 +263,32 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     })()
   }, [firebaseUser, businessId, leadTracked])
 
-  const handleConnect = () => {
+  const openEncryptedChat = () => {
     if (!isLoggedInMember) {
-      router.push(`/login?returnUrl=/directory/${businessId}`)
+      router.push(`/login?returnUrl=${encodeURIComponent(`/directory/${businessId}`)}`)
       return
     }
-    const inbox = hasBusinessAccess(user) ? '/business/messages' : '/dashboard/messages'
-    router.push(`${inbox}?to=${encodeURIComponent(businessId)}`)
+    const recipientId = (business?.ownerId || '').trim()
+    if (!recipientId) {
+      alert('This business has no messaging contact yet. Please try again later.')
+      return
+    }
+    const myId = user?.id || firebaseUser?.uid || ''
+    if (myId && recipientId === myId) {
+      alert('This is your business profile. Members will message you in Messages.')
+      return
+    }
+    // Always open member/business DM thread with the business owner — never admin chatbot
+    const inbox = getDmInboxPath(user)
+    router.push(`${inbox}?to=${encodeURIComponent(recipientId)}`)
+  }
+
+  const handleConnect = () => {
+    openEncryptedChat()
   }
 
   const handleMessage = () => {
-    if (!isLoggedInMember) {
-      router.push(`/login?returnUrl=/directory/${businessId}`)
-      return
-    }
-    const inbox = hasBusinessAccess(user) ? '/business/messages' : '/dashboard/messages'
-    router.push(`${inbox}?to=${encodeURIComponent(businessId)}`)
+    openEncryptedChat()
   }
 
   const activeOffers = useMemo(() => offers.filter(isActiveOffer), [offers])
@@ -254,8 +299,16 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       return bt - at
     })
   }, [jobs])
-  const latestOffers = useMemo(() => activeOffers.slice(0, 8), [activeOffers])
-  const latestJobs = useMemo(() => activeJobs.slice(0, 8), [activeJobs])
+  const latestOffers = useMemo(() => activeOffers.slice(0, 12), [activeOffers])
+  const latestJobs = useMemo(() => activeJobs.slice(0, 12), [activeJobs])
+  const galleryImages = useMemo(() => {
+    const fromBusiness = business?.productImages || []
+    const fromOffers = activeOffers.flatMap((o) => {
+      if (o.images?.length) return o.images
+      return o.imageURL ? [o.imageURL] : []
+    })
+    return Array.from(new Set([...fromBusiness, ...fromOffers].filter(Boolean)))
+  }, [business, activeOffers])
   const memberDiscounts = useMemo(
     () => activeOffers.filter((o) => o.isMemberDiscount),
     [activeOffers]
@@ -325,7 +378,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
         Back to directory
       </Link>
 
-      {/* Banner + identity */}
+      {/* Banner + identity — logo may overlap banner; name sits below on light background */}
       <div>
         <div className="relative w-full overflow-hidden rounded-lg aspect-[21/9] sm:aspect-[3/1] bg-neutral-100">
           {business.bannerURL ? (
@@ -340,118 +393,134 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row lg:items-end gap-4 -mt-10 sm:-mt-12 px-1 relative z-10">
-          <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-sm shrink-0">
-            {business.logoURL ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={business.logoURL}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 font-headline text-2xl font-bold text-neutral-500">
-                {initial}
-              </div>
-            )}
-          </div>
-
-          <div className="min-w-0 flex-1 pb-1">
-            <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 break-words">
-              {business.name}
-            </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-600">
-              {business.location ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  {business.location}
-                </span>
-              ) : null}
-              {business.category ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Tag className="w-4 h-4 shrink-0" />
-                  {business.category}
-                </span>
-              ) : null}
+        <div className="relative z-10 px-1">
+          <div className="-mt-10 sm:-mt-12 mb-3">
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden bg-white border-4 border-white shadow-md shrink-0">
+              {business.logoURL ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={business.logoURL}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 font-headline text-2xl font-bold text-neutral-500">
+                  {initial}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end pb-1">
-            {websiteHref ? (
-              <div className="text-sm">
-                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
-                  Website
-                </p>
-                <a
-                  href={websiteHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 font-semibold text-neutral-900 hover:underline break-all"
-                >
-                  {business.website.replace(/^https?:\/\//, '')}
-                  <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                </a>
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 pb-1">
+            <div className="min-w-0 flex-1">
+              <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-900 break-words inline-flex items-center gap-2 flex-wrap">
+                {business.name}
+                {business.isSponsor ? (
+                  <span
+                    title="PB sponsor"
+                    className="inline-flex items-center text-[#1D9BF0]"
+                    aria-label="PB sponsor"
+                  >
+                    <BadgeCheck className="w-6 h-6 fill-[#1D9BF0] text-white" />
+                  </span>
+                ) : null}
+              </h1>
+              {business.ownerName ? (
+                <p className="mt-1 text-sm text-neutral-500">{business.ownerName}</p>
+              ) : null}
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-600">
+                {business.location ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4 shrink-0" />
+                    {business.location}
+                  </span>
+                ) : null}
+                {business.category ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Tag className="w-4 h-4 shrink-0" />
+                    {business.category}
+                  </span>
+                ) : null}
               </div>
-            ) : null}
-            {(social.facebook || social.twitter || social.linkedin || social.instagram) && (
-              <div className="text-sm">
-                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">
-                  Follow Company
-                </p>
-                <div className="flex items-center gap-2">
-                  {social.facebook ? (
-                    <a
-                      href={social.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
-                      aria-label="Facebook"
-                    >
-                      <Facebook className="w-4 h-4" />
-                    </a>
-                  ) : null}
-                  {social.twitter ? (
-                    <a
-                      href={social.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
-                      aria-label="Twitter"
-                    >
-                      <Twitter className="w-4 h-4" />
-                    </a>
-                  ) : null}
-                  {social.linkedin ? (
-                    <a
-                      href={social.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
-                      aria-label="LinkedIn"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                  ) : null}
-                  {social.instagram ? (
-                    <a
-                      href={social.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
-                      aria-label="Instagram"
-                    >
-                      <Instagram className="w-4 h-4" />
-                    </a>
-                  ) : null}
+            </div>
+
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end shrink-0">
+              {websiteHref ? (
+                <div className="text-sm">
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+                    Website
+                  </p>
+                  <a
+                    href={websiteHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-semibold text-neutral-900 hover:underline break-all"
+                  >
+                    {business.website.replace(/^https?:\/\//, '')}
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  </a>
                 </div>
-              </div>
-            )}
+              ) : null}
+              {(social.facebook || social.twitter || social.linkedin || social.instagram) && (
+                <div className="text-sm">
+                  <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">
+                    Follow Company
+                  </p>
+                  <div className="flex items-center gap-2">
+                    {social.facebook ? (
+                      <a
+                        href={social.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                        aria-label="Facebook"
+                      >
+                        <Facebook className="w-4 h-4" />
+                      </a>
+                    ) : null}
+                    {social.twitter ? (
+                      <a
+                        href={social.twitter}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                        aria-label="Twitter"
+                      >
+                        <Twitter className="w-4 h-4" />
+                      </a>
+                    ) : null}
+                    {social.linkedin ? (
+                      <a
+                        href={social.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                        aria-label="LinkedIn"
+                      >
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                    ) : null}
+                    {social.instagram ? (
+                      <a
+                        href={social.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
+                        aria-label="Instagram"
+                      >
+                        <Instagram className="w-4 h-4" />
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 lg:gap-8">
-        {/* Main column */}
+        {/* Main column — ordered: tags → gallery → products → jobs → events */}
         <div className="min-w-0 space-y-8">
           {business.description ? (
             <section>
@@ -464,104 +533,57 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
             </section>
           ) : null}
 
+          {/* 3. Services Offered as tags */}
           {business.services.length > 0 ? (
-            <section>
-              <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
-                Working Area
+            <section id="services">
+              <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-3">
+                Services Offered
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {business.services.slice(0, 8).map((service, index) => (
-                  <article
+              <div className="flex flex-wrap gap-2">
+                {business.services.map((service) => (
+                  <span
                     key={service}
-                    className="relative border border-neutral-200 rounded-lg bg-white p-4 sm:p-5"
+                    className="inline-flex items-center px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-800 font-body text-sm"
                   >
-                    <span className="absolute top-3 right-3 text-2xl font-bold text-neutral-200">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <div className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-neutral-100 mb-3">
-                      <Sparkles className="w-4 h-4 text-neutral-700" />
-                    </div>
-                    <h3 className="font-semibold text-neutral-900 pr-8">{service}</h3>
-                    <p className="text-xs text-neutral-500 mt-1.5">
-                      Service offered by {business.name}
-                    </p>
-                  </article>
+                    {service}
+                  </span>
                 ))}
               </div>
             </section>
           ) : null}
 
-          {/* Latest Jobs */}
-          <section id="jobs" className="scroll-mt-24">
+          {/* 4. Image Gallery of the Services */}
+          <section id="gallery">
             <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
-              Latest Jobs
+              Image Gallery
             </h2>
-            {latestJobs.length === 0 ? (
-              <p className="text-sm text-neutral-500">No open roles at the moment.</p>
+            {galleryImages.length === 0 ? (
+              <p className="text-sm text-neutral-500">No service images uploaded yet.</p>
             ) : (
-              <div className="space-y-3">
-                {latestJobs.map((job) => (
-                  <article
-                    key={job.id}
-                    className="border border-neutral-200 rounded-lg bg-white p-4 sm:p-5 flex gap-3 sm:gap-4"
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                {galleryImages.map((url) => (
+                  <div
+                    key={url}
+                    className="relative aspect-[4/3] overflow-hidden rounded-lg bg-neutral-100 border border-neutral-200"
                   >
-                    <div className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-md overflow-hidden bg-neutral-100 border border-neutral-200 shrink-0">
-                      {business.logoURL ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={business.logoURL}
-                          alt=""
-                          className="absolute inset-0 h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center font-bold text-neutral-500">
-                          {initial}
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <h3 className="font-bold text-neutral-900 break-words">{job.title}</h3>
-                          <p className="text-xs text-neutral-500 mt-0.5">{business.name}</p>
-                        </div>
-                        <Link
-                          href={`/opportunities/${job.id}`}
-                          className="shrink-0 inline-flex items-center justify-center h-9 px-3 rounded-md bg-[#111] text-white text-xs font-semibold"
-                        >
-                          View
-                        </Link>
-                      </div>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
-                        {(job.location || business.location) && (
-                          <span className="inline-flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            {job.location || business.location}
-                          </span>
-                        )}
-                        {job.experience ? <span>Experience: {job.experience}</span> : null}
-                        {job.salary ? <span>Salary: {job.salary}</span> : null}
-                        {job.publishedAt ? (
-                          <span>Published: {format(job.publishedAt, 'dd MMM yyyy')}</span>
-                        ) : null}
-                      </div>
-                    </div>
-                  </article>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
                 ))}
               </div>
             )}
           </section>
 
-          {/* Latest Offers / Products & Services */}
+          {/* 5. Services / Product Listing */}
           <section id="offers" className="scroll-mt-24">
-            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
-              Latest Offers
+            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
+              Services / Product Listing
             </h2>
-            <p className="text-sm text-neutral-500 mb-4 -mt-2">
-              Products and services from this business
+            <p className="text-sm text-neutral-500 mb-4">
+              Offers posted by this business
             </p>
             {latestOffers.length === 0 ? (
-              <p className="text-sm text-neutral-500">No active offers yet.</p>
+              <p className="text-sm text-neutral-500">No products or services listed yet.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {latestOffers.map((offer) => (
@@ -622,13 +644,83 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
             )}
           </section>
 
-          {/* Latest Events */}
-          <section id="events" className="scroll-mt-24">
-            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-4">
-              Latest Events
+          {/* 6. Jobs Listed by this business */}
+          <section id="jobs" className="scroll-mt-24">
+            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
+              Jobs Listed
             </h2>
+            <p className="text-sm text-neutral-500 mb-4">
+              Open roles posted by this business
+            </p>
+            {latestJobs.length === 0 ? (
+              <p className="text-sm text-neutral-500">No jobs listed yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {latestJobs.map((job) => (
+                  <article
+                    key={job.id}
+                    className="border border-neutral-200 rounded-lg bg-white p-4 sm:p-5 flex gap-3 sm:gap-4"
+                  >
+                    <div className="relative h-12 w-12 sm:h-14 sm:w-14 rounded-md overflow-hidden bg-neutral-100 border border-neutral-200 shrink-0">
+                      {business.logoURL ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={business.logoURL}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center font-bold text-neutral-500">
+                          {initial}
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-neutral-900 break-words">{job.title}</h3>
+                          <p className="text-xs text-neutral-500 mt-0.5">{business.name}</p>
+                        </div>
+                        <Link
+                          href={`/opportunities/${job.id}`}
+                          className="shrink-0 inline-flex items-center justify-center h-9 px-3 rounded-md bg-[#111] text-white text-xs font-semibold"
+                        >
+                          View
+                        </Link>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
+                        {(job.location || business.location) && (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {job.location || business.location}
+                          </span>
+                        )}
+                        {job.jobType || job.category ? (
+                          <span className="capitalize">{job.jobType || job.category}</span>
+                        ) : null}
+                        {job.experience ? <span>Experience: {job.experience}</span> : null}
+                        {job.salary ? <span>Salary: {job.salary}</span> : null}
+                        {job.publishedAt ? (
+                          <span>Published: {format(job.publishedAt, 'dd MMM yyyy')}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* 7. Events Listed by this business */}
+          <section id="events" className="scroll-mt-24">
+            <h2 className="font-headline text-xl sm:text-2xl font-bold text-neutral-900 mb-2">
+              Events Listed
+            </h2>
+            <p className="text-sm text-neutral-500 mb-4">
+              Events hosted or listed by this business
+            </p>
             {events.length === 0 ? (
-              <p className="text-sm text-neutral-500">No upcoming events listed.</p>
+              <p className="text-sm text-neutral-500">No events listed yet.</p>
             ) : (
               <div className="space-y-3">
                 {events.map((ev) => {
@@ -638,9 +730,20 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                       key={ev.id}
                       className="border border-neutral-200 rounded-lg bg-white p-4 sm:p-5 flex gap-3 items-start"
                     >
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-neutral-100 shrink-0">
-                        <Calendar className="w-4 h-4 text-neutral-700" />
-                      </div>
+                      {ev.imageURL ? (
+                        <div className="relative h-12 w-12 rounded-md overflow-hidden bg-neutral-100 shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={ev.imageURL}
+                            alt=""
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-neutral-100 shrink-0">
+                          <Calendar className="w-4 h-4 text-neutral-700" />
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <h3 className="font-bold text-neutral-900 break-words">{ev.title}</h3>
                         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-500">
@@ -732,6 +835,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
             />
             <OverviewRow label="Company Size" value={business.teamSize || '—'} />
             <OverviewRow label="Open Jobs" value={String(activeJobs.length)} />
+            <OverviewRow label="Events Listed" value={String(events.length)} />
             <OverviewRow
               label="Last Job Posted"
               value={lastJobPosted ? format(lastJobPosted, 'dd MMM yyyy') : '—'}

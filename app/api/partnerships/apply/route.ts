@@ -50,6 +50,28 @@ export async function POST(request: NextRequest) {
       })
     )
 
+    // Mirror into Contact Submissions so Admin → Communication sees it
+    try {
+      await db.collection('contactSubmissions').add(
+        sanitizeForFirestore({
+          name: submitterName,
+          email: submitterEmail.toLowerCase(),
+          phone: String(body.phone || '').trim().slice(0, 40),
+          subject: title.slice(0, 200),
+          message: description.slice(0, 10000),
+          source: 'partners',
+          category: 'partnership',
+          partnershipId: ref.id,
+          partnershipType: type,
+          status: 'unread',
+          submittedAt: now.toDate(),
+          createdAt: now.toDate(),
+        })
+      )
+    } catch (mirrorErr) {
+      console.warn('[partnerships/apply] contactSubmissions mirror skipped:', mirrorErr)
+    }
+
     return NextResponse.json({ success: true, id: ref.id })
   } catch (error) {
     console.error('[partnerships/apply] error:', error)

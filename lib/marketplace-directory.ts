@@ -53,6 +53,8 @@ export interface DirectoryBusiness {
   logoURL: string
   bannerURL: string
   ownerName: string
+  /** Firebase Auth uid of the business owner (for encrypted buyer↔seller DMs) */
+  ownerId: string
   services: string[]
   productImages: string[]
   phone: string
@@ -189,6 +191,11 @@ export function normalizeDirectoryBusiness(
       asString(data.owner) ||
       asString(data.contactName) ||
       asString(data.contact),
+    ownerId:
+      asString(data.ownerId) ||
+      asString(data.userId) ||
+      asString(data.createdBy) ||
+      asString(data.memberId),
     services,
     productImages,
     phone: asString(data.phone) || asString(data.businessPhone) || asString(data.contact),

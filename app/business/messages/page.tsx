@@ -16,8 +16,8 @@ export default function BusinessMessagesPage() {
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">Messages</h1>
           <p className="text-sm text-neutral-600">
-            Private conversations with members and connections (encrypted end-to-end in transit via
-            Firebase Auth).
+            Encrypted direct messages between you and members (buyer ↔ seller). Not the admin
+            chatbot.
           </p>
         </div>
         <Link

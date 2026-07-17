@@ -9,7 +9,7 @@ import { db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { normalizeDirectoryOffer, isActiveOffer } from '@/lib/marketplace-directory'
 import { useAuth } from '@/lib/auth-context'
-import { hasBusinessAccess } from '@/lib/roles'
+import { getDmInboxPath } from '@/lib/roles'
 import { auth } from '@/lib/firebase'
 import { RichTextContent } from '@/components/rich-text-content'
 
@@ -122,7 +122,7 @@ export function MarketplaceOfferDetail() {
         throw new Error(json.error)
       }
       if (!isPaid && json.sellerUserId) {
-        const inbox = hasBusinessAccess(user) ? '/business/messages' : '/dashboard/messages'
+        const inbox = getDmInboxPath(user)
         router.push(`${inbox}?to=${encodeURIComponent(json.sellerUserId)}`)
         return
       }

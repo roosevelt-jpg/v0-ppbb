@@ -15,7 +15,10 @@ function MessagesFallback() {
 
 export default function MessagesPage() {
   return (
-    <DashboardPageShell title="Messages" subtitle="Direct conversations with community members and businesses">
+    <DashboardPageShell
+      title="Messages"
+      subtitle="Encrypted direct conversations with businesses and members (buyer ↔ seller)"
+    >
       <Suspense fallback={<MessagesFallback />}>
         <DmInbox />
       </Suspense>

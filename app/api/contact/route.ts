@@ -38,6 +38,11 @@ export async function POST(request: NextRequest) {
       subject: String(subject).trim().slice(0, 200),
       message: String(message).trim().slice(0, 10000),
       source,
+      category:
+        source === 'partners' ||
+        /partner|sponsor/i.test(String(subject))
+          ? 'partnership'
+          : 'other',
       submittedAt: now,
       status: 'unread',
       createdAt: now,

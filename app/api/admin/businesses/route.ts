@@ -16,6 +16,8 @@ type BusinessAction =
   | 'suspend'
   | 'feature'
   | 'unfeature'
+  | 'mark_sponsor'
+  | 'unmark_sponsor'
   | 'delete'
   | 'set_referral_percent'
 
@@ -377,6 +379,19 @@ export async function PATCH(request: NextRequest) {
       case 'unfeature':
         patch = {
           featured: false,
+          updatedAt: now,
+        }
+        break
+      case 'mark_sponsor':
+        patch = {
+          isSponsor: true,
+          sponsorMarkedAt: now,
+          updatedAt: now,
+        }
+        break
+      case 'unmark_sponsor':
+        patch = {
+          isSponsor: false,
           updatedAt: now,
         }
         break

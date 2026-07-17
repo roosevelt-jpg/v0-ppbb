@@ -106,6 +106,8 @@ export default function BusinessesPage() {
       | 'suspend'
       | 'feature'
       | 'unfeature'
+      | 'mark_sponsor'
+      | 'unmark_sponsor'
       | 'delete'
       | 'set_referral_percent',
     extra?: Record<string, unknown>
@@ -398,6 +400,21 @@ export default function BusinessesPage() {
                       >
                         <Star className="w-4 h-4 mr-1.5" />
                         {biz.featured ? 'Unfeature' : 'Feature'}
+                      </Button>
+                      <Button
+                        type="button"
+                        disabled={busy}
+                        onClick={() =>
+                          void runAction(
+                            biz.id,
+                            biz.isSponsor ? 'unmark_sponsor' : 'mark_sponsor'
+                          )
+                        }
+                        className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+                        title="Blue tick on public directory cards"
+                      >
+                        <BadgeCheck className="w-4 h-4 mr-1.5 text-[#1D9BF0]" />
+                        {biz.isSponsor ? 'Remove sponsor tick' : 'Mark as sponsor'}
                       </Button>
                       <Button
                         type="button"

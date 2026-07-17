@@ -96,8 +96,6 @@ export const adminMenuItems = [
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
   { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
   { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },
-  { label: 'Sponsor Inquiries', href: '/admin/partnerships', icon: Handshake, group: 'Community' },
-  { label: 'Contact Inquiries', href: '/admin/contact-submissions', icon: Inbox, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
 
   // Charity & Support
@@ -117,7 +115,8 @@ export const adminMenuItems = [
   { label: 'Pricing Plans', href: '/admin/pricing', icon: Tags, group: 'Memberships' },
   { label: 'Approvals', href: '/admin/approvals', icon: BadgeCheck, group: 'Memberships' },
 
-  // Communication & Support
+  // Communication — one inbox for all website contact / partnership inquiries
+  { label: 'Contact Submissions', href: '/admin/contact-submissions', icon: Inbox, group: 'Communication' },
   { label: 'Newsletters', href: '/admin/newsletters', icon: Mail, group: 'Communication' },
   { label: 'Moderation', href: '/admin/moderation', icon: ShieldCheck, group: 'Communication' },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap, group: 'Communication' },

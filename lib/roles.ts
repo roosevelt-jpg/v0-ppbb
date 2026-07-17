@@ -76,6 +76,21 @@ export function isBasicMember(
   return !hasAdminAccess(user) && !hasBusinessAccess(user)
 }
 
+/**
+ * Encrypted buyer↔seller DM inbox path.
+ * Real business operators use /business/messages; members and admins use
+ * /dashboard/messages so public "Message" never opens the admin chatbot.
+ */
+export function getDmInboxPath(
+  user: Pick<User, 'role' | 'roles'> | null | undefined
+): string {
+  const roles = getUserRoles(user)
+  if (roles.includes('business') && !hasAdminAccess(user)) {
+    return '/business/messages'
+  }
+  return '/dashboard/messages'
+}
+
 /** Who may create events via UI/API. */
 export function canCreateEvents(
   user: Pick<User, 'role' | 'roles'> | null | undefined
