@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Calendar, MapPin, Users, Download, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
-import { getEventTimeRangeLabel } from '@/lib/event-utils'
+import { getEventLocationLabel, getEventTimeRangeLabel } from '@/lib/event-utils'
 
 type EventCardEvent = Record<string, unknown> & {
   id?: string
@@ -52,10 +52,7 @@ function getTimeLabel(event: EventCardEvent): string {
 }
 
 function getLocationLabel(event: EventCardEvent): string {
-  const name = typeof event.locationName === 'string' ? event.locationName.trim() : ''
-  const loc = typeof event.location === 'string' ? event.location.trim() : ''
-  const address = typeof event.locationAddress === 'string' ? event.locationAddress.trim() : ''
-  return name || loc || address || 'Location TBA'
+  return getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])
 }
 
 export default function EventCard({ event, showActions = true }: EventCardProps) {
@@ -159,10 +156,10 @@ END:VCALENDAR`
       </div>
 
       <div className="p-4 flex-1 flex flex-col">
-        {/* Host: logo + business + owner (once) */}
+        {/* Host: Admin for PB events; business name only for business hosts */}
         {(logoUrl || businessName || ownerName) && (
           <div className="flex items-center gap-2.5 mb-3 min-w-0">
-            {logoUrl ? (
+            {logoUrl && businessName !== 'Admin' ? (
               <img
                 src={logoUrl}
                 alt={businessName || 'Host'}
@@ -170,14 +167,14 @@ END:VCALENDAR`
               />
             ) : (
               <div className="h-9 w-9 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shrink-0">
-                {(businessName || ownerName || 'E').charAt(0).toUpperCase()}
+                {(businessName || ownerName || 'A').charAt(0).toUpperCase()}
               </div>
             )}
             <div className="min-w-0">
-              {businessName ? (
-                <p className="text-sm font-semibold text-neutral-900 truncate">{businessName}</p>
-              ) : null}
-              {ownerName && ownerName !== businessName ? (
+              <p className="text-sm font-semibold text-neutral-900 truncate">
+                {businessName === 'Admin' ? 'Admin' : businessName || 'Host'}
+              </p>
+              {businessName !== 'Admin' && ownerName && ownerName !== businessName ? (
                 <p className="text-xs text-neutral-500 truncate">{ownerName}</p>
               ) : null}
             </div>

@@ -8,6 +8,9 @@ export type EventsCategoryFilter = string
 
 export interface NormalizedEvent extends Event {
   id: string
+  businessName?: string
+  ownerName?: string
+  businessLogoUrl?: string
 }
 
 export function toEventDate(value: unknown): Date | null {
@@ -81,10 +84,33 @@ export function getEventTimeRangeLabel(
   return startLabel
 }
 
+/** True when a string is a Maps/web URL rather than a human-readable address. */
+export function isMapsOrWebUrl(value: string): boolean {
+  const t = value.trim().toLowerCase()
+  if (!t) return false
+  return (
+    t.startsWith('http://') ||
+    t.startsWith('https://') ||
+    t.includes('maps.google.') ||
+    t.includes('google.com/maps') ||
+    t.includes('maps.app.goo.gl') ||
+    t.includes('goo.gl/maps')
+  )
+}
+
+/**
+ * Prefer a human-readable address over pasted Google Maps links.
+ * Order: non-URL address → non-URL name → non-URL location → TBA.
+ */
 export function getEventLocationLabel(event: Partial<Event> & { location?: string }): string {
-  if (typeof event.locationName === 'string' && event.locationName) return event.locationName
-  if (typeof event.location === 'string' && event.location) return event.location
-  if (typeof event.locationAddress === 'string' && event.locationAddress) return event.locationAddress
+  const candidates = [
+    typeof event.locationAddress === 'string' ? event.locationAddress.trim() : '',
+    typeof event.locationName === 'string' ? event.locationName.trim() : '',
+    typeof event.location === 'string' ? event.location.trim() : '',
+  ].filter(Boolean)
+
+  const human = candidates.find((c) => !isMapsOrWebUrl(c))
+  if (human) return human
   return 'Location TBA'
 }
 
@@ -110,10 +136,32 @@ export function mapEventDoc(id: string, data: Record<string, unknown>): Normaliz
     speakers: Array.isArray(data.speakers) ? (data.speakers as Event['speakers']) : [],
     agenda: Array.isArray(data.agenda) ? (data.agenda as Event['agenda']) : [],
     locationName: getEventLocationLabel(data as Partial<Event>),
-    locationAddress: typeof data.locationAddress === 'string' ? data.locationAddress : '',
+    locationAddress: (() => {
+      const raw = typeof data.locationAddress === 'string' ? data.locationAddress.trim() : ''
+      if (raw && !isMapsOrWebUrl(raw)) return raw
+      return getEventLocationLabel(data as Partial<Event>)
+    })(),
     locationPlaceId: typeof data.locationPlaceId === 'string' ? data.locationPlaceId : '',
     locationLat: typeof data.locationLat === 'number' ? data.locationLat : 0,
     locationLng: typeof data.locationLng === 'number' ? data.locationLng : 0,
+    businessName:
+      data.createdByRole === 'admin'
+        ? 'Admin'
+        : typeof data.businessName === 'string'
+          ? data.businessName
+          : undefined,
+    ownerName:
+      data.createdByRole === 'admin'
+        ? ''
+        : typeof data.ownerName === 'string'
+          ? data.ownerName
+          : undefined,
+    businessLogoUrl:
+      typeof data.businessLogoUrl === 'string'
+        ? data.businessLogoUrl
+        : typeof data.businessLogoURL === 'string'
+          ? data.businessLogoURL
+          : undefined,
     startDate: getEventStartDate(data as Partial<Event>),
     endDate: getEventEndDate(data as Partial<Event>),
     timezone: typeof data.timezone === 'string' ? data.timezone : 'Asia/Dubai',

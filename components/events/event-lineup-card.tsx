@@ -12,7 +12,7 @@ import {
   getEventTimeRangeLabel,
   getGenderBadgeLabel,
 } from '@/lib/event-utils'
-import { getEventPriceCornerLabel } from '@/lib/event-host'
+import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
 
 interface EventLineupCardProps {
   event: NormalizedEvent
@@ -26,16 +26,10 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
   const categoryName = getCategoryName(categories, event.category)
   const genderLabel = getGenderBadgeLabel(event.genderRestriction)
   const priceCorner = getEventPriceCornerLabel(event as unknown as Record<string, unknown>)
-  const businessName = typeof (event as { businessName?: string }).businessName === 'string'
-    ? (event as { businessName?: string }).businessName
-    : ''
-  const ownerName = typeof (event as { ownerName?: string }).ownerName === 'string'
-    ? (event as { ownerName?: string }).ownerName
-    : ''
-  const logoUrl =
-    typeof (event as { businessLogoUrl?: string }).businessLogoUrl === 'string'
-      ? (event as { businessLogoUrl?: string }).businessLogoUrl
-      : ''
+  const host = hostFromEventDoc(event as unknown as Record<string, unknown>)
+  const businessName = host?.businessName || ''
+  const ownerName = host?.ownerName || ''
+  const logoUrl = host?.businessLogoUrl || ''
 
   return (
     <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full max-w-sm mx-auto w-full md:max-w-none">
@@ -70,7 +64,7 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
       <div className="p-3 sm:p-3.5 flex flex-col flex-1 min-w-0">
         {(logoUrl || businessName || ownerName) && (
           <div className="flex items-center gap-2 mb-2 min-w-0">
-            {logoUrl ? (
+            {logoUrl && businessName !== 'Admin' ? (
               <img
                 src={logoUrl}
                 alt={businessName || 'Host'}
@@ -78,14 +72,14 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
               />
             ) : (
               <div className="h-7 w-7 rounded-full bg-neutral-900 text-white text-[0.65rem] font-bold flex items-center justify-center shrink-0">
-                {(businessName || ownerName || 'E').charAt(0).toUpperCase()}
+                {(businessName || ownerName || 'A').charAt(0).toUpperCase()}
               </div>
             )}
             <div className="min-w-0">
-              {businessName ? (
-                <p className="text-xs font-semibold text-foreground truncate">{businessName}</p>
-              ) : null}
-              {ownerName && ownerName !== businessName ? (
+              <p className="text-xs font-semibold text-foreground truncate">
+                {businessName === 'Admin' ? 'Admin' : businessName || 'Host'}
+              </p>
+              {businessName !== 'Admin' && ownerName && ownerName !== businessName ? (
                 <p className="text-[0.65rem] text-muted-foreground truncate">{ownerName}</p>
               ) : null}
             </div>

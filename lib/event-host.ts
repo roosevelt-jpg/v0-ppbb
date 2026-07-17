@@ -24,20 +24,37 @@ export function resolveEventHostFromUserData(
   const firstName = asString(data?.firstName)
   const lastName = asString(data?.lastName)
   const fullName = `${firstName} ${lastName}`.trim()
+  // Admin-hosted events always show "Admin" — never the admin's personal name
+  if (role === 'admin') {
+    return {
+      businessId: userId || '',
+      businessName: 'Admin',
+      ownerName: '',
+      businessLogoUrl:
+        asString(data?.logoUrl) ||
+        asString(data?.logoURL) ||
+        asString(data?.logo) ||
+        asString(data?.photoURL) ||
+        asString(data?.avatarUrl) ||
+        '',
+    }
+  }
+
   const ownerName =
     asString(data?.ownerName) ||
     asString(data?.memberName) ||
     asString(data?.contactName) ||
     fullName ||
     asString(data?.displayName) ||
-    (role === 'admin' ? 'Passive Blessings' : '')
+    ''
 
   const businessName =
     asString(data?.businessName) ||
     asString(data?.name) ||
     asString(profile.businessName) ||
     asString(data?.companyName) ||
-    (role === 'admin' ? 'Passive Blessings' : ownerName || 'Host')
+    ownerName ||
+    'Host'
 
   const businessLogoUrl =
     asString(data?.logoUrl) ||
@@ -56,10 +73,34 @@ export function resolveEventHostFromUserData(
 }
 
 export function hostFromEventDoc(data: Record<string, unknown>): EventHostInfo | null {
+  const createdByRole = asString(data.createdByRole)
+  if (createdByRole === 'admin') {
+    return {
+      businessId: asString(data.businessId) || asString(data.createdBy),
+      businessName: 'Admin',
+      ownerName: '',
+      businessLogoUrl: asString(data.businessLogoUrl) || asString(data.businessLogoURL),
+    }
+  }
+
   const businessName = asString(data.businessName)
   const ownerName = asString(data.ownerName)
   const businessLogoUrl = asString(data.businessLogoUrl) || asString(data.businessLogoURL)
   if (!businessName && !ownerName && !businessLogoUrl) return null
+
+  // Legacy admin events may lack createdByRole but store a personal ownerName under Passive Blessings
+  const looksLikeLegacyAdmin =
+    businessName.toLowerCase() === 'passive blessings' ||
+    asString(data.businessId) === 'passive-blessings'
+  if (looksLikeLegacyAdmin && !asString(data.createdByRole)) {
+    return {
+      businessId: asString(data.businessId) || asString(data.createdBy),
+      businessName: 'Admin',
+      ownerName: '',
+      businessLogoUrl,
+    }
+  }
+
   return {
     businessId: asString(data.businessId) || asString(data.createdBy),
     businessName: businessName || 'Host',

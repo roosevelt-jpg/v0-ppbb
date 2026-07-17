@@ -226,10 +226,11 @@ export async function POST(request: NextRequest) {
       createdBy: uid,
       createdByRole,
       businessId: host.businessId,
-      businessName: host.businessName,
-      ownerName: host.ownerName,
-      businessLogoUrl: host.businessLogoUrl,
-      submittedAt: isPending ? Timestamp.now() : null,
+      businessName: createdByRole === 'admin' ? 'Admin' : host.businessName,
+      ownerName: createdByRole === 'admin' ? 'Admin' : host.ownerName,
+      businessLogoUrl: createdByRole === 'admin' ? '' : host.businessLogoUrl,
+      // Admin publishes skip pending — still record when the event entered the system
+      submittedAt: isPending || isPublished ? Timestamp.now() : null,
       approvedBy: isPublished && !isBusiness ? uid : null,
       approvedAt: isPublished && !isBusiness ? Timestamp.now() : null,
       approvalNotes: null,
@@ -318,6 +319,10 @@ export async function PUT(request: NextRequest) {
 
     if (updates.status === 'pending_approval' && !updates.submittedAt) {
       updates.submittedAt = Timestamp.now()
+    }
+
+    if (updates.status === 'published' && !existing.submittedAt && !updates.submittedAt) {
+      updates.submittedAt = existing.publishedAt || Timestamp.now()
     }
 
     if (updates.status === 'published' && !updates.publishedAt) {

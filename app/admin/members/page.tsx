@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 import React from 'react'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { Search } from 'lucide-react'
+import { Search, Trash2 } from 'lucide-react'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { AdminUserProfileModal, AdminViewProfileButton } from '@/components/admin-user-profile-modal'
@@ -17,6 +17,10 @@ export default function AdminMembersPage() {
   const [search, setSearch] = React.useState('')
   const [profileOpen, setProfileOpen] = React.useState(false)
   const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = React.useState(false)
+  const [bulkStatus, setBulkStatus] = React.useState('')
+  const [bulkRole, setBulkRole] = React.useState('')
 
   const openProfile = (member: Record<string, unknown>) => {
     setActiveProfile(profileFromMember(member))
@@ -41,6 +45,7 @@ export default function AdminMembersPage() {
       const json = await res.json()
       if (json.success) {
         setMembers(json.data)
+        setSelectedIds(new Set())
       }
     } catch (error) {
       console.error('[v0] Error fetching members:', error)
@@ -49,7 +54,6 @@ export default function AdminMembersPage() {
     }
   }
 
-  // Get stats by type
   const allMembers = members
   const memberCount = allMembers.filter(m => m.role === 'member' || m.userType === 'member').length
   const volunteerCount = allMembers.filter(m => m.role === 'volunteer' || m.userType === 'volunteer').length
@@ -57,6 +61,91 @@ export default function AdminMembersPage() {
   const sponsorCount = allMembers.filter(m => m.role === 'sponsor' || m.userType === 'sponsor').length
 
   const displayMembers = userType === 'all' ? allMembers : allMembers.filter(m => m.role === userType || m.userType === userType)
+
+  const allVisibleSelected =
+    displayMembers.length > 0 && displayMembers.every((m) => selectedIds.has(m.id))
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleAllVisible = () => {
+    if (allVisibleSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev)
+        displayMembers.forEach((m) => next.delete(m.id))
+        return next
+      })
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev)
+        displayMembers.forEach((m) => next.add(m.id))
+        return next
+      })
+    }
+  }
+
+  const selectedList = Array.from(selectedIds)
+
+  const runBulkUpdate = async () => {
+    if (!selectedList.length) return
+    if (!bulkStatus && !bulkRole) {
+      alert('Choose a status and/or role to apply')
+      return
+    }
+    if (!confirm(`Update ${selectedList.length} selected member(s)?`)) return
+    setBulkBusy(true)
+    try {
+      const payload: Record<string, unknown> = { ids: selectedList }
+      if (bulkStatus) payload.status = bulkStatus
+      if (bulkRole) payload.role = bulkRole
+      const res = await fetch('/api/members', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Update failed')
+      setBulkStatus('')
+      setBulkRole('')
+      await loadMembers()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Bulk update failed')
+    } finally {
+      setBulkBusy(false)
+    }
+  }
+
+  const runBulkDelete = async () => {
+    if (!selectedList.length) return
+    if (
+      !confirm(
+        `Delete ${selectedList.length} selected member(s)? They will be marked deleted and hidden from lists.`
+      )
+    ) {
+      return
+    }
+    setBulkBusy(true)
+    try {
+      const res = await fetch('/api/members', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedList }),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Delete failed')
+      await loadMembers()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Bulk delete failed')
+    } finally {
+      setBulkBusy(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -73,7 +162,6 @@ export default function AdminMembersPage() {
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-black">All Members</h2>
 
-        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
             <p className="text-sm text-gray-600">Total Members</p>
@@ -93,7 +181,6 @@ export default function AdminMembersPage() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <div className="flex gap-2 overflow-x-auto pb-1 min-w-0">
             {['all', 'member', 'volunteer', 'business', 'sponsor'].map(type => (
@@ -129,16 +216,75 @@ export default function AdminMembersPage() {
           </div>
         </div>
 
-        {/* Table */}
+        {selectedList.length > 0 && (
+          <div className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-neutral-50 p-4">
+            <p className="text-sm font-medium text-gray-800 w-full sm:w-auto">
+              {selectedList.length} selected
+            </p>
+            <label className="text-sm text-gray-700">
+              Set status
+              <select
+                value={bulkStatus}
+                onChange={(e) => setBulkStatus(e.target.value)}
+                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              >
+                <option value="">—</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </label>
+            <label className="text-sm text-gray-700">
+              Set role
+              <select
+                value={bulkRole}
+                onChange={(e) => setBulkRole(e.target.value)}
+                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              >
+                <option value="">—</option>
+                <option value="member">Member</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="business">Business</option>
+                <option value="sponsor">Sponsor</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => void runBulkUpdate()}
+              className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+            >
+              Update selected
+            </button>
+            <button
+              type="button"
+              disabled={bulkBusy}
+              onClick={() => void runBulkDelete()}
+              className="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+            >
+              <Trash2 size={14} />
+              Delete selected
+            </button>
+          </div>
+        )}
+
         {displayMembers.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500">No members found matching your filters.</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 admin-table-scroll min-w-0">
-            <table className="w-full min-w-[1020px]">
+            <table className="w-full min-w-[1080px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleAllVisible}
+                      aria-label="Select all visible members"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
@@ -153,6 +299,14 @@ export default function AdminMembersPage() {
               <tbody className="divide-y divide-gray-200">
                 {displayMembers.map((member: any) => (
                   <tr key={member.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(member.id)}
+                        onChange={() => toggleOne(member.id)}
+                        aria-label={`Select ${member.name || member.email || member.id}`}
+                      />
+                    </td>
                     <td className="px-6 py-3 text-sm">
                         <AdminUserCell user={member} />
                     </td>

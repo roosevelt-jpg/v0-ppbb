@@ -53,6 +53,14 @@ export default function GooglePlacesAutocomplete({
   const emitManualEntry = (text: string) => {
     const trimmed = text.trim()
     if (!trimmed) return
+    const looksLikeUrl =
+      /^https?:\/\//i.test(trimmed) ||
+      /maps\.(google|app\.goo)/i.test(trimmed) ||
+      /goo\.gl\/maps/i.test(trimmed)
+    if (looksLikeUrl) {
+      setError('Enter a place name or street address — Google Maps links cannot be used as the location label')
+      return
+    }
 
     onChange({
       placeId: `manual-${Date.now()}`,

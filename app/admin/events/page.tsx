@@ -9,7 +9,7 @@ import { format } from 'date-fns'
 import { Plus, Trash2, Edit2, CheckCircle, AlertCircle, XCircle, Eye } from 'lucide-react'
 import type { Event, EventStatus } from '@/lib/event-types'
 import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
-import { toEventDate } from '@/lib/event-utils'
+import { toEventDate, getEventLocationLabel } from '@/lib/event-utils'
 
 type TabType = 'all' | 'pending_approval' | 'draft' | 'published' | 'changes_requested' | 'rejected' | 'cancelled' | 'completed'
 
@@ -53,6 +53,8 @@ function EventsPageContent() {
     const tab = searchParams.get('tab')
     return isValidTab(tab) ? tab : 'all'
   })
+  const [publishedFrom, setPublishedFrom] = React.useState('')
+  const [publishedTo, setPublishedTo] = React.useState('')
 
   React.useEffect(() => {
     const tab = searchParams.get('tab')
@@ -80,8 +82,56 @@ function EventsPageContent() {
     return events.filter((e) => e.status === status)
   }
 
-  const filteredEvents = getEventsByStatus(activeTab)
+  const sortPublishedUpcomingFirst = (list: Event[]): Event[] => {
+    const now = Date.now()
+    return [...list].sort((a, b) => {
+      const aStart = toEventDate(a.startDate)?.getTime() ?? 0
+      const bStart = toEventDate(b.startDate)?.getTime() ?? 0
+      const aUpcoming = aStart >= now
+      const bUpcoming = bStart >= now
+      if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1
+      if (aUpcoming && bUpcoming) return aStart - bStart
+      return bStart - aStart
+    })
+  }
+
+  const filteredEvents = React.useMemo(() => {
+    let list = getEventsByStatus(activeTab)
+
+    if (activeTab === 'published') {
+      if (publishedFrom || publishedTo) {
+        const fromMs = publishedFrom ? new Date(`${publishedFrom}T00:00:00`).getTime() : null
+        const toMs = publishedTo ? new Date(`${publishedTo}T23:59:59`).getTime() : null
+        list = list.filter((e) => {
+          const pub =
+            toEventDate(e.publishedAt)?.getTime() ??
+            toEventDate(e.submittedAt)?.getTime() ??
+            toEventDate(e.createdAt)?.getTime() ??
+            0
+          if (fromMs != null && pub < fromMs) return false
+          if (toMs != null && pub > toMs) return false
+          return true
+        })
+      }
+      return sortPublishedUpcomingFirst(list)
+    }
+
+    return list
+  }, [events, activeTab, publishedFrom, publishedTo])
+
   const pendingCount = events.filter((e) => e.status === 'pending_approval').length
+
+  const submittedDisplayDate = (event: Event) => {
+    return (
+      toEventDate(event.submittedAt) ||
+      toEventDate(event.publishedAt) ||
+      toEventDate(event.createdAt)
+    )
+  }
+
+  const locationDisplay = (event: Event) => {
+    return getEventLocationLabel(event)
+  }
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this event?')) return
@@ -225,6 +275,44 @@ function EventsPageContent() {
           })}
         </div>
 
+        {activeTab === 'published' && (
+          <div className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-white p-4">
+            <label className="text-sm text-gray-700">
+              Published from
+              <input
+                type="date"
+                value={publishedFrom}
+                onChange={(e) => setPublishedFrom(e.target.value)}
+                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              />
+            </label>
+            <label className="text-sm text-gray-700">
+              Published to
+              <input
+                type="date"
+                value={publishedTo}
+                onChange={(e) => setPublishedTo(e.target.value)}
+                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+              />
+            </label>
+            {(publishedFrom || publishedTo) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPublishedFrom('')
+                  setPublishedTo('')
+                }}
+                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+              >
+                Clear dates
+              </button>
+            )}
+            <p className="text-xs text-gray-500 w-full sm:w-auto sm:ml-auto">
+              Current &amp; upcoming events appear first
+            </p>
+          </div>
+        )}
+
         {filteredEvents.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-500">
@@ -236,12 +324,13 @@ function EventsPageContent() {
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 min-w-0">
             <div className="admin-table-scroll">
-            <table className="w-full min-w-[1100px]">
+            <table className="w-full min-w-[1200px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created By</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Submitted</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
@@ -265,6 +354,11 @@ function EventsPageContent() {
                         <span>{event.createdByRole === 'business' ? 'Business' : 'Admin'}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-3 text-sm text-gray-600 max-w-[200px]">
+                      <span className="line-clamp-2" title={locationDisplay(event)}>
+                        {locationDisplay(event)}
+                      </span>
+                    </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {(() => {
                         const date = toEventDate(event.startDate)
@@ -273,7 +367,7 @@ function EventsPageContent() {
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {(() => {
-                        const date = toEventDate(event.submittedAt)
+                        const date = submittedDisplayDate(event)
                         return date ? format(date, 'MMM dd, yyyy') : '-'
                       })()}
                     </td>

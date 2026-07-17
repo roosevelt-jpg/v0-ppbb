@@ -443,23 +443,32 @@ function CreateEventForm() {
                 setFormData((prev) => ({
                   ...prev,
                   locationName: text,
+                  // Keep address in sync for free-text; Places selection overwrites with formatted address
                   locationAddress: text,
                 }))
               }}
               onChange={(place) => {
+                const label = place.secondaryText
+                  ? `${place.mainText}, ${place.secondaryText}`
+                  : place.mainText
+                const isUrl =
+                  /^https?:\/\//i.test(label) ||
+                  /maps\.(google|app\.goo)/i.test(label)
                 setFormData((prev) => ({
                   ...prev,
-                  locationName: place.mainText,
-                  locationAddress: place.mainText,
-                  locationPlaceId: place.placeId,
+                  // Prefer human-readable place name / formatted address — never store maps links as the name
+                  locationName: isUrl ? prev.locationName : place.mainText,
+                  locationAddress: isUrl ? prev.locationAddress : label,
+                  locationPlaceId: place.placeId.startsWith('manual-') ? '' : place.placeId,
                   locationLat: place.lat || 0,
                   locationLng: place.lng || 0,
                 }))
               }}
               countryRestrictions={['AE']}
+              placeholder="Search address (e.g. Dubai Marina) — not a Maps link"
             />
 
-            {formData.locationName && (
+            {formData.locationAddress && !/^https?:\/\//i.test(formData.locationAddress) && (
               <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex gap-2">
                 <MapPin size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
@@ -473,6 +482,13 @@ function CreateEventForm() {
                   )}
                 </div>
               </div>
+            )}
+            {(formData.locationName?.startsWith('http') ||
+              formData.locationAddress?.includes('maps.')) && (
+              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                Paste a place name or pick a Google suggestion — Maps links are not shown as the location
+                address on event cards.
+              </p>
             )}
           </div>
 

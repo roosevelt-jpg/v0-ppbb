@@ -67,8 +67,13 @@ export async function POST(request: NextRequest) {
 
     const suitableFor = parseLines(body.suitableFor)
     let genderRestriction = body.genderRestriction || 'mixed'
-    if (suitableFor.includes('Women Only')) genderRestriction = 'female'
-    if (suitableFor.includes('Men Only')) genderRestriction = 'male'
+    if (suitableFor.some((s) => /ladies only|women only/i.test(s))) genderRestriction = 'female'
+    if (suitableFor.some((s) => /men only|male only/i.test(s))) genderRestriction = 'male'
+
+    const workType = String(body.locationType || body.workType || '').toLowerCase()
+    const isRemote = workType === 'remote' || Boolean(body.remote)
+    const locationType =
+      workType === 'hybrid' ? 'hybrid' : isRemote ? 'remote' : workType === 'onsite' ? 'onsite' : body.locationType || 'onsite'
 
     const now = Timestamp.now()
     const ref = db.collection('businessOpportunities').doc()
@@ -76,6 +81,11 @@ export async function POST(request: NextRequest) {
 
     const requirements = parseLines(body.requirements)
     const benefits = parseLines(body.benefits)
+    const responsibilities = parseLines(body.responsibilities || body.keyResponsibilities)
+
+    const compensation =
+      (typeof body.compensation === 'string' && body.compensation.trim()) ||
+      (typeof body.salary === 'number' && body.salary > 0 ? `AED ${body.salary}` : null)
 
     const opportunity = sanitizeForFirestore({
       id,
@@ -87,12 +97,14 @@ export async function POST(request: NextRequest) {
       roleType: body.roleType || body.type || 'job',
       companyName: body.companyName || businessName,
       description: body.description || '',
+      responsibilities,
       category: body.category || '',
       salary: typeof body.salary === 'number' ? body.salary : null,
-      remote: Boolean(body.remote),
-      locationType: body.remote ? 'remote' : body.locationType || 'onsite',
-      locationCity: body.remote ? null : body.locationCity || null,
-      locationText: body.locationCity || null,
+      compensation,
+      remote: isRemote,
+      locationType,
+      locationCity: isRemote ? null : body.locationCity || body.location || null,
+      locationText: body.locationCity || body.location || null,
       duration: body.duration || null,
       hoursPerWeek: typeof body.hoursPerWeek === 'number' ? body.hoursPerWeek : null,
       requirements,
@@ -102,6 +114,7 @@ export async function POST(request: NextRequest) {
       applicationProcess: body.applicationProcess || 'cv_upload',
       applicationURL: body.applicationURL || null,
       deadline: body.deadline ? Timestamp.fromDate(new Date(body.deadline)) : null,
+      hiringBy: body.hiringBy ? Timestamp.fromDate(new Date(body.hiringBy)) : null,
       posterRelation: body.posterRelation || 'employer',
       isMemberOnly: Boolean(body.isMemberOnly),
       applications: 0,
@@ -123,16 +136,20 @@ export async function POST(request: NextRequest) {
         companyName: body.companyName || businessName,
         title,
         description: body.description || '',
+        responsibilities,
         category: body.category || body.type || '',
         jobType: body.type || 'job',
         roleType: body.roleType || body.type || 'job',
+        compensation,
         genderRestriction,
         suitableFor,
         isMemberOnly: Boolean(body.isMemberOnly),
         applicationProcess: body.applicationProcess || 'cv_upload',
         applicationURL: body.applicationURL || null,
-        locationCity: body.remote ? null : body.locationCity || null,
-        locationType: body.remote ? 'remote' : 'onsite',
+        locationCity: isRemote ? null : body.locationCity || body.location || null,
+        locationType,
+        deadline: body.deadline ? Timestamp.fromDate(new Date(body.deadline)) : null,
+        hiringBy: body.hiringBy ? Timestamp.fromDate(new Date(body.hiringBy)) : null,
         status,
         createdAt: now,
         updatedAt: now,

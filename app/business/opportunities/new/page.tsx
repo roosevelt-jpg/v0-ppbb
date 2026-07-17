@@ -10,30 +10,75 @@ import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
 import { RichTextEditor } from '@/components/rich-text-editor'
 
+const UAE_EMIRATES = [
+  'Abu Dhabi',
+  'Dubai',
+  'Sharjah',
+  'Ajman',
+  'Umm Al Quwain',
+  'Ras Al Khaimah',
+  'Fujairah',
+]
+
+const ROLE_TYPES = [
+  { value: 'freelance', label: 'Freelance' },
+  { value: 'full_time', label: 'Full Time' },
+  { value: 'part_time', label: 'Part Time' },
+  { value: 'internship', label: 'Internship' },
+  { value: 'training', label: 'Training' },
+  { value: 'volunteer', label: 'Volunteer' },
+  { value: 'contract', label: 'Contract' },
+]
+
+const WORK_TYPES = [
+  { value: 'onsite', label: 'Onsite' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+]
+
+const SUITABILITY = [
+  'Ladies Only',
+  'Men Only',
+  'Fresh Graduates',
+  'Experienced 5yrs+',
+]
+
+const fieldStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '12px 16px',
+  border: '1px solid #e4e1da',
+  borderRadius: '8px',
+  backgroundColor: '#ffffff',
+  color: '#111111',
+}
+
+const labelStyle: React.CSSProperties = {
+  color: '#111111',
+  fontWeight: 600,
+  display: 'block',
+  marginBottom: '8px',
+}
+
 export default function NewOpportunity() {
   const { user } = useAuth()
   const router = useRouter()
   const [isSaving, setIsSaving] = React.useState(false)
   const [formData, setFormData] = React.useState({
     title: '',
-    type: 'job',
-    roleType: 'full_time',
     companyName: '',
-    description: '',
-    category: '',
-    salary: 0,
-    remote: false,
+    roleType: 'full_time',
+    locationType: 'onsite',
     locationCity: '',
-    duration: '',
-    hoursPerWeek: 0,
+    locationLink: '',
+    responsibilities: '',
     requirements: '',
-    benefits: '',
+    compensation: '',
     suitableFor: [] as string[],
-    genderRestriction: 'mixed' as 'male' | 'female' | 'mixed',
+    deadline: '',
+    hiringBy: '',
+    description: '',
     applicationProcess: 'cv_upload' as 'cv_upload' | 'external_link' | 'both',
     applicationURL: '',
-    deadline: '',
-    posterRelation: 'employer' as 'employer' | 'connector',
     isMemberOnly: false,
   })
 
@@ -49,10 +94,9 @@ export default function NewOpportunity() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     const checked = (e.target as HTMLInputElement).checked
-    
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
+      [name]: type === 'checkbox' ? checked : value,
     }))
   }
 
@@ -61,10 +105,7 @@ export default function NewOpportunity() {
       const next = prev.suitableFor.includes(label)
         ? prev.suitableFor.filter((s) => s !== label)
         : [...prev.suitableFor, label]
-      let genderRestriction: 'male' | 'female' | 'mixed' = 'mixed'
-      if (next.includes('Women Only')) genderRestriction = 'female'
-      else if (next.includes('Men Only')) genderRestriction = 'male'
-      return { ...prev, suitableFor: next, genderRestriction }
+      return { ...prev, suitableFor: next }
     })
   }
 
@@ -78,6 +119,12 @@ export default function NewOpportunity() {
         alert('Please sign in again to post a job.')
         return
       }
+
+      const locationValue =
+        formData.locationType === 'remote'
+          ? 'Remote'
+          : formData.locationCity || formData.locationLink || ''
+
       const res = await fetch('/api/business/opportunities', {
         method: 'POST',
         headers: {
@@ -85,11 +132,29 @@ export default function NewOpportunity() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...formData,
-          businessName: user.businessProfile?.businessName || 'Unknown',
+          title: formData.title,
           companyName: formData.companyName || user.businessProfile?.businessName || 'Unknown',
+          businessName: user.businessProfile?.businessName || formData.companyName || 'Unknown',
+          roleType: formData.roleType,
+          type: formData.roleType === 'internship' || formData.roleType === 'volunteer'
+            ? formData.roleType
+            : formData.roleType === 'freelance' || formData.roleType === 'contract'
+              ? 'gig'
+              : 'job',
+          locationType: formData.locationType,
+          remote: formData.locationType === 'remote',
+          locationCity: locationValue,
+          location: locationValue,
+          responsibilities: formData.responsibilities,
           requirements: formData.requirements.split('\n').filter((r) => r.trim()),
-          benefits: formData.benefits.split('\n').filter((b) => b.trim()),
+          compensation: formData.compensation,
+          suitableFor: formData.suitableFor,
+          deadline: formData.deadline || null,
+          hiringBy: formData.hiringBy || null,
+          description: formData.description || formData.responsibilities,
+          applicationProcess: formData.applicationProcess,
+          applicationURL: formData.applicationURL || null,
+          isMemberOnly: formData.isMemberOnly,
           status: isDraft ? 'draft' : 'pending_approval',
         }),
       })
@@ -123,264 +188,151 @@ export default function NewOpportunity() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      {/* Header */}
       <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
         <div className="max-w-2xl mx-auto">
           <h1
             style={{ color: '#111111', fontSize: '32px', fontWeight: 700, fontFamily: 'Cormorant Garamond, serif' }}
           >
-            Post New Opportunity
+            Post Work Opportunity
           </h1>
           <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
-            Share a job, internship, or gig — submitted for admin approval before it goes live
+            Fill in the details below — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
 
-      {/* Form */}
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {/* Title */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Opportunity Title *
-              </label>
+              <label style={labelStyle}>1. Job Title / Opportunity Name *</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
                 required
-                placeholder="e.g., Senior React Developer"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                }}
+                placeholder="e.g., Community Outreach Coordinator"
+                style={fieldStyle}
               />
             </div>
 
-            {/* Type and Category */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Type *
-                </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                  }}
-                >
-                  <option value="job">Job</option>
-                  <option value="internship">Internship</option>
-                  <option value="gig">Gig</option>
-                  <option value="volunteer">Volunteer</option>
-                  <option value="contract">Contract</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Category *
-                </label>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                  placeholder="e.g., Technology, Marketing"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                  }}
-                />
-              </div>
-            </div>
-
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Company / Organization Name
-              </label>
+              <label style={labelStyle}>2. Company / Organization Name</label>
               <input
                 type="text"
                 name="companyName"
                 value={formData.companyName}
                 onChange={handleChange}
-                placeholder="Your company or organization name"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                }}
+                placeholder="Defaults to your organization"
+                style={fieldStyle}
               />
             </div>
 
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Employment Type
-              </label>
+              <label style={labelStyle}>3. Role Type *</label>
               <select
                 name="roleType"
                 value={formData.roleType}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                }}
+                required
+                style={fieldStyle}
               >
-                <option value="full_time">Full Time</option>
-                <option value="part_time">Part Time</option>
-                <option value="freelance">Freelance</option>
-                <option value="volunteer">Volunteer</option>
-                <option value="internship">Internship</option>
-                <option value="contract">Contract</option>
+                {ROLE_TYPES.map((r) => (
+                  <option key={r.value} value={r.value}>
+                    {r.label}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {/* Description */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Description *
-              </label>
-              <RichTextEditor
-                value={formData.description}
-                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
-                placeholder="Describe the opportunity in detail..."
-                minHeight={180}
-              />
+              <label style={labelStyle}>4. Work Type *</label>
+              <select
+                name="locationType"
+                value={formData.locationType}
+                onChange={handleChange}
+                required
+                style={fieldStyle}
+              >
+                {WORK_TYPES.map((w) => (
+                  <option key={w.value} value={w.value}>
+                    {w.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Salary and Duration */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Salary (AED) or Hourly Rate
-                </label>
-                <input
-                  type="number"
-                  name="salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  placeholder="0"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
+            {formData.locationType !== 'remote' && (
+              <div className="space-y-3">
+                <label style={labelStyle}>5. Location</label>
+                <select
+                  name="emirateSelect"
+                  value={UAE_EMIRATES.includes(formData.locationCity) ? formData.locationCity : ''}
+                  onChange={(e) => {
+                    if (!e.target.value) return
+                    setFormData((p) => ({ ...p, locationCity: e.target.value, locationLink: '' }))
                   }}
-                />
-              </div>
-              <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Duration
-                </label>
-                <input
-                  type="text"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  placeholder="e.g., 3 months, Full-time"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Hours Per Week and Remote */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Hours Per Week
-                </label>
-                <input
-                  type="number"
-                  name="hoursPerWeek"
-                  value={formData.hoursPerWeek}
-                  onChange={handleChange}
-                  placeholder="0"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                  }}
-                />
-              </div>
-              <div className="flex items-end">
-                <label style={{ color: '#111111', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="checkbox"
-                    name="remote"
-                    checked={formData.remote}
-                    onChange={handleChange}
-                  />
-                  Remote Position
-                </label>
-              </div>
-            </div>
-
-            {!formData.remote && (
-              <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Location / City
-                </label>
+                  style={fieldStyle}
+                >
+                  <option value="">Select UAE emirate…</option>
+                  {UAE_EMIRATES.map((em) => (
+                    <option key={em} value={em}>
+                      {em}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="text"
                   name="locationCity"
                   value={formData.locationCity}
                   onChange={handleChange}
-                  placeholder="e.g. Dubai, UAE"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #e4e1da',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                  }}
+                  placeholder="Or type area / Google Maps link"
+                  style={fieldStyle}
                 />
               </div>
             )}
 
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Who is this suitable for?
-              </label>
+              <label style={labelStyle}>6. Key Responsibilities (brief)</label>
+              <textarea
+                name="responsibilities"
+                value={formData.responsibilities}
+                onChange={handleChange}
+                rows={4}
+                placeholder="Summarize the main responsibilities…"
+                style={{ ...fieldStyle, fontFamily: 'inherit' }}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>7. Requirements / Skills Needed</label>
+              <textarea
+                name="requirements"
+                value={formData.requirements}
+                onChange={handleChange}
+                rows={4}
+                placeholder="One skill or requirement per line"
+                style={{ ...fieldStyle, fontFamily: 'inherit' }}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>8. Salary / Compensation</label>
+              <input
+                type="text"
+                name="compensation"
+                value={formData.compensation}
+                onChange={handleChange}
+                placeholder="e.g., AED 5,000/month, Unpaid, Stipend"
+                style={fieldStyle}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>9. Suitability</label>
               <div className="flex flex-wrap gap-3">
-                {['Students', 'Graduates', 'Women Only', 'Men Only', 'Open to All'].map((label) => (
+                {SUITABILITY.map((label) => (
                   <label key={label} className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
@@ -393,10 +345,41 @@ export default function NewOpportunity() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={labelStyle}>10. Application Deadline</label>
+                <input
+                  type="date"
+                  name="deadline"
+                  value={formData.deadline}
+                  onChange={handleChange}
+                  style={fieldStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>11. Hiring By</label>
+                <input
+                  type="date"
+                  name="hiringBy"
+                  value={formData.hiringBy}
+                  onChange={handleChange}
+                  style={fieldStyle}
+                />
+              </div>
+            </div>
+
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Application Process
-              </label>
+              <label style={labelStyle}>Full description (optional)</label>
+              <RichTextEditor
+                value={formData.description}
+                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
+                placeholder="Additional details for applicants…"
+                minHeight={140}
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Application Process</label>
               <div className="flex flex-wrap gap-4 text-sm">
                 {(
                   [
@@ -429,50 +412,6 @@ export default function NewOpportunity() {
               )}
             </div>
 
-            <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Application Deadline (optional)
-              </label>
-              <input
-                type="date"
-                name="deadline"
-                value={formData.deadline}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Your relation to this opportunity
-              </label>
-              <div className="flex flex-wrap gap-4 text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={formData.posterRelation === 'employer'}
-                    onChange={() => setFormData((p) => ({ ...p, posterRelation: 'employer' }))}
-                  />
-                  Employer
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={formData.posterRelation === 'connector'}
-                    onChange={() => setFormData((p) => ({ ...p, posterRelation: 'connector' }))}
-                  />
-                  Connector
-                </label>
-              </div>
-            </div>
-
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
@@ -482,53 +421,6 @@ export default function NewOpportunity() {
               Restrict to platform members only
             </label>
 
-            {/* Requirements */}
-            <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Requirements (one per line)
-              </label>
-              <textarea
-                name="requirements"
-                value={formData.requirements}
-                onChange={handleChange}
-                rows={3}
-                placeholder="3+ years experience&#10;React expertise&#10;..."
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                  fontFamily: 'inherit',
-                }}
-              />
-            </div>
-
-            {/* Benefits */}
-            <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Benefits (one per line)
-              </label>
-              <textarea
-                name="benefits"
-                value={formData.benefits}
-                onChange={handleChange}
-                rows={3}
-                placeholder="Health insurance&#10;Flexible hours&#10;..."
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                  fontFamily: 'inherit',
-                }}
-              />
-            </div>
-
-            {/* Buttons */}
             <div className="flex flex-wrap gap-4 pt-4">
               <Button
                 type="submit"
@@ -552,14 +444,14 @@ export default function NewOpportunity() {
                   padding: '12px 24px',
                 }}
               >
-                Save as Draft
+                Save Draft
               </Button>
               <Button
                 type="button"
                 onClick={() => router.back()}
                 style={{
-                  backgroundColor: '#e4e1da',
-                  color: '#111111',
+                  backgroundColor: 'transparent',
+                  color: '#666666',
                   padding: '12px 24px',
                 }}
               >

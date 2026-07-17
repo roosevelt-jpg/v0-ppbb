@@ -225,7 +225,9 @@ export function addWeeks(date: Date, weeks: number): Date {
   return d
 }
 
-/** Generate child events for a simple weekly/monthly series (excluding the parent). */
+/** Generate child events for a simple weekly/monthly series (excluding the parent).
+ * Children inherit the parent banner/fields; each child can later be edited independently
+ * (including its own bannerURL). */
 export async function generateRecurringEvents(
   parentId: string,
   parentData: Record<string, unknown>,
@@ -248,7 +250,8 @@ export async function generateRecurringEvents(
   let cursor = new Date(start)
   let guard = 0
 
-  while (guard < 52) {
+  // Weekly for 6 months ≈ 26; allow up to a year of weekly occurrences
+  while (guard < 60) {
     guard += 1
     cursor =
       recurrence.frequency === 'monthly'
@@ -259,8 +262,12 @@ export async function generateRecurringEvents(
     const childStart = new Date(cursor)
     const childEnd = new Date(childStart.getTime() + duration)
     const { id: _id, createdAt: _c, updatedAt: _u, publishedAt: _p, ...rest } = parentData as any
+    const bannerURL = rest.bannerURL || rest.bannerImage || rest.bannerImageUrl || ''
     const payload = {
       ...rest,
+      bannerURL,
+      bannerImage: bannerURL,
+      bannerImageUrl: bannerURL,
       startDate: Timestamp.fromDate(childStart),
       endDate: Timestamp.fromDate(childEnd),
       seriesId,
@@ -278,6 +285,7 @@ export async function generateRecurringEvents(
         : [],
       status: rest.status === 'published' ? 'published' : rest.status,
       publishedAt: rest.status === 'published' ? Timestamp.now() : null,
+      submittedAt: rest.submittedAt || (rest.status === 'published' ? Timestamp.now() : null),
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     }

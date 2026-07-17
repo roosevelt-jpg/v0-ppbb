@@ -975,14 +975,19 @@ export interface BusinessOpportunity {
   status: 'draft' | 'pending_approval' | 'open' | 'closed' | 'filled' | 'archived' | 'rejected'
   companyName?: string
   roleType?: string
-  locationCity?: string
+  /** Onsite / Remote / Hybrid */
   locationType?: string
+  locationCity?: string
+  /** Brief key responsibilities */
+  responsibilities?: string | string[]
   suitableFor?: string[]
   genderRestriction?: 'male' | 'female' | 'mixed' | string
   applicationProcess?: 'cv_upload' | 'external_link' | 'both' | string
   applicationURL?: string | null
   posterRelation?: 'employer' | 'connector' | string
   isMemberOnly?: boolean
+  /** Target hire-by date */
+  hiringBy?: Date | string | null
   createdAt: Date
   updatedAt: Date
 }

@@ -57,7 +57,29 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, ...updateData } = body
+    const { id, ids, ...updateData } = body
+
+    // Bulk update: { ids: string[], status?, role?, userType? }
+    if (Array.isArray(ids) && ids.length > 0) {
+      const db = getAdminDb()
+      const batch = db.batch()
+      const allowed: Record<string, unknown> = { updatedAt: new Date() }
+      if (typeof updateData.status === 'string') allowed.status = updateData.status
+      if (typeof updateData.role === 'string') {
+        allowed.role = updateData.role
+        allowed.userType = updateData.role
+      }
+      if (typeof updateData.userType === 'string') {
+        allowed.userType = updateData.userType
+        if (!allowed.role) allowed.role = updateData.userType
+      }
+      for (const memberId of ids.slice(0, 200)) {
+        if (typeof memberId !== 'string' || !memberId) continue
+        batch.update(db.collection('users').doc(memberId), allowed)
+      }
+      await batch.commit()
+      return NextResponse.json({ success: true, message: `Updated ${ids.length} members` })
+    }
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing member ID' }, { status: 400 })
@@ -71,5 +93,42 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('[v0] Member update error:', error)
     return NextResponse.json({ success: false, error: 'Failed to update member' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const body = await request.json().catch(() => ({}))
+    const ids: string[] = Array.isArray(body.ids)
+      ? body.ids.filter((id: unknown) => typeof id === 'string' && id)
+      : typeof body.id === 'string'
+        ? [body.id]
+        : []
+
+    if (!ids.length) {
+      return NextResponse.json({ success: false, error: 'Missing member ID(s)' }, { status: 400 })
+    }
+
+    const db = getAdminDb()
+    const batch = db.batch()
+    const now = new Date()
+    for (const id of ids.slice(0, 200)) {
+      // Soft-delete: mark deleted rather than wiping auth/history
+      batch.update(db.collection('users').doc(id), {
+        status: 'deleted',
+        accountDeleted: true,
+        deletedAt: now,
+        updatedAt: now,
+      })
+    }
+    await batch.commit()
+
+    return NextResponse.json({
+      success: true,
+      message: ids.length === 1 ? 'Member deleted' : `Deleted ${ids.length} members`,
+    })
+  } catch (error) {
+    console.error('[v0] Member delete error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to delete member(s)' }, { status: 500 })
   }
 }

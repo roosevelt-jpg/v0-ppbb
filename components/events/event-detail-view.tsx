@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import type { Event, TicketType } from '@/lib/event-types'
-import { getEventBannerURL, toEventDate } from '@/lib/event-utils'
+import { getEventBannerURL, getEventLocationLabel, toEventDate } from '@/lib/event-utils'
 
 interface EventDetailViewProps {
   event: Event
@@ -68,6 +68,7 @@ export function EventDetailView({
     ticketTypes.find((t) => t.id === selectedTicketId) || ticketTypes[0] || null
 
   const bannerSrc = getEventBannerURL(event as unknown as Record<string, unknown>)
+  const locationLabel = getEventLocationLabel(event)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,7 +113,7 @@ export function EventDetailView({
                 <MapPin className="text-gray-600 shrink-0" size={20} />
                 <div>
                   <p className="text-xs text-gray-500">Location</p>
-                  <p className="font-semibold break-words">{event.locationName}</p>
+                  <p className="font-semibold break-words">{locationLabel}</p>
                 </div>
               </div>
               {(event as any).showGuestList !== false && (
@@ -312,7 +313,7 @@ export function EventDetailView({
                 </div>
 
                 <div className="pt-4 border-t border-gray-200 space-y-2 text-xs text-gray-600 break-words">
-                  <p>{event.locationAddress}</p>
+                  <p>{locationLabel}</p>
                   <p>{formatEventDate(event.startDate, 'MMM dd, yyyy HH:mm')}</p>
                   {event.endDate && <p>Ends {formatEventDate(event.endDate, 'HH:mm')}</p>}
                 </div>

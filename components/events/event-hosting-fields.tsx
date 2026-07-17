@@ -342,6 +342,35 @@ export function EventHostingFields({
           </>
         )}
       </div>
+      {recurrence && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500">
+            All dates in the series share this event&apos;s banner by default. Edit any weekly occurrence
+            later to set a unique banner for that date.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[3, 4, 6].map((months) => (
+              <button
+                key={months}
+                type="button"
+                onClick={() => {
+                  const until = new Date()
+                  until.setMonth(until.getMonth() + months)
+                  const yyyy = until.getFullYear()
+                  const mm = String(until.getMonth() + 1).padStart(2, '0')
+                  const dd = String(until.getDate()).padStart(2, '0')
+                  onChange({
+                    recurrence: { ...recurrence, until: `${yyyy}-${mm}-${dd}` },
+                  })
+                }}
+                className="rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium hover:bg-gray-50"
+              >
+                Next {months} months
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
