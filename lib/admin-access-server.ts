@@ -181,13 +181,26 @@ export async function getAdminUserData(userId: string): Promise<Record<string, u
     const legacyAdminData = legacyAdminSnap.exists ? legacyAdminSnap.data() : {}
     const userData = userSnap.exists ? userSnap.data() : {}
 
-    const role =
+    let role =
       adminData?.adminRole ||
       adminData?.role ||
       legacyAdminData?.adminRole ||
       legacyAdminData?.role ||
       userData?.adminRole ||
       userData?.role
+
+    // Membership roles (member/business) must not shadow admin panel access —
+    // Passive Blessings superadmins often keep users.role as member.
+    const membershipRoles = new Set(['member', 'volunteer', 'business', 'sponsor'])
+    const roleKey = typeof role === 'string' ? role.trim().toLowerCase() : ''
+    const isPanelAdmin = adminSnap.exists || legacyAdminSnap.exists
+    if (isPanelAdmin && (!roleKey || membershipRoles.has(roleKey))) {
+      const flaggedSuper =
+        adminData?.isSuperAdmin === true ||
+        userData?.isSuperAdmin === true ||
+        adminData?.superAdmin === true
+      role = flaggedSuper ? 'super_admin' : 'admin'
+    }
 
     return {
       ...userData,

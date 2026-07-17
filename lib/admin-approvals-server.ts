@@ -251,7 +251,7 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       description: String(d.description || ''),
       submittedBy: String(d.submittedBy || d.businessId || ''),
       createdAt: toIso(d.submittedAt || d.createdAt),
-      href: '/admin/partnerships',
+      href: '/admin/contact-submissions?category=partnership',
     })
   }
 

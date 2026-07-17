@@ -63,18 +63,31 @@ export function PartnersPageCopy() {
       alert('No inquiry category available.')
       return
     }
-    const href = getInquiryCategoryHref(selected)
-    if (!href) {
-      alert(
-        'This inquiry category is not linked to a form yet. Please ask an admin to map it under CMS → Partners.'
-      )
+
+    // Charity support must use the beneficiary request form (not Contact / CMS forms)
+    const id = String(selected.id || '').toLowerCase()
+    const label = String(selected.label || '').toLowerCase()
+    if (
+      id === 'charity-support' ||
+      id.includes('charity') ||
+      /charity\s*support|seeking\s*charity/i.test(label)
+    ) {
+      router.push('/dashboard/charity-requests?apply=1')
       return
     }
-    if (/^https?:\/\//i.test(href)) {
-      window.open(href, '_blank', 'noopener,noreferrer')
+
+    const mapped = getInquiryCategoryHref(selected)
+    if (mapped && /^https?:\/\//i.test(mapped)) {
+      window.open(mapped, '_blank', 'noopener,noreferrer')
       return
     }
-    router.push(href)
+
+    // Partnership / other inquiries → Contact Submissions inbox
+    const params = new URLSearchParams({
+      source: 'partners',
+      subject: selected.label || 'Partnerships',
+    })
+    router.push(`/contact?${params.toString()}`)
   }
 
   return (

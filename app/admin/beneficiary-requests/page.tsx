@@ -6,7 +6,7 @@ import { AdminDetailModal } from '@/components/admin-detail-modal'
 import { useAuth } from '@/lib/auth-context'
 import { db, auth } from '@/lib/firebase'
 import { adminApiFetch } from '@/lib/admin-api-client'
-import { canAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
+import { canUserAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from '@/lib/admin-design-system'
 import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'
 import {
@@ -75,9 +75,11 @@ export default function BeneficiaryRequestsAdmin() {
   const [error, setError] = useState('')
   const [filters, setFilters] = useState({ status: '', emergencyLevel: '' })
   const [usingFirestoreFallback, setUsingFirestoreFallback] = useState(false)
+  const [canViewDocsFromApi, setCanViewDocsFromApi] = useState<boolean | null>(null)
 
-  const adminRole = user?.role || user?.adminRole || 'admin'
-  const canViewDocs = canAccessSensitiveBeneficiaryDocs(adminRole)
+  // Prefer adminRole / permissions over membership role (e.g. member who is also super_admin)
+  const canViewDocsLocal = canUserAccessSensitiveBeneficiaryDocs(user)
+  const canViewDocs = canViewDocsFromApi ?? canViewDocsLocal
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -85,6 +87,9 @@ export default function BeneficiaryRequestsAdmin() {
     setUsingFirestoreFallback(false)
     try {
       const json = await adminApiFetch<BeneficiaryRow[]>('/api/admin/beneficiary-requests')
+      if (typeof json.canViewSensitiveDocuments === 'boolean') {
+        setCanViewDocsFromApi(json.canViewSensitiveDocuments)
+      }
       if (json.success && Array.isArray(json.data)) {
         setRequests(sortRequests(json.data))
         return
@@ -221,13 +226,14 @@ export default function BeneficiaryRequestsAdmin() {
         )}
 
         <div className="bg-amber-50 border border-amber-200 rounded p-3 text-sm text-amber-900">
-          Sensitive documents (Emirates ID, salary cert, bank statement) are visible only to
-          admins with role <strong>welfare</strong>, <strong>founder</strong>, or{' '}
-          <strong>coordinator</strong> (also founder_admin / manager). Standard admins see the
-          request metadata only — no document URLs.
+          Sensitive documents (Emirates ID, salary cert, bank statement) are visible to{' '}
+          <strong>super admin</strong>, <strong>admin</strong>, and welfare-tier roles (
+          <strong>welfare</strong>, <strong>founder</strong>, <strong>coordinator</strong>,
+          founder_admin / manager). Document URLs are never listed in bulk — open them via Review.
           {!canViewDocs && (
             <span className="block mt-1 font-medium">
-              Your current session cannot view or download sensitive files.
+              Your current session cannot view or download sensitive files. If you are a super
+              admin, refresh after signing in again so your admin role is loaded.
             </span>
           )}
         </div>
@@ -358,7 +364,7 @@ export default function BeneficiaryRequestsAdmin() {
                               </button>
                               <button
                                 type="button"
-                                className="underline text-red-600"
+                                className="bg-black !text-white px-2 py-1 rounded-md no-underline"
                                 disabled={acting}
                                 onClick={() => void runAction(r.id, 'reject')}
                               >
@@ -455,7 +461,7 @@ export default function BeneficiaryRequestsAdmin() {
                 <div className="flex gap-2 items-start text-sm text-neutral-600 bg-neutral-50 p-2.5 rounded">
                   <FileWarning className="w-4 h-4 shrink-0 text-amber-600" />
                   <span>
-                    Documents are hidden for your role. Only welfare / founder / coordinator
+                    Documents are hidden for your role. Super admin, admin, and welfare-tier
                     roles can view them via the secure API.
                   </span>
                 </div>

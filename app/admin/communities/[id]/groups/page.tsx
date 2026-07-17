@@ -112,11 +112,11 @@ export default function CommunityGroupsPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl border border-[#e4e1da] p-5 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-5 hover:border-neutral-300 transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -145,25 +145,26 @@ export default function CommunityGroupsPage() {
                 <div className="flex gap-2 shrink-0">
                   <Link
                     href={`/communities/${communityId}/groups/${group.id}`}
-                    className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-black border border-[#e4e1da] rounded-lg hover:bg-neutral-50 min-h-[40px]"
                     title="Open group chat"
                   >
-                    <MessageCircle size={18} />
+                    <MessageCircle size={16} />
+                    Open chat
                   </Link>
                   <Link
                     href={`/admin/communities/${communityId}/groups/${group.id}/edit`}
-                    className="p-2 text-gray-600 hover:bg-gray-100 rounded transition"
+                    className="inline-flex items-center justify-center p-2 text-neutral-600 border border-[#e4e1da] rounded-lg hover:bg-neutral-50 min-h-[40px] min-w-[40px]"
                     title="Edit group"
                   >
-                    <Edit2 size={18} />
+                    <Edit2 size={16} />
                   </Link>
                   <button
                     type="button"
                     onClick={() => handleDeleteGroup(group.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded transition"
+                    className="inline-flex items-center justify-center p-2 bg-black text-white rounded-lg hover:bg-neutral-800 min-h-[40px] min-w-[40px]"
                     title="Delete group"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>

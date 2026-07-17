@@ -116,6 +116,7 @@ export const SENSITIVE_DOC_ROLES = new Set([
   'admin',
   'super_admin',
   'superadmin',
+  'super-admin',
 ])
 
 export const WELFARE_INVITE_ROLE_OPTIONS = [
@@ -126,12 +127,40 @@ export const WELFARE_INVITE_ROLE_OPTIONS = [
   { value: 'manager', label: 'Manager', description: 'Operational manager with welfare document access' },
 ] as const
 
+/** Normalize role strings from invites / legacy docs (spaces, hyphens, case). */
+export function normalizeAdminRoleKey(role: unknown): string {
+  if (typeof role !== 'string') return ''
+  return role
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_')
+    .replace(/__+/g, '_')
+}
+
 export function isWelfareOperationalRole(role: unknown): boolean {
-  if (typeof role !== 'string') return false
-  return SENSITIVE_DOC_ROLES.has(role.toLowerCase())
+  const key = normalizeAdminRoleKey(role)
+  if (!key) return false
+  if (SENSITIVE_DOC_ROLES.has(key)) return true
+  // superadmin variants already covered via normalize → super_admin / superadmin
+  return false
 }
 
 export function canAccessSensitiveBeneficiaryDocs(adminRole: unknown): boolean {
-  if (typeof adminRole !== 'string') return false
-  return SENSITIVE_DOC_ROLES.has(adminRole.toLowerCase())
+  return isWelfareOperationalRole(adminRole)
+}
+
+/**
+ * Resolve whether the signed-in profile may open sensitive docs.
+ * Prefer adminRole over primary membership role (member/business users can also be super_admin in adminUsers).
+ */
+export function canUserAccessSensitiveBeneficiaryDocs(
+  user: { role?: unknown; adminRole?: unknown; roles?: unknown; permissions?: unknown } | null | undefined
+): boolean {
+  if (!user) return false
+  const candidates: unknown[] = [user.adminRole, user.role]
+  if (Array.isArray(user.roles)) candidates.push(...user.roles)
+  if (candidates.some((r) => canAccessSensitiveBeneficiaryDocs(r))) return true
+  const perms = Array.isArray(user.permissions) ? user.permissions.map(String) : []
+  if (perms.includes('full_access') || perms.includes('manage_beneficiary')) return true
+  return false
 }

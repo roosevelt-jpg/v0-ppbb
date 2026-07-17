@@ -51,50 +51,72 @@ export function GroupMembersPanel({
     }
   }, [communityId, groupId])
 
-  if (loading) return <p className="p-4 text-sm text-neutral-500">Loading members…</p>
-  if (error) return <p className="p-4 text-sm text-red-600">{error}</p>
+  if (loading) {
+    return (
+      <p className="px-4 sm:px-6 lg:px-8 py-10 text-sm text-neutral-500 text-center">
+        Loading members…
+      </p>
+    )
+  }
+  if (error) {
+    return (
+      <p className="px-4 sm:px-6 lg:px-8 py-10 text-sm text-red-600 text-center">{error}</p>
+    )
+  }
   if (items.length === 0) {
-    return <p className="p-4 text-sm text-neutral-500">No active members yet.</p>
+    return (
+      <p className="px-4 sm:px-6 lg:px-8 py-10 text-sm text-neutral-500 text-center">
+        No active members yet.
+      </p>
+    )
   }
 
   return (
-    <ul className="p-4 space-y-2">
-      {items.map((item) => {
-        const canOpen = item.profile.canViewFullProfile && !item.profile.hidden
-        return (
-          <li key={item.userId}>
-            <button
-              type="button"
-              disabled={!canOpen}
-              onClick={() => canOpen && onOpenProfile(item.userId)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl border border-neutral-200 bg-white text-left ${
-                canOpen ? 'hover:bg-neutral-50' : 'opacity-80 cursor-default'
-              }`}
-            >
-              {item.profile.profilePictureURL ? (
-                <img
-                  src={item.profile.profilePictureURL}
-                  alt=""
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center text-sm font-bold">
-                  {item.profile.displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="font-medium truncate">{item.profile.displayName}</p>
-                <p className="text-xs text-neutral-500 capitalize">{item.role}</p>
-              </div>
-              {item.profile.hidden ? (
-                <span className="text-[11px] text-neutral-500">Private</span>
-              ) : canOpen ? (
-                <span className="text-[11px] text-neutral-500">View</span>
-              ) : null}
-            </button>
-          </li>
-        )
-      })}
-    </ul>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-3xl mx-auto space-y-4">
+        <div className="space-y-1 mb-2">
+          <h2 className="font-headline text-xl sm:text-2xl font-bold">Members</h2>
+          <p className="text-sm text-neutral-500">{items.length} active in this group</p>
+        </div>
+        <ul className="space-y-3">
+          {items.map((item) => {
+            const canOpen = item.profile.canViewFullProfile && !item.profile.hidden
+            return (
+              <li key={item.userId}>
+                <button
+                  type="button"
+                  disabled={!canOpen}
+                  onClick={() => canOpen && onOpenProfile(item.userId)}
+                  className={`w-full flex items-center gap-4 p-4 sm:p-5 rounded-2xl border border-[#e4e1da] bg-white text-left ${
+                    canOpen ? 'hover:bg-neutral-50' : 'opacity-80 cursor-default'
+                  }`}
+                >
+                  {item.profile.profilePictureURL ? (
+                    <img
+                      src={item.profile.profilePictureURL}
+                      alt=""
+                      className="w-11 h-11 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-neutral-900 text-white flex items-center justify-center text-sm font-bold">
+                      {item.profile.displayName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold truncate">{item.profile.displayName}</p>
+                    <p className="text-xs text-neutral-500 capitalize mt-0.5">{item.role}</p>
+                  </div>
+                  {item.profile.hidden ? (
+                    <span className="text-[11px] text-neutral-500">Private</span>
+                  ) : canOpen ? (
+                    <span className="text-[11px] font-medium text-neutral-600">View</span>
+                  ) : null}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </div>
   )
 }

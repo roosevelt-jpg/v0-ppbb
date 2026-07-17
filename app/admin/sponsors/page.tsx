@@ -13,7 +13,7 @@ export default function AdminSponsorsRedirectPage() {
   const router = useRouter()
 
   React.useEffect(() => {
-    router.replace('/admin/partnerships')
+    router.replace('/admin/contact-submissions?category=partnership')
   }, [router])
 
   return (

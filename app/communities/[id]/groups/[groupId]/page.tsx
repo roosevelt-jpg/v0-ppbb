@@ -88,7 +88,7 @@ export default function GroupChatPage() {
   const [pendingMembers, setPendingMembers] = React.useState<PendingMember[]>([])
   const [pendingLoading, setPendingLoading] = React.useState(false)
   const [actingMemberId, setActingMemberId] = React.useState<string | null>(null)
-  const [showPending, setShowPending] = React.useState(true)
+  const [showPending, setShowPending] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState<'chat' | 'forum' | 'members'>('chat')
   const [identities, setIdentities] = React.useState<Record<string, GroupChatIdentity>>({})
   const [profileOpen, setProfileOpen] = React.useState(false)
@@ -429,6 +429,11 @@ export default function GroupChatPage() {
     setEditText(msg.text || '')
   }
 
+  // Auto-open pending panel only when there are requests (avoids empty squeezed banner)
+  React.useEffect(() => {
+    if (pendingMembers.length > 0) setShowPending(true)
+  }, [pendingMembers.length])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -463,135 +468,156 @@ export default function GroupChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#f7f6f2] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 flex flex-col max-h-[calc(100vh-120px)]">
+      <main className="flex-1 flex flex-col min-h-0 max-h-[calc(100vh-4.5rem)]">
         {/* Chat Header */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-4 min-w-0">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <div className="min-w-0">
-              <h1 className="text-xl font-bold text-black truncate">{group?.name}</h1>
-              <p className="text-sm text-gray-600">
-                {activeTab === 'chat'
-                  ? `${messages.length} messages`
-                  : activeTab === 'forum'
-                    ? 'Group forum'
-                    : 'Members'}
-              </p>
+        <div className="bg-white border-b border-[#e4e1da] px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+          <div className="max-w-5xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#e4e1da] text-neutral-700 hover:bg-neutral-50"
+                aria-label="Back"
+              >
+                <ChevronLeft size={22} />
+              </button>
+              <div className="min-w-0">
+                <h1 className="font-headline text-xl sm:text-2xl font-bold text-black truncate">
+                  {group?.name}
+                </h1>
+                <p className="text-sm text-neutral-500 mt-0.5">
+                  {activeTab === 'chat'
+                    ? `${messages.length} message${messages.length === 1 ? '' : 's'}`
+                    : activeTab === 'forum'
+                      ? 'Group forum'
+                      : 'Members'}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {(['chat', 'forum', 'members'] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium min-h-[44px] capitalize ${
-                  activeTab === tab
-                    ? 'bg-black text-white'
-                    : 'bg-white text-black border border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-            {showPendingPanel && (
-              <button
-                type="button"
-                onClick={() => setShowPending((v) => !v)}
-                className="px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 min-h-[44px]"
-              >
-                Pending Members ({pendingMembers.length})
-              </button>
-            )}
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {(['chat', 'forum', 'members'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-semibold min-h-[44px] capitalize tracking-wide ${
+                    activeTab === tab
+                      ? 'bg-black text-white'
+                      : 'bg-white text-black border border-[#e4e1da] hover:bg-neutral-50'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+              {showPendingPanel && (
+                <button
+                  type="button"
+                  onClick={() => setShowPending((v) => !v)}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-semibold min-h-[44px] ${
+                    showPending || pendingMembers.length > 0
+                      ? 'bg-black text-white hover:bg-neutral-900'
+                      : 'bg-white text-black border border-[#e4e1da] hover:bg-neutral-50'
+                  }`}
+                >
+                  Pending ({pendingMembers.length})
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         {showPendingPanel && showPending && (
-          <div className="bg-amber-50 border-b border-amber-200 p-4 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-amber-900">Pending Members</h2>
-              <button
-                type="button"
-                onClick={loadPendingMembers}
-                className="text-xs px-3 py-1 bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[36px]"
-              >
-                Refresh
-              </button>
-            </div>
-            {pendingLoading ? (
-              <p className="text-sm text-amber-800">Loading requests...</p>
-            ) : pendingMembers.length === 0 ? (
-              <p className="text-sm text-amber-800">No pending join requests.</p>
-            ) : (
-              <ul className="space-y-2">
-                {pendingMembers.map((member) => (
-                  <li
-                    key={member.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white border border-amber-200 rounded-lg p-3"
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {member.userPhoto ? (
-                        <img
-                          src={member.userPhoto}
-                          alt=""
-                          className="w-10 h-10 rounded-full object-cover shrink-0"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-medium text-black truncate">
-                          {member.userName || member.userEmail || 'Member'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Requested{' '}
-                          {member.joinedAt
-                            ? format(new Date(member.joinedAt), 'MMM dd, yyyy')
-                            : 'recently'}
-                        </p>
+          <div className="bg-amber-50 border-b border-amber-200 px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+            <div className="max-w-5xl mx-auto space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-amber-800/80 font-semibold">
+                    Join requests
+                  </p>
+                  <h2 className="text-sm sm:text-base font-semibold text-amber-950 mt-0.5">
+                    Pending members
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadPendingMembers}
+                  className="text-xs px-3 py-2 bg-white text-black border border-[#e4e1da] rounded-lg hover:bg-neutral-50 min-h-[40px]"
+                >
+                  Refresh
+                </button>
+              </div>
+              {pendingLoading ? (
+                <p className="text-sm text-amber-900">Loading requests…</p>
+              ) : pendingMembers.length === 0 ? (
+                <p className="text-sm text-amber-900">No pending join requests.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {pendingMembers.map((member) => (
+                    <li
+                      key={member.id}
+                      className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white border border-amber-200 rounded-xl p-4"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {member.userPhoto ? (
+                          <img
+                            src={member.userPhoto}
+                            alt=""
+                            className="w-11 h-11 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-11 h-11 rounded-full bg-neutral-200 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-medium text-black truncate">
+                            {member.userName || member.userEmail || 'Member'}
+                          </p>
+                          <p className="text-xs text-neutral-500 mt-0.5">
+                            Requested{' '}
+                            {member.joinedAt
+                              ? format(new Date(member.joinedAt), 'MMM dd, yyyy')
+                              : 'recently'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                      <button
-                        type="button"
-                        disabled={actingMemberId === member.id}
-                        onClick={() => handleMemberDecision(member.id, 'active')}
-                        className="flex-1 sm:flex-none px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-gray-900 disabled:opacity-50 min-h-[44px]"
-                      >
-                        {actingMemberId === member.id ? '…' : 'Approve'}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={actingMemberId === member.id}
-                        onClick={() => handleMemberDecision(member.id, 'rejected')}
-                        className="flex-1 sm:flex-none px-3 py-2 bg-black !text-white rounded-lg text-sm font-medium hover:bg-neutral-800 disabled:opacity-50 min-h-[44px]"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                        <button
+                          type="button"
+                          disabled={actingMemberId === member.id}
+                          onClick={() => handleMemberDecision(member.id, 'active')}
+                          className="flex-1 sm:flex-none px-4 py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-neutral-900 disabled:opacity-50 min-h-[44px]"
+                        >
+                          {actingMemberId === member.id ? '…' : 'Approve'}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={actingMemberId === member.id}
+                          onClick={() => handleMemberDecision(member.id, 'rejected')}
+                          className="flex-1 sm:flex-none px-4 py-2.5 bg-white text-black border border-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50 disabled:opacity-50 min-h-[44px]"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         )}
 
         {/* Messages Area */}
         {activeTab === 'chat' && (
         <>
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 bg-[#f7f6f2]">
+          <div className="max-w-3xl mx-auto space-y-5 min-h-full">
           {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No messages yet. Start the conversation!</p>
+            <div className="flex items-center justify-center min-h-[12rem] py-16">
+              <p className="text-neutral-500 text-sm sm:text-base text-center px-4">
+                No messages yet. Start the conversation.
+              </p>
             </div>
           ) : (
             messages.map((msg) => {
@@ -605,8 +631,8 @@ export default function GroupChatPage() {
               const canOpen = identity?.canOpenProfile === true
               return (
                 <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs lg:max-w-md space-y-1`}>
-                    <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-2 items-end group`}>
+                  <div className="w-full max-w-[min(100%,28rem)] sm:max-w-md lg:max-w-lg space-y-1.5">
+                    <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-3 items-end group`}>
                       {!isOwn && (
                         <button
                           type="button"
@@ -619,23 +645,23 @@ export default function GroupChatPage() {
                             <img
                               src={displayAvatar}
                               alt={displayName}
-                              className="w-8 h-8 rounded-full object-cover"
+                              className="w-9 h-9 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-neutral-200 text-xs font-bold flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-full bg-neutral-200 text-xs font-bold flex items-center justify-center">
                               {displayName.charAt(0).toUpperCase()}
                             </div>
                           )}
                         </button>
                       )}
                       
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         {!isOwn && (
                           <button
                             type="button"
                             disabled={!canOpen}
                             onClick={() => canOpen && void openMemberProfile(msg.senderId)}
-                            className={`text-xs font-medium text-gray-600 mb-1 px-2 ${
+                            className={`text-xs font-medium text-neutral-600 mb-1.5 px-1 ${
                               canOpen ? 'hover:underline' : 'cursor-default'
                             }`}
                           >
@@ -645,17 +671,17 @@ export default function GroupChatPage() {
                         
                         {/* Message Bubble */}
                         {isEditing ? (
-                          <div className={`rounded-lg px-4 py-2 ${isOwn ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                          <div className={`rounded-2xl px-4 py-3 ${isOwn ? 'bg-neutral-900 text-white' : 'bg-white border border-[#e4e1da]'}`}>
                             <textarea
                               value={editText}
                               onChange={(e) => setEditText(e.target.value)}
-                              className="w-full p-2 rounded border border-gray-300 text-sm"
+                              className="w-full p-2.5 rounded-lg border border-neutral-300 text-sm text-black bg-white"
                               rows={2}
                             />
-                            <div className="flex gap-2 mt-2">
+                            <div className="flex gap-2 mt-3">
                               <button
                                 onClick={() => handleEditMessage(msg.id)}
-                                className="flex items-center gap-1 px-2 py-1 bg-black text-white rounded text-xs hover:bg-neutral-800"
+                                className="flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-800 min-h-[36px]"
                               >
                                 <Check size={14} />
                                 Save
@@ -665,7 +691,7 @@ export default function GroupChatPage() {
                                   setEditingId(null)
                                   setEditText('')
                                 }}
-                                className="flex items-center gap-1 px-2 py-1 bg-white text-black border border-black rounded text-xs hover:bg-neutral-50"
+                                className="flex items-center gap-1 px-3 py-1.5 bg-white text-black border border-neutral-300 rounded-lg text-xs font-semibold hover:bg-neutral-50 min-h-[36px]"
                               >
                                 <X size={14} />
                                 Cancel
@@ -674,23 +700,23 @@ export default function GroupChatPage() {
                           </div>
                         ) : (
                           <div
-                            className={`rounded-lg px-4 py-2 relative ${
+                            className={`rounded-2xl px-4 py-3 relative ${
                               isOwn
                                 ? 'bg-black text-white'
-                                : 'bg-white text-black border border-gray-200'
+                                : 'bg-white text-black border border-[#e4e1da]'
                             }`}
                           >
                             {msg.isDeleted ? (
                               <p className="text-sm italic opacity-50">[Message deleted]</p>
                             ) : (
                               <>
-                                {msg.text && <p className="text-sm break-words">{msg.text}</p>}
+                                {msg.text && <p className="text-sm sm:text-[15px] leading-relaxed break-words">{msg.text}</p>}
 
                                 {msg.fileType === 'image' && msg.fileURL && (
                                   <img
                                     src={msg.fileURL}
                                     alt="Shared image"
-                                    className="max-w-xs rounded mt-2"
+                                    className="max-w-full rounded-lg mt-3"
                                   />
                                 )}
 
@@ -698,7 +724,7 @@ export default function GroupChatPage() {
                                   <video
                                     src={msg.fileURL}
                                     controls
-                                    className="max-w-xs rounded mt-2"
+                                    className="max-w-full rounded-lg mt-3"
                                   />
                                 )}
 
@@ -707,7 +733,9 @@ export default function GroupChatPage() {
                                     href={msg.fileURL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:underline"
+                                    className={`inline-flex items-center gap-2 mt-3 text-sm font-medium underline ${
+                                      isOwn ? 'text-neutral-200' : 'text-neutral-800'
+                                    }`}
                                   >
                                     <FileText size={16} />
                                     Download PDF
@@ -719,40 +747,42 @@ export default function GroupChatPage() {
                                     href={msg.fileURL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 mt-2 text-blue-600 hover:underline"
+                                    className={`inline-flex items-center gap-2 mt-3 text-sm font-medium underline ${
+                                      isOwn ? 'text-neutral-200' : 'text-neutral-800'
+                                    }`}
                                   >
                                     <Download size={16} />
                                     Download File
                                   </a>
                                 )}
 
-                                <div className="flex justify-between items-center mt-1">
-                                  <p className={`text-xs ${isOwn ? 'text-gray-300' : 'text-gray-500'}`}>
+                                <div className="flex justify-between items-center mt-2 gap-2">
+                                  <p className={`text-xs ${isOwn ? 'text-neutral-400' : 'text-neutral-500'}`}>
                                     {msg.sentAt && format(msg.sentAt.toDate(), 'HH:mm')}
                                     {msg.edited && ' (edited)'}
                                   </p>
                                   
                                   {/* Message Actions */}
-                                  <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2`}>
+                                  <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity`}>
                                     <button
                                       onClick={() => setEmojiPickerFor(msg.id)}
-                                      className="p-1 hover:bg-gray-200 rounded"
+                                      className={`p-1.5 rounded-md ${isOwn ? 'hover:bg-neutral-800' : 'hover:bg-neutral-100'}`}
                                     >
-                                      <Smile size={14} className="text-gray-600" />
+                                      <Smile size={14} className={isOwn ? 'text-neutral-300' : 'text-neutral-600'} />
                                     </button>
                                     {isOwn && (
                                       <>
                                         <button
                                           onClick={() => startEditMessage(msg)}
-                                          className="p-1 hover:bg-gray-200 rounded"
+                                          className="p-1.5 hover:bg-neutral-800 rounded-md"
                                         >
-                                          <Edit2 size={14} className="text-gray-600" />
+                                          <Edit2 size={14} className="text-neutral-300" />
                                         </button>
                                         <button
                                           onClick={() => handleDeleteMessage(msg.id)}
-                                          className="p-1 hover:bg-gray-200 rounded"
+                                          className="p-1.5 hover:bg-neutral-800 rounded-md"
                                         >
-                                          <Trash2 size={14} className="text-red-600" />
+                                          <Trash2 size={14} className="text-red-400" />
                                         </button>
                                       </>
                                     )}
@@ -767,8 +797,8 @@ export default function GroupChatPage() {
 
                     {/* Emoji Picker */}
                     {emojiPickerFor === msg.id && (
-                      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} ml-2`}>
-                        <div className="bg-white rounded-lg border border-gray-200 shadow-lg">
+                      <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                        <div className="bg-white rounded-xl border border-[#e4e1da] shadow-lg overflow-hidden">
                           <EmojiPicker
                             onEmojiClick={(e) => {
                               handleAddReaction(msg.id, e.emoji)
@@ -782,7 +812,7 @@ export default function GroupChatPage() {
 
                     {/* Reactions */}
                     {msg.reactions && msg.reactions.length > 0 && (
-                      <div className="flex flex-wrap gap-1 px-2 mt-1">
+                      <div className="flex flex-wrap gap-1.5 px-1 mt-1">
                         {msg.reactions.map((reaction) => (
                           <button
                             key={reaction.emoji}
@@ -795,14 +825,16 @@ export default function GroupChatPage() {
                               }
                             }}
                             title={reaction.users.join(', ')}
-                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm border transition-colors ${
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-sm border transition-colors ${
                               reaction.users.includes(user?.id || '')
-                                ? 'bg-yellow-100 border-yellow-300'
-                                : 'bg-gray-100 border-gray-300 hover:bg-gray-200'
+                                ? 'bg-neutral-900 text-white border-neutral-900'
+                                : 'bg-white border-[#e4e1da] hover:bg-neutral-50'
                             }`}
                           >
                             <span>{reaction.emoji}</span>
-                            <span className="text-xs text-gray-600">{reaction.users.length}</span>
+                            <span className={`text-xs ${reaction.users.includes(user?.id || '') ? 'text-neutral-300' : 'text-neutral-600'}`}>
+                              {reaction.users.length}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -813,25 +845,29 @@ export default function GroupChatPage() {
             })
           )}
           <div ref={messagesEndRef} />
+          </div>
         </div>
 
         {/* Input Area */}
         {!canSendMessages && isMember && (
-          <div className="bg-amber-50 border-t border-amber-200 px-4 py-3 text-sm text-amber-900">
+          <div className="bg-amber-50 border-t border-amber-200 px-4 sm:px-6 lg:px-8 py-3.5 text-sm text-amber-950">
+            <div className="max-w-3xl mx-auto">
             {memberStatus === 'suspended'
               ? 'Your membership is suspended. You can read messages but cannot send new ones.'
               : memberStatus === 'banned'
                 ? 'You are banned from this group.'
                 : 'You cannot send messages in this group right now.'}
+            </div>
           </div>
         )}
         <form
           onSubmit={handleSendMessage}
-          className="bg-white border-t border-gray-200 p-4 space-y-2"
+          className="bg-white border-t border-[#e4e1da] px-4 sm:px-6 lg:px-8 py-4 sm:py-5"
         >
+          <div className="max-w-3xl mx-auto space-y-3">
           {showEmojiPicker && (
-            <div className="flex justify-start mb-2">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-lg">
+            <div className="flex justify-start">
+              <div className="bg-white rounded-xl border border-[#e4e1da] shadow-lg overflow-hidden">
                 <EmojiPicker
                   onEmojiClick={(e) => {
                     setNewMessage(newMessage + e.emoji)
@@ -843,9 +879,9 @@ export default function GroupChatPage() {
             </div>
           )}
           
-          <div className="flex gap-2">
-            <label className="cursor-pointer hover:opacity-70 p-2">
-              <Upload size={20} className="text-gray-600" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <label className="cursor-pointer hover:opacity-70 p-2.5 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg border border-[#e4e1da] bg-white">
+              <Upload size={20} className="text-neutral-600" />
               <input
                 type="file"
                 onChange={handleFileUpload}
@@ -859,35 +895,36 @@ export default function GroupChatPage() {
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               disabled={!canSendMessages}
-              className="p-2 hover:opacity-70 disabled:opacity-40"
+              className="p-2.5 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-lg border border-[#e4e1da] bg-white hover:bg-neutral-50 disabled:opacity-40"
             >
-              <Smile size={20} className="text-gray-600" />
+              <Smile size={20} className="text-neutral-600" />
             </button>
 
             <input
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder={canSendMessages ? 'Type a message...' : 'Messaging disabled'}
+              placeholder={canSendMessages ? 'Type a message…' : 'Messaging disabled'}
               disabled={sending || uploading || !canSendMessages}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent disabled:opacity-50"
+              className="flex-1 min-h-[48px] px-4 py-3 border border-[#e4e1da] rounded-xl text-sm focus:ring-2 focus:ring-black focus:border-transparent disabled:opacity-50 bg-white"
             />
 
             <button
               type="submit"
               disabled={sending || uploading || !newMessage.trim() || !canSendMessages}
-              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 flex items-center gap-2"
+              className="min-h-[48px] px-4 sm:px-5 py-3 bg-black text-white rounded-xl hover:bg-neutral-900 disabled:opacity-50 inline-flex items-center gap-2 font-semibold text-sm"
             >
               <Send size={18} />
-              Send
+              <span className="hidden sm:inline">Send</span>
             </button>
+          </div>
           </div>
         </form>
         </>
         )}
 
         {activeTab === 'forum' && (
-          <div className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="flex-1 overflow-y-auto bg-[#f7f6f2]">
             <GroupForumPanel
               communityId={communityId}
               groupId={groupId}
@@ -898,7 +935,7 @@ export default function GroupChatPage() {
         )}
 
         {activeTab === 'members' && (
-          <div className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="flex-1 overflow-y-auto bg-[#f7f6f2]">
             <GroupMembersPanel
               communityId={communityId}
               groupId={groupId}

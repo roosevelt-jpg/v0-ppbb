@@ -12,7 +12,7 @@ export default function AdminSponsorDetailRedirectPage() {
   const id = typeof params?.id === 'string' ? params.id : ''
 
   React.useEffect(() => {
-    router.replace(id ? `/admin/businesses` : '/admin/partnerships')
+    router.replace(id ? `/admin/businesses` : '/admin/contact-submissions?category=partnership')
   }, [router, id])
 
   return (

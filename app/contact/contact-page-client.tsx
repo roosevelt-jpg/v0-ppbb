@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { SocialMediaLinks } from '@/components/social-media-links'
@@ -27,12 +28,16 @@ interface ContactInfo {
   socialLinks: GlobalSocialLinks
 }
 
-export function ContactPageClient() {
+function ContactPageInner() {
+  const searchParams = useSearchParams()
+  const sourceParam = searchParams.get('source') || 'contact'
+  const subjectParam = searchParams.get('subject') || ''
+
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
-    subject: '',
+    subject: subjectParam,
     message: '',
   })
   const [loading, setLoading] = useState(false)
@@ -44,6 +49,12 @@ export function ContactPageClient() {
     address: DEFAULT_GLOBAL_SETTINGS.address,
     socialLinks: {},
   })
+
+  useEffect(() => {
+    if (subjectParam) {
+      setFormData((prev) => ({ ...prev, subject: subjectParam }))
+    }
+  }, [subjectParam])
 
   useEffect(() => {
     return subscribeToGlobalSettings((s) => {
@@ -69,6 +80,11 @@ export function ContactPageClient() {
     setError('')
     setSuccess(false)
 
+    const source =
+      sourceParam === 'partners' || /partner|sponsor/i.test(formData.subject)
+        ? 'partners'
+        : 'contact'
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -79,7 +95,7 @@ export function ContactPageClient() {
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message,
-          source: 'contact',
+          source,
         }),
       })
 
@@ -96,6 +112,18 @@ export function ContactPageClient() {
     }
   }
 
+  const subjectOptions = Array.from(
+    new Set([
+      ...PARTNERS_CONTACT_SUBJECTS,
+      ...(formData.subject &&
+      !(PARTNERS_CONTACT_SUBJECTS as readonly string[]).includes(formData.subject)
+        ? [formData.subject]
+        : []),
+    ])
+  )
+
+  const isPartners = sourceParam === 'partners'
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col overflow-x-hidden">
       <Navbar />
@@ -104,10 +132,12 @@ export function ContactPageClient() {
           <div className="mb-8 sm:mb-12 text-center sm:text-left min-w-0">
             <p className="eyebrow text-muted-foreground mb-2">GET IN TOUCH</p>
             <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-foreground break-words">
-              Contact
+              {isPartners ? 'Partnership inquiry' : 'Contact'}
             </h1>
             <p className="font-body text-base sm:text-lg text-muted-foreground leading-relaxed max-w-[42rem] mx-auto sm:mx-0">
-              Have questions? Send us a message and we&apos;ll respond as soon as possible.
+              {isPartners
+                ? 'Sponsorship and partnership messages are sent to our Contact Submissions inbox.'
+                : 'Have questions? Send us a message and we\u2019ll respond as soon as possible.'}
             </p>
           </div>
 
@@ -242,7 +272,7 @@ export function ContactPageClient() {
                       required
                     >
                       <option value="">Select a subject</option>
-                      {PARTNERS_CONTACT_SUBJECTS.map((subject) => (
+                      {subjectOptions.map((subject) => (
                         <option key={subject} value={subject}>
                           {subject}
                         </option>
@@ -301,5 +331,19 @@ export function ContactPageClient() {
       </main>
       <Footer />
     </div>
+  )
+}
+
+export function ContactPageClient() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-sm text-neutral-500">
+          Loading contact form…
+        </div>
+      }
+    >
+      <ContactPageInner />
+    </Suspense>
   )
 }

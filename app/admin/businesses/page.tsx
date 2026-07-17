@@ -203,7 +203,7 @@ export default function BusinessesPage() {
             </Button>
             <Button
               type="button"
-              onClick={() => (window.location.href = '/admin/partnerships')}
+              onClick={() => (window.location.href = '/admin/contact-submissions?category=partnership')}
               className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
             >
               Sponsor inquiries

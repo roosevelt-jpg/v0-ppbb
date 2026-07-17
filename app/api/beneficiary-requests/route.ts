@@ -213,8 +213,17 @@ export async function POST(request: NextRequest) {
     }
 
     const emergencyLevel = emergencyLevelRaw
-    const visibleTo = ['welfare', 'founder', 'coordinator', 'founder_admin', 'manager']
-    const canDownloadDocuments = ['welfare', 'founder', 'coordinator', 'founder_admin', 'manager']
+    const visibleTo = [
+      'welfare',
+      'founder',
+      'coordinator',
+      'founder_admin',
+      'manager',
+      'admin',
+      'super_admin',
+      'superadmin',
+    ]
+    const canDownloadDocuments = [...visibleTo]
 
     await db.collection('beneficiaryConsents').doc(consentId).set(
       sanitizeForFirestore({

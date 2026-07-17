@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,14 +20,22 @@ interface ContactSubmission {
   source: string
   status: 'unread' | 'read' | 'resolved' | string
   submittedAt: Date | null
+  origin?: 'contactSubmissions' | 'partnerships' | 'contactRequests'
 }
 
 function asDate(value: unknown): Date | null {
   if (!value) return null
-  if (value instanceof Date) return value
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
   if (typeof value === 'object' && value !== null && 'toDate' in value) {
     const maybe = value as { toDate?: () => Date }
-    if (typeof maybe.toDate === 'function') return maybe.toDate()
+    if (typeof maybe.toDate === 'function') {
+      try {
+        const d = maybe.toDate()
+        return Number.isNaN(d.getTime()) ? null : d
+      } catch {
+        return null
+      }
+    }
   }
   if (typeof value === 'string' || typeof value === 'number') {
     const d = new Date(value)
@@ -35,7 +44,11 @@ function asDate(value: unknown): Date | null {
   return null
 }
 
-function mapDoc(id: string, data: Record<string, unknown>): ContactSubmission {
+function mapDoc(
+  id: string,
+  data: Record<string, unknown>,
+  origin: ContactSubmission['origin'] = 'contactSubmissions'
+): ContactSubmission {
   return {
     id,
     name: typeof data.name === 'string' ? data.name : '',
@@ -45,21 +58,47 @@ function mapDoc(id: string, data: Record<string, unknown>): ContactSubmission {
     message: typeof data.message === 'string' ? data.message : '',
     source: typeof data.source === 'string' ? data.source : 'website',
     status: typeof data.status === 'string' ? data.status : 'unread',
-    submittedAt: asDate(data.submittedAt),
+    submittedAt: asDate(data.submittedAt) || asDate(data.createdAt),
+    origin,
+  }
+}
+
+function mapPartnership(id: string, data: Record<string, unknown>): ContactSubmission {
+  const statusRaw = String(data.status || 'pending').toLowerCase()
+  const status =
+    statusRaw === 'approved' || statusRaw === 'declined' || statusRaw === 'resolved'
+      ? 'resolved'
+      : statusRaw === 'under_review' || statusRaw === 'read'
+        ? 'read'
+        : 'unread'
+  return {
+    id: `partnership:${id}`,
+    name: String(data.submitterName || ''),
+    email: String(data.submitterEmail || ''),
+    phone: String(data.phone || ''),
+    subject: String(data.title || data.type || 'Partnership inquiry'),
+    message: String(data.description || ''),
+    source: 'partners',
+    status,
+    submittedAt: asDate(data.submittedAt) || asDate(data.createdAt),
+    origin: 'partnerships',
   }
 }
 
 function sourceLabel(source: string) {
-  if (source === 'partners') return 'Sponsorship / Partnership'
-  if (source === 'contact') return 'Other inquiry'
-  if (source === 'partnership' || source === 'sponsorship') return 'Sponsorship / Partnership'
+  if (source === 'partners' || source === 'partnership' || source === 'sponsorship') {
+    return 'Sponsorship / Partnership'
+  }
   return 'Other inquiry'
 }
 
 function categoryOf(item: ContactSubmission): 'partnership' | 'other' {
+  if (item.origin === 'partnerships') return 'partnership'
   const s = `${item.source} ${item.subject}`.toLowerCase()
   if (
     item.source === 'partners' ||
+    item.source === 'partnership' ||
+    item.source === 'sponsorship' ||
     /partner|sponsor|collaborat/i.test(s)
   ) {
     return 'partnership'
@@ -74,17 +113,41 @@ async function getAuthHeaders(): Promise<HeadersInit> {
     : { 'Content-Type': 'application/json' }
 }
 
-export default function ContactSubmissionsPage() {
+function mergeById(rows: ContactSubmission[]): ContactSubmission[] {
+  const map = new Map<string, ContactSubmission>()
+  for (const row of rows) {
+    if (row.origin === 'contactSubmissions' || !map.has(row.id)) {
+      map.set(row.id, row)
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => {
+    const at = a.submittedAt?.getTime() || 0
+    const bt = b.submittedAt?.getTime() || 0
+    return bt - at
+  })
+}
+
+function ContactSubmissionsInner() {
+  const searchParams = useSearchParams()
+  const initialCategory = searchParams.get('category')
   const [items, setItems] = useState<ContactSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'partnership' | 'other'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'partnership' | 'other'>(
+    initialCategory === 'partnership' || initialCategory === 'other' ? initialCategory : 'all'
+  )
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selected, setSelected] = useState<ContactSubmission | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (initialCategory === 'partnership' || initialCategory === 'other') {
+      setCategoryFilter(initialCategory)
+    }
+  }, [initialCategory])
 
   const loadViaApi = useCallback(async () => {
     try {
@@ -98,11 +161,10 @@ export default function ContactSubmissionsPage() {
         throw new Error(json.error || 'Failed to load submissions')
       }
       setItems(
-        json.data.map((row: Record<string, unknown>) =>
-          mapDoc(String(row.id), {
-            ...row,
-            submittedAt: row.submittedAt,
-          })
+        mergeById(
+          json.data.map((row: Record<string, unknown>) =>
+            mapDoc(String(row.id), { ...row, submittedAt: row.submittedAt })
+          )
         )
       )
       setError('')
@@ -119,20 +181,78 @@ export default function ContactSubmissionsPage() {
   }, [])
 
   useEffect(() => {
-    const q = query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc'))
-    const unsub = onSnapshot(
-      q,
+    let submissions: ContactSubmission[] = []
+    let partnerships: ContactSubmission[] = []
+    let legacyRequests: ContactSubmission[] = []
+
+    const emit = () => {
+      setItems(mergeById([...submissions, ...partnerships, ...legacyRequests]))
+      setLoading(false)
+      setError('')
+    }
+
+    const unsubA = onSnapshot(
+      query(collection(db, 'contactSubmissions'), orderBy('submittedAt', 'desc')),
       (snapshot) => {
-        setItems(snapshot.docs.map((d) => mapDoc(d.id, d.data() as Record<string, unknown>)))
-        setLoading(false)
-        setError('')
+        submissions = snapshot.docs.map((d) =>
+          mapDoc(d.id, d.data() as Record<string, unknown>, 'contactSubmissions')
+        )
+        emit()
       },
       (err) => {
         console.error('[v0] contactSubmissions listener failed:', err)
         void loadViaApi()
       }
     )
-    return unsub
+
+    const unsubB = onSnapshot(
+      collection(db, 'partnerships'),
+      (snapshot) => {
+        partnerships = snapshot.docs.map((d) =>
+          mapPartnership(d.id, d.data() as Record<string, unknown>)
+        )
+        emit()
+      },
+      () => {
+        partnerships = []
+        emit()
+      }
+    )
+
+    const unsubC = onSnapshot(
+      collection(db, 'contactRequests'),
+      (snapshot) => {
+        legacyRequests = snapshot.docs.map((d) => {
+          const data = d.data() as Record<string, unknown>
+          return mapDoc(
+            d.id,
+            {
+              ...data,
+              source: data.source || 'contact',
+              submittedAt: data.submittedAt || data.createdAt,
+              status:
+                data.status === 'new' || data.read === false
+                  ? 'unread'
+                  : data.status === 'closed' || data.status === 'replied'
+                    ? 'resolved'
+                    : String(data.status || 'read'),
+            },
+            'contactRequests'
+          )
+        })
+        emit()
+      },
+      () => {
+        legacyRequests = []
+        emit()
+      }
+    )
+
+    return () => {
+      unsubA()
+      unsubB()
+      unsubC()
+    }
   }, [loadViaApi])
 
   const filtered = useMemo(() => {
@@ -149,11 +269,13 @@ export default function ContactSubmissionsPage() {
     })
   }, [items, search, subjectFilter, statusFilter, categoryFilter])
 
+  const partnershipCount = items.filter((i) => categoryOf(i) === 'partnership').length
+  const otherCount = items.filter((i) => categoryOf(i) === 'other').length
   const unreadCount = items.filter((i) => i.status === 'unread').length
 
   const handleSelect = async (item: ContactSubmission) => {
     setSelected(item)
-    if (item.status !== 'unread') return
+    if (item.status !== 'unread' || item.origin !== 'contactSubmissions') return
     setUpdatingId(item.id)
     try {
       const headers = await getAuthHeaders()
@@ -180,6 +302,11 @@ export default function ContactSubmissionsPage() {
   }
 
   const handleMarkResolved = async (id: string) => {
+    const row = items.find((i) => i.id === id)
+    if (!row || row.origin !== 'contactSubmissions') {
+      alert('Only Contact Submissions records can be marked resolved here.')
+      return
+    }
     setUpdatingId(id)
     try {
       const headers = await getAuthHeaders()
@@ -194,9 +321,7 @@ export default function ContactSubmissionsPage() {
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Update failed')
-      setItems((prev) =>
-        prev.map((row) => (row.id === id ? { ...row, status: 'resolved' } : row))
-      )
+      setItems((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'resolved' } : r)))
       setSelected((prev) => (prev?.id === id ? { ...prev, status: 'resolved' } : prev))
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update status')
@@ -206,6 +331,11 @@ export default function ContactSubmissionsPage() {
   }
 
   const handleDelete = async (id: string) => {
+    const row = items.find((i) => i.id === id)
+    if (!row || row.origin !== 'contactSubmissions') {
+      alert('Only Contact Submissions records can be deleted here.')
+      return
+    }
     if (!window.confirm('Delete this submission permanently?')) return
     setDeletingId(id)
     try {
@@ -217,7 +347,7 @@ export default function ContactSubmissionsPage() {
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Delete failed')
       if (selected?.id === id) setSelected(null)
-      setItems((prev) => prev.filter((row) => row.id !== id))
+      setItems((prev) => prev.filter((r) => r.id !== id))
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Delete failed')
     } finally {
@@ -228,23 +358,25 @@ export default function ContactSubmissionsPage() {
   return (
     <AdminPageLayout
       title="Contact Submissions"
-      subtitle="Website contact form · Sponsorship and partnership requests also appear under Sponsor Inquiries"
+      subtitle="Single inbox for website inquiries — Sponsorship/Partnership and Other"
     >
       <div className="space-y-4 w-full min-w-0">
         <div className="flex flex-wrap gap-2">
           {(
             [
-              ['all', 'All'],
-              ['partnership', 'Sponsorship / Partnership Inquiries'],
-              ['other', 'Other Inquiries'],
+              ['all', `All (${items.length})`],
+              ['partnership', `Sponsorship / Partnership Inquiries (${partnershipCount})`],
+              ['other', `Other Inquiries (${otherCount})`],
             ] as const
           ).map(([id, label]) => (
             <button
               key={id}
               type="button"
               onClick={() => setCategoryFilter(id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium min-h-[36px] bg-black text-white hover:bg-neutral-800 ${
-                categoryFilter === id ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium min-h-[36px] ${
+                categoryFilter === id
+                  ? 'bg-black text-white ring-2 ring-offset-1 ring-black'
+                  : 'bg-white text-neutral-800 border border-neutral-300 hover:bg-neutral-50'
               }`}
             >
               {label}
@@ -254,7 +386,7 @@ export default function ContactSubmissionsPage() {
 
         <div className="flex flex-wrap items-center gap-3 text-sm font-body text-neutral-600">
           <span>
-            <strong className="text-neutral-900">{items.length}</strong> total
+            <strong className="text-neutral-900">{filtered.length}</strong> showing
           </span>
           <span className="text-neutral-300">·</span>
           <span>
@@ -297,12 +429,12 @@ export default function ContactSubmissionsPage() {
           </select>
         </div>
 
-        {error && (
+        {error ? (
           <div className="flex items-center gap-2 p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
             <AlertCircle className="w-4 h-4 shrink-0" />
             {error}
           </div>
-        )}
+        ) : null}
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
@@ -313,9 +445,10 @@ export default function ContactSubmissionsPage() {
         ) : filtered.length === 0 ? (
           <Card className="p-10 text-center">
             <Inbox className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
-            <p className="font-headline text-xl font-bold mb-1">No submissions yet</p>
+            <p className="font-headline text-xl font-bold mb-1">No submissions in this category</p>
             <p className="font-body text-sm text-neutral-600">
-              Messages from Partners Get in Touch and the Contact page appear here in real time.
+              Partners and Contact page messages appear here. Business partnership requests are
+              included under Sponsorship / Partnership.
             </p>
           </Card>
         ) : (
@@ -326,7 +459,7 @@ export default function ContactSubmissionsPage() {
                   <tr>
                     <th className="px-3 py-3 font-semibold">Name</th>
                     <th className="px-3 py-3 font-semibold">Subject</th>
-                    <th className="px-3 py-3 font-semibold">Source</th>
+                    <th className="px-3 py-3 font-semibold">Category</th>
                     <th className="px-3 py-3 font-semibold">Status</th>
                     <th className="px-3 py-3 font-semibold">Submitted</th>
                     <th className="px-3 py-3 font-semibold"> </th>
@@ -349,7 +482,9 @@ export default function ContactSubmissionsPage() {
                       </td>
                       <td className="px-3 py-3 break-words max-w-[9rem]">{item.subject}</td>
                       <td className="px-3 py-3 whitespace-nowrap text-neutral-600">
-                        {sourceLabel(item.source)}
+                        {categoryOf(item) === 'partnership'
+                          ? 'Sponsorship / Partnership'
+                          : 'Other'}
                       </td>
                       <td className="px-3 py-3">
                         <span
@@ -368,18 +503,20 @@ export default function ContactSubmissionsPage() {
                         {item.submittedAt ? item.submittedAt.toLocaleDateString() : '—'}
                       </td>
                       <td className="px-3 py-3">
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={deletingId === item.id}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            void handleDelete(item.id)
-                          }}
-                          className="pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 bg-black text-white hover:bg-neutral-800"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
+                        {item.origin === 'contactSubmissions' ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            disabled={deletingId === item.id}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              void handleDelete(item.id)
+                            }}
+                            className="pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 bg-black text-white hover:bg-neutral-800"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        ) : null}
                       </td>
                     </tr>
                   ))}
@@ -418,6 +555,12 @@ export default function ContactSubmissionsPage() {
                     <span className="font-semibold">Subject:</span> {selected.subject}
                   </p>
                   <p className="font-body text-sm">
+                    <span className="font-semibold">Category:</span>{' '}
+                    {categoryOf(selected) === 'partnership'
+                      ? 'Sponsorship / Partnership'
+                      : 'Other'}
+                  </p>
+                  <p className="font-body text-sm">
                     <span className="font-semibold">Source:</span> {sourceLabel(selected.source)}
                   </p>
                   <p className="font-body text-sm text-neutral-600">
@@ -429,7 +572,7 @@ export default function ContactSubmissionsPage() {
                       {selected.message}
                     </p>
                   </div>
-                  {selected.status !== 'resolved' && (
+                  {selected.origin === 'contactSubmissions' && selected.status !== 'resolved' ? (
                     <Button
                       type="button"
                       disabled={updatingId === selected.id}
@@ -439,7 +582,7 @@ export default function ContactSubmissionsPage() {
                       <Check className="w-4 h-4 mr-2" />
                       Mark resolved
                     </Button>
-                  )}
+                  ) : null}
                 </div>
               ) : (
                 <p className="font-body text-sm text-neutral-500 text-center py-8">
@@ -451,5 +594,19 @@ export default function ContactSubmissionsPage() {
         )}
       </div>
     </AdminPageLayout>
+  )
+}
+
+export default function ContactSubmissionsPage() {
+  return (
+    <Suspense
+      fallback={
+        <AdminPageLayout title="Contact Submissions">
+          <p className="text-sm text-neutral-500 py-8">Loading inbox…</p>
+        </AdminPageLayout>
+      }
+    >
+      <ContactSubmissionsInner />
+    </Suspense>
   )
 }

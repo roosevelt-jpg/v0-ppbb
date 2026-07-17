@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { Firestore } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access-server'
-import { canAccessSensitiveBeneficiaryDocs } from '@/lib/charity-cases'
+import {
+  canAccessSensitiveBeneficiaryDocs,
+  canUserAccessSensitiveBeneficiaryDocs,
+} from '@/lib/charity-cases'
 import { getSignedReadUrl } from '@/lib/storage-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
@@ -48,7 +52,10 @@ async function requireAdminAuth(request: NextRequest) {
   if (!isAdmin) return null
   const adminData = await getAdminUserData(uid)
   const adminRole = String(adminData?.adminRole || adminData?.role || 'admin')
-  return { uid, adminRole }
+  const permissions = Array.isArray(adminData?.permissions)
+    ? (adminData.permissions as unknown[]).map(String)
+    : []
+  return { uid, adminRole, permissions }
 }
 
 /**
@@ -69,7 +76,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl
     const id = searchParams.get('id')
     const documentKey = searchParams.get('document')
-    const canViewDocs = canAccessSensitiveBeneficiaryDocs(admin.adminRole)
+    const canViewDocs =
+      canAccessSensitiveBeneficiaryDocs(admin.adminRole) ||
+      canUserAccessSensitiveBeneficiaryDocs({
+        role: admin.adminRole,
+        adminRole: admin.adminRole,
+        permissions: admin.permissions,
+      })
 
     const db = getAdminDb()
 
@@ -110,13 +123,23 @@ export async function GET(request: NextRequest) {
     }
 
     const snapshot = await db.collection('beneficiaryRequests').limit(200).get()
-    const data = snapshot.docs
-      .map((d) => redactRequest(d.id, d.data() || {}, canViewDocs))
-      .sort((a, b) => {
-        const aT = timestampMs(a.createdAt) || timestampMs(a.submissionDate)
-        const bT = timestampMs(b.createdAt) || timestampMs(b.submissionDate)
-        return bT - aT
-      })
+    const byId = new Map<string, Record<string, unknown>>()
+    for (const d of snapshot.docs) {
+      byId.set(d.id, redactRequest(d.id, d.data() || {}, canViewDocs))
+    }
+
+    // Surface CMS Charity Support submissions that never landed in beneficiaryRequests
+    try {
+      await importOrphanedCharityFormSubmissions(db, byId, canViewDocs)
+    } catch (importErr) {
+      console.warn('[beneficiary-requests] charity form import skipped:', importErr)
+    }
+
+    const data = Array.from(byId.values()).sort((a, b) => {
+      const aT = timestampMs(a.createdAt) || timestampMs(a.submissionDate)
+      const bT = timestampMs(b.createdAt) || timestampMs(b.submissionDate)
+      return bT - aT
+    })
 
     return NextResponse.json({
       success: true,
@@ -126,6 +149,99 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[beneficiary-requests GET]', error)
     return NextResponse.json({ success: false, error: 'Failed to load requests' }, { status: 500 })
+  }
+}
+
+async function importOrphanedCharityFormSubmissions(
+  db: Firestore,
+  byId: Map<string, Record<string, unknown>>,
+  canViewDocs: boolean
+) {
+  const formsSnap = await db.collection('customForms').limit(100).get()
+  const charityFormIds = formsSnap.docs
+    .filter((d) => {
+      const data = d.data() || {}
+      const slug = String(data.slug || '').toLowerCase()
+      const category = String(data.category || '').toLowerCase()
+      const title = String(data.title || '').toLowerCase()
+      return (
+        slug.includes('charity') ||
+        category === 'charity' ||
+        category === 'beneficiary' ||
+        title.includes('charity support')
+      )
+    })
+    .map((d) => d.id)
+
+  if (charityFormIds.length === 0) return
+
+  const existingSubmissionIds = new Set<string>()
+  for (const row of byId.values()) {
+    if (typeof row.formSubmissionId === 'string') existingSubmissionIds.add(row.formSubmissionId)
+    if (typeof row.id === 'string' && row.id.startsWith('form_')) {
+      existingSubmissionIds.add(row.id.slice(5))
+    }
+  }
+
+  for (const formId of charityFormIds.slice(0, 10)) {
+    const subs = await db
+      .collection('formSubmissions')
+      .where('formId', '==', formId)
+      .limit(50)
+      .get()
+
+    for (const sub of subs.docs) {
+      if (existingSubmissionIds.has(sub.id)) continue
+      const mirroredId = `form_${sub.id}`
+      if (byId.has(mirroredId)) continue
+
+      const subData = sub.data() || {}
+      const responses =
+        subData.responses && typeof subData.responses === 'object'
+          ? (subData.responses as Record<string, unknown>)
+          : {}
+
+      const fullName = String(responses.fullName || responses.name || 'Charity support applicant')
+      const email = String(responses.email || subData.userEmail || '')
+      const emergencyRaw = String(responses.emergencyLevel || 'medium').toLowerCase()
+      const emergencyLevel = ['low', 'medium', 'high', 'critical'].includes(emergencyRaw)
+        ? emergencyRaw
+        : 'medium'
+
+      const payload = {
+        id: mirroredId,
+        formSubmissionId: sub.id,
+        formId,
+        source: 'formSubmissions',
+        status: String(subData.status || 'pending'),
+        fullName,
+        name: fullName,
+        email,
+        phoneNumber: String(responses.phone || responses.phoneNumber || ''),
+        emergencyLevel,
+        reason: String(responses.reason || ''),
+        reasonCategory: String(responses.supportType || 'support'),
+        emiratesIdUrl: typeof responses.emiratesId === 'string' ? responses.emiratesId : '',
+        passportUrl: typeof responses.passport === 'string' ? responses.passport : '',
+        visaUrl: typeof responses.visa === 'string' ? responses.visa : '',
+        salaryCertificateUrl:
+          typeof responses.salaryCertificate === 'string' ? responses.salaryCertificate : '',
+        bankStatementUrl:
+          typeof responses.bankStatement === 'string' ? responses.bankStatement : '',
+        submissionDate: subData.submittedAt || subData.createdAt || null,
+        createdAt: subData.submittedAt || subData.createdAt || null,
+      }
+
+      // Persist so Refresh stays stable (idempotent doc id)
+      try {
+        await db.collection('beneficiaryRequests').doc(mirroredId).set(payload, { merge: true })
+      } catch {
+        /* list still includes in-memory row */
+      }
+
+      byId.set(mirroredId, redactRequest(mirroredId, payload, canViewDocs))
+      existingSubmissionIds.add(sub.id)
+    }
   }
 }
 
