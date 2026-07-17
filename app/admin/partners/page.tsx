@@ -34,6 +34,7 @@ import { useAuth } from '@/lib/auth-context'
 import { uploadFileToFirebase } from '@/lib/upload-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { BUTTON_OUTLINE, BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 const PARTNER_TYPES: { value: PartnerType; label: string }[] = [
   { value: 'sponsor', label: 'Sponsor' },
@@ -353,21 +354,20 @@ export default function AdminPartnersLogosPage() {
           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
             <Button
               type="button"
+              variant="outline"
               onClick={handleSeedDefaults}
               disabled={seeding}
-              className="h-7 min-h-0 bg-white text-black border border-neutral-300 hover:bg-neutral-50"
-              style={{ fontFamily: 'Inter, sans-serif' }}
+              className={BUTTON_OUTLINE}
             >
-              <Sparkles className="w-4 h-4 mr-2" />
+              <Sparkles className="w-3 h-3 mr-1" />
               {seeding ? 'Seeding…' : 'Seed defaults'}
             </Button>
             <Button
               type="button"
               onClick={openCreate}
-              className="h-7 min-h-0 bg-black text-white hover:bg-neutral-900"
-              style={{ fontFamily: 'Inter, sans-serif' }}
+              className={BUTTON_PRIMARY}
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-3 h-3 mr-1" />
               Add Partner
             </Button>
           </div>

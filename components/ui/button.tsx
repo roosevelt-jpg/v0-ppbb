@@ -21,16 +21,16 @@ const buttonVariants = cva(
       },
       size: {
         default:
-          'h-7 min-h-0 gap-1 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-        xs: 'h-6 min-h-0 gap-1 rounded-md px-2 text-[11px] in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*=\'size-\'])]:size-3',
-        sm: 'h-7 min-h-0 gap-1 rounded-md px-2.5 text-[11px] in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*=\'size-\'])]:size-3',
-        lg: 'h-8 min-h-0 gap-1.5 px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-        icon: 'size-7',
+          'h-6 min-h-0 gap-1 px-2 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5',
+        xs: "h-5 min-h-0 gap-0.5 rounded-md px-1.5 text-[10px] in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 [&_svg:not([class*='size-'])]:size-2.5",
+        sm: "h-6 min-h-0 gap-1 rounded-md px-2 text-[11px] in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
+        lg: 'h-7 min-h-0 gap-1 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
+        icon: 'size-6',
         'icon-xs':
-          'size-6 rounded-md in-data-[slot=button-group]:rounded-md [&_svg:not([class*=\'size-\'])]:size-3',
+          "size-5 rounded-md in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-2.5",
         'icon-sm':
-          'size-7 rounded-md in-data-[slot=button-group]:rounded-md',
-        'icon-lg': 'size-8',
+          'size-6 rounded-md in-data-[slot=button-group]:rounded-md',
+        'icon-lg': 'size-7',
       },
     },
     defaultVariants: {
@@ -46,10 +46,17 @@ function Button({
   size = 'default',
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  const toneClass =
+    variant === 'ghost' || variant === 'link'
+      ? 'pb-ghost-btn'
+      : variant === 'outline'
+        ? 'pb-outline-btn'
+        : 'pb-compact-btn'
+
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), toneClass, className)}
       {...props}
     />
   )

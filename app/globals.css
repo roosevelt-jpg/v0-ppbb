@@ -401,18 +401,32 @@ label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) s
   stroke: currentColor !important;
 }
 
-button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn) {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  font-size: 11px;
-  min-height: 28px;
-  box-shadow: none;
-  transition: background-color 0.2s, opacity 0.2s;
+/* Platform-wide compact CTA size (Admin / Member / Business + public forms using Button) */
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn),
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn),
+a.pb-compact-btn,
+a.pb-outline-btn,
+label.pb-compact-btn,
+label.pb-outline-btn,
+label:has(> input[type='file'].hidden),
+label:has(> input[type='file'].sr-only) {
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  font-size: 11px !important;
+  line-height: 24px !important;
+  border-radius: 0.375rem !important;
+  font-weight: 600 !important;
+  gap: 0.25rem !important;
+  box-shadow: none !important;
 }
 
-button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):active {
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):active,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):active {
   opacity: 0.9;
 }
 
@@ -445,9 +459,12 @@ a.pb-outline-btn {
   color: #111111 !important;
   border: 1px solid #d4d4d4 !important;
   box-shadow: none !important;
-  min-height: 28px !important;
-  padding: 0.25rem 0.625rem !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding: 0 0.5rem !important;
   font-size: 11px !important;
+  line-height: 22px !important;
   font-weight: 600 !important;
   border-radius: 0.375rem !important;
 }
@@ -606,15 +623,15 @@ label:has(> input[type='file'].hidden) {
 [data-dashboard-surface] label.pb-compact-btn,
 [data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
 [data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
-  height: 28px !important;
-  min-height: 28px !important;
-  max-height: 28px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  padding-left: 0.625rem !important;
-  padding-right: 0.625rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
   font-size: 11px !important;
-  line-height: 28px !important;
+  line-height: 24px !important;
   border-radius: 0.375rem !important;
   font-weight: 600 !important;
   gap: 0.25rem !important;
@@ -657,14 +674,18 @@ label:has(> input[type='file'].hidden) {
 [data-dashboard-surface] [data-slot='button'][class*='min-h-[44'],
 [data-dashboard-surface] [data-slot='button'][class*='min-h-[40'],
 [data-dashboard-surface] [data-slot='button'][class*='min-h-[36'],
-[data-dashboard-surface] label[class*='min-h-[44'] {
-  min-height: 28px !important;
-  height: 28px !important;
-  max-height: 28px !important;
+[data-dashboard-surface] label[class*='min-h-[44'],
+[data-dashboard-surface] a[class*='min-h-[44px]'],
+[data-dashboard-surface] button.min-h-\[44px\],
+[data-dashboard-surface] a.bg-black,
+[data-dashboard-surface] a.bg-neutral-900 {
+  min-height: 24px !important;
+  height: 24px !important;
+  max-height: 24px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   font-size: 11px !important;
-  line-height: 28px !important;
+  line-height: 24px !important;
   border-radius: 0.375rem !important;
 }
 
@@ -672,12 +693,12 @@ label:has(> input[type='file'].hidden) {
 [data-dashboard-surface] button.pb-outline-btn,
 [data-dashboard-surface] a.pb-outline-btn,
 [data-dashboard-surface] label.pb-outline-btn {
-  height: 28px !important;
-  min-height: 28px !important;
-  max-height: 28px !important;
-  padding: 0 0.625rem !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  padding: 0 0.5rem !important;
   font-size: 11px !important;
-  line-height: 26px !important;
+  line-height: 22px !important;
   border-radius: 0.375rem !important;
   background-color: #ffffff !important;
   color: #111111 !important;
@@ -701,6 +722,18 @@ label:has(> input[type='file'].hidden) {
 }
 
 /* Keep square icon actions compact (not stretched by padding rules) */
+[data-dashboard-surface] button.h-5.w-5,
+[data-dashboard-surface] button.w-5.h-5,
+[data-dashboard-surface] a.h-5.w-5 {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
 [data-dashboard-surface] button.h-6.w-6,
 [data-dashboard-surface] button.w-6.h-6,
 [data-dashboard-surface] a.h-6.w-6,

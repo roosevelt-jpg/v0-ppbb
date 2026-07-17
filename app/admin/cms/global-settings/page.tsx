@@ -18,6 +18,7 @@ import {
   ReferralsPlatformConfig,
 } from '@/lib/referral-config'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
+import { BUTTON_OUTLINE, BUTTON_PRIMARY } from '@/lib/admin-design-system'
 import { auth } from '@/lib/firebase'
 import {
   DEFAULT_LOGO_ON_DARK_BG,
@@ -677,10 +678,9 @@ export default function AdminCmsGlobalSettingsPage() {
           </p>
           <Link
             href="/admin/integrations"
-            className="h-7 min-h-0 inline-flex items-center gap-2 px-5 bg-black text-white rounded text-sm font-semibold hover:bg-neutral-900 w-full sm:w-auto justify-center"
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            className={`${BUTTON_PRIMARY} gap-1 w-full sm:w-auto no-underline`}
           >
-            <Plug className="w-4 h-4" />
+            <Plug className="w-3 h-3" />
             Open Integrations dashboard
           </Link>
         </Card>
@@ -742,20 +742,19 @@ export default function AdminCmsGlobalSettingsPage() {
             type="button"
             onClick={handleSaveReferrals}
             disabled={savingReferrals}
-            className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
+            className={BUTTON_PRIMARY}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-3 h-3 mr-1" />
             {savingReferrals ? 'Saving…' : 'Save referral defaults'}
           </Button>
         </Card>
 
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-end pb-8">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 justify-end pb-8">
           <button
             type="button"
             onClick={() => void runMigration()}
             disabled={migrating}
-            className="h-7 min-h-0 px-5 bg-white text-black border border-neutral-300 rounded text-sm font-semibold hover:bg-neutral-50 disabled:opacity-50"
-            style={{ fontFamily: 'Inter, sans-serif' }}
+            className={`${BUTTON_OUTLINE} disabled:opacity-50`}
           >
             {migrating ? 'Migrating…' : 'Import from legacy settings'}
           </button>
@@ -763,9 +762,9 @@ export default function AdminCmsGlobalSettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
+            className={BUTTON_PRIMARY}
           >
-            <Save className="w-4 h-4 mr-2" />
+            <Save className="w-3 h-3 mr-1" />
             {saving ? 'Saving…' : 'Save global settings'}
           </Button>
         </div>

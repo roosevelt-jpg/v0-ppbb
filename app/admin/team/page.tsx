@@ -31,6 +31,7 @@ import {
 } from '@/lib/team-members'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { BUTTON_PRIMARY } from '@/lib/admin-design-system'
 
 export default function AdminTeamPage() {
   const audit = useAdminAudit()
@@ -288,9 +289,9 @@ export default function AdminTeamPage() {
             type="button"
             onClick={() => void handleSeedDefaults()}
             disabled={seeding}
-            className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
+            className={BUTTON_PRIMARY}
           >
-            <Sparkles className="w-4 h-4 mr-2" />
+            <Sparkles className="w-3 h-3 mr-1" />
             {seeding ? 'Seeding…' : 'Seed 7 default members'}
           </Button>
         </div>
@@ -417,8 +418,8 @@ export default function AdminTeamPage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button type="submit" className="h-7 min-h-0 bg-black text-white hover:bg-gray-800">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button type="submit" className={BUTTON_PRIMARY}>
+                <Plus className="w-3 h-3 mr-1" />
                 {editingId ? 'Save changes' : 'Add member'}
               </Button>
               {editingId && (

@@ -36,33 +36,35 @@ export const ADMIN_RADIUS = {
 
 // Button styles — compact by default (black / white)
 export const BUTTON_BASE = 'inline-flex items-center justify-center font-semibold transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
-export const BUTTON_PRIMARY = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:h-3 [&_svg]:w-3 [&_svg]:text-white`
+export const BUTTON_PRIMARY = `${BUTTON_BASE} pb-compact-btn h-6 min-h-0 px-2 text-[11px] rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:h-3 [&_svg]:w-3 [&_svg]:text-white`
+/** White outline secondary CTA */
+export const BUTTON_OUTLINE = `${BUTTON_BASE} pb-outline-btn h-6 min-h-0 px-2 text-[11px] rounded-md`
 /** Same black / white treatment — no white secondary CTAs in admin */
 export const BUTTON_SECONDARY = BUTTON_PRIMARY
 export const BUTTON_DANGER = BUTTON_PRIMARY
 /** Icon-only table actions — black primary (compact) */
-export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
+export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center h-5 w-5 min-h-0 min-w-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-2.5 [&_svg]:w-2.5`
 /** Icon-only table actions — same black style (delete/archive included) */
 export const BUTTON_ICON_DANGER = BUTTON_ICON_PRIMARY
 /** Compact icon actions for table rows (Edit / Archive / Delete on one line) */
 export const BUTTON_ICON_COMPACT = BUTTON_ICON_PRIMARY
 /** Compact text actions for table rows */
-export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center gap-0.5 h-6 min-h-0 px-2 text-[11px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none whitespace-nowrap shrink-0 [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
+export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center gap-0.5 h-5 min-h-0 px-1.5 text-[10px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none whitespace-nowrap shrink-0 [&_svg]:text-white [&_svg]:h-2.5 [&_svg]:w-2.5`
 /** Keep Edit/Archive/Delete on one horizontal line */
 export const ACTION_ROW = 'flex flex-nowrap items-center gap-0.5 whitespace-nowrap'
 /** Compact back / navigation control */
-export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1.5 h-7 min-h-0 px-2.5 text-[11px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
+export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1 h-6 min-h-0 px-2 text-[11px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
 /** Filter / tab pills — compact; inactive uses outline (not black-forced compact) */
-export const FILTER_PILL_ACTIVE = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white border border-black shadow-none`
-export const FILTER_PILL_INACTIVE = `${BUTTON_BASE} pb-outline-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md`
+export const FILTER_PILL_ACTIVE = `${BUTTON_BASE} pb-compact-btn h-6 min-h-0 px-2 text-[11px] rounded-md bg-black !text-white border border-black shadow-none`
+export const FILTER_PILL_INACTIVE = `${BUTTON_BASE} pb-outline-btn h-6 min-h-0 px-2 text-[11px] rounded-md`
 /** Up/down reorder controls — black square with white icon */
-export const BUTTON_REORDER = `${BUTTON_BASE} pb-compact-btn min-h-0 min-w-0 h-6 w-6 p-0 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0 [&_svg]:h-3 [&_svg]:w-3`
+export const BUTTON_REORDER = `${BUTTON_BASE} pb-compact-btn min-h-0 min-w-0 h-5 w-5 p-0 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0 [&_svg]:h-2.5 [&_svg]:w-2.5`
 /** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */
 export const BUTTON_SUCCESS = BUTTON_PRIMARY
 export const BUTTON_SMALL = BUTTON_ROW_COMPACT
 export const BUTTON_LARGE = BUTTON_PRIMARY
 /** Label styled as compact upload / file button */
-export const BUTTON_LABEL_COMPACT = `${BUTTON_BASE} pb-compact-btn h-7 min-h-0 px-2.5 text-[11px] rounded-md bg-black !text-white hover:bg-neutral-800 border-0 shadow-none cursor-pointer [&_svg]:h-3 [&_svg]:w-3 [&_svg]:text-white`
+export const BUTTON_LABEL_COMPACT = `${BUTTON_BASE} pb-compact-btn h-6 min-h-0 px-2 text-[11px] rounded-md bg-black !text-white hover:bg-neutral-800 border-0 shadow-none cursor-pointer [&_svg]:h-3 [&_svg]:w-3 [&_svg]:text-white`
 
 /** Compact admin detail modal shell (profile popups, review dialogs) */
 export const ADMIN_DETAIL_MODAL_OVERLAY =

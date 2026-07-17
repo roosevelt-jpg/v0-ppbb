@@ -30,7 +30,7 @@ import {
 } from '@/lib/testimonials'
 import { useAuth } from '@/lib/auth-context'
 import { uploadFileToFirebase, uploadImageToFirebase } from '@/lib/upload-utils'
-import { BUTTON_LABEL_COMPACT } from '@/lib/admin-design-system'
+import { BUTTON_LABEL_COMPACT, BUTTON_PRIMARY } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function AdminCmsTestimonialsPage() {
@@ -313,9 +313,9 @@ export default function AdminCmsTestimonialsPage() {
             <Button
               type="submit"
               disabled={testimonials.length >= MAX_TESTIMONIALS}
-              className="h-7 min-h-0 bg-black text-white hover:bg-gray-800"
+              className={BUTTON_PRIMARY}
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-3 h-3 mr-1" />
               Add testimonial ({testimonials.length}/{MAX_TESTIMONIALS})
             </Button>
           </form>
