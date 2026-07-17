@@ -59,6 +59,17 @@ export async function adminApiFetch<T = unknown>(
   })
 
   const contentType = res.headers.get('content-type') || ''
+  let json: AdminApiJson<T> | null = null
+  try {
+    json = (await res.json()) as AdminApiJson<T>
+  } catch {
+    json = null
+  }
+
+  if (json && typeof json === 'object') {
+    return json
+  }
+
   if (!contentType.includes('application/json')) {
     return {
       success: false,
@@ -68,9 +79,5 @@ export async function adminApiFetch<T = unknown>(
     }
   }
 
-  try {
-    return (await res.json()) as AdminApiJson<T>
-  } catch {
-    return { success: false, error: 'Failed to parse server response' }
-  }
+  return { success: false, error: 'Failed to parse server response' }
 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuth } from 'firebase-admin/auth'
 import { Timestamp } from 'firebase-admin/firestore'
-import { getAdminApp, getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { splitFullName } from '@/lib/user-profile'
@@ -19,8 +18,12 @@ function isValidEmail(value: string): boolean {
 
 /**
  * PATCH /api/account/profile
- * Updates the signed-in user's profile in Firestore + Firebase Auth (Admin SDK).
- * Also syncs admin-users / adminUsers when those docs exist.
+ * Updates the signed-in user's profile in Firestore (Admin SDK).
+ * Syncs admin-users / adminUsers when those docs exist.
+ *
+ * Intentionally does NOT import firebase-admin/auth — that module crashes some
+ * Vercel/Next serverless bundles at load time (HTML 500 before the handler runs).
+ * Firebase Auth profile fields are updated on the client after a successful save.
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -57,9 +60,7 @@ export async function PATCH(request: NextRequest) {
     const db = getAdminDb()
     const userRef = db.collection('users').doc(uid)
     const userSnap = await userRef.get()
-    if (!userSnap.exists) {
-      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 })
-    }
+    const existing = userSnap.exists ? userSnap.data() || {} : {}
 
     const now = Timestamp.now()
     const displayName = fullName
@@ -75,6 +76,8 @@ export async function PATCH(request: NextRequest) {
         ? { profilePictureURL: picture, avatarUrl: picture }
         : {}),
       updatedAt: now,
+      // Ensure admins without a users/ doc can still save profile
+      ...(userSnap.exists ? {} : { createdAt: now, role: existing.role || 'admin' }),
     })
 
     await userRef.set(firestoreUpdates, { merge: true })
@@ -95,41 +98,13 @@ export async function PATCH(request: NextRequest) {
     const adminUsersCamelSnap = await adminUsersCamelRef.get()
     if (adminUsersCamelSnap.exists) {
       await adminUsersCamelRef.set(
-        sanitizeForFirestore({ email, updatedAt: now }),
+        sanitizeForFirestore({
+          name: displayName,
+          displayName,
+          email,
+          updatedAt: now,
+        }),
         { merge: true }
-      )
-    }
-
-    const auth = getAuth(getAdminApp())
-    const authUpdate: { displayName: string; email: string; photoURL?: string } = {
-      displayName,
-      email,
-    }
-    if (picture) authUpdate.photoURL = picture
-
-    try {
-      await auth.updateUser(uid, authUpdate)
-    } catch (authError: unknown) {
-      const code = (authError as { code?: string })?.code || ''
-      if (code === 'auth/email-already-exists') {
-        return NextResponse.json(
-          { success: false, error: 'That email is already used by another account.' },
-          { status: 409 }
-        )
-      }
-      if (code === 'auth/invalid-email') {
-        return NextResponse.json(
-          { success: false, error: 'A valid email is required' },
-          { status: 400 }
-        )
-      }
-      console.warn('[account/profile] Auth update failed:', authError)
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Profile saved in database, but auth update failed. Try again.',
-        },
-        { status: 500 }
       )
     }
 
@@ -142,15 +117,19 @@ export async function PATCH(request: NextRequest) {
         displayName,
         email,
         phone,
-        profilePictureURL: picture || userSnap.data()?.profilePictureURL || null,
-        avatarUrl: picture || userSnap.data()?.avatarUrl || null,
+        profilePictureURL:
+          picture ||
+          (typeof existing.profilePictureURL === 'string' ? existing.profilePictureURL : null),
+        avatarUrl:
+          picture || (typeof existing.avatarUrl === 'string' ? existing.avatarUrl : null),
       },
     })
   } catch (error) {
     console.error('[v0] Account profile update error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to update profile' },
-      { status: 500 }
-    )
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : 'Failed to update profile'
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { UserAvatar } from '@/components/user-avatar'
 import { useAuth } from '@/lib/auth-context'
 import { auth } from '@/lib/firebase'
+import { updateEmail, updateProfile } from 'firebase/auth'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import {
   getUserDisplayName,
@@ -72,8 +73,31 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
       throw new Error(result.error || 'Failed to save profile')
     }
 
-    // Refresh auth token so Auth claims/email stay in sync client-side
+    // Sync Firebase Auth client profile (server avoids firebase-admin/auth — Vercel crash)
     if (auth.currentUser) {
+      try {
+        await updateProfile(auth.currentUser, {
+          displayName: payload.fullName,
+          ...(payload.profilePictureURL
+            ? { photoURL: payload.profilePictureURL }
+            : {}),
+        })
+        const currentEmail = (auth.currentUser.email || '').toLowerCase()
+        if (payload.email && payload.email.toLowerCase() !== currentEmail) {
+          await updateEmail(auth.currentUser, payload.email)
+        }
+      } catch (authError: unknown) {
+        const code = (authError as { code?: string })?.code || ''
+        if (code === 'auth/requires-recent-login') {
+          throw new Error(
+            'Name saved. To change email, sign out and sign back in, then try again.'
+          )
+        }
+        if (code === 'auth/email-already-in-use') {
+          throw new Error('That email is already used by another account.')
+        }
+        console.warn('[profile-quick-edit] Auth sync failed:', authError)
+      }
       await auth.currentUser.reload()
       await auth.currentUser.getIdToken(true)
     }
