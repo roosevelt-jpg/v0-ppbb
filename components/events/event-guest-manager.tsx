@@ -11,6 +11,7 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react'
+import { ACTION_ROW, BUTTON_BACK, BUTTON_PRIMARY, BUTTON_ROW_COMPACT } from '@/lib/admin-design-system'
 
 type Guest = {
   id: string
@@ -42,6 +43,9 @@ async function authFetch(path: string, options: RequestInit = {}) {
   }
   return res.json()
 }
+
+const BTN = `${BUTTON_PRIMARY} !text-white text-sm`
+const BTN_COMPACT = `${BUTTON_ROW_COMPACT} !text-white`
 
 export function EventGuestManager({
   eventId,
@@ -143,10 +147,10 @@ export function EventGuestManager({
     <div className="space-y-6 max-w-5xl">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <Link href={backHref} className="text-sm text-neutral-500 hover:underline">
+          <Link href={backHref} className={BUTTON_BACK}>
             ← Back
           </Link>
-          <h1 className="text-2xl font-bold text-black mt-1 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-black mt-3 flex items-center gap-2">
             <Users className="h-6 w-6" />
             Attendees {eventTitle ? `· ${eventTitle}` : ''}
           </h1>
@@ -164,12 +168,8 @@ export function EventGuestManager({
             </ol>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={exportCsv}
-          className="inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-sm bg-white"
-        >
-          <Download className="h-4 w-4" /> Export CSV
+        <button type="button" onClick={exportCsv} className={`${BTN} inline-flex items-center gap-2`}>
+          <Download className="h-4 w-4 text-white" /> Export CSV
         </button>
       </div>
 
@@ -188,11 +188,7 @@ export function EventGuestManager({
             placeholder="Scan / paste QR token or check-in code"
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
-          <button
-            type="button"
-            onClick={handleCheckIn}
-            className="px-4 py-2 bg-black text-white rounded-lg text-sm"
-          >
+          <button type="button" onClick={handleCheckIn} className={BTN}>
             Check in guest
           </button>
         </div>
@@ -209,18 +205,10 @@ export function EventGuestManager({
             className="w-full border rounded-lg px-3 py-2 text-sm"
           />
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => handleInvite(false)}
-              className="px-3 py-2 border rounded-lg text-sm"
-            >
+            <button type="button" onClick={() => handleInvite(false)} className={BTN}>
               Send invite links
             </button>
-            <button
-              type="button"
-              onClick={() => handleInvite(true)}
-              className="px-3 py-2 bg-black text-white rounded-lg text-sm"
-            >
+            <button type="button" onClick={() => handleInvite(true)} className={BTN}>
               Add directly (comp)
             </button>
           </div>
@@ -244,24 +232,20 @@ export function EventGuestManager({
             placeholder="Email"
             className="border rounded-lg px-3 py-2 text-sm"
           />
-          <button
-            type="button"
-            onClick={() => runAction('add')}
-            className="px-3 py-2 bg-black text-white rounded-lg text-sm"
-          >
+          <button type="button" onClick={() => runAction('add')} className={BTN}>
             Add guest
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className={`${ACTION_ROW} gap-1.5 flex-wrap`}>
         {['all', 'confirmed', 'pending', 'waitlisted', 'cancelled'].map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => setFilter(s)}
-            className={`px-3 py-1 rounded-full text-sm ${
-              filter === s ? 'bg-black text-white' : 'bg-neutral-100'
+            className={`${BTN_COMPACT} capitalize ${
+              filter === s ? 'ring-2 ring-black ring-offset-1 opacity-100' : 'opacity-70'
             }`}
           >
             {s}
@@ -270,7 +254,7 @@ export function EventGuestManager({
         <button
           type="button"
           onClick={() => runAction('promote_waitlist')}
-          className="px-3 py-1 rounded-full text-sm border"
+          className={BTN_COMPACT}
         >
           Promote next waitlist
         </button>
@@ -317,43 +301,45 @@ export function EventGuestManager({
                     )}
                   </td>
                   <td className="p-3 font-mono text-xs">{g.checkInCode || '—'}</td>
-                  <td className="p-3 space-x-2 whitespace-nowrap">
-                    {g.status === 'pending' && (
-                      <>
+                  <td className="p-3">
+                    <div className={ACTION_ROW}>
+                      {g.status === 'pending' && (
+                        <>
+                          <button
+                            type="button"
+                            className={BTN_COMPACT}
+                            onClick={() => runAction('approve', g.id)}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            className={BTN_COMPACT}
+                            onClick={() => runAction('reject', g.id)}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {g.status === 'confirmed' && !g.checkedInAt && (
                         <button
                           type="button"
-                          className="underline text-xs"
-                          onClick={() => runAction('approve', g.id)}
+                          className={BTN_COMPACT}
+                          onClick={() => runAction('checkin', g.id)}
                         >
-                          Approve
+                          Check in
                         </button>
+                      )}
+                      {g.checkedInAt && (
                         <button
                           type="button"
-                          className="underline text-xs text-red-600"
-                          onClick={() => runAction('reject', g.id)}
+                          className={BTN_COMPACT}
+                          onClick={() => runAction('uncheckin', g.id)}
                         >
-                          Reject
+                          Undo
                         </button>
-                      </>
-                    )}
-                    {g.status === 'confirmed' && !g.checkedInAt && (
-                      <button
-                        type="button"
-                        className="underline text-xs"
-                        onClick={() => runAction('checkin', g.id)}
-                      >
-                        Check in
-                      </button>
-                    )}
-                    {g.checkedInAt && (
-                      <button
-                        type="button"
-                        className="underline text-xs"
-                        onClick={() => runAction('uncheckin', g.id)}
-                      >
-                        Undo
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

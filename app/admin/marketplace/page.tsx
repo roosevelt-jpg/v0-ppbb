@@ -9,6 +9,14 @@ import { adminApiFetch } from '@/lib/admin-api-client'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { CheckCircle2, Trash2, Star, Tag, Plus, X, Upload, Loader2 } from 'lucide-react'
+import {
+  ACTION_ROW,
+  BUTTON_LABEL_COMPACT,
+  BUTTON_PRIMARY,
+  BUTTON_ROW_COMPACT,
+  FILTER_PILL_ACTIVE,
+  FILTER_PILL_INACTIVE,
+} from '@/lib/admin-design-system'
 
 type OfferRow = {
   id: string
@@ -281,25 +289,21 @@ export default function AdminMarketplacePage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center justify-between">
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 items-center justify-between">
+          <div className="flex flex-wrap gap-1.5">
             <button
               type="button"
               onClick={() => setSection('offers')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white ${
-                section === 'offers' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
-              }`}
+              className={section === 'offers' ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
             >
               Offers
             </button>
             <button
               type="button"
               onClick={() => setSection('discounts')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] inline-flex items-center gap-2 bg-black text-white ${
-                section === 'discounts' ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
-              }`}
+              className={`${section === 'discounts' ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE} gap-1`}
             >
-              <Tag size={16} />
+              <Tag />
               Discounts
             </button>
           </div>
@@ -307,9 +311,9 @@ export default function AdminMarketplacePage() {
             <button
               type="button"
               onClick={() => setShowCreate((v) => !v)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white"
+              className={`${BUTTON_PRIMARY} gap-1`}
             >
-              {showCreate ? <X size={16} /> : <Plus size={16} />}
+              {showCreate ? <X /> : <Plus />}
               {showCreate ? 'Cancel' : 'Add PB product'}
             </button>
           )}
@@ -406,18 +410,18 @@ export default function AdminMarketplacePage() {
                     <button
                       type="button"
                       onClick={() => setCreateForm((f) => ({ ...f, imageURL: '' }))}
-                      className="absolute top-2 right-2 inline-flex items-center gap-1 min-h-[36px] px-3 rounded-lg bg-black text-white text-xs font-semibold"
+                      className={`${BUTTON_ROW_COMPACT} absolute top-2 right-2 gap-0.5`}
                     >
-                      <X size={14} />
+                      <X />
                       Remove
                     </button>
                   </div>
                 ) : null}
-                <label className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-lg bg-black text-white text-sm font-semibold cursor-pointer hover:bg-neutral-900 disabled:opacity-50">
+                <label className={BUTTON_LABEL_COMPACT}>
                   {uploadingImage ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 className="animate-spin" />
                   ) : (
-                    <Upload size={16} />
+                    <Upload />
                   )}
                   {uploadingImage
                     ? 'Uploading…'
@@ -445,23 +449,21 @@ export default function AdminMarketplacePage() {
             <button
               type="submit"
               disabled={creating || uploadingImage}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-black text-white text-sm font-semibold disabled:opacity-50 min-h-[44px]"
+              className={`${BUTTON_PRIMARY} gap-1`}
             >
-              <Plus size={16} />
+              <Plus />
               {creating ? 'Creating…' : 'Create PB product'}
             </button>
           </form>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {(['all', 'pending_approval', 'published', 'pb'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[44px] bg-black text-white ${
-                filter === tab ? 'ring-2 ring-offset-1 ring-black' : 'opacity-70'
-              }`}
+              className={filter === tab ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
             >
               {tab === 'all'
                 ? 'All'
@@ -495,13 +497,13 @@ export default function AdminMarketplacePage() {
                       {' · '}
                       <span className="capitalize">{(row.status || '').replace(/_/g, ' ')}</span>
                     </p>
-                    <div className="flex flex-wrap gap-2 pt-1">
+                    <div className={`${ACTION_ROW} flex-wrap gap-1 pt-1`}>
                       {isPending && (
                         <button
                           type="button"
                           disabled={actingId === row.id}
                           onClick={() => runDiscountAction(row.id, 'approve')}
-                          className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                          className={BUTTON_ROW_COMPACT}
                         >
                           Approve
                         </button>
@@ -512,7 +514,7 @@ export default function AdminMarketplacePage() {
                         onClick={() => {
                           if (confirm('Remove this discount?')) void runDiscountAction(row.id, 'remove')
                         }}
-                        className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                        className={BUTTON_ROW_COMPACT}
                       >
                         Remove
                       </button>
@@ -546,15 +548,15 @@ export default function AdminMarketplacePage() {
                         </td>
                         <td className="px-4 py-3 text-sm capitalize">{(row.status || '').replace(/_/g, ' ')}</td>
                         <td className="px-4 py-3 text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className={`${ACTION_ROW} justify-end`}>
                             {isPending && (
                               <button
                                 type="button"
                                 disabled={actingId === row.id}
                                 onClick={() => runDiscountAction(row.id, 'approve')}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                                className={`${BUTTON_ROW_COMPACT} gap-0.5`}
                               >
-                                <CheckCircle2 size={14} />
+                                <CheckCircle2 />
                                 Approve
                               </button>
                             )}
@@ -564,9 +566,9 @@ export default function AdminMarketplacePage() {
                               onClick={() => {
                                 if (confirm('Remove this discount?')) void runDiscountAction(row.id, 'remove')
                               }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                              className={`${BUTTON_ROW_COMPACT} gap-0.5`}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 />
                               Remove
                             </button>
                           </div>
@@ -594,13 +596,13 @@ export default function AdminMarketplacePage() {
                   <p className="text-sm capitalize">
                     {offer.type || offer.category} · {offer.price != null ? `AED ${offer.price}` : '—'} · {status.replace(/_/g, ' ')}
                   </p>
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className={`${ACTION_ROW} flex-wrap gap-1 pt-1`}>
                     {isPending && (
                       <button
                         type="button"
                         disabled={actingId === offer.id}
                         onClick={() => runAction(offer.id, 'approve')}
-                        className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                        className={BUTTON_ROW_COMPACT}
                       >
                         Approve
                       </button>
@@ -609,7 +611,7 @@ export default function AdminMarketplacePage() {
                       type="button"
                       disabled={actingId === offer.id}
                       onClick={() => runAction(offer.id, 'feature')}
-                      className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                      className={BUTTON_ROW_COMPACT}
                     >
                       {offer.isFeatured ? 'Unfeature' : 'Feature'}
                     </button>
@@ -621,7 +623,7 @@ export default function AdminMarketplacePage() {
                           void runAction(offer.id, 'remove')
                         }
                       }}
-                      className="min-h-[44px] px-3 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                      className={BUTTON_ROW_COMPACT}
                     >
                       Remove
                     </button>
@@ -658,15 +660,15 @@ export default function AdminMarketplacePage() {
                       <td className="px-4 py-3 text-sm capitalize">{status.replace(/_/g, ' ')}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{formatDate(offer.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className={`${ACTION_ROW} justify-end`}>
                           {isPending && (
                             <button
                               type="button"
                               disabled={actingId === offer.id}
                               onClick={() => runAction(offer.id, 'approve')}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                              className={`${BUTTON_ROW_COMPACT} gap-0.5`}
                             >
-                              <CheckCircle2 size={14} />
+                              <CheckCircle2 />
                               Approve
                             </button>
                           )}
@@ -674,9 +676,9 @@ export default function AdminMarketplacePage() {
                             type="button"
                             disabled={actingId === offer.id}
                             onClick={() => runAction(offer.id, 'feature')}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                            className={`${BUTTON_ROW_COMPACT} gap-0.5`}
                           >
-                            <Star size={14} />
+                            <Star />
                             {offer.isFeatured ? 'Unfeature' : 'Feature'}
                           </button>
                           <button
@@ -687,19 +689,19 @@ export default function AdminMarketplacePage() {
                                 void runAction(offer.id, 'remove')
                               }
                             }}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded text-xs font-medium disabled:opacity-50"
+                            className={`${BUTTON_ROW_COMPACT} gap-0.5`}
                           >
-                            <Trash2 size={14} />
-                            Remove
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                            <Trash2 />
+                              Remove
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
       </div>

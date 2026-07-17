@@ -341,13 +341,12 @@ input[type='checkbox'] {
   }
 
   button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn) {
-    @apply px-5 rounded-xl font-semibold text-sm active:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
+    @apply px-3 rounded-md font-semibold text-xs active:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md;
     font-family: var(--pb-font-button, var(--font-body));
     background-color: var(--pb-color-button-bg, #111111);
     color: var(--pb-color-button-text, #ffffff);
-    font-size: 13px;
-    /* REMOVED h-10 — let height be natural */
-    min-height: 36px;
+    font-size: 12px;
+    min-height: 28px;
   }
 
   button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-compact-btn):not(.pb-rating-btn):hover {
@@ -356,12 +355,17 @@ input[type='checkbox'] {
 
   /* Compact icon / rating controls — opt out of global CTA chrome */
   button.pb-compact-btn,
-  button.pb-rating-btn {
+  button.pb-rating-btn,
+  label.pb-compact-btn {
     min-height: 0 !important;
     min-width: 0 !important;
-    padding: 0;
     box-shadow: none !important;
     font-weight: 600;
+  }
+
+  button.pb-compact-btn,
+  button.pb-rating-btn {
+    padding: 0;
   }
 
   a.pb-compact-btn {
@@ -373,16 +377,21 @@ input[type='checkbox'] {
 
   button.pb-compact-btn:hover,
   button.pb-rating-btn:hover,
-  a.pb-compact-btn:hover {
+  a.pb-compact-btn:hover,
+  label.pb-compact-btn:hover {
     box-shadow: none !important;
   }
 
   /* Admin link-buttons: force black bg / white text when using compact classes */
-  a.pb-compact-btn.bg-black {
+  a.pb-compact-btn.bg-black,
+  label.pb-compact-btn.bg-black,
+  button.pb-compact-btn.bg-black {
     background-color: #111111 !important;
     color: #ffffff !important;
   }
-  a.pb-compact-btn.bg-black:hover {
+  a.pb-compact-btn.bg-black:hover,
+  label.pb-compact-btn.bg-black:hover,
+  button.pb-compact-btn.bg-black:hover {
     background-color: #262626 !important;
     color: #ffffff !important;
   }
