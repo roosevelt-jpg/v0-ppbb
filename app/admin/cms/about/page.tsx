@@ -390,7 +390,7 @@ export default function AdminCmsAboutPage() {
                   <button
                     type="button"
                     onClick={() => removeParagraph(i)}
-                    className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 bg-red-600 text-white rounded"
+                    className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 bg-black text-white rounded inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                     aria-label="Remove paragraph"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -561,7 +561,7 @@ export default function AdminCmsAboutPage() {
                     type="button"
                     onClick={() => moveDifferentiator(i, 'up')}
                     disabled={i === 0}
-                    className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                    className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                     aria-label="Move up"
                   >
                     <ChevronUp className="w-4 h-4" />
@@ -570,7 +570,7 @@ export default function AdminCmsAboutPage() {
                     type="button"
                     onClick={() => moveDifferentiator(i, 'down')}
                     disabled={i === config.values.differentiators.length - 1}
-                    className="flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none"
+                    className="flex items-center justify-center pb-compact-btn h-6 w-6 min-h-0 min-w-0 p-0 rounded bg-black text-white hover:bg-neutral-800 disabled:opacity-40 shadow-none inline-flex items-center justify-center [&_svg]:h-3 [&_svg]:w-3"
                     aria-label="Move down"
                   >
                     <ChevronDown className="w-4 h-4" />

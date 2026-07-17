@@ -735,7 +735,7 @@ export default function SponsorsCrmPage() {
                           <button
                             type="button"
                             onClick={() => openEdit(row)}
-                            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded bg-white text-black border border-neutral-300"
+                            className="pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 rounded bg-black text-white [&_svg]:h-3 [&_svg]:w-3"
                             aria-label="Edit"
                           >
                             <Pencil className="w-4 h-4" />
@@ -743,7 +743,7 @@ export default function SponsorsCrmPage() {
                           <button
                             type="button"
                             onClick={() => handleDelete(row)}
-                            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded bg-red-600 text-white"
+                            className="pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 rounded bg-black text-white [&_svg]:h-3 [&_svg]:w-3"
                             aria-label="Delete"
                           >
                             <Trash2 className="w-4 h-4" />

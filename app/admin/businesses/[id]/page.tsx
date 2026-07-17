@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { ArrowLeft, Building, CheckCircle, AlertCircle, Mail, Phone, MapPin } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_BACK } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function BusinessDetailPage() {
@@ -88,8 +88,8 @@ export default function BusinessDetailPage() {
   if (error && !business) {
     return (
       <div className="min-h-screen bg-neutral-50 p-8">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
-          <ArrowLeft className="w-4 h-4" /> Back
+        <button type="button" onClick={() => router.back()} className={`${BUTTON_BACK} mb-4`}>
+          <ArrowLeft /> Back
         </button>
         <Card className="p-8 border-red-200 bg-red-50 border-2">
           <div className="flex items-center gap-3">
@@ -106,8 +106,8 @@ export default function BusinessDetailPage() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="p-8">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
-          <ArrowLeft className="w-4 h-4" /> Back to Businesses
+        <button type="button" onClick={() => router.back()} className={`${BUTTON_BACK} mb-6`}>
+          <ArrowLeft /> Back to Businesses
         </button>
 
         <div className="max-w-4xl">
@@ -279,6 +279,7 @@ export default function BusinessDetailPage() {
 
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={saving}
                 className={`${BUTTON_PRIMARY} flex-1`}
@@ -286,8 +287,9 @@ export default function BusinessDetailPage() {
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
               <button
+                type="button"
                 onClick={() => router.back()}
-                className={`${BUTTON_SECONDARY} flex-1`}
+                className={`${BUTTON_PRIMARY} flex-1`}
               >
                 Cancel
               </button>

@@ -364,9 +364,27 @@ input[type='checkbox'] {
     font-weight: 600;
   }
 
-  button.pb-compact-btn:hover,
-  button.pb-rating-btn:hover {
+  a.pb-compact-btn {
+    min-height: 0 !important;
     box-shadow: none !important;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  button.pb-compact-btn:hover,
+  button.pb-rating-btn:hover,
+  a.pb-compact-btn:hover {
+    box-shadow: none !important;
+  }
+
+  /* Admin link-buttons: force black bg / white text when using compact classes */
+  a.pb-compact-btn.bg-black {
+    background-color: #111111 !important;
+    color: #ffffff !important;
+  }
+  a.pb-compact-btn.bg-black:hover {
+    background-color: #262626 !important;
+    color: #ffffff !important;
   }
 
   button:not([data-slot='button']):not([data-dashboard-control]):not([data-menu-item]):disabled { @apply opacity-50 cursor-not-allowed; }

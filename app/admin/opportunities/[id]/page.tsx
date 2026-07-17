@@ -15,6 +15,7 @@ import {
 import { JobApplication } from '@/lib/types'
 import { normalizeOpportunityFromJob } from '@/lib/opportunity-utils'
 import { ArrowLeft, Download } from 'lucide-react'
+import { BUTTON_BACK } from '@/lib/admin-design-system'
 
 async function adminFetch(path: string, options?: RequestInit) {
   const token = await auth.currentUser?.getIdToken()
@@ -108,9 +109,9 @@ export default function AdminOpportunityDetailPage() {
     <AdminPageLayout title="Opportunity Detail" description="Review job posting and applications">
       <Link
         href="/admin/opportunities"
-        className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-900 mb-6"
+        className={`${BUTTON_BACK} mb-6`}
       >
-        <ArrowLeft className="w-4 h-4" /> Back to All Opportunities
+        <ArrowLeft /> Back to All Opportunities
       </Link>
 
       {loading ? (

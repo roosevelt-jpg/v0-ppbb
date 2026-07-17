@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { Plus, Edit2, Archive, Users, Layers } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { BUTTON_PRIMARY, BUTTON_ROW_COMPACT } from '@/lib/admin-design-system'
 
 export default function CommunitiesPage() {
   const [communities, setCommunities] = useState<any[]>([])
@@ -75,19 +76,19 @@ export default function CommunitiesPage() {
           </div>
           <Link
             href="/admin/communities/messages"
-            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50 transition"
+            className={BUTTON_ROW_COMPACT}
           >
             Messages
           </Link>
           <Link
             href="/admin/communities/approvals"
-            className="flex items-center gap-2 px-4 py-2 bg-white text-black border border-black rounded-lg hover:bg-neutral-50 transition"
+            className={BUTTON_ROW_COMPACT}
           >
             Approvals
           </Link>
           <Link
             href="/admin/communities/create"
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+            className={BUTTON_PRIMARY}
           >
             <Plus className="w-4 h-4" />
             Create Community

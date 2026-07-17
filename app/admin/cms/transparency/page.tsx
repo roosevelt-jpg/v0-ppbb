@@ -14,7 +14,7 @@ import { Save, CheckCircle2, AlertCircle, Plus, Trash2, ExternalLink } from 'luc
 const btnPrimary =
   'inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 shadow-none min-h-[36px]'
 const btnIcon =
-  'inline-flex items-center justify-center p-2 bg-black !text-white rounded-lg hover:bg-neutral-900 shadow-none min-h-[44px] min-w-[44px]'
+  'pb-compact-btn inline-flex items-center justify-center h-6 w-6 p-0 bg-black !text-white rounded-md hover:bg-neutral-900 shadow-none min-h-0 min-w-0 [&_svg]:h-3 [&_svg]:w-3'
 
 export default function AdminCmsTransparencyPage() {
   const [config, setConfig] = useState<TransparencyConfig>(DEFAULT_TRANSPARENCY_CONFIG)

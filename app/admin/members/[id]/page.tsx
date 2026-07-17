@@ -8,6 +8,7 @@ import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
 import { AdminUserProfileSummary } from '@/components/admin-user-profile-summary'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
+import { BUTTON_BACK } from '@/lib/admin-design-system'
 
 const NOT_PROVIDED = 'Not provided'
 
@@ -114,8 +115,13 @@ export default function AdminMemberDetailPage() {
   if (!member) {
     return (
       <div style={{ padding: '2rem' }}>
-        <button onClick={() => router.back()} style={{ marginBottom: '1rem', padding: '0.5rem 1rem', backgroundColor: '#f7f6f2', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ArrowLeft size={16} /> Back
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className={BUTTON_BACK}
+          style={{ marginBottom: '1rem' }}
+        >
+          <ArrowLeft /> Back
         </button>
         <div style={{ padding: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem' }}>
           <AlertCircle size={20} style={{ color: '#dc2626' }} />
@@ -127,8 +133,13 @@ export default function AdminMemberDetailPage() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <button onClick={() => router.back()} style={{ marginBottom: '1.5rem', padding: '0.5rem 1rem', backgroundColor: '#f7f6f2', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
-        <ArrowLeft size={18} /> Back to Members
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className={BUTTON_BACK}
+        style={{ marginBottom: '1.5rem' }}
+      >
+        <ArrowLeft /> Back to Members
       </button>
 
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem', color: '#111' }}>

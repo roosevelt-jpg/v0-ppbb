@@ -37,18 +37,21 @@ export const ADMIN_RADIUS = {
 // Button styles
 export const BUTTON_BASE = 'inline-flex items-center justify-center font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
 export const BUTTON_PRIMARY = `${BUTTON_BASE} bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 px-4 py-2 rounded-lg`
-export const BUTTON_SECONDARY = `${BUTTON_BASE} bg-white text-black border border-black hover:bg-neutral-50 active:bg-neutral-100 px-4 py-2 rounded-lg`
+/** Same black / white treatment — no white secondary CTAs in admin */
+export const BUTTON_SECONDARY = BUTTON_PRIMARY
 export const BUTTON_DANGER = `${BUTTON_BASE} bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 px-4 py-2 rounded-lg`
 /** Icon-only table actions — black primary (compact) */
-export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 p-0 rounded-md bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
+export const BUTTON_ICON_PRIMARY = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center h-6 w-6 min-h-0 min-w-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
 /** Icon-only table actions — same black style (delete/archive included) */
 export const BUTTON_ICON_DANGER = BUTTON_ICON_PRIMARY
 /** Compact icon actions for table rows (Edit / Archive / Delete on one line) */
 export const BUTTON_ICON_COMPACT = BUTTON_ICON_PRIMARY
 /** Compact text actions for table rows */
-export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center gap-0.5 h-6 min-h-0 px-2 text-[11px] font-semibold rounded-md bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none whitespace-nowrap shrink-0`
+export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center gap-0.5 h-6 min-h-0 px-2 text-[11px] font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none whitespace-nowrap shrink-0 [&_svg]:text-white [&_svg]:h-3 [&_svg]:w-3`
 /** Keep Edit/Archive/Delete on one horizontal line */
 export const ACTION_ROW = 'flex flex-nowrap items-center gap-0.5 whitespace-nowrap'
+/** Compact back / navigation control */
+export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1.5 h-8 min-h-0 px-3 text-xs font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-3.5 [&_svg]:w-3.5`
 /** Filter / tab pills */
 export const FILTER_PILL_ACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-black text-white border border-black'
 export const FILTER_PILL_INACTIVE = 'px-4 py-2 rounded-lg font-medium transition text-sm whitespace-nowrap bg-white text-black border border-black hover:bg-neutral-50'

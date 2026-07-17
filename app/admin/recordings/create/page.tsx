@@ -6,7 +6,7 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, ArrowLeft, Loader2, X } from 'lucide-react'
 import Link from 'next/link'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_BACK } from '@/lib/admin-design-system'
 
 interface RecordingFormData {
   title: string
@@ -101,8 +101,8 @@ export default function CreateRecordingPage() {
 
   return (
     <div className="w-full">
-      <Link href="/admin/recordings" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
-        <ArrowLeft size={20} />
+      <Link href="/admin/recordings" className={`${BUTTON_BACK} mb-6`}>
+        <ArrowLeft />
         Back to Recordings
       </Link>
 

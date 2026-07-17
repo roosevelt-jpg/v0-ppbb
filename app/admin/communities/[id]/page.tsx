@@ -7,11 +7,17 @@ import Link from 'next/link'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { subscribeToCommunity, subscribeToCommunityGroups, deleteGroup } from '@/lib/community-queries'
 import type { Community, Group } from '@/lib/community-types'
-import { ChevronLeft, Plus, Trash2, Edit2, Users, Shield, Layers, MessageCircle } from 'lucide-react'
+import { ChevronLeft, Plus, Trash2, Edit2, Shield, Layers, MessageCircle } from 'lucide-react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import { genderRestrictionLabel } from '@/lib/community-governance'
+import {
+  ACTION_ROW,
+  BUTTON_BACK,
+  BUTTON_PRIMARY,
+  BUTTON_ROW_COMPACT,
+} from '@/lib/admin-design-system'
 
 type CommunityMemberRow = {
   id: string
@@ -119,8 +125,8 @@ export default function AdminCommunityDetailPage() {
   return (
     <AdminPageLayout title={community.name} subtitle={`${groups.length} groups · ${community.memberCount} members`}>
       <div className="space-y-6">
-        <Link href="/admin/communities" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900">
-          <ChevronLeft size={20} />
+        <Link href="/admin/communities" className={BUTTON_BACK}>
+          <ChevronLeft />
           Back to Communities
         </Link>
 
@@ -138,31 +144,31 @@ export default function AdminCommunityDetailPage() {
           </div>
           <Link
             href={`/admin/communities/create?id=${communityId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+            className={BUTTON_PRIMARY}
           >
-            <Edit2 size={18} />
+            <Edit2 size={18} className="inline mr-1" />
             Edit
           </Link>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className={`${ACTION_ROW} gap-1.5 flex-wrap`}>
           <Link
             href={`/admin/communities/${communityId}/groups`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
+            className={BUTTON_ROW_COMPACT}
           >
-            <Layers size={18} />
+            <Layers />
             Manage Groups
           </Link>
           <Link
             href={`/admin/communities/${communityId}/groups/create`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50"
+            className={BUTTON_ROW_COMPACT}
           >
-            <Plus size={18} />
+            <Plus />
             Create Group
           </Link>
           <Link
             href={`/communities/${communityId}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-neutral-50"
+            className={BUTTON_ROW_COMPACT}
           >
             View public page
           </Link>
@@ -187,27 +193,27 @@ export default function AdminCommunityDetailPage() {
                     {genderRestrictionLabel(group.genderRestriction)} · {group.memberCount} members
                     {group.requiresApproval ? ' · approval required' : ''}
                   </p>
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className={ACTION_ROW}>
                     <Link
                       href={`/admin/communities/${communityId}/groups/${group.id}/edit`}
-                      className="text-sm text-black underline flex items-center gap-1"
+                      className={BUTTON_ROW_COMPACT}
                     >
-                      <Edit2 size={14} />
+                      <Edit2 />
                       Edit
                     </Link>
                     <Link
                       href={`/communities/${communityId}/groups/${group.id}`}
-                      className="text-sm text-black underline flex items-center gap-1"
+                      className={BUTTON_ROW_COMPACT}
                     >
-                      <MessageCircle size={14} />
+                      <MessageCircle />
                       Open chat
                     </Link>
                     <button
                       type="button"
                       onClick={() => handleDeleteGroup(group.id!)}
-                      className="text-sm text-red-700 flex items-center gap-1"
+                      className={BUTTON_ROW_COMPACT}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 />
                       Delete
                     </button>
                   </div>
@@ -231,14 +237,14 @@ export default function AdminCommunityDetailPage() {
                 <p className="font-medium">{member.userName || 'Member'}</p>
                 <p className="text-sm text-gray-500">{member.userEmail}</p>
               </div>
-              <div className="flex gap-2">
+              <div className={ACTION_ROW}>
                 {member.memberStatus === 'active' ? (
                   <>
                     <button
                       type="button"
                       disabled={moderatingId === member.id}
                       onClick={() => handleModerateMember(member, 'suspend')}
-                      className="px-3 py-1 text-sm border rounded-lg"
+                      className={BUTTON_ROW_COMPACT}
                     >
                       Suspend
                     </button>
@@ -246,7 +252,7 @@ export default function AdminCommunityDetailPage() {
                       type="button"
                       disabled={moderatingId === member.id}
                       onClick={() => handleModerateMember(member, 'ban')}
-                      className="px-3 py-1 text-sm border border-red-300 text-red-700 rounded-lg"
+                      className={BUTTON_ROW_COMPACT}
                     >
                       Ban
                     </button>
@@ -256,7 +262,7 @@ export default function AdminCommunityDetailPage() {
                     type="button"
                     disabled={moderatingId === member.id}
                     onClick={() => handleModerateMember(member, 'restore')}
-                    className="px-3 py-1 text-sm border rounded-lg"
+                    className={BUTTON_ROW_COMPACT}
                   >
                     Restore
                   </button>

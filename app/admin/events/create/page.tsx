@@ -16,6 +16,7 @@ import {
 import type { EventTag, GenderRestriction } from '@/lib/types'
 import type { EventCoupon, EventRecurrence, EventStatus, TicketType } from '@/lib/event-types'
 import { EventHostingFields } from '@/components/events/event-hosting-fields'
+import { BUTTON_BACK, BUTTON_PRIMARY } from '@/lib/admin-design-system'
 import {
   subscribeToEventsConfig,
   DEFAULT_EVENTS_CONFIG,
@@ -365,8 +366,8 @@ function CreateEventForm() {
 
   return (
     <div className="w-full">
-      <Link href="/admin/events" className="flex items-center gap-2 text-black mb-6 hover:text-gray-700">
-        <ArrowLeft size={20} />
+      <Link href="/admin/events" className={`${BUTTON_BACK} mb-6`}>
+        <ArrowLeft />
         Back to Events
       </Link>
 
@@ -780,7 +781,7 @@ function CreateEventForm() {
             <button
               type="button"
               onClick={() => router.push('/admin/events')}
-              className="flex-1 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 flex items-center justify-center gap-2 min-h-[44px]"
+              className={`${BUTTON_PRIMARY} flex-1`}
             >
               Cancel
             </button>

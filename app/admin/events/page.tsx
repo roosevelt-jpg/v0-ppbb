@@ -10,6 +10,11 @@ import { Plus, Trash2, Edit2, CheckCircle, AlertCircle, XCircle, Eye } from 'luc
 import type { Event, EventStatus } from '@/lib/event-types'
 import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
 import { toEventDate, getEventLocationLabel } from '@/lib/event-utils'
+import {
+  ACTION_ROW,
+  BUTTON_ICON_COMPACT,
+  BUTTON_ROW_COMPACT,
+} from '@/lib/admin-design-system'
 
 type TabType = 'all' | 'pending_approval' | 'draft' | 'published' | 'changes_requested' | 'rejected' | 'cancelled' | 'completed'
 
@@ -381,25 +386,25 @@ function EventsPageContent() {
                       {event.pricingType === 'free' ? 'Free' : `AED ${event.totalRevenue || 0}`}
                     </td>
                     <td className="px-6 py-3 text-sm">
-                      <div className="flex flex-wrap gap-2">
+                      <div className={ACTION_ROW}>
                         <Link
                           href={`/admin/events/${event.id}/preview`}
-                          className="p-2 bg-black !text-white rounded hover:bg-gray-900 min-h-[36px] min-w-[36px] inline-flex items-center justify-center"
+                          className={BUTTON_ICON_COMPACT}
                           title="Preview"
                         >
-                          <Eye size={16} />
+                          <Eye />
                         </Link>
                         <Link
                           href={`/admin/events/create?id=${event.id}`}
-                          className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px] inline-flex items-center"
+                          className={BUTTON_ROW_COMPACT}
                           title="Edit"
                         >
-                          <Edit2 size={14} className="mr-1" />
+                          <Edit2 />
                           Edit
                         </Link>
                         <Link
                           href={`/admin/events/${event.id}/guests`}
-                          className="px-2 py-1 text-xs bg-black !text-white rounded font-medium hover:bg-gray-900 min-h-[36px] inline-flex items-center"
+                          className={BUTTON_ROW_COMPACT}
                           title="Attendees & Check-in"
                         >
                           Attendees
@@ -409,21 +414,21 @@ function EventsPageContent() {
                             <button
                               type="button"
                               onClick={() => handleApprove(event.id!)}
-                              className="px-2 py-1 text-xs bg-black !text-white rounded font-medium hover:bg-gray-900 min-h-[36px]"
+                              className={BUTTON_ROW_COMPACT}
                             >
                               Approve
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRequestChanges(event.id!)}
-                              className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px]"
+                              className={BUTTON_ROW_COMPACT}
                             >
                               Changes
                             </button>
                             <button
                               type="button"
                               onClick={() => handleReject(event.id!)}
-                              className="px-2 py-1 text-xs bg-red-600 !text-white rounded font-medium hover:bg-red-700 min-h-[36px]"
+                              className={BUTTON_ROW_COMPACT}
                             >
                               Reject
                             </button>
@@ -432,7 +437,7 @@ function EventsPageContent() {
                         {event.status === 'published' && (
                           <Link
                             href={`/admin/events/${event.id}/revenue`}
-                            className="px-2 py-1 text-xs bg-white border border-gray-300 rounded text-black font-medium hover:bg-gray-50 min-h-[36px] inline-flex items-center"
+                            className={BUTTON_ROW_COMPACT}
                             title="View Revenue"
                           >
                             Revenue
@@ -441,10 +446,10 @@ function EventsPageContent() {
                         <button
                           type="button"
                           onClick={() => handleDelete(event.id!)}
-                          className="px-2 py-1 text-xs bg-red-600 !text-white rounded font-medium hover:bg-red-700 min-h-[36px]"
+                          className={BUTTON_ROW_COMPACT}
                           title="Delete"
                         >
-                          <Trash2 size={14} className="inline mr-1" />
+                          <Trash2 />
                           Delete
                         </button>
                       </div>
