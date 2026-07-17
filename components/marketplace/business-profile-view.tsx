@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Briefcase, MessageCircle, Phone, Tag, UserPlus } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
+import { hasBusinessAccess } from '@/lib/roles'
 import { auth } from '@/lib/firebase'
 import {
   isActiveJob,
@@ -133,7 +134,8 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       router.push(`/login?returnUrl=/directory/${businessId}`)
       return
     }
-    router.push(`/dashboard/messages?to=${businessId}`)
+    const inbox = hasBusinessAccess(user) ? '/business/messages' : '/dashboard/messages'
+    router.push(`${inbox}?to=${encodeURIComponent(businessId)}`)
   }
 
   const handleMessage = () => {
@@ -141,7 +143,8 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
       router.push(`/login?returnUrl=/directory/${businessId}`)
       return
     }
-    router.push(`/dashboard/messages?to=${businessId}`)
+    const inbox = hasBusinessAccess(user) ? '/business/messages' : '/dashboard/messages'
+    router.push(`${inbox}?to=${encodeURIComponent(businessId)}`)
   }
 
   const activeOffers = useMemo(() => offers.filter(isActiveOffer), [offers])

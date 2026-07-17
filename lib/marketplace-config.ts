@@ -24,6 +24,8 @@ export interface MarketplacePageConfig {
   benefitsHeadline: string
   benefits: MarketplaceBenefit[]
   membershipImageURL: string
+  /** Image beside the first marketplace hero text block */
+  heroImageURL: string
 }
 
 export interface MarketplacePlatformConfig {
@@ -59,6 +61,7 @@ export const DEFAULT_MARKETPLACE_PAGE_CONFIG: MarketplacePageConfig = {
     },
   ],
   membershipImageURL: '',
+  heroImageURL: '',
 }
 
 export const DEFAULT_MARKETPLACE_CONFIG: MarketplacePlatformConfig = {
@@ -110,6 +113,7 @@ function mergePageConfig(data: unknown): MarketplacePageConfig {
     benefits: mergeBenefits(d.benefits),
     membershipImageURL:
       typeof d.membershipImageURL === 'string' ? d.membershipImageURL : defaults.membershipImageURL,
+    heroImageURL: typeof d.heroImageURL === 'string' ? d.heroImageURL : defaults.heroImageURL,
   }
 }
 

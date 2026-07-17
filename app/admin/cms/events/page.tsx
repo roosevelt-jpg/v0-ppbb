@@ -412,6 +412,73 @@ export default function AdminCmsEventsPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Hero photo gallery</h2>
+          <p className="text-xs text-neutral-500">
+            Previous event images shown as a slideshow beside the Events page hero text (max 12).
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(config.pageConfig.heroGalleryURLs || []).map((url) => (
+              <div key={url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-20 w-28 object-cover rounded border" />
+                <button
+                  type="button"
+                  className="absolute -top-2 -right-2 bg-black text-white rounded-full px-1.5 text-xs"
+                  onClick={() =>
+                    setConfig((p) => ({
+                      ...p,
+                      pageConfig: {
+                        ...p.pageConfig,
+                        heroGalleryURLs: (p.pageConfig.heroGalleryURLs || []).filter((u) => u !== url),
+                      },
+                    }))
+                  }
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <input
+            type="file"
+            accept="image/*,image/gif"
+            multiple
+            onChange={async (e) => {
+              const files = Array.from(e.target.files || [])
+              if (!files.length) return
+              try {
+                const uploaded: string[] = []
+                for (const file of files) {
+                  const fd = new FormData()
+                  fd.append('file', file)
+                  fd.append('folder', 'events/hero-gallery')
+                  const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                  const json = await res.json()
+                  if (!json.success || !json.url) throw new Error(json.error || 'Upload failed')
+                  uploaded.push(json.url)
+                }
+                setConfig((p) => ({
+                  ...p,
+                  pageConfig: {
+                    ...p.pageConfig,
+                    heroGalleryURLs: [...(p.pageConfig.heroGalleryURLs || []), ...uploaded].slice(
+                      0,
+                      12
+                    ),
+                  },
+                }))
+              } catch (err) {
+                setMessage({
+                  type: 'error',
+                  text: err instanceof Error ? err.message : 'Gallery upload failed',
+                })
+              }
+              e.target.value = ''
+            }}
+          />
+        </Card>
+
+        <Card className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Category filter tags</h2>

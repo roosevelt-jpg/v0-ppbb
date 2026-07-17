@@ -89,6 +89,63 @@ export function PartnersPageCopy() {
         </p>
       </section>
 
+      {/* Partnership projects feature block — right after Build alongside us */}
+      <section className="min-w-0 space-y-4">
+        <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground">
+          Featured partnership projects
+        </h2>
+        <p className="font-body text-sm text-muted-foreground max-w-[42rem]">
+          Title, photo, brief, date, location, and partner names — managed in Admin → CMS → Partners.
+        </p>
+        {pc.featuredProjects.length === 0 ? (
+          <p className="text-sm text-neutral-500">Projects will appear here once published by admin.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pc.featuredProjects.map((project) => (
+              <article
+                key={project.id}
+                className="border border-[#e4e1da] rounded-lg overflow-hidden bg-white flex flex-col"
+              >
+                {project.imageURL ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={project.imageURL}
+                    alt=""
+                    className="w-full h-40 object-cover bg-neutral-100"
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-neutral-100" />
+                )}
+                <div className="p-4 space-y-2 flex-1">
+                  <h3 className="font-headline text-lg font-bold text-foreground break-words">
+                    {project.title}
+                  </h3>
+                  {project.brief ? (
+                    <p className="font-body text-sm text-muted-foreground line-clamp-3">{project.brief}</p>
+                  ) : null}
+                  <p className="text-xs text-neutral-500">
+                    {[project.date, project.location].filter(Boolean).join(' · ')}
+                  </p>
+                  {project.partnerNames ? (
+                    <p className="text-xs font-medium text-neutral-700">
+                      Partners: {project.partnerNames}
+                    </p>
+                  ) : null}
+                  {project.ctaHref ? (
+                    <a
+                      href={project.ctaHref}
+                      className="inline-flex mt-2 items-center justify-center min-h-[40px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
+                    >
+                      {project.ctaLabel || 'Learn more'}
+                    </a>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
       <section className="min-w-0 rounded-lg border border-[#e4e1da] bg-[#f7f6f2] p-5 sm:p-8">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.sponsorshipDeckEyebrow}</p>
         <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words">
@@ -177,63 +234,6 @@ export function PartnersPageCopy() {
         headline={pc.trustedBySubLabel}
         description={pc.trustedByDescription}
       />
-
-      {/* Partnership projects feature block */}
-      <section className="min-w-0 space-y-4">
-        <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground">
-          Featured partnership projects
-        </h2>
-        <p className="font-body text-sm text-muted-foreground max-w-[42rem]">
-          Title, photo, brief, date, location, and partner names — managed in Admin → CMS → Partners.
-        </p>
-        {pc.featuredProjects.length === 0 ? (
-          <p className="text-sm text-neutral-500">Projects will appear here once published by admin.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pc.featuredProjects.map((project) => (
-              <article
-                key={project.id}
-                className="border border-[#e4e1da] rounded-lg overflow-hidden bg-white flex flex-col"
-              >
-                {project.imageURL ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={project.imageURL}
-                    alt=""
-                    className="w-full h-40 object-cover bg-neutral-100"
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-neutral-100" />
-                )}
-                <div className="p-4 space-y-2 flex-1">
-                  <h3 className="font-headline text-lg font-bold text-foreground break-words">
-                    {project.title}
-                  </h3>
-                  {project.brief ? (
-                    <p className="font-body text-sm text-muted-foreground line-clamp-3">{project.brief}</p>
-                  ) : null}
-                  <p className="text-xs text-neutral-500">
-                    {[project.date, project.location].filter(Boolean).join(' · ')}
-                  </p>
-                  {project.partnerNames ? (
-                    <p className="text-xs font-medium text-neutral-700">
-                      Partners: {project.partnerNames}
-                    </p>
-                  ) : null}
-                  {project.ctaHref ? (
-                    <a
-                      href={project.ctaHref}
-                      className="inline-flex mt-2 items-center justify-center min-h-[40px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
-                    >
-                      {project.ctaLabel || 'Learn more'}
-                    </a>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   )
 }

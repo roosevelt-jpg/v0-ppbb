@@ -25,6 +25,7 @@ import {
   truncateAtWord,
   mergeCharityCaseLists,
 } from '@/lib/charity-cases'
+import { subscribeToPartnersConfig } from '@/lib/partners-page-config'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +33,15 @@ export default function HomePage() {
   const [causes, setCauses] = useState<CharityCase[]>([])
   const [sponsors, setSponsors] = useState<any[]>([])
   const [news, setNews] = useState<any[]>([])
+  const [partnershipImageURL, setPartnershipImageURL] = useState('')
+
+  useEffect(() => {
+    return subscribeToPartnersConfig((cfg) => {
+      const dedicated = cfg.pageConfig.homepageCtaImageURL?.trim()
+      const fromProject = cfg.pageConfig.featuredProjects.find((p) => p.imageURL)?.imageURL || ''
+      setPartnershipImageURL(dedicated || fromProject)
+    })
+  }, [])
 
   useEffect(() => {
     const unsubscribers: (() => void)[] = []
@@ -208,10 +218,15 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="rounded-lg overflow-hidden border border-[#e4e1da] bg-[#f7f6f2] min-h-[160px] flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/pb-logo-black.png"
+              src={partnershipImageURL || '/images/pb-logo-black.png'}
               alt="Passive Blessings partnership"
-              className="max-h-24 w-auto object-contain opacity-80"
+              className={
+                partnershipImageURL
+                  ? 'w-full h-full min-h-[160px] max-h-56 object-cover'
+                  : 'max-h-24 w-auto object-contain opacity-80'
+              }
             />
           </div>
         </div>

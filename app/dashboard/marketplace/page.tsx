@@ -63,7 +63,7 @@ export default function MarketplacePage() {
           <Card className="p-4 border border-neutral-200 sticky top-4">
             <h3 className="font-bold mb-4 text-neutral-900">Categories</h3>
             <div className="space-y-2">
-              {['all', 'merchandise', 'books', 'courses', 'discounts'].map((cat) => (
+              {['all', 'merchandise', 'books', 'courses', 'technology', 'hr', 'retail', 'other'].map((cat) => (
                 <button
                   key={cat}
                   type="button"

@@ -52,6 +52,8 @@ export interface PartnersPageConfig {
   trustedBySubLabel: string
   trustedByDescription: string
   featuredProjects: PartnersFeaturedProject[]
+  /** Image used beside “Partner with Passive Blessings” on the homepage */
+  homepageCtaImageURL: string
 }
 
 export interface PartnersPlatformConfig {
@@ -119,6 +121,7 @@ export const DEFAULT_PARTNERS_PAGE_CONFIG: PartnersPageConfig = {
   trustedByDescription:
     'A selection of organisations that have supported, sponsored or collaborated with Passive Blessings.',
   featuredProjects: [],
+  homepageCtaImageURL: '',
 }
 
 export const DEFAULT_PARTNERS_CONFIG: PartnersPlatformConfig = {
@@ -242,6 +245,10 @@ function mergePageConfig(data: unknown): PartnersPageConfig {
         ? d.trustedByDescription
         : defaults.trustedByDescription,
     featuredProjects: mergeFeaturedProjects(d.featuredProjects),
+    homepageCtaImageURL:
+      typeof d.homepageCtaImageURL === 'string'
+        ? d.homepageCtaImageURL
+        : defaults.homepageCtaImageURL,
   }
 }
 

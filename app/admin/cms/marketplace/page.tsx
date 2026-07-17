@@ -216,7 +216,44 @@ export default function AdminCmsMarketplacePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">WhatsApp channel URL</label>
+              <label className="block text-sm font-medium mb-1">Hero image (beside text)</label>
+              <p className="text-xs text-neutral-500 mb-2">
+                Shown beside the first marketplace text block. Falls back to membership image if empty.
+              </p>
+              {pc.heroImageURL ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={pc.heroImageURL} alt="" className="h-24 w-40 object-cover rounded border mb-2" />
+              ) : null}
+              <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer hover:bg-neutral-50 text-sm min-h-[44px] w-fit bg-white text-black">
+                <Upload className="w-4 h-4" />
+                {uploading ? 'Uploading…' : 'Upload hero image'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    try {
+                      setUploading(true)
+                      const url = await uploadFileToFirebase(file, 'marketplace/hero')
+                      updatePage('heroImageURL', url)
+                    } catch (err) {
+                      setMessage({
+                        type: 'error',
+                        text: err instanceof Error ? err.message : 'Upload failed',
+                      })
+                    } finally {
+                      setUploading(false)
+                      e.target.value = ''
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">WhatsApp channel URL (unused on public page)</label>
               <input
                 type="url"
                 value={pc.whatsappLink}
@@ -225,8 +262,8 @@ export default function AdminCmsMarketplacePage() {
                 placeholder="https://whatsapp.com/channel/..."
               />
               <p className="text-xs text-neutral-500 mt-1">
-                Powers the black “Join Our Whatsapp” button under the hero. Leave empty to use
-                Global Settings → WhatsApp channel URL.
+                WhatsApp CTA was removed from the public marketplace per feedback; field kept for
+                legacy config only.
               </p>
             </div>
             <div>

@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { Calendar, Clock, MapPin } from 'lucide-react'
+import { Calendar, Clock, MapPin, Mic2 } from 'lucide-react'
 import type { EventsPageConfig, EventsCategory } from '@/lib/events-config'
 import { getCategoryColor, getCategoryName } from '@/lib/events-config'
 import type { NormalizedEvent } from '@/lib/event-utils'
@@ -109,6 +109,19 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
             <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span className="break-words">{event.locationName}</span>
           </div>
+          {Array.isArray(event.speakers) && event.speakers.length > 0 ? (
+            <div className="flex items-start gap-1.5 min-w-0">
+              <Mic2 className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <span className="break-words">
+                {event.speakers
+                  .map((s) => (typeof s === 'string' ? s : s?.name || ''))
+                  .filter(Boolean)
+                  .slice(0, 3)
+                  .join(', ')}
+                {event.speakers.length > 3 ? ` +${event.speakers.length - 3}` : ''}
+              </span>
+            </div>
+          ) : null}
         </div>
 
         {event.tags.length > 0 && (

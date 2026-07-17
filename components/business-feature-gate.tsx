@@ -36,7 +36,12 @@ export function BusinessFeatureLink({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (hasBusinessAccess(user)) {
-      router.push(href)
+      // Already a business member — never send them back to paid join packages
+      const joinBusiness =
+        href.includes('/join?type=business') ||
+        href === '/join?type=business' ||
+        /list\s*your\s*business|join\s*as\s*business|list\s*business/i.test(featureLabel)
+      router.push(joinBusiness ? '/business/profile' : href)
       return
     }
     if (isBasicMember(user) || !user) {

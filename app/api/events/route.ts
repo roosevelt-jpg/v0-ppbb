@@ -382,6 +382,7 @@ export async function PUT(request: NextRequest) {
         'bannerURL',
         'bannerImage',
         'bannerImageUrl',
+        'galleryURLs',
         'locationName',
         'locationAddress',
         'locationPlaceId',
@@ -390,6 +391,20 @@ export async function PUT(request: NextRequest) {
         'category',
         'genderRestriction',
         'tags',
+        'speakers',
+        'agenda',
+        'startTime',
+        'endTime',
+        'timezone',
+        'hostName',
+        'requireApproval',
+        'enableWaitlist',
+        'showGuestList',
+        'pricingType',
+        'price',
+        'currency',
+        'ticketTypes',
+        'maxAttendees',
       ] as const) {
         if (key in sanitized) shared[key] = sanitized[key]
       }

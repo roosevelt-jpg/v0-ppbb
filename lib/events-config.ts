@@ -22,6 +22,8 @@ export interface EventsPageConfig {
   adBannerImageURL?: string
   adBannerHref?: string
   adBannerAlt?: string
+  /** Previous-event photo gallery beside hero copy (slideshow) */
+  heroGalleryURLs?: string[]
 }
 
 export interface EventsCategory {
@@ -62,6 +64,7 @@ export const DEFAULT_EVENTS_CONFIG: EventsPlatformConfig = {
     adBannerImageURL: '',
     adBannerHref: '',
     adBannerAlt: 'Advertisement',
+    heroGalleryURLs: [],
   },
   categories: [
     { id: 'tech', name: 'Tech', color: '#0EA5E9' },
@@ -143,6 +146,9 @@ function mergePageConfig(data: unknown): EventsPageConfig {
       typeof d.adBannerImageURL === 'string' ? d.adBannerImageURL : defaults.adBannerImageURL,
     adBannerHref: typeof d.adBannerHref === 'string' ? d.adBannerHref : defaults.adBannerHref,
     adBannerAlt: typeof d.adBannerAlt === 'string' ? d.adBannerAlt : defaults.adBannerAlt,
+    heroGalleryURLs: Array.isArray(d.heroGalleryURLs)
+      ? d.heroGalleryURLs.map((u) => String(u || '').trim()).filter(Boolean).slice(0, 12)
+      : defaults.heroGalleryURLs || [],
   }
 }
 

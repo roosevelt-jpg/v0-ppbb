@@ -61,11 +61,21 @@ export function MarketplacePageCopy() {
           </BusinessFeatureLink>
         </div>
         <div className="rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 min-h-[200px] flex items-center justify-center">
-          <img
-            src="/images/pb-logo-black.png"
-            alt=""
-            className="max-h-28 w-auto object-contain opacity-80"
-          />
+          {pc.heroImageURL || pc.membershipImageURL ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={pc.heroImageURL || pc.membershipImageURL}
+              alt=""
+              className="w-full h-full min-h-[200px] max-h-72 object-cover"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/images/pb-logo-black.png"
+              alt=""
+              className="max-h-28 w-auto object-contain opacity-80"
+            />
+          )}
         </div>
       </section>
 

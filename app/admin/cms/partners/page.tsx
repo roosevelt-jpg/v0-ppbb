@@ -614,6 +614,39 @@ export default function AdminCmsPartnersPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
+          <h2 className="font-headline text-xl font-bold">Homepage partnership image</h2>
+          <p className="text-xs text-neutral-500">
+            Shown beside “Partner with Passive Blessings” on the homepage. Falls back to the first
+            featured project image if empty.
+          </p>
+          <input
+            type="url"
+            value={pc.homepageCtaImageURL || ''}
+            onChange={(e) => updatePage('homepageCtaImageURL', e.target.value)}
+            className="w-full min-h-[44px] px-3 border rounded-lg"
+            placeholder="https://… image URL"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (e) => {
+              const file = e.target.files?.[0]
+              if (!file) return
+              try {
+                const url = await uploadFileToFirebase(file, 'partners/homepage-cta')
+                updatePage('homepageCtaImageURL', url)
+              } catch (err) {
+                setMessage({
+                  type: 'error',
+                  text: err instanceof Error ? err.message : 'Upload failed',
+                })
+              }
+              e.target.value = ''
+            }}
+          />
+        </Card>
+
+        <Card className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Featured partnership projects</h2>

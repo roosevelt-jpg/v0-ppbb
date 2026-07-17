@@ -25,6 +25,7 @@ export default function CreateRecordingPage() {
   const [saving, setSaving] = useState(false)
   const [thumbnailPreview, setThumbnailPreview] = useState<string>('')
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [uploadingMedia, setUploadingMedia] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<RecordingFormData>({
@@ -60,6 +61,10 @@ export default function CreateRecordingPage() {
     setError(null)
 
     try {
+      if (!formData.url?.trim()) {
+        throw new Error('Add a recording URL or upload a media file.')
+      }
+
       let thumbnailUrl = formData.thumbnailUrl
       if (thumbnailFile) {
         const fd = new FormData()
@@ -158,18 +163,63 @@ export default function CreateRecordingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Recording URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Recording URL or upload file
+              </label>
               <input
                 type="url"
                 value={formData.url}
                 onChange={(e) => handleChange('url', e.target.value)}
-                placeholder="https://… (YouTube, Vimeo, Drive, audio host)"
+                placeholder="https://… (YouTube, Vimeo, Drive, or leave blank and upload below)"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                required
               />
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <label className="inline-flex items-center gap-2 min-h-[44px] px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium">
+                  <Upload size={16} />
+                  {uploadingMedia ? 'Uploading…' : 'Upload video / audio file'}
+                  <input
+                    type="file"
+                    accept="video/*,audio/*"
+                    className="hidden"
+                    disabled={uploadingMedia}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      if (file.size > 500 * 1024 * 1024) {
+                        setError('Media file is too large. Maximum size is 500 MB.')
+                        e.target.value = ''
+                        return
+                      }
+                      setUploadingMedia(true)
+                      setError(null)
+                      try {
+                        const fd = new FormData()
+                        fd.append('file', file)
+                        fd.append('folder', 'recordings/media')
+                        const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                        const json = await res.json()
+                        if (!json.success) throw new Error(json.error || 'Upload failed')
+                        const url = json.url || json.data?.url
+                        if (!url) throw new Error('Upload succeeded but no URL returned')
+                        handleChange('url', url)
+                        if (file.type.startsWith('audio/')) handleChange('type', 'audio')
+                        else handleChange('type', 'video')
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : 'Media upload failed')
+                      } finally {
+                        setUploadingMedia(false)
+                        e.target.value = ''
+                      }
+                    }}
+                  />
+                </label>
+                {formData.url ? (
+                  <span className="text-xs text-neutral-500 break-all max-w-md">{formData.url}</span>
+                ) : null}
+              </div>
               <p className="text-xs text-neutral-500 mt-1">
-                Paste a hosted media link (not a local file upload). Thumbnail images must be under 25 MB —
-                oversized uploads show a clear error.
+                Prefer a hosted link for very large files. Direct uploads support up to 500 MB (storage
+                provider limits may apply). Thumbnail images must be under 25 MB.
               </p>
             </div>
 
