@@ -1,0 +1,331 @@
+﻿MaKE SURE YOU MAIN OUR COLORS, THOSE IN THIS DOCUMENT ARE FOR ILLUSTRATION PURPOSES REMEMBER THE BUTTON BG IS ALWAYS BLACK AND BUTTON TEXT IS WHITE, ALSO MAKE SURE THE SPACES IN BETWEEN ARE COMPACT AND NOT WIDE, THAT MAKE IT LOOK NICE
+
+The content for T&amp;Cs, FAQ, CoC, UAE DPC, Privacy Policy, all added in this document:
+
+The pages added in superadmin was not allowing copy pasting the text and creating the pages when previewed shows all text joined together all because the field supports HTML and not text
+
+I want the Contents pasted in the pages to be plain text and not HTML, and admin can be able to Make some titles and subtitles in the page content description bold,italics, or add stylings to the text
+
+OPPORTUNITIES PAGE FEEDBACK:
+
+A. PUBLIC WEB FRONT END
+
+Please add a jobsearch filter, with Location, Role Type, Work Type, Industry Type
+
+Reference: the filter and cards of jobs summary matching
+
+The short job card can show: Company Name + Logo, Job Title, Date Posted, Salary, Role Type, Work Type, Location
+
+When the job card gets clicked, they can see all the details as shared below
+
+Work Opportunity Name
+
+1. Job Title / Opportunity Name:
+
+2. Company / Organization Name: (by default the organization posting)
+
+3. Role Type: Freelance/Full Time/Part Time/ Internship/ Training/ Volunteer/ Contract
+
+4. Work Type: Onsite/Remote/Hybrid
+
+5. Location: (all uae emirates or google links)
+
+6. Key Responsibilities (brief):
+
+7. Requirements / Skills Needed:
+
+8. Salary / Compensation:
+
+9. Suitability: Ladies Only/ Men Only/ Fresh Graduates/ Experienced 5yrs+
+
+10. Application Deadline: (Date)
+
+11. Hiring By: (Date)
+
+12. Industry/Category:
+
+Reference of job details page:
+
+Individual members list when we see directory, and they apply as candidates, should all remain the same look and feel, with the feature to download their CVs
+
+Design Reference: Show: Name, Title, Volunteer Hours, Location, Education Level, Experience Level
+
+B. BUSINESS MEMBER BACKEND
+
+Business members can see all the jobs they posted in the job list and when the view the job they get to see the applicants as references below
+
+Reference of job list
+
+Reference of clicking a job and checking applicants, where they will reject or accept a candidate
+
+C. INDIVIDUAL &amp; BUSINESS MEMBERS BACKEND
+
+Both individuals, business members and public can view the businesses directly like the below with a filter in the directory.
+
+When the business is clicked, the details of the business can be seen and the latest jobs they posted, the latest offer they have posted as products and services, and latest events they listed below the description of the business. Reference Image:
+
+D. SUPER ADMIN BACKEND
+
+For USER TYPE
+
+It is only two types of user in our platform
+
+INDIVIDUAL MEMBERS
+
+They can be volunteers, and join PB team
+
+BUSINESS MEMBERS
+
+They can apply for
+
+AS VENDORS: Business users can only apply for it to serve PBâ€™s events
+
+AS SPONSORS: Business users can requests to sponsors for projects in the causes section of donation
+
+So Iâ€™d not make a separate tab for sponsors, as its the same businesses whoâ€™d be listed in the directory and inquiries section will receive the sponsor requests
+
+The profile of business design should be same as shared above when clicked. However the directory can be short cards of displaying businessâ€™s details, with option for PB to mark them as sponsors if they sponsored our initiatives like a blue tick
+
+Short Card Display: Business Name, Services Offered, Location,
+
+(no contacts details shared to public unless they register as a member in the platform)
+
+Design Reference as shown to public:
+
+ON THE PUBLIC WEB FRONT END:
+
+The header image is overlapped with name of the business.
+
+We want them to contact, however the message is encrypted between the buyer and seller, currently I see that the button is directing to the the super adminâ€™s conversation tab?
+
+For the businessâ€™s page, the DETAILS NEED TO BE (1-5 already added)
+
+Name of the business
+
+Image of the logo
+
+Services Offered as tags
+
+Image Gallery of the Services
+
+Services/Product Listing
+
+Jobs Listed (to be added) by this business
+
+Events Listed (to be added) by this business
+
+For COMMUNICATION:
+
+What is the difference between contact request and contact submissions?
+
+I submitted the partnership inquiry form from the website, but it didnt display or show up in any of these section of request or submission.
+
+Can we consolidate and just keep one of them â€œContact Submissionsâ€, and make categories to display:
+
+Sponsorship/Partnership Inquiries
+
+Other Inquiries
+
+As for Beneficiary request for Charity Support:
+
+I am superadmin and not able to see the documents as Passive blessings?
+
+I also submitted a form, and it isnt appearing here in the requests.
+
+FOR COMMUNITY:
+
+A. SUPER ADMIN BACKEND
+
+The current design can be improved and made intuitive, current the gaps in the chatroom and forum is a bit squeezed.
+
+We need it shown/listed as below under Community Page Tab, SHORT DISPLAY CARDS WITH name of the community + members, category detail,
+
+EVENTS
+
+Public Web End, please add a photo gallery beside the text as slides so we can add previous event images
+
+Also, kindly add a volunteer banner in this page beside the event calendar like the reference below, and link the button to the volunteer form, this is an advertising banner and admin will upload either an image/gif file to be displaying, so it should have an admin backend to upload the banner, even in the Homepage enable a horizontal advertising banner so people or Businesses who want to advertise can submit a request to advertise and pay for it, for admin to upload and advertise is free but for businesses they will be redirected to our enabled payment gateway to make payment.
+
+Let that come in the volunteer tab in the superadmin backend.
+
+Add a filter, and make sure when we create event without needing to approve attendees, it doesnâ€™t show the notification of approval sent when you register.
+
+When there is one event in recurring every week, let any change in one event be reflected in all events in the future if consented.
+
+How does qr/check in works?
+
+In the Public Web Front end of events, please add filter to list it per month or upcoming events
+
+We need to add host of the event, timing displayed here, Location with name : Eg: Abudhabi/Dubai Emirates, Speaker if any,
+
+MARKETPLACE
+
+Could you add image beside the first text block?  CTA Button to link with Join as Business Member and remove the whatsapp button here
+
+Could you move the below block to the end of the page after the directory?
+
+PARTNERSHIP
+
+We have two forms in the same page, one that says start a conversation and the other contact form:
+
+Streamline and keep only the partnership form embedded in this page, and remove the contact form, as there is a separate contact button with the form already.
+
+After BUILD ALONGSIDE US text block, I need to display a block of different projects with title name and photo gallery for partnership based projects to be featured.
+
+One photo or collage with a brief and title about the project and date. Location and partners names.
+
+For approvals, currently the receiving of forms is super confusing
+
+1, there is an approval tab but we cannot view the inquiry, it opens and goes random places, and its a mix of discounts of businesses, business page, etc
+
+2, contact requests are separately listed
+
+3, contact submission again separately listed
+
+4, custom forms shows the submission of forms again but when you view it, its categorises on which stage it is in but it doesn't allow the admin to approve, or reject etc.
+
+I would really make it seamless by just making two tabs:
+
+One that is dedicated to all the forms inquiries submitted, be it partnerships/volunteers/etc
+
+Second that is dedicated to 3 categories: businesses, events, products/services
+
+And remove more than this all tabs.
+
+FRONT PAGE
+
+While we need to add/link a small partnership inquiry section here in the front page after Active Causes:
+
+Additionally the homepage displays 3 Active Causes Card, but there is no button that says â€œView All Causesâ€ which when clicked will take them to the main causes page to see and select which cause to donate to
+
+And add an image beside the text block beside the texts shown below
+
+Big Text:
+
+Partner with Passive Blessings
+
+Please also add a news block, to link to news features
+
+In the footer, please remove the rest and only keep the below:
+
+About us
+
+Impact &amp; Transparency
+
+Events
+
+Marketplace
+
+PBâ€™s Merchandize &gt;&gt; link to shop
+
+Partners &gt;&gt; link to partners page
+
+Community &gt;&gt; link to community groups page
+
+Donate
+
+Volunteer (link to the form)
+
+Charity Support Request (link to the form)
+
+Educational Resources &gt;&gt;link to 1 page with recordings &amp; articles of learning resources
+
+FAQ
+
+Workshops dont need a separate page or tab backend, it will be under events itself
+
+Educational Resources will display recordings and learning resources articles from back end all will be displayed under the same page.
+
+For the header, Keep the tabs:
+
+About Us, Events, Marketplace, Opportunities, Community, Partners
+
+And the buttons when signed in: Drop down of Dashboard with signout and Contact Us
+
+When signed out: Contact and Sign in
+
+The black card, keep the numbers as non static as in the front website.
+
+FOR RECORDING
+
+Error uploading the video files, is there limit on gb? Even after jst publishing with links, cant see the upload
+
+=====================================
+
+BUSINESS ACCOUNT
+
+For network and connections when I click a name and open message
+
+I get redirected to this msg box when i click it, and it shows the old member i messaged and not the new member. And it takes me a to a whole new navigation bar, and I cant go back, and have to go click business portal and again click networks. Loop is broken and confusing.
+
+For networking and events
+
+Start time is mixed with start date
+
+For partnership and request
+
+Keep the form same as partnership form as linked in the front end so that in terms of its field it all remains same, so we receive the inquiries in similar formats.
+
+For communities, I am able to see my community i posted, but i cant see other communities to join or engage. But when i move to member portal under business, i go to join community&gt; explore i can see it and join.
+
+For payments and subscription
+
+I would like to see the renewal dates and months remaining of my paid membership, and invoices
+
+And have the option to stop renewal when i want
+
+When I open membership from member portal i see the two options,
+
+For JOB Gigs posted
+
+The employment type and type is all same. Keep it same field as shared above by super admin.
+
+1. Job Title / Opportunity Name:
+
+2. Company / Organization Name: (by default the organization posting)
+
+3. Role Type: Freelance/Full Time/Part Time/ Internship/ Training/ Volunteer/ Contract
+
+4. Work Type: Onsite/Remote/Hybrid
+
+5. Location: (all uae emirates or google links)
+
+6. Key Responsibilities (brief):
+
+7. Requirements / Skills Needed:
+
+8. Salary / Compensation:
+
+9. Suitability: Ladies Only/ Men Only/ Fresh Graduates/ Experienced 5yrs+
+
+10. Application Deadline: (Date)
+
+11. Hiring By: (Date)
+
+12. Industry/Category:
+
+FOR PRODUCTS/MARKETPLACE
+
+Type and category filters are all same, type is Product or Service
+
+Category is Technology, HR, Retail, Real Estate, Automotive, F&amp;B, Hospitality, Health &amp; Fitness, Consultancy, Business, Other
+
+When i upload the image the below error pops up
+
+As a business profile allow me to add services tags here in the profile
+
+When I see a product in marketplace and click buy now, as many times i click the product gets added multiple times in the cart, and i have no option to remove it from the cart
+
+Keep the filters of the business directory same as mentioned for public website front end above, its not just categories to search business, and when i click list business its taking me to membership paid and unpaid packages, if im in this page you shouldn't be asked since no one can have this dashboard without having paid the membership. Also discounts is not a category.
+
+For certificates, I can only view if its there or not, i am unable to issue myself a certificate like individual members
+
+INDIVIDUAL ACCOUNT
+
+For certificates, I can only view if its there or not, i am unable to issue myself a certificate like individual members. I thought we get to issue ourselves the certificate with autosynced volunteer hours as shown in super admin.
+
+Each event which is listed as charity event, and i confirm my attendance, i get the hours for my certificate.
+
+For volunteering opportunities, it will showcase under this tab all events that is categorised as charity event, and all jobs that is volunteer based
+
+I applied for the job and got the attached error
