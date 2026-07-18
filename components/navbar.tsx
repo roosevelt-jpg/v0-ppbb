@@ -226,10 +226,15 @@ export function Navbar() {
           <button
             type="button"
             className="pb-ghost-btn p-2 -mr-1 text-white min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+            style={{ color: '#ffffff' }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? (
+              <X size={22} color="#ffffff" strokeWidth={2.25} aria-hidden />
+            ) : (
+              <Menu size={22} color="#ffffff" strokeWidth={2.25} aria-hidden />
+            )}
           </button>
         </div>
       </div>
