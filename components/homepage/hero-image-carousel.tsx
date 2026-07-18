@@ -128,18 +128,20 @@ export function HeroImageCarousel({
       <button
         type="button"
         onClick={() => goTo(index - 1)}
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+        className="pb-ghost-btn absolute left-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-full bg-transparent text-white hover:bg-transparent transition-colors"
+        style={{ backgroundColor: 'transparent', color: '#ffffff' }}
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-6 h-6 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]" color="#ffffff" strokeWidth={2.25} />
       </button>
       <button
         type="button"
         onClick={() => goTo(index + 1)}
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+        className="pb-ghost-btn absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center min-h-[44px] min-w-[44px] p-2 rounded-full bg-transparent text-white hover:bg-transparent transition-colors"
+        style={{ backgroundColor: 'transparent', color: '#ffffff' }}
         aria-label="Next slide"
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-6 h-6 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]" color="#ffffff" strokeWidth={2.25} />
       </button>
 
       <div className="absolute bottom-2 sm:bottom-3 left-0 right-0 z-20 flex justify-center items-center gap-1 sm:gap-1.5 pointer-events-none">
@@ -148,12 +150,13 @@ export function HeroImageCarousel({
             key={img.id}
             type="button"
             onClick={() => goTo(i)}
-            className="pointer-events-auto p-1.5 sm:p-2 flex items-center justify-center min-h-[32px] min-w-[32px] sm:min-h-[36px] sm:min-w-[36px]"
+            className="pb-ghost-btn pointer-events-auto p-1.5 sm:p-2 flex items-center justify-center min-h-[32px] min-w-[32px] sm:min-h-[36px] sm:min-w-[36px] bg-transparent"
+            style={{ backgroundColor: 'transparent' }}
             aria-label={`Go to slide ${i + 1}`}
           >
             <span
-              className={`block rounded-full transition-all ${
-                i === index ? 'h-1.5 w-4 sm:w-5 bg-white' : 'h-1.5 w-1.5 bg-white/55 hover:bg-white/80'
+              className={`block rounded-full transition-all shadow-[0_1px_2px_rgba(0,0,0,0.65)] ${
+                i === index ? 'h-1.5 w-4 sm:w-5 bg-white' : 'h-1.5 w-1.5 bg-white/70 hover:bg-white'
               }`}
             />
           </button>
