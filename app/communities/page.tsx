@@ -313,31 +313,31 @@ export default function CommunitiesPage() {
         </div>
 
         {/* Tabs — Suggestions / Popular / My Groups */}
-        <div className="border-b border-[#e4e1da]">
-          <nav className="flex gap-6 sm:gap-8 overflow-x-auto" aria-label="Community lists">
+        <div className="border-b border-[#e4e1da] pb-3">
+          <nav className="flex flex-wrap gap-2 sm:gap-3" aria-label="Community lists">
             {(
               [
                 { id: 'suggestions' as const, label: 'Suggestions' },
                 { id: 'popular' as const, label: 'Popular' },
                 { id: 'mine' as const, label: 'My Groups' },
               ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setListTab(tab.id)}
-                className={`relative pb-3 text-sm sm:text-base font-semibold whitespace-nowrap transition-colors ${
-                  listTab === tab.id
-                    ? 'text-black'
-                    : 'text-neutral-500 hover:text-neutral-800'
-                }`}
-              >
-                {tab.label}
-                {listTab === tab.id ? (
-                  <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-black rounded-full" />
-                ) : null}
-              </button>
-            ))}
+            ).map((tab) => {
+              const active = listTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setListTab(tab.id)}
+                  className={`pb-ghost-btn inline-flex items-center justify-center min-h-[40px] px-4 sm:px-5 py-2 rounded-lg text-sm font-semibold whitespace-nowrap leading-none transition-colors ${
+                    active
+                      ? '!bg-black !text-white hover:!bg-neutral-900'
+                      : '!bg-white !text-neutral-600 border border-[#e4e1da] hover:!bg-neutral-50 hover:!text-black'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
           </nav>
         </div>
 
