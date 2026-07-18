@@ -538,6 +538,23 @@ export default function SignupClient() {
       await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userData))
       await persistBusinessDirectory(firebaseUser.uid, now)
 
+      try {
+        const idToken = await firebaseUser.getIdToken()
+        void fetch('/api/email/welcome', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            accountType: formData.memberType,
+            firstName: formData.firstName,
+          }),
+        })
+      } catch {
+        /* welcome email is best-effort */
+      }
+
       console.log('[v0] User account created successfully:', firebaseUser.uid)
       setCreatedUserId(firebaseUser.uid)
       setError('')
@@ -626,6 +643,8 @@ export default function SignupClient() {
                               key={plan.id}
                               role="button"
                               tabIndex={0}
+                              className="pb-selectable-card"
+                              data-selected={selected ? 'true' : 'false'}
                               onClick={() => selectPlan(plan)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
@@ -633,23 +652,14 @@ export default function SignupClient() {
                                   selectPlan(plan)
                                 }
                               }}
-                              style={{
-                                textAlign: 'left',
-                                padding: '1rem',
-                                border: `2px solid ${selected ? '#111111' : '#e4e1da'}`,
-                                borderRadius: '0.75rem',
-                                backgroundColor: selected ? '#f7f6f2' : '#fff',
-                                cursor: 'pointer',
-                                color: '#111111',
-                              }}
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'flex-start' }}>
-                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                                  {plan.icon ? <span style={{ fontSize: '1.5rem' }}>{plan.icon}</span> : null}
-                                  <div>
-                                    <p style={{ fontWeight: 700, color: '#111', fontSize: '1rem' }}>{plan.name}</p>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
+                                  {plan.icon ? <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{plan.icon}</span> : null}
+                                  <div style={{ minWidth: 0 }}>
+                                    <p style={{ fontWeight: 700, color: '#111', fontSize: '1rem', margin: 0 }}>{plan.name}</p>
                                     {plan.description ? (
-                                      <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', lineHeight: 1.4 }}>
+                                      <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', lineHeight: 1.4, marginBottom: 0 }}>
                                         {plan.description.length > 120
                                           ? `${plan.description.slice(0, 120)}…`
                                           : plan.description}
@@ -658,22 +668,22 @@ export default function SignupClient() {
                                   </div>
                                 </div>
                                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                  <p style={{ fontWeight: 700, fontSize: '1rem', color: '#111' }}>{amount}</p>
-                                  <p style={{ fontSize: '0.7rem', color: '#888' }}>/{period}</p>
+                                  <p style={{ fontWeight: 700, fontSize: '1rem', color: '#111', margin: 0 }}>{amount}</p>
+                                  <p style={{ fontSize: '0.7rem', color: '#888', margin: 0 }}>/{period}</p>
                                 </div>
                               </div>
                               {items.length > 0 && (
-                                <ul style={{ marginTop: '0.75rem', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                <ul style={{ marginTop: '0.75rem', marginBottom: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                   {items.map((item) => (
-                                    <li key={item} style={{ fontSize: '0.75rem', color: '#555', display: 'flex', gap: '0.35rem' }}>
+                                    <li key={item} style={{ fontSize: '0.75rem', color: '#555', display: 'flex', gap: '0.35rem', alignItems: 'flex-start' }}>
                                       <Check size={14} color="#111111" style={{ flexShrink: 0, marginTop: 2 }} />
-                                      {item}
+                                      <span>{item}</span>
                                     </li>
                                   ))}
                                 </ul>
                               )}
                               {selected && (
-                                <p style={{ marginTop: '0.75rem', fontSize: '0.7rem', fontWeight: 700, color: '#111' }}>
+                                <p style={{ marginTop: '0.75rem', marginBottom: 0, fontSize: '0.7rem', fontWeight: 700, color: '#111' }}>
                                   Selected ✓
                                 </p>
                               )}
@@ -1068,6 +1078,8 @@ export default function SignupClient() {
                           key={plan.id}
                           role="button"
                           tabIndex={0}
+                          className="pb-selectable-card"
+                          data-selected={selected ? 'true' : 'false'}
                           onClick={() => selectPlan(plan)}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
@@ -1075,29 +1087,20 @@ export default function SignupClient() {
                               selectPlan(plan)
                             }
                           }}
-                          style={{
-                            textAlign: 'left',
-                            padding: '1rem',
-                            border: `2px solid ${selected ? '#111111' : '#e4e1da'}`,
-                            borderRadius: '0.75rem',
-                            backgroundColor: selected ? '#f7f6f2' : '#fff',
-                            cursor: 'pointer',
-                            color: '#111111',
-                          }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
-                            <div>
-                              <p style={{ fontWeight: 700, color: '#111' }}>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <p style={{ fontWeight: 700, color: '#111', margin: 0 }}>
                                 {plan.icon ? `${plan.icon} ` : ''}
                                 {plan.name}
                               </p>
-                              <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>
+                              <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem', marginBottom: 0 }}>
                                 {getPlanIncludedItems(plan).slice(0, 3).join(' · ') || plan.description || ''}
                               </p>
                             </div>
                             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                              <p style={{ fontWeight: 700 }}>{amount}</p>
-                              <p style={{ fontSize: '0.7rem', color: '#888' }}>/{period}</p>
+                              <p style={{ fontWeight: 700, margin: 0 }}>{amount}</p>
+                              <p style={{ fontSize: '0.7rem', color: '#888', margin: 0 }}>/{period}</p>
                             </div>
                           </div>
                         </div>
@@ -1113,15 +1116,9 @@ export default function SignupClient() {
                   type="button"
                   onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
                   disabled={currentStep === 1 || currentStep === 5 || isLoading || checkingOut}
-                  className="pb-outline-btn"
+                  className="pb-form-nav-btn pb-outline-btn"
                   style={{
                     flex: 1,
-                    height: 'auto',
-                    minHeight: 40,
-                    maxHeight: 'none',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
                     opacity: currentStep === 1 || currentStep === 5 || isLoading || checkingOut ? 0.5 : 1,
                   }}
                 >
@@ -1133,16 +1130,9 @@ export default function SignupClient() {
                     type="button"
                     onClick={() => handleStepChange(currentStep + 1)}
                     disabled={isLoading}
+                    className="pb-form-nav-btn"
                     style={{
                       flex: 1,
-                      padding: '0.75rem',
-                      border: 'none',
-                      backgroundColor: '#111111',
-                      color: '#ffffff',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
                       opacity: isLoading ? 0.7 : 1,
                       display: 'flex',
                       alignItems: 'center',
@@ -1157,16 +1147,9 @@ export default function SignupClient() {
                   <button
                     type="submit"
                     disabled={isLoading}
+                    className="pb-form-nav-btn"
                     style={{
                       flex: 1,
-                      padding: '0.75rem',
-                      border: 'none',
-                      backgroundColor: '#111111',
-                      color: '#ffffff',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
                       opacity: isLoading ? 0.7 : 1,
                       display: 'flex',
                       alignItems: 'center',
@@ -1188,16 +1171,9 @@ export default function SignupClient() {
                     type="button"
                     onClick={handleSubscribe}
                     disabled={checkingOut || !formData.planId}
+                    className="pb-form-nav-btn"
                     style={{
                       flex: 1,
-                      padding: '0.75rem',
-                      border: 'none',
-                      backgroundColor: '#111111',
-                      color: '#ffffff',
-                      borderRadius: '0.375rem',
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
                       opacity: checkingOut || !formData.planId ? 0.7 : 1,
                       display: 'flex',
                       alignItems: 'center',
