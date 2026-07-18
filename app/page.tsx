@@ -16,6 +16,7 @@ import { HomeDonationBanner } from '@/components/homepage/home-donation-banner'
 import { HomeAdvertisingBanner } from '@/components/homepage/home-advertising-banner'
 import { HomeSocialFeeds } from '@/components/homepage/home-social-feeds'
 import { HomeTestimonials } from '@/components/homepage/home-testimonials'
+import { HomeNews } from '@/components/homepage/home-news'
 import { Button } from '@/components/ui/button'
 import { ArrowRight } from 'lucide-react'
 import {
@@ -32,7 +33,6 @@ export const dynamic = 'force-dynamic'
 export default function HomePage() {
   const [causes, setCauses] = useState<CharityCase[]>([])
   const [sponsors, setSponsors] = useState<any[]>([])
-  const [news, setNews] = useState<any[]>([])
   const [partnershipImageURL, setPartnershipImageURL] = useState('')
 
   useEffect(() => {
@@ -107,15 +107,6 @@ export default function HomePage() {
           sponsorsQuery,
           (snapshot) => setSponsors(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))),
           (error) => console.error('Sponsors listener error:', error)
-        )
-      )
-
-      const newsQuery = query(collection(db, 'news'), where('isPublished', '==', true), limit(3))
-      unsubscribers.push(
-        onSnapshot(
-          newsQuery,
-          (snapshot) => setNews(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))),
-          (error) => console.error('News listener error:', error)
         )
       )
     } catch (error) {
@@ -200,6 +191,9 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Press Room / news — immediately after Active Causes */}
+      <HomeNews />
+
       {/* Partnership inquiry CTA after Active Causes */}
       <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-white">
         <div className="max-w-[72rem] mx-auto w-full min-w-0 grid md:grid-cols-2 gap-6 items-center">
@@ -267,46 +261,6 @@ export default function HomePage() {
                   Become a Partner
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* NEWS - Mobile First */}
-      {news.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-[#f7f6f2]">
-          <div className="max-w-[72rem] mx-auto w-full min-w-0">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-7 md:mb-8 font-headline">
-              Latest News
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {news.map((article) => (
-                <Link
-                  key={article.id}
-                  href={article.slug ? `/news/${article.slug}` : `/news/${article.id}`}
-                  className="bg-white rounded-lg overflow-hidden border border-[#e4e1da] hover:shadow-md transition-shadow block"
-                >
-                  {article.image && (
-                    <img src={article.image} alt={article.title} className="w-full h-40 sm:h-48 object-cover" />
-                  )}
-                  <div className="p-4 sm:p-6">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-bold uppercase text-[#888888] bg-[#e4e1da] px-2 py-1 rounded">
-                        {article.category}
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-base sm:text-lg mb-2 line-clamp-2">{article.title}</h3>
-                    <p className="text-xs sm:text-sm text-[#888888] mb-3 line-clamp-2">{article.summary}</p>
-                    <p className="text-xs text-[#888888]">By {article.author}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <div className="text-center mt-6">
-              <Link href="/news" className="text-sm font-semibold underline">
-                View all news →
               </Link>
             </div>
           </div>

@@ -3,13 +3,14 @@
 import React from 'react'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
-import { db } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { format } from 'date-fns'
-import { Calendar, MapPin, Users, Trash2, ArrowRight } from 'lucide-react'
+import { Calendar, MapPin, Users, Trash2, ArrowRight, CheckCircle2 } from 'lucide-react'
 import type { Event } from '@/lib/event-types'
 import type { User } from '@/lib/types'
+import { isCharityVolunteerEvent } from '@/lib/charity-event'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -28,15 +29,23 @@ function parseEventDate(value: unknown): Date | null {
 
 type BrowseEvent = Record<string, unknown> & { id: string }
 
+type RegisteredEvent = Event & {
+  registrationId?: string
+  registrationStatus?: string
+  checkedInAt?: Date | string | null
+  attendanceConfirmedByMember?: boolean
+}
+
 export default function MyEventsPage() {
   const { user, loading: authLoading } = useAuth()
   const [browseEvents, setBrowseEvents] = React.useState<BrowseEvent[]>([])
-  const [registeredEvents, setRegisteredEvents] = React.useState<Event[]>([])
+  const [registeredEvents, setRegisteredEvents] = React.useState<RegisteredEvent[]>([])
   const [registeredIds, setRegisteredIds] = React.useState<Set<string>>(new Set())
   const [loadingBrowse, setLoadingBrowse] = React.useState(true)
   const [loadingRegistered, setLoadingRegistered] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [registeringId, setRegisteringId] = React.useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState<'browse' | 'registered'>('browse')
 
   const loadRegistered = React.useCallback(async () => {
@@ -52,7 +61,7 @@ export default function MyEventsPage() {
       }
       const raw = json.data
       const eventList = Array.isArray(raw) ? raw : raw ? [raw] : []
-      const events = eventList.filter(Boolean) as Event[]
+      const events = eventList.filter(Boolean) as RegisteredEvent[]
       setRegisteredEvents(events)
       setRegisteredIds(new Set(events.map((e) => e.id!).filter(Boolean)))
     } catch (err) {
@@ -159,15 +168,52 @@ export default function MyEventsPage() {
     }
   }
 
+  const handleConfirmAttendance = async (eventId: string) => {
+    setConfirmingId(eventId)
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) {
+        alert('Sign in required')
+        return
+      }
+      const res = await fetch(`/api/events/${eventId}/confirm-attendance`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        alert(json.error || 'Could not confirm attendance')
+        return
+      }
+      alert(json.message || 'Attendance confirmed')
+      await loadRegistered()
+    } catch (err) {
+      console.error('[v0] Confirm attendance error:', err)
+      alert('Could not confirm attendance')
+    } finally {
+      setConfirmingId(null)
+    }
+  }
+
   const loading = authLoading || (activeTab === 'browse' ? loadingBrowse : loadingRegistered)
   if (loading) return <DashboardSkeleton />
   if (error && activeTab === 'browse') return <DashboardErrorState message={error} />
 
   const now = new Date()
-  const upcomingRegistered = registeredEvents.filter((e) => {
+  const sortedRegistered = [...registeredEvents].sort((a, b) => {
+    const ad = parseEventDate(a.startDate)?.getTime() ?? 0
+    const bd = parseEventDate(b.startDate)?.getTime() ?? 0
+    return bd - ad
+  })
+  const upcomingRegistered = sortedRegistered.filter((e) => {
     const d = parseEventDate(e.startDate)
     return d && d >= now
   })
+  const pastRegistered = sortedRegistered.filter((e) => {
+    const d = parseEventDate(e.startDate)
+    return !d || d < now
+  })
+  const displayRegistered = [...upcomingRegistered, ...pastRegistered]
 
   return (
     <DashboardPageShell title="My Events" subtitle="Your upcoming and registered events">
@@ -244,7 +290,7 @@ export default function MyEventsPage() {
             })}
           </div>
         )
-      ) : upcomingRegistered.length === 0 ? (
+      ) : displayRegistered.length === 0 ? (
         <DashboardEmptyState
           icon={<Calendar className="w-12 h-12" />}
           title="No registered events"
@@ -261,17 +307,33 @@ export default function MyEventsPage() {
         />
       ) : (
         <div className="grid gap-4">
-          {upcomingRegistered.map((event) => {
+          {displayRegistered.map((event) => {
             const start = parseEventDate(event.startDate)
+            const isPast = !start || start < now
+            const isCharity = isCharityVolunteerEvent(event)
+            const attended = Boolean(event.checkedInAt)
+            const canCancel = !isPast && !attended
             return (
               <Card key={event.id} className="p-4 sm:p-5 border border-neutral-200">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <Link href={`/events/${event.id}`} className="no-underline">
-                      <h3 className="text-lg font-semibold text-neutral-900 hover:underline">
-                        {event.title ?? 'Event'}
-                      </h3>
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/events/${event.id}`} className="no-underline">
+                        <h3 className="text-lg font-semibold text-neutral-900 hover:underline">
+                          {event.title ?? 'Event'}
+                        </h3>
+                      </Link>
+                      {isCharity ? (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-800">
+                          Charity
+                        </span>
+                      ) : null}
+                      {isPast ? (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">
+                          Past
+                        </span>
+                      ) : null}
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm text-neutral-600">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} />
@@ -287,16 +349,36 @@ export default function MyEventsPage() {
                       </div>
                     </div>
                   </div>
-                  {event.id ? (
-                    <button
-                      type="button"
-                      onClick={() => handleCancel(event.id!)}
-                      className="self-start !bg-black !text-white px-3 py-2 rounded-lg text-sm"
-                      aria-label="Cancel registration"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  ) : null}
+                  <div className="flex flex-col sm:flex-row gap-2 self-start">
+                    {isCharity ? (
+                      attended ? (
+                        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 px-3 py-2">
+                          <CheckCircle2 size={16} /> Hours credited
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={
+                            confirmingId === event.id || event.registrationStatus !== 'confirmed'
+                          }
+                          onClick={() => event.id && void handleConfirmAttendance(event.id)}
+                          className="!bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                        >
+                          {confirmingId === event.id ? 'Confirming…' : 'Confirm attendance'}
+                        </button>
+                      )
+                    ) : null}
+                    {canCancel && event.id ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCancel(event.id!)}
+                        className="!bg-black !text-white px-3 py-2 rounded-lg text-sm"
+                        aria-label="Cancel registration"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               </Card>
             )

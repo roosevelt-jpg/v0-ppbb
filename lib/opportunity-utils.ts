@@ -12,6 +12,58 @@ export const ROLE_TYPE_LABELS: Record<string, string> = {
   gig: 'Gig',
 }
 
+/** Single Role Type field — shared by business post/edit and public display */
+export const ROLE_TYPE_FORM_OPTIONS = [
+  { value: 'freelance', label: 'Freelance' },
+  { value: 'full_time', label: 'Full Time' },
+  { value: 'part_time', label: 'Part Time' },
+  { value: 'internship', label: 'Internship' },
+  { value: 'training', label: 'Training' },
+  { value: 'volunteer', label: 'Volunteer' },
+  { value: 'contract', label: 'Contract' },
+] as const
+
+export const WORK_TYPE_FORM_OPTIONS = [
+  { value: 'onsite', label: 'Onsite' },
+  { value: 'remote', label: 'Remote' },
+  { value: 'hybrid', label: 'Hybrid' },
+] as const
+
+export const SUITABILITY_OPTIONS = [
+  'Ladies Only',
+  'Men Only',
+  'Fresh Graduates',
+  'Experienced 5yrs+',
+] as const
+
+export const UAE_EMIRATES = [
+  'Abu Dhabi',
+  'Dubai',
+  'Sharjah',
+  'Ajman',
+  'Umm Al Quwain',
+  'Ras Al Khaimah',
+  'Fujairah',
+] as const
+
+/** Map Role Type → legacy `type` for filters / older records */
+export function roleTypeToLegacyType(roleType: string): BusinessOpportunity['type'] {
+  if (roleType === 'internship' || roleType === 'volunteer') return roleType
+  if (roleType === 'freelance' || roleType === 'contract' || roleType === 'gig') return 'gig'
+  return 'job'
+}
+
+export function normalizeRoleType(value: unknown): string {
+  const raw = String(value || '')
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_')
+  if (raw === 'fulltime' || raw === 'full_time' || raw === 'job') return 'full_time'
+  if (raw === 'parttime' || raw === 'part_time') return 'part_time'
+  if (raw === 'gig') return 'freelance'
+  if (ROLE_TYPE_FORM_OPTIONS.some((o) => o.value === raw)) return raw
+  return 'full_time'
+}
+
 export const WORK_TYPE_OPTIONS = [
   { id: 'all', label: 'All work types' },
   { id: 'onsite', label: 'Onsite' },
@@ -122,7 +174,7 @@ export function isOpportunityExpired(opp: BusinessOpportunity): boolean {
 }
 
 export function getRoleType(opp: BusinessOpportunity): string {
-  return (opp as { roleType?: string }).roleType || opp.type || 'job'
+  return normalizeRoleType((opp as { roleType?: string }).roleType || opp.type || 'job')
 }
 
 export function matchesRoleTypeFilter(opp: BusinessOpportunity, filterId: string): boolean {

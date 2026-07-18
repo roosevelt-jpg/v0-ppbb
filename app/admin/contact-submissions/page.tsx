@@ -130,6 +130,7 @@ function mergeById(rows: ContactSubmission[]): ContactSubmission[] {
 function ContactSubmissionsInner() {
   const searchParams = useSearchParams()
   const initialCategory = searchParams.get('category')
+  const focusId = searchParams.get('id')
   const [items, setItems] = useState<ContactSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -142,6 +143,7 @@ function ContactSubmissionsInner() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [selected, setSelected] = useState<ContactSubmission | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const focusApplied = React.useRef(false)
 
   useEffect(() => {
     if (initialCategory === 'partnership' || initialCategory === 'other') {
@@ -300,6 +302,17 @@ function ContactSubmissionsInner() {
       setUpdatingId(null)
     }
   }
+
+  useEffect(() => {
+    if (!focusId || loading || focusApplied.current || items.length === 0) return
+    const match = items.find((row) => row.id === focusId)
+    if (!match) return
+    focusApplied.current = true
+    if (categoryOf(match) === 'partnership') setCategoryFilter('partnership')
+    void handleSelect(match)
+    // One-shot deep-link from Approvals; do not re-bind when handleSelect identity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusId, loading, items])
 
   const handleMarkResolved = async (id: string) => {
     const row = items.find((i) => i.id === id)

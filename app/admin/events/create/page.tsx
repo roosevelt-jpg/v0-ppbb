@@ -58,6 +58,8 @@ interface EventFormData {
   isFeatured: boolean
   cohostEmails: string
   recurrence: EventRecurrence | null
+  seriesId: string | null
+  applyChangesToFuture: boolean
 }
 
 const EMPTY_FORM: EventFormData = {
@@ -90,6 +92,8 @@ const EMPTY_FORM: EventFormData = {
   isFeatured: false,
   cohostEmails: '',
   recurrence: null,
+  seriesId: null,
+  applyChangesToFuture: false,
 }
 
 export default function CreateEventPage() {
@@ -166,12 +170,14 @@ function CreateEventForm() {
           tags: mapped.tags,
           ticketTypes: mapped.ticketTypes || [],
           coupons: mapped.coupons || [],
-          requireApproval: Boolean(mapped.requireApproval),
+          requireApproval: mapped.requireApproval === true,
           enableWaitlist: mapped.enableWaitlist !== false,
           showGuestList: mapped.showGuestList !== false,
           isFeatured: Boolean(mapped.isFeatured),
           cohostEmails: (mapped.cohostEmails || []).join(', '),
           recurrence: mapped.recurrence || null,
+          seriesId: mapped.seriesId || null,
+          applyChangesToFuture: false,
         })
         setApprovalNotes(mapped.approvalNotes || null)
         setExistingStatus(mapped.existingStatus || null)
@@ -292,6 +298,7 @@ function CreateEventForm() {
             id: eventId,
             ...updatePayload,
             status: statusToSave,
+            applyChangesToFuture: formData.applyChangesToFuture === true,
             lastEditedBy: user?.id || user?.email || 'admin',
             lastEditedAt: new Date().toISOString(),
           }),
@@ -680,6 +687,8 @@ function CreateEventForm() {
             isFeatured={formData.isFeatured}
             cohostEmails={formData.cohostEmails}
             recurrence={formData.recurrence}
+            seriesId={formData.seriesId}
+            applyChangesToFuture={formData.applyChangesToFuture}
             maxAttendees={formData.maxAttendees ?? null}
             onChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}
           />

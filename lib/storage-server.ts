@@ -139,9 +139,11 @@ export async function parseUploadRequest(
     const file = form.get('file') as File | null
     if (!file) throw new Error('No file provided')
     const maxBytes = 25 * 1024 * 1024
+    // Note: serverless hosts often cap request bodies (~4.5–25 MB). Large videos
+    // should upload via the client Storage SDK (recordings create form), not this route.
     if (typeof file.size === 'number' && file.size > maxBytes) {
       throw new Error(
-        `File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum upload size is 25 MB.`
+        `File is too large (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maximum for this upload route is 25 MB. For recordings, use the create form’s direct Storage upload (up to 500 MB) or paste a hosted link.`
       )
     }
     // `type` is an alias some callers use to bucket uploads into a folder.

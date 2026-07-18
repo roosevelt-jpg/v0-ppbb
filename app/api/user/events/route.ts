@@ -13,15 +13,23 @@ export async function GET(request: NextRequest) {
     // Get all registrations for this user
     const regsSnapshot = await db.collection('eventRegistrations').where('userId', '==', userId).get()
 
-    const registrations = regsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      registeredAt: doc.data().registeredAt?.toDate?.() || doc.data().registeredAt,
+    const registrations = regsSnapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+      registeredAt: docSnap.data().registeredAt?.toDate?.() || docSnap.data().registeredAt,
+      checkedInAt: docSnap.data().checkedInAt?.toDate?.() || docSnap.data().checkedInAt || null,
     }))
 
-    // Get event details for each registration
+    // Get event details for each registration (include registration meta for attendance confirm)
     const events = await Promise.all(
-      registrations.map(async (reg: any) => {
+      registrations.map(async (reg: {
+        id: string
+        eventId: string
+        status?: string
+        checkedInAt?: Date | string | null
+        attendanceConfirmedByMember?: boolean
+      }) => {
+        if (reg.status === 'cancelled' || reg.status === 'rejected') return null
         const eventDoc = await db.collection('events').doc(reg.eventId).get()
         if (eventDoc.exists) {
           return {
@@ -29,6 +37,10 @@ export async function GET(request: NextRequest) {
             ...eventDoc.data(),
             startDate: eventDoc.data()?.startDate?.toDate?.() || eventDoc.data()?.startDate,
             endDate: eventDoc.data()?.endDate?.toDate?.() || eventDoc.data()?.endDate,
+            registrationId: reg.id,
+            registrationStatus: reg.status || 'confirmed',
+            checkedInAt: reg.checkedInAt,
+            attendanceConfirmedByMember: Boolean(reg.attendanceConfirmedByMember),
           }
         }
         return null

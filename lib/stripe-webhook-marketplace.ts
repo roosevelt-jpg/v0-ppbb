@@ -1,4 +1,11 @@
 import type Stripe from 'stripe'
+import { getStripeClient } from '@/lib/get-stripe-client'
+import { getAdminDb } from '@/lib/firebase-admin'
+import {
+  completeMarketplacePurchase,
+  findPendingOrderByStripeSession,
+} from '@/lib/marketplace-purchase-server'
+import type { MarketplaceAddress, MarketplacePaymentMethod } from '@/lib/marketplace-shipping'
 
 export async function handleMarketplaceCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (session.metadata?.type !== 'marketplace') return false
@@ -11,6 +18,7 @@ export async function handleMarketplaceCheckoutCompleted(session: Stripe.Checkou
   }
 
   const pending = await findPendingOrderByStripeSession(session.id)
+  const pendingData = (pending?.data || {}) as Record<string, unknown>
   const paymentReference =
     typeof session.payment_intent === 'string'
       ? session.payment_intent
@@ -22,8 +30,11 @@ export async function handleMarketplaceCheckoutCompleted(session: Stripe.Checkou
     mode: 'purchase',
     paymentReference,
     paymentGateway: 'stripe',
+    paymentMethod: (pendingData.paymentMethod as MarketplacePaymentMethod) || 'card',
     orderId: pending?.id,
     stripeSessionId: session.id,
+    invoiceAddress: (pendingData.invoiceAddress as MarketplaceAddress) || undefined,
+    deliveryAddress: (pendingData.deliveryAddress as MarketplaceAddress) || undefined,
   })
 
   return true

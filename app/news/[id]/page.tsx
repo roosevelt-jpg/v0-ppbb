@@ -57,6 +57,15 @@ export default function NewsArticlePage() {
         ) : (
           <article className="space-y-4">
             <h1 className="font-headline text-3xl font-bold">{title}</h1>
+            {typeof article.author === 'string' || typeof article.publishedAt !== 'undefined' ? (
+              <p className="text-sm text-[#888888]">
+                {typeof article.author === 'string' ? `By ${article.author}` : null}
+                {typeof article.author === 'string' ? ' · ' : null}
+                <Link href="/news" className="underline">
+                  Press Room
+                </Link>
+              </p>
+            ) : null}
             {typeof article.image === 'string' ? (
               <img src={article.image} alt="" className="w-full rounded-lg object-cover max-h-80" />
             ) : null}

@@ -79,6 +79,8 @@ function BusinessEventForm() {
     isFeatured: false,
     cohostEmails: '',
     recurrence: null as EventRecurrence | null,
+    seriesId: null as string | null,
+    applyChangesToFuture: false,
   })
 
   const [categories, setCategories] = React.useState<EventsCategory[]>(DEFAULT_EVENTS_CONFIG.categories)
@@ -153,12 +155,14 @@ function BusinessEventForm() {
           maxAttendees: event.maxAttendees != null ? String(event.maxAttendees) : '',
           ticketTypes: Array.isArray(event.ticketTypes) ? event.ticketTypes : [],
           coupons: Array.isArray(event.coupons) ? event.coupons : [],
-          requireApproval: Boolean(event.requireApproval),
+          requireApproval: event.requireApproval === true,
           enableWaitlist: event.enableWaitlist !== false,
           showGuestList: event.showGuestList !== false,
           isFeatured: Boolean(event.isFeatured),
           cohostEmails: Array.isArray(event.cohostEmails) ? event.cohostEmails.join(', ') : '',
           recurrence: event.recurrence || null,
+          seriesId: event.seriesId || null,
+          applyChangesToFuture: false,
         })
         setApprovalNotes(event.approvalNotes || null)
         setExistingStatus(event.status || null)
@@ -232,6 +236,7 @@ function BusinessEventForm() {
           .map((e) => e.trim())
           .filter(Boolean),
         recurrence: formData.recurrence,
+        applyChangesToFuture: formData.applyChangesToFuture === true,
         status,
         createdBy: user?.id,
         createdByRole: 'business' as const,
@@ -1006,6 +1011,8 @@ function BusinessEventForm() {
             isFeatured={formData.isFeatured}
             cohostEmails={formData.cohostEmails}
             recurrence={formData.recurrence}
+            seriesId={formData.seriesId}
+            applyChangesToFuture={formData.applyChangesToFuture}
             maxAttendees={
               formData.maxAttendees === '' || formData.maxAttendees == null
                 ? null

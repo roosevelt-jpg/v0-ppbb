@@ -6,34 +6,69 @@ import { RichTextEditor } from '@/components/rich-text-editor'
 import { RichTextContent } from '@/components/rich-text-content'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
-import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import { Save, Edit2 } from 'lucide-react'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { Save, Edit2, X, Plus } from 'lucide-react'
+import { BusinessShippingSettings } from '@/components/business/business-shipping-settings'
+
+function servicesFromProfile(profile: Record<string, unknown> | undefined | null): string[] {
+  if (!profile) return []
+  const raw = profile.services
+  if (Array.isArray(raw)) {
+    return raw.map(String).map((s) => s.trim()).filter(Boolean)
+  }
+  if (typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }
+  return []
+}
 
 export default function BusinessProfile() {
-  const { user } = useAuth()
-  const router = useRouter()
+  const { user, refreshUser } = useAuth()
   const [isEditing, setIsEditing] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
+  const [tagDraft, setTagDraft] = React.useState('')
   const [formData, setFormData] = React.useState({
-    businessName: user?.businessProfile?.businessName || '',
-    businessType: user?.businessProfile?.businessType || '',
-    businessDescription: user?.businessProfile?.businessDescription || '',
-    businessWebsite: user?.businessProfile?.businessWebsite || '',
-    businessEmail: user?.businessProfile?.businessEmail || '',
-    businessPhone: user?.businessProfile?.businessPhone || '',
-    services:
-      Array.isArray((user?.businessProfile as { services?: string[] } | undefined)?.services)
-        ? ((user?.businessProfile as { services?: string[] }).services || []).join(', ')
-        : typeof (user?.businessProfile as { services?: string } | undefined)?.services === 'string'
-          ? String((user?.businessProfile as { services?: string }).services)
-          : '',
+    businessName: '',
+    businessType: '',
+    businessDescription: '',
+    businessWebsite: '',
+    businessEmail: '',
+    businessPhone: '',
+    services: [] as string[],
   })
 
-  if (!user || (!hasBusinessAccess(user))) {
+  React.useEffect(() => {
+    if (!user?.businessProfile && !user) return
+    const bp = (user.businessProfile || {}) as Record<string, unknown>
+    setFormData({
+      businessName: String(bp.businessName || user.businessProfile?.businessName || ''),
+      businessType: String(bp.businessType || user.businessProfile?.businessType || ''),
+      businessDescription: String(
+        bp.businessDescription || user.businessProfile?.businessDescription || ''
+      ),
+      businessWebsite: String(bp.businessWebsite || user.businessProfile?.businessWebsite || ''),
+      businessEmail: String(
+        bp.businessEmail ||
+          (user.businessProfile as { businessEmail?: string } | undefined)?.businessEmail ||
+          ''
+      ),
+      businessPhone: String(
+        bp.businessPhone ||
+          (user.businessProfile as { businessPhone?: string } | undefined)?.businessPhone ||
+          ''
+      ),
+      services: servicesFromProfile(bp),
+    })
+  }, [user])
+
+  if (!user || !hasBusinessAccess(user)) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
@@ -42,20 +77,93 @@ export default function BusinessProfile() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const addServiceTag = (raw?: string) => {
+    const value = (raw ?? tagDraft).trim().replace(/^,+|,+$/g, '')
+    if (!value) return
+    setFormData((prev) => {
+      if (prev.services.some((s) => s.toLowerCase() === value.toLowerCase())) return prev
+      return { ...prev, services: [...prev.services, value].slice(0, 24) }
+    })
+    setTagDraft('')
+  }
+
+  const removeServiceTag = (tag: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: prev.services.filter((s) => s !== tag),
+    }))
+  }
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addServiceTag()
+    } else if (e.key === 'Backspace' && !tagDraft && formData.services.length > 0) {
+      removeServiceTag(formData.services[formData.services.length - 1])
+    }
+  }
+
   const handleSave = async () => {
     try {
       setIsSaving(true)
-      const services = formData.services
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
-      await updateDoc(doc(db, 'users', user.id), {
-        businessProfile: {
-          ...formData,
-          services,
-        },
+      const services = formData.services.map((s) => s.trim()).filter(Boolean)
+
+      const userRef = doc(db, 'users', user.id)
+      const userSnap = await getDoc(userRef)
+      const existingProfile =
+        (userSnap.exists() ? (userSnap.data().businessProfile as Record<string, unknown>) : null) ||
+        (user.businessProfile as Record<string, unknown>) ||
+        {}
+
+      const nextProfile = sanitizeForFirestore({
+        ...existingProfile,
+        businessName: formData.businessName.trim(),
+        businessType: formData.businessType.trim(),
+        businessDescription: formData.businessDescription,
+        businessWebsite: formData.businessWebsite.trim(),
+        businessEmail: formData.businessEmail.trim(),
+        businessPhone: formData.businessPhone.trim(),
+        services,
+      })
+
+      await updateDoc(userRef, {
+        businessProfile: nextProfile,
         updatedAt: new Date(),
       })
+
+      // Marketplace directory reads `businesses/{id}.services`
+      const bizRef = doc(db, 'businesses', user.id)
+      const bizSnap = await getDoc(bizRef)
+      const bizPayload = sanitizeForFirestore({
+        name: formData.businessName.trim() || existingProfile.businessName || 'Business',
+        businessName: formData.businessName.trim(),
+        businessType: formData.businessType.trim(),
+        description: formData.businessDescription,
+        website: formData.businessWebsite.trim(),
+        email: formData.businessEmail.trim(),
+        phone: formData.businessPhone.trim(),
+        services,
+        servicesOffered: services,
+        ownerId: user.id,
+        updatedAt: new Date(),
+      })
+      if (bizSnap.exists()) {
+        await updateDoc(bizRef, bizPayload)
+      } else {
+        await setDoc(
+          bizRef,
+          {
+            ...bizPayload,
+            id: user.id,
+            status: 'active',
+            isActive: true,
+            createdAt: new Date(),
+          },
+          { merge: true }
+        )
+      }
+
+      await refreshUser()
       setIsEditing(false)
       alert('Profile updated successfully!')
     } catch (error) {
@@ -89,33 +197,20 @@ export default function BusinessProfile() {
       <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
         <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
           <div className="flex flex-col gap-6">
-            {/* Business Name */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Business Name *
-              </label>
+              <label className="block font-semibold text-[#111111] mb-2">Business Name *</label>
               <input
                 type="text"
                 name="businessName"
                 value={formData.businessName}
                 onChange={handleChange}
                 disabled={!isEditing}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                }}
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
-            {/* Business Type */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Business Type
-              </label>
+              <label className="block font-semibold text-[#111111] mb-2">Business Type</label>
               <input
                 type="text"
                 name="businessType"
@@ -123,22 +218,12 @@ export default function BusinessProfile() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 placeholder="e.g., Technology, Retail, Services"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                }}
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
-            {/* Business Description */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Description
-              </label>
+              <label className="block font-semibold text-[#111111] mb-2">Description</label>
               {isEditing ? (
                 <RichTextEditor
                   value={formData.businessDescription}
@@ -155,50 +240,64 @@ export default function BusinessProfile() {
               )}
             </div>
 
-            {/* Services tags */}
+            {/* Services tags — shown on marketplace directory cards */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Services / tags
-              </label>
-              <input
-                type="text"
-                name="services"
-                value={formData.services}
-                onChange={handleChange}
-                disabled={!isEditing}
-                placeholder="Comma-separated, e.g. Consulting, Catering, Mentorship"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                }}
-              />
-              {!isEditing && formData.services ? (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.services
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter(Boolean)
-                    .map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+              <label className="block font-semibold text-[#111111] mb-2">Services tags</label>
+              <p className="text-xs text-neutral-500 mb-2">
+                Add the services you offer. These appear on your marketplace profile.
+              </p>
+
+              <div className="flex flex-wrap gap-2 min-h-[28px]">
+                {formData.services.length === 0 && !isEditing ? (
+                  <p className="text-sm text-neutral-500">No service tags yet. Click Edit to add some.</p>
+                ) : (
+                  formData.services.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200"
+                    >
+                      {tag}
+                      {isEditing ? (
+                        <button
+                          type="button"
+                          onClick={() => removeServiceTag(tag)}
+                          className="ml-0.5 rounded-full p-0.5 hover:bg-neutral-200"
+                          aria-label={`Remove ${tag}`}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      ) : null}
+                    </span>
+                  ))
+                )}
+              </div>
+
+              {isEditing ? (
+                <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={tagDraft}
+                    onChange={(e) => setTagDraft(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    placeholder="Type a service and press Enter"
+                    className="flex-1 min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg"
+                    maxLength={48}
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => addServiceTag()}
+                    disabled={!tagDraft.trim()}
+                    className="min-h-[44px] bg-black text-white hover:bg-neutral-800 inline-flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add tag
+                  </Button>
                 </div>
               ) : null}
             </div>
 
-            {/* Website */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Website
-              </label>
+              <label className="block font-semibold text-[#111111] mb-2">Website</label>
               <input
                 type="url"
                 name="businessWebsite"
@@ -206,84 +305,47 @@ export default function BusinessProfile() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 placeholder="https://example.com"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                }}
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
-            {/* Business Email */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Business Email
-              </label>
+              <label className="block font-semibold text-[#111111] mb-2">Business Email</label>
               <input
                 type="email"
                 name="businessEmail"
                 value={formData.businessEmail}
                 onChange={handleChange}
                 disabled={!isEditing}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                }}
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
-            {/* Business Phone */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                Business Phone
-              </label>
+              <label className="block font-semibold text-[#111111] mb-2">Business Phone</label>
               <input
                 type="tel"
                 name="businessPhone"
                 value={formData.businessPhone}
                 onChange={handleChange}
                 disabled={!isEditing}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '1px solid #e4e1da',
-                  borderRadius: '8px',
-                  backgroundColor: isEditing ? '#ffffff' : '#f5f5f5',
-                  color: '#111111',
-                }}
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
-            {/* Action Buttons */}
             {isEditing && (
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-wrap gap-3 pt-2">
                 <Button
-                  onClick={handleSave}
+                  onClick={() => void handleSave()}
                   disabled={isSaving}
-                  style={{
-                    backgroundColor: '#111111',
-                    color: '#ffffff',
-                    padding: '12px 24px',
-                  }}
-                  className="flex items-center gap-2"
+                  className="min-h-[44px] bg-[#111111] text-white hover:bg-neutral-800 inline-flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? 'Saving…' : 'Save Changes'}
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}
-                  style={{
-                    backgroundColor: '#e4e1da',
-                    color: '#111111',
-                    padding: '12px 24px',
-                  }}
+                  className="min-h-[44px] bg-[#e4e1da] text-[#111111] hover:bg-neutral-300"
                 >
                   Cancel
                 </Button>
@@ -292,31 +354,32 @@ export default function BusinessProfile() {
           </div>
         </Card>
 
-        {/* Membership Info */}
+        <BusinessShippingSettings />
+
         <Card className="bg-white border-[#e4e1da] p-4 sm:p-6 mt-6">
           <h3 className="text-lg font-semibold text-[#111111] mb-4">Membership Information</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p style={{ color: '#888888', fontSize: '14px' }}>Membership Tier</p>
-              <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>
+              <p className="text-sm text-[#888888]">Membership Tier</p>
+              <p className="font-semibold text-[#111111] mt-1">
                 {user.businessProfile?.membership || 'Partner'}
               </p>
             </div>
             <div>
-              <p style={{ color: '#888888', fontSize: '14px' }}>Member Since</p>
-              <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>
+              <p className="text-sm text-[#888888]">Member Since</p>
+              <p className="font-semibold text-[#111111] mt-1">
                 {user.memberSince ? new Date(user.memberSince).toLocaleDateString() : 'N/A'}
               </p>
             </div>
             <div>
-              <p style={{ color: '#888888', fontSize: '14px' }}>Active Opportunities</p>
-              <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>
+              <p className="text-sm text-[#888888]">Active Opportunities</p>
+              <p className="font-semibold text-[#111111] mt-1">
                 {user.businessProfile?.activeOpportunities || 0}
               </p>
             </div>
             <div>
-              <p style={{ color: '#888888', fontSize: '14px' }}>Revenue Generated</p>
-              <p style={{ color: '#111111', fontWeight: 600, marginTop: '4px' }}>
+              <p className="text-sm text-[#888888]">Revenue Generated</p>
+              <p className="font-semibold text-[#111111] mt-1">
                 AED {user.businessProfile?.revenue || 0}
               </p>
             </div>

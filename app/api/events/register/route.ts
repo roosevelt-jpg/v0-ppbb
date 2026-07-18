@@ -16,9 +16,50 @@ import {
   incrementCouponUsed,
   incrementTicketSold,
   isEventFull,
+  isExplicitTrue,
   nextWaitlistPosition,
   resolveTicketType,
 } from '@/lib/event-luma-server'
+
+export async function GET(request: NextRequest) {
+  try {
+    const registrationId = request.nextUrl.searchParams.get('registrationId')
+    if (!registrationId) {
+      return NextResponse.json({ success: false, error: 'registrationId required' }, { status: 400 })
+    }
+    const uid = await getAuthUidFromRequest(request)
+    const db = getAdminDb()
+    const snap = await db.collection('eventRegistrations').doc(registrationId).get()
+    if (!snap.exists) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
+    }
+    const data = snap.data() || {}
+    // Registrant or unauthenticated with matching id only returns limited public confirmation fields
+    if (uid && data.userId && uid !== data.userId) {
+      const { canManageEvent } = await import('@/lib/event-luma-server')
+      const eventSnap = await db.collection('events').doc(String(data.eventId || '')).get()
+      const canManage = eventSnap.exists && (await canManageEvent(uid, eventSnap.data() || {}))
+      if (!canManage) {
+        return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+      }
+    }
+    return NextResponse.json({
+      success: true,
+      registration: {
+        id: snap.id,
+        status: data.status,
+        waitlistPosition: data.waitlistPosition ?? null,
+        checkInCode: data.checkInCode || null,
+        qrToken: data.qrToken || null,
+        paymentStatus: data.paymentStatus || null,
+        eventId: data.eventId,
+      },
+    })
+  } catch (error) {
+    console.error('[events/register] GET', error)
+    return NextResponse.json({ success: false, error: 'Failed to load registration' }, { status: 500 })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,8 +126,8 @@ export async function POST(request: NextRequest) {
     const isPaid = price > 0 && registrationType !== 'free'
     const full = isEventFull(event, ticket)
     const enableWaitlist = Boolean(event.enableWaitlist)
-    // Event-level only (per-ticket Approve was removed — it caused false "pending" states)
-    const requireApproval = Boolean(event.requireApproval)
+    // Event-level only. Strict check — Boolean("false") must not become pending.
+    const requireApproval = isExplicitTrue(event.requireApproval)
 
     let status: 'confirmed' | 'pending' | 'waitlisted' = 'confirmed'
     let waitlistPosition: number | null = null
@@ -106,13 +147,20 @@ export async function POST(request: NextRequest) {
     const businessCut = isPaid ? price - pbCut : 0
 
     const needsPayment = isPaid && status !== 'waitlisted'
+    // Never mark as pending approval unless the host explicitly requires approval
+    const registrationStatus: 'confirmed' | 'pending' | 'waitlisted' = needsPayment
+      ? requireApproval
+        ? 'pending'
+        : 'confirmed'
+      : status
+
     const registration = buildRegistrationRecord({
       eventId,
       userId,
       userName: userName || '',
       userEmail: userEmail || '',
       userGender,
-      status: needsPayment ? (requireApproval ? 'pending' : 'confirmed') : status,
+      status: registrationStatus,
       ticket,
       amountPaid: price,
       paymentStatus: needsPayment ? 'pending' : price > 0 ? 'pending' : 'free',
@@ -124,8 +172,9 @@ export async function POST(request: NextRequest) {
       inviteStatus: 'self',
       couponCode: couponResult.coupon?.code || null,
       referralCode,
-      checkInCode: needsPayment || status !== 'confirmed' ? null : generateCheckInCode(),
-      qrToken: needsPayment || status !== 'confirmed' ? null : generateQrToken(),
+      checkInCode:
+        needsPayment || registrationStatus !== 'confirmed' ? null : generateCheckInCode(),
+      qrToken: needsPayment || registrationStatus !== 'confirmed' ? null : generateQrToken(),
     })
 
     if (status === 'waitlisted') {

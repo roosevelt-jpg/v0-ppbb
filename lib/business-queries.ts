@@ -1099,10 +1099,45 @@ export async function applyToOpportunity(
   coverLetter?: string,
   resumeUrl?: string
 ): Promise<JobApplication> {
-  const id = doc(collection(db, 'jobApplications')).id
-  const now = Timestamp.now()
-  const application: JobApplication = {
-    id,
+  const { auth } = await import('@/lib/firebase')
+  const token = await auth.currentUser?.getIdToken()
+  if (!token) {
+    throw new Error('Sign in required to apply')
+  }
+
+  const res = await fetch('/api/jobs/apply', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      opportunityId: opportunity.id,
+      opportunityTitle: opportunity.title,
+      applicantName: applicant.name,
+      applicantEmail: applicant.email,
+      applicantPhone: applicant.phone || '',
+      applicantAvatarUrl: applicant.avatarUrl || '',
+      applicantTitle: applicant.title || '',
+      applicantLocation: applicant.location || '',
+      applicantEducation: applicant.education || '',
+      applicantExperience: applicant.experience || '',
+      applicantVolunteerHours:
+        typeof applicant.volunteerHours === 'number' ? applicant.volunteerHours : null,
+      applicantSkills: Array.isArray(applicant.skills) ? applicant.skills.filter(Boolean) : [],
+      coverLetter: coverLetter || '',
+      resumeUrl: resumeUrl || '',
+    }),
+  })
+
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || 'Failed to submit application')
+  }
+
+  const data = (json.data || {}) as Record<string, unknown>
+  return {
+    id: String(data.id || ''),
     opportunityId: opportunity.id,
     opportunityTitle: opportunity.title,
     businessId: opportunity.businessId,
@@ -1122,48 +1157,9 @@ export async function applyToOpportunity(
     coverLetter: coverLetter || '',
     resumeUrl: resumeUrl || '',
     status: 'pending',
-    createdAt: now.toDate(),
-    updatedAt: now.toDate(),
-  }
-  await setDoc(doc(db, 'jobApplications', id), application)
-
-  try {
-    await setDoc(doc(db, 'jobs', opportunity.id, 'applications', id), {
-      ...application,
-      jobId: opportunity.id,
-      createdAt: now,
-      updatedAt: now,
-    })
-  } catch {
-    /* jobs mirror optional */
-  }
-
-  // Increment the opportunity's application count and track applicant id.
-  const oppRef = doc(db, 'businessOpportunities', opportunity.id)
-  const applicants = Array.isArray(opportunity.applicants) ? [...opportunity.applicants] : []
-  if (!applicants.includes(applicant.id)) {
-    applicants.push(applicant.id)
-  }
-  await updateDoc(oppRef, {
-    applicants,
-    applications: applicants.length,
-    updatedAt: now.toDate(),
-  })
-
-  try {
-    const jobsRef = doc(db, 'jobs', opportunity.id)
-    const jobsSnap = await getDoc(jobsRef)
-    if (jobsSnap.exists()) {
-      await updateDoc(jobsRef, {
-        applicationCount: applicants.length,
-        updatedAt: now,
-      })
-    }
-  } catch {
-    // Legacy-only opportunity without jobs mirror
-  }
-
-  return application
+    createdAt: data.createdAt ? new Date(String(data.createdAt)) : new Date(),
+    updatedAt: data.updatedAt ? new Date(String(data.updatedAt)) : new Date(),
+  } as JobApplication
 }
 
 // Has a given member already applied to a given opportunity?

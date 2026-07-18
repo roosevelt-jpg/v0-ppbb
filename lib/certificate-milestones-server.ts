@@ -49,11 +49,20 @@ function generateCredentialId(): string {
 export async function evaluateCertificateMilestonesForUser(userId: string): Promise<{
   issued: string[]
   skipped: string[]
+  totalHours: number
+  eligibleCount: number
+  alreadyHadCount: number
 }> {
   const db = getAdminDb()
   const userSnap = await db.collection('users').doc(userId).get()
   if (!userSnap.exists) {
-    return { issued: [], skipped: ['user_not_found'] }
+    return {
+      issued: [],
+      skipped: ['user_not_found'],
+      totalHours: 0,
+      eligibleCount: 0,
+      alreadyHadCount: 0,
+    }
   }
 
   const userData = userSnap.data() || {}
@@ -69,6 +78,7 @@ export async function evaluateCertificateMilestonesForUser(userId: string): Prom
 
   const issued: string[] = []
   const skipped: string[] = []
+  let alreadyHadCount = 0
 
   const gmailConfig = await getGmailSmtpConfig()
   const transporter =
@@ -85,6 +95,7 @@ export async function evaluateCertificateMilestonesForUser(userId: string): Prom
     const existing = await db.collection('certificates').doc(certDocId).get()
     if (existing.exists) {
       skipped.push(template.id)
+      alreadyHadCount += 1
       continue
     }
 
@@ -157,5 +168,11 @@ export async function evaluateCertificateMilestonesForUser(userId: string): Prom
     }
   }
 
-  return { issued, skipped }
+  return {
+    issued,
+    skipped,
+    totalHours,
+    eligibleCount: templates.length,
+    alreadyHadCount,
+  }
 }

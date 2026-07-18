@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 import React from 'react'
+import { useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -45,18 +46,34 @@ type BusinessRow = {
 
 type FilterTab = 'all' | 'pending' | 'approved' | 'suspended' | 'featured' | 'sponsors' | 'vendors'
 
-export default function BusinessesPage() {
+function BusinessesPageInner() {
   const { firebaseUser } = useAuth()
+  const searchParams = useSearchParams()
+  const focusId = searchParams.get('focus')
   const [businesses, setBusinesses] = React.useState<BusinessRow[]>([])
   const [loading, setLoading] = React.useState(true)
   const [actingId, setActingId] = React.useState<string | null>(null)
-  const [filter, setFilter] = React.useState<FilterTab>('all')
+  const [filter, setFilter] = React.useState<FilterTab>(focusId ? 'pending' : 'all')
   const [search, setSearch] = React.useState('')
   const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(
     null
   )
   const [profileOpen, setProfileOpen] = React.useState(false)
   const [activeProfile, setActiveProfile] = React.useState<AdminProfileViewData | null>(null)
+  const [highlightId, setHighlightId] = React.useState<string | null>(focusId)
+
+  React.useEffect(() => {
+    if (!focusId) return
+    setHighlightId(focusId)
+    setFilter('pending')
+    const t = window.setTimeout(() => {
+      document.getElementById(`business-row-${focusId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 500)
+    return () => window.clearTimeout(t)
+  }, [focusId, businesses.length])
 
   const openProfile = (biz: BusinessRow) => {
     setActiveProfile(profileFromBusiness(biz as unknown as Record<string, unknown>))
@@ -259,7 +276,13 @@ export default function BusinessesPage() {
             {businesses.map((biz) => {
               const busy = actingId === biz.id
               return (
-                <Card key={biz.id} className="p-4 sm:p-5">
+                <Card
+                  key={biz.id}
+                  id={`business-row-${biz.id}`}
+                  className={`p-4 sm:p-5 ${
+                    highlightId === biz.id ? 'ring-2 ring-black border-black' : ''
+                  }`}
+                >
                   <div className="flex flex-col lg:flex-row lg:items-start gap-4 justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
@@ -437,5 +460,19 @@ export default function BusinessesPage() {
         editLabel="Edit business"
       />
     </AdminPageLayout>
+  )
+}
+
+export default function BusinessesPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <AdminPageLayout title="Businesses" subtitle="Loading…">
+          <p className="text-neutral-500 py-12 text-center">Loading businesses…</p>
+        </AdminPageLayout>
+      }
+    >
+      <BusinessesPageInner />
+    </React.Suspense>
   )
 }

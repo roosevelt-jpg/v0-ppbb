@@ -21,7 +21,7 @@ export const DEFAULT_VOLUNTEER_PAGE_CONFIG: VolunteerPageConfig = {
   eyebrow: 'APPLICATION',
   headline: 'Apply to volunteer.',
   body: 'While you can join and signup as a member (free or paid), you can also apply to volunteer with the PB Management team and request a role based on your skill and department.',
-  formLink: 'https://tinyurl.com/volunteerpb26',
+  formLink: '/forms/volunteer-unpaid-service',
   imageURL: '',
   pillarOptions: [
     'Community Programs',

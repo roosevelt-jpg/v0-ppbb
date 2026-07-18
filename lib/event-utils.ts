@@ -104,14 +104,25 @@ export function isMapsOrWebUrl(value: string): boolean {
  */
 export function getEventLocationLabel(event: Partial<Event> & { location?: string }): string {
   const candidates = [
-    typeof event.locationAddress === 'string' ? event.locationAddress.trim() : '',
     typeof event.locationName === 'string' ? event.locationName.trim() : '',
+    typeof event.locationAddress === 'string' ? event.locationAddress.trim() : '',
     typeof event.location === 'string' ? event.location.trim() : '',
   ].filter(Boolean)
 
   const human = candidates.find((c) => !isMapsOrWebUrl(c))
   if (human) return human
   return 'Location TBA'
+}
+
+/** First Maps / web URL found on the event (for “Open map” links). */
+export function getEventMapsUrl(event: Partial<Event> & { location?: string }): string | null {
+  const candidates = [
+    typeof event.locationAddress === 'string' ? event.locationAddress.trim() : '',
+    typeof event.locationName === 'string' ? event.locationName.trim() : '',
+    typeof event.location === 'string' ? event.location.trim() : '',
+  ].filter(Boolean)
+  const url = candidates.find((c) => isMapsOrWebUrl(c))
+  return url || null
 }
 
 export function mapEventDoc(id: string, data: Record<string, unknown>): NormalizedEvent {

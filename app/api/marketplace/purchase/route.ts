@@ -4,6 +4,11 @@ import {
   completeMarketplacePurchase,
   loadMarketplaceOffer,
 } from '@/lib/marketplace-purchase-server'
+import {
+  validateMarketplaceAddress,
+  type MarketplaceAddress,
+  type MarketplacePaymentMethod,
+} from '@/lib/marketplace-shipping'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +26,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const offerId = String(body.offerId || '')
     const mode = body.mode === 'enquire' ? 'enquire' : 'purchase'
+    const paymentMethod = (body.paymentMethod || 'card') as MarketplacePaymentMethod
 
     if (!offerId) {
       return NextResponse.json({ success: false, error: 'offerId required' }, { status: 400 })
@@ -33,15 +39,44 @@ export async function POST(request: NextRequest) {
 
     const amount = typeof offerRow.data.price === 'number' ? offerRow.data.price : 0
 
-    if (mode === 'purchase' && amount > 0 && body.paymentGateway !== 'stripe' && !body.paymentReference) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Paid listings require Stripe checkout',
-          requiresCheckout: true,
-        },
-        { status: 402 }
-      )
+    if (mode === 'purchase' && amount > 0) {
+      if (paymentMethod === 'card' && body.paymentGateway !== 'stripe' && !body.paymentReference) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Card payments require Stripe checkout',
+            requiresCheckout: true,
+          },
+          { status: 402 }
+        )
+      }
+
+      const invoiceAddress = body.invoiceAddress as MarketplaceAddress | undefined
+      const deliveryAddress = (body.deliveryAddress || body.invoiceAddress) as
+        | MarketplaceAddress
+        | undefined
+      if (invoiceAddress) {
+        const invErr = validateMarketplaceAddress(invoiceAddress, 'Invoice address')
+        if (invErr) return NextResponse.json({ success: false, error: invErr }, { status: 400 })
+      }
+      if (deliveryAddress) {
+        const delErr = validateMarketplaceAddress(deliveryAddress, 'Delivery address')
+        if (delErr) return NextResponse.json({ success: false, error: delErr }, { status: 400 })
+      }
+
+      const result = await completeMarketplacePurchase({
+        offerId,
+        buyerId: uid,
+        mode,
+        paymentReference: body.paymentReference,
+        paymentGateway: body.paymentGateway || paymentMethod,
+        paymentMethod,
+        invoiceAddress,
+        deliveryAddress,
+        awaitingFulfillment: paymentMethod === 'cod' || paymentMethod === 'bank_transfer',
+      })
+
+      return NextResponse.json({ success: true, ...result })
     }
 
     const result = await completeMarketplacePurchase({
@@ -50,6 +85,7 @@ export async function POST(request: NextRequest) {
       mode,
       paymentReference: body.paymentReference,
       paymentGateway: body.paymentGateway || (amount > 0 ? 'stripe' : 'direct'),
+      paymentMethod: amount > 0 ? paymentMethod : undefined,
     })
 
     return NextResponse.json({ success: true, ...result })

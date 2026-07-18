@@ -9,8 +9,9 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
-import { Loader2, Upload } from 'lucide-react'
+import { Loader2, Upload, X } from 'lucide-react'
 import { RichTextEditor } from '@/components/rich-text-editor'
+import { OFFER_INDUSTRY_CATEGORIES, OFFER_TYPES } from '@/lib/offer-categories'
 
 export default function NewOffer() {
   const { user } = useAuth()
@@ -137,7 +138,7 @@ export default function NewOffer() {
             Post New Offer
           </h1>
           <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
-            Share a product, service, or discount — submitted for admin approval before it goes live
+            Share a product or service — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
@@ -172,7 +173,7 @@ export default function NewOffer() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Listing type *
+                  Type *
                 </label>
                 <select
                   name="type"
@@ -186,13 +187,16 @@ export default function NewOffer() {
                     color: '#111111',
                   }}
                 >
-                  <option value="product">Product</option>
-                  <option value="service">Service</option>
+                  {OFFER_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
                 <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  Industry category *
+                  Category *
                 </label>
                 <select
                   name="category"
@@ -208,23 +212,17 @@ export default function NewOffer() {
                     minHeight: '44px',
                   }}
                 >
-                  <option value="">Select industry category</option>
-                  <option value="technology">Technology</option>
-                  <option value="hr">HR</option>
-                  <option value="retail">Retail</option>
-                  <option value="real-estate">Real Estate</option>
-                  <option value="automotive">Automotive</option>
-                  <option value="fb">F&B</option>
-                  <option value="hospitality">Hospitality</option>
-                  <option value="health-fitness">Health & Fitness</option>
-                  <option value="consultancy">Consultancy</option>
-                  <option value="business">Business</option>
-                  <option value="other">Other</option>
+                  <option value="">Select category</option>
+                  {OFFER_INDUSTRY_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            {/* Variant — used on /shop merch cards (colour / size) */}
+            {/* Variant — colour / size line for product cards */}
             <div>
               <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Variant (colour / size)
@@ -245,7 +243,7 @@ export default function NewOffer() {
                 }}
               />
               <p style={{ color: '#888888', fontSize: '12px', marginTop: '6px' }}>
-                Displayed on the public Shop page for Merchandise offers.
+                Optional — shown on marketplace product cards when relevant.
               </p>
             </div>
 

@@ -170,6 +170,13 @@ export interface User {
     businessDescription?: string
     businessRegistration?: string
     businessWebsite?: string
+    businessEmail?: string
+    businessPhone?: string
+    /** Service tags shown on marketplace directory / profile */
+    services?: string[]
+    membership?: string
+    activeOpportunities?: number
+    revenue?: number
   }
   emergencyContact?: {
     name?: string

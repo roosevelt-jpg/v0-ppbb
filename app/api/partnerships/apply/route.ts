@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
         submittedBy,
         submitterName,
         submitterEmail,
+        phone: String(body.phone || '').trim().slice(0, 40) || null,
         type,
         title,
         description,

@@ -17,7 +17,8 @@ async function requireUid(request: NextRequest): Promise<string | null> {
   return verifyIdToken(token)
 }
 
-/** Business submits a homepage advertising request (image + link). */
+/** Business submits a homepage advertising request (image + link).
+ *  Admin may set adminFree: true to upload without payment. */
 export async function POST(request: NextRequest) {
   try {
     const uid = await requireUid(request)
@@ -30,12 +31,59 @@ export async function POST(request: NextRequest) {
     const href = String(body.href || '').trim()
     const alt = String(body.alt || 'Advertisement').trim()
     const businessName = String(body.businessName || '').trim()
+    const adminFree = body.adminFree === true
+    const publishNow = body.publishNow === true
 
     if (!imageURL) {
       return NextResponse.json({ success: false, error: 'Banner image is required' }, { status: 400 })
     }
 
     const db = getAdminDb()
+    const { isAdminUser } = await import('@/lib/admin-access-server')
+
+    if (adminFree) {
+      if (!(await isAdminUser(uid))) {
+        return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+      }
+
+      const ref = db.collection('advertisingRequests').doc()
+      const payload = sanitizeForFirestore({
+        businessId: uid,
+        businessName: businessName || 'Passive Blessings (admin)',
+        imageURL,
+        href,
+        alt,
+        priceAed: 0,
+        currency: 'AED',
+        status: publishNow ? 'published' : 'admin_free',
+        adminFree: true,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        publishedAt: publishNow ? Timestamp.now() : null,
+      })
+      await ref.set(payload)
+
+      if (publishNow) {
+        await db
+          .collection('platformConfig')
+          .doc('homepage')
+          .set(
+            {
+              advertisingBanner: {
+                enabled: true,
+                imageURL,
+                href,
+                alt,
+              },
+              updatedAt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          )
+      }
+
+      return NextResponse.json({ success: true, id: ref.id, priceAed: 0, adminFree: true })
+    }
+
     const priceAed =
       typeof body.priceAed === 'number' && body.priceAed > 0 ? body.priceAed : DEFAULT_PRICE_AED
 
@@ -134,9 +182,13 @@ export async function PATCH(request: NextRequest) {
     const data = snap.data() || {}
 
     if (action === 'publish') {
-      if (data.status !== 'paid' && data.status !== 'published') {
+      // Paid business ads OR admin-created free creatives (status admin_free / paid / published)
+      if (!['paid', 'published', 'admin_free'].includes(String(data.status))) {
         return NextResponse.json(
-          { success: false, error: 'Only paid requests can be published to the homepage' },
+          {
+            success: false,
+            error: 'Only paid or admin free requests can be published to the homepage',
+          },
           { status: 400 }
         )
       }

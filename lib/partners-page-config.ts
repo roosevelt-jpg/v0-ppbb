@@ -27,6 +27,8 @@ export interface PartnersFeaturedProject {
   location: string
   partnerNames: string
   imageURL: string
+  /** Optional extra photos for a collage (cover stays imageURL) */
+  galleryURLs?: string[]
   ctaLabel: string
   ctaHref: string
 }
@@ -190,6 +192,9 @@ function mergeFeaturedProjects(data: unknown): PartnersFeaturedProject[] {
         location: typeof p.location === 'string' ? p.location : '',
         partnerNames: typeof p.partnerNames === 'string' ? p.partnerNames : '',
         imageURL: typeof p.imageURL === 'string' ? p.imageURL : '',
+        galleryURLs: Array.isArray(p.galleryURLs)
+          ? p.galleryURLs.map((u) => String(u || '').trim()).filter(Boolean).slice(0, 6)
+          : [],
         ctaLabel: typeof p.ctaLabel === 'string' ? p.ctaLabel : '',
         ctaHref: typeof p.ctaHref === 'string' ? p.ctaHref : '',
       }

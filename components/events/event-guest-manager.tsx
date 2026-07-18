@@ -155,8 +155,9 @@ export function EventGuestManager({
             Attendees {eventTitle ? `· ${eventTitle}` : ''}
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
-            Pending registrations appear under the <strong>pending</strong> filter — only when the event
-            requires host approval. Otherwise guests are confirmed immediately.
+            Pending registrations appear under the <strong>pending</strong> filter — only when the
+            event has “Require host approval” turned on. Otherwise guests are confirmed immediately
+            with a QR check-in code (no approval email).
           </p>
           <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-xs text-neutral-700 space-y-1.5">
             <p className="font-semibold text-neutral-900">How QR / check-in works</p>

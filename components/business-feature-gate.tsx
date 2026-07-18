@@ -38,10 +38,10 @@ export function BusinessFeatureLink({
     if (hasBusinessAccess(user)) {
       // Already a business member — never send them back to paid join packages
       const joinBusiness =
-        href.includes('/join?type=business') ||
-        href === '/join?type=business' ||
-        /list\s*your\s*business|join\s*as\s*business|list\s*business/i.test(featureLabel)
-      router.push(joinBusiness ? '/business/profile' : href)
+        href.includes('/join') ||
+        href.includes('type=business') ||
+        /list\s*your\s*business|join\s*as\s*business|list\s*business|upgrade/i.test(featureLabel)
+      router.push(joinBusiness ? '/business/dashboard' : href)
       return
     }
     if (isBasicMember(user) || !user) {

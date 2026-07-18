@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
+import { useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db } from '@/lib/firebase'
 import { adminApiFetch } from '@/lib/admin-api-client'
@@ -17,6 +18,7 @@ import {
   FILTER_PILL_ACTIVE,
   FILTER_PILL_INACTIVE,
 } from '@/lib/admin-design-system'
+import { OFFER_INDUSTRY_CATEGORIES, OFFER_TYPES } from '@/lib/offer-categories'
 
 type OfferRow = {
   id: string
@@ -46,13 +48,21 @@ type DiscountRow = {
   createdAt?: Date | null
 }
 
-export default function AdminMarketplacePage() {
+function AdminMarketplacePageInner() {
+  const searchParams = useSearchParams()
+  const focusId = searchParams.get('focus')
+  const sectionParam = searchParams.get('section')
   const [offers, setOffers] = React.useState<OfferRow[]>([])
   const [discounts, setDiscounts] = React.useState<DiscountRow[]>([])
   const [loading, setLoading] = React.useState(true)
   const [actingId, setActingId] = React.useState<string | null>(null)
-  const [section, setSection] = React.useState<'offers' | 'discounts'>('offers')
-  const [filter, setFilter] = React.useState<'all' | 'pending_approval' | 'published' | 'pb'>('all')
+  const [section, setSection] = React.useState<'offers' | 'discounts'>(
+    sectionParam === 'discounts' ? 'discounts' : 'offers'
+  )
+  const [filter, setFilter] = React.useState<'all' | 'pending_approval' | 'published' | 'pb'>(
+    focusId ? 'pending_approval' : 'all'
+  )
+  const [highlightId, setHighlightId] = React.useState<string | null>(focusId)
   const [showCreate, setShowCreate] = React.useState(false)
   const [creating, setCreating] = React.useState(false)
   const [uploadingImage, setUploadingImage] = React.useState(false)
@@ -61,11 +71,32 @@ export default function AdminMarketplacePage() {
     description: '',
     price: '',
     originalPrice: '',
-    category: 'merchandise',
+    type: 'product',
+    category: 'retail',
+    listOnShop: true,
     variant: '',
     imageURL: '',
     publishNow: true,
   })
+
+  React.useEffect(() => {
+    if (sectionParam === 'discounts' || sectionParam === 'offers') {
+      setSection(sectionParam)
+    }
+  }, [sectionParam])
+
+  React.useEffect(() => {
+    if (!focusId) return
+    setHighlightId(focusId)
+    setFilter('pending_approval')
+    const t = window.setTimeout(() => {
+      document.getElementById(`marketplace-row-${focusId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }, 400)
+    return () => window.clearTimeout(t)
+  }, [focusId, offers.length, discounts.length, section])
 
   const resetCreateForm = () => {
     setCreateForm({
@@ -73,7 +104,9 @@ export default function AdminMarketplacePage() {
       description: '',
       price: '',
       originalPrice: '',
-      category: 'merchandise',
+      type: 'product',
+      category: 'retail',
+      listOnShop: true,
       variant: '',
       imageURL: '',
       publishNow: true,
@@ -253,7 +286,9 @@ export default function AdminMarketplacePage() {
           price: createForm.price === '' ? null : Number(createForm.price),
           originalPrice: createForm.originalPrice === '' ? null : Number(createForm.originalPrice),
           category: createForm.category,
-          type: 'product',
+          industryCategory: createForm.category,
+          type: createForm.type === 'service' ? 'service' : 'product',
+          showOnShop: Boolean(createForm.listOnShop),
           variant: createForm.variant.trim(),
           imageURL: createForm.imageURL.trim(),
           status: createForm.publishNow ? 'published' : 'draft',
@@ -373,17 +408,40 @@ export default function AdminMarketplacePage() {
                 />
               </label>
               <label className="text-sm">
-                Category
+                Type *
+                <select
+                  value={createForm.type}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, type: e.target.value }))}
+                  className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  {OFFER_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm">
+                Category *
                 <select
                   value={createForm.category}
                   onChange={(e) => setCreateForm((f) => ({ ...f, category: e.target.value }))}
                   className="mt-1 w-full border rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="merchandise">Merchandise (shows on /shop)</option>
-                  <option value="product">Product (marketplace)</option>
-                  <option value="service">Service</option>
-                  <option value="education">Education</option>
+                  {OFFER_INDUSTRY_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
                 </select>
+              </label>
+              <label className="text-sm sm:col-span-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={createForm.listOnShop}
+                  onChange={(e) => setCreateForm((f) => ({ ...f, listOnShop: e.target.checked }))}
+                />
+                Also list on public Shop (/shop merchandise)
               </label>
               <label className="text-sm">
                 Variant (size / colour)
@@ -487,7 +545,15 @@ export default function AdminMarketplacePage() {
               {filteredDiscounts.map((row) => {
                 const isPending = (row.status || '').toLowerCase() === 'pending_approval'
                 return (
-                  <div key={row.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
+                  <div
+                    key={row.id}
+                    id={`marketplace-row-${row.id}`}
+                    className={`bg-white border rounded-lg p-4 space-y-2 ${
+                      highlightId === row.id
+                        ? 'border-black ring-2 ring-black/20'
+                        : 'border-gray-200'
+                    }`}
+                  >
                     <p className="font-semibold text-sm break-words">{row.title}</p>
                     <p className="text-xs text-gray-600 break-all">{row.businessId}</p>
                     <p className="text-sm">
@@ -538,7 +604,13 @@ export default function AdminMarketplacePage() {
                   {filteredDiscounts.map((row) => {
                     const isPending = (row.status || '').toLowerCase() === 'pending_approval'
                     return (
-                      <tr key={row.id} className="hover:bg-gray-50">
+                      <tr
+                        key={row.id}
+                        id={`marketplace-row-${row.id}`}
+                        className={`hover:bg-gray-50 ${
+                          highlightId === row.id ? 'bg-neutral-100 ring-2 ring-inset ring-black/30' : ''
+                        }`}
+                      >
                         <td className="px-4 py-3 text-sm font-medium">{row.title}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{row.businessId}</td>
                         <td className="px-4 py-3 text-sm">
@@ -590,7 +662,15 @@ export default function AdminMarketplacePage() {
               const status = (offer.status || '').toLowerCase()
               const isPending = status === 'pending_approval' || status === 'draft'
               return (
-                <div key={offer.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
+                <div
+                  key={offer.id}
+                  id={`marketplace-row-${offer.id}`}
+                  className={`bg-white border rounded-lg p-4 space-y-2 ${
+                    highlightId === offer.id
+                      ? 'border-black ring-2 ring-black/20'
+                      : 'border-gray-200'
+                  }`}
+                >
                   <p className="font-semibold text-sm break-words">{offer.title}</p>
                   <p className="text-xs text-gray-600">{offer.businessName || offer.businessId}</p>
                   <p className="text-sm capitalize">
@@ -650,7 +730,13 @@ export default function AdminMarketplacePage() {
                   const status = (offer.status || '').toLowerCase()
                   const isPending = status === 'pending_approval' || status === 'draft'
                   return (
-                    <tr key={offer.id} className="hover:bg-gray-50">
+                    <tr
+                      key={offer.id}
+                      id={`marketplace-row-${offer.id}`}
+                      className={`hover:bg-gray-50 ${
+                        highlightId === offer.id ? 'bg-neutral-100 ring-2 ring-inset ring-black/30' : ''
+                      }`}
+                    >
                       <td className="px-4 py-3 text-sm font-medium">{offer.title}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{offer.businessName || offer.businessId}</td>
                       <td className="px-4 py-3 text-sm capitalize">{offer.type || offer.category}</td>
@@ -706,5 +792,21 @@ export default function AdminMarketplacePage() {
         )}
       </div>
     </AdminPageLayout>
+  )
+}
+
+function AdminMarketplacePageFallback() {
+  return (
+    <AdminPageLayout title="Marketplace" subtitle="Loading…">
+      <p className="text-gray-500 py-12 text-center">Loading marketplace…</p>
+    </AdminPageLayout>
+  )
+}
+
+export default function AdminMarketplacePage() {
+  return (
+    <React.Suspense fallback={<AdminMarketplacePageFallback />}>
+      <AdminMarketplacePageInner />
+    </React.Suspense>
   )
 }

@@ -1,0 +1,170 @@
+import { jsPDF } from 'jspdf'
+import {
+  formatMarketplaceAddress,
+  paymentMethodLabel,
+  deliveryPartnerLabel,
+  type MarketplaceAddress,
+  type MarketplacePaymentMethod,
+} from '@/lib/marketplace-shipping'
+
+export interface MarketplaceInvoiceData {
+  documentType: 'invoice' | 'receipt'
+  orderId: string
+  invoiceNumber: string
+  issuedAt: Date
+  offerTitle: string
+  amount: number
+  currency: string
+  paymentMethod: MarketplacePaymentMethod | string
+  paymentStatus: string
+  deliveryPartnerLabel: string
+  /** Shop on Passive Blessings marketplace */
+  shopName: string
+  shopAddress: string
+  shopEmail?: string
+  shopPhone?: string
+  platformName?: string
+  platformAddress?: string
+  buyerName: string
+  buyerEmail: string
+  invoiceAddress: MarketplaceAddress
+  deliveryAddress: MarketplaceAddress
+}
+
+function money(amount: number, currency: string) {
+  return `${currency} ${amount.toFixed(2)}`
+}
+
+/**
+ * Auto-generated marketplace invoice / receipt.
+ * Includes shop name & address (from the business on Passive Blessings).
+ */
+export function generateMarketplaceInvoicePdf(data: MarketplaceInvoiceData): Uint8Array {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const pageWidth = (doc as jsPDF & { getPageWidth?: () => number }).getPageWidth?.()
+    ?? doc.internal.pageSize.getWidth()
+  const margin = 16
+  const contentWidth = pageWidth - margin * 2
+  let y = margin
+
+  const platform = data.platformName || 'Passive Blessings'
+  const title = data.documentType === 'receipt' ? 'RECEIPT' : 'INVOICE'
+
+  doc.setFillColor(17, 17, 17)
+  doc.rect(0, 0, pageWidth, 36, 'F')
+  doc.setTextColor(255, 255, 255)
+  doc.setFontSize(20)
+  doc.setFont('helvetica', 'bold')
+  doc.text(platform, margin, 16)
+  doc.setFontSize(11)
+  doc.setFont('helvetica', 'normal')
+  doc.text(`Marketplace ${title}`, margin, 24)
+  if (data.platformAddress) {
+    doc.setFontSize(8)
+    doc.text(data.platformAddress, margin, 30)
+  }
+
+  y = 46
+  doc.setTextColor(0, 0, 0)
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'bold')
+  doc.text(`${title} NO.`, margin, y)
+  doc.setFont('helvetica', 'normal')
+  doc.text(data.invoiceNumber, margin + 32, y)
+  y += 6
+  doc.setFont('helvetica', 'bold')
+  doc.text('ORDER ID', margin, y)
+  doc.setFont('helvetica', 'normal')
+  doc.text(data.orderId, margin + 32, y)
+  y += 6
+  doc.setFont('helvetica', 'bold')
+  doc.text('DATE', margin, y)
+  doc.setFont('helvetica', 'normal')
+  doc.text(data.issuedAt.toLocaleString('en-AE'), margin + 32, y)
+
+  y += 12
+  doc.setFillColor(245, 245, 245)
+  doc.rect(margin, y - 4, contentWidth / 2 - 2, 42, 'F')
+  doc.rect(margin + contentWidth / 2 + 2, y - 4, contentWidth / 2 - 2, 42, 'F')
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.text('SOLD BY (SHOP)', margin + 2, y + 2)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  const shopLines = doc.splitTextToSize(
+    [data.shopName, data.shopAddress, data.shopEmail, data.shopPhone].filter(Boolean).join('\n'),
+    contentWidth / 2 - 6
+  )
+  doc.text(shopLines, margin + 2, y + 8)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.text('BILL TO', margin + contentWidth / 2 + 4, y + 2)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  const billLines = doc.splitTextToSize(
+    formatMarketplaceAddress(data.invoiceAddress),
+    contentWidth / 2 - 6
+  )
+  doc.text(billLines, margin + contentWidth / 2 + 4, y + 8)
+
+  y += 48
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.text('DELIVER TO', margin, y)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8)
+  const shipLines = doc.splitTextToSize(formatMarketplaceAddress(data.deliveryAddress), contentWidth)
+  doc.text(shipLines, margin, y + 5)
+
+  y += 5 + shipLines.length * 4 + 8
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(9)
+  doc.text('ITEM', margin, y)
+  doc.text('AMOUNT', margin + contentWidth - 30, y)
+  y += 2
+  doc.setDrawColor(200, 200, 200)
+  doc.line(margin, y, margin + contentWidth, y)
+  y += 7
+  doc.setFont('helvetica', 'normal')
+  const itemLines = doc.splitTextToSize(data.offerTitle, contentWidth - 40)
+  doc.text(itemLines, margin, y)
+  doc.text(money(data.amount, data.currency), margin + contentWidth - 30, y)
+
+  y += itemLines.length * 5 + 10
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(11)
+  doc.text('TOTAL', margin, y)
+  doc.text(money(data.amount, data.currency), margin + contentWidth - 30, y)
+
+  y += 10
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.text(`Payment method: ${paymentMethodLabel(data.paymentMethod)}`, margin, y)
+  y += 5
+  doc.text(`Payment status: ${data.paymentStatus}`, margin, y)
+  y += 5
+  doc.text(`Delivery partner: ${data.deliveryPartnerLabel}`, margin, y)
+  y += 5
+  doc.text(`Buyer: ${data.buyerName}${data.buyerEmail ? ` · ${data.buyerEmail}` : ''}`, margin, y)
+
+  y += 14
+  doc.setFontSize(7)
+  doc.setTextColor(100, 100, 100)
+  doc.text(
+    'This document was generated by Passive Blessings Marketplace. The shop named above is responsible for fulfilling and arranging delivery with their preferred partner.',
+    margin,
+    y,
+    { maxWidth: contentWidth }
+  )
+
+  return new Uint8Array(doc.output('arraybuffer'))
+}
+
+export function buildInvoiceNumber(orderId: string, type: 'invoice' | 'receipt'): string {
+  const prefix = type === 'receipt' ? 'PB-RCPT' : 'PB-INV'
+  return `${prefix}-${orderId.slice(0, 8).toUpperCase()}`
+}
+
+export { deliveryPartnerLabel }

@@ -10,6 +10,10 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore'
 import type { BusinessOffer } from '@/lib/types'
+import {
+  matchesOfferMarketplaceTab,
+  type OfferMarketplaceTabId,
+} from '@/lib/offer-categories'
 
 export function parseFirestoreDate(value: unknown): Date | null {
   if (!value) return null
@@ -215,22 +219,16 @@ export function isMarketplaceOfferVisible(offer: BusinessOffer): boolean {
 
 export function filterMarketplaceOffers(
   offers: BusinessOffer[],
-  category: string
+  filter: string
 ): BusinessOffer[] {
   const visible = offers.filter(isMarketplaceOfferVisible)
-  if (category === 'all') return visible
-  if (category === 'discounts') {
-    return visible.filter((o) => o.type === 'discount' || Boolean(o.discountPercentage))
+  if (filter === 'all') return visible
+  if (filter === 'product' || filter === 'service') {
+    return visible.filter((o) => (o.type || '').toLowerCase() === filter)
   }
-  if (category === 'books') {
-    return visible.filter((o) => ['books', 'education'].includes((o.category ?? '').toLowerCase()))
-  }
-  if (category === 'courses') {
-    return visible.filter((o) =>
-      ['courses', 'coaching', 'education'].includes((o.category ?? '').toLowerCase())
-    )
-  }
-  return visible.filter((o) => (o.category ?? '').toLowerCase() === category)
+  return visible.filter((o) =>
+    matchesOfferMarketplaceTab(o, filter as OfferMarketplaceTabId)
+  )
 }
 
 export function subscribeToMarketplaceOffers(

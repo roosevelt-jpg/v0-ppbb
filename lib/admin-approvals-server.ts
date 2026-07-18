@@ -23,11 +23,18 @@ export type ApprovalItem = {
   type: ApprovalItemType
   title: string
   description?: string
+  /** Full inquiry / body text for in-page review */
+  message?: string
   submittedBy?: string
   createdAt: string | null
   amount?: number
+  /** Deep link to the dedicated admin page for this item */
   href: string
+  /** Human label for the destination (e.g. “Marketplace discounts”) */
+  destinationLabel?: string
   communityId?: string
+  formId?: string
+  queue: 'forms' | 'listings'
 }
 
 function toIso(value: unknown): string | null {
@@ -57,24 +64,18 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
   const db = getAdminDb()
   const items: ApprovalItem[] = []
   const seenOffers = new Set<string>()
-  const seenJobs = new Set<string>()
 
   const add = (item: ApprovalItem) => pushItem(items, item)
 
   const results = await Promise.allSettled([
     db.collection('beneficiaryRequests').where('status', '==', 'pending').limit(100).get(),
-    db.collection('vendorApplications').where('status', '==', 'pending').limit(100).get(),
     db.collection('offers').where('status', '==', 'pending_approval').limit(100).get(),
     db.collection('businessOffers').where('status', '==', 'pending_approval').limit(100).get(),
-    db.collection('jobs').where('status', '==', 'pending_approval').limit(100).get(),
-    db.collection('businessOpportunities').where('status', '==', 'pending_approval').limit(100).get(),
     db.collection('discounts').where('status', '==', 'pending_approval').limit(100).get(),
     db.collection('businesses').where('isApproved', '==', false).limit(100).get(),
     db.collection('donationSubmissions').where('status', '==', 'pending').limit(100).get(),
     db.collection('events').where('status', '==', 'pending_approval').limit(100).get(),
     db.collection('partnerships').where('status', '==', 'pending').limit(100).get(),
-    db.collection('communities').where('status', '==', 'pending_approval').limit(100).get(),
-    db.collectionGroup('groups').where('status', '==', 'pending_approval').limit(100).get(),
     db.collection('contactSubmissions').where('status', '==', 'unread').limit(100).get(),
     db.collection('formSubmissions').where('status', '==', 'pending').limit(100).get(),
   ])
@@ -83,20 +84,15 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
     results[index].status === 'fulfilled' ? results[index].value : { docs: [] as never[] }
 
   const beneficiarySnap = snap(0)
-  const vendorSnap = snap(1)
-  const offersSnap = snap(2)
-  const legacyOffersSnap = snap(3)
-  const jobsSnap = snap(4)
-  const legacyJobsSnap = snap(5)
-  const discountsSnap = snap(6)
-  const businessesSnap = snap(7)
-  const donationsSnap = snap(8)
-  const eventsSnap = snap(9)
-  const partnershipsSnap = snap(10)
-  const communitiesSnap = snap(11)
-  const groupsSnap = snap(12)
-  const contactSnap = snap(13)
-  const formSubmissionsSnap = snap(14)
+  const offersSnap = snap(1)
+  const legacyOffersSnap = snap(2)
+  const discountsSnap = snap(3)
+  const businessesSnap = snap(4)
+  const donationsSnap = snap(5)
+  const eventsSnap = snap(6)
+  const partnershipsSnap = snap(7)
+  const contactSnap = snap(8)
+  const formSubmissionsSnap = snap(9)
 
   for (const failed of results) {
     if (failed.status === 'rejected') {
@@ -111,22 +107,12 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'beneficiary',
       title: String(d.fullName || d.name || 'Beneficiary request'),
       description: String(d.reasonCategory || d.motivation || ''),
-      submittedBy: String(d.email || d.userId || ''),
+      message: String(d.motivation || d.reasonDetails || d.description || d.reasonCategory || ''),
+      submittedBy: String(d.email || d.phone || d.userId || ''),
       createdAt: toIso(d.createdAt || d.submissionDate),
-      href: '/admin/beneficiary-requests',
-    })
-  }
-
-  for (const doc of vendorSnap.docs) {
-    const d = doc.data()
-    add({
-      id: doc.id,
-      type: 'vendor',
-      title: String(d.businessName || 'Vendor application'),
-      description: String(d.description || ''),
-      submittedBy: String(d.contactEmail || d.applicantId || ''),
-      createdAt: toIso(d.createdAt || d.submittedAt),
-      href: '/admin/vendor-applications',
+      href: `/admin/beneficiary-requests?focus=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Beneficiary requests',
+      queue: 'forms',
     })
   }
 
@@ -138,10 +124,13 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'offer',
       title: String(d.title || 'Marketplace offer'),
       description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.businessId || ''),
+      message: String(d.description || ''),
+      submittedBy: String(d.businessName || d.businessId || ''),
       createdAt: toIso(d.createdAt),
       amount: typeof d.price === 'number' ? d.price : undefined,
-      href: '/admin/marketplace',
+      href: `/admin/marketplace?section=offers&focus=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Marketplace · Offers',
+      queue: 'listings',
     })
   }
 
@@ -153,38 +142,13 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'offer',
       title: String(d.title || 'Marketplace offer'),
       description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.businessId || ''),
+      message: String(d.description || ''),
+      submittedBy: String(d.businessName || d.businessId || ''),
       createdAt: toIso(d.createdAt),
       amount: typeof d.price === 'number' ? d.price : undefined,
-      href: '/admin/marketplace',
-    })
-  }
-
-  for (const doc of jobsSnap.docs) {
-    seenJobs.add(doc.id)
-    const d = doc.data()
-    add({
-      id: doc.id,
-      type: 'job',
-      title: String(d.title || 'Job listing'),
-      description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.businessId || ''),
-      createdAt: toIso(d.createdAt),
-      href: '/admin/opportunities',
-    })
-  }
-
-  for (const doc of legacyJobsSnap.docs) {
-    if (seenJobs.has(doc.id)) continue
-    const d = doc.data()
-    add({
-      id: doc.id,
-      type: 'job',
-      title: String(d.title || 'Job listing'),
-      description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.businessId || ''),
-      createdAt: toIso(d.createdAt),
-      href: '/admin/opportunities',
+      href: `/admin/marketplace?section=offers&focus=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Marketplace · Offers',
+      queue: 'listings',
     })
   }
 
@@ -195,9 +159,12 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'discount',
       title: String(d.title || 'Member discount'),
       description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.businessId || ''),
+      message: String(d.description || ''),
+      submittedBy: String(d.businessName || d.businessId || ''),
       createdAt: toIso(d.createdAt),
-      href: '/admin/marketplace',
+      href: `/admin/marketplace?section=discounts&focus=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Marketplace · Discounts',
+      queue: 'listings',
     })
   }
 
@@ -209,9 +176,12 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'business',
       title: String(d.name || d.businessName || 'Business profile'),
       description: String(d.description || d.category || ''),
-      submittedBy: String(d.userId || d.ownerId || doc.id),
+      message: String(d.description || d.about || ''),
+      submittedBy: String(d.email || d.businessEmail || d.contactEmail || d.userId || d.ownerId || doc.id),
       createdAt: toIso(d.createdAt),
-      href: '/admin/businesses',
+      href: `/admin/businesses?focus=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Businesses',
+      queue: 'listings',
     })
   }
 
@@ -222,10 +192,13 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'donation',
       title: String(d.causeName || d.causeTitle || 'Donation proof'),
       description: String(d.reference || ''),
-      submittedBy: String(d.userEmail || d.userId || ''),
+      message: String(d.notes || d.reference || ''),
+      submittedBy: String(d.userEmail || d.userName || ''),
       createdAt: toIso(d.createdAt || d.submittedAt),
       amount: typeof d.amount === 'number' ? d.amount : undefined,
-      href: '/admin/finance/donations',
+      href: `/admin/finance/donations?focus=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Donation proofs',
+      queue: 'forms',
     })
   }
 
@@ -236,9 +209,12 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       type: 'event',
       title: String(d.title || d.name || 'Event'),
       description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.createdBy || d.organizerId || ''),
+      message: String(d.description || ''),
+      submittedBy: String(d.hostName || d.businessName || d.createdBy || d.organizerId || ''),
       createdAt: toIso(d.createdAt),
       href: `/admin/events/${doc.id}`,
+      destinationLabel: 'Event review',
+      queue: 'listings',
     })
   }
 
@@ -248,65 +224,56 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
       id: doc.id,
       type: 'partnership',
       title: String(d.title || d.partnerName || 'Partnership request'),
-      description: String(d.description || ''),
-      submittedBy: String(d.submittedBy || d.businessId || ''),
+      description: String(d.description || '').slice(0, 200),
+      message: String(d.description || ''),
+      submittedBy: String(d.submitterEmail || d.submitterName || d.submittedBy || d.businessId || ''),
       createdAt: toIso(d.submittedAt || d.createdAt),
-      href: '/admin/contact-submissions?category=partnership',
-    })
-  }
-
-  for (const doc of communitiesSnap.docs) {
-    const d = doc.data()
-    add({
-      id: doc.id,
-      type: 'community',
-      title: String(d.name || 'Community'),
-      description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.createdBy || ''),
-      createdAt: toIso(d.createdAt),
-      href: '/admin/communities',
-    })
-  }
-
-  for (const doc of groupsSnap.docs) {
-    const d = doc.data()
-    const communityId = doc.ref.parent.parent?.id || ''
-    add({
-      id: doc.id,
-      type: 'group',
-      title: String(d.name || 'Group'),
-      description: String(d.description || '').slice(0, 200),
-      submittedBy: String(d.createdBy || ''),
-      createdAt: toIso(d.createdAt),
-      href: communityId ? `/admin/communities/${communityId}` : '/admin/communities',
-      communityId: communityId || undefined,
+      href: `/admin/contact-submissions?category=partnership&id=${encodeURIComponent(`partnership:${doc.id}`)}`,
+      destinationLabel: 'Contact · Partnerships',
+      queue: 'forms',
     })
   }
 
   for (const doc of contactSnap.docs) {
     const d = doc.data()
-    const category = String(d.category || d.inquiryType || 'other')
+    const category = String(d.category || d.inquiryType || d.source || 'contact')
     add({
       id: doc.id,
       type: 'contact',
       title: String(d.subject || d.name || 'Contact inquiry'),
       description: `${category}: ${String(d.message || d.body || '').slice(0, 180)}`,
+      message: String(d.message || d.body || ''),
       submittedBy: String(d.email || d.name || ''),
       createdAt: toIso(d.submittedAt || d.createdAt),
-      href: '/admin/contact-submissions',
+      href: `/admin/contact-submissions?id=${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Contact submissions',
+      queue: 'forms',
     })
   }
 
   for (const doc of formSubmissionsSnap.docs) {
     const d = doc.data()
+    const formId = typeof d.formId === 'string' ? d.formId : ''
+    const responses = d.responses && typeof d.responses === 'object' ? d.responses : null
+    let message = String(d.summary || '')
+    if (!message && responses) {
+      message = Object.entries(responses as Record<string, unknown>)
+        .slice(0, 8)
+        .map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)
+        .join('\n')
+    }
     add({
       id: doc.id,
       type: 'form_submission',
       title: String(d.formTitle || d.formName || 'Form submission'),
       description: String(d.summary || d.email || '').slice(0, 200),
+      message,
       submittedBy: String(d.email || d.submittedBy || d.userId || ''),
       createdAt: toIso(d.submittedAt || d.createdAt),
-      href: d.formId ? `/admin/forms/${d.formId}` : '/admin/forms',
+      href: `/admin/forms/submissions/${encodeURIComponent(doc.id)}`,
+      destinationLabel: 'Form submission detail',
+      formId: formId || undefined,
+      queue: 'forms',
     })
   }
 

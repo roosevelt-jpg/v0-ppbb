@@ -2,17 +2,14 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getCmsPageHref, getCmsPageLabel } from '@/lib/cms-page-routes'
-import { Page } from '@/lib/types'
 import { SocialMediaLinks } from '@/components/social-media-links'
 import { SiteLogo } from '@/components/site-logo'
-import { BusinessFeatureLink } from '@/components/business-feature-gate'
 import {
   subscribeToGlobalSettings,
   DEFAULT_GLOBAL_SETTINGS,
   type GlobalSocialLinks,
 } from '@/lib/platform-config'
-import { ensureMenuPagesSeeded, subscribeToMenuPages } from '@/lib/cms-menu-live'
+import { FOOTER_PRIMARY_LINKS } from '@/lib/cms-menu-seeds'
 import { useCommunityStats } from '@/hooks/use-community-stats'
 
 interface Stats {
@@ -20,18 +17,6 @@ interface Stats {
   volunteerHours: number
   businessPartners: number
   donationsTracked: string
-}
-
-const BUSINESS_GATE_LABELS = new Set(['Start Business', 'Host Event', 'List Your Business', 'Post a Job'])
-
-type MenuLink = { id: string; label: string; href: string }
-
-function pagesToLinks(pages: Page[]): MenuLink[] {
-  return pages.map((p) => ({
-    id: p.id,
-    label: getCmsPageLabel(p),
-    href: getCmsPageHref(p),
-  }))
 }
 
 export function Footer() {
@@ -48,10 +33,6 @@ export function Footer() {
   )
   const [footerBlurb, setFooterBlurb] = useState(DEFAULT_GLOBAL_SETTINGS.siteDescription)
 
-  const [quickLinks, setQuickLinks] = useState<MenuLink[]>([])
-  const [getInvolvedLinks, setGetInvolvedLinks] = useState<MenuLink[]>([])
-  const [legalLinks, setLegalLinks] = useState<MenuLink[]>([])
-
   useEffect(() => {
     return subscribeToGlobalSettings((s) => {
       setSocialLinks(s.socialLinks || {})
@@ -59,15 +40,9 @@ export function Footer() {
     })
   }, [])
 
-  useEffect(() => {
-    void ensureMenuPagesSeeded()
-    const unsubs = [
-      subscribeToMenuPages('footer-quicklinks', (pages) => setQuickLinks(pagesToLinks(pages))),
-      subscribeToMenuPages('footer-getinvolved', (pages) => setGetInvolvedLinks(pagesToLinks(pages))),
-      subscribeToMenuPages('footer-legal', (pages) => setLegalLinks(pagesToLinks(pages))),
-    ]
-    return () => unsubs.forEach((u) => u())
-  }, [])
+  const mid = Math.ceil(FOOTER_PRIMARY_LINKS.length / 2)
+  const linkColA = FOOTER_PRIMARY_LINKS.slice(0, mid)
+  const linkColB = FOOTER_PRIMARY_LINKS.slice(mid)
 
   return (
     <footer
@@ -105,8 +80,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div>
             <SiteLogo background="dark" variant="footer" href="/" />
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
               {footerBlurb}
@@ -115,12 +90,16 @@ export function Footer() {
 
           <div>
             <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
-              Quick Links
+              Explore
             </h3>
             <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.id}>
-                  <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
+              {linkColA.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm hover:text-white transition-colors"
+                    style={{ color: '#888888' }}
+                  >
                     {link.label}
                   </Link>
                 </li>
@@ -128,48 +107,18 @@ export function Footer() {
             </ul>
           </div>
 
-          {getInvolvedLinks.length > 0 ? (
-            <div>
-              <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
-                Get Involved
-              </h3>
-              <ul className="space-y-2">
-                {getInvolvedLinks.map((link) => {
-                  const gate =
-                    BUSINESS_GATE_LABELS.has(link.label) ||
-                    link.href.includes('/join?type=business') ||
-                    link.href.startsWith('/business/')
-                  return (
-                    <li key={link.id}>
-                      {gate ? (
-                        <BusinessFeatureLink
-                          featureLabel={link.label}
-                          href={link.href}
-                          className="text-sm hover:text-white transition-colors text-left"
-                          style={{ color: '#888888' }}
-                        >
-                          {link.label}
-                        </BusinessFeatureLink>
-                      ) : (
-                        <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
-                          {link.label}
-                        </Link>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ) : null}
-
           <div>
             <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
-              Legal
+              Get involved
             </h3>
             <ul className="space-y-2">
-              {legalLinks.map((link) => (
-                <li key={link.id}>
-                  <Link href={link.href} className="text-sm hover:text-white transition-colors" style={{ color: '#888888' }}>
+              {linkColB.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm hover:text-white transition-colors"
+                    style={{ color: '#888888' }}
+                  >
                     {link.label}
                   </Link>
                 </li>

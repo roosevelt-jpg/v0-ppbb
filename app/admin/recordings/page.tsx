@@ -4,25 +4,28 @@ export const dynamic = 'force-dynamic'
 import React from 'react'
 import Link from 'next/link'
 import { AdminPageLayout } from '@/components/admin-page-layout'
-import { format } from 'date-fns'
-import { Plus, Trash2, Edit2, Eye, Music, Video } from 'lucide-react'
-import { ACTION_ROW, BUTTON_ICON_COMPACT } from '@/lib/admin-design-system'
+import { Plus, Trash2, Eye, EyeOff, Music, Video, ExternalLink } from 'lucide-react'
+import { ACTION_ROW, BUTTON_ICON_COMPACT, BUTTON_PRIMARY, FILTER_PILL_ACTIVE, FILTER_PILL_INACTIVE } from '@/lib/admin-design-system'
+
+type StatusFilter = 'all' | 'draft' | 'published'
 
 export default function AdminRecordingsPage() {
   const [recordings, setRecordings] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [filter, setFilter] = React.useState<'all' | 'audio' | 'video'>('all')
+  const [statusFilter, setStatusFilter] = React.useState<StatusFilter>('all')
 
   React.useEffect(() => {
-    loadRecordings()
+    void loadRecordings()
   }, [])
 
   const loadRecordings = async () => {
+    setLoading(true)
     try {
-      const res = await fetch('/api/recordings?status=draft', { cache: 'no-store' })
+      const res = await fetch('/api/recordings?status=all', { cache: 'no-store' })
       const json = await res.json()
       if (json.success) {
-        setRecordings(json.data.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+        setRecordings(Array.isArray(json.data) ? json.data : [])
       }
     } catch (error) {
       console.error('[v0] Error fetching recordings:', error)
@@ -37,30 +40,34 @@ export default function AdminRecordingsPage() {
       const res = await fetch(`/api/recordings?id=${id}`, { method: 'DELETE' })
       const json = await res.json()
       if (json.success) {
-        setRecordings(recordings.filter(r => r.id !== id))
+        setRecordings(recordings.filter((r) => r.id !== id))
       }
     } catch (error) {
       console.error('[v0] Error deleting recording:', error)
     }
   }
 
-  const handlePublish = async (id: string) => {
+  const handleSetStatus = async (id: string, status: 'draft' | 'published') => {
     try {
       const res = await fetch('/api/recordings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: 'published' }),
+        body: JSON.stringify({ id, status }),
       })
       const json = await res.json()
       if (json.success) {
-        loadRecordings()
+        await loadRecordings()
       }
     } catch (error) {
-      console.error('[v0] Error publishing recording:', error)
+      console.error('[v0] Error updating recording:', error)
     }
   }
 
-  const filtered = filter === 'all' ? recordings : recordings.filter(r => r.type === filter)
+  const filtered = recordings.filter((r) => {
+    if (statusFilter !== 'all' && r.status !== statusFilter) return false
+    if (filter !== 'all' && r.type !== filter) return false
+    return true
+  })
 
   if (loading) {
     return (
@@ -73,37 +80,39 @@ export default function AdminRecordingsPage() {
   }
 
   return (
-    <AdminPageLayout title="Recordings">
+    <AdminPageLayout
+      title="Recordings"
+      subtitle="Published items appear on Educational Resources and /recordings"
+    >
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-black">All Recordings (Draft)</h2>
-            <div className="flex gap-2">
+        <div className="flex flex-wrap justify-between items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {(['all', 'published', 'draft'] as const).map((s) => (
               <button
-                onClick={() => setFilter('all')}
-                className={`px-3 py-1 rounded text-sm font-medium ${filter === 'all' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'}`}
+                key={s}
+                type="button"
+                onClick={() => setStatusFilter(s)}
+                className={statusFilter === s ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
               >
-                All
+                {s === 'all' ? 'All' : s === 'published' ? 'Published' : 'Draft'}
               </button>
+            ))}
+            <span className="text-neutral-300 px-1">|</span>
+            {(['all', 'audio', 'video'] as const).map((t) => (
               <button
-                onClick={() => setFilter('audio')}
-                className={`px-3 py-1 rounded text-sm font-medium flex items-center gap-1 ${filter === 'audio' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'}`}
+                key={t}
+                type="button"
+                onClick={() => setFilter(t)}
+                className={`${filter === t ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE} gap-1`}
               >
-                <Music size={16} /> Audio
+                {t === 'audio' ? <Music size={14} /> : null}
+                {t === 'video' ? <Video size={14} /> : null}
+                {t === 'all' ? 'All types' : t}
               </button>
-              <button
-                onClick={() => setFilter('video')}
-                className={`px-3 py-1 rounded text-sm font-medium flex items-center gap-1 ${filter === 'video' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'}`}
-              >
-                <Video size={16} /> Video
-              </button>
-            </div>
+            ))}
           </div>
-          <Link
-            href="/admin/recordings/create"
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
-          >
-            <Plus size={20} />
+          <Link href="/admin/recordings/create" className={`${BUTTON_PRIMARY} gap-1`}>
+            <Plus size={16} />
             Upload Recording
           </Link>
         </div>
@@ -115,68 +124,94 @@ export default function AdminRecordingsPage() {
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 min-w-0">
             <div className="admin-table-scroll">
-            <table className="w-full min-w-[800px]">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Speaker</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Duration</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filtered.map((recording: any) => (
-                  <tr key={recording.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 text-sm font-medium text-gray-900">{recording.title}</td>
-                    <td className="px-6 py-3 text-sm">
-                      <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 w-fit ${
-                        recording.type === 'audio' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
-                      }`}>
-                        {recording.type === 'audio' ? <Music size={14} /> : <Video size={14} />}
-                        {recording.type}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{recording.speaker || '-'}</td>
-                    <td className="px-6 py-3 text-sm text-gray-600">{recording.duration ? `${Math.floor(recording.duration / 60)}m` : '-'}</td>
-                    <td className="px-6 py-3 text-sm">
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-medium">Draft</span>
-                    </td>
-                    <td className="px-6 py-3 text-sm whitespace-nowrap">
-                      <div className={ACTION_ROW}>
-                      <Link
-                        href={`/admin/recordings/${recording.id}`}
-                        className={BUTTON_ICON_COMPACT}
-                        title="Edit"
-                        aria-label="Edit"
-                      >
-                        <Edit2 size={14} />
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => handlePublish(recording.id)}
-                        className={BUTTON_ICON_COMPACT}
-                        title="Publish"
-                        aria-label="Publish"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(recording.id)}
-                        className={BUTTON_ICON_COMPACT}
-                        title="Delete"
-                        aria-label="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                      </div>
-                    </td>
+              <table className="w-full min-w-[800px]">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Speaker</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Duration</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filtered.map((recording: any) => (
+                    <tr key={recording.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-3 text-sm font-medium text-gray-900">{recording.title}</td>
+                      <td className="px-6 py-3 text-sm">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium inline-flex items-center gap-1 w-fit ${
+                            recording.type === 'audio'
+                              ? 'bg-neutral-100 text-neutral-800'
+                              : 'bg-neutral-200 text-neutral-900'
+                          }`}
+                        >
+                          {recording.type === 'audio' ? <Music size={14} /> : <Video size={14} />}
+                          {recording.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-gray-600">{recording.speaker || '—'}</td>
+                      <td className="px-6 py-3 text-sm text-gray-600">
+                        {recording.duration ? `${recording.duration}m` : '—'}
+                      </td>
+                      <td className="px-6 py-3 text-sm">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            recording.status === 'published'
+                              ? 'bg-black text-white'
+                              : 'bg-neutral-100 text-neutral-700'
+                          }`}
+                        >
+                          {recording.status || 'draft'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-sm whitespace-nowrap">
+                        <div className={ACTION_ROW}>
+                          {recording.url ? (
+                            <a
+                              href={recording.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={BUTTON_ICON_COMPACT}
+                              title="Open media"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          ) : null}
+                          {recording.status !== 'published' ? (
+                            <button
+                              type="button"
+                              onClick={() => void handleSetStatus(recording.id, 'published')}
+                              className={BUTTON_ICON_COMPACT}
+                              title="Publish"
+                            >
+                              <Eye size={14} />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => void handleSetStatus(recording.id, 'draft')}
+                              className={BUTTON_ICON_COMPACT}
+                              title="Unpublish"
+                            >
+                              <EyeOff size={14} />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => void handleDelete(recording.id)}
+                            className={BUTTON_ICON_COMPACT}
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

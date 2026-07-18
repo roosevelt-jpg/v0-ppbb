@@ -514,8 +514,9 @@ export default function AdminCmsPartnersPage() {
               <div>
                 <h3 className="font-semibold text-sm">Inquiry categories → forms</h3>
                 <p className="text-xs text-neutral-500 mt-1">
-                  Create forms under Admin → Forms, copy the public link (or pick the form here).
-                  “Start a conversation” opens that form for the selected category.
+                  Optional: link a custom form (Admin → Forms). If linked, Partners uses that form.
+                  Otherwise the embedded partnership inquiry form is shown. Charity categories still
+                  open the beneficiary request flow. General Contact stays on /contact only.
                 </p>
               </div>
               <Button
@@ -640,7 +641,7 @@ export default function AdminCmsPartnersPage() {
             <div>
               <h2 className="font-headline text-xl font-bold">Featured partnership projects</h2>
               <p className="text-xs text-neutral-500 mt-1">
-                Shown on the public Partners page with title, photo, brief, date, location, and partner names.
+                Shown on /partners right after “Build alongside us” — title, cover/collage, brief, date, location, partner names.
               </p>
             </div>
             <Button
@@ -660,6 +661,7 @@ export default function AdminCmsPartnersPage() {
                         location: '',
                         partnerNames: '',
                         imageURL: '',
+                        galleryURLs: [],
                         ctaLabel: 'Learn more',
                         ctaHref: '',
                       },
@@ -726,7 +728,7 @@ export default function AdminCmsPartnersPage() {
                       })
                     }
                     className="w-full min-h-[44px]"
-                    placeholder="Location"
+                    placeholder="Location (e.g. Abu Dhabi / Dubai, UAE)"
                   />
                 </div>
                 <textarea
@@ -742,7 +744,7 @@ export default function AdminCmsPartnersPage() {
                   placeholder="Brief description"
                 />
                 <CmsImageUpload
-                  label="Project photo"
+                  label="Cover photo"
                   value={project.imageURL || ''}
                   folder="partners/projects"
                   preset="content"
@@ -754,6 +756,68 @@ export default function AdminCmsPartnersPage() {
                     })
                   }
                 />
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-neutral-600">
+                    Extra gallery photos (optional collage, max 5)
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {(project.galleryURLs || []).map((url) => (
+                      <div key={url} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" className="h-16 w-20 object-cover rounded border" />
+                        <button
+                          type="button"
+                          className="absolute -top-1.5 -right-1.5 bg-black text-white rounded-full w-5 h-5 text-xs"
+                          onClick={() =>
+                            setConfig((prev) => {
+                              const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                              featuredProjects[i] = {
+                                ...featuredProjects[i],
+                                galleryURLs: (featuredProjects[i].galleryURLs || []).filter(
+                                  (u) => u !== url
+                                ),
+                              }
+                              return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                            })
+                          }
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*,image/gif"
+                    multiple
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || [])
+                      if (!files.length) return
+                      try {
+                        const uploaded: string[] = []
+                        for (const file of files) {
+                          const url = await uploadFileToFirebase(file, 'partners/projects/gallery')
+                          uploaded.push(url)
+                        }
+                        setConfig((prev) => {
+                          const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                          const current = featuredProjects[i].galleryURLs || []
+                          featuredProjects[i] = {
+                            ...featuredProjects[i],
+                            galleryURLs: [...current, ...uploaded].slice(0, 5),
+                          }
+                          return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                        })
+                      } catch (err) {
+                        setMessage({
+                          type: 'error',
+                          text: err instanceof Error ? err.message : 'Gallery upload failed',
+                        })
+                      }
+                      e.target.value = ''
+                    }}
+                  />
+                </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <input
                     type="text"

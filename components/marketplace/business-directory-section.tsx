@@ -8,6 +8,7 @@ import {
   subscribeToAllJobs,
   subscribeToAllOffers,
   subscribeToApprovedBusinesses,
+  MARKETPLACE_DIRECTORY_TABS,
   type DirectoryBusiness,
   type DirectoryJob,
   type DirectoryOffer,
@@ -169,11 +170,14 @@ export function BusinessDirectorySection({
     setSort('default')
   }
 
-  const categoryOptions = facets.categories.map((c) => ({
-    id: c.id,
-    label: c.label,
-    count: c.count,
-  }))
+  const categoryOptions = MARKETPLACE_DIRECTORY_TABS.map((tab) => {
+    const facet = facets.categories.find((c) => c.id === tab.id)
+    return {
+      id: tab.id,
+      label: tab.label,
+      count: facet?.count ?? 0,
+    }
+  })
 
   const locationOptions = [
     { id: 'all', label: 'All Locations', count: businesses.length },
@@ -182,7 +186,22 @@ export function BusinessDirectorySection({
 
   const typeOptions = [
     { id: 'all', label: 'All Types', count: businesses.length },
-    ...facets.companyTypes,
+    {
+      id: 'product',
+      label: 'Product',
+      count: businesses.filter((b) => {
+        const t = (b.companyType || '').toLowerCase()
+        return t === 'product' || t === 'products' || t.includes('product')
+      }).length,
+    },
+    {
+      id: 'service',
+      label: 'Service',
+      count: businesses.filter((b) => {
+        const t = (b.companyType || '').toLowerCase()
+        return t === 'service' || t === 'services' || t.includes('service')
+      }).length,
+    },
   ]
 
   return (

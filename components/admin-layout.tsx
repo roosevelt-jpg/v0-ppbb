@@ -60,6 +60,7 @@ import {
   BookOpen,
   FolderOpen,
   Megaphone,
+  Newspaper,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -133,13 +134,14 @@ export const adminMenuItems = [
   { label: 'Donations Config', href: '/admin/cms/donations', icon: HeartHandshake, group: 'CMS' },
   { label: 'Transparency Page', href: '/admin/cms/transparency', icon: BarChart3, group: 'CMS' },
   { label: 'Shop Config', href: '/admin/cms/shop', icon: ShoppingBag, group: 'CMS' },
-  { label: 'Volunteer Config', href: '/admin/cms/volunteer', icon: HandHeart, group: 'CMS' },
+  { label: 'Volunteer & Ads', href: '/admin/cms/volunteer', icon: HandHeart, group: 'CMS' },
   { label: 'Learning Resources', href: '/admin/cms/learning', icon: BookOpen, group: 'CMS' },
   { label: 'Volunteer Certificates', href: '/admin/cms/certificates', icon: Award, group: 'CMS' },
   { label: 'Navigation', href: '/admin/cms/navigation', icon: Compass, group: 'CMS' },
   { label: 'Global Settings', href: '/admin/cms/global-settings', icon: Settings, group: 'CMS' },
   { label: 'Team Members', href: '/admin/team', icon: Users, group: 'CMS' },
   { label: 'Testimonials', href: '/admin/cms/testimonials', icon: MessageSquareQuote, group: 'CMS' },
+  { label: 'News & Press Room', href: '/admin/cms/news', icon: Newspaper, group: 'CMS' },
   { label: 'Partners & Logos', href: '/admin/partners', icon: Building2, group: 'CMS' },
   { label: 'Form Builder', href: '/admin/forms', icon: ClipboardList, group: 'Content' },
   { label: 'FAQ Management', href: '/admin/faq', icon: HelpCircle, group: 'Content' },

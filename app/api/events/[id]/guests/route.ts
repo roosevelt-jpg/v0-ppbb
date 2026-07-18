@@ -177,6 +177,25 @@ export async function POST(request: NextRequest, context: Ctx) {
 
     if (action === 'checkin') {
       await ref.update({ checkedInAt: Timestamp.now(), checkedInBy: uid })
+      try {
+        const guestUserId = typeof doc.data()?.userId === 'string' ? doc.data()!.userId : ''
+        if (guestUserId) {
+          const eventSnap = await getAdminDb().collection('events').doc(eventId).get()
+          if (eventSnap.exists) {
+            const { creditVolunteerHoursForEventAttendance } = await import(
+              '@/lib/volunteer-hours-from-event'
+            )
+            await creditVolunteerHoursForEventAttendance({
+              eventId,
+              event: eventSnap.data() || {},
+              registrationId: id,
+              userId: guestUserId,
+            })
+          }
+        }
+      } catch (err) {
+        console.error('[guests] volunteer hours credit failed:', err)
+      }
       return NextResponse.json({ success: true })
     }
 

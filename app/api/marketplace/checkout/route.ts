@@ -7,6 +7,11 @@ import {
 } from '@/lib/marketplace-purchase-server'
 import { persistUserReferralAttribution } from '@/lib/referral-attribution-server'
 import { getReferralCodeFromRequest } from '@/lib/referral-cookie'
+import {
+  validateMarketplaceAddress,
+  type MarketplaceAddress,
+  type MarketplacePaymentMethod,
+} from '@/lib/marketplace-shipping'
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +37,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'offerId required' }, { status: 400 })
     }
 
+    const paymentMethod = (body.paymentMethod || 'card') as MarketplacePaymentMethod
+    if (!['card', 'cod', 'bank_transfer'].includes(paymentMethod)) {
+      return NextResponse.json({ success: false, error: 'Invalid payment method' }, { status: 400 })
+    }
+
+    const invoiceAddress = body.invoiceAddress as MarketplaceAddress
+    const deliveryAddress = (body.deliveryAddress || body.invoiceAddress) as MarketplaceAddress
+    const invErr = validateMarketplaceAddress(invoiceAddress, 'Invoice address')
+    if (invErr) return NextResponse.json({ success: false, error: invErr }, { status: 400 })
+    const delErr = validateMarketplaceAddress(deliveryAddress, 'Delivery address')
+    if (delErr) return NextResponse.json({ success: false, error: delErr }, { status: 400 })
+
     const offerRow = await loadMarketplaceOffer(offerId)
     if (!offerRow) {
       return NextResponse.json({ success: false, error: 'Offer not found' }, { status: 404 })
@@ -44,6 +61,30 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'This listing has no price — use enquire instead.' },
         { status: 400 }
       )
+    }
+
+    // COD / bank transfer — no Stripe; complete order immediately as awaiting fulfillment
+    if (paymentMethod === 'cod' || paymentMethod === 'bank_transfer') {
+      const { completeMarketplacePurchase } = await import('@/lib/marketplace-purchase-server')
+      const result = await completeMarketplacePurchase({
+        offerId,
+        buyerId: uid,
+        mode: 'purchase',
+        paymentMethod,
+        paymentGateway: paymentMethod,
+        paymentReference: `${paymentMethod}_${Date.now()}`,
+        invoiceAddress,
+        deliveryAddress,
+        awaitingFulfillment: true,
+      })
+      return NextResponse.json({
+        success: true,
+        orderId: result.orderId,
+        invoiceUrl: result.invoiceUrl,
+        receiptUrl: result.receiptUrl,
+        paymentMethod,
+        bankTransferDetails: result.bankTransferDetails || null,
+      })
     }
 
     const currency = String(offer.currency || 'AED').toLowerCase()
@@ -75,6 +116,7 @@ export async function POST(request: NextRequest) {
         offerId,
         userId: uid,
         businessId,
+        paymentMethod: 'card',
       },
     })
 
@@ -86,6 +128,9 @@ export async function POST(request: NextRequest) {
       offerId,
       buyerId: uid,
       stripeSessionId: session.id,
+      invoiceAddress,
+      deliveryAddress,
+      paymentMethod: 'card',
     })
 
     return NextResponse.json({
@@ -93,6 +138,7 @@ export async function POST(request: NextRequest) {
       checkoutUrl: session.url,
       sessionId: session.id,
       orderId,
+      paymentMethod: 'card',
     })
   } catch (error) {
     console.error('[marketplace/checkout] error:', error)

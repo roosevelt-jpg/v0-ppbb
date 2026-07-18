@@ -117,15 +117,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 })
     }
 
-    const categoryRaw = String(body.category || 'merchandise').trim()
-    const categoryNormalized =
-      categoryRaw.toLowerCase() === 'merchandise' ||
-      categoryRaw.toLowerCase() === 'merch' ||
-      categoryRaw.toLowerCase() === 'product'
-        ? categoryRaw.toLowerCase() === 'product'
-          ? 'product'
-          : 'merchandise'
-        : categoryRaw.toLowerCase() || 'merchandise'
+    const industryCategory = String(body.industryCategory || body.category || 'other')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-') || 'other'
+    const showOnShop =
+      Boolean(body.showOnShop) ||
+      industryCategory === 'merchandise' ||
+      industryCategory === 'merch'
+    // /shop still queries category == merchandise; industry stays in industryCategory
+    const categoryNormalized = showOnShop ? 'merchandise' : industryCategory
 
     const imageURLs: string[] = Array.isArray(body.imageURLs)
       ? body.imageURLs.filter((u: unknown) => typeof u === 'string' && (u as string).trim())
@@ -162,9 +163,11 @@ export async function POST(request: NextRequest) {
       ownerType: 'platform',
       createdBy: adminUid,
       title,
-      type: body.type || 'product',
+      type: body.type === 'service' ? 'service' : 'product',
       description: typeof body.description === 'string' ? body.description : '',
       category: categoryNormalized,
+      industryCategory: showOnShop ? industryCategory : categoryNormalized,
+      showOnShop,
       variant: typeof body.variant === 'string' ? body.variant.trim() : '',
       price: Number.isFinite(price as number) ? price : null,
       originalPrice:

@@ -28,6 +28,11 @@ export function generateQrToken(): string {
   return randomUUID().replace(/-/g, '')
 }
 
+/** Strict truthy for Firestore flags (avoids Boolean("false") === true). */
+export function isExplicitTrue(value: unknown): boolean {
+  return value === true || value === 1 || value === 'true' || value === '1'
+}
+
 export function resolveTicketType(
   event: Record<string, unknown>,
   ticketTypeId?: string | null

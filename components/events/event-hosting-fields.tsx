@@ -15,6 +15,9 @@ type EventHostingFieldsProps = {
   isFeatured: boolean
   cohostEmails: string
   recurrence: EventRecurrence | null
+  /** Present on weekly series instances — enables “apply to future” consent */
+  seriesId?: string | null
+  applyChangesToFuture?: boolean
   /** Event-wide guest / attendance cap (null = unlimited) */
   maxAttendees?: number | null
   onChange: (patch: {
@@ -26,6 +29,7 @@ type EventHostingFieldsProps = {
     isFeatured?: boolean
     cohostEmails?: string
     recurrence?: EventRecurrence | null
+    applyChangesToFuture?: boolean
     maxAttendees?: number | null
   }) => void
 }
@@ -40,6 +44,8 @@ export function EventHostingFields({
   isFeatured,
   cohostEmails,
   recurrence,
+  seriesId = null,
+  applyChangesToFuture = false,
   maxAttendees = null,
   onChange,
 }: EventHostingFieldsProps) {
@@ -345,24 +351,10 @@ export function EventHostingFields({
       {recurrence && (
         <div className="space-y-2">
           <p className="text-xs text-gray-500">
-            All dates in the series share this event&apos;s banner by default. Edit any weekly occurrence
-            later to set a unique banner for that date.
+            All dates in the series share this event&apos;s banner by default. Edit any weekly
+            occurrence later to set a unique banner for that date — or consent below to update all
+            future dates.
           </p>
-          <label className="text-sm flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={Boolean((recurrence as { applyChangesToFuture?: boolean }).applyChangesToFuture)}
-              onChange={(e) =>
-                onChange({
-                  recurrence: {
-                    ...recurrence,
-                    applyChangesToFuture: e.target.checked,
-                  } as EventRecurrence,
-                })
-              }
-            />
-            When editing this occurrence, apply changes to all future events in the series
-          </label>
           <div className="flex flex-wrap gap-2">
             {[3, 4, 6].map((months) => (
               <button
@@ -385,6 +377,24 @@ export function EventHostingFields({
             ))}
           </div>
         </div>
+      )}
+
+      {(seriesId || recurrence) && (
+        <label className="text-sm flex items-start gap-2 rounded-md border border-neutral-200 bg-neutral-50 p-3">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={Boolean(applyChangesToFuture)}
+            onChange={(e) => onChange({ applyChangesToFuture: e.target.checked })}
+          />
+          <span>
+            Apply these changes to all future events in this weekly series
+            <span className="block text-xs text-neutral-500 mt-0.5">
+              Only if you consent. Unchecked = this date only. Updates title, description, banner,
+              location, tickets, and approval settings — not each occurrence&apos;s date.
+            </span>
+          </span>
+        </label>
       )}
     </div>
   )

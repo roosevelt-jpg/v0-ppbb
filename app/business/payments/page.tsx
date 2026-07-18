@@ -2,6 +2,7 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { useRouter } from 'next/navigation'
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { subscribeToBusinessPayments } from '@/lib/business-queries'
 import { BusinessPayment } from '@/lib/types'
 import { DollarSign } from 'lucide-react'
+import { MembershipSubscriptionOverview } from '@/components/membership/subscription-overview'
 
 export default function Payments() {
   const { user } = useAuth()
@@ -55,8 +57,32 @@ export default function Payments() {
     .reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
+      <section className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">Membership & renewal</h2>
+            <p className="text-sm text-neutral-600">
+              Renewal date, months remaining, invoices, and stop renewal
+            </p>
+          </div>
+          <Link
+            href="/business/membership"
+            className="text-sm underline text-neutral-700 hover:text-black"
+          >
+            Browse membership plans
+          </Link>
+        </div>
+        <MembershipSubscriptionOverview manageHref="/business/membership" />
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-neutral-900">Marketplace & business payments</h2>
+          <p className="text-sm text-neutral-600">Commissions, payouts, and other business charges</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
             <div className="flex items-center gap-4">
               <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
@@ -101,7 +127,7 @@ export default function Payments() {
           </Card>
         ) : payments.length === 0 ? (
           <Card className="p-8 sm:p-12 text-center border-[#e4e1da] bg-white text-neutral-900">
-            <p className="text-neutral-500">No payments yet</p>
+            <p className="text-neutral-500">No marketplace payments yet</p>
           </Card>
         ) : (
           <Card className="p-4 sm:p-6 border-[#e4e1da] overflow-x-auto table-scroll">
@@ -143,6 +169,7 @@ export default function Payments() {
             </table>
           </Card>
         )}
+      </section>
     </div>
   )
 }

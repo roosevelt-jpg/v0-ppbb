@@ -6,10 +6,11 @@ import Link from 'next/link'
 import { FormSubmission, CustomForm } from '@/lib/form-builder-types'
 import { getFormById, subscribeToFormSubmissions } from '@/lib/form-builder-queries'
 import { Card } from '@/components/ui/card'
-import { ChevronLeft, Eye, Download } from 'lucide-react'
+import { ChevronLeft, Eye, Download, Check, X, BookOpenCheck } from 'lucide-react'
 import {
   BUTTON_PRIMARY,
   BUTTON_SECONDARY,
+  BUTTON_OUTLINE,
   BUTTON_ICON_PRIMARY,
   FILTER_PILL_ACTIVE,
   FILTER_PILL_INACTIVE,
@@ -19,6 +20,9 @@ import {
   isFileFieldValue,
   getPublicFormPath,
 } from '@/lib/form-builder-utils'
+import { adminApiFetch } from '@/lib/admin-api-client'
+
+type SubmissionStatus = FormSubmission['status']
 
 function SubmissionsSkeleton() {
   return (
@@ -38,6 +42,8 @@ export default function FormSubmissionsByFormPage() {
   const [submissions, setSubmissions] = useState<FormSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [actingId, setActingId] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     let unsub = () => {}
@@ -55,6 +61,28 @@ export default function FormSubmissionsByFormPage() {
     void load()
     return () => unsub()
   }, [formId])
+
+  const updateStatus = async (submissionId: string, status: SubmissionStatus) => {
+    setActingId(submissionId)
+    setActionError(null)
+    try {
+      const res = await adminApiFetch('/api/admin/form-submissions', {
+        method: 'PATCH',
+        body: JSON.stringify({ id: submissionId, status }),
+      })
+      if (!res.success) {
+        setActionError(res.error || 'Failed to update status')
+        return
+      }
+      setSubmissions((prev) =>
+        prev.map((s) => (s.id === submissionId ? { ...s, status } : s))
+      )
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to update status')
+    } finally {
+      setActingId(null)
+    }
+  }
 
   const handleDownloadCSV = () => {
     if (submissions.length === 0 || !form) return
@@ -95,6 +123,20 @@ export default function FormSubmissionsByFormPage() {
     return s.status === statusFilter
   })
 
+  const statusCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {
+      all: submissions.length,
+      pending: 0,
+      reviewed: 0,
+      approved: 0,
+      rejected: 0,
+    }
+    for (const s of submissions) {
+      if (counts[s.status] != null) counts[s.status] += 1
+    }
+    return counts
+  }, [submissions])
+
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl">
@@ -124,6 +166,17 @@ export default function FormSubmissionsByFormPage() {
         </div>
       </div>
 
+      <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+        Filter by stage below, then use <strong>Approve</strong> / <strong>Reject</strong> on each
+        submission (or open details for notes).
+      </div>
+
+      {actionError ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {actionError}
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap gap-2">
         <button type="button" onClick={handleDownloadCSV} className={`${BUTTON_SECONDARY} inline-flex items-center gap-2`}>
           <Download className="h-4 w-4" />
@@ -139,7 +192,7 @@ export default function FormSubmissionsByFormPage() {
             onClick={() => setStatusFilter(status)}
             className={statusFilter === status ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE}
           >
-            {status}
+            {status} ({statusCounts[status] ?? 0})
           </button>
         ))}
       </div>
@@ -147,32 +200,81 @@ export default function FormSubmissionsByFormPage() {
       <div className="space-y-3">
         {filteredSubmissions.length === 0 ? (
           <Card className="p-8 text-center text-neutral-600 font-body">
-            <p>No submissions yet.</p>
+            <p>No submissions in this stage.</p>
           </Card>
         ) : (
-          filteredSubmissions.map((submission) => (
-            <Card key={submission.id} className="p-4 sm:p-5">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1 min-w-0 space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold font-body">{submission.userEmail || 'Anonymous'}</p>
-                    <span
-                      className={`text-xs px-2 py-1 rounded capitalize ${
-                        submission.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : submission.status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : submission.status === 'rejected'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-blue-100 text-blue-800'
-                      }`}
-                    >
-                      {submission.status}
-                    </span>
+          filteredSubmissions.map((submission) => {
+            const busy = actingId === submission.id
+            return (
+              <Card key={submission.id} className="p-4 sm:p-5">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold font-body">{submission.userEmail || 'Anonymous'}</p>
+                        <span
+                          className={`text-xs px-2 py-1 rounded capitalize border ${
+                            submission.status === 'pending'
+                              ? 'bg-neutral-100 text-neutral-800 border-neutral-300'
+                              : submission.status === 'approved'
+                                ? 'bg-black text-white border-black'
+                                : submission.status === 'rejected'
+                                  ? 'bg-white text-neutral-900 border-neutral-400'
+                                  : 'bg-neutral-200 text-neutral-800 border-neutral-300'
+                          }`}
+                        >
+                          {submission.status}
+                        </span>
+                      </div>
+                      <p className="text-sm text-neutral-600 font-body">
+                        {new Date(submission.submittedAt).toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {submission.status !== 'reviewed' ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void updateStatus(submission.id, 'reviewed')}
+                          className={`${BUTTON_OUTLINE} gap-1 disabled:opacity-50`}
+                          title="Mark as reviewed"
+                        >
+                          <BookOpenCheck className="h-3.5 w-3.5" />
+                          Reviewed
+                        </button>
+                      ) : null}
+                      {submission.status !== 'approved' ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void updateStatus(submission.id, 'approved')}
+                          className={`${BUTTON_PRIMARY} gap-1 disabled:opacity-50`}
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Approve
+                        </button>
+                      ) : null}
+                      {submission.status !== 'rejected' ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => void updateStatus(submission.id, 'rejected')}
+                          className={`${BUTTON_OUTLINE} gap-1 disabled:opacity-50`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Reject
+                        </button>
+                      ) : null}
+                      <Link
+                        href={`/admin/forms/submissions/${submission.id}`}
+                        className={BUTTON_ICON_PRIMARY}
+                        title="View details & notes"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
-                  <p className="text-sm text-neutral-600 font-body">
-                    {new Date(submission.submittedAt).toLocaleString()}
-                  </p>
 
                   {form?.sections.map((section) => (
                     <div key={section.id} className="border-t border-neutral-100 pt-3">
@@ -208,17 +310,9 @@ export default function FormSubmissionsByFormPage() {
                     </div>
                   ))}
                 </div>
-
-                <Link
-                  href={`/admin/forms/submissions/${submission.id}`}
-                  className={BUTTON_ICON_PRIMARY}
-                  title="View details"
-                >
-                  <Eye className="h-4 w-4" />
-                </Link>
-              </div>
-            </Card>
-          ))
+              </Card>
+            )
+          })
         )}
       </div>
     </div>

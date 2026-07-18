@@ -59,7 +59,7 @@ export const DEFAULT_EVENTS_CONFIG: EventsPlatformConfig = {
     registerButtonLabel: 'Register',
     detailsButtonLabel: 'Details',
     volunteerBannerImageURL: '',
-    volunteerBannerHref: '/forms/volunteer-with-pb',
+    volunteerBannerHref: '/forms/volunteer-unpaid-service',
     volunteerBannerAlt: 'Volunteer with Passive Blessings',
     adBannerImageURL: '',
     adBannerHref: '',

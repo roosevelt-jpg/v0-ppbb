@@ -504,7 +504,14 @@ export function buildDirectoryCards(
     })
     .filter((business) => {
       if (companyTypeFilter === 'all' || !companyTypeFilter) return true
-      return (business.companyType || 'other').trim().toLowerCase() === companyTypeFilter
+      const t = (business.companyType || 'other').trim().toLowerCase()
+      if (companyTypeFilter === 'product') {
+        return t === 'product' || t === 'products' || t.includes('product')
+      }
+      if (companyTypeFilter === 'service') {
+        return t === 'service' || t === 'services' || t.includes('service')
+      }
+      return t === companyTypeFilter
     })
     .filter((business) => {
       if (!term) return true

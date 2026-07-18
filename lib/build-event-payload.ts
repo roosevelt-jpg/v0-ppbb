@@ -56,6 +56,7 @@ export interface AdminEventFormInput {
   showGuestList?: boolean
   isFeatured?: boolean
   recurrence?: EventRecurrence | null
+  seriesId?: string | null
 }
 
 function combineDateAndTime(date: string, time: string): Date {
@@ -155,7 +156,7 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
       : [],
     ticketTypes,
     coupons: Array.isArray(form.coupons) ? form.coupons : [],
-    requireApproval: Boolean(form.requireApproval),
+    requireApproval: form.requireApproval === true,
     enableWaitlist: Boolean(form.enableWaitlist),
     waitlistCount: 0,
     cohostIds: form.cohostIds || [],
@@ -258,12 +259,13 @@ export function mapEventDocToAdminForm(
     agenda: Array.isArray(data.agenda) ? (data.agenda as AdminEventFormInput['agenda']) : [],
     ticketTypes: Array.isArray(data.ticketTypes) ? (data.ticketTypes as TicketType[]) : [],
     coupons: Array.isArray(data.coupons) ? (data.coupons as EventCoupon[]) : [],
-    requireApproval: Boolean(data.requireApproval),
+    requireApproval: data.requireApproval === true,
     enableWaitlist: Boolean(data.enableWaitlist),
     cohostIds: Array.isArray(data.cohostIds) ? (data.cohostIds as string[]) : [],
     cohostEmails: Array.isArray(data.cohostEmails) ? (data.cohostEmails as string[]) : [],
     showGuestList: data.showGuestList !== false,
     isFeatured: Boolean(data.isFeatured),
     recurrence: (data.recurrence as EventRecurrence) || null,
+    seriesId: typeof data.seriesId === 'string' ? data.seriesId : null,
   }
 }

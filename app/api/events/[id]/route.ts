@@ -24,9 +24,42 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 })
     }
 
+    const payload = serializeFirestoreDoc(snap.id, data as Record<string, unknown>) as Record<
+      string,
+      unknown
+    >
+
+    // Backfill host branding when older events lack denormalized fields
+    const needsHost =
+      !payload.businessName &&
+      !payload.ownerName &&
+      typeof payload.createdBy === 'string' &&
+      payload.createdBy
+    if (needsHost) {
+      try {
+        const { resolveEventHostFromUserData } = await import('@/lib/event-host')
+        const userSnap = await db.collection('users').doc(String(payload.createdBy)).get()
+        const role =
+          payload.createdByRole === 'admin' || payload.createdByRole === 'business'
+            ? payload.createdByRole
+            : String(userSnap.data()?.role || 'business')
+        const host = resolveEventHostFromUserData(
+          String(payload.createdBy),
+          userSnap.exists ? (userSnap.data() as Record<string, unknown>) : undefined,
+          role.includes('admin') ? 'admin' : 'business'
+        )
+        payload.businessName = host.businessName
+        payload.ownerName = host.ownerName
+        payload.businessLogoUrl = host.businessLogoUrl
+        payload.businessId = host.businessId
+      } catch {
+        /* ignore host enrich failures */
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      data: serializeFirestoreDoc(snap.id, data as Record<string, unknown>),
+      data: payload,
     })
   } catch (error) {
     console.error('[v0] Error fetching event:', error)

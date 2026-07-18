@@ -9,12 +9,34 @@ import {
   getInquiryCategoryHref,
 } from '@/lib/partners-page-config'
 import { PartnersLogosGrid } from '@/components/partners/partners-logos-grid'
+import { PartnersFeaturedProjects } from '@/components/partners/partners-featured-projects'
+import { PartnershipInquiryForm } from '@/components/partners/partnership-inquiry-form'
+
+function isCharityCategory(id: string, label: string) {
+  const i = id.toLowerCase()
+  const l = label.toLowerCase()
+  return (
+    i === 'charity-support' ||
+    i.includes('charity') ||
+    /charity\s*support|seeking\s*charity/i.test(l)
+  )
+}
+
+function partnershipTypeFromCategory(id: string, label: string): string {
+  const i = id.toLowerCase()
+  const l = label.toLowerCase()
+  if (i.includes('sponsor') || l.includes('sponsor')) return 'sponsorship'
+  if (i.includes('campaign') || l.includes('campaign')) return 'campaign'
+  if (i.includes('event') || l.includes('event')) return 'event'
+  return 'partnership'
+}
 
 export function PartnersPageCopy() {
   const router = useRouter()
   const [config, setConfig] = useState<PartnersPlatformConfig>(DEFAULT_PARTNERS_CONFIG)
   const [ready, setReady] = useState(false)
   const [inquiryCategoryId, setInquiryCategoryId] = useState('')
+  const [formKey, setFormKey] = useState(0)
 
   useEffect(
     () =>
@@ -38,6 +60,11 @@ export function PartnersPageCopy() {
     [categories, inquiryCategoryId]
   )
 
+  const charitySelected = selected
+    ? isCharityCategory(selected.id, selected.label)
+    : false
+  const linkedFormHref = selected ? getInquiryCategoryHref(selected) : null
+
   if (!ready) {
     return (
       <div className="space-y-12 sm:space-y-16 animate-pulse">
@@ -58,37 +85,24 @@ export function PartnersPageCopy() {
 
   const pc = config.pageConfig
 
-  const openInquiry = () => {
-    if (!selected) {
-      alert('No inquiry category available.')
-      return
-    }
-
-    // Charity support must use the beneficiary request form (not Contact / CMS forms)
-    const id = String(selected.id || '').toLowerCase()
-    const label = String(selected.label || '').toLowerCase()
-    if (
-      id === 'charity-support' ||
-      id.includes('charity') ||
-      /charity\s*support|seeking\s*charity/i.test(label)
-    ) {
+  const openLinkedOrCharity = () => {
+    if (!selected) return
+    if (charitySelected) {
       router.push('/dashboard/charity-requests?apply=1')
       return
     }
-
-    const mapped = getInquiryCategoryHref(selected)
-    if (mapped && /^https?:\/\//i.test(mapped)) {
-      window.open(mapped, '_blank', 'noopener,noreferrer')
-      return
+    if (linkedFormHref) {
+      if (/^https?:\/\//i.test(linkedFormHref)) {
+        window.open(linkedFormHref, '_blank', 'noopener,noreferrer')
+      } else {
+        router.push(linkedFormHref)
+      }
     }
-
-    // Partnership / other inquiries → Contact Submissions inbox
-    const params = new URLSearchParams({
-      source: 'partners',
-      subject: selected.label || 'Partnerships',
-    })
-    router.push(`/contact?${params.toString()}`)
   }
+
+  const inquiryType = selected
+    ? partnershipTypeFromCategory(selected.id, selected.label)
+    : 'partnership'
 
   return (
     <div className="space-y-12 sm:space-y-16 md:space-y-20 min-w-0">
@@ -102,62 +116,7 @@ export function PartnersPageCopy() {
         </p>
       </section>
 
-      {/* Partnership projects feature block — right after Build alongside us */}
-      <section className="min-w-0 space-y-4">
-        <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground">
-          Featured partnership projects
-        </h2>
-        <p className="font-body text-sm text-muted-foreground max-w-[42rem]">
-          Title, photo, brief, date, location, and partner names — managed in Admin → CMS → Partners.
-        </p>
-        {pc.featuredProjects.length === 0 ? (
-          <p className="text-sm text-neutral-500">Projects will appear here once published by admin.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pc.featuredProjects.map((project) => (
-              <article
-                key={project.id}
-                className="border border-[#e4e1da] rounded-lg overflow-hidden bg-white flex flex-col"
-              >
-                {project.imageURL ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={project.imageURL}
-                    alt=""
-                    className="w-full h-40 object-cover bg-neutral-100"
-                  />
-                ) : (
-                  <div className="w-full h-40 bg-neutral-100" />
-                )}
-                <div className="p-4 space-y-2 flex-1">
-                  <h3 className="font-headline text-lg font-bold text-foreground break-words">
-                    {project.title}
-                  </h3>
-                  {project.brief ? (
-                    <p className="font-body text-sm text-muted-foreground line-clamp-3">{project.brief}</p>
-                  ) : null}
-                  <p className="text-xs text-neutral-500">
-                    {[project.date, project.location].filter(Boolean).join(' · ')}
-                  </p>
-                  {project.partnerNames ? (
-                    <p className="text-xs font-medium text-neutral-700">
-                      Partners: {project.partnerNames}
-                    </p>
-                  ) : null}
-                  {project.ctaHref ? (
-                    <a
-                      href={project.ctaHref}
-                      className="inline-flex mt-2 items-center justify-center min-h-[40px] px-4 py-2 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
-                    >
-                      {project.ctaLabel || 'Learn more'}
-                    </a>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+      <PartnersFeaturedProjects projects={pc.featuredProjects} />
 
       <section className="min-w-0 rounded-lg border border-[#e4e1da] bg-[#f7f6f2] p-5 sm:p-8">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.sponsorshipDeckEyebrow}</p>
@@ -205,6 +164,7 @@ export function PartnersPageCopy() {
         </div>
       </section>
 
+      {/* Partnership inquiry only — general contact lives on /contact */}
       <section id="inquiry" className="min-w-0 scroll-mt-24">
         <p className="eyebrow text-muted-foreground mb-2 break-words">{pc.inquiryEyebrow}</p>
         <h2 className="font-headline text-2xl sm:text-3xl font-bold text-foreground mb-3 break-words max-w-[36rem]">
@@ -214,15 +174,18 @@ export function PartnersPageCopy() {
           {pc.inquiryBody}
         </p>
 
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4 max-w-xl">
-          <div className="flex-1 min-w-0 w-full">
+        <div className="max-w-xl space-y-4">
+          <div>
             <label htmlFor="inquiry-category" className="block text-sm font-medium mb-1 font-body">
               Inquiry category
             </label>
             <select
               id="inquiry-category"
               value={selected?.id || ''}
-              onChange={(e) => setInquiryCategoryId(e.target.value)}
+              onChange={(e) => {
+                setInquiryCategoryId(e.target.value)
+                setFormKey((k) => k + 1)
+              }}
               className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black"
             >
               {categories.map((cat) => (
@@ -232,13 +195,40 @@ export function PartnersPageCopy() {
               ))}
             </select>
           </div>
-          <button
-            type="button"
-            onClick={openInquiry}
-            className="w-full sm:w-auto min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors shrink-0"
-          >
-            {pc.inquiryCTA}
-          </button>
+
+          {charitySelected ? (
+            <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Charity support uses our beneficiary request form — not the general contact form.
+              </p>
+              <button
+                type="button"
+                onClick={openLinkedOrCharity}
+                className="min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+              >
+                {pc.inquiryCTA}
+              </button>
+            </div>
+          ) : linkedFormHref ? (
+            <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                This category opens the form linked in Admin → CMS → Partners.
+              </p>
+              <button
+                type="button"
+                onClick={openLinkedOrCharity}
+                className="min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+              >
+                {pc.inquiryCTA}
+              </button>
+            </div>
+          ) : (
+            <PartnershipInquiryForm
+              key={`${inquiryCategoryId}-${formKey}`}
+              type={inquiryType}
+              submitLabel={pc.inquiryCTA}
+            />
+          )}
         </div>
       </section>
 

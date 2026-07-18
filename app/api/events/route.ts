@@ -354,12 +354,23 @@ export async function PUT(request: NextRequest) {
       updates.bannerImageUrl = updates.bannerURL
     }
 
-    // Optionally push banner/title/description/location to future events in the same series
+    // Optionally push shared fields to future events in the same series (explicit consent)
     const applyFuture =
-      updates.recurrence &&
-      typeof updates.recurrence === 'object' &&
-      (updates.recurrence as { applyChangesToFuture?: boolean }).applyChangesToFuture === true
-    const seriesId = (updates.seriesId as string) || (existing.seriesId as string) || null
+      body.applyChangesToFuture === true ||
+      (updates.recurrence &&
+        typeof updates.recurrence === 'object' &&
+        (updates.recurrence as { applyChangesToFuture?: boolean }).applyChangesToFuture === true)
+    const seriesId = (existing.seriesId as string) || (updates.seriesId as string) || null
+
+    // Do not persist one-shot consent flags on the event document
+    delete updates.applyChangesToFuture
+    if (updates.recurrence && typeof updates.recurrence === 'object') {
+      const { applyChangesToFuture: _acf, ...recRest } = updates.recurrence as Record<string, unknown>
+      updates.recurrence = Object.keys(recRest).length ? recRest : updates.recurrence
+      if ('applyChangesToFuture' in (updates.recurrence as object)) {
+        delete (updates.recurrence as { applyChangesToFuture?: boolean }).applyChangesToFuture
+      }
+    }
 
     updates.updatedAt = Timestamp.now()
     if (updates.lastEditedAt) {

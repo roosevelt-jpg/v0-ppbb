@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { auth } from '@/lib/firebase'
 import {
@@ -55,12 +55,14 @@ async function getAdminToken(): Promise<string | null> {
   return (await auth.currentUser?.getIdToken()) || null
 }
 
-export default function AdminOpportunitiesPage() {
+export function AdminOpportunitiesPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const focusId = searchParams.get('focus')
   const [jobs, setJobs] = React.useState<AdminJob[]>([])
   const [appsThisMonth, setAppsThisMonth] = React.useState(0)
   const [loading, setLoading] = React.useState(true)
-  const [tab, setTab] = React.useState<AdminJobFilterTab>('all')
+  const [tab, setTab] = React.useState<AdminJobFilterTab>(focusId ? 'pending_approval' : 'all')
   const [search, setSearch] = React.useState('')
   const [actingId, setActingId] = React.useState<string | null>(null)
   const [message, setMessage] = React.useState<{ type: 'success' | 'error'; text: string } | null>(
@@ -75,6 +77,7 @@ export default function AdminOpportunitiesPage() {
     gender: '',
     description: '',
   })
+  const focusApplied = React.useRef(false)
 
   React.useEffect(() => {
     const unsub = subscribeToAdminJobs(
@@ -88,6 +91,15 @@ export default function AdminOpportunitiesPage() {
   }, [])
 
   React.useEffect(() => subscribeToApplicationsThisMonth(setAppsThisMonth), [])
+
+  React.useEffect(() => {
+    if (!focusId || loading || focusApplied.current || jobs.length === 0) return
+    const match = jobs.find((j) => j.id === focusId)
+    if (!match) return
+    focusApplied.current = true
+    setTab('pending_approval')
+    setViewJob(match)
+  }, [focusId, loading, jobs])
 
   const stats = React.useMemo(() => {
     const total = jobs.length
@@ -595,5 +607,19 @@ export default function AdminOpportunitiesPage() {
         </div>
       )}
     </AdminPageLayout>
+  )
+}
+
+export default function AdminOpportunitiesPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <AdminPageLayout title="Opportunities" subtitle="Loading…">
+          <p className="text-neutral-500 py-12 text-center">Loading opportunities…</p>
+        </AdminPageLayout>
+      }
+    >
+      <AdminOpportunitiesPageInner />
+    </React.Suspense>
   )
 }

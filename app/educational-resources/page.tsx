@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { collection, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore'
+import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { Video, BookOpen } from 'lucide-react'
 import {
@@ -75,46 +75,61 @@ export default function EducationalResourcesPage() {
   const [dateTo, setDateTo] = useState('')
 
   useEffect(() => {
-    const unsubs: Array<() => void> = []
-
-    try {
-      unsubs.push(
-        onSnapshot(
-          query(collection(db, 'recordings'), where('status', '==', 'published'), limit(48)),
-          (snap) => {
-            setRecordings(
-              snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Recording, 'id'>) }))
-            )
-            setLoading(false)
-          },
-          () => setLoading(false)
-        )
-      )
-    } catch {
-      setLoading(false)
+    let cancelled = false
+    const load = async () => {
+      try {
+        const res = await fetch('/api/recordings?status=published&limit=48', { cache: 'no-store' })
+        const json = await res.json()
+        if (cancelled) return
+        if (json.success && Array.isArray(json.data)) {
+          setRecordings(
+            json.data.map((row: Record<string, unknown>) => ({
+              id: String(row.id),
+              title: String(row.title || 'Untitled'),
+              description: typeof row.description === 'string' ? row.description : '',
+              thumbnailUrl:
+                (typeof row.thumbnailUrl === 'string' && row.thumbnailUrl) ||
+                (typeof row.thumbnail === 'string' && row.thumbnail) ||
+                '',
+              videoUrl: typeof row.url === 'string' ? row.url : '',
+              status: typeof row.status === 'string' ? row.status : 'published',
+              category: typeof row.category === 'string' ? row.category : '',
+              author: typeof row.speaker === 'string' ? row.speaker : '',
+              createdAt: (row.createdAt as Recording['createdAt']) || (row.date as string) || null,
+            }))
+          )
+        }
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
+    void load()
 
+    let unsubArticles = () => {}
     try {
-      unsubs.push(
-        onSnapshot(
-          query(collection(db, 'learningResources'), orderBy('createdAt', 'desc'), limit(48)),
-          (snap) => {
-            setArticles(
-              snap.docs
-                .map((d) => ({ id: d.id, ...(d.data() as Omit<Article, 'id'>) }))
-                .filter((a) => a.status !== 'draft')
-            )
-          },
-          () => {
-            /* collection may be empty / missing index */
-          }
-        )
+      unsubArticles = onSnapshot(
+        query(collection(db, 'learningResources'), orderBy('createdAt', 'desc'), limit(48)),
+        (snap) => {
+          setArticles(
+            snap.docs
+              .map((d) => ({ id: d.id, ...(d.data() as Omit<Article, 'id'>) }))
+              .filter((a) => a.status !== 'draft')
+          )
+        },
+        () => {
+          /* collection may be empty / missing index */
+        }
       )
     } catch {
       /* ignore */
     }
 
-    return () => unsubs.forEach((u) => u())
+    return () => {
+      cancelled = true
+      unsubArticles()
+    }
   }, [])
 
   const inDateRange = (value: unknown) => {

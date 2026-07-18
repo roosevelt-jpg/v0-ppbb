@@ -36,14 +36,18 @@ export const OFFER_MARKETPLACE_TABS = [
 export type OfferMarketplaceTabId = (typeof OFFER_MARKETPLACE_TABS)[number]['id']
 
 export function matchesOfferMarketplaceTab(
-  offer: { type?: string; category?: string },
+  offer: { type?: string; category?: string; industryCategory?: string },
   tab: OfferMarketplaceTabId
 ): boolean {
   if (tab === 'all') return true
   const type = (offer.type || '').toLowerCase()
-  const category = (offer.category || '').toLowerCase().replace(/\s+/g, '-')
+  const category = (offer.industryCategory || offer.category || '')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
   if (tab === 'service') return type === 'service'
-  if (tab === 'product') return type === 'product' || type === 'discount'
+  if (tab === 'product') return type === 'product' || type === 'merchandise'
+  // Discounts are not a marketplace category/type filter
+  if (type === 'discount') return false
   if (tab === 'fb') {
     return (
       category.includes('fb') ||

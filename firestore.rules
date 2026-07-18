@@ -242,6 +242,12 @@ service cloud.firestore {
       allow read: if resource.data.isPublished == true || isAdmin();
       allow create, update, delete: if isAdmin();
     }
+
+    // Educational recordings — public read when published
+    match /recordings/{recordingId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
     
     // Events - Public read of published events; admin/business create via API + client rules
     match /events/{eventId} {

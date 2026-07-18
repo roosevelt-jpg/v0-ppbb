@@ -299,12 +299,16 @@ export async function updateSubmissionStatus(
   notes?: string
 ) {
   try {
-    await updateDoc(doc(db, 'formSubmissions', submissionId), {
-      status,
-      reviewedAt: new Date(),
-      reviewedBy: reviewerEmail,
-      notes,
-    })
+    await updateDoc(
+      doc(db, 'formSubmissions', submissionId),
+      sanitizeForFirestore({
+        status,
+        reviewedAt: new Date(),
+        reviewedBy: reviewerEmail,
+        notes,
+        updatedAt: new Date(),
+      })
+    )
   } catch (error) {
     console.error('[v0] Error updating submission status:', error)
     throw error

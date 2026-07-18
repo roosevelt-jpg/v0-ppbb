@@ -9,39 +9,14 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
 import { RichTextEditor } from '@/components/rich-text-editor'
-
-const UAE_EMIRATES = [
-  'Abu Dhabi',
-  'Dubai',
-  'Sharjah',
-  'Ajman',
-  'Umm Al Quwain',
-  'Ras Al Khaimah',
-  'Fujairah',
-]
-
-const ROLE_TYPES = [
-  { value: 'freelance', label: 'Freelance' },
-  { value: 'full_time', label: 'Full Time' },
-  { value: 'part_time', label: 'Part Time' },
-  { value: 'internship', label: 'Internship' },
-  { value: 'training', label: 'Training' },
-  { value: 'volunteer', label: 'Volunteer' },
-  { value: 'contract', label: 'Contract' },
-]
-
-const WORK_TYPES = [
-  { value: 'onsite', label: 'Onsite' },
-  { value: 'remote', label: 'Remote' },
-  { value: 'hybrid', label: 'Hybrid' },
-]
-
-const SUITABILITY = [
-  'Ladies Only',
-  'Men Only',
-  'Fresh Graduates',
-  'Experienced 5yrs+',
-]
+import {
+  INDUSTRY_OPTIONS,
+  ROLE_TYPE_FORM_OPTIONS,
+  SUITABILITY_OPTIONS,
+  UAE_EMIRATES,
+  WORK_TYPE_FORM_OPTIONS,
+  roleTypeToLegacyType,
+} from '@/lib/opportunity-utils'
 
 const fieldStyle: React.CSSProperties = {
   width: '100%',
@@ -124,7 +99,7 @@ export default function NewOpportunity() {
       const locationValue =
         formData.locationType === 'remote'
           ? 'Remote'
-          : formData.locationCity || formData.locationLink || ''
+          : formData.locationLink?.trim() || formData.locationCity || ''
 
       const res = await fetch('/api/business/opportunities', {
         method: 'POST',
@@ -138,11 +113,7 @@ export default function NewOpportunity() {
           businessName: user.businessProfile?.businessName || formData.companyName || 'Unknown',
           roleType: formData.roleType,
           category: formData.category,
-          type: formData.roleType === 'internship' || formData.roleType === 'volunteer'
-            ? formData.roleType
-            : formData.roleType === 'freelance' || formData.roleType === 'contract'
-              ? 'gig'
-              : 'job',
+          type: roleTypeToLegacyType(formData.roleType),
           locationType: formData.locationType,
           remote: formData.locationType === 'remote',
           locationCity: locationValue,
@@ -184,21 +155,17 @@ export default function NewOpportunity() {
     await submitOpportunity(false)
   }
 
-  if (!user || (!hasBusinessAccess(user))) {
+  if (!user || !hasBusinessAccess(user)) {
     return <div className="text-center py-8">Access Denied</div>
   }
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
-        <div className="max-w-2xl mx-auto">
-          <h1
-            style={{ color: '#111111', fontSize: '32px', fontWeight: 700, fontFamily: 'Cormorant Garamond, serif' }}
-          >
-            Post Work Opportunity
-          </h1>
+      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '24px 32px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Post a Job / Gig</h1>
           <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
-            Fill in the details below — submitted for admin approval before it goes live
+            Same fields as the platform opportunity form — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
@@ -240,7 +207,7 @@ export default function NewOpportunity() {
                 required
                 style={fieldStyle}
               >
-                {ROLE_TYPES.map((r) => (
+                {ROLE_TYPE_FORM_OPTIONS.map((r) => (
                   <option key={r.value} value={r.value}>
                     {r.label}
                   </option>
@@ -257,7 +224,7 @@ export default function NewOpportunity() {
                 required
                 style={fieldStyle}
               >
-                {WORK_TYPES.map((w) => (
+                {WORK_TYPE_FORM_OPTIONS.map((w) => (
                   <option key={w.value} value={w.value}>
                     {w.label}
                   </option>
@@ -270,7 +237,7 @@ export default function NewOpportunity() {
                 <label style={labelStyle}>5. Location</label>
                 <select
                   name="emirateSelect"
-                  value={UAE_EMIRATES.includes(formData.locationCity) ? formData.locationCity : ''}
+                  value={(UAE_EMIRATES as readonly string[]).includes(formData.locationCity) ? formData.locationCity : ''}
                   onChange={(e) => {
                     if (!e.target.value) return
                     setFormData((p) => ({ ...p, locationCity: e.target.value, locationLink: '' }))
@@ -285,11 +252,19 @@ export default function NewOpportunity() {
                   ))}
                 </select>
                 <input
+                  type="url"
+                  name="locationLink"
+                  value={formData.locationLink}
+                  onChange={handleChange}
+                  placeholder="Or paste a Google Maps link"
+                  style={fieldStyle}
+                />
+                <input
                   type="text"
                   name="locationCity"
                   value={formData.locationCity}
                   onChange={handleChange}
-                  placeholder="Or type area / Google Maps link"
+                  placeholder="Or type area / city"
                   style={fieldStyle}
                 />
               </div>
@@ -332,40 +307,9 @@ export default function NewOpportunity() {
             </div>
 
             <div>
-              <label style={labelStyle}>12. Industry / Category</label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                style={fieldStyle}
-              >
-                <option value="">Select industry…</option>
-                {[
-                  'Technology',
-                  'HR',
-                  'Retail',
-                  'Real Estate',
-                  'Automotive',
-                  'F&B',
-                  'Hospitality',
-                  'Health & Fitness',
-                  'Consultancy',
-                  'Business',
-                  'Education',
-                  'Nonprofit',
-                  'Other',
-                ].map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
               <label style={labelStyle}>9. Suitability</label>
               <div className="flex flex-wrap gap-3">
-                {SUITABILITY.map((label) => (
+                {SUITABILITY_OPTIONS.map((label) => (
                   <label key={label} className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
@@ -399,6 +343,18 @@ export default function NewOpportunity() {
                   style={fieldStyle}
                 />
               </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>12. Industry / Category</label>
+              <select name="category" value={formData.category} onChange={handleChange} style={fieldStyle}>
+                <option value="">Select industry…</option>
+                {INDUSTRY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -448,47 +404,28 @@ export default function NewOpportunity() {
             <label className="flex items-center gap-2 text-sm font-medium">
               <input
                 type="checkbox"
+                name="isMemberOnly"
                 checked={formData.isMemberOnly}
-                onChange={(e) => setFormData((p) => ({ ...p, isMemberOnly: e.target.checked }))}
+                onChange={handleChange}
               />
-              Restrict to platform members only
+              Members only
             </label>
 
-            <div className="flex flex-wrap gap-4 pt-4">
-              <Button
-                type="submit"
-                disabled={isSaving}
-                style={{
-                  backgroundColor: '#111111',
-                  color: '#ffffff',
-                  padding: '12px 24px',
-                }}
-              >
-                {isSaving ? 'Posting...' : 'Post Opportunity'}
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 type="button"
                 disabled={isSaving}
                 onClick={() => void submitOpportunity(true)}
-                style={{
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                  border: '1px solid #e4e1da',
-                  padding: '12px 24px',
-                }}
+                className="min-h-[44px] flex-1 border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50"
               >
-                Save Draft
+                Save as Draft
               </Button>
               <Button
-                type="button"
-                onClick={() => router.back()}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#666666',
-                  padding: '12px 24px',
-                }}
+                type="submit"
+                disabled={isSaving}
+                className="min-h-[44px] flex-1 bg-neutral-900 text-white hover:bg-black"
               >
-                Cancel
+                {isSaving ? 'Submitting…' : 'Submit for Approval'}
               </Button>
             </div>
           </form>

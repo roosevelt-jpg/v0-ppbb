@@ -3,19 +3,23 @@
 import React from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
-import { db } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 import {
   collection,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   query,
   where,
   type Timestamp,
 } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
-import { Clock, Heart, Award, TrendingUp, Briefcase } from 'lucide-react'
+import { Clock, Heart, Award, TrendingUp, Briefcase, CheckCircle2, Calendar } from 'lucide-react'
 import { getAllOpenOpportunities, getMemberApplications } from '@/lib/business-queries'
+import { matchesRoleTypeFilter } from '@/lib/opportunity-utils'
+import { isCharityVolunteerEvent } from '@/lib/charity-event'
+import { parseFirestoreDate } from '@/lib/member-dashboard'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -34,9 +38,20 @@ interface VolunteerRecord {
   verified?: boolean
 }
 
+type RegisteredCharityEvent = {
+  id: string
+  title?: string
+  locationName?: string
+  startDate?: unknown
+  checkedInAt?: unknown
+  registrationStatus?: string
+}
+
 export default function VolunteeringPage() {
   const { user, loading: authLoading } = useAuth()
-  const [activeTab, setActiveTab] = React.useState<'opportunities' | 'history'>('opportunities')
+  const [activeTab, setActiveTab] = React.useState<'opportunities' | 'history' | 'attendance'>(
+    'opportunities'
+  )
   const [volunteerData, setVolunteerData] = React.useState({
     totalHours: 0,
     thisMonthHours: 0,
@@ -45,9 +60,12 @@ export default function VolunteeringPage() {
   })
   const [opportunities, setOpportunities] = React.useState<Record<string, unknown>[]>([])
   const [charityEvents, setCharityEvents] = React.useState<Record<string, unknown>[]>([])
+  const [registeredCharity, setRegisteredCharity] = React.useState<RegisteredCharityEvent[]>([])
   const [applications, setApplications] = React.useState<Record<string, unknown>[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
+  const [attendanceMessage, setAttendanceMessage] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (authLoading) return
@@ -64,12 +82,13 @@ export default function VolunteeringPage() {
         if (!cancelled) {
           setOpportunities(
             opps
-              .filter((o) => o.type === 'volunteer')
+              .filter((o) => matchesRoleTypeFilter(o, 'volunteer'))
               .map((o) => ({
                 id: o.id,
                 title: o.title,
-                businessName: o.businessName,
+                businessName: o.businessName || o.companyName,
                 description: o.description,
+                location: o.locationText || o.locationCity,
                 kind: 'job',
               }))
           )
@@ -81,39 +100,80 @@ export default function VolunteeringPage() {
 
     const loadCharityEvents = async () => {
       try {
-        const res = await fetch('/api/events?status=published&limit=40')
+        // Prefer a high limit so charity events are not truncated by recent non-charity publishes
+        const res = await fetch('/api/events?status=published&limit=200')
         const json = await res.json()
         const rows = Array.isArray(json.data) ? json.data : []
         const now = Date.now()
         const charity = rows
           .filter((e: Record<string, unknown>) => {
-            const cat = String(e.category || '').toLowerCase()
-            const tags = Array.isArray(e.tags) ? e.tags.map((t) => String(t).toLowerCase()) : []
-            const isCharity =
-              cat === 'charity' ||
-              cat.includes('charity') ||
-              tags.includes('fundraiser') ||
-              tags.includes('volunteer') ||
-              tags.includes('charity')
-            if (!isCharity) return false
-            const start =
-              e.startDate && typeof e.startDate === 'object' && 'seconds' in (e.startDate as object)
-                ? (e.startDate as { seconds: number }).seconds * 1000
-                : e.startDate
-                  ? new Date(String(e.startDate)).getTime()
-                  : 0
-            return !start || start >= now - 86400000
+            if (!isCharityVolunteerEvent(e)) return false
+            const start = parseFirestoreDate(e.startDate)
+            // Show upcoming + events from the last day (same-day / just-ended still listed)
+            return !start || start.getTime() >= now - 86400000
+          })
+          .sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+            const ad = parseFirestoreDate(a.startDate)?.getTime() ?? 0
+            const bd = parseFirestoreDate(b.startDate)?.getTime() ?? 0
+            return ad - bd
           })
           .map((e: Record<string, unknown>) => ({
             id: e.id,
             title: e.title,
             businessName: e.locationName || e.location || 'Community event',
             description: e.description,
+            startDate: e.startDate,
             kind: 'event',
           }))
         if (!cancelled) setCharityEvents(charity)
       } catch (err) {
         console.error('[v0] Charity events error:', err)
+        // Fallback: client Firestore read if API fails
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'events'), where('status', '==', 'published'))
+          )
+          const now = Date.now()
+          const charity = snap.docs
+            .map((d) => ({ id: d.id, ...d.data() } as Record<string, unknown>))
+            .filter((e) => {
+              if (!isCharityVolunteerEvent(e)) return false
+              const start = parseFirestoreDate(e.startDate)
+              return !start || start.getTime() >= now - 86400000
+            })
+            .map((e) => ({
+              id: e.id,
+              title: e.title,
+              businessName: e.locationName || e.location || 'Community event',
+              description: e.description,
+              startDate: e.startDate,
+              kind: 'event',
+            }))
+          if (!cancelled) setCharityEvents(charity)
+        } catch (fallbackErr) {
+          console.error('[v0] Charity events fallback error:', fallbackErr)
+        }
+      }
+    }
+
+    const loadRegisteredCharity = async () => {
+      try {
+        const res = await fetch(`/api/user/events?userId=${encodeURIComponent(user.id)}`)
+        const json = await res.json()
+        if (!json.success || !Array.isArray(json.data)) {
+          if (!cancelled) setRegisteredCharity([])
+          return
+        }
+        const rows = (json.data as RegisteredCharityEvent[])
+          .filter((e) => isCharityVolunteerEvent(e as Record<string, unknown>))
+          .sort((a, b) => {
+            const ad = a.startDate ? new Date(String(a.startDate)).getTime() : 0
+            const bd = b.startDate ? new Date(String(b.startDate)).getTime() : 0
+            return bd - ad
+          })
+        if (!cancelled) setRegisteredCharity(rows)
+      } catch (err) {
+        console.error('[v0] Registered charity events error:', err)
       }
     }
 
@@ -121,7 +181,9 @@ export default function VolunteeringPage() {
       try {
         const apps = await getMemberApplications(user.id)
         const volunteerIds = new Set(
-          (await getAllOpenOpportunities()).filter((o) => o.type === 'volunteer').map((o) => o.id)
+          (await getAllOpenOpportunities())
+            .filter((o) => matchesRoleTypeFilter(o, 'volunteer'))
+            .map((o) => o.id)
         )
         if (!cancelled) {
           setApplications(
@@ -143,6 +205,7 @@ export default function VolunteeringPage() {
 
     loadOpportunities()
     loadCharityEvents()
+    loadRegisteredCharity()
     loadApplications()
 
     const q = query(collection(db, 'volunteerRecords'), where('userId', '==', user.id))
@@ -212,16 +275,39 @@ export default function VolunteeringPage() {
     }
   }, [authLoading, user?.id])
 
-  const formatDate = (timestamp: Timestamp | Date | undefined) => {
+  const formatDate = (timestamp: Timestamp | Date | string | undefined) => {
     if (!timestamp) return 'Date TBA'
     try {
       const date =
-        typeof timestamp === 'object' && 'toDate' in timestamp
+        typeof timestamp === 'object' && timestamp !== null && 'toDate' in timestamp
           ? (timestamp as Timestamp).toDate()
-          : new Date(timestamp as Date)
+          : new Date(timestamp as Date | string)
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     } catch {
       return 'Invalid date'
+    }
+  }
+
+  const confirmAttendance = async (eventId: string) => {
+    setConfirmingId(eventId)
+    setAttendanceMessage(null)
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) throw new Error('Sign in required')
+      const res = await fetch(`/api/events/${eventId}/confirm-attendance`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(json.error || 'Could not confirm attendance')
+      setAttendanceMessage(String(json.message || 'Attendance confirmed.'))
+      setRegisteredCharity((prev) =>
+        prev.map((e) => (e.id === eventId ? { ...e, checkedInAt: new Date().toISOString() } : e))
+      )
+    } catch (err) {
+      setAttendanceMessage(err instanceof Error ? err.message : 'Could not confirm attendance')
+    } finally {
+      setConfirmingId(null)
     }
   }
 
@@ -230,6 +316,16 @@ export default function VolunteeringPage() {
 
   return (
     <DashboardPageShell title="Volunteering" subtitle="Give your time and skills to causes that matter">
+      <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50">
+        <p className="text-sm text-neutral-700">
+          Confirm attendance at charity events to add hours toward your certificates, then{' '}
+          <Link href="/dashboard/certificates" className="underline font-medium text-neutral-900">
+            issue your certificate
+          </Link>
+          .
+        </p>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-6">
         {[
           { label: 'Total Hours', value: volunteerData.totalHours, sub: 'All-time', icon: Clock },
@@ -256,67 +352,185 @@ export default function VolunteeringPage() {
         <DashboardTabButton active={activeTab === 'opportunities'} onClick={() => setActiveTab('opportunities')}>
           Available Opportunities
         </DashboardTabButton>
+        <DashboardTabButton active={activeTab === 'attendance'} onClick={() => setActiveTab('attendance')}>
+          Confirm attendance
+        </DashboardTabButton>
         <DashboardTabButton active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
           My Volunteer History
         </DashboardTabButton>
       </div>
+
+      {attendanceMessage ? (
+        <p className="mb-4 text-sm text-neutral-700 bg-white border border-neutral-200 rounded-lg px-3 py-2">
+          {attendanceMessage}
+        </p>
+      ) : null}
 
       {activeTab === 'opportunities' ? (
         opportunities.length === 0 && charityEvents.length === 0 ? (
           <DashboardEmptyState
             icon={<Briefcase className="w-12 h-12" />}
             title="No volunteering opportunities"
-            description="No volunteering opportunities right now. Check back soon."
+            description="Charity events and volunteer roles will appear here when published."
             action={
-              <Link href="/opportunities?type=volunteer" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                Browse Opportunities
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Link href="/events" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center">
+                  Browse events
+                </Link>
+                <Link href="/opportunities?type=volunteer" className="border border-neutral-300 px-4 py-2 rounded-lg text-sm font-semibold text-center">
+                  Browse opportunities
+                </Link>
+              </div>
+            }
+          />
+        ) : (
+          <div className="space-y-8">
+            <section>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 mb-3">
+                Charity events ({charityEvents.length})
+              </h2>
+              {charityEvents.length === 0 ? (
+                <p className="text-sm text-neutral-500">No upcoming charity events right now.</p>
+              ) : (
+                <div className="space-y-3">
+                  {charityEvents.map((evt) => (
+                    <Card key={`evt-${String(evt.id)}`} className="p-4 border border-neutral-200">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div>
+                          <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-900 text-white">
+                            Charity event
+                          </span>
+                          <h3 className="font-semibold text-neutral-900 mt-2">{String(evt.title ?? 'Event')}</h3>
+                          <p className="text-sm text-neutral-500 flex items-center gap-1.5 mt-1">
+                            <Calendar className="w-3.5 h-3.5 shrink-0" />
+                            {evt.startDate
+                              ? parseFirestoreDate(evt.startDate)?.toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                }) || String(evt.businessName ?? '')
+                              : String(evt.businessName ?? '')}
+                          </p>
+                          {evt.businessName ? (
+                            <p className="text-sm text-neutral-500">{String(evt.businessName)}</p>
+                          ) : null}
+                          {evt.description ? (
+                            <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(evt.description)}</p>
+                          ) : null}
+                        </div>
+                        <Link
+                          href={`/events/${String(evt.id)}`}
+                          className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
+                        >
+                          View & register
+                        </Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 mb-3">
+                Volunteer roles ({opportunities.length})
+              </h2>
+              {opportunities.length === 0 ? (
+                <p className="text-sm text-neutral-500">No open volunteer jobs right now.</p>
+              ) : (
+                <div className="space-y-3">
+                  {opportunities.map((opp) => (
+                    <Card key={String(opp.id)} className="p-4 border border-neutral-200">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div>
+                          <span className="text-xs font-semibold px-2 py-1 rounded border border-neutral-300 text-neutral-800">
+                            Volunteer role
+                          </span>
+                          <h3 className="font-semibold text-neutral-900 mt-2">{String(opp.title ?? 'Role')}</h3>
+                          <p className="text-sm text-neutral-500">{String(opp.businessName ?? '')}</p>
+                          {opp.location ? (
+                            <p className="text-xs text-neutral-400 mt-1">{String(opp.location)}</p>
+                          ) : null}
+                          {opp.description ? (
+                            <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(opp.description)}</p>
+                          ) : null}
+                        </div>
+                        <Link
+                          href={`/opportunities/${String(opp.id)}`}
+                          className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
+                        >
+                          Apply to volunteer
+                        </Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        )
+      ) : activeTab === 'attendance' ? (
+        registeredCharity.length === 0 ? (
+          <DashboardEmptyState
+            icon={<CheckCircle2 className="w-12 h-12" />}
+            title="No charity events registered"
+            description="Register for a charity event, attend, then confirm attendance here to earn certificate hours."
+            action={
+              <button
+                type="button"
+                onClick={() => setActiveTab('opportunities')}
+                className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+              >
+                Browse charity events
+              </button>
             }
           />
         ) : (
           <div className="space-y-3">
-            {charityEvents.map((evt) => (
-              <Card key={`evt-${String(evt.id)}`} className="p-4 border border-neutral-200">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div>
-                    <span className="text-xs font-semibold px-2 py-1 rounded bg-rose-100 text-rose-800">
-                      Charity event
-                    </span>
-                    <h3 className="font-semibold text-neutral-900 mt-2">{String(evt.title ?? 'Event')}</h3>
-                    <p className="text-sm text-neutral-500">{String(evt.businessName ?? '')}</p>
-                    {evt.description ? (
-                      <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(evt.description)}</p>
-                    ) : null}
+            {registeredCharity.map((evt) => {
+              const attended = Boolean(evt.checkedInAt)
+              return (
+                <Card key={evt.id} className="p-4 border border-neutral-200">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div>
+                      <span className="text-xs font-semibold px-2 py-1 rounded bg-rose-100 text-rose-800">
+                        Charity event
+                      </span>
+                      <h3 className="font-semibold text-neutral-900 mt-2">{evt.title || 'Event'}</h3>
+                      <p className="text-sm text-neutral-500">{evt.locationName || 'Community event'}</p>
+                      <p className="text-xs text-neutral-400 mt-1">
+                        {formatDate(evt.startDate as string | Date | undefined)}
+                      </p>
+                    </div>
+                    {attended ? (
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 shrink-0">
+                        <CheckCircle2 className="w-4 h-4" /> Hours credited
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={confirmingId === evt.id || evt.registrationStatus !== 'confirmed'}
+                        onClick={() => void confirmAttendance(evt.id)}
+                        className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                      >
+                        {confirmingId === evt.id
+                          ? 'Confirming…'
+                          : evt.registrationStatus !== 'confirmed'
+                            ? 'Pending approval'
+                            : 'Confirm attendance'}
+                      </button>
+                    )}
                   </div>
-                  <Link
-                    href={`/events/${String(evt.id)}`}
-                    className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
-                  >
-                    View & register
-                  </Link>
-                </div>
-              </Card>
-            ))}
-            {opportunities.map((opp) => (
-              <Card key={String(opp.id)} className="p-4 border border-neutral-200">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div>
-                    <span className="text-xs font-semibold px-2 py-1 rounded bg-green-100 text-green-800">Volunteer</span>
-                    <h3 className="font-semibold text-neutral-900 mt-2">{String(opp.title ?? 'Role')}</h3>
-                    <p className="text-sm text-neutral-500">{String(opp.businessName ?? '')}</p>
-                    {opp.description ? (
-                      <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(opp.description)}</p>
-                    ) : null}
-                  </div>
-                  <Link
-                    href={`/opportunities/${String(opp.id)}`}
-                    className="shrink-0 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center"
-                  >
-                    Apply to Volunteer
-                  </Link>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              )
+            })}
+            <p className="text-xs text-neutral-500 pt-2">
+              After hours are credited, go to{' '}
+              <Link href="/dashboard/certificates" className="underline font-medium text-neutral-800">
+                Certificates
+              </Link>{' '}
+              and tap Issue my certificates.
+            </p>
           </div>
         )
       ) : volunteerData.records.length === 0 && applications.length === 0 ? (

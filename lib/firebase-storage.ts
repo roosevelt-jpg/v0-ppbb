@@ -1,5 +1,11 @@
 import { storage } from './firebase'
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
+import {
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage'
 
 export interface UploadProgress {
   progress: number
@@ -16,14 +22,28 @@ export async function uploadToFirebaseStorage(
     onProgress?.({ progress: 0, status: 'uploading' })
 
     const storageRef = ref(storage, path)
-    await uploadBytes(storageRef, file)
 
-    onProgress?.({ progress: 50, status: 'uploading' })
+    // Resumable upload for larger media (videos); small files still work
+    if (file.size > 2 * 1024 * 1024 || file.type.startsWith('video/') || file.type.startsWith('audio/')) {
+      const task = uploadBytesResumable(storageRef, file)
+      await new Promise<void>((resolve, reject) => {
+        task.on(
+          'state_changed',
+          (snap) => {
+            const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100)
+            onProgress?.({ progress: pct, status: 'uploading' })
+          },
+          (err) => reject(err),
+          () => resolve()
+        )
+      })
+    } else {
+      await uploadBytes(storageRef, file)
+      onProgress?.({ progress: 90, status: 'uploading' })
+    }
 
     const downloadURL = await getDownloadURL(storageRef)
-
     onProgress?.({ progress: 100, status: 'success' })
-
     return downloadURL
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Upload failed'

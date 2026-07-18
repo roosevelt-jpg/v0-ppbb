@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import {
   MapPin,
   Calendar,
+  Clock,
   Users,
   DollarSign,
   Loader2,
@@ -15,7 +16,14 @@ import {
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import type { Event, TicketType } from '@/lib/event-types'
-import { getEventBannerURL, getEventLocationLabel, toEventDate } from '@/lib/event-utils'
+import {
+  getEventBannerURL,
+  getEventLocationLabel,
+  getEventMapsUrl,
+  getEventTimeRangeLabel,
+  toEventDate,
+} from '@/lib/event-utils'
+import { hostFromEventDoc } from '@/lib/event-host'
 import { buildGoogleCalendarUrl } from '@/lib/google-calendar'
 
 interface EventDetailViewProps {
@@ -128,6 +136,20 @@ export function EventDetailView({
 
   const bannerSrc = getEventBannerURL(event as unknown as Record<string, unknown>)
   const locationLabel = getEventLocationLabel(event)
+  const mapsUrl = getEventMapsUrl(event)
+  const timeLabel = getEventTimeRangeLabel(event)
+  const host = hostFromEventDoc(event as unknown as Record<string, unknown>)
+  const hostName =
+    host?.businessName === 'Admin'
+      ? 'Admin'
+      : host?.businessName ||
+        host?.ownerName ||
+        (typeof (event as { hostName?: string }).hostName === 'string'
+          ? (event as { hostName?: string }).hostName
+          : '') ||
+        ''
+  const hostLogo = host?.businessLogoUrl || ''
+  const hasSpeakers = Array.isArray(event.speakers) && event.speakers.length > 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -161,6 +183,26 @@ export function EventDetailView({
               <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 break-words">
                 {event.title}
               </h1>
+              {hostName ? (
+                <div className="flex items-center gap-2.5 mb-4">
+                  {hostLogo && hostName !== 'Admin' ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={hostLogo}
+                      alt=""
+                      className="h-8 w-8 rounded-full object-cover border border-neutral-200"
+                    />
+                  ) : (
+                    <span className="h-8 w-8 rounded-full bg-neutral-900 text-white text-xs font-semibold inline-flex items-center justify-center">
+                      {hostName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <div>
+                    <p className="text-xs text-gray-500">Hosted by</p>
+                    <p className="text-sm font-semibold text-black">{hostName}</p>
+                  </div>
+                </div>
+              ) : null}
               <p className="text-gray-700 text-base sm:text-lg break-words">{event.description}</p>
             </div>
 
@@ -173,10 +215,27 @@ export function EventDetailView({
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
-                <MapPin className="text-gray-600 shrink-0" size={20} />
+                <Clock className="text-gray-600 shrink-0" size={20} />
                 <div>
+                  <p className="text-xs text-gray-500">Time</p>
+                  <p className="font-semibold">{timeLabel || 'TBA'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
+                <MapPin className="text-gray-600 shrink-0 mt-0.5" size={20} />
+                <div className="min-w-0">
                   <p className="text-xs text-gray-500">Location</p>
                   <p className="font-semibold break-words">{locationLabel}</p>
+                  {mapsUrl ? (
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-neutral-600 underline mt-1 inline-block"
+                    >
+                      Open map
+                    </a>
+                  ) : null}
                 </div>
               </div>
               {(event as any).showGuestList !== false && (
@@ -207,11 +266,11 @@ export function EventDetailView({
               </div>
             </div>
 
-            {event.speakers && event.speakers.length > 0 && (
+            {hasSpeakers ? (
               <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
                 <h2 className="text-2xl font-bold mb-6">Speakers</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {event.speakers.map((speaker, idx) => (
+                  {event.speakers!.map((speaker, idx) => (
                     <div key={idx}>
                       {speaker.photoURL && (
                         <div className="w-full h-40 rounded-lg overflow-hidden mb-3">
@@ -229,7 +288,7 @@ export function EventDetailView({
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
             {event.agenda && event.agenda.length > 0 && (
               <div className="bg-white rounded-lg border border-gray-200 p-6 sm:p-8">
