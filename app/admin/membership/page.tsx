@@ -96,6 +96,10 @@ export default function MembershipPage() {
   const handleUpgradeTier = async (memberId: string, planId: string) => {
     if (!planId) return
     try {
+      const member = members.find((m) => String(m.id) === memberId)
+      const previousPlanName = String(
+        member?.membershipPlanName || member?.membershipTier || ''
+      ).trim()
       const plan = plans.find((p) => p.id === planId)
       const isBusiness = /business|partner|corporate|company/i.test(String(plan?.name || ''))
       await updateDoc(doc(db, 'users', memberId), {
@@ -127,6 +131,16 @@ export default function MembershipPage() {
         entityId: memberId,
         entityName: plan?.name,
         status: 'success',
+      })
+      void adminApiFetch('/api/email/membership-upgrade', {
+        method: 'POST',
+        body: JSON.stringify({
+          memberId,
+          planName: plan?.name ?? planId,
+          previousPlanName: previousPlanName || null,
+        }),
+      }).catch(() => {
+        /* branded upgrade email is best-effort */
       })
     } catch (error) {
       console.error('[v0] Error upgrading tier:', error)

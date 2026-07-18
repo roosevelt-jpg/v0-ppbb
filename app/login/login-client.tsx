@@ -146,6 +146,25 @@ export default function LoginPage() {
         timestamp: new Date().toISOString()
       })
 
+      try {
+        const idToken = await auth.currentUser?.getIdToken()
+        if (idToken) {
+          void fetch('/api/email/login-alert', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              method: 'email/password',
+              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            }),
+          })
+        }
+      } catch {
+        /* login alert is best-effort */
+      }
+
       setLoading(false)
       routeAfterLogin(user)
     } else {
@@ -177,6 +196,25 @@ export default function LoginPage() {
       logActivity(userId, user.email || '', 'SIGNIN_GOOGLE', 'Signed in with Google', { 
         timestamp: new Date().toISOString()
       })
+
+      try {
+        const idToken = await auth.currentUser?.getIdToken()
+        if (idToken) {
+          void fetch('/api/email/login-alert', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({
+              method: 'Google',
+              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            }),
+          })
+        }
+      } catch {
+        /* login alert is best-effort */
+      }
 
       routeAfterLogin(user)
     } else {

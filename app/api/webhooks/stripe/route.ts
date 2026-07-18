@@ -205,6 +205,29 @@ export async function POST(req: NextRequest) {
           updatedAt: Timestamp.now(),
         })
 
+        try {
+          const {
+            notifyMembershipCancelled,
+            resolveUserIdForSubscription,
+          } = await import('@/lib/member-notifications')
+          const userId = await resolveUserIdForSubscription({
+            subscriptionId,
+            email: subscription.metadata?.email || null,
+          })
+          if (userId) {
+            const endsAt = subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000)
+              : null
+            notifyMembershipCancelled({
+              userId,
+              planName: subscription.metadata?.planName || undefined,
+              endsAt,
+            })
+          }
+        } catch (mailErr) {
+          console.error('[v0] Cancel email failed:', mailErr)
+        }
+
         console.log('[v0] Subscription cancelled:', subscriptionId)
         break
       }
@@ -215,24 +238,59 @@ export async function POST(req: NextRequest) {
 
         if (subscriptionId) {
           // Log charge
+          const periodEndSec = invoice.lines?.data?.[0]?.period?.end
+          const paidAtSec = invoice.status_transitions?.paid_at || invoice.created
           const chargeData = {
             stripeInvoiceId: invoice.id,
             stripeSubscriptionId: subscriptionId,
             amount: invoice.amount_paid / 100,
             currency: invoice.currency,
             status: 'succeeded',
-            paidAt: Timestamp.fromDate(new Date(invoice.paid_date * 1000)),
-            nextBillingDate: Timestamp.fromDate(new Date(invoice.lines.data[0]?.period.end * 1000)),
+            paidAt: Timestamp.fromDate(new Date((paidAtSec || Date.now() / 1000) * 1000)),
+            nextBillingDate: periodEndSec
+              ? Timestamp.fromDate(new Date(periodEndSec * 1000))
+              : null,
             createdAt: Timestamp.now(),
           }
 
           await setDoc(doc(db, 'subscriptions', subscriptionId, 'charges', invoice.id), chargeData)
 
           // Update subscription next billing date
-          await updateDoc(doc(db, 'subscriptions', subscriptionId), {
-            nextBillingDate: Timestamp.fromDate(new Date(invoice.lines.data[0]?.period.end * 1000)),
-            updatedAt: Timestamp.now(),
-          })
+          if (periodEndSec) {
+            await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+              nextBillingDate: Timestamp.fromDate(new Date(periodEndSec * 1000)),
+              paymentStatus: 'succeeded',
+              updatedAt: Timestamp.now(),
+            })
+          }
+
+          // Renewal emails for recurring cycles (first payment already covered by checkout activation)
+          const billingReason = String(invoice.billing_reason || '')
+          if (billingReason === 'subscription_cycle' || billingReason === 'subscription_update') {
+            try {
+              const {
+                notifyMembershipRenewed,
+                resolveUserIdForSubscription,
+              } = await import('@/lib/member-notifications')
+              const customerEmail =
+                typeof invoice.customer_email === 'string' ? invoice.customer_email : null
+              const userId = await resolveUserIdForSubscription({
+                subscriptionId,
+                email: customerEmail,
+              })
+              if (userId) {
+                notifyMembershipRenewed({
+                  userId,
+                  planName: invoice.lines?.data?.[0]?.description || undefined,
+                  amount: invoice.amount_paid / 100,
+                  currency: String(invoice.currency || 'aed').toUpperCase(),
+                  nextBillingDate: periodEndSec ? new Date(periodEndSec * 1000) : null,
+                })
+              }
+            } catch (mailErr) {
+              console.error('[v0] Renewal email failed:', mailErr)
+            }
+          }
 
           console.log('[v0] Charge logged for subscription:', subscriptionId)
         }
@@ -263,6 +321,30 @@ export async function POST(req: NextRequest) {
             lastPaymentError: invoice.last_finalization_error?.message,
             updatedAt: Timestamp.now(),
           })
+
+          try {
+            const {
+              notifyMembershipPaymentFailed,
+              resolveUserIdForSubscription,
+            } = await import('@/lib/member-notifications')
+            const customerEmail =
+              typeof invoice.customer_email === 'string' ? invoice.customer_email : null
+            const userId = await resolveUserIdForSubscription({
+              subscriptionId,
+              email: customerEmail,
+            })
+            if (userId) {
+              notifyMembershipPaymentFailed({
+                userId,
+                planName: invoice.lines?.data?.[0]?.description || undefined,
+                amount: invoice.amount_due / 100,
+                currency: String(invoice.currency || 'aed').toUpperCase(),
+                reason: invoice.last_finalization_error?.message || invoice.billing_reason,
+              })
+            }
+          } catch (mailErr) {
+            console.error('[v0] Payment-failed email failed:', mailErr)
+          }
 
           console.log('[v0] Payment failed for subscription:', subscriptionId)
         }

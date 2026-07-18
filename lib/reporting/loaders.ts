@@ -456,6 +456,494 @@ export async function loadReportData(
       return payload(reportType, details, dateRange)
     }
 
+    case 'subscriptions': {
+      const [subsSnap, usersSnap] = await Promise.all([
+        safeGetDocs('subscriptions'),
+        safeGetDocs('users'),
+      ])
+      const userById = new Map(
+        usersSnap?.docs.map((d) => [d.id, d.data() as Record<string, unknown>]) || []
+      )
+      const fromSubs =
+        subsSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'updatedAt', 'cancelledAt']))
+          .map((d) => {
+            const row = d.data()
+            const user = userById.get(String(row.userId || '')) || {}
+            return {
+              id: d.id,
+              member: displayName(user) !== '—' ? displayName(user) : String(row.userId || '—'),
+              email: String(user.email || '—'),
+              plan: String(
+                row.planName ||
+                  user.membershipPlanName ||
+                  row.planId ||
+                  user.membershipPlanId ||
+                  '—'
+              ),
+              status: String(row.status || user.membershipStatus || '—'),
+              amount: Number(row.amount || 0),
+              currency: String(row.currency || 'AED').toUpperCase(),
+              interval: String(row.interval || '—'),
+              gateway: String(row.gateway || row.paymentGateway || '—'),
+              renewsAt: formatReportValue(
+                row.nextBillingDate || row.currentPeriodEnd || user.membershipRenewDate
+              ),
+              cancelAtPeriodEnd: row.cancelAtPeriodEnd === true ? 'yes' : 'no',
+              createdAt: formatReportValue(row.createdAt),
+            }
+          }) || []
+
+      // Also include active members who have plan fields but no subscription doc yet
+      const subUserIds = new Set(
+        (subsSnap?.docs || [])
+          .map((d) => String(d.data()?.userId || '').trim())
+          .filter(Boolean)
+      )
+      const fromUsers =
+        usersSnap?.docs
+          .filter((d) => {
+            const row = d.data()
+            if (!row.membershipPlanId && !row.membershipStatus) return false
+            if (subUserIds.has(d.id)) return false
+            return inRange(row, dateRange, ['createdAt', 'upgradedAt'])
+          })
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: `user:${d.id}`,
+              member: displayName(row),
+              email: String(row.email || '—'),
+              plan: String(row.membershipPlanName || row.membershipTier || row.membershipPlanId || '—'),
+              status: String(row.membershipStatus || '—'),
+              amount: 0,
+              currency: 'AED',
+              interval: '—',
+              gateway: row.membershipPromoCode ? 'promo' : 'profile',
+              renewsAt: formatReportValue(row.membershipRenewDate),
+              cancelAtPeriodEnd: '—',
+              createdAt: formatReportValue(row.createdAt),
+            }
+          }) || []
+
+      const details = [...fromSubs, ...fromUsers]
+      const active = details.filter((r) => String(r.status).toLowerCase() === 'active').length
+      return payload(reportType, details, dateRange, {
+        summary: { active, total: details.length },
+      })
+    }
+
+    case 'event_registrations': {
+      const snap = await safeGetDocs('eventRegistrations')
+      const rows =
+        snap?.docs.filter((d) =>
+          inRange(d.data(), dateRange, ['createdAt', 'registeredAt', 'paidAt'])
+        ) || []
+      const details = rows.map((d) => {
+        const row = d.data()
+        return {
+          id: d.id,
+          eventId: String(row.eventId || '—'),
+          guest: String(row.userName || row.guestName || '—'),
+          email: String(row.userEmail || row.email || '—'),
+          ticket: String(row.ticketTypeName || row.ticketTypeId || '—'),
+          paymentStatus: String(row.paymentStatus || '—'),
+          status: String(row.status || '—'),
+          amountPaid: Number(row.amountPaid || row.amount || 0),
+          currency: String(row.currency || 'AED'),
+          coupon: String(row.couponCode || '—'),
+          checkedIn: row.checkedInAt ? 'yes' : 'no',
+          registeredAt: formatReportValue(row.registeredAt || row.createdAt),
+        }
+      })
+      const totalAmount = details.reduce((sum, r) => sum + (Number(r.amountPaid) || 0), 0)
+      const paid = details.filter((r) => String(r.paymentStatus).toLowerCase() === 'paid').length
+      return payload(reportType, details, dateRange, {
+        totalAmount,
+        summary: { revenue: totalAmount, paid, total: details.length },
+      })
+    }
+
+    case 'marketplace_orders': {
+      const snap = await safeGetDocs('orders')
+      const rows =
+        snap?.docs.filter((d) => {
+          const row = d.data()
+          const isMarketplace =
+            row.type === 'marketplace' ||
+            Boolean(row.offerId) ||
+            Boolean(row.shopName) ||
+            Array.isArray(row.items)
+          return isMarketplace && inRange(row, dateRange)
+        }) || []
+      const details = rows.map((d) => {
+        const row = d.data()
+        return {
+          id: d.id,
+          buyer: String(row.buyerName || row.userId || '—'),
+          business: String(row.shopName || row.businessName || row.businessId || '—'),
+          offer: String(row.offerTitle || row.offerId || '—'),
+          amount: Number(row.amount || row.total || row.totalAmount || 0),
+          currency: String(row.currency || 'AED'),
+          paymentStatus: String(row.paymentStatus || row.status || '—'),
+          fulfillment: String(row.fulfillmentStatus || '—'),
+          createdAt: formatReportValue(row.createdAt),
+        }
+      })
+      const totalAmount = details.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
+      return payload(reportType, details, dateRange, {
+        totalAmount,
+        summary: { gmv: totalAmount, orders: details.length },
+      })
+    }
+
+    case 'promo_codes': {
+      const snap = await safeGetDocs('membershipPromoCodes')
+      const details =
+        snap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'codeExpiresAt']))
+          .map((d) => {
+            const row = d.data()
+            const used = Number(row.usedCount || 0)
+            const max = Number(row.maxRedemptions || 0)
+            return {
+              id: d.id,
+              code: String(row.code || '—'),
+              label: String(row.label || row.description || '—'),
+              type: String(row.type || '—'),
+              plan: String(row.planName || row.planId || '—'),
+              percentOff: Number(row.percentOff || 0),
+              usedCount: used,
+              maxRedemptions: max || 'unlimited',
+              remaining: max > 0 ? Math.max(0, max - used) : 'unlimited',
+              status: String(row.status || 'active'),
+              expiresAt: formatReportValue(row.codeExpiresAt),
+              createdAt: formatReportValue(row.createdAt),
+            }
+          }) || []
+      const totalRedemptions = details.reduce((sum, r) => sum + (Number(r.usedCount) || 0), 0)
+      return payload(reportType, details, dateRange, {
+        summary: { codes: details.length, redemptions: totalRedemptions },
+      })
+    }
+
+    case 'beneficiary_requests': {
+      let snap = await safeGetDocs('beneficiaryRequests')
+      if (!snap || snap.empty) snap = await safeGetDocs('charityRequests')
+      const details =
+        snap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'submissionDate', 'submittedAt']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              name: String(row.fullName || row.name || displayName(row)),
+              email: String(row.email || '—'),
+              phone: String(row.phoneNumber || row.phone || '—'),
+              status: String(row.status || 'pending'),
+              submittedAt: formatReportValue(
+                row.submissionDate || row.submittedAt || row.createdAt
+              ),
+            }
+          }) || []
+      const byStatus: Record<string, number> = {}
+      for (const r of details) {
+        const key = String(r.status || 'unknown')
+        byStatus[key] = (byStatus[key] || 0) + 1
+      }
+      return payload(reportType, details, dateRange, {
+        summary: { total: details.length, ...byStatus },
+      })
+    }
+
+    case 'donation_verification': {
+      const snap = await safeGetDocs('donationSubmissions')
+      const rows =
+        snap?.docs.filter((d) =>
+          inRange(d.data(), dateRange, ['createdAt', 'submittedAt', 'verifiedAt'])
+        ) || []
+      const details = rows.map((d) => {
+        const row = d.data()
+        return {
+          id: d.id,
+          donor: String(row.donorName || row.userName || '—'),
+          email: String(row.donorEmail || row.email || '—'),
+          amount: Number(row.amount || 0),
+          currency: String(row.currency || 'AED'),
+          cause: String(row.causeName || row.partnerName || '—'),
+          reference: String(row.referenceNumber || '—'),
+          status: String(row.status || 'pending'),
+          submittedAt: formatReportValue(row.submittedAt || row.createdAt),
+        }
+      })
+      const totalAmount = details.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
+      const pending = details.filter((r) =>
+        String(r.status).toLowerCase().includes('pending')
+      ).length
+      return payload(reportType, details, dateRange, {
+        totalAmount,
+        summary: { pending, total: details.length, totalAmount },
+      })
+    }
+
+    case 'advertising': {
+      // Prefer client read (rules allow admin); fall back to advertising admin API
+      let rows: Array<{ id: string; data: Record<string, unknown> }> = []
+      const snap = await safeGetDocs('advertisingRequests')
+      if (snap && !snap.empty) {
+        rows = snap.docs.map((d) => ({ id: d.id, data: d.data() as Record<string, unknown> }))
+      } else {
+        try {
+          const { adminApiFetch } = await import('@/lib/admin-api-client')
+          const res = await adminApiFetch<Array<Record<string, unknown>>>(
+            '/api/advertising/requests?admin=1'
+          )
+          if (res.success && Array.isArray(res.data)) {
+            rows = res.data.map((item) => {
+              const { id, ...rest } = item
+              return { id: String(id || ''), data: rest }
+            })
+          }
+        } catch (error) {
+          console.warn('[reporting] advertising API fallback failed:', error)
+        }
+      }
+      const details = rows
+        .filter((r) => inRange(r.data, dateRange, ['createdAt', 'publishedAt']))
+        .map((r) => {
+          const row = r.data
+          return {
+            id: r.id,
+            business: String(row.businessName || row.businessId || '—'),
+            status: String(row.status || '—'),
+            priceAed: Number(row.priceAed || row.price || 0),
+            currency: String(row.currency || 'AED'),
+            href: String(row.href || '—'),
+            adminFree: row.adminFree === true ? 'yes' : 'no',
+            publishedAt: formatReportValue(row.publishedAt),
+            createdAt: formatReportValue(row.createdAt),
+          }
+        })
+      const totalAmount = details.reduce((sum, r) => sum + (Number(r.priceAed) || 0), 0)
+      return payload(reportType, details, dateRange, {
+        totalAmount,
+        summary: { requests: details.length, bookedValueAed: totalAmount },
+      })
+    }
+
+    case 'job_applications': {
+      const snap = await safeGetDocs('jobApplications')
+      const details =
+        snap?.docs
+          .filter((d) => inRange(d.data(), dateRange))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              applicant: String(row.applicantName || row.userName || '—'),
+              email: String(row.applicantEmail || row.email || '—'),
+              opportunity: String(row.opportunityTitle || row.jobTitle || row.opportunityId || '—'),
+              business: String(row.businessName || row.businessId || '—'),
+              status: String(row.status || 'submitted'),
+              createdAt: formatReportValue(row.createdAt),
+            }
+          }) || []
+      const byStatus: Record<string, number> = {}
+      for (const r of details) {
+        const key = String(r.status || 'unknown')
+        byStatus[key] = (byStatus[key] || 0) + 1
+      }
+      return payload(reportType, details, dateRange, {
+        summary: { applications: details.length, ...byStatus },
+      })
+    }
+
+    case 'newsletters': {
+      const [newsSnap, unsubSnap] = await Promise.all([
+        safeGetDocs('newsletters'),
+        safeGetDocs('newsletterUnsubscribes'),
+      ])
+      const campaignRows =
+        newsSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'sentAt', 'scheduledFor']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              kind: 'campaign',
+              title: String(row.title || row.subject || '—'),
+              status: String(row.status || '—'),
+              recipients: Number(row.recipientCount || 0),
+              opened: Number(row.openedCount || 0),
+              clicked: Number(row.clickedCount || 0),
+              date: formatReportValue(row.sentAt || row.scheduledFor || row.createdAt),
+            }
+          }) || []
+      const unsubRows =
+        unsubSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['unsubscribedAt', 'createdAt']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              kind: 'unsubscribe',
+              title: String(row.email || d.id),
+              status: 'unsubscribed',
+              recipients: 0,
+              opened: 0,
+              clicked: 0,
+              date: formatReportValue(row.unsubscribedAt || row.createdAt),
+            }
+          }) || []
+      const details = [...campaignRows, ...unsubRows]
+      return payload(reportType, details, dateRange, {
+        summary: {
+          campaigns: campaignRows.length,
+          unsubscribes: unsubRows.length,
+        },
+      })
+    }
+
+    case 'moderation': {
+      const snap = await safeGetDocs('communityReports')
+      const details =
+        snap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'resolvedAt']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              type: String(row.type || '—'),
+              reason: String(row.reason || '—'),
+              reportedBy: String(row.reportedBy || '—'),
+              reportedUser: String(row.reportedUserId || '—'),
+              contentId: String(row.reportedContentId || '—'),
+              status: String(row.status || 'open'),
+              createdAt: formatReportValue(row.createdAt),
+              resolvedAt: formatReportValue(row.resolvedAt),
+            }
+          }) || []
+      const open = details.filter((r) => {
+        const s = String(r.status).toLowerCase()
+        return s === 'open' || s === 'pending' || s === 'new'
+      }).length
+      return payload(reportType, details, dateRange, {
+        summary: { open, total: details.length },
+      })
+    }
+
+    case 'business_payments': {
+      const [paySnap, payoutSnap] = await Promise.all([
+        safeGetDocs('businessPayments'),
+        safeGetDocs('payouts'),
+      ])
+      const paymentRows =
+        paySnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'paidDate', 'dueDate']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              kind: 'business_payment',
+              business: String(row.businessName || row.businessId || '—'),
+              type: String(row.type || '—'),
+              amount: Number(row.amount || 0),
+              currency: String(row.currency || 'AED'),
+              status: String(row.status || '—'),
+              reference: String(row.stripeTransactionId || row.paymentReference || '—'),
+              date: formatReportValue(row.paidDate || row.dueDate || row.createdAt),
+            }
+          }) || []
+      const payoutRows =
+        payoutSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'initiatedAt', 'completedAt']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              kind: 'event_payout',
+              business: String(row.businessName || row.businessId || '—'),
+              type: String(row.eventTitle || row.eventId || 'event_payout'),
+              amount: Number(row.amount || 0),
+              currency: String(row.currency || 'AED'),
+              status: String(row.status || '—'),
+              reference: String(row.payoutReference || '—'),
+              date: formatReportValue(row.completedAt || row.initiatedAt || row.createdAt),
+            }
+          }) || []
+      const details = [...paymentRows, ...payoutRows]
+      const totalAmount = details.reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
+      return payload(reportType, details, dateRange, {
+        totalAmount,
+        summary: {
+          businessPayments: paymentRows.length,
+          eventPayouts: payoutRows.length,
+          totalAmount,
+        },
+      })
+    }
+
+    case 'learning': {
+      const [workshopsSnap, recordingsSnap, resourcesSnap] = await Promise.all([
+        safeGetDocs('workshops'),
+        safeGetDocs('recordings'),
+        safeGetDocs('learningResources'),
+      ])
+      const workshopRows =
+        workshopsSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'date']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              catalog: 'workshop',
+              title: String(row.title || '—'),
+              instructor: String(row.instructor || row.speaker || '—'),
+              status: String(row.status || '—'),
+              date: formatReportValue(row.date || row.createdAt),
+              capacity: Number(row.capacity || 0),
+            }
+          }) || []
+      const recordingRows =
+        recordingsSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange, ['createdAt', 'date']))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              catalog: 'recording',
+              title: String(row.title || '—'),
+              instructor: String(row.speaker || row.instructor || '—'),
+              status: String(row.status || '—'),
+              date: formatReportValue(row.date || row.createdAt),
+              capacity: Number(row.duration || 0),
+            }
+          }) || []
+      const resourceRows =
+        resourcesSnap?.docs
+          .filter((d) => inRange(d.data(), dateRange))
+          .map((d) => {
+            const row = d.data()
+            return {
+              id: d.id,
+              catalog: 'resource',
+              title: String(row.title || '—'),
+              instructor: String(row.author || '—'),
+              status: String(row.status || '—'),
+              date: formatReportValue(row.createdAt),
+              capacity: 0,
+            }
+          }) || []
+      const details = [...workshopRows, ...recordingRows, ...resourceRows]
+      return payload(reportType, details, dateRange, {
+        summary: {
+          workshops: workshopRows.length,
+          recordings: recordingRows.length,
+          resources: resourceRows.length,
+        },
+      })
+    }
+
     default:
       throw new Error(`Unknown report type: ${reportType}`)
   }

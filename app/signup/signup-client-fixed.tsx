@@ -596,19 +596,25 @@ export default function SignupClient() {
 
       try {
         const idToken = await firebaseUser.getIdToken()
+        const authHeaders = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        }
         void fetch('/api/email/welcome', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${idToken}`,
-          },
+          headers: authHeaders,
           body: JSON.stringify({
             accountType: formData.memberType,
             firstName: formData.firstName,
           }),
         })
+        void fetch('/api/auth/send-verification', {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({ firstName: formData.firstName }),
+        })
       } catch {
-        /* welcome email is best-effort */
+        /* welcome / verification emails are best-effort */
       }
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)

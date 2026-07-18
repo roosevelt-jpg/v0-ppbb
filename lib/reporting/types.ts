@@ -18,6 +18,18 @@ export type ReportType =
   | 'audit'
   | 'partnerships'
   | 'vendors'
+  | 'subscriptions'
+  | 'event_registrations'
+  | 'marketplace_orders'
+  | 'promo_codes'
+  | 'beneficiary_requests'
+  | 'donation_verification'
+  | 'advertising'
+  | 'job_applications'
+  | 'newsletters'
+  | 'moderation'
+  | 'business_payments'
+  | 'learning'
 
 export type ReportRow = Record<string, string | number>
 
@@ -57,7 +69,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
   {
     type: 'memberships',
     title: 'Membership Plans',
-    description: 'Pricing plans, tiers, and membership configuration',
+    description: 'Pricing plan configuration (tiers, prices, billing periods)',
     category: 'finance',
   },
   {
@@ -93,7 +105,7 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
   {
     type: 'marketplace',
     title: 'Marketplace Offers',
-    description: 'Offers, discounts, pricing, and listing status',
+    description: 'Offer listings, discounts, pricing, and listing status',
     category: 'operations',
   },
   {
@@ -143,6 +155,78 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     title: 'Audit Logs',
     description: 'Admin actions for compliance and security review',
     category: 'compliance',
+  },
+  {
+    type: 'subscriptions',
+    title: 'Membership Subscriptions',
+    description: 'Active paid plans, renewals, cancel status, and billing periods',
+    category: 'finance',
+  },
+  {
+    type: 'event_registrations',
+    title: 'Event Registrations & Revenue',
+    description: 'Tickets sold, payment status, check-ins, and registration revenue',
+    category: 'finance',
+  },
+  {
+    type: 'marketplace_orders',
+    title: 'Marketplace Orders',
+    description: 'Purchase GMV, fulfillment, and order payment status',
+    category: 'finance',
+  },
+  {
+    type: 'promo_codes',
+    title: 'Promo Code Performance',
+    description: 'Membership promo codes, redemption counts, and caps',
+    category: 'finance',
+  },
+  {
+    type: 'beneficiary_requests',
+    title: 'Beneficiary Request Pipeline',
+    description: 'Charity support requests by status and submission volume',
+    category: 'operations',
+  },
+  {
+    type: 'donation_verification',
+    title: 'Donation Verification Queue',
+    description: 'Manual donation proofs pending review, approved, or rejected',
+    category: 'finance',
+  },
+  {
+    type: 'advertising',
+    title: 'Advertising Requests',
+    description: 'Homepage ad requests, pricing, and publish status',
+    category: 'operations',
+  },
+  {
+    type: 'job_applications',
+    title: 'Job Applications Funnel',
+    description: 'Applications by opportunity, business, and review status',
+    category: 'engagement',
+  },
+  {
+    type: 'newsletters',
+    title: 'Newsletters & Unsubscribes',
+    description: 'Campaign sends, opens/clicks, and unsubscribe list',
+    category: 'engagement',
+  },
+  {
+    type: 'moderation',
+    title: 'Community Moderation',
+    description: 'Reported users/content and resolution status',
+    category: 'compliance',
+  },
+  {
+    type: 'business_payments',
+    title: 'Business Payments & Payouts',
+    description: 'Business billing, commission payouts, and event revenue payouts',
+    category: 'finance',
+  },
+  {
+    type: 'learning',
+    title: 'Learning & Recordings Catalog',
+    description: 'Workshops, recordings, and learning resources inventory',
+    category: 'engagement',
   },
 ]
 

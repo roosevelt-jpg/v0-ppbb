@@ -9,7 +9,6 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
-  sendPasswordResetEmail,
 } from 'firebase/auth'
 import { doc, setDoc, getDoc, DocumentSnapshot } from 'firebase/firestore'
 import { User, UserRole, LocationData, UploadedImage, AdminRole } from '@/lib/types'
@@ -257,7 +256,15 @@ export async function sendPasswordReset(email: string): Promise<{ success: boole
     if (!trimmed) {
       return { success: false, error: 'Please enter your email address.' }
     }
-    await sendPasswordResetEmail(auth, trimmed)
+    const res = await fetch('/api/auth/send-password-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: trimmed }),
+    })
+    const data = (await res.json().catch(() => ({}))) as { success?: boolean; error?: string }
+    if (!res.ok || data.success === false) {
+      return { success: false, error: data.error || 'Failed to send reset email. Please try again.' }
+    }
     return { success: true, error: null }
   } catch (error: unknown) {
     return { success: false, error: formatAuthError(error) }

@@ -827,6 +827,22 @@ service cloud.firestore {
       );
     }
 
+    // Homepage advertising requests (business submits; admin reporting/CMS)
+    match /advertisingRequests/{requestId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create: if isAuth();
+      allow update, delete: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+    }
+
+    // Event revenue payouts to businesses (admin reporting)
+    match /payouts/{payoutId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.businessId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
     // Default deny all other requests
     match /{document=**} {
       allow read, write: if false;

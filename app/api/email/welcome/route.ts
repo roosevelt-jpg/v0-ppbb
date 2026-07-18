@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         isBusiness
           ? 'Your business account has been created. Complete membership payment and wait for approval to unlock the full business portal.'
           : 'Your member account has been created. Choose a membership plan to activate your access and start exploring communities, events, and volunteering.',
+        'We also sent a separate email to verify your address — please confirm it to keep your account secure.',
         'If you have any questions, reply to this email or contact PB Admin through the platform.'
       ),
       cta: {

@@ -7,7 +7,7 @@ import {
   incrementCouponUsed,
   incrementTicketSold,
 } from '@/lib/event-luma-server'
-import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
+import { notifyMembershipActivated } from '@/lib/member-notifications'
 
 export function getPublicAppUrl(): string {
   return (
@@ -324,23 +324,24 @@ export async function completeMembershipPayment(params: {
   const membershipUrl = `${getPublicAppUrl()}/dashboard/membership?status=success`
   const planName = String(plan.name || params.planId)
   const isPromo = params.gateway === 'promo'
-  sendBrandedEmailToUserSafe({
+  const prevPlanId = String(existingUser.membershipPlanId || existingUser.membershipTier || '').trim()
+  const wasActive = String(existingUser.membershipStatus || '').toLowerCase() === 'active'
+  const isUpgrade =
+    wasActive &&
+    Boolean(prevPlanId) &&
+    prevPlanId !== params.planId &&
+    params.gateway !== 'promo'
+
+  notifyMembershipActivated({
     userId: params.userId,
-    subject: isPromo
-      ? `Welcome — ${planName} (promo) activated`
-      : `Welcome — ${planName} membership activated`,
-    purpose: 'Membership activation confirmation',
-    headline: 'Membership activated',
-    bodyHtml: paragraphs(
-      'Assalamu alaikum,',
-      isLifetimePromo
-        ? `Your ${planName} membership is now active for free with no end date. Thank you for joining Passive Blessings.`
-        : isPromo
-          ? `Your ${planName} membership is now active via a promo code. Access continues until ${renewDate.toLocaleDateString()}.`
-          : `Your ${planName} membership is now active. Thank you for joining Passive Blessings.`,
-      'You can manage your plan anytime from your member dashboard.'
-    ),
-    cta: { label: 'Open membership', url: membershipUrl },
+    planName,
+    renewDate: isLifetimePromo ? null : renewDate,
+    isPromo,
+    isLifetime: isLifetimePromo,
+    isUpgrade,
+    previousPlanName: isUpgrade
+      ? String(existingUser.membershipPlanName || prevPlanId || '')
+      : null,
   })
 
   return { membershipUrl }
