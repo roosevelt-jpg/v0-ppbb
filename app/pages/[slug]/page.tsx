@@ -50,7 +50,7 @@ export default async function CmsPage({ params }: { params: Promise<{ slug: stri
             <p className="text-neutral-600 mb-8 font-body">{page.description}</p>
           ) : null}
           <article
-            className="prose prose-neutral max-w-none font-body cms-page-content [&_p]:mb-4 [&_p]:leading-relaxed [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_br]:block"
+            className="prose prose-neutral max-w-none font-body cms-page-content [&_p]:mb-4 [&_p]:leading-relaxed [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-semibold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1.5 [&_a]:underline [&_a]:text-neutral-900 [&_strong]:font-semibold [&_em]:italic [&_br]:block"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
         </div>

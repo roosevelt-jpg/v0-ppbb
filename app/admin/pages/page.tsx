@@ -19,7 +19,11 @@ import {
   type NavigationConfig,
 } from '@/lib/platform-config'
 import { getCmsPageHref } from '@/lib/cms-page-routes'
-import { ensureCmsParagraphs, htmlToPlainText, stripDuplicateCmsHeadings } from '@/lib/cms-page-content'
+import {
+  normalizeCmsContentForSave,
+  prepareCmsContentForEditor,
+} from '@/lib/cms-page-content'
+import { RichTextEditor } from '@/components/rich-text-editor'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,12 +55,7 @@ function menuLocationFromPlacement(
 function buildPagePayload(page: Page) {
   const title = page.title.trim()
   const seoTitle = page.seoTitle?.trim() || title
-  // Store normalized paragraph HTML derived from plain text (line breaks preserved)
-  const content = stripDuplicateCmsHeadings(
-    ensureCmsParagraphs(htmlToPlainText(page.content || '')),
-    seoTitle,
-    title
-  )
+  const content = normalizeCmsContentForSave(page.content || '', seoTitle, title)
 
   return {
     slug: page.slug.trim(),
@@ -112,7 +111,7 @@ export default function AdminPages() {
   const openEditor = (page: Page, creating: boolean) => {
     setEditingPage({
       ...page,
-      content: htmlToPlainText(page.content || ''),
+      content: prepareCmsContentForEditor(page.content || ''),
     })
     setIsCreating(creating)
     setMenuPlacement(placementFromPage(page))
@@ -211,7 +210,7 @@ export default function AdminPages() {
   return (
     <AdminPageLayout
       title="Pages CMS"
-      subtitle="Edit footer Legal pages and other site pages. Paste plain text — no HTML needed."
+      subtitle="Edit site pages with formatting — bold, italics, lists, headings, and links."
     >
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-xl font-bold">All Pages</h2>
@@ -316,15 +315,14 @@ export default function AdminPages() {
               <div>
                 <label className="block text-sm font-medium mb-2">Page content</label>
                 <p className="text-xs text-neutral-500 mb-2">
-                  Paste plain text here. Line breaks and blank lines become paragraphs on the public
-                  page. Do not paste HTML.
+                  Use the toolbar for bold, italics, subtitles, bullets, numbering, and hyperlinks.
+                  Applies to this page and all future pages.
                 </p>
-                <textarea
+                <RichTextEditor
                   value={editingPage.content}
-                  onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
+                  onChange={(html) => setEditingPage({ ...editingPage, content: html })}
                   placeholder="Write or paste page content…"
-                  rows={14}
-                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-sm font-body leading-relaxed whitespace-pre-wrap"
+                  minHeight={280}
                 />
               </div>
 
