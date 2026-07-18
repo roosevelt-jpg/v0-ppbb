@@ -49,16 +49,11 @@ function toDate(value: unknown): Date | null {
 }
 
 function isLiveStatus(status: BusinessOpportunity['status']): boolean {
-  return status === 'open' || status === 'published' || status === 'active'
+  return status === 'open'
 }
 
 function canToggleLive(status: BusinessOpportunity['status']): boolean {
-  return (
-    isLiveStatus(status) ||
-    status === 'closed' ||
-    status === 'filled' ||
-    status === 'paused'
-  )
+  return status === 'open' || status === 'closed' || status === 'filled'
 }
 
 function MetricCell({
