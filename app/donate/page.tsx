@@ -385,10 +385,15 @@ export default function DonationPage() {
           </div>
 
           {selectedCause && (
-            <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-3 z-50 overflow-y-auto">
-              <div className="bg-white rounded-t-xl sm:rounded-lg shadow-xl max-w-md w-full max-h-[85vh] overflow-y-auto">
-                <div className="p-3.5 sm:p-4 border-b border-neutral-100">
+            <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 overflow-y-auto">
+              <div
+                role="dialog"
+                aria-labelledby="donate-modal-title"
+                className="bg-white rounded-t-2xl sm:rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="p-4 sm:p-5 border-b border-neutral-100">
                   <h2
+                    id="donate-modal-title"
                     className="text-lg sm:text-xl flex items-center gap-2 text-neutral-900 leading-snug"
                     style={{ fontFamily: 'Cormorant Garamond, serif' }}
                   >
@@ -396,87 +401,112 @@ export default function DonationPage() {
                     Donate to: {selectedCause.title}
                   </h2>
                   <p
-                    className="text-neutral-600 mt-1 text-xs line-clamp-2"
+                    className="text-neutral-600 mt-1.5 text-sm leading-relaxed line-clamp-3"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     {selectedCause.description}
                   </p>
                 </div>
 
-                <div className="p-3.5 sm:p-4 space-y-3" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <div className="p-4 sm:p-5 space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
                   {modalStep === 'partner' ? (
                     <div>
-                      <h3 className="text-sm font-semibold mb-1">1. Select payment partner</h3>
-                      <p className="text-neutral-600 text-xs mb-2.5">
+                      <h3 className="text-sm font-semibold mb-1 text-neutral-900">1. Select payment partner</h3>
+                      <p className="text-neutral-600 text-xs mb-3 leading-relaxed">
                         Next you will choose Zakat or Sadaqah — each uses its own payment link.
                       </p>
 
                       {assignedPartner ? (
-                        <button
-                          type="button"
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={() => choosePartner(assignedPartner)}
-                          className="w-full text-left block border-2 border-neutral-900 rounded-md p-2.5 hover:bg-neutral-50 transition-all"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              choosePartner(assignedPartner)
+                            }
+                          }}
+                          className="w-full text-left border-2 border-neutral-900 rounded-lg p-3.5 sm:p-4 bg-white hover:bg-neutral-50 transition-colors cursor-pointer"
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <h4 className="font-bold text-sm truncate">{assignedPartner.name}</h4>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1 space-y-1.5">
+                              <h4 className="font-bold text-sm sm:text-base text-neutral-900">
+                                {assignedPartner.name}
+                              </h4>
                               {assignedPartner.description ? (
-                                <p className="text-xs text-neutral-600 mt-0.5 line-clamp-1">
+                                <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
                                   {assignedPartner.description}
                                 </p>
                               ) : null}
-                              <span className="inline-block mt-1.5 text-[10px] bg-black text-white px-1.5 py-0.5 rounded">
+                              <span className="inline-flex text-[10px] font-semibold uppercase tracking-wide bg-neutral-900 text-white px-2 py-1 rounded">
                                 Primary partner for this cause
                               </span>
                             </div>
-                            <ArrowRight className="w-4 h-4 shrink-0" />
+                            <ArrowRight className="w-4 h-4 shrink-0 mt-1 text-neutral-700" />
                           </div>
-                        </button>
+                        </div>
                       ) : partners.length > 0 ? (
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           {partners.map((partner) => (
-                            <button
+                            <div
                               key={partner.id}
-                              type="button"
+                              role="button"
+                              tabIndex={0}
                               onClick={() => choosePartner(partner)}
-                              className="w-full text-left block border border-neutral-200 rounded-md p-2.5 hover:border-neutral-900 hover:bg-neutral-50 transition-all"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  choosePartner(partner)
+                                }
+                              }}
+                              className="w-full text-left border border-neutral-200 rounded-lg p-3.5 bg-white hover:border-neutral-900 hover:bg-neutral-50 transition-colors cursor-pointer"
                             >
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="min-w-0">
-                                  <h4 className="font-bold text-sm truncate">{partner.name}</h4>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1 space-y-1">
+                                  <h4 className="font-bold text-sm text-neutral-900">{partner.name}</h4>
                                   {partner.description ? (
-                                    <p className="text-xs text-neutral-600 line-clamp-1">
+                                    <p className="text-xs text-neutral-600 leading-relaxed line-clamp-2">
                                       {partner.description}
                                     </p>
                                   ) : null}
                                 </div>
-                                <ArrowRight className="w-4 h-4 shrink-0" />
+                                <ArrowRight className="w-4 h-4 shrink-0 mt-0.5 text-neutral-500" />
                               </div>
-                            </button>
+                            </div>
                           ))}
                         </div>
                       ) : fallbackUrl ? (
-                        <button
-                          type="button"
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={() => choosePartner(null)}
-                          className="w-full text-left block border-2 border-neutral-900 rounded-md p-2.5 hover:bg-neutral-50 transition-all"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              choosePartner(null)
+                            }
+                          }}
+                          className="w-full text-left border-2 border-neutral-900 rounded-lg p-3.5 sm:p-4 bg-white hover:bg-neutral-50 transition-colors cursor-pointer"
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <div>
-                              <h4 className="font-bold text-sm">Beit Al Khair</h4>
-                              <p className="text-xs text-neutral-600 mt-0.5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <h4 className="font-bold text-sm sm:text-base text-neutral-900">
+                                Beit Al Khair
+                              </h4>
+                              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
                                 Official payment partner.
                               </p>
                             </div>
-                            <ArrowRight className="w-4 h-4 shrink-0" />
+                            <ArrowRight className="w-4 h-4 shrink-0 mt-1 text-neutral-700" />
                           </div>
-                        </button>
+                        </div>
                       ) : (
-                        <div className="bg-amber-50 border border-amber-200 rounded p-2.5">
-                          <p className="text-amber-900 font-semibold text-sm mb-0.5">
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3.5">
+                          <p className="text-amber-900 font-semibold text-sm mb-1">
                             Payment link not configured
                           </p>
-                          <p className="text-amber-800 text-xs">
+                          <p className="text-amber-800 text-xs leading-relaxed">
                             Ask an admin to set Zakat/Sadaqah payment links on a charity partner.
                           </p>
                         </div>
@@ -484,24 +514,33 @@ export default function DonationPage() {
 
                       {assignedPartner &&
                         partners.filter((p) => p.id !== assignedPartner.id).length > 0 && (
-                          <div className="mt-3 space-y-1.5">
-                            <p className="text-xs font-semibold text-neutral-600">Alternatives</p>
+                          <div className="mt-4 space-y-2">
+                            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+                              Alternatives
+                            </p>
                             {partners
                               .filter((p) => p.id !== assignedPartner.id)
                               .map((partner) => (
-                                <button
+                                <div
                                   key={partner.id}
-                                  type="button"
+                                  role="button"
+                                  tabIndex={0}
                                   onClick={() => choosePartner(partner)}
-                                  className="w-full text-left block border rounded-md px-2.5 py-2 hover:bg-neutral-50"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      choosePartner(partner)
+                                    }
+                                  }}
+                                  className="w-full text-left border border-neutral-200 rounded-lg px-3.5 py-3 bg-white hover:bg-neutral-50 cursor-pointer"
                                 >
                                   <div className="flex justify-between items-center gap-2">
-                                    <span className="font-medium text-xs truncate">
+                                    <span className="font-medium text-sm text-neutral-900 truncate">
                                       {partner.name}
                                     </span>
-                                    <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                                    <ArrowRight className="w-3.5 h-3.5 shrink-0 text-neutral-500" />
                                   </div>
-                                </button>
+                                </div>
                               ))}
                           </div>
                         )}
@@ -511,17 +550,17 @@ export default function DonationPage() {
                       <button
                         type="button"
                         onClick={() => setModalStep('partner')}
-                        className="text-xs font-semibold text-neutral-600 underline mb-2"
+                        className="pb-ghost-btn text-xs font-semibold text-neutral-700 underline mb-3 h-auto min-h-0 p-0"
                       >
                         ← Change partner
                       </button>
-                      <h3 className="text-sm font-semibold mb-1">2. Zakat or Sadaqah?</h3>
-                      <p className="text-neutral-600 text-xs mb-2.5">
+                      <h3 className="text-sm font-semibold mb-1 text-neutral-900">2. Zakat or Sadaqah?</h3>
+                      <p className="text-neutral-600 text-xs mb-3 leading-relaxed">
                         {selectedPartner
                           ? `Paying via ${selectedPartner.name}. Each type opens a different payment link.`
                           : 'Choose the donation type to open the matching payment link.'}
                       </p>
-                      <div className="space-y-2">
+                      <div className="space-y-2.5">
                         {DONATION_PAYMENT_TYPES.map((t) => {
                           const href = buildConfirmHref(selectedCause, selectedPartner, t.id)
                           const link = resolvePaymentLink(selectedCause, selectedPartner, t.id)
@@ -529,11 +568,13 @@ export default function DonationPage() {
                           return disabled ? (
                             <div
                               key={t.id}
-                              className="border border-neutral-200 rounded-md p-2.5 opacity-50"
+                              className="border border-neutral-200 rounded-lg p-3.5 opacity-50"
                             >
-                              <p className="font-bold text-sm">{t.label}</p>
-                              <p className="text-xs text-neutral-500">{t.description}</p>
-                              <p className="text-[10px] text-amber-700 mt-1">
+                              <p className="font-bold text-sm text-neutral-900">{t.label}</p>
+                              <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                                {t.description}
+                              </p>
+                              <p className="text-[10px] text-amber-700 mt-1.5">
                                 No payment link configured for this type
                               </p>
                             </div>
@@ -541,14 +582,18 @@ export default function DonationPage() {
                             <Link
                               key={t.id}
                               href={href}
-                              className="block border-2 border-neutral-900 rounded-md p-2.5 hover:bg-neutral-50 transition-all"
+                              className="block border-2 border-neutral-900 rounded-lg p-3.5 sm:p-4 bg-white hover:bg-neutral-50 transition-colors no-underline"
                             >
-                              <div className="flex items-center justify-between gap-2">
-                                <div>
-                                  <p className="font-bold text-sm">{t.label}</p>
-                                  <p className="text-xs text-neutral-600">{t.description}</p>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="space-y-1">
+                                  <p className="font-bold text-sm sm:text-base text-neutral-900">
+                                    {t.label}
+                                  </p>
+                                  <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                                    {t.description}
+                                  </p>
                                 </div>
-                                <ArrowRight className="w-4 h-4 shrink-0" />
+                                <ArrowRight className="w-4 h-4 shrink-0 mt-1 text-neutral-700" />
                               </div>
                             </Link>
                           )
@@ -558,11 +603,11 @@ export default function DonationPage() {
                   )}
                 </div>
 
-                <div className="p-3 sm:p-3.5 border-t bg-neutral-50">
+                <div className="p-4 sm:p-5 border-t border-neutral-100 bg-neutral-50">
                   <button
                     type="button"
                     onClick={closeDonateModal}
-                    className="w-full h-8 min-h-0 bg-black hover:bg-neutral-800 text-white rounded-md font-semibold text-[11px]"
+                    className="w-full !bg-black !text-white hover:bg-neutral-800 rounded-lg font-semibold text-sm min-h-[40px] h-auto py-2.5"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     Cancel

@@ -29,7 +29,7 @@ import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 const STEPS = [
   { id: 1, label: 'Choose membership' },
   { id: 2, label: 'Personal info & account' },
-  { id: 3, label: 'Verify & activate' },
+  { id: 3, label: 'Location & profile' },
   { id: 4, label: 'Complete profile' },
   { id: 5, label: 'Subscribe to plan' },
 ]
@@ -375,6 +375,128 @@ export default function SignupClient() {
     }
   }
 
+  const buildUserPayload = (uid: string) => {
+    const now = new Date()
+    const resolvedCity = isUaeCountry(formData.country)
+      ? formData.city
+      : (formData.customCity || formData.city).trim()
+
+    const location: LocationData = sanitizeForFirestore({
+      country: formData.country,
+      countryCode: formData.countryCode,
+      emirate: isUaeCountry(formData.country) ? formData.emirate : formData.country,
+      city: resolvedCity,
+      state: isUaeCountry(formData.country) ? formData.emirate : undefined,
+      address: formData.address || undefined,
+      placeId: formData.placeId || undefined,
+      latitude: formData.latitude || undefined,
+      longitude: formData.longitude || undefined,
+    })
+
+    const userData: Record<string, unknown> = {
+      uid,
+      email: formData.email.toLowerCase(),
+      createdAt: now,
+      dateJoined: now,
+      memberSince: now,
+      updatedAt: now,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      displayName: `${formData.firstName} ${formData.lastName}`.trim(),
+      phone: formData.phone,
+      whatsappNumber: formData.phone,
+      nationality: formData.nationality,
+      country: formData.country,
+      emirate: isUaeCountry(formData.country) ? formData.emirate : null,
+      city: resolvedCity,
+      location,
+      gender: formData.gender,
+      dateOfBirth: formData.dateOfBirth,
+      bio: formData.bio || null,
+      skills: formData.skills,
+      role: formData.memberType,
+      roles: [formData.memberType],
+      language: 'en',
+      timezone: 'Asia/Dubai',
+      emailVerified: false,
+      phoneVerified: false,
+      profileComplete: true,
+      status: 'active',
+      active: true,
+      membershipStatus: 'pending_payment',
+      membershipTier: formData.planId || planName || 'standard',
+      membershipPlanId: formData.planId || null,
+      membershipPlanName: planName || null,
+      volunteeredHours: 0,
+      volunteerHours: 0,
+      totalDonated: 0,
+      consentTerms: formData.consentTerms,
+      consentPrivacy: formData.consentPrivacy,
+      consentLocation: formData.consentLocation,
+      consentNotifications: formData.consentNotifications,
+      avatarUrl: null,
+      documentUrls: {
+        idVerification: null,
+        addressProof: null,
+      },
+    }
+
+    if (formData.memberType === 'business') {
+      userData.business = {
+        name: formData.businessName,
+        type: formData.businessType,
+        registration: formData.businessRegistration || null,
+        location: formData.businessLocation,
+        description: formData.businessDescription || null,
+        placeId: businessAddress.placeId || null,
+        latitude: businessAddress.lat || null,
+        longitude: businessAddress.lng || null,
+        createdAt: now,
+      }
+      userData.hasBusinessProfile = true
+    }
+
+    return { userData, now }
+  }
+
+  const persistBusinessDirectory = async (uid: string, now: Date) => {
+    if (formData.memberType !== 'business') return
+    await setDoc(
+      doc(db, 'businesses', uid),
+      {
+        name: formData.businessName || `${formData.firstName}'s Business`,
+        businessName: formData.businessName || `${formData.firstName}'s Business`,
+        category: formData.businessType || 'Services',
+        businessType: formData.businessType || 'Services',
+        description: formData.businessDescription || '',
+        communityBenefit: formData.businessDescription || '',
+        services: [],
+        productImages: [],
+        tradeLicenceURL: '',
+        logoURL: '',
+        bannerURL: '',
+        ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
+        ownerId: uid,
+        userId: uid,
+        email: formData.email.toLowerCase(),
+        phone: formData.phone || '',
+        location: formData.businessLocation || formData.emirate || '',
+        placeId: businessAddress.placeId || '',
+        latitude: businessAddress.lat || 0,
+        longitude: businessAddress.lng || 0,
+        isApproved: false,
+        isActive: true,
+        isVerified: false,
+        featured: false,
+        status: 'pending_review',
+        createdAt: now,
+        updatedAt: now,
+        submittedAt: now,
+      },
+      { merge: true }
+    )
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (currentStep === 5) {
@@ -384,145 +506,39 @@ export default function SignupClient() {
     if (currentStep !== 4) return
     if (!(await validateStep(currentStep))) return
 
-    if (createdUserId || auth.currentUser) {
-      setCurrentStep(5)
-      return
-    }
-
     setIsLoading(true)
     setError('')
 
     try {
-      // Create Firebase Auth account
+      const existingUid = createdUserId || auth.currentUser?.uid || null
+      if (existingUid) {
+        const userRef = doc(db, 'users', existingUid)
+        const existing = await getDoc(userRef)
+        if (!existing.exists()) {
+          const { userData, now } = buildUserPayload(existingUid)
+          await setDoc(userRef, sanitizeForFirestore(userData))
+          await persistBusinessDirectory(existingUid, now)
+        }
+        setCreatedUserId(existingUid)
+        setCurrentStep(5)
+        return
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email.toLowerCase(),
         formData.password
       )
-
       const firebaseUser = userCredential.user
-      const now = new Date()
-      const resolvedCity = isUaeCountry(formData.country)
-        ? formData.city
-        : (formData.customCity || formData.city).trim()
-
-      const location: LocationData = sanitizeForFirestore({
-        country: formData.country,
-        countryCode: formData.countryCode,
-        emirate: isUaeCountry(formData.country) ? formData.emirate : formData.country,
-        city: resolvedCity,
-        state: isUaeCountry(formData.country) ? formData.emirate : undefined,
-        address: formData.address || undefined,
-        latitude: formData.latitude || undefined,
-        longitude: formData.longitude || undefined,
-      })
-
-      // Update profile with display name
       await updateProfile(firebaseUser, {
-        displayName: `${formData.firstName} ${formData.lastName}`
+        displayName: `${formData.firstName} ${formData.lastName}`.trim(),
       })
 
-      // Create user document in Firestore with proper schema
-      const userDocRef = doc(db, 'users', firebaseUser.uid)
-      
-      const userData: Record<string, unknown> = {
-        uid: firebaseUser.uid,
-        email: formData.email.toLowerCase(),
-        createdAt: now,
-        dateJoined: now,
-        memberSince: now,
-        updatedAt: now,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        displayName: `${formData.firstName} ${formData.lastName}`,
-        phone: formData.phone,
-        whatsappNumber: formData.phone,
-        nationality: formData.nationality,
-        country: formData.country,
-        emirate: isUaeCountry(formData.country) ? formData.emirate : null,
-        city: resolvedCity,
-        location,
-        gender: formData.gender,
-        dateOfBirth: formData.dateOfBirth,
-        bio: formData.bio || null,
-        skills: formData.skills,
-        role: formData.memberType,
-        roles: [formData.memberType],
-        language: 'en',
-        timezone: 'Asia/Dubai',
-        emailVerified: false,
-        phoneVerified: false,
-        profileComplete: true,
-        status: 'active',
-        active: true,
-        membershipTier: formData.planId || planName || 'standard',
-        membershipPlanId: formData.planId || null,
-        volunteeredHours: 0,
-        volunteerHours: 0,
-        totalDonated: 0,
-        consentTerms: formData.consentTerms,
-        consentPrivacy: formData.consentPrivacy,
-        consentLocation: formData.consentLocation,
-        consentNotifications: formData.consentNotifications,
-        avatarUrl: null,
-        documentUrls: {
-          idVerification: null,
-          addressProof: null,
-        },
-      }
-      
-      // Add business profile if user type is business
-      if (formData.memberType === 'business') {
-        userData.business = {
-          name: formData.businessName,
-          type: formData.businessType,
-          registration: formData.businessRegistration || null,
-          location: formData.businessLocation,
-          description: formData.businessDescription || null,
-          createdAt: now,
-        }
-        userData.hasBusinessProfile = true
-      }
-      
-      await setDoc(userDocRef, sanitizeForFirestore(userData))
-
-      // Directory listing starts pending — admin must approve (Part 5C/5D)
-      if (formData.memberType === 'business') {
-        await setDoc(
-          doc(db, 'businesses', firebaseUser.uid),
-          {
-            name: formData.businessName || `${formData.firstName}'s Business`,
-            businessName: formData.businessName || `${formData.firstName}'s Business`,
-            category: formData.businessType || 'Services',
-            businessType: formData.businessType || 'Services',
-            description: formData.businessDescription || '',
-            communityBenefit: formData.businessDescription || '',
-            services: [],
-            productImages: [],
-            tradeLicenceURL: '',
-            logoURL: '',
-            bannerURL: '',
-            ownerName: `${formData.firstName} ${formData.lastName}`.trim(),
-            ownerId: firebaseUser.uid,
-            userId: firebaseUser.uid,
-            email: formData.email.toLowerCase(),
-            phone: formData.phone || '',
-            location: formData.businessLocation || formData.emirate || '',
-            isApproved: false,
-            isActive: true,
-            isVerified: false,
-            featured: false,
-            status: 'pending_review',
-            createdAt: now,
-            updatedAt: now,
-            submittedAt: now,
-          },
-          { merge: true }
-        )
-      }
+      const { userData, now } = buildUserPayload(firebaseUser.uid)
+      await setDoc(doc(db, 'users', firebaseUser.uid), sanitizeForFirestore(userData))
+      await persistBusinessDirectory(firebaseUser.uid, now)
 
       console.log('[v0] User account created successfully:', firebaseUser.uid)
-
       setCreatedUserId(firebaseUser.uid)
       setError('')
       setCurrentStep(5)
@@ -534,6 +550,8 @@ export default function SignupClient() {
         setError('Password is too weak. Please use a stronger password.')
       } else if (err.code === 'auth/invalid-email') {
         setError('Invalid email address')
+      } else if (err.code === 'permission-denied') {
+        setError('Could not save your profile. Please refresh and try again, or contact support.')
       } else {
         setError(err.message || 'An error occurred during signup. Please try again.')
       }
@@ -543,7 +561,7 @@ export default function SignupClient() {
   }
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+    <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
       {/* Header */}
       <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
@@ -604,10 +622,17 @@ export default function SignupClient() {
                           const { amount, period } = formatPlanPriceDetailed(plan)
                           const selected = formData.planId === plan.id
                           return (
-                            <button
+                            <div
                               key={plan.id}
-                              type="button"
+                              role="button"
+                              tabIndex={0}
                               onClick={() => selectPlan(plan)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  selectPlan(plan)
+                                }
+                              }}
                               style={{
                                 textAlign: 'left',
                                 padding: '1rem',
@@ -615,6 +640,7 @@ export default function SignupClient() {
                                 borderRadius: '0.75rem',
                                 backgroundColor: selected ? '#f7f6f2' : '#fff',
                                 cursor: 'pointer',
+                                color: '#111111',
                               }}
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem', alignItems: 'flex-start' }}>
@@ -640,7 +666,7 @@ export default function SignupClient() {
                                 <ul style={{ marginTop: '0.75rem', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                   {items.map((item) => (
                                     <li key={item} style={{ fontSize: '0.75rem', color: '#555', display: 'flex', gap: '0.35rem' }}>
-                                      <Check size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                                      <Check size={14} color="#111111" style={{ flexShrink: 0, marginTop: 2 }} />
                                       {item}
                                     </li>
                                   ))}
@@ -651,7 +677,7 @@ export default function SignupClient() {
                                   Selected ✓
                                 </p>
                               )}
-                            </button>
+                            </div>
                           )
                         })}
                       </div>
@@ -670,7 +696,8 @@ export default function SignupClient() {
                         <button
                           type="button"
                           onClick={() => setCurrentStep(1)}
-                          style={{ fontSize: '0.75rem', color: '#666', textDecoration: 'underline', marginTop: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                          className="pb-ghost-btn"
+                          style={{ fontSize: '0.75rem', color: '#666', textDecoration: 'underline', marginTop: '0.25rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', height: 'auto', minHeight: 0 }}
                         >
                           Change package
                         </button>
@@ -753,7 +780,9 @@ export default function SignupClient() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          style={{ position: 'absolute', right: '0.625rem', background: 'none', border: 'none', cursor: 'pointer', color: '#888' }}
+                          className="pb-ghost-btn"
+                          style={{ position: 'absolute', right: '0.625rem', background: 'none', border: 'none', cursor: 'pointer', color: '#888', height: 'auto', minHeight: 0, padding: 4 }}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
@@ -775,7 +804,9 @@ export default function SignupClient() {
                         <button
                           type="button"
                           onClick={() => setShowConfirm(!showConfirm)}
-                          style={{ position: 'absolute', right: '0.625rem', background: 'none', border: 'none', cursor: 'pointer', color: '#888' }}
+                          className="pb-ghost-btn"
+                          style={{ position: 'absolute', right: '0.625rem', background: 'none', border: 'none', cursor: 'pointer', color: '#888', height: 'auto', minHeight: 0, padding: 4 }}
+                          aria-label={showConfirm ? 'Hide password' : 'Show password'}
                         >
                           {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
@@ -881,6 +912,38 @@ export default function SignupClient() {
                         placeholder="Share a bit about yourself..." 
                         style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box', minHeight: '100px', fontFamily: 'inherit' }} 
                       />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', color: '#111111' }}>Skills (optional)</label>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                        {SKILLS.map((skill) => {
+                          const selected = formData.skills.includes(skill)
+                          return (
+                            <button
+                              key={skill}
+                              type="button"
+                              onClick={() => handleSkillToggle(skill)}
+                              className={selected ? undefined : 'pb-outline-btn'}
+                              style={{
+                                height: 'auto',
+                                minHeight: 28,
+                                maxHeight: 'none',
+                                padding: '0.35rem 0.65rem',
+                                borderRadius: 9999,
+                                fontSize: '0.7rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                backgroundColor: selected ? '#111111' : '#fff',
+                                color: selected ? '#fff' : '#111',
+                                border: `1px solid ${selected ? '#111' : '#e4e1da'}`,
+                              }}
+                            >
+                              {skill}
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1001,10 +1064,17 @@ export default function SignupClient() {
                       const { amount, period } = formatPlanPriceDetailed(plan)
                       const selected = formData.planId === plan.id
                       return (
-                        <button
+                        <div
                           key={plan.id}
-                          type="button"
+                          role="button"
+                          tabIndex={0}
                           onClick={() => selectPlan(plan)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              selectPlan(plan)
+                            }
+                          }}
                           style={{
                             textAlign: 'left',
                             padding: '1rem',
@@ -1012,6 +1082,7 @@ export default function SignupClient() {
                             borderRadius: '0.75rem',
                             backgroundColor: selected ? '#f7f6f2' : '#fff',
                             cursor: 'pointer',
+                            color: '#111111',
                           }}
                         >
                           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.75rem' }}>
@@ -1029,7 +1100,7 @@ export default function SignupClient() {
                               <p style={{ fontSize: '0.7rem', color: '#888' }}>/{period}</p>
                             </div>
                           </div>
-                        </button>
+                        </div>
                       )
                     })}
                   </div>
@@ -1042,17 +1113,15 @@ export default function SignupClient() {
                   type="button"
                   onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
                   disabled={currentStep === 1 || currentStep === 5 || isLoading || checkingOut}
+                  className="pb-outline-btn"
                   style={{
                     flex: 1,
+                    height: 'auto',
+                    minHeight: 40,
+                    maxHeight: 'none',
                     padding: '0.75rem',
-                    border: '1px solid #e4e1da',
-                    backgroundColor: '#ffffff',
-                    color: '#111111',
-                    borderRadius: '0.375rem',
                     fontSize: '0.875rem',
                     fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
                     opacity: currentStep === 1 || currentStep === 5 || isLoading || checkingOut ? 0.5 : 1,
                   }}
                 >

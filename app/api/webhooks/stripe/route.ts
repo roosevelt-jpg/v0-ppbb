@@ -120,18 +120,15 @@ export async function POST(req: NextRequest) {
           session.metadata.userId &&
           session.metadata.planId
         ) {
-          const revenueAmount =
-            typeof session.amount_total === 'number' ? session.amount_total / 100 : 0
-          if (revenueAmount > 0) {
-            void recordReferralConversion({
-              convertedUserId: session.metadata.userId,
-              conversionType: 'membership',
-              relatedDocId: session.metadata.planId,
-              revenueAmount,
-              status: 'confirmed',
-              idempotencyKey: `membership:${session.id}`,
-            }).catch((err) => console.error('[referral] membership conversion:', err))
-          }
+          const { completeMembershipPayment } = await import('@/lib/payment-completion')
+          await completeMembershipPayment({
+            userId: session.metadata.userId,
+            planId: session.metadata.planId,
+            gateway: 'stripe',
+            paymentReference: session.id,
+            amountCents:
+              typeof session.amount_total === 'number' ? session.amount_total : undefined,
+          })
         } else if (
           session.metadata?.type === 'advertising' &&
           session.metadata.advertisingRequestId

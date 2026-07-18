@@ -15,7 +15,7 @@ interface Message {
 }
 
 const WELCOME_MESSAGE =
-  "Hello! Welcome to Passive Blessings — I'm glad you're here. How can I help you today? Ask me about membership, events, volunteering, donations, or anything else on the platform."
+  "Hello! Welcome to Passive Blessings — I'm glad you're here. How can I help you today?"
 
 export function ChatWidget() {
   const pathname = usePathname()
@@ -197,34 +197,37 @@ export function ChatWidget() {
 
       {isOpen && (
         <div
-          className="fixed z-50 flex flex-col bg-white border border-neutral-200 shadow-2xl
-            inset-x-3 bottom-3 top-[max(4.5rem,12%)] rounded-2xl
-            sm:inset-auto sm:bottom-6 sm:right-6 sm:top-auto
-            sm:w-[22rem] sm:h-[min(32rem,calc(100dvh-5rem))] sm:rounded-lg
-            md:w-[24rem]"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[min(18.5rem,calc(100vw-1.5rem))] h-[min(26rem,calc(100dvh-5.5rem))] sm:w-80 bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200"
           role="dialog"
           aria-label="PB Assistant"
         >
           <div
-            className="flex items-center justify-between gap-2 px-3 py-3 sm:px-4 border-b border-neutral-200 text-white rounded-t-2xl sm:rounded-t-lg shrink-0"
+            className="flex items-center justify-between gap-2 p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg shrink-0"
             style={{ backgroundColor: '#111111' }}
           >
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <ChatbotAvatar size={36} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 p-0.5 shrink-0" />
               <div className="min-w-0">
                 <h3 className="font-semibold text-sm sm:text-base truncate !text-white">PB Assistant</h3>
-                <p className="text-[10px] opacity-70 truncate !text-white">
-                  {ready || conversationId ? 'Online · usually replies instantly' : 'Connecting…'}
+                <p className="text-[10px] opacity-60 font-light !text-white">
+                  <a
+                    href="https://myflynai.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:opacity-100 hover:underline underline-offset-2 text-inherit"
+                  >
+                    By FLYN.AI
+                  </a>
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={closeChat}
-              className="pb-ghost-btn p-2 rounded-lg !text-white hover:!bg-white/10"
+              className="pb-ghost-btn p-1.5 rounded transition hover:!bg-white/10 !text-white"
               aria-label="Close chat"
             >
-              <X className="w-5 h-5 !text-white" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5 !text-white" />
             </button>
           </div>
 
@@ -235,13 +238,13 @@ export function ChatWidget() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start items-end gap-2'} w-full`}
               >
                 {message.role === 'assistant' && (
-                  <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-0.5 hidden xs:block sm:block" />
+                  <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-0.5 hidden sm:block" />
                 )}
                 <div
-                  className={`max-w-[88%] sm:max-w-[85%] px-3 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                  className={`max-w-[85%] px-3 py-2 rounded-lg text-xs sm:text-sm leading-relaxed ${
                     message.role === 'user'
-                      ? 'text-white rounded-br-md'
-                      : 'bg-white text-neutral-900 rounded-bl-md border border-neutral-200'
+                      ? 'text-white rounded-br-none'
+                      : 'bg-white text-neutral-900 rounded-bl-none border border-neutral-200'
                   }`}
                   style={message.role === 'user' ? { backgroundColor: '#111111' } : undefined}
                 >
@@ -253,16 +256,16 @@ export function ChatWidget() {
             {loading && (
               <div className="flex justify-start items-end gap-2">
                 <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-0.5 hidden sm:block" />
-                <div className="bg-white border border-neutral-200 px-4 py-3 rounded-2xl rounded-bl-md">
-                  <div className="flex gap-1.5">
+                <div className="bg-white border border-neutral-200 px-3 sm:px-4 py-2 rounded-lg rounded-bl-none">
+                  <div className="flex gap-1">
                     <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" />
                     <div
                       className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.12s' }}
+                      style={{ animationDelay: '0.1s' }}
                     />
                     <div
                       className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"
-                      style={{ animationDelay: '0.24s' }}
+                      style={{ animationDelay: '0.2s' }}
                     />
                   </div>
                 </div>
@@ -280,7 +283,7 @@ export function ChatWidget() {
 
           <form
             onSubmit={handleSendMessage}
-            className="p-3 sm:p-4 border-t border-neutral-200 bg-white rounded-b-2xl sm:rounded-b-lg shrink-0 safe-area-pb"
+            className="p-3 sm:p-4 border-t border-neutral-200 bg-white rounded-b-lg shrink-0"
           >
             <div className="flex gap-2 items-center">
               <input
@@ -288,15 +291,15 @@ export function ChatWidget() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your question…"
+                placeholder="Ask me anything..."
                 disabled={loading}
                 autoComplete="off"
-                className="flex-1 min-w-0 px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900 text-sm disabled:bg-neutral-50"
+                className="flex-1 min-w-0 px-2 sm:px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 text-xs sm:text-sm disabled:bg-neutral-50"
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="shrink-0 !bg-black !text-white p-2.5 rounded-xl disabled:opacity-40"
+                className="shrink-0 !bg-black !text-white p-2 rounded-lg disabled:opacity-40"
                 aria-label="Send message"
               >
                 <Send className="w-4 h-4" />

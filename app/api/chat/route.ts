@@ -9,11 +9,14 @@ import {
   retrieveChatAnswer,
   type ChatFaq,
 } from '@/lib/chatbot-retrieval'
+import { generateConversationalSupportReply } from '@/lib/chatbot-converse'
 
 function isFaqUsable(faq: ChatFaq): boolean {
-  if (faq.status === 'published') return true
-  if (faq.status === 'draft') return false
-  return faq.isActive === true
+  const status = String(faq.status || '').toLowerCase()
+  if (status === 'draft' || status === 'archived' || status === 'inactive') return false
+  if (status === 'published' || status === 'active') return Boolean(String(faq.answer || '').trim())
+  if (faq.isActive === false) return false
+  return Boolean(String(faq.answer || '').trim())
 }
 
 async function loadUsableFaqs(): Promise<ChatFaq[]> {
@@ -53,7 +56,9 @@ async function loadWhatsAppLink(): Promise<string> {
 }
 
 /**
- * FAQ + AI training docs retrieval chatbot (no Anthropic / external LLM).
+ * Conversational support chatbot.
+ * Prefers Anthropic + private FAQ/training context; falls back to retrieval-only.
+ * Never discloses FAQ / training-doc sources to the visitor.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -64,13 +69,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 })
     }
 
-    const lastUserMessage = String(messages[messages.length - 1]?.content || '').trim()
+    const normalized = messages
+      .map((m: { role?: string; content?: string }) => ({
+        role: m.role === 'assistant' ? ('assistant' as const) : ('user' as const),
+        content: String(m.content || '').trim(),
+      }))
+      .filter((m: { content: string }) => m.content)
+
+    const lastUserMessage = [...normalized].reverse().find((m) => m.role === 'user')?.content || ''
 
     const [faqs, knowledgeItems, whatsappLink] = await Promise.all([
       loadUsableFaqs(),
       loadActiveKnowledge(),
       loadWhatsAppLink(),
     ])
+
+    const conversational = await generateConversationalSupportReply({
+      messages: normalized,
+      faqs,
+      knowledge: knowledgeItems,
+      whatsappLink,
+    })
+
+    if (conversational) {
+      console.log(
+        `[v0] Chat converse: faqs=${faqs.length} knowledge=${knowledgeItems.length} msgLen=${lastUserMessage.length}`
+      )
+      return NextResponse.json({
+        message: conversational,
+        conversationId,
+        engine: 'support',
+      })
+    }
 
     const result = retrieveChatAnswer({
       userMessage: lastUserMessage,
@@ -88,7 +118,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: result.message,
       conversationId,
-      // Do not expose FAQ / training-doc sources to the client
       engine: 'support',
     })
   } catch (error) {

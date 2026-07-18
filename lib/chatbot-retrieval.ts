@@ -22,16 +22,34 @@ export interface RetrievalResult {
   matchScore: number
 }
 
-const FAQ_DIRECT_THRESHOLD = 12
-const KNOWLEDGE_DIRECT_THRESHOLD = 10
+const FAQ_DIRECT_THRESHOLD = 8
+const KNOWLEDGE_DIRECT_THRESHOLD = 6
 const MAX_ANSWER_CHARS = 1200
 
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/[^\p{L}\p{N}\s']/gu, ' ')
     .split(/\s+/)
-    .filter((w) => w.length > 2)
+    .filter((w) => w.length > 1)
+}
+
+function smallTalkReply(userMessage: string): string | null {
+  const m = userMessage.toLowerCase().trim()
+  if (!m) return null
+  if (/^(hi|hello|hey|yo|salam|assalamu?\s*alaikum|good\s+(morning|afternoon|evening))[\s!.?]*$/i.test(m)) {
+    return "Hello! Welcome to Passive Blessings — lovely to meet you. How can I help you today?"
+  }
+  if (/^(thanks|thank you|thx|ty|cheers|jazak)[\s!.?]*$/i.test(m)) {
+    return "You're very welcome! Happy to help anytime — anything else on your mind?"
+  }
+  if (/^(ok|okay|cool|great|nice|perfect|got it)[\s!.?]*$/i.test(m)) {
+    return "Glad that helps. If you have another question, I'm right here."
+  }
+  if (/^(bye|goodbye|see you|take care)[\s!.?]*$/i.test(m)) {
+    return "Take care! Come back anytime — we're glad to have you in the community."
+  }
+  return null
 }
 
 /** Score an FAQ against the user message. */
@@ -105,14 +123,20 @@ export function extractBestPassage(content: string, userMessage: string): string
 }
 
 function buildFallback(whatsappLink: string): string {
+  const openers = [
+    "I don't have a clear answer for that one just yet.",
+    "That detail isn't something I can confirm on the spot.",
+    "I'm not fully sure about that specific point.",
+  ]
+  const opener = openers[Math.floor(Math.random() * openers.length)]!
   const lines = [
-    "I'm not sure I have that detail yet, but I'm happy to help another way.",
-    'You can ask about membership, events, volunteering, donations, or how to get involved.',
+    opener,
+    'Feel free to ask about membership, events, volunteering, donations, or getting involved — or tell me a bit more so I can point you the right way.',
   ]
   if (whatsappLink) {
-    lines.push(`For personal support, message us on WhatsApp: ${whatsappLink}`)
+    lines.push(`For personal support: ${whatsappLink}`)
   } else {
-    lines.push('You can also reach us through the Contact page — we are glad to help.')
+    lines.push('You can also reach us through the Contact page.')
   }
   return lines.join('\n\n')
 }
@@ -152,6 +176,17 @@ export function retrieveChatAnswer(input: {
       faqSource: null,
       knowledgeSource: null,
       matchScore: 0,
+    }
+  }
+
+  const chatty = smallTalkReply(userMessage)
+  if (chatty) {
+    return {
+      message: chatty,
+      source: 'fallback',
+      faqSource: null,
+      knowledgeSource: null,
+      matchScore: 100,
     }
   }
 

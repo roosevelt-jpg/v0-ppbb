@@ -26,11 +26,12 @@ function matchesTab(offer: DirectoryOffer, tab: OfferTab): boolean {
 function OfferCardSkeleton() {
   return (
     <div className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden animate-pulse">
-      <div className="aspect-square bg-neutral-200" />
-      <div className="p-4 space-y-2">
-        <div className="h-4 bg-neutral-200 rounded w-3/4" />
-        <div className="h-3 bg-neutral-100 rounded w-1/2" />
-        <div className="h-10 bg-neutral-200 rounded w-full mt-3" />
+      <div className="aspect-[16/10] bg-neutral-200" />
+      <div className="p-3 space-y-1.5">
+        <div className="h-3 bg-neutral-200 rounded w-2/3" />
+        <div className="h-4 bg-neutral-200 rounded w-4/5" />
+        <div className="h-3 bg-neutral-100 rounded w-1/3" />
+        <div className="h-8 bg-neutral-200 rounded w-full mt-2" />
       </div>
     </div>
   )
@@ -150,13 +151,13 @@ export function MarketplaceOffersSection() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {visible.map((offer) => (
                     <article
                       key={offer.id}
-                      className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                      className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col"
                     >
-                      <div className="relative aspect-square bg-neutral-100">
+                      <div className="relative aspect-[16/10] bg-neutral-100 shrink-0">
                         {offer.imageURL ? (
                           <img
                             src={offer.imageURL}
@@ -170,48 +171,56 @@ export function MarketplaceOffersSection() {
                           </div>
                         )}
                         {offer.isMemberDiscount && (
-                          <span className="absolute top-2 right-2 px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded">
+                          <span className="absolute top-2 right-2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded">
                             {offer.discountPercentage || offer.memberBenefit || ''}% OFF
                           </span>
                         )}
                         {(offer.genderRestriction === 'ladies-only' ||
                           offer.genderRestriction === 'female' ||
                           offer.genderRestriction === 'women-only') && (
-                          <span className="absolute top-2 left-2 px-2 py-1 bg-pink-600 text-white text-xs font-bold rounded">
+                          <span className="absolute top-2 left-2 px-2 py-0.5 bg-pink-600 text-white text-[10px] font-bold rounded">
                             Ladies only
                           </span>
                         )}
                         {(offer.genderRestriction === 'men-only' || offer.genderRestriction === 'male') && (
-                          <span className="absolute top-2 left-2 px-2 py-1 bg-blue-700 text-white text-xs font-bold rounded">
+                          <span className="absolute top-2 left-2 px-2 py-0.5 bg-blue-700 text-white text-[10px] font-bold rounded">
                             Men only
                           </span>
                         )}
                         {offer.isMemberOnly && !user && (
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <span className="px-3 py-1.5 bg-white text-black text-xs font-bold rounded">
+                            <span className="px-3 py-1 bg-white text-black text-xs font-bold rounded">
                               Members only
                             </span>
                           </div>
                         )}
                       </div>
-                      <div className="p-4 space-y-2">
-                        <p className="text-xs text-neutral-500 capitalize">{offer.type || offer.category}</p>
-                        {offer.businessName ? (
-                          <p className="text-xs font-medium text-neutral-600">by {offer.businessName}</p>
-                        ) : null}
-                        <h3 className="font-semibold text-foreground line-clamp-2">{offer.title}</h3>
-                        <p className="text-sm font-medium">
+                      <div className="p-3 flex flex-col gap-1 flex-1">
+                        <p className="text-[11px] text-neutral-500 leading-snug">
+                          <span className="capitalize">{offer.type || offer.category}</span>
+                          {offer.businessName ? (
+                            <>
+                              {' '}
+                              <span className="text-neutral-400">·</span>{' '}
+                              <span className="font-medium text-neutral-700">by {offer.businessName}</span>
+                            </>
+                          ) : null}
+                        </p>
+                        <h3 className="font-semibold text-sm text-foreground line-clamp-1 leading-snug">
+                          {offer.title}
+                        </h3>
+                        <p className="text-sm font-medium text-neutral-900">
                           {offer.price != null ? `AED ${offer.price}` : 'Contact for price'}
                         </p>
                         {offer.isMemberDiscount && !user && (
-                          <p className="text-xs text-amber-700">Sign in to see member prices</p>
+                          <p className="text-[11px] text-amber-700">Sign in to see member prices</p>
                         )}
                         {offer.isMemberOnly && !user && (
-                          <p className="text-xs text-neutral-600">Sign in to access this listing</p>
+                          <p className="text-[11px] text-neutral-600">Sign in to access this listing</p>
                         )}
                         <Link
                           href={`/marketplace/${offer.id}`}
-                          className="block w-full text-center min-h-[44px] py-2.5 bg-black text-white rounded-lg text-sm font-semibold hover:bg-neutral-800"
+                          className="mt-1.5 block w-full text-center min-h-[36px] py-2 !bg-black !text-white rounded-lg text-xs font-semibold hover:bg-neutral-800"
                         >
                           {offer.isMemberOnly && !user ? 'Sign in to view' : 'View Details'}
                         </Link>

@@ -111,6 +111,7 @@ export interface LocationData {
   emirate?: string
   area?: string
   postalCode?: string
+  placeId?: string
 }
 
 export interface UploadedImage {
