@@ -108,6 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = async () => {
+    try {
+      const { clearAdminMfaSession } = await import('@/lib/admin-mfa-session')
+      clearAdminMfaSession()
+    } catch {
+      /* ignore */
+    }
     await auth.signOut()
     setUser(null)
     setFirebaseUser(null)

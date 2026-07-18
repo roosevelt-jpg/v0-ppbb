@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser, loginWithGoogle } from '@/lib/auth'
 import { auth } from '@/lib/firebase'
@@ -12,12 +12,14 @@ import { logActivity } from '@/lib/activity-logger'
 import { hasBusinessAccess } from '@/lib/roles'
 import { User } from '@/lib/types'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState('')
+  const [idleNotice, setIdleNotice] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
   const [rememberMe, setRememberMe] = React.useState(false)
   const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
@@ -52,6 +54,12 @@ export default function LoginPage() {
       router.push('/dashboard')
     }
   }
+
+  useEffect(() => {
+    if (searchParams.get('reason') === 'idle') {
+      setIdleNotice(true)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -237,6 +245,14 @@ export default function LoginPage() {
               Sign in to access your dashboard, events, and community.
             </p>
           </div>
+
+          {idleNotice && !error && (
+            <div className="mb-3 p-2.5 bg-neutral-100 border border-neutral-200 rounded-lg">
+              <p className="text-xs text-neutral-800">
+                You were signed out after 10 minutes of inactivity.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-3 p-2.5 bg-red-50 border border-red-200 rounded-lg flex gap-2 items-start">

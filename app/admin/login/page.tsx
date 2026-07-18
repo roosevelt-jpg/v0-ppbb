@@ -39,6 +39,12 @@ function AdminLoginForm() {
   const safeReturnUrl = returnUrl.startsWith('/admin') ? returnUrl : '/admin'
 
   useEffect(() => {
+    if (searchParams.get('reason') === 'idle') {
+      setInfo('You were signed out after 10 minutes of inactivity.')
+    }
+  }, [searchParams])
+
+  useEffect(() => {
     if (authLoading) return
     if (user && hasAdminAccess(user) && hasValidAdminMfaSession(user.id)) {
       router.replace(safeReturnUrl)
@@ -378,6 +384,20 @@ function AdminLoginForm() {
                   {error}
                 </div>
               )}
+              {info && !error && (
+                <div
+                  style={{
+                    padding: '12px',
+                    backgroundColor: '#f5f5f5',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    color: '#333',
+                    fontSize: '14px',
+                  }}
+                >
+                  {info}
+                </div>
+              )}
               <button type="submit" style={buttonStyle}>
                 Continue
               </button>
@@ -537,6 +557,7 @@ function AdminLoginForm() {
                 onClick={async () => {
                   await logoutUser()
                   clearAdminMfaSession()
+                  autoOtpRequested.current = false
                   setStep(1)
                   setPassword('')
                   setOtpCode('')

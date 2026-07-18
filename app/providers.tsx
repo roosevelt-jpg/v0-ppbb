@@ -7,6 +7,7 @@ import { AuthProvider } from '@/lib/auth-context'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ReferralAttributionCapture } from '@/components/referral-attribution-capture'
 import { SiteThemeApplier } from '@/components/site-theme-applier'
+import { SessionIdleTimeout } from '@/components/session-idle-timeout'
 import {
   PREFERRED_LANGUAGE_KEY,
   SUPPORTED_LOCALE_CODES,
@@ -64,6 +65,7 @@ export function Providers({ children }: ProvidersProps) {
           <PolicyInitializer />
           <ReferralAttributionCapture />
           <SiteThemeApplier />
+          <SessionIdleTimeout />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>
