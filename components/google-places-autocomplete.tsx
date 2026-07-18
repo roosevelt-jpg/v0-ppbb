@@ -224,7 +224,7 @@ export default function GooglePlacesAutocomplete({
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full max-w-md">
       {error && (
         <div className="mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
           {error}. You can still type a location and continue.
@@ -232,7 +232,7 @@ export default function GooglePlacesAutocomplete({
       )}
 
       <div className="relative">
-        <Search className="absolute left-3 top-3 text-gray-400" size={18} />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
         <input
           ref={inputRef}
           type="text"
@@ -241,13 +241,14 @@ export default function GooglePlacesAutocomplete({
           onBlur={handleBlur}
           onFocus={() => input && setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent border-gray-300"
+          className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent border-gray-300 bg-white text-neutral-900"
         />
         {input && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+            className="pb-ghost-btn absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-700"
+            aria-label="Clear address"
           >
             <X size={18} />
           </button>
@@ -255,41 +256,58 @@ export default function GooglePlacesAutocomplete({
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+        <div
+          role="listbox"
+          className="absolute top-full left-0 z-50 mt-1 w-full max-w-sm overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg max-h-56"
+        >
           {loading && (
-            <div className="p-4 text-center text-gray-500">
-              <div className="inline-block w-5 h-5 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+            <div className="p-3 text-center text-neutral-500 text-sm">
+              <div className="inline-block w-5 h-5 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
             </div>
           )}
 
           {!loading && predictions.length === 0 && input.trim() && (
-            <div className="space-y-2 p-3">
-              <div className="text-center text-gray-500 text-sm">No locations found</div>
-              <button
-                type="button"
+            <div className="space-y-2 p-2.5">
+              <div className="text-center text-neutral-500 text-xs">No locations found</div>
+              <div
+                role="option"
+                tabIndex={0}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={handleManualEntry}
-                className="w-full p-3 text-left bg-white border border-black rounded-lg hover:bg-neutral-50 transition"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleManualEntry()
+                  }
+                }}
+                className="w-full cursor-pointer rounded-md border border-neutral-300 bg-white p-2.5 text-left transition hover:bg-neutral-50"
               >
                 <p className="font-medium text-neutral-900 text-sm">Use entered location</p>
-                <p className="text-xs text-neutral-600">&quot;{input.trim()}&quot;</p>
-              </button>
+                <p className="text-xs text-neutral-600 mt-0.5 line-clamp-2">&quot;{input.trim()}&quot;</p>
+              </div>
             </div>
           )}
 
           {predictions.map((prediction) => (
-            <button
+            <div
               key={prediction.placeId}
-              type="button"
+              role="option"
+              tabIndex={0}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => handleSelectPrediction(prediction)}
-              className="w-full text-left p-3 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 transition"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleSelectPrediction(prediction)
+                }
+              }}
+              className="w-full cursor-pointer border-b border-neutral-100 bg-white p-2.5 text-left last:border-b-0 transition hover:bg-neutral-50"
             >
-              <p className="font-medium text-gray-900">{prediction.mainText}</p>
-              {prediction.secondaryText && (
-                <p className="text-sm text-gray-600">{prediction.secondaryText}</p>
-              )}
-            </button>
+              <p className="font-medium text-neutral-900 text-sm leading-snug">{prediction.mainText}</p>
+              {prediction.secondaryText ? (
+                <p className="text-xs text-neutral-600 mt-0.5 leading-snug">{prediction.secondaryText}</p>
+              ) : null}
+            </div>
           ))}
         </div>
       )}

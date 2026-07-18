@@ -187,13 +187,16 @@ export default function AuditLogsPage() {
         ) : (
           <div>
             {filteredLogs.map((log) => (
-              <div key={log.id} className="border-b border-neutral-200 last:border-b-0">
+              <div
+                key={log.id}
+                className={`border-b border-neutral-200 last:border-b-0 ${
+                  expandedLog === log.id ? 'bg-neutral-50' : 'bg-white hover:bg-neutral-50'
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
-                  className={`w-full p-4 text-left flex items-start gap-3 transition ${
-                    expandedLog === log.id ? 'bg-neutral-50' : 'bg-white hover:bg-neutral-50'
-                  }`}
+                  className="pb-ghost-btn w-full h-auto max-h-none min-h-0 p-4 text-left flex items-start gap-3 text-neutral-900"
                 >
                   <ChevronDown
                     className={`h-4 w-4 flex-shrink-0 mt-1 text-neutral-500 transition-transform ${
