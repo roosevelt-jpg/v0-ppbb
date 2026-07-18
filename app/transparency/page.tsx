@@ -31,6 +31,14 @@ const EMPTY_STATS: TransparencyStats = {
   volunteerHours: 0,
 }
 
+/** Warm progress colors: red → orange → green by funding % */
+function progressTone(percentage: number): { bar: string; text: string } {
+  const p = Math.max(0, Math.min(100, percentage))
+  if (p < 34) return { bar: '#e74c3c', text: '#c0392b' }
+  if (p < 67) return { bar: '#f39c12', text: '#d68910' }
+  return { bar: '#27ae60', text: '#1e8449' }
+}
+
 export default function TransparencyPage() {
   const [copy, setCopy] = useState<TransparencyConfig>(DEFAULT_TRANSPARENCY_CONFIG)
   const [stats, setStats] = useState<TransparencyStats>(EMPTY_STATS)
@@ -172,27 +180,31 @@ export default function TransparencyPage() {
             <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-lg border border-[#e4e1da]">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-lg">{copy.causesChartTitle}</h3>
-                <BarChart3 className="h-5 w-5 text-[#3498db]" />
+                <BarChart3 className="h-5 w-5 text-[#27ae60]" />
               </div>
 
               <div className="space-y-6">
                 {causes.slice(0, 5).map((cause) => {
                   const goal = cause.goalAmount || 0
                   const percentage = goal > 0 ? (cause.currentAmount / goal) * 100 : 0
+                  const tone = progressTone(percentage)
                   return (
                     <div key={cause.id}>
                       <div className="flex justify-between items-center mb-2">
                         <h4 className="font-semibold text-sm sm:text-base text-[#111111] line-clamp-2">
                           {cause.title}
                         </h4>
-                        <span className="text-xs sm:text-sm font-bold text-[#3498db]">
+                        <span className="text-xs sm:text-sm font-bold" style={{ color: tone.text }}>
                           {Math.round(percentage)}%
                         </span>
                       </div>
                       <div className="w-full bg-[#e4e1da] rounded-full h-3">
                         <div
-                          className="bg-[#3498db] h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${Math.min(percentage, 100)}%` }}
+                          className="h-3 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min(percentage, 100)}%`,
+                            backgroundColor: tone.bar,
+                          }}
                         />
                       </div>
                       <div className="flex justify-between text-xs text-[#888888] mt-1">
