@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import {
-  notifyCommunityMembers,
   notifyGroupMessage,
   sendPushToUser,
 } from '@/lib/push-notifications-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 export const dynamic = 'force-dynamic'
+
+function siteUrl() {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,6 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const db = getAdminDb()
+    const site = siteUrl()
 
     if (type === 'community_joined') {
       const name = communityName || 'the community'
@@ -52,6 +61,17 @@ export async function POST(request: NextRequest) {
           click_action: `/communities/${communityId}`,
         }
       )
+      sendBrandedEmailToUserSafe({
+        userId: uid,
+        subject: `Welcome to ${name}`,
+        purpose: 'Community join confirmation',
+        headline: 'Welcome to the community',
+        bodyHtml: paragraphs(
+          'Assalamu alaikum,',
+          `You joined ${name}. Explore groups and start connecting with members.`
+        ),
+        cta: { label: 'Open community', url: `${site}/communities/${communityId}` },
+      })
       return NextResponse.json({ success: true })
     }
 
@@ -74,6 +94,19 @@ export async function POST(request: NextRequest) {
             : `/communities/${communityId}`,
         }
       )
+      sendBrandedEmailToUserSafe({
+        userId: uid,
+        subject: `Welcome to ${gName}`,
+        purpose: 'Group join confirmation',
+        headline: 'Welcome to the group',
+        bodyHtml: paragraphs('Assalamu alaikum,', `You joined ${gName} in ${cName}.`),
+        cta: {
+          label: 'Open group',
+          url: groupId
+            ? `${site}/communities/${communityId}/groups/${groupId}`
+            : `${site}/communities/${communityId}`,
+        },
+      })
 
       if (groupId) {
         const groupSnap = await db
@@ -103,6 +136,17 @@ export async function POST(request: NextRequest) {
               click_action: `/communities/${communityId}/groups/${groupId}`,
             }
           )
+          sendBrandedEmailToUserSafe({
+            userId: createdBy,
+            subject: `New member in ${gName}`,
+            purpose: 'New group member notification',
+            headline: 'New group member',
+            bodyHtml: paragraphs('Assalamu alaikum,', `${joinerName} joined ${gName}.`),
+            cta: {
+              label: 'Open group',
+              url: `${site}/communities/${communityId}/groups/${groupId}`,
+            },
+          })
         }
       }
 

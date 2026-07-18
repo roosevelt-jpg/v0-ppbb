@@ -7,6 +7,7 @@ import {
   incrementCouponUsed,
   incrementTicketSold,
 } from '@/lib/event-luma-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 export function getPublicAppUrl(): string {
   return (
@@ -191,5 +192,20 @@ export async function completeMembershipPayment(params: {
     }).catch((err) => console.error('[referral] membership conversion:', err))
   }
 
-  return { membershipUrl: `${getPublicAppUrl()}/dashboard/membership?status=success` }
+  const membershipUrl = `${getPublicAppUrl()}/dashboard/membership?status=success`
+  const planName = String(plan.name || params.planId)
+  sendBrandedEmailToUserSafe({
+    userId: params.userId,
+    subject: `Welcome — ${planName} membership activated`,
+    purpose: 'Membership activation confirmation',
+    headline: 'Membership activated',
+    bodyHtml: paragraphs(
+      'Assalamu alaikum,',
+      `Your ${planName} membership is now active. Thank you for joining Passive Blessings.`,
+      'You can manage your plan anytime from your member dashboard.'
+    ),
+    cta: { label: 'Open membership', url: membershipUrl },
+  })
+
+  return { membershipUrl }
 }

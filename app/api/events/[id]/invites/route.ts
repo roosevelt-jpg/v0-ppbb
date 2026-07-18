@@ -14,28 +14,20 @@ type Ctx = { params: Promise<{ id: string }> }
 
 async function sendInviteEmail(to: string, eventTitle: string, eventUrl: string) {
   try {
-    const { getGmailSmtpConfig, createGmailTransporter } = await import('@/lib/gmail-service')
-    const config = await getGmailSmtpConfig()
-    if (!config?.gmailEmail || !config?.gmailAppPassword) {
-      console.warn('[events] Gmail SMTP not configured — invite logged only')
-      return false
-    }
-    const transporter = createGmailTransporter({
-      enabled: true,
-      gmailEmail: config.gmailEmail,
-      gmailAppPassword: config.gmailAppPassword,
-      fromName: config.fromName || 'Passive Blessings',
-    } as any)
-    if (!transporter) return false
-    await transporter.sendMail({
-      from: `"${config.fromName || 'Passive Blessings'}" <${config.gmailEmail}>`,
+    const { paragraphs, sendBrandedEmail } = await import('@/lib/platform-email')
+    const result = await sendBrandedEmail({
       to,
       subject: `You're invited: ${eventTitle}`,
-      html: `<p>You've been invited to <strong>${eventTitle}</strong>.</p>
-        <p><a href="${eventUrl}">View event & RSVP</a></p>
-        <p>— Passive Blessings</p>`,
+      purpose: 'Event invitation',
+      headline: "You're invited",
+      bodyHtml: paragraphs(
+        'Assalamu alaikum,',
+        `You've been invited to “${eventTitle}”.`,
+        'Open the event page to view details and RSVP.'
+      ),
+      cta: { label: 'View event & RSVP', url: eventUrl },
     })
-    return true
+    return result.ok
   } catch (e) {
     console.warn('[events] invite email failed:', e)
     return false

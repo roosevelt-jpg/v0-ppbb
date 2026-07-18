@@ -2,6 +2,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb, getAdminBucket } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { sendPushToUser } from '@/lib/push-notifications-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 import { recordReferralConversion } from '@/lib/referral-conversion-server'
 import {
   buildInvoiceNumber,
@@ -362,6 +363,46 @@ export async function completeMarketplacePurchase(
         click_action: mode === 'enquire' ? '/business/messages' : '/business/orders',
       }
     ).catch(console.error)
+
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+
+    sendBrandedEmailToUserSafe({
+      userId: pushTarget,
+      subject: mode === 'enquire' ? 'New marketplace enquiry' : 'New marketplace order',
+      purpose: mode === 'enquire' ? 'Marketplace enquiry notification' : 'Marketplace order notification',
+      headline: mode === 'enquire' ? 'New enquiry' : 'New order',
+      bodyHtml: paragraphs(
+        'Assalamu alaikum,',
+        mode === 'enquire'
+          ? `${buyerName} sent an enquiry about “${title}”.`
+          : `${buyerName} ordered “${title}”. ${payNote}. Delivery partner preference: ${partnerLabel}.`,
+        'Please review this in your business orders or messages.'
+      ),
+      cta: {
+        label: mode === 'enquire' ? 'Open messages' : 'Open orders',
+        url: `${site}${mode === 'enquire' ? '/business/messages' : '/business/orders'}`,
+      },
+    })
+
+    if (mode === 'purchase' && params.buyerId) {
+      sendBrandedEmailToUserSafe({
+        userId: params.buyerId,
+        subject: `Order confirmed: ${title}`,
+        purpose: 'Marketplace order confirmation',
+        headline: 'Order confirmed',
+        bodyHtml: paragraphs(
+          'Assalamu alaikum,',
+          `Your order for “${title}” from ${shopName} has been placed.`,
+          payNote,
+          `Preferred delivery partner: ${partnerLabel}.`
+        ),
+        cta: { label: 'View my orders', url: `${site}/dashboard/orders` },
+      })
+    }
   }
 
   if (mode === 'purchase' && amount > 0) {

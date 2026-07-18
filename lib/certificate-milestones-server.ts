@@ -1,11 +1,7 @@
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
-import {
-  createGmailTransporter,
-  getGmailSmtpConfig,
-  sendCertificateMilestoneEmail,
-} from '@/lib/gmail-service'
 import { interpolateCertificateText } from '@/lib/certificate-templates'
+import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
 type TemplateRow = {
   id: string
@@ -80,15 +76,11 @@ export async function evaluateCertificateMilestonesForUser(userId: string): Prom
   const skipped: string[] = []
   let alreadyHadCount = 0
 
-  const gmailConfig = await getGmailSmtpConfig()
-  const transporter =
-    gmailConfig?.gmailEmail && gmailConfig?.gmailAppPassword
-      ? createGmailTransporter({
-          enabled: true,
-          gmailEmail: gmailConfig.gmailEmail,
-          gmailAppPassword: gmailConfig.gmailAppPassword,
-        })
-      : null
+  const site = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
 
   for (const template of templates) {
     const certDocId = `${userId}_${template.id}`
@@ -145,23 +137,28 @@ export async function evaluateCertificateMilestonesForUser(userId: string): Prom
 
     issued.push(template.id)
 
-    if (memberEmail && transporter && gmailConfig?.gmailEmail) {
+    if (memberEmail) {
       try {
         const subject = interpolateCertificateText(template.emailSubject, vars)
         const body = interpolateCertificateText(template.emailBody, vars)
-        await sendCertificateMilestoneEmail(transporter, gmailConfig.gmailEmail, {
+        const result = await sendBrandedEmail({
           to: memberEmail,
-          memberName,
           subject,
-          bodyText: body,
-          certificateTitle: template.title,
-          hours: totalHours,
-          fromName: gmailConfig.fromName || 'Passive Blessings',
+          purpose: 'Volunteer certificate milestone',
+          headline: template.title,
+          bodyHtml: paragraphs(
+            'Assalamu alaikum,',
+            ...body.split(/\n+/).map((p) => p.trim()).filter(Boolean),
+            `${totalHours} volunteer hours logged.`
+          ),
+          cta: { label: 'View certificates', url: `${site}/dashboard/certificates` },
         })
-        await db.collection('certificates').doc(certDocId).update({
-          emailSent: true,
-          emailSentAt: Timestamp.now(),
-        })
+        if (result.ok) {
+          await db.collection('certificates').doc(certDocId).update({
+            emailSent: true,
+            emailSentAt: Timestamp.now(),
+          })
+        }
       } catch (err) {
         console.error('[certificates] email failed for', userId, template.id, err)
       }

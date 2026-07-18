@@ -7,6 +7,7 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get('authorization') || ''
@@ -37,6 +38,20 @@ async function notifyBusinessListingLive(businessId: string, title: string, jobI
   } catch (err) {
     console.warn('[admin/opportunities] in-app notify failed:', err)
   }
+
+  const site = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+  sendBrandedEmailToUserSafe({
+    userId: businessId,
+    subject: 'Your opportunity listing is live',
+    purpose: 'Job / opportunity approval',
+    headline: 'Listing published',
+    bodyHtml: paragraphs('Assalamu alaikum,', message),
+    cta: { label: 'View opportunities', url: `${site}/business/opportunities` },
+  })
 
   try {
     const userSnap = await db.collection('users').doc(businessId).get()

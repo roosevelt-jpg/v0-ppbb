@@ -6,6 +6,7 @@ import { ensureBusinessReferralCode } from '@/lib/referral-code-server'
 import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
 import type { AuditActionType } from '@/lib/audit-log-shared'
 import { serializeFirestoreValue } from '@/lib/serialize-firestore'
+import { paragraphs, sendBrandedEmail, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -414,6 +415,59 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updated = await ref.get()
+    const updatedData = (updated.data() || {}) as Record<string, unknown>
+    const ownerId = asString(updatedData.ownerId) || asString(updatedData.userId) || id
+    const bizEmail = asString(updatedData.email) || asString(updatedData.contactEmail)
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+
+    if (action === 'approve' || action === 'suspend' || action === 'verify') {
+      const emailCopy: Record<string, { subject: string; purpose: string; headline: string; body: string }> = {
+        approve: {
+          subject: `Business approved: ${businessName}`,
+          purpose: 'Business account approval',
+          headline: 'Business approved',
+          body: `Your business “${businessName}” has been approved and is now active on Passive Blessings.`,
+        },
+        suspend: {
+          subject: `Business suspended: ${businessName}`,
+          purpose: 'Business account suspension notice',
+          headline: 'Business suspended',
+          body: `Your business “${businessName}” has been suspended. Please contact Passive Blessings support if you need help.`,
+        },
+        verify: {
+          subject: `Business verified: ${businessName}`,
+          purpose: 'Business verification confirmation',
+          headline: 'Business verified',
+          body: `Your business “${businessName}” has been verified on Passive Blessings.`,
+        },
+      }
+      const copy = emailCopy[action]
+      if (copy) {
+        if (bizEmail.includes('@')) {
+          void sendBrandedEmail({
+            to: bizEmail,
+            subject: copy.subject,
+            purpose: copy.purpose,
+            headline: copy.headline,
+            bodyHtml: paragraphs('Assalamu alaikum,', copy.body),
+            cta: { label: 'Open business dashboard', url: `${site}/business/dashboard` },
+          })
+        } else {
+          sendBrandedEmailToUserSafe({
+            userId: ownerId,
+            subject: copy.subject,
+            purpose: copy.purpose,
+            headline: copy.headline,
+            bodyHtml: paragraphs('Assalamu alaikum,', copy.body),
+            cta: { label: 'Open business dashboard', url: `${site}/business/dashboard` },
+          })
+        }
+      }
+    }
 
     await auditBusinessMutation(request, adminUid, {
       action,

@@ -2,6 +2,7 @@ import type { Firestore } from 'firebase-admin/firestore'
 import { Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { paragraphs, sendBrandedEmailToUserSafe, sendBrandedEmailSafe } from '@/lib/platform-email'
 
 export type ApprovalItemType =
   | 'beneficiary'
@@ -286,6 +287,50 @@ export async function loadPendingApprovals(): Promise<ApprovalItem[]> {
   return items
 }
 
+function siteBase(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+}
+
+function notifyApprovalOutcome(opts: {
+  userId?: string
+  email?: string
+  subject: string
+  purpose: string
+  headline: string
+  body: string
+  ctaLabel: string
+  ctaPath: string
+}) {
+  const cta = { label: opts.ctaLabel, url: `${siteBase()}${opts.ctaPath}` }
+  const bodyHtml = paragraphs('Assalamu alaikum,', opts.body)
+  const userId = String(opts.userId || '').trim()
+  if (userId) {
+    sendBrandedEmailToUserSafe({
+      userId,
+      subject: opts.subject,
+      purpose: opts.purpose,
+      headline: opts.headline,
+      bodyHtml,
+      cta,
+    })
+    return
+  }
+  if (opts.email && opts.email.includes('@')) {
+    sendBrandedEmailSafe({
+      to: opts.email,
+      subject: opts.subject,
+      purpose: opts.purpose,
+      headline: opts.headline,
+      bodyHtml,
+      cta,
+    })
+  }
+}
+
 export async function processApprovalAction(
   adminUid: string,
   params: {
@@ -302,6 +347,8 @@ export async function processApprovalAction(
 
   try {
     if (type === 'beneficiary') {
+      const snap = await db.collection('beneficiaryRequests').doc(id).get()
+      const d = snap.data() || {}
       await db.collection('beneficiaryRequests').doc(id).update({
         status: action === 'approve' ? 'approved' : 'rejected',
         reviewedBy: adminUid,
@@ -309,15 +356,47 @@ export async function processApprovalAction(
         reviewNotes: notes || null,
         updatedAt: now,
       })
+      notifyApprovalOutcome({
+        userId: String(d.userId || ''),
+        email: String(d.email || ''),
+        subject: action === 'approve' ? 'Beneficiary request approved' : 'Beneficiary request update',
+        purpose:
+          action === 'approve'
+            ? 'Beneficiary request approval'
+            : 'Beneficiary request rejection',
+        headline: action === 'approve' ? 'Request approved' : 'Request not approved',
+        body:
+          action === 'approve'
+            ? 'Your beneficiary request has been approved.'
+            : notes
+              ? `Your beneficiary request was not approved: ${notes}`
+              : 'Your beneficiary request was not approved.',
+        ctaLabel: 'Open dashboard',
+        ctaPath: '/dashboard',
+      })
       return { success: true }
     }
 
     if (type === 'vendor') {
       if (action === 'reject') {
+        const snap = await db.collection('vendorApplications').doc(id).get()
+        const d = snap.data() || {}
         await db.collection('vendorApplications').doc(id).update({
           status: 'rejected',
           reviewedAt: now,
           reviewedBy: adminUid,
+        })
+        notifyApprovalOutcome({
+          userId: String(d.userId || d.applicantId || ''),
+          email: String(d.email || ''),
+          subject: 'Vendor application update',
+          purpose: 'Vendor application rejection',
+          headline: 'Application not approved',
+          body: notes
+            ? `Your vendor application was not approved: ${notes}`
+            : 'Your vendor application was not approved.',
+          ctaLabel: 'Open dashboard',
+          ctaPath: '/dashboard',
         })
         return { success: true }
       }
@@ -328,11 +407,13 @@ export async function processApprovalAction(
     }
 
     if (type === 'business') {
+      const ref = db.collection('businesses').doc(id)
+      const snap = await ref.get()
+      const data = snap.data() || {}
+      const businessName = String(data.name || data.businessName || 'Business')
+      const ownerId = String(data.ownerId || data.userId || id)
       if (action === 'approve') {
         const { ensureBusinessReferralCode } = await import('@/lib/referral-code-server')
-        const ref = db.collection('businesses').doc(id)
-        const snap = await ref.get()
-        const data = snap.data() || {}
         await ref.set(
           sanitizeForFirestore({
             isApproved: true,
@@ -346,9 +427,19 @@ export async function processApprovalAction(
         await ensureBusinessReferralCode(
           db,
           id,
-          String(data.name || data.businessName || 'Business'),
+          businessName,
           typeof data.referralCode === 'string' ? data.referralCode : null
         )
+        notifyApprovalOutcome({
+          userId: ownerId,
+          email: String(data.email || data.contactEmail || ''),
+          subject: `Business approved: ${businessName}`,
+          purpose: 'Business account approval',
+          headline: 'Business approved',
+          body: `Your business “${businessName}” has been approved and is now active.`,
+          ctaLabel: 'Open business dashboard',
+          ctaPath: '/business/dashboard',
+        })
       } else {
         await db.collection('businesses').doc(id).set(
           sanitizeForFirestore({
@@ -359,29 +450,97 @@ export async function processApprovalAction(
           }),
           { merge: true }
         )
+        notifyApprovalOutcome({
+          userId: ownerId,
+          email: String(data.email || data.contactEmail || ''),
+          subject: `Business application update: ${businessName}`,
+          purpose: 'Business account rejection',
+          headline: 'Business not approved',
+          body: notes
+            ? `Your business “${businessName}” was not approved: ${notes}`
+            : `Your business “${businessName}” was not approved.`,
+          ctaLabel: 'Open business dashboard',
+          ctaPath: '/business/dashboard',
+        })
       }
       return { success: true }
     }
 
     if (type === 'offer') {
+      const [offersSnap, legacySnap] = await Promise.all([
+        db.collection('offers').doc(id).get(),
+        db.collection('businessOffers').doc(id).get(),
+      ])
+      const current = (offersSnap.exists ? offersSnap.data() : legacySnap.data()) || {}
+      const title = String(current.title || 'Your offer')
+      const businessId = String(current.businessId || '')
       const updates =
         action === 'approve'
           ? { status: 'published', isAvailable: true, approvedAt: now, approvedBy: adminUid }
           : { status: 'archived', isAvailable: false, rejectedAt: now, rejectedBy: adminUid }
       await syncDualCollection(db, id, 'offers', 'businessOffers', updates, action === 'approve')
+      if (businessId) {
+        notifyApprovalOutcome({
+          userId: businessId,
+          subject:
+            action === 'approve'
+              ? `Offer approved: ${title}`
+              : `Offer update: ${title}`,
+          purpose:
+            action === 'approve' ? 'Marketplace offer approval' : 'Marketplace offer rejection',
+          headline: action === 'approve' ? 'Offer published' : 'Offer not approved',
+          body:
+            action === 'approve'
+              ? `Your listing “${title}” is now live on the marketplace.`
+              : notes
+                ? `Your listing “${title}” was not approved: ${notes}`
+                : `Your listing “${title}” was not approved.`,
+          ctaLabel: 'View offers',
+          ctaPath: '/business/offers',
+        })
+      }
       return { success: true }
     }
 
     if (type === 'job') {
+      const [jobsSnap, oppSnap] = await Promise.all([
+        db.collection('jobs').doc(id).get(),
+        db.collection('businessOpportunities').doc(id).get(),
+      ])
+      const current = (jobsSnap.exists ? jobsSnap.data() : oppSnap.data()) || {}
+      const title = String(current.title || 'Your listing')
+      const businessId = String(current.businessId || '')
       const updates =
         action === 'approve'
           ? { status: 'published', approvedAt: now, approvedBy: adminUid }
           : { status: 'closed', closedAt: now, closedBy: adminUid }
       await syncDualCollection(db, id, 'jobs', 'businessOpportunities', updates, false)
+      if (businessId) {
+        notifyApprovalOutcome({
+          userId: businessId,
+          subject:
+            action === 'approve'
+              ? `Listing approved: ${title}`
+              : `Listing update: ${title}`,
+          purpose:
+            action === 'approve' ? 'Job / opportunity approval' : 'Job / opportunity rejection',
+          headline: action === 'approve' ? 'Listing published' : 'Listing closed',
+          body:
+            action === 'approve'
+              ? `Your listing “${title}” is now live.`
+              : notes
+                ? `Your listing “${title}” was closed: ${notes}`
+                : `Your listing “${title}” was closed.`,
+          ctaLabel: 'View opportunities',
+          ctaPath: '/business/opportunities',
+        })
+      }
       return { success: true }
     }
 
     if (type === 'discount') {
+      const snap = await db.collection('discounts').doc(id).get()
+      const d = snap.data() || {}
       await db.collection('discounts').doc(id).update(
         sanitizeForFirestore({
           status: action === 'approve' ? 'active' : 'expired',
@@ -390,10 +549,30 @@ export async function processApprovalAction(
           updatedAt: now,
         })
       )
+      const businessId = String(d.businessId || d.ownerId || '')
+      if (businessId) {
+        notifyApprovalOutcome({
+          userId: businessId,
+          subject: action === 'approve' ? 'Discount approved' : 'Discount update',
+          purpose:
+            action === 'approve' ? 'Discount approval' : 'Discount rejection',
+          headline: action === 'approve' ? 'Discount active' : 'Discount not approved',
+          body:
+            action === 'approve'
+              ? `Your discount “${String(d.title || d.code || id)}” is now active.`
+              : `Your discount “${String(d.title || d.code || id)}” was not approved.`,
+          ctaLabel: 'Open business dashboard',
+          ctaPath: '/business/dashboard',
+        })
+      }
       return { success: true }
     }
 
     if (type === 'event') {
+      const snap = await db.collection('events').doc(id).get()
+      const d = snap.data() || {}
+      const title = String(d.title || 'Your event')
+      const createdBy = String(d.createdBy || d.organizerId || '')
       await db.collection('events').doc(id).update(
         sanitizeForFirestore({
           status: action === 'approve' ? 'published' : 'rejected',
@@ -403,30 +582,91 @@ export async function processApprovalAction(
           updatedAt: now,
         })
       )
+      if (createdBy) {
+        notifyApprovalOutcome({
+          userId: createdBy,
+          subject:
+            action === 'approve'
+              ? `Event approved: ${title}`
+              : `Event update: ${title}`,
+          purpose: action === 'approve' ? 'Event approval notification' : 'Event rejection notification',
+          headline: action === 'approve' ? 'Event approved' : 'Event not approved',
+          body:
+            action === 'approve'
+              ? `Your event “${title}” has been approved and published.`
+              : notes
+                ? `Your event “${title}” was not approved: ${notes}`
+                : `Your event “${title}” was not approved.`,
+          ctaLabel: 'View my events',
+          ctaPath: '/dashboard/events',
+        })
+      }
       return { success: true }
     }
 
     if (type === 'donation') {
+      const snap = await db.collection('donationSubmissions').doc(id).get()
+      const d = snap.data() || {}
       await db.collection('donationSubmissions').doc(id).update({
         status: action === 'approve' ? 'verified' : 'rejected',
         reviewedAt: now,
         reviewedBy: adminUid,
         updatedAt: now,
       })
+      notifyApprovalOutcome({
+        userId: String(d.userId || ''),
+        email: String(d.donorEmail || d.email || ''),
+        subject: action === 'approve' ? 'Donation verified' : 'Donation proof update',
+        purpose:
+          action === 'approve'
+            ? 'Donation verification confirmation'
+            : 'Donation proof rejection',
+        headline: action === 'approve' ? 'Donation verified' : 'Donation not verified',
+        body:
+          action === 'approve'
+            ? 'Your donation was verified. Thank you for your support.'
+            : notes
+              ? `Your donation proof was not verified: ${notes}`
+              : 'Your donation proof was not verified.',
+        ctaLabel: 'View donations',
+        ctaPath: '/dashboard/donations',
+      })
       return { success: true }
     }
 
     if (type === 'partnership') {
+      const snap = await db.collection('partnerships').doc(id).get()
+      const d = snap.data() || {}
       await db.collection('partnerships').doc(id).update({
         status: action === 'approve' ? 'active' : 'ended',
         reviewedAt: now,
         reviewedBy: adminUid,
         updatedAt: now,
       })
+      notifyApprovalOutcome({
+        userId: String(d.submittedBy || d.userId || d.businessId || ''),
+        email: String(d.submitterEmail || d.email || ''),
+        subject: action === 'approve' ? 'Partnership request approved' : 'Partnership request update',
+        purpose:
+          action === 'approve'
+            ? 'Partnership approval'
+            : 'Partnership rejection',
+        headline: action === 'approve' ? 'Partnership approved' : 'Partnership not approved',
+        body:
+          action === 'approve'
+            ? `Your partnership request “${String(d.title || id)}” has been approved.`
+            : notes
+              ? `Your partnership request was not approved: ${notes}`
+              : 'Your partnership request was not approved.',
+        ctaLabel: 'Open business dashboard',
+        ctaPath: '/business/dashboard',
+      })
       return { success: true }
     }
 
     if (type === 'community') {
+      const snap = await db.collection('communities').doc(id).get()
+      const d = snap.data() || {}
       await db.collection('communities').doc(id).update({
         status: action === 'approve' ? 'active' : 'archived',
         approvedBy: action === 'approve' ? adminUid : undefined,
@@ -434,16 +674,50 @@ export async function processApprovalAction(
         rejectionReason: action === 'reject' ? notes || null : undefined,
         updatedAt: now,
       })
+      notifyApprovalOutcome({
+        userId: String(d.createdBy || d.ownerId || ''),
+        subject: action === 'approve' ? 'Community approved' : 'Community update',
+        purpose:
+          action === 'approve' ? 'Community approval' : 'Community rejection',
+        headline: action === 'approve' ? 'Community approved' : 'Community not approved',
+        body:
+          action === 'approve'
+            ? `Your community “${String(d.name || id)}” is now active.`
+            : notes
+              ? `Your community was not approved: ${notes}`
+              : 'Your community was not approved.',
+        ctaLabel: 'View communities',
+        ctaPath: '/communities',
+      })
       return { success: true }
     }
 
     if (type === 'group') {
       if (!communityId) return { success: false, error: 'communityId required for group approval' }
+      const snap = await db
+        .collection('communities')
+        .doc(communityId)
+        .collection('groups')
+        .doc(id)
+        .get()
+      const d = snap.data() || {}
       await db.collection('communities').doc(communityId).collection('groups').doc(id).update({
         status: action === 'approve' ? 'active' : 'archived',
         approvedBy: action === 'approve' ? adminUid : undefined,
         approvedAt: action === 'approve' ? now : undefined,
         updatedAt: now,
+      })
+      notifyApprovalOutcome({
+        userId: String(d.createdBy || ''),
+        subject: action === 'approve' ? 'Group approved' : 'Group update',
+        purpose: action === 'approve' ? 'Group approval' : 'Group rejection',
+        headline: action === 'approve' ? 'Group approved' : 'Group not approved',
+        body:
+          action === 'approve'
+            ? `Your group “${String(d.name || id)}” is now active.`
+            : 'Your group was not approved.',
+        ctaLabel: 'Open community',
+        ctaPath: `/communities/${communityId}`,
       })
       return { success: true }
     }
@@ -459,11 +733,29 @@ export async function processApprovalAction(
     }
 
     if (type === 'form_submission') {
+      const snap = await db.collection('formSubmissions').doc(id).get()
+      const d = snap.data() || {}
       await db.collection('formSubmissions').doc(id).update({
         status: action === 'approve' ? 'approved' : 'rejected',
         reviewedAt: now,
         reviewedBy: adminUid,
         updatedAt: now,
+      })
+      notifyApprovalOutcome({
+        userId: String(d.userId || d.submittedBy || ''),
+        email: String(d.email || ''),
+        subject: action === 'approve' ? 'Form submission approved' : 'Form submission update',
+        purpose:
+          action === 'approve' ? 'Form submission approval' : 'Form submission rejection',
+        headline: action === 'approve' ? 'Submission approved' : 'Submission not approved',
+        body:
+          action === 'approve'
+            ? `Your submission for “${String(d.formTitle || d.formName || 'form')}” was approved.`
+            : notes
+              ? `Your form submission was not approved: ${notes}`
+              : 'Your form submission was not approved.',
+        ctaLabel: 'Open dashboard',
+        ctaPath: '/dashboard',
       })
       return { success: true }
     }

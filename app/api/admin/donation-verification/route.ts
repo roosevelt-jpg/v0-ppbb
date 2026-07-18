@@ -6,6 +6,7 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { generateDonationReceipt } from '@/lib/pdf-receipt-generator'
 import { uploadBufferToPath } from '@/lib/storage-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get('authorization') || ''
@@ -40,6 +41,26 @@ async function notifyDonor(
   } catch (err) {
     console.warn('[donation-verification] donor notify failed:', err)
   }
+
+  const purposeMap: Record<string, string> = {
+    donation_verified: 'Donation verification confirmation',
+    donation_rejected: 'Donation proof rejection',
+    donation_resubmission: 'Donation proof resubmission request',
+    donation_update: 'Donation status update',
+  }
+  const site = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+  sendBrandedEmailToUserSafe({
+    userId,
+    subject: title,
+    purpose: purposeMap[type] || 'Donation status update',
+    headline: title,
+    bodyHtml: paragraphs('Assalamu alaikum,', bodyText),
+    cta: { label: 'View donations', url: `${site}/dashboard/donations` },
+  })
 }
 
 async function generateAndStoreReceipt(

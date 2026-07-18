@@ -5,6 +5,7 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -49,12 +50,13 @@ async function syncOffer(id: string, updates: Record<string, unknown>) {
 async function notifyBusinessOfferLive(businessId: string, title: string, offerId: string) {
   if (!businessId) return
   const db = getAdminDb()
+  const message = `Your listing "${title}" is now live on the marketplace.`
   try {
     await db.collection('users').doc(businessId).collection('notifications').add(
       sanitizeForFirestore({
         type: 'offer_approved',
         title: 'Offer published',
-        message: `Your listing "${title}" is now live on the marketplace.`,
+        message,
         offerId,
         read: false,
         createdAt: Timestamp.now(),
@@ -63,6 +65,20 @@ async function notifyBusinessOfferLive(businessId: string, title: string, offerI
   } catch (err) {
     console.warn('[admin/offers] notify failed:', err)
   }
+
+  const site = (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+  sendBrandedEmailToUserSafe({
+    userId: businessId,
+    subject: 'Your marketplace offer is live',
+    purpose: 'Marketplace offer approval',
+    headline: 'Offer published',
+    bodyHtml: paragraphs('Assalamu alaikum,', message),
+    cta: { label: 'View offers', url: `${site}/business/offers` },
+  })
 }
 
 export async function GET(request: NextRequest) {

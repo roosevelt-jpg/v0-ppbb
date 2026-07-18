@@ -4,6 +4,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { hasBusinessAccessServer } from '@/lib/roles-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 /**
  * Member job application — admin write so counters on jobs/businessOpportunities
@@ -152,6 +153,42 @@ export async function POST(request: NextRequest) {
         { merge: true }
       )
     }
+
+    const businessId = String(listing.businessId || '')
+    const jobTitle = String(listing.title || 'Opportunity')
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+
+    if (businessId) {
+      sendBrandedEmailToUserSafe({
+        userId: businessId,
+        subject: `New application: ${jobTitle}`,
+        purpose: 'New job application notification',
+        headline: 'New job application',
+        bodyHtml: paragraphs(
+          'Assalamu alaikum,',
+          `${applicantName} applied to “${jobTitle}”.`,
+          'Review the application in your business opportunities dashboard.'
+        ),
+        cta: { label: 'View applications', url: `${site}/business/opportunities` },
+      })
+    }
+
+    sendBrandedEmailToUserSafe({
+      userId: uid,
+      subject: `Application submitted: ${jobTitle}`,
+      purpose: 'Job application confirmation',
+      headline: 'Application submitted',
+      bodyHtml: paragraphs(
+        'Assalamu alaikum,',
+        `Your application for “${jobTitle}” was submitted successfully.`,
+        'We will notify you when the business responds.'
+      ),
+      cta: { label: 'View my applications', url: `${site}/dashboard/opportunities` },
+    })
 
     return NextResponse.json({
       success: true,

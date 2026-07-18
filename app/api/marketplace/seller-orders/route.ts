@@ -4,6 +4,7 @@ import { verifyIdToken } from '@/lib/admin-access-server'
 import { getAdminDb, getAdminBucket } from '@/lib/firebase-admin'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { sendPushToUser } from '@/lib/push-notifications-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 import {
   generateMarketplaceInvoicePdf,
   buildInvoiceNumber,
@@ -171,14 +172,39 @@ export async function PATCH(request: NextRequest) {
         mark_delivered: 'Order delivered',
         confirm_bank_transfer: 'Bank transfer confirmed',
       }
+      const purposes: Record<string, string> = {
+        arrange_pickup: 'Marketplace pickup arrangement',
+        mark_shipped: 'Marketplace shipping update',
+        mark_delivered: 'Marketplace delivery confirmation',
+        confirm_bank_transfer: 'Marketplace payment confirmation',
+      }
+      const offerTitle = String(data.offerTitle || 'Your marketplace order')
       void sendPushToUser(
         buyerId,
         {
           title: titles[action] || 'Order update',
-          body: String(data.offerTitle || 'Your marketplace order was updated'),
+          body: offerTitle,
         },
         { type: 'marketplace_order_update', orderId, click_action: '/dashboard/orders' }
       ).catch(console.error)
+
+      const site = (
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        'https://www.passive-blessings.com'
+      ).replace(/\/$/, '')
+      sendBrandedEmailToUserSafe({
+        userId: buyerId,
+        subject: titles[action] || 'Order update',
+        purpose: purposes[action] || 'Marketplace order update',
+        headline: titles[action] || 'Order update',
+        bodyHtml: paragraphs(
+          'Assalamu alaikum,',
+          `Your order for “${offerTitle}” has been updated.`,
+          titles[action] || 'Please check your orders for details.'
+        ),
+        cta: { label: 'View my orders', url: `${site}/dashboard/orders` },
+      })
     }
 
     return NextResponse.json({ success: true, orderId, ...patch })

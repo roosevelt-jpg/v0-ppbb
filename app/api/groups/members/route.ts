@@ -6,6 +6,7 @@ import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { hasAdminAccessServer } from '@/lib/roles-server'
 import { shouldNotifyUser, mapNotificationTypeToPreference } from '@/lib/user-settings'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 async function notifyUser(
   userId: string,
@@ -19,14 +20,29 @@ async function notifyUser(
     const userSnap = await db.collection('users').doc(userId).get()
     const userData = userSnap.data() || {}
     const pref = mapNotificationTypeToPreference(type)
-    if (!shouldNotifyUser({ ...userData, id: userId }, 'in_app', pref)) return
+    if (shouldNotifyUser({ ...userData, id: userId }, 'in_app', pref)) {
+      await db.collection('users').doc(userId).collection('notifications').add({
+        type,
+        title,
+        message,
+        read: false,
+        createdAt: Timestamp.now(),
+      })
+    }
 
-    await db.collection('users').doc(userId).collection('notifications').add({
-      type,
-      title,
-      message,
-      read: false,
-      createdAt: Timestamp.now(),
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+
+    sendBrandedEmailToUserSafe({
+      userId,
+      subject: title,
+      purpose: title,
+      headline: title,
+      bodyHtml: paragraphs('Assalamu alaikum,', message),
+      cta: { label: 'Open Passive Blessings', url: `${site}/dashboard` },
     })
   } catch (error) {
     console.warn('[v0] Could not notify user:', error)

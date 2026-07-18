@@ -1,7 +1,9 @@
 /**
- * Send event registration confirmation (or waitlist/pending) via Gmail SMTP.
+ * Send event registration confirmation (or waitlist/pending) via branded Gmail SMTP.
  * Failures are logged only — registration must not fail because of email.
  */
+
+import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
 export async function sendEventRegistrationEmail(opts: {
   to: string
@@ -12,43 +14,46 @@ export async function sendEventRegistrationEmail(opts: {
   waitlistPosition?: number | null
 }): Promise<boolean> {
   if (!opts.to) return false
-  try {
-    const { getGmailSmtpConfig, createGmailTransporter } = await import('@/lib/gmail-service')
-    const config = await getGmailSmtpConfig()
-    if (!config?.gmailEmail || !config?.gmailAppPassword) {
-      console.warn('[events] Gmail SMTP not configured — confirmation email skipped')
-      return false
-    }
-    const transporter = createGmailTransporter({
-      enabled: true,
-      gmailEmail: config.gmailEmail,
-      gmailAppPassword: config.gmailAppPassword,
-      fromName: config.fromName || 'Passive Blessings',
-    } as any)
-    if (!transporter) return false
 
-    let subject = `Registered: ${opts.eventTitle}`
-    let body = `<p>You're registered for <strong>${opts.eventTitle}</strong>.</p>`
-    if (opts.status === 'waitlisted') {
-      subject = `Waitlisted: ${opts.eventTitle}`
-      body = `<p>You're on the waitlist for <strong>${opts.eventTitle}</strong>${
+  let purpose = 'Event registration confirmation'
+  let subject = `Registered: ${opts.eventTitle}`
+  let headline = 'You’re registered'
+  const lines: string[] = [
+    `You're registered for "${opts.eventTitle}".`,
+  ]
+
+  if (opts.status === 'waitlisted') {
+    purpose = 'Event waitlist confirmation'
+    subject = `Waitlisted: ${opts.eventTitle}`
+    headline = 'You’re on the waitlist'
+    lines.length = 0
+    lines.push(
+      `You're on the waitlist for "${opts.eventTitle}"${
         opts.waitlistPosition ? ` (position #${opts.waitlistPosition})` : ''
-      }.</p>`
-    } else if (opts.status === 'pending') {
-      subject = `Pending approval: ${opts.eventTitle}`
-      body = `<p>Your registration for <strong>${opts.eventTitle}</strong> is pending host approval.</p>`
-    } else if (opts.checkInCode) {
-      body += `<p>Your check-in code: <strong style="font-family:monospace;letter-spacing:0.1em">${opts.checkInCode}</strong></p>`
-    }
-    body += `<p><a href="${opts.eventUrl}">View event</a></p><p>— Passive Blessings</p>`
+      }. We'll notify you if a spot opens.`
+    )
+  } else if (opts.status === 'pending') {
+    purpose = 'Event registration pending approval'
+    subject = `Pending approval: ${opts.eventTitle}`
+    headline = 'Registration pending'
+    lines.length = 0
+    lines.push(
+      `Your registration for "${opts.eventTitle}" is pending host approval. We'll update you once it's reviewed.`
+    )
+  } else if (opts.checkInCode) {
+    lines.push(`Your check-in code: ${opts.checkInCode}`)
+  }
 
-    await transporter.sendMail({
-      from: `"${config.fromName || 'Passive Blessings'}" <${config.gmailEmail}>`,
+  try {
+    const result = await sendBrandedEmail({
       to: opts.to,
       subject,
-      html: body,
+      purpose,
+      headline,
+      bodyHtml: paragraphs(...lines),
+      cta: { label: 'View event', url: opts.eventUrl },
     })
-    return true
+    return result.ok
   } catch (e) {
     console.warn('[events] confirmation email failed:', e)
     return false

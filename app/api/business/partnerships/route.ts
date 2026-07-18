@@ -3,6 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { verifyIdToken } from '@/lib/admin-access-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,10 +77,39 @@ export async function POST(request: NextRequest) {
             createdAt: now,
           })
         )
+        sendBrandedEmailToUserSafe({
+          userId: adminDoc.id,
+          subject: 'New partnership request',
+          purpose: 'Partnership request notification for admins',
+          headline: 'New partnership request',
+          bodyHtml: paragraphs(
+            'Assalamu alaikum,',
+            `${submitterName} submitted a partnership request: “${title}”.`
+          ),
+          cta: {
+            label: 'Review in admin',
+            url: `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.passive-blessings.com').replace(/\/$/, '')}/admin/approvals`,
+          },
+        })
       }
     } catch (notifyErr) {
       console.warn('[business/partnerships] admin notify failed:', notifyErr)
     }
+
+    sendBrandedEmailToUserSafe({
+      userId: uid,
+      subject: 'Partnership request received',
+      purpose: 'Partnership request confirmation',
+      headline: 'Request received',
+      bodyHtml: paragraphs(
+        'Assalamu alaikum,',
+        `We received your partnership request “${title}”. Our team will review it shortly.`
+      ),
+      cta: {
+        label: 'Open business dashboard',
+        url: `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.passive-blessings.com').replace(/\/$/, '')}/business/dashboard`,
+      },
+    })
 
     return NextResponse.json({ success: true, data: { id: ref.id } })
   } catch (error) {

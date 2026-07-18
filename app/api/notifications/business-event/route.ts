@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { sendPushToUser } from '@/lib/push-notifications-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 /** Notify business owner on job application or other business events */
 export async function POST(request: NextRequest) {
@@ -42,6 +43,37 @@ export async function POST(request: NextRequest) {
       { title, body: message },
       { type: pushType, eventType: type, click_action: clickAction }
     )
+
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+
+    const purpose =
+      type === 'job_application'
+        ? 'New job application notification'
+        : type === 'marketplace_purchase'
+          ? 'Marketplace purchase notification'
+          : 'Business account notification'
+
+    const ctaPath = clickAction.startsWith('/') ? clickAction : `/${clickAction}`
+
+    sendBrandedEmailToUserSafe({
+      userId: businessId,
+      subject: title,
+      purpose,
+      headline: title,
+      bodyHtml: paragraphs(
+        'Assalamu alaikum,',
+        message,
+        'Please sign in to your business portal to review and respond.'
+      ),
+      cta: {
+        label: 'Open business portal',
+        url: clickAction.startsWith('http') ? clickAction : `${site}${ctaPath}`,
+      },
+    })
 
     return NextResponse.json({ success: true, ...result })
   } catch (error) {

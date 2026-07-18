@@ -4,6 +4,7 @@ import { Timestamp } from 'firebase-admin/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 import { notifyNewEventPublished } from '@/lib/push-notifications-server'
+import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
 
 function sortEventsByCreatedAt(events: Array<Record<string, unknown> & { id: string }>) {
   return events.sort((a, b) => {
@@ -28,6 +29,30 @@ async function notifyEventCreator(
       message,
       read: false,
       createdAt: Timestamp.now(),
+    })
+
+    const purposeMap = {
+      event_approved: 'Event approval notification',
+      event_rejected: 'Event rejection notification',
+      event_changes_requested: 'Event changes requested',
+    } as const
+    const headlineMap = {
+      event_approved: 'Event approved',
+      event_rejected: 'Event not approved',
+      event_changes_requested: 'Changes requested',
+    } as const
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+    sendBrandedEmailToUserSafe({
+      userId: createdBy,
+      subject: `${headlineMap[type]}: ${title}`,
+      purpose: purposeMap[type],
+      headline: headlineMap[type],
+      bodyHtml: paragraphs('Assalamu alaikum,', message),
+      cta: { label: 'View my events', url: `${site}/dashboard/events` },
     })
   } catch (error) {
     console.warn('[v0] Could not notify event creator:', error)

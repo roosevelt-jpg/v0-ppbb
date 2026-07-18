@@ -52,6 +52,25 @@ export async function POST(request: NextRequest) {
       })
     )
 
+    const { paragraphs, sendBrandedEmailToUserSafe } = await import('@/lib/platform-email')
+    const site = (
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    ).replace(/\/$/, '')
+    sendBrandedEmailToUserSafe({
+      userId: uid,
+      subject: 'Donation proof received',
+      purpose: 'Donation submission confirmation',
+      headline: 'Proof received',
+      bodyHtml: paragraphs(
+        'Assalamu alaikum,',
+        `We received your ${typeLabel} donation proof of AED ${amount} for ${causeName}.`,
+        'Our team will verify it shortly and notify you once it is confirmed.'
+      ),
+      cta: { label: 'View donations', url: `${site}/dashboard/donations` },
+    })
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[donations/notify-pending]', error)
