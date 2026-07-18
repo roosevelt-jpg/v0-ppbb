@@ -8,7 +8,6 @@ import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import { getOpportunityById, updateOpportunity } from '@/lib/business-queries'
 import type { BusinessOpportunity } from '@/lib/types'
-import { RichTextEditor } from '@/components/rich-text-editor'
 import {
   INDUSTRY_OPTIONS,
   ROLE_TYPE_FORM_OPTIONS,
@@ -143,7 +142,7 @@ export default function EditJobPage() {
         suitableFor: formData.suitableFor,
         deadline: formData.deadline ? new Date(formData.deadline) : undefined,
         hiringBy: formData.hiringBy || null,
-        description: formData.description || formData.responsibilities,
+        description: htmlToPlainText(formData.description || formData.responsibilities),
       }
 
       await updateOpportunity(id, payload)
@@ -341,10 +340,13 @@ export default function EditJobPage() {
 
         <div>
           <label className="block text-sm font-semibold mb-1">Full description (optional)</label>
-          <RichTextEditor
+          <textarea
+            name="description"
             value={formData.description}
-            onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
-            minHeight={140}
+            onChange={handleChange}
+            rows={6}
+            className={`${fieldClass} min-h-[140px]`}
+            placeholder="Plain text description…"
           />
         </div>
 

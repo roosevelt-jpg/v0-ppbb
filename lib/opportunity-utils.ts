@@ -1,4 +1,5 @@
 import { BusinessOpportunity } from '@/lib/types'
+import { htmlToPlainText } from '@/lib/cms-page-content'
 
 export const ROLE_TYPE_LABELS: Record<string, string> = {
   full_time: 'Full Time',
@@ -255,7 +256,7 @@ export function normalizeOpportunityFromJob(
     type: (data.jobType || data.type || 'job') as BusinessOpportunity['type'],
     roleType: String(data.roleType || data.jobType || data.type || 'job'),
     companyName: String(data.companyName || data.businessName || ''),
-    description: String(data.description || ''),
+    description: htmlToPlainText(String(data.description || '')),
     category: String(data.category || ''),
     salary: typeof data.salary === 'number' ? data.salary : undefined,
     compensation: data.compensation as string | undefined,

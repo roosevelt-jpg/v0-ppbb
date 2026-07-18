@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/firebase'
-import { RichTextEditor } from '@/components/rich-text-editor'
 import {
   INDUSTRY_OPTIONS,
   ROLE_TYPE_FORM_OPTIONS,
@@ -17,6 +16,7 @@ import {
   WORK_TYPE_FORM_OPTIONS,
   roleTypeToLegacyType,
 } from '@/lib/opportunity-utils'
+import { htmlToPlainText } from '@/lib/cms-page-content'
 
 const fieldStyle: React.CSSProperties = {
   width: '100%',
@@ -359,11 +359,13 @@ export default function NewOpportunity() {
 
             <div>
               <label style={labelStyle}>Full description (optional)</label>
-              <RichTextEditor
+              <textarea
+                name="description"
                 value={formData.description}
-                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
+                onChange={handleChange}
+                rows={6}
                 placeholder="Additional details for applicants…"
-                minHeight={140}
+                style={{ ...fieldStyle, minHeight: 140, resize: 'vertical' }}
               />
             </div>
 

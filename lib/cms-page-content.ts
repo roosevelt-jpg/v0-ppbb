@@ -19,12 +19,14 @@ export function htmlToPlainText(content: string): string {
   const raw = (content || '').trim()
   if (!raw) return ''
 
-  if (!/<[a-z][\s\S]*>/i.test(raw)) {
-    return decodeHtmlEntities(raw.replace(/\r\n/g, '\n'))
+  // Decode entities first so stored `&lt;p&gt;` / `&lt;br&gt;` still strip correctly
+  let text = decodeHtmlEntities(raw.replace(/\r\n/g, '\n'))
+
+  if (!/<[a-z/!][\s\S]*>/i.test(text)) {
+    return text.trim()
   }
 
-  let text = raw
-    .replace(/\r\n/g, '\n')
+  text = text
     .replace(/<\s*br\s*\/?>/gi, '\n')
     .replace(/<\/\s*(p|div|h[1-6]|li|tr|blockquote)\s*>/gi, '\n')
     .replace(/<\s*(p|div|h[1-6]|li|tr|blockquote)[^>]*>/gi, '')
@@ -32,12 +34,10 @@ export function htmlToPlainText(content: string): string {
     .replace(/<\s*li[^>]*>/gi, '• ')
     .replace(/<[^>]+>/g, '')
 
-  text = decodeHtmlEntities(text)
+  return decodeHtmlEntities(text)
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
-
-  return text
 }
 
 export function normalizeCmsHeadingText(text: string): string {
