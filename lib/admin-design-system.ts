@@ -51,7 +51,7 @@ export const BUTTON_ICON_COMPACT = BUTTON_ICON_PRIMARY
 /** Compact text actions for table rows */
 export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex items-center justify-center gap-1 h-7 min-h-0 px-2 text-xs font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none whitespace-nowrap shrink-0 [&_svg]:text-white [&_svg]:h-4 [&_svg]:w-4`
 /** Keep Edit/Archive/Delete on one horizontal line */
-export const ACTION_ROW = 'flex flex-nowrap items-center gap-0.5 whitespace-nowrap'
+export const ACTION_ROW = 'flex flex-wrap items-center gap-0.5'
 /** Compact back / navigation control */
 export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1.5 h-7 min-h-0 px-2.5 text-xs font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-4 [&_svg]:w-4`
 /** Filter / tab pills — compact; inactive uses outline (not black-forced compact) */

@@ -290,41 +290,25 @@ function BusinessEventForm() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}>
-      <div
-        style={{
-          width: '280px',
-          backgroundColor: '#ffffff',
-          borderRight: '1px solid #e4e1da',
-          padding: '24px',
-        }}
-      >
+    <div className="min-h-full bg-[#fafafa]">
+      <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href="/business/events"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            color: '#111111',
-            textDecoration: 'none',
-            marginBottom: '32px',
-          }}
+          className="mb-5 inline-flex min-h-[40px] items-center gap-2 text-sm font-medium text-[#111] no-underline"
         >
-          <ChevronLeft size={20} />
-          Back
+          <ChevronLeft size={18} />
+          Back to Events
         </Link>
-      </div>
 
-      <div style={{ flex: 1, padding: '40px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#111111', marginBottom: '8px' }}>
+        <h1 className="mb-2 text-2xl font-bold text-[#111] sm:text-3xl">
           {isEditing ? 'Edit Event' : 'Create New Event'}
         </h1>
         {existingStatus && (
-          <p style={{ color: '#888', marginBottom: '24px', fontSize: 14 }}>
+          <p className="mb-6 text-sm text-neutral-500">
             Status: {existingStatus.replace(/_/g, ' ').toUpperCase()}
           </p>
         )}
-        {!existingStatus && <div style={{ marginBottom: 24 }} />}
+        {!existingStatus && <div className="mb-6" />}
 
         {approvalNotes && (
           <div

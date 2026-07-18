@@ -240,7 +240,7 @@ export default function DashboardPage() {
                   <p className="font-semibold text-neutral-900 text-sm">
                     {n.title ?? 'Notification'}
                   </p>
-                  <p className="text-sm text-neutral-500 mt-1">
+                  <p className="text-sm text-neutral-500 mt-1 break-words">
                     {n.message ?? n.body ?? ''}
                   </p>
                 </div>

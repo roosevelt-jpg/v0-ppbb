@@ -160,17 +160,17 @@ export default function NewOpportunity() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '24px 32px' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Post a Job / Gig</h1>
-          <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="min-h-full bg-[#faf9f7]">
+      <div className="border-b border-[#e4e1da] bg-white px-4 py-5 sm:px-8 sm:py-6">
+        <div className="mx-auto max-w-3xl">
+          <h1 className="text-2xl font-bold text-[#111] sm:text-3xl">Post a Job / Gig</h1>
+          <p className="mt-2 text-sm text-neutral-500">
             Same fields as the platform opportunity form — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8 sm:py-8">
         <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>

@@ -216,19 +216,20 @@ export function Navbar() {
       </div>
 
       <div className="lg:hidden px-3 sm:px-4 py-0 flex items-center justify-between gap-2 h-11">
-        <div className="h-full flex items-center min-w-0">
+        <div className="h-full flex items-center min-w-0 flex-1">
           <SiteLogo background="dark" variant="navbar" href="/" />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 shrink-0">
           <LanguageSwitcherWithFlags onDark />
           <ThemeToggle onDark />
           <ProfileMenuButton compact />
           <button
-            className="p-1.5 -mr-1 text-white min-h-[36px] min-w-[36px] inline-flex items-center justify-center"
+            type="button"
+            className="pb-ghost-btn p-2 -mr-1 text-white min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>

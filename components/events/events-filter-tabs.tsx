@@ -17,8 +17,9 @@ export function EventsFilterTabs({ tabs, active, onChange }: EventsFilterTabsPro
           <button
             key={tab.id}
             type="button"
+            data-dashboard-control
             onClick={() => onChange(tab.id)}
-            className={`min-h-[32px] px-2.5 py-1 rounded-md font-body text-[0.65rem] sm:text-xs font-semibold tracking-wide transition-colors whitespace-nowrap ${
+            className={`min-h-[44px] px-3 py-2 rounded-md font-body text-xs sm:text-sm font-semibold tracking-wide transition-colors whitespace-nowrap ${
               active === tab.id
                 ? 'bg-black text-white'
                 : 'bg-white text-foreground border border-[#e4e1da] hover:bg-neutral-50'

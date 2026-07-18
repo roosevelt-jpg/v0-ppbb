@@ -582,8 +582,8 @@ export default function SignupClient() {
       {/* Header */}
       <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>
-          <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#111111', height: '28px', display: 'flex', alignItems: 'center' }}>
-            <SiteLogo background="light" variant="primary" href="/" />
+          <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#111111', height: '44px', display: 'flex', alignItems: 'center', minWidth: 0 }}>
+            <SiteLogo background="light" variant="navbar" href="/" />
           </div>
           <Link href="/login" style={{ fontSize: '0.75rem', fontWeight: 500, color: '#111111', textDecoration: 'none' }}>Sign In</Link>
         </div>
@@ -749,7 +749,7 @@ export default function SignupClient() {
                     {/* Gender */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Gender *</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.375rem' }}>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                         {['Male', 'Female', 'Other', 'Prefer not to say'].map(g => (
                           <label key={g} style={{ display: 'flex', alignItems: 'center', padding: '0.5rem', border: `1px solid ${formData.gender === g ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', backgroundColor: formData.gender === g ? '#f7f6f2' : '#fff', transition: 'all 0.2s' }}>
                             <input type="radio" name="gender" value={g} checked={formData.gender === g} onChange={handleInputChange} style={{ width: '14px', height: '14px', cursor: 'pointer', flexShrink: 0 }} />

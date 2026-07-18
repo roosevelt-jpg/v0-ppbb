@@ -58,196 +58,122 @@ export default function BusinessEventsPage() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}>
-      {/* Sidebar */}
-      <div style={{ width: '280px', backgroundColor: '#ffffff', borderRight: '1px solid #e4e1da', padding: '24px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#111111' }}>Events</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {(['draft', 'pending_approval', 'changes_requested', 'published', 'rejected'] as const).map(
-            (tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                padding: '12px 16px',
-                textAlign: 'left',
-                backgroundColor: activeTab === tab ? '#111111' : 'transparent',
-                color: activeTab === tab ? '#ffffff' : '#111111',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: activeTab === tab ? 600 : 500,
-              }}
-            >
-              {tab === 'draft'
-                ? 'Drafts'
-                : tab === 'pending_approval'
-                ? 'Pending Approval'
-                : tab === 'changes_requested'
-                ? 'Changes Requested'
-                : tab === 'published'
-                ? 'Published'
-                : 'Rejected'}
-            </button>
-          )
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ flex: 1, padding: '40px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#111111' }}>Your Events</h1>
+    <div className="min-h-full bg-[#fafafa]">
+      <div className="px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-bold text-[#111] sm:text-3xl">Your Events</h1>
           <Link
             href="/business/events/new"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 24px',
-              backgroundColor: '#111111',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              textDecoration: 'none',
-            }}
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md bg-[#111] px-4 py-2 text-sm font-semibold text-white no-underline sm:min-h-0"
           >
-            <Plus size={20} />
+            <Plus size={18} />
             Create Event
           </Link>
         </div>
 
+        <div className="mb-5 -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+          {(['draft', 'pending_approval', 'changes_requested', 'published', 'rejected'] as const).map(
+            (tab) => (
+              <button
+                key={tab}
+                type="button"
+                data-dashboard-control
+                onClick={() => setActiveTab(tab)}
+                className={`shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  activeTab === tab
+                    ? 'bg-[#111] text-white'
+                    : 'border border-[#e4e1da] bg-white text-[#111] hover:bg-neutral-50'
+                }`}
+              >
+                {tab === 'draft'
+                  ? 'Drafts'
+                  : tab === 'pending_approval'
+                    ? 'Pending Approval'
+                    : tab === 'changes_requested'
+                      ? 'Changes Requested'
+                      : tab === 'published'
+                        ? 'Published'
+                        : 'Rejected'}
+              </button>
+            )
+          )}
+        </div>
+
         {loading ? (
-          <div style={{ textAlign: 'center', color: '#888888' }}>Loading...</div>
+          <div className="text-center text-neutral-500">Loading...</div>
         ) : events.length === 0 ? (
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '48px', textAlign: 'center' }}>
-            <p style={{ color: '#888888', marginBottom: '16px' }}>No events yet</p>
+          <Card className="border-[#e4e1da] bg-white p-8 text-center sm:p-12">
+            <p className="mb-4 text-neutral-500">No events yet</p>
             <Link
               href="/business/events/new"
-              style={{
-                display: 'inline-block',
-                padding: '12px 24px',
-                backgroundColor: '#111111',
-                color: '#ffffff',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontWeight: 600,
-              }}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[#111] px-4 py-2 text-sm font-semibold text-white no-underline"
             >
               Create Your First Event
             </Link>
           </Card>
         ) : (
-          <div style={{ display: 'grid', gap: '16px' }}>
+          <div className="grid gap-3 sm:gap-4">
             {events.map((event) => (
               <Card
                 key={event.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderColor: '#e4e1da',
-                  padding: 0,
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'stretch',
-                  gap: 0,
-                  flexWrap: 'wrap',
-                }}
+                className="overflow-hidden border-[#e4e1da] bg-white p-0"
               >
-                <div style={{ width: 140, minHeight: 100, flexShrink: 0 }}>
-                  <EventBannerThumb
-                    event={event as never}
-                    title={event.title}
-                    size="md"
-                    rounded="rounded-none"
-                    className="!h-full !min-h-[100px]"
-                  />
-                </div>
-                <div
-                  style={{
-                    flex: 1,
-                    minWidth: 200,
-                    padding: 24,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: 16,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111111' }}>{event.title}</h3>
-                  <p style={{ fontSize: '14px', color: '#888888', marginTop: '4px' }}>
-                    {format(new Date(event.startDate), 'MMM dd, yyyy')} • {event.category}
-                  </p>
-                  <p style={{ fontSize: '12px', color: '#666666', marginTop: '6px', wordBreak: 'break-word' }}>
-                    {getEventLocationLabel(event as never)}
-                  </p>
-                  <p style={{ fontSize: '12px', color: '#999999', marginTop: '8px' }}>
-                    {event.status.replace(/_/g, ' ').toUpperCase()}
-                  </p>
-                  {event.status === 'changes_requested' && event.approvalNotes && (
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: '#e65100',
-                        marginTop: 8,
-                        background: '#fff8e1',
-                        padding: 8,
-                        borderRadius: 6,
-                      }}
-                    >
-                      {event.approvalNotes}
-                    </p>
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => router.push(`/business/events/new?id=${event.id}`)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: '#111111',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
-                    title="Edit / Resubmit"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => router.push(`/business/events/${event.id}/guests`)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: '#374151',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}
-                    title="Attendees & Check-in"
-                  >
-                    Attendees
-                  </button>
-                  <button
-                    onClick={() => handleDelete(event.id!)}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: '#c62828',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                <div className="flex flex-col sm:flex-row">
+                  <div className="h-36 w-full shrink-0 sm:h-auto sm:w-36 sm:min-h-[100px]">
+                    <EventBannerThumb
+                      event={event as never}
+                      title={event.title}
+                      size="md"
+                      rounded="rounded-none"
+                      className="!h-full !min-h-[100px] !w-full"
+                    />
+                  </div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="break-words text-base font-semibold text-[#111]">{event.title}</h3>
+                      <p className="mt-1 text-sm text-neutral-500">
+                        {format(new Date(event.startDate), 'MMM dd, yyyy')} • {event.category}
+                      </p>
+                      <p className="mt-1 break-words text-xs text-neutral-600">
+                        {getEventLocationLabel(event as never)}
+                      </p>
+                      <p className="mt-2 text-xs uppercase tracking-wide text-neutral-400">
+                        {event.status.replace(/_/g, ' ')}
+                      </p>
+                      {event.status === 'changes_requested' && event.approvalNotes && (
+                        <p className="mt-2 break-words rounded-md bg-amber-50 p-2 text-sm text-orange-800">
+                          {event.approvalNotes}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/business/events/new?id=${event.id}`)}
+                        className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-[#111] px-3 py-2 text-white"
+                        title="Edit / Resubmit"
+                      >
+                        <Edit2 size={16} />
+                        <span className="text-xs font-semibold sm:hidden">Edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/business/events/${event.id}/guests`)}
+                        className="inline-flex min-h-[40px] items-center rounded-md bg-neutral-700 px-3 py-2 text-xs font-semibold text-white"
+                        title="Attendees & Check-in"
+                      >
+                        Attendees
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(event.id!)}
+                        className="inline-flex min-h-[40px] items-center gap-1 rounded-md bg-red-700 px-3 py-2 text-white"
+                      >
+                        <Trash2 size={16} />
+                        <span className="text-xs font-semibold sm:hidden">Delete</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </Card>
             ))}

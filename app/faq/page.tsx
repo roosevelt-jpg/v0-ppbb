@@ -133,10 +133,9 @@ export default function FAQPage() {
                     <button
                       type="button"
                       onClick={() => toggleExpand(faq.id)}
-                      className="w-full flex items-center justify-between gap-3 px-4 py-4 text-left bg-white hover:bg-gray-50 !bg-white !text-black !shadow-none !min-h-0 !rounded-none !px-4"
-                      data-slot="button"
+                      className="pb-ghost-btn w-full flex items-center justify-between gap-3 px-4 py-4 text-left bg-white hover:bg-gray-50 min-h-[48px] rounded-none"
                     >
-                      <span className="font-semibold text-black">{faq.question}</span>
+                      <span className="font-semibold text-black break-words">{faq.question}</span>
                       <ChevronDown
                         className={`w-5 h-5 shrink-0 text-neutral-600 transition-transform ${
                           open ? 'rotate-180' : ''

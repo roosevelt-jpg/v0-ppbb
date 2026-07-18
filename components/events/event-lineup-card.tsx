@@ -116,16 +116,16 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           </div>
         )}
 
-        <div className="mt-auto flex gap-1 pt-1.5">
+        <div className="mt-auto flex flex-col gap-2 pt-1.5 sm:flex-row sm:gap-1">
           <Link
             href={`/events/${event.id}`}
-            className="pb-compact-btn inline-flex items-center justify-center h-7 flex-1 px-2 bg-black !text-white rounded-md text-[11px] font-semibold hover:bg-neutral-800"
+            className="inline-flex min-h-[40px] sm:min-h-0 sm:h-7 items-center justify-center flex-1 px-2 bg-black !text-white rounded-md text-xs sm:text-[11px] font-semibold hover:bg-neutral-800"
           >
             {pageConfig.registerButtonLabel}
           </Link>
           <Link
             href={`/events/${event.id}`}
-            className="pb-compact-btn inline-flex items-center justify-center h-7 flex-1 px-2 bg-black !text-white rounded-md text-[11px] font-semibold hover:bg-neutral-800"
+            className="inline-flex min-h-[40px] sm:min-h-0 sm:h-7 items-center justify-center flex-1 px-2 border border-[#e4e1da] bg-white !text-neutral-900 rounded-md text-xs sm:text-[11px] font-semibold hover:bg-neutral-50"
           >
             {pageConfig.detailsButtonLabel}
           </Link>

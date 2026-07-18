@@ -239,11 +239,11 @@ function EventsPageContent() {
   return (
     <AdminPageLayout title="Events">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <h2 className="text-2xl font-bold text-black">Events</h2>
           <Link
             href="/admin/events/create"
-            className="flex items-center gap-2 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 transition-colors"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 transition-colors min-h-[40px]"
           >
             <Plus size={20} />
             Create Event
@@ -329,7 +329,78 @@ function EventsPageContent() {
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 min-w-0">
-            <div className="admin-table-scroll">
+            <ul className="lg:hidden divide-y divide-gray-100">
+              {filteredEvents.map((event) => (
+                <li key={event.id} className="p-4 space-y-3">
+                  <div className="flex gap-3 min-w-0">
+                    <EventBannerThumb
+                      event={event as never}
+                      title={event.title}
+                      size="sm"
+                      rounded="rounded-md"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/admin/events/${event.id}`}
+                        className="font-semibold text-blue-600 hover:underline break-words"
+                      >
+                        {event.title}
+                      </Link>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {event.category || 'General'} ·{' '}
+                        {event.createdByRole === 'business' ? 'Business' : 'Admin'}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500 break-words">{locationDisplay(event)}</p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {(() => {
+                          const date = toEventDate(event.startDate)
+                          return date ? format(date, 'MMM dd, yyyy') : '-'
+                        })()}
+                      </p>
+                      <span
+                        className={`mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(event.status)}`}
+                      >
+                        {getStatusIcon(event.status)}
+                        {event.status.replace(/_/g, ' ').toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Link href={`/admin/events/${event.id}/preview`} className={BUTTON_ROW_COMPACT}>
+                      <Eye /> Preview
+                    </Link>
+                    <Link href={`/admin/events/create?id=${event.id}`} className={BUTTON_ROW_COMPACT}>
+                      <Edit2 /> Edit
+                    </Link>
+                    <Link href={`/admin/events/${event.id}/guests`} className={BUTTON_ROW_COMPACT}>
+                      Attendees
+                    </Link>
+                    {event.status === 'pending_approval' && (
+                      <>
+                        <button type="button" onClick={() => handleApprove(event.id!)} className={BUTTON_ROW_COMPACT}>
+                          Approve
+                        </button>
+                        <button type="button" onClick={() => handleRequestChanges(event.id!)} className={BUTTON_ROW_COMPACT}>
+                          Changes
+                        </button>
+                        <button type="button" onClick={() => handleReject(event.id!)} className={BUTTON_ROW_COMPACT}>
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {event.status === 'published' && (
+                      <Link href={`/admin/events/${event.id}/revenue`} className={BUTTON_ROW_COMPACT}>
+                        Revenue
+                      </Link>
+                    )}
+                    <button type="button" onClick={() => handleDelete(event.id!)} className={BUTTON_ROW_COMPACT}>
+                      <Trash2 /> Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden lg:block admin-table-scroll">
             <table className="w-full min-w-[1200px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>

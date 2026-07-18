@@ -40,7 +40,7 @@ const VARIANT_CLASSES: Record<
   },
   navbar: {
     wrapper:
-      'inline-flex items-center self-stretch shrink-0 leading-none h-full max-w-[min(72vw,260px)] sm:max-w-[min(50vw,280px)]',
+      'inline-flex items-center self-stretch shrink-0 leading-none h-full max-w-[min(42vw,150px)] sm:max-w-[min(50vw,220px)] lg:max-w-[min(40vw,280px)]',
     img: 'block h-full max-h-full w-auto object-contain object-left',
   },
   sidebar: {

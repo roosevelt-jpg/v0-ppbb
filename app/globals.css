@@ -366,9 +366,10 @@ input[type='checkbox'] {
 }
 
 /*
- * Platform-wide buttons: black bg + white text/icons (unlayered so it beats Tailwind utilities).
- * Opt-outs: theme/nav chrome, calendar days, rating stars, ghost/outline, floating FABs,
- * selectable cards (signup plans), form nav rows.
+ * Platform-wide brand color for primary CTAs (unlayered so it beats Tailwind utilities).
+ * SIZE is NOT forced here — only under [data-dashboard-surface] — so public pages keep
+ * proper touch targets (44px+). Opt-outs: theme/nav chrome, calendar days, rating stars,
+ * ghost/outline, floating FABs, selectable cards, form nav rows.
  */
 button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn),
 [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn),
@@ -402,15 +403,14 @@ label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) s
   stroke: currentColor !important;
 }
 
-/* Platform-wide compact CTA size (Admin / Member / Business + public forms using Button) */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn),
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn),
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):active,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):active {
+  opacity: 0.9;
+}
+
+/* Compact CTA size — dashboards only (see [data-dashboard-surface] below) */
 a.pb-compact-btn,
-a.pb-outline-btn,
-label.pb-compact-btn,
-label.pb-outline-btn,
-label:has(> input[type='file'].hidden),
-label:has(> input[type='file'].sr-only) {
+label.pb-compact-btn {
   height: 28px !important;
   min-height: 28px !important;
   max-height: 28px !important;
@@ -426,14 +426,8 @@ label:has(> input[type='file'].sr-only) {
   box-shadow: none !important;
 }
 
-/* White icons/text on black CTAs must stay readable */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn) svg,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn) svg,
 a.pb-compact-btn svg,
-a.bg-black:not(.pb-float-btn) svg,
-label.pb-compact-btn svg,
-label:has(> input[type='file'].hidden):not(.pb-outline-btn) svg,
-label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
+label.pb-compact-btn svg {
   width: 1rem !important;
   height: 1rem !important;
   min-width: 1rem !important;
@@ -441,11 +435,6 @@ label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
   color: #ffffff !important;
   stroke: currentColor !important;
   stroke-width: 2.25 !important;
-}
-
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):active,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):active {
-  opacity: 0.9;
 }
 
 /* Floating WhatsApp / chatbot FABs — large & readable */
@@ -605,7 +594,7 @@ button.pb-ghost-btn svg {
   stroke: currentColor !important;
 }
 
-/* White outline secondary actions (Reject, inactive tabs) */
+/* White outline secondary actions (Reject, inactive tabs) — color only; height on dashboards */
 button.pb-outline-btn,
 label.pb-outline-btn,
 a.pb-outline-btn {
@@ -613,12 +602,6 @@ a.pb-outline-btn {
   color: #111111 !important;
   border: 1px solid #d4d4d4 !important;
   box-shadow: none !important;
-  height: 28px !important;
-  min-height: 28px !important;
-  max-height: 28px !important;
-  padding: 0 0.625rem !important;
-  font-size: 12px !important;
-  line-height: 26px !important;
   font-weight: 600 !important;
   border-radius: 0.375rem !important;
 }

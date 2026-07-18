@@ -431,7 +431,7 @@ export default function AdminManagementPage() {
             ) : (
               <div className="space-y-3">
                 {codes.map((code: any) => (
-                  <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between gap-3">
+                  <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <code className="font-mono font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">
@@ -440,7 +440,7 @@ export default function AdminManagementPage() {
                         <button
                           type="button"
                           onClick={() => toggleCodeVisibility(code.id)}
-                          className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+                          className="pb-ghost-btn p-2 text-gray-600 hover:bg-gray-100 rounded min-h-[40px] min-w-[40px] inline-flex items-center justify-center"
                           aria-label="Toggle code visibility"
                         >
                           {visibleCodes.has(code.id) ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -448,7 +448,7 @@ export default function AdminManagementPage() {
                         <button
                           type="button"
                           onClick={() => handleCopyCode(code.code)}
-                          className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+                          className="pb-ghost-btn p-2 text-gray-600 hover:bg-gray-100 rounded min-h-[40px] min-w-[40px] inline-flex items-center justify-center"
                           aria-label="Copy code"
                         >
                           <Copy size={16} />
@@ -456,7 +456,7 @@ export default function AdminManagementPage() {
                       </div>
                       <div className="flex flex-col gap-0.5 text-xs text-gray-600">
                         {(code.adminName || code.adminEmail) && (
-                          <p className="font-medium text-gray-900 truncate">
+                          <p className="font-medium text-gray-900 break-words">
                             {code.adminName || 'Invitee'}
                             {code.adminEmail ? ` · ${code.adminEmail}` : ''}
                           </p>
@@ -470,9 +470,9 @@ export default function AdminManagementPage() {
                         <p>Expires: {format(new Date(code.expiresAt), 'MMM dd, yyyy')}</p>
                       </div>
                     </div>
-                    <div className="shrink-0 flex flex-col items-end gap-2">
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end shrink-0">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
+                        className={`self-start px-2 py-1 rounded text-xs font-medium ${
                           code.used || code.isUsed
                             ? 'bg-gray-100 text-gray-800'
                             : 'bg-green-100 text-green-800'
@@ -486,7 +486,7 @@ export default function AdminManagementPage() {
                             type="button"
                             onClick={() => void handleResendInvite(code)}
                             disabled={resendingId === code.id}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[36px]"
+                            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[40px]"
                           >
                             <Mail size={14} />
                             {resendingId === code.id ? 'Sending…' : 'Resend invite'}
@@ -497,7 +497,7 @@ export default function AdminManagementPage() {
                               void handleSendPasswordReset(code.adminEmail, code.adminName)
                             }
                             disabled={resettingEmail === String(code.adminEmail).trim().toLowerCase()}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[36px]"
+                            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1.5 bg-black !text-white rounded-lg text-xs font-medium hover:bg-neutral-900 disabled:opacity-50 min-h-[40px]"
                             title="Email a password reset link (super admin)"
                           >
                             <KeyRound size={14} />

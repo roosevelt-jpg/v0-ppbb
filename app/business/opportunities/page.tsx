@@ -378,7 +378,109 @@ export default function BusinessOpportunities() {
       ) : (
         <>
           <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white shadow-sm">
-            <table className="w-full min-w-[860px] text-left text-sm">
+            <ul className="lg:hidden divide-y divide-neutral-100">
+              {paged.map((opp) => {
+                const m = metricsFor(opp)
+                const deadline = toDate(opp.deadline) || toDate(opp.hiringBy)
+                const live = isLiveStatus(opp.status)
+                return (
+                  <li key={opp.id} className="p-4 space-y-3">
+                    <div className="min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/business/opportunities/${opp.id}`)}
+                        className="pb-ghost-btn text-left font-semibold text-neutral-900 break-words"
+                      >
+                        {opp.title}
+                      </button>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-500">
+                        <Calendar className="w-3.5 h-3.5 shrink-0" />
+                        Deadline:{' '}
+                        {deadline ? format(deadline, 'dd MMMM, yyyy') : 'Not set'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 min-h-[44px]">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={live}
+                        aria-label={live ? 'Set job closed' : 'Set job live'}
+                        disabled={togglingId === opp.id || !canToggleLive(opp.status)}
+                        onClick={() => void handleLiveToggle(opp)}
+                        className="pb-ghost-btn relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-0 p-0 shadow-none transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        style={{
+                          height: 32,
+                          width: 56,
+                          minHeight: 32,
+                          maxHeight: 32,
+                          minWidth: 56,
+                          padding: 0,
+                          backgroundColor: live ? '#10b981' : '#a3a3a3',
+                        }}
+                      >
+                        <span
+                          aria-hidden
+                          className="pointer-events-none inline-block rounded-full bg-white shadow-md transition-transform duration-200"
+                          style={{
+                            height: 26,
+                            width: 26,
+                            transform: live ? 'translateX(26px)' : 'translateX(3px)',
+                          }}
+                        />
+                      </button>
+                      <span
+                        className={`text-sm font-semibold capitalize ${
+                          live ? 'text-emerald-700' : 'text-neutral-600'
+                        }`}
+                      >
+                        {live ? 'Live' : String(opp.status || 'closed').replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                      <div className="rounded-md bg-neutral-50 p-2">
+                        <p className="font-semibold text-neutral-900">{m.applications}</p>
+                        <p className="text-neutral-500">Apps</p>
+                      </div>
+                      <div className="rounded-md bg-neutral-50 p-2">
+                        <p className="font-semibold text-neutral-900">{m.matched}</p>
+                        <p className="text-neutral-500">Matched</p>
+                      </div>
+                      <div className="rounded-md bg-neutral-50 p-2">
+                        <p className="font-semibold text-neutral-900">{m.shortlisted}</p>
+                        <p className="text-neutral-500">Shortlist</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        title="View applicants"
+                        onClick={() => router.push(`/business/opportunities/${opp.id}`)}
+                        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[#111] px-3 text-sm text-white"
+                      >
+                        <Eye className="w-4 h-4" /> Applicants
+                      </button>
+                      <button
+                        type="button"
+                        title="Edit job"
+                        onClick={() => openEditModal(opp)}
+                        className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[#111] px-3 text-sm text-white"
+                      >
+                        <Edit2 className="w-4 h-4" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        title="Delete job"
+                        onClick={() => void handleDelete(opp.id)}
+                        className="pb-outline-btn inline-flex min-h-[40px] items-center gap-1.5 rounded-md px-3 text-sm"
+                      >
+                        <Trash2 className="w-4 h-4" /> Delete
+                      </button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+            <table className="hidden lg:table w-full min-w-[860px] text-left text-sm">
               <thead>
                 <tr className="bg-neutral-900 text-white">
                   <th className="px-4 py-3 font-semibold">Job Title</th>
@@ -507,7 +609,7 @@ export default function BusinessOpportunities() {
           </div>
 
           {totalPages > 1 ? (
-            <div className="mt-4 flex items-center justify-between gap-3 text-sm text-neutral-600">
+            <div className="mt-4 flex flex-col gap-3 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
               <span>
                 Showing {(pageSafe - 1) * perPage + 1}–
                 {Math.min(pageSafe * perPage, filtered.length)} of {filtered.length}
