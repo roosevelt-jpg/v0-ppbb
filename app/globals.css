@@ -576,7 +576,6 @@ button.pb-form-nav-btn:not(.pb-outline-btn) svg {
 /* Text / avatar / icon-only controls — never paint as black CTAs */
 button.pb-ghost-btn {
   background-color: transparent !important;
-  color: inherit !important;
   border-color: transparent !important;
   box-shadow: none !important;
   min-height: 0 !important;
@@ -586,11 +585,10 @@ button.pb-ghost-btn {
 
 button.pb-ghost-btn:hover {
   background-color: transparent !important;
-  color: inherit !important;
 }
 
 button.pb-ghost-btn svg {
-  color: inherit !important;
+  color: currentColor !important;
   stroke: currentColor !important;
 }
 
