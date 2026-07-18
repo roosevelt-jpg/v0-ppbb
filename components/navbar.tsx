@@ -187,13 +187,13 @@ export function Navbar() {
 
   return (
     <nav className="w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
-      <div className="hidden lg:block px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 lg:gap-8 min-h-[112px]">
+      <div className="hidden lg:block px-4 sm:px-6 lg:px-8 py-1.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-6 min-h-[44px]">
           <div className="flex-shrink-0">
             <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
 
-          <div className="flex-1 flex items-center justify-center gap-4 xl:gap-8 min-w-0 overflow-visible">
+          <div className="flex-1 flex items-center justify-center gap-4 xl:gap-6 min-w-0 overflow-visible">
             {visibleLinks.map((item) => renderNavItem(item))}
             {topLevelHeaderPages.map((page) => (
               <Link
@@ -206,7 +206,7 @@ export function Navbar() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <LanguageSwitcherWithFlags onDark />
             <ThemeToggle onDark />
             <ProfileMenuButton compact />
@@ -215,18 +215,18 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="lg:hidden px-3 sm:px-4 py-3 flex items-center justify-between gap-2 min-h-[88px]">
+      <div className="lg:hidden px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 min-h-[44px]">
         <SiteLogo background="dark" variant="navbar" href="/" />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <LanguageSwitcherWithFlags onDark />
           <ThemeToggle onDark />
           <ProfileMenuButton compact />
           <button
-            className="p-2 -mr-2 text-white min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+            className="p-1.5 -mr-1 text-white min-h-[36px] min-w-[36px] inline-flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>

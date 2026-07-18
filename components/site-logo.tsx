@@ -40,8 +40,8 @@ const VARIANT_CLASSES: Record<
   },
   navbar: {
     wrapper:
-      'inline-flex items-center shrink-0 leading-none max-w-[min(70vw,380px)] sm:max-w-[min(55vw,420px)] md:max-w-none',
-    img: 'block h-16 w-auto max-h-16 sm:h-20 sm:max-h-20 md:h-24 md:max-h-24 lg:h-28 lg:max-h-28 object-contain object-left',
+      'inline-flex items-center shrink-0 leading-none max-w-[min(70vw,220px)] sm:max-w-[min(50vw,240px)]',
+    img: 'block h-8 w-auto max-h-8 sm:h-9 sm:max-h-9 object-contain object-left',
   },
   sidebar: {
     wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[260px]',
