@@ -118,10 +118,12 @@ export async function hasInvitePermissionServer(
 export async function canAccessAdminPathServer(userId: string, pathname: string): Promise<boolean> {
   const data = await getUserProfileData(userId)
   if (!data) return false
-  const role = data.role as string
+  const role = String(data.role || '')
+  // Any invite/admin panel role may proceed; path gating uses permissions
   if (
     role !== 'admin' &&
     role !== 'super_admin' &&
+    role !== 'moderator' &&
     !isWelfareOperationalRole(role)
   ) {
     return false
@@ -133,31 +135,11 @@ export async function canAccessAdminPathServer(userId: string, pathname: string)
 }
 
 /**
- * Server-side only: Auto-grant manage_integrations to founder_admin
+ * @deprecated Do not auto-expand invite permissions by role.
+ * Kept as a no-op so older callers do not grant extra access.
  */
-export async function grantIntegrationPermission(userId: string): Promise<boolean> {
-  try {
-    const app = getAdminApp()
-    const db = getFirestore(app)
-    const adminRef = db.collection('adminUsers').doc(userId)
-    const adminSnap = await adminRef.get()
-
-    if (!adminSnap.exists) return false
-
-    const adminData = adminSnap.data()
-    if (adminData?.adminRole !== 'founder_admin') return false
-
-    const currentPerms = adminData?.permissions || []
-    if (!currentPerms.includes('manage_integrations')) {
-      await adminRef.update({
-        permissions: [...currentPerms, 'manage_integrations'],
-      })
-    }
-    return true
-  } catch (error) {
-    console.error('[v0] Grant permission failed:', error)
-    return false
-  }
+export async function grantIntegrationPermission(_userId: string): Promise<boolean> {
+  return false
 }
 
 /**
@@ -208,6 +190,17 @@ export async function getAdminUserData(userId: string): Promise<Record<string, u
       ...adminData,
       role,
       adminRole: role,
+      // Invite permissions on users/{uid} are the source of truth for menu gating
+      permissions:
+        (Array.isArray(userData?.permissions) && (userData.permissions as unknown[]).length > 0
+          ? userData.permissions
+          : null) ||
+        (Array.isArray(legacyAdminData?.permissions) &&
+        (legacyAdminData.permissions as unknown[]).length > 0
+          ? legacyAdminData.permissions
+          : null) ||
+        adminData?.permissions ||
+        [],
     }
   } catch (error) {
     console.error('[v0] Get admin user failed:', error)

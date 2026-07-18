@@ -10,6 +10,7 @@ import {
 } from '@/lib/gmail-service'
 import { getUserProfileData, verifyIdToken } from '@/lib/admin-access-server'
 import { getUserRoles } from '@/lib/roles-server'
+import { defaultPermissionsForInviteRole } from '@/lib/admin-invite-permissions'
 import crypto from 'crypto'
 
 function getPublicSiteUrl(): string {
@@ -610,7 +611,7 @@ export async function POST(request: NextRequest) {
       const codeData = codeSnap.exists ? codeSnap.data() : null
       const invitePermissions = Array.isArray(codeData?.permissions)
         ? codeData.permissions
-        : getRolePermissions(role)
+        : defaultPermissionsForInviteRole(role)
 
       await codeRef.update({
         isUsed: true,
@@ -687,9 +688,9 @@ export async function PUT(request: NextRequest) {
 
     updateData.updatedAt = new Date()
 
-    // If role changed, update permissions
-    if (updateData.role) {
-      updateData.permissions = getRolePermissions(updateData.role)
+    // Role change alone must not wipe a custom invite permission set
+    if (updateData.role && updateData.permissions === undefined) {
+      updateData.permissions = defaultPermissionsForInviteRole(String(updateData.role))
     }
 
     await getAdminDb().collection('admin-users').doc(id).update(updateData)
@@ -746,64 +747,4 @@ export async function DELETE(request: NextRequest) {
     console.error('[v0] Admin delete error:', error)
     return NextResponse.json({ success: false, error: 'Failed to delete admin' }, { status: 500 })
   }
-}
-
-// Helper function to map roles to permissions
-function getRolePermissions(role: string): string[] {
-  const permissionMap: Record<string, string[]> = {
-    super_admin: [
-      'manage_admins',
-      'manage_events',
-      'manage_workshops',
-      'manage_recordings',
-      'manage_team',
-      'manage_community',
-      'manage_members',
-      'manage_settings',
-      'view_analytics',
-      'manage_security',
-    ],
-    founder_admin: [
-      'manage_admins',
-      'manage_events',
-      'manage_workshops',
-      'manage_recordings',
-      'manage_team',
-      'manage_community',
-      'manage_members',
-      'manage_settings',
-      'view_analytics',
-      'manage_security',
-      'manage_beneficiary',
-    ],
-    manager: [
-      'manage_events',
-      'manage_workshops',
-      'manage_recordings',
-      'manage_team',
-      'manage_community',
-      'manage_members',
-      'view_analytics',
-      'manage_beneficiary',
-    ],
-    welfare: ['manage_beneficiary'],
-    founder: ['manage_beneficiary'],
-    coordinator: ['manage_beneficiary'],
-    admin: [
-      'manage_events',
-      'manage_workshops',
-      'manage_recordings',
-      'manage_team',
-      'manage_community',
-      'manage_members',
-      'view_analytics',
-    ],
-    moderator: [
-      'manage_events',
-      'manage_community',
-      'manage_members',
-    ],
-  }
-
-  return permissionMap[role] || []
 }

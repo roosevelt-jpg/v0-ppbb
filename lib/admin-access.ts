@@ -74,22 +74,49 @@ export async function getAdminUser(userId: string) {
 }
 
 // Create or update admin user
-export async function setAdminUser(userId: string, adminRole: AdminRole): Promise<{ success: boolean; error?: string }> {
+export async function setAdminUser(
+  userId: string,
+  adminRole: AdminRole,
+  invitePermissions?: string[]
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const permissions = ROLE_PERMISSIONS[adminRole]
+    const { defaultPermissionsForInviteRole } = await import('@/lib/admin-invite-permissions')
+    const permissions =
+      Array.isArray(invitePermissions) && invitePermissions.length > 0
+        ? invitePermissions
+        : defaultPermissionsForInviteRole(adminRole)
+
     const adminRef = doc(db, 'adminUsers', userId)
-    
-    await setDoc(adminRef, {
-      adminRole,
-      permissions,
-      canApprove: true,
-      canDelete: adminRole !== 'analyst',
-      canViewAnalytics: true,
-      canManageUsers: adminRole === 'founder_admin' || adminRole === 'manager',
-      canManageContent: adminRole === 'founder_admin' || adminRole === 'moderator',
-      canManageFinance: adminRole === 'founder_admin',
-      adminSince: Timestamp.now(),
-    }, { merge: true })
+
+    await setDoc(
+      adminRef,
+      {
+        adminRole,
+        role: adminRole,
+        permissions,
+        canApprove: true,
+        canDelete: adminRole !== 'analyst',
+        canViewAnalytics:
+          permissions.includes('full_access') ||
+          permissions.includes('view_reports') ||
+          adminRole === 'analyst' ||
+          adminRole === 'founder_admin',
+        canManageUsers:
+          permissions.includes('full_access') ||
+          permissions.includes('manage_members') ||
+          adminRole === 'founder_admin' ||
+          adminRole === 'manager',
+        canManageContent:
+          permissions.includes('full_access') ||
+          permissions.includes('manage_content') ||
+          adminRole === 'founder_admin' ||
+          adminRole === 'moderator',
+        canManageFinance:
+          permissions.includes('full_access') || adminRole === 'founder_admin',
+        adminSince: Timestamp.now(),
+      },
+      { merge: true }
+    )
 
     return { success: true }
   } catch (error: any) {

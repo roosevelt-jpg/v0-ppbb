@@ -3,7 +3,6 @@ import {
   verifyIdToken,
   isAdminUser,
   hasInvitePermissionServer,
-  grantIntegrationPermission,
   getAdminUserData,
 } from '@/lib/admin-access-server'
 import {
@@ -11,29 +10,25 @@ import {
   getUnlockTokenFromRequest,
   verifyIntegrationsUnlockToken,
 } from '@/lib/integrations/vault-lock'
+import { getEffectiveInvitePermissions } from '@/lib/admin-invite-permissions'
 
+/**
+ * Integrations access follows invite permissions only.
+ * `full_access` / `manage_integrations` / `super_admin` → allowed.
+ * Role names like manager/admin alone do NOT bypass a limited invite.
+ */
 export async function canManageIntegrations(uid: string): Promise<boolean> {
-  // Best-effort: ensure founder_admin docs include manage_integrations.
-  try {
-    await grantIntegrationPermission(uid)
-  } catch {
-    /* non-blocking */
-  }
-
   if (await hasInvitePermissionServer(uid, 'manage_integrations')) {
     return true
   }
 
-  // Fallback for legacy admin profiles where role is admin/super_admin but
-  // invite permissions were never written.
+  // Legacy profiles with no permissions array: only super_admin keeps vault access
   const data = await getAdminUserData(uid)
-  const role = String(data?.role || data?.adminRole || '').toLowerCase()
-  return (
-    role === 'super_admin' ||
-    role === 'founder_admin' ||
-    role === 'manager' ||
-    role === 'admin'
-  )
+  const role = String(data?.role || data?.adminRole || '')
+  const perms = Array.isArray(data?.permissions) ? (data.permissions as string[]) : []
+  if (role === 'super_admin') return true
+  const effective = getEffectiveInvitePermissions(perms, role)
+  return effective.includes('full_access') || effective.includes('manage_integrations')
 }
 
 /**

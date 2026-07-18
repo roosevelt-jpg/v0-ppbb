@@ -82,7 +82,17 @@ type PermissionUser = Pick<User, 'role' | 'permissions'> | null | undefined
  * Resolve invite permissions for menu/route gating.
  * Explicit checked permissions always win. Empty list = role default
  * (matches Admin Management copy: "leave empty for full access").
+ * Only `super_admin` is hard-gated to full access regardless of checkboxes.
  */
+export function defaultPermissionsForInviteRole(role?: string): string[] {
+  if (role === 'super_admin') return ['full_access']
+  if (role === 'welfare' || role === 'founder' || role === 'coordinator') {
+    return ['manage_beneficiary']
+  }
+  // admin | manager | founder_admin | moderator | unknown
+  return ['full_access']
+}
+
 export function getEffectiveInvitePermissions(
   permissions: string[] | undefined,
   role?: string
@@ -98,13 +108,7 @@ export function getEffectiveInvitePermissions(
     return Array.from(new Set(selected))
   }
 
-  // No checkboxes selected → role defaults
-  if (role === 'welfare' || role === 'founder' || role === 'coordinator') {
-    return ['manage_beneficiary']
-  }
-
-  // admin, manager, founder_admin, or unknown with empty permissions
-  return ['full_access']
+  return defaultPermissionsForInviteRole(role)
 }
 
 export function hasInvitePermission(

@@ -26,8 +26,16 @@ export default function AdminManagementPage() {
   const [selectedPermissions, setSelectedPermissions] = React.useState<string[]>([])
 
   const INVITE_ROLE_OPTIONS = [
-    { value: 'admin', label: 'Admin', description: 'Standard admin with configurable permissions' },
-    { value: 'super_admin', label: 'Super Admin', description: 'Full unrestricted admin access' },
+    {
+      value: 'admin',
+      label: 'Admin',
+      description: 'Standard admin — empty permissions = full access; checkboxes limit the menu',
+    },
+    {
+      value: 'super_admin',
+      label: 'Super Admin',
+      description: 'Full unrestricted admin access (permissions checkboxes ignored)',
+    },
     ...WELFARE_INVITE_ROLE_OPTIONS,
   ]
 
@@ -98,7 +106,15 @@ export default function AdminManagementPage() {
     expiresAt.setHours(expiresAt.getHours() + 24)
 
     setGeneratingCode(true)
-    const permissionsToSend = selectedPermissions.length > 0 ? selectedPermissions : ['full_access']
+    const welfareDefaults = ['manage_beneficiary']
+    const permissionsToSend =
+      selectedPermissions.length > 0
+        ? selectedPermissions
+        : adminRole === 'super_admin'
+          ? ['full_access']
+          : adminRole === 'welfare' || adminRole === 'founder' || adminRole === 'coordinator'
+            ? welfareDefaults
+            : ['full_access']
 
     try {
       const token = await firebaseUser.getIdToken()

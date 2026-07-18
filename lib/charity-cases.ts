@@ -120,11 +120,31 @@ export const SENSITIVE_DOC_ROLES = new Set([
 ])
 
 export const WELFARE_INVITE_ROLE_OPTIONS = [
-  { value: 'welfare', label: 'Welfare', description: 'Review beneficiary requests and sensitive documents' },
-  { value: 'founder', label: 'Founder', description: 'Founder-level beneficiary and welfare access' },
-  { value: 'coordinator', label: 'Coordinator', description: 'Coordinate welfare cases and document review' },
-  { value: 'founder_admin', label: 'Founder Admin', description: 'Full admin by default; check permissions below to limit access' },
-  { value: 'manager', label: 'Manager', description: 'Operational manager; check permissions below to limit menu access (empty = full access)' },
+  {
+    value: 'welfare',
+    label: 'Welfare',
+    description: 'Defaults to beneficiary access; add permission checkboxes to expand',
+  },
+  {
+    value: 'founder',
+    label: 'Founder',
+    description: 'Defaults to beneficiary access; add permission checkboxes to expand',
+  },
+  {
+    value: 'coordinator',
+    label: 'Coordinator',
+    description: 'Defaults to beneficiary access; add permission checkboxes to expand',
+  },
+  {
+    value: 'founder_admin',
+    label: 'Founder Admin',
+    description: 'Empty permissions = full access; checkboxes limit the menu',
+  },
+  {
+    value: 'manager',
+    label: 'Manager',
+    description: 'Empty permissions = full access; checkboxes limit the menu',
+  },
 ] as const
 
 /** Normalize role strings from invites / legacy docs (spaces, hyphens, case). */
