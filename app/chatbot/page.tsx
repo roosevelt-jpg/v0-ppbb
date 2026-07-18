@@ -5,121 +5,72 @@ import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
 import { LinkifiedText } from '@/components/chat/linkified-text'
-import { FAQ } from '@/lib/types'
-import { getAllFAQs, searchFAQs } from '@/lib/faq-queries'
 import { Send } from 'lucide-react'
 
 interface Message {
   type: 'user' | 'bot'
   content: string
   timestamp: Date
-  relatedFAQ?: FAQ
 }
 
 export default function ChatBotPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'bot',
-      content: 'Hello! Welcome to Passive Blessings. I am here to help answer your questions about our platform, community, volunteering, sponsorship, and more. How can I assist you today?',
+      content: 'Hello! Welcome to Passive Blessings — I\'m glad you\'re here. How can I help you today?',
       timestamp: new Date(),
     },
   ])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [faqs, setFaqs] = useState<FAQ[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const unsubscribe = getAllFAQs((foundFaqs) => {
-      setFaqs(foundFaqs)
-    })
-    return unsubscribe
-  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const findBestMatch = (userQuery: string): FAQ | null => {
-    const lowerQuery = userQuery.toLowerCase()
-    let bestMatch: FAQ | null = null
-    let bestScore = 0
-
-    for (const faq of faqs) {
-      let score = 0
-
-      // Check question similarity
-      const queryWords = lowerQuery.split(' ')
-      const questionWords = faq.question.toLowerCase().split(' ')
-      const matchingWords = queryWords.filter(word => questionWords.some(qw => qw.includes(word)))
-      score += matchingWords.length * 10
-
-      // Check keywords
-      for (const keyword of faq.keywords) {
-        if (lowerQuery.includes(keyword.toLowerCase())) {
-          score += 15
-        }
-      }
-
-      // Check answer content
-      if (faq.answer.toLowerCase().includes(lowerQuery)) {
-        score += 20
-      }
-
-      if (score > bestScore) {
-        bestScore = score
-        bestMatch = faq
-      }
-    }
-
-    return bestScore >= 5 ? bestMatch : null
-  }
-
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return
 
-    // Add user message
     const userMessage: Message = {
       type: 'user',
       content: inputValue,
       timestamp: new Date(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage])
     const messageCopy = inputValue
     setInputValue('')
     setIsLoading(true)
 
     try {
-      // Simulate thinking with timeout
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const chatResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: messageCopy }],
+          userId: 'public-chatbot-page',
+        }),
+      })
+      const data = await chatResponse.json().catch(() => ({}))
+      if (!chatResponse.ok) throw new Error(data.error || 'Failed to get a reply')
 
-      const matchedFAQ = findBestMatch(messageCopy)
-
-      if (matchedFAQ) {
-        const botResponse: Message = {
-          type: 'bot',
-          content: matchedFAQ.answer,
-          timestamp: new Date(),
-          relatedFAQ: matchedFAQ,
-        }
-        setMessages(prev => [...prev, botResponse])
-      } else {
-        const botResponse: Message = {
-          type: 'bot',
-          content: `I'm not sure about that specific question. For the most accurate assistance, please:\n\n1. Browse our FAQ page for more answers\n2. Visit our Charity Support Request page if you need assistance\n3. Contact our support team at support@passiveblessings.com\n\nIs there anything else I can help you with?`,
-          timestamp: new Date(),
-        }
-        setMessages(prev => [...prev, botResponse])
+      const botResponse: Message = {
+        type: 'bot',
+        content:
+          String(data.message || '').trim() ||
+          "I'm happy to help — could you rephrase that, or ask about membership, events, or volunteering?",
+        timestamp: new Date(),
       }
+      setMessages((prev) => [...prev, botResponse])
     } catch (error) {
       console.error('[v0] Error in handleSendMessage:', error)
       const errorResponse: Message = {
         type: 'bot',
-        content: 'Sorry, I encountered an error. Please try again or contact support@passiveblessings.com',
+        content: "Sorry — I had a brief hiccup. Please try again, or reach us through the Contact page.",
         timestamp: new Date(),
       }
-      setMessages(prev => [...prev, errorResponse])
+      setMessages((prev) => [...prev, errorResponse])
     } finally {
       setIsLoading(false)
     }
@@ -143,7 +94,7 @@ export default function ChatBotPage() {
           <h1 style={{ fontSize: '28px', fontWeight: 700, margin: 0 }}>Passive Blessings Assistant</h1>
         </div>
         <p style={{ fontSize: '14px', color: '#aaa', margin: 0 }}>
-          Powered by our comprehensive FAQ database. Type your question and press Enter to send.
+          Ask about membership, events, volunteering, donations, and more.
         </p>
       </section>
 

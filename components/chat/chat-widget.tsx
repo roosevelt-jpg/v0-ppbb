@@ -1,27 +1,21 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
 import { LinkifiedText } from '@/components/chat/linkified-text'
 import { isDashboardRoute } from '@/lib/dashboard-routes'
-import { X, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { X, Send, AlertCircle } from 'lucide-react'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp?: Date
-  faqSource?: {
-    id: string
-    question: string
-    category: string
-  }
-  knowledgeSource?: {
-    id: string
-    title: string
-  }
 }
+
+const WELCOME_MESSAGE =
+  "Hello! Welcome to Passive Blessings — I'm glad you're here. How can I help you today? Ask me about membership, events, volunteering, donations, or anything else on the platform."
 
 export function ChatWidget() {
   const pathname = usePathname()
@@ -32,22 +26,18 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [conversationId, setConversationId] = useState<string>('')
+  const [ready, setReady] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const initRef = useRef(false)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, loading])
 
-  // Initialize conversation on open
-  useEffect(() => {
-    if (isOpen && !conversationId) {
-      initializeConversation()
-    }
-  }, [isOpen, conversationId])
-
-  const initializeConversation = async () => {
+  const ensureConversation = useCallback(async (): Promise<string | null> => {
+    if (conversationId) return conversationId
     try {
-      setError('')
       const response = await fetch('/api/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,186 +47,134 @@ export function ChatWidget() {
           role: user?.role || 'member',
         }),
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to initialize conversation')
-      }
-
+      if (!response.ok) throw new Error('Failed to start chat')
       const data = await response.json()
-      if (data.id) {
-        setConversationId(data.id)
-        // Add welcome message
-        setMessages([
-          {
-            role: 'assistant',
-            content: "Hello! I'm here to help. Ask me anything about Passive Blessings!",
-            timestamp: new Date(),
-          },
-        ])
-      }
-    } catch (error) {
-      console.error('[v0] Error initializing conversation:', error)
-      setError('Failed to connect. Please refresh and try again.')
+      if (!data.id) throw new Error('No conversation ID')
+      setConversationId(data.id)
+      return data.id as string
+    } catch (err) {
+      console.error('[v0] Error initializing conversation:', err)
+      return null
+    }
+  }, [conversationId, user?.id, user?.role])
+
+  const openChat = () => {
+    setIsOpen(true)
+    setError('')
+    // Greet immediately — don't wait for the network
+    if (messages.length === 0) {
       setMessages([
         {
           role: 'assistant',
-          content: "Sorry, I'm having trouble connecting. Please try again in a moment.",
+          content: WELCOME_MESSAGE,
           timestamp: new Date(),
         },
       ])
     }
+    window.setTimeout(() => inputRef.current?.focus(), 80)
+
+    if (!initRef.current) {
+      initRef.current = true
+      void (async () => {
+        const id = await ensureConversation()
+        setReady(Boolean(id))
+        if (!id) {
+          setError('Connection is slow — you can still type; we will retry when you send.')
+        }
+      })()
+    }
+  }
+
+  const closeChat = () => {
+    setIsOpen(false)
+  }
+
+  const sendToApi = async (convId: string, allMessages: { role: string; content: string }[]) => {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: allMessages,
+        conversationId: convId,
+        userId: user?.id || 'anonymous',
+      }),
+    })
+    if (!response.ok) {
+      let errorMsg = 'Failed to send message'
+      try {
+        const errorData = await response.json()
+        errorMsg = errorData.error || errorMsg
+      } catch {
+        /* ignore */
+      }
+      throw new Error(errorMsg)
+    }
+    return response.json()
   }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!input.trim() || loading) {
-      return
-    }
+    const text = input.trim()
+    if (!text || loading) return
 
-    // Add user message immediately
     const userMessage: Message = {
       role: 'user',
-      content: input,
+      content: text,
       timestamp: new Date(),
     }
-    
-    setMessages(prev => [...prev, userMessage])
+
+    setMessages((prev) => [...prev, userMessage])
     setInput('')
     setLoading(true)
     setError('')
 
-    // If no conversation, initialize it first
-    if (!conversationId) {
-      try {
-        const response = await fetch('/api/conversations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user?.id || 'anonymous',
-            title: `Chat - ${new Date().toLocaleString()}`,
-            role: user?.role || 'member',
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to initialize conversation')
-        }
-
-        const data = await response.json()
-        if (!data.id) {
-          throw new Error('No conversation ID returned')
-        }
-
-        // Now send the message with the new conversation ID
-        const allMessages = [userMessage].map(m => ({
-          role: m.role,
-          content: m.content,
-        }))
-
-        const chatResponse = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: allMessages,
-            conversationId: data.id,
-            userId: user?.id || 'anonymous',
-          }),
-        })
-
-        if (!chatResponse.ok) {
-          let errorMsg = 'Failed to send message'
-          try {
-            const errorData = await chatResponse.json()
-            errorMsg = errorData.error || errorMsg
-          } catch (e) {
-            // Response body not JSON
-          }
-          throw new Error(errorMsg)
-        }
-
-        const chatData = await chatResponse.json()
-        
-        if (chatData.message) {
-          const assistantMessage: Message = {
-            role: 'assistant',
-            content: chatData.message,
-            timestamp: new Date(),
-            faqSource: chatData.faqSource,
-            knowledgeSource: chatData.knowledgeSource,
-          }
-          setMessages(prev => [...prev, assistantMessage])
-        }
-
-        setConversationId(data.id)
-        setLoading(false)
-      } catch (error) {
-        console.error('[v0] Error in first message:', error)
-        setError(error instanceof Error ? error.message : 'Failed to send message')
-        setLoading(false)
-      }
-      return
-    }
-
     try {
-      // Send message to chat API with all previous messages
-      const allMessages = [...messages, userMessage].map(m => ({
-        role: m.role,
-        content: m.content,
-      }))
-
-      console.log('[v0] Sending message to API:', { conversationId, messageCount: allMessages.length })
-
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: allMessages,
-          conversationId,
-          userId: user?.id || 'anonymous',
-        }),
-      })
-
-      if (!response.ok) {
-        let errorMsg = 'Failed to send message'
-        try {
-          const data = await response.json()
-          errorMsg = data.error || errorMsg
-        } catch (e) {
-          // Response body not JSON
-        }
-        throw new Error(errorMsg)
+      let convId = conversationId
+      if (!convId) {
+        convId = (await ensureConversation()) || ''
+        if (!convId) throw new Error('Could not start chat. Please try again.')
+        setReady(true)
       }
 
-      const data = await response.json()
-      console.log('[v0] API response:', data)
+      const history = [...messages, userMessage]
+        .filter((m) => m.content !== WELCOME_MESSAGE || m.role === 'user')
+        .map((m) => ({ role: m.role, content: m.content }))
+
+      // Include welcome only as context if needed — send recent user/assistant turns
+      const payload =
+        history.length > 0
+          ? history
+          : [{ role: 'user' as const, content: text }]
+
+      const data = await sendToApi(convId, payload)
 
       if (data.message) {
-        const assistantMessage: Message = {
-          role: 'assistant',
-          content: data.message,
-          timestamp: new Date(),
-          faqSource: data.faqSource,
-          knowledgeSource: data.knowledgeSource,
-        }
-        setMessages(prev => [...prev, assistantMessage])
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: String(data.message),
+            timestamp: new Date(),
+          },
+        ])
       } else {
-        throw new Error('No message in response')
+        throw new Error('No reply received')
       }
-    } catch (error) {
-      console.error('[v0] Chat error:', error)
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err) {
+      console.error('[v0] Chat error:', err)
+      const errorMsg = err instanceof Error ? err.message : 'Something went wrong'
       setError(errorMsg)
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.',
+          content: "Sorry — I had a brief hiccup. Please send your question again and I'll help right away.",
           timestamp: new Date(),
         },
       ])
     } finally {
       setLoading(false)
+      window.setTimeout(() => inputRef.current?.focus(), 50)
     }
   }
 
@@ -249,8 +187,8 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
-          className="pb-float-btn fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 overflow-hidden bg-white border-2 border-neutral-700 p-1"
+          onClick={openChat}
+          className="pb-float-btn fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 overflow-hidden bg-white border-2 border-neutral-700 p-1"
           aria-label="Open PB Assistant chat"
         >
           <ChatbotAvatar size={56} className="w-full h-full" priority />
@@ -258,123 +196,108 @@ export function ChatWidget() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[min(20rem,calc(100vw-2rem))] h-[min(26.875rem,calc(100dvh-6rem))] sm:w-80 bg-white rounded-lg shadow-2xl flex flex-col border border-neutral-200">
-          {/* Header */}
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-neutral-200 text-white rounded-t-lg" style={{ backgroundColor: '#111111' }}>
+        <div
+          className="fixed z-50 flex flex-col bg-white border border-neutral-200 shadow-2xl
+            inset-x-3 bottom-3 top-[max(4.5rem,12%)] rounded-2xl
+            sm:inset-auto sm:bottom-6 sm:right-6 sm:top-auto
+            sm:w-[22rem] sm:h-[min(32rem,calc(100dvh-5rem))] sm:rounded-lg
+            md:w-[24rem]"
+          role="dialog"
+          aria-label="PB Assistant"
+        >
+          <div
+            className="flex items-center justify-between gap-2 px-3 py-3 sm:px-4 border-b border-neutral-200 text-white rounded-t-2xl sm:rounded-t-lg shrink-0"
+            style={{ backgroundColor: '#111111' }}
+          >
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <ChatbotAvatar size={36} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 p-0.5" />
+              <ChatbotAvatar size={36} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 p-0.5 shrink-0" />
               <div className="min-w-0">
-                <h3 className="font-semibold text-sm sm:text-base truncate">PB Assistant</h3>
-                <p className="text-[10px] opacity-60 font-light">
-                  <a
-                    href="https://myflynai.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:opacity-100 hover:underline underline-offset-2 text-inherit"
-                  >
-                    By FLYN.AI
-                  </a>
+                <h3 className="font-semibold text-sm sm:text-base truncate !text-white">PB Assistant</h3>
+                <p className="text-[10px] opacity-70 truncate !text-white">
+                  {ready || conversationId ? 'Online · usually replies instantly' : 'Connecting…'}
                 </p>
               </div>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 rounded transition hover:bg-neutral-700"
+              type="button"
+              onClick={closeChat}
+              className="pb-ghost-btn p-2 rounded-lg !text-white hover:!bg-white/10"
+              aria-label="Close chat"
             >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              <X className="w-5 h-5 !text-white" />
             </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-neutral-50">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 bg-neutral-50">
             {messages.map((message, idx) => (
-              <div key={idx} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start items-end gap-2'} w-full`}>
+              <div
+                key={`${message.role}-${idx}-${message.timestamp?.getTime?.() || idx}`}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start items-end gap-2'} w-full`}
+              >
                 {message.role === 'assistant' && (
-                  <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-1 hidden sm:block" />
+                  <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-0.5 hidden xs:block sm:block" />
                 )}
-                <div className={`${message.role === 'user' ? 'max-w-[calc(100%-24px)]' : 'max-w-[calc(100%-32px)] sm:max-w-[calc(100%-24px)]'}`}>
-                  <div
-                    className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm ${
-                      message.role === 'user'
-                        ? 'text-white rounded-br-none'
-                        : 'bg-white text-neutral-900 rounded-bl-none border border-neutral-200'
-                    }`}
-                    style={{
-                      ...(message.role === 'user' ? { backgroundColor: '#111111' } : {}),
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                      wordBreak: 'break-word',
-                      display: 'block',
-                    }}
-                  >
-                    <p className="leading-relaxed" style={{ wordBreak: 'break-word' }}>
-                      <LinkifiedText text={message.content} onDark={message.role === 'user'} />
-                    </p>
-                  </div>
-                  {/* Source badge */}
-                  {message.faqSource && (
-                    <div className="mt-1 text-xs text-neutral-600 italic flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      From FAQ: {message.faqSource.category || message.faqSource.question}
-                    </div>
-                  )}
-                  {!message.faqSource && message.knowledgeSource && (
-                    <div className="mt-1 text-xs text-neutral-600 italic flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      From: {message.knowledgeSource.title}
-                    </div>
-                  )}
+                <div
+                  className={`max-w-[88%] sm:max-w-[85%] px-3 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                    message.role === 'user'
+                      ? 'text-white rounded-br-md'
+                      : 'bg-white text-neutral-900 rounded-bl-md border border-neutral-200'
+                  }`}
+                  style={message.role === 'user' ? { backgroundColor: '#111111' } : undefined}
+                >
+                  <LinkifiedText text={message.content} onDark={message.role === 'user'} />
                 </div>
               </div>
             ))}
+
             {loading && (
               <div className="flex justify-start items-end gap-2">
-                <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-1 hidden sm:block" />
-                <div className="bg-white border border-neutral-200 px-3 sm:px-4 py-2 rounded-lg rounded-bl-none">
-                  <div className="flex gap-1">
+                <ChatbotAvatar size={24} className="w-6 h-6 shrink-0 mb-0.5 hidden sm:block" />
+                <div className="bg-white border border-neutral-200 px-4 py-3 rounded-2xl rounded-bl-md">
+                  <div className="flex gap-1.5">
                     <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                    <div className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                    <div
+                      className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.12s' }}
+                    />
+                    <div
+                      className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.24s' }}
+                    />
                   </div>
                 </div>
               </div>
             )}
-            {error && (
+
+            {error ? (
               <div className="bg-red-50 border border-red-200 rounded-lg p-2 flex gap-2 text-xs text-red-700">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
-            )}
+            ) : null}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <form onSubmit={handleSendMessage} className="p-3 sm:p-4 border-t border-neutral-200 bg-white rounded-b-lg">
-            <div className="flex gap-2">
+          <form
+            onSubmit={handleSendMessage}
+            className="p-3 sm:p-4 border-t border-neutral-200 bg-white rounded-b-2xl sm:rounded-b-lg shrink-0 safe-area-pb"
+          >
+            <div className="flex gap-2 items-center">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && !loading) {
-                    e.preventDefault()
-                    handleSendMessage(e as any)
-                  }
-                }}
-                placeholder="Ask me anything..."
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your question…"
                 disabled={loading}
-                className="flex-1 px-2 sm:px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm disabled:bg-neutral-50"
+                autoComplete="off"
+                className="flex-1 min-w-0 px-3 py-2.5 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900 text-sm disabled:bg-neutral-50"
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="p-2 text-white rounded-lg transition"
-                style={{ 
-                  backgroundColor: loading || !input.trim() ? '#cccccc' : '#111111'
-                }}
-                onMouseEnter={(e) => !loading && !input.trim() && (e.currentTarget.style.backgroundColor = '#333333')}
-                onMouseLeave={(e) => !loading && !input.trim() && (e.currentTarget.style.backgroundColor = '#111111')}
-                title={loading ? 'Sending...' : 'Send message'}
+                className="shrink-0 !bg-black !text-white p-2.5 rounded-xl disabled:opacity-40"
+                aria-label="Send message"
               >
                 <Send className="w-4 h-4" />
               </button>

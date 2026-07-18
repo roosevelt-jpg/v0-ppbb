@@ -193,11 +193,11 @@ export default function AdminChatbotPage() {
     <button
       type="button"
       onClick={() => setTab(id)}
-      className={`px-4 py-2 rounded-lg text-sm font-medium min-h-[40px] ${
+      className={
         tab === id
-          ? 'bg-black !text-white'
-          : 'bg-neutral-100 !text-neutral-900 hover:bg-neutral-200'
-      }`}
+          ? '!bg-black !text-white border border-black px-4 py-2 rounded-lg text-sm font-semibold'
+          : 'pb-outline-btn px-4 text-sm font-semibold'
+      }
     >
       {label}
     </button>

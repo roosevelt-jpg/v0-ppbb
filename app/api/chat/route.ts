@@ -88,12 +88,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: result.message,
       conversationId,
-      faqSource: result.faqSource,
-      faqMatch: result.source === 'faq',
-      knowledgeSource: result.knowledgeSource,
-      knowledgeMatch: result.source === 'knowledge',
-      matchScore: result.matchScore,
-      engine: 'faq-knowledge',
+      // Do not expose FAQ / training-doc sources to the client
+      engine: 'support',
     })
   } catch (error) {
     console.error('[v0] Chat API error:', error)

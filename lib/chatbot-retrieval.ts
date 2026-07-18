@@ -22,8 +22,8 @@ export interface RetrievalResult {
   matchScore: number
 }
 
-const FAQ_DIRECT_THRESHOLD = 20
-const KNOWLEDGE_DIRECT_THRESHOLD = 15
+const FAQ_DIRECT_THRESHOLD = 12
+const KNOWLEDGE_DIRECT_THRESHOLD = 10
 const MAX_ANSWER_CHARS = 1200
 
 function tokenize(text: string): string[] {
@@ -106,20 +106,35 @@ export function extractBestPassage(content: string, userMessage: string): string
 
 function buildFallback(whatsappLink: string): string {
   const lines = [
-    "I couldn't find an exact match in our FAQ or training documents for that question.",
-    'Try rephrasing, or ask about membership, events, volunteering, donations, or how to join.',
+    "I'm not sure I have that detail yet, but I'm happy to help another way.",
+    'You can ask about membership, events, volunteering, donations, or how to get involved.',
   ]
   if (whatsappLink) {
-    lines.push(`You can also reach us on WhatsApp: ${whatsappLink}`)
+    lines.push(`For personal support, message us on WhatsApp: ${whatsappLink}`)
   } else {
-    lines.push('You can also contact support through the Contact page.')
+    lines.push('You can also reach us through the Contact page — we are glad to help.')
   }
   return lines.join('\n\n')
 }
 
+/** Present answers as natural support replies — never mention FAQ / training docs. */
+export function toNaturalSupportReply(raw: string): string {
+  let text = String(raw || '').trim()
+  if (!text) return text
+
+  text = text
+    .replace(/\b(according to|as (?:per|stated in)|from|based on)\s+(our\s+)?(faq|faqs|frequently asked questions|training\s+docs?|training\s+documents?|knowledge\s+base|help\s+center)\b[,:\s-]*/gi, '')
+    .replace(/\b(see|check|refer to)\s+(the\s+)?(faq|faqs|training\s+docs?|knowledge\s+base)\b[,:\s-]*/gi, '')
+    .replace(/\b(faq|faqs|training\s+documents?)\s*(answer|says|state[sd]?)?\s*[:\-–]\s*/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  return text
+}
+
 /**
  * Answer from FAQ + knowledge only (no external LLM).
- * Always returns a message.
+ * Always returns a message phrased for the visitor (no source disclosure).
  */
 export function retrieveChatAnswer(input: {
   userMessage: string
@@ -132,7 +147,7 @@ export function retrieveChatAnswer(input: {
 
   if (!userMessage) {
     return {
-      message: 'Please type a question and I will answer from our FAQ and training documents.',
+      message: 'Please share your question and I will help right away.',
       source: 'fallback',
       faqSource: null,
       knowledgeSource: null,
@@ -163,7 +178,7 @@ export function retrieveChatAnswer(input: {
 
   if (faqWins && bestFaq) {
     return {
-      message: bestFaq.faq.answer,
+      message: toNaturalSupportReply(bestFaq.faq.answer),
       source: 'faq',
       faqSource: {
         id: bestFaq.faq.id,
@@ -178,7 +193,7 @@ export function retrieveChatAnswer(input: {
   if (bestKnowledge && bestKnowledge.score >= KNOWLEDGE_DIRECT_THRESHOLD) {
     const passage = extractBestPassage(bestKnowledge.item.content, userMessage)
     return {
-      message: passage,
+      message: toNaturalSupportReply(passage),
       source: 'knowledge',
       faqSource: null,
       knowledgeSource: { id: bestKnowledge.item.id, title: bestKnowledge.item.title },
@@ -189,7 +204,7 @@ export function retrieveChatAnswer(input: {
   // Soft FAQ — still better than a dead end
   if (bestFaq && bestFaq.score > 0) {
     return {
-      message: bestFaq.faq.answer,
+      message: toNaturalSupportReply(bestFaq.faq.answer),
       source: 'faq',
       faqSource: {
         id: bestFaq.faq.id,
@@ -209,7 +224,7 @@ export function retrieveChatAnswer(input: {
       .slice(0, 2)
       .map((k) => extractBestPassage(k.content, userMessage))
 
-    const message = [passage, ...alwaysBits].filter(Boolean).join('\n\n')
+    const message = toNaturalSupportReply([passage, ...alwaysBits].filter(Boolean).join('\n\n'))
     return {
       message,
       source: 'knowledge',
@@ -227,7 +242,7 @@ export function retrieveChatAnswer(input: {
       .map((k) => extractBestPassage(k.content, userMessage))
       .join('\n\n')
     return {
-      message: `${message}\n\n${buildFallback(whatsappLink)}`,
+      message: toNaturalSupportReply(`${message}\n\n${buildFallback(whatsappLink)}`),
       source: 'knowledge',
       faqSource: null,
       knowledgeSource: { id: alwaysInclude[0]!.id, title: alwaysInclude[0]!.title },
