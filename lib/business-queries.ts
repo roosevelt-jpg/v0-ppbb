@@ -1202,7 +1202,7 @@ export async function getBusinessApplications(
     where('businessId', '==', businessId)
   )
   const snapshot = await getDocs(q)
-  const apps = snapshot.docs.map((d) => d.data() as JobApplication)
+  const apps = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as JobApplication)
   return apps.sort((a, b) => {
     const aTime = new Date(a.createdAt as any).getTime() || 0
     const bTime = new Date(b.createdAt as any).getTime() || 0
@@ -1226,10 +1226,25 @@ export async function updateApplicationStatus(
   applicationId: string,
   status: JobApplication['status']
 ): Promise<void> {
-  await updateDoc(doc(db, 'jobApplications', applicationId), {
+  const payload = {
     status,
     updatedAt: Timestamp.now().toDate(),
-  })
+  }
+  const appRef = doc(db, 'jobApplications', applicationId)
+  await updateDoc(appRef, payload)
+
+  // Keep jobs/{id}/applications mirror in sync when present
+  try {
+    const snap = await getDoc(appRef)
+    const opportunityId = snap.exists() ? String(snap.data()?.opportunityId || '') : ''
+    if (opportunityId) {
+      await updateDoc(doc(db, 'jobs', opportunityId, 'applications', applicationId), payload).catch(
+        () => undefined
+      )
+    }
+  } catch {
+    /* mirror is best-effort */
+  }
 }
 
 // ======================== ADDITIONAL BUSINESS SUITE QUERIES ========================

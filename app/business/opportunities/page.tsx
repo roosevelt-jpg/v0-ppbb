@@ -19,18 +19,29 @@ import { format } from 'date-fns'
 
 type JobMetrics = {
   applications: number
-  matched: number
+  pending: number
+  reviewing: number
   shortlisted: number
-  viewed: number
-  notViewed: number
+  accepted: number
+  rejected: number
 }
 
 const EMPTY_METRICS: JobMetrics = {
   applications: 0,
-  matched: 0,
+  pending: 0,
+  reviewing: 0,
   shortlisted: 0,
-  viewed: 0,
-  notViewed: 0,
+  accepted: 0,
+  rejected: 0,
+}
+
+function normalizeAppStatus(raw: unknown): keyof Omit<JobMetrics, 'applications'> {
+  const s = String(raw || '').toLowerCase()
+  if (s === 'shortlisted') return 'shortlisted'
+  if (s === 'accepted' || s === 'hired') return 'accepted'
+  if (s === 'rejected') return 'rejected'
+  if (s === 'reviewing' || s === 'viewed') return 'reviewing'
+  return 'pending'
 }
 
 function toDate(value: unknown): Date | null {
@@ -59,24 +70,33 @@ function canToggleLive(status: BusinessOpportunity['status']): boolean {
 function MetricCell({
   value,
   tone,
+  onClick,
+  label,
 }: {
   value: number
-  tone: 'apps' | 'matched' | 'shortlisted' | 'viewed' | 'notViewed'
+  tone: 'apps' | 'pending' | 'reviewing' | 'shortlisted' | 'accepted' | 'rejected'
+  onClick?: () => void
+  label: string
 }) {
   const tones: Record<typeof tone, string> = {
-    apps: 'bg-slate-100 text-slate-800',
-    matched: 'bg-rose-100 text-rose-800',
-    shortlisted: 'bg-sky-100 text-sky-800',
-    viewed: 'bg-orange-100 text-orange-800',
-    notViewed: 'bg-fuchsia-100 text-fuchsia-800',
+    apps: 'bg-slate-100 text-slate-800 hover:bg-slate-200',
+    pending: 'bg-amber-100 text-amber-900 hover:bg-amber-200',
+    reviewing: 'bg-orange-100 text-orange-900 hover:bg-orange-200',
+    shortlisted: 'bg-sky-100 text-sky-900 hover:bg-sky-200',
+    accepted: 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200',
+    rejected: 'bg-rose-100 text-rose-900 hover:bg-rose-200',
   }
-  return (
-    <span
-      className={`inline-flex min-w-[2.75rem] items-center justify-center rounded-md px-2.5 py-1.5 text-sm font-semibold ${tones[tone]}`}
-    >
-      {value}
-    </span>
-  )
+  const className = `inline-flex min-w-[2.75rem] items-center justify-center rounded-md px-2.5 py-1.5 text-sm font-semibold transition-colors ${tones[tone]} ${
+    onClick ? 'cursor-pointer' : ''
+  }`
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={className} title={`View ${label}`}>
+        {value}
+      </button>
+    )
+  }
+  return <span className={className}>{value}</span>
 }
 
 export default function BusinessOpportunities() {
@@ -139,10 +159,7 @@ export default function BusinessOpportunities() {
           if (!map[oppId]) map[oppId] = { ...EMPTY_METRICS }
           const m = map[oppId]
           m.applications += 1
-          if (app.status === 'accepted') m.matched += 1
-          if (app.status === 'shortlisted') m.shortlisted += 1
-          if (app.status === 'pending') m.notViewed += 1
-          else m.viewed += 1
+          m[normalizeAppStatus(app.status)] += 1
         }
         setMetricsByOpp(map)
       })
@@ -255,7 +272,15 @@ export default function BusinessOpportunities() {
     const fromApps = metricsByOpp[opp.id]
     if (fromApps) return fromApps
     const total = opp.applications ?? opp.applicants?.length ?? 0
-    return { ...EMPTY_METRICS, applications: total, notViewed: total }
+    return { ...EMPTY_METRICS, applications: total, pending: total }
+  }
+
+  const openApplicants = (
+    oppId: string,
+    status?: keyof Omit<JobMetrics, 'applications'>
+  ) => {
+    const qs = status ? `?status=${status}` : ''
+    router.push(`/business/opportunities/${oppId}${qs}`)
   }
 
   if (user && !hasBusinessAccess(user)) {
@@ -436,25 +461,38 @@ export default function BusinessOpportunities() {
                         {live ? 'Live' : String(opp.status || 'closed').replace(/_/g, ' ')}
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                      <div className="rounded-md bg-neutral-50 p-2">
-                        <p className="font-semibold text-neutral-900">{m.applications}</p>
-                        <p className="text-neutral-500">Apps</p>
-                      </div>
-                      <div className="rounded-md bg-neutral-50 p-2">
-                        <p className="font-semibold text-neutral-900">{m.matched}</p>
-                        <p className="text-neutral-500">Matched</p>
-                      </div>
-                      <div className="rounded-md bg-neutral-50 p-2">
-                        <p className="font-semibold text-neutral-900">{m.shortlisted}</p>
-                        <p className="text-neutral-500">Shortlist</p>
-                      </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs">
+                      {(
+                        [
+                          ['applications', 'Apps', undefined],
+                          ['pending', 'Pending', 'pending'],
+                          ['reviewing', 'Review', 'reviewing'],
+                          ['shortlisted', 'Short', 'shortlisted'],
+                          ['accepted', 'Accepted', 'accepted'],
+                          ['rejected', 'Rejected', 'rejected'],
+                        ] as const
+                      ).map(([key, label, status]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() =>
+                            openApplicants(
+                              opp.id,
+                              status as keyof Omit<JobMetrics, 'applications'> | undefined
+                            )
+                          }
+                          className="rounded-md bg-neutral-50 p-2 hover:bg-neutral-100 text-left sm:text-center"
+                        >
+                          <p className="font-semibold text-neutral-900">{m[key]}</p>
+                          <p className="text-neutral-500">{label}</p>
+                        </button>
+                      ))}
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         title="View applicants"
-                        onClick={() => router.push(`/business/opportunities/${opp.id}`)}
+                        onClick={() => openApplicants(opp.id)}
                         className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[#111] px-3 text-sm text-white"
                       >
                         <Eye className="w-4 h-4" /> Applicants
@@ -480,15 +518,16 @@ export default function BusinessOpportunities() {
                 )
               })}
             </ul>
-            <table className="hidden lg:table w-full min-w-[860px] text-left text-sm">
+            <table className="hidden lg:table w-full min-w-[960px] text-left text-sm">
               <thead>
                 <tr className="bg-neutral-900 text-white">
                   <th className="px-4 py-3 font-semibold">Job Title</th>
-                  <th className="px-3 py-3 font-semibold text-center">Applications</th>
-                  <th className="px-3 py-3 font-semibold text-center">Matched</th>
-                  <th className="px-3 py-3 font-semibold text-center">Shortlisted</th>
-                  <th className="px-3 py-3 font-semibold text-center">Viewed</th>
-                  <th className="px-3 py-3 font-semibold text-center">Not Viewed</th>
+                  <th className="px-2 py-3 font-semibold text-center">All</th>
+                  <th className="px-2 py-3 font-semibold text-center">Pending</th>
+                  <th className="px-2 py-3 font-semibold text-center">Reviewing</th>
+                  <th className="px-2 py-3 font-semibold text-center">Shortlisted</th>
+                  <th className="px-2 py-3 font-semibold text-center">Accepted</th>
+                  <th className="px-2 py-3 font-semibold text-center">Rejected</th>
                   <th className="px-4 py-3 font-semibold text-center">Action</th>
                 </tr>
               </thead>
@@ -503,7 +542,7 @@ export default function BusinessOpportunities() {
                       <td className="px-4 py-4">
                         <button
                           type="button"
-                          onClick={() => router.push(`/business/opportunities/${opp.id}`)}
+                          onClick={() => openApplicants(opp.id)}
                           className="font-semibold text-neutral-900 hover:underline text-left"
                         >
                           {opp.title}
@@ -558,27 +597,60 @@ export default function BusinessOpportunities() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-3 py-4 text-center">
-                        <MetricCell value={m.applications} tone="apps" />
+                      <td className="px-2 py-4 text-center">
+                        <MetricCell
+                          value={m.applications}
+                          tone="apps"
+                          label="all applicants"
+                          onClick={() => openApplicants(opp.id)}
+                        />
                       </td>
-                      <td className="px-3 py-4 text-center">
-                        <MetricCell value={m.matched} tone="matched" />
+                      <td className="px-2 py-4 text-center">
+                        <MetricCell
+                          value={m.pending}
+                          tone="pending"
+                          label="pending"
+                          onClick={() => openApplicants(opp.id, 'pending')}
+                        />
                       </td>
-                      <td className="px-3 py-4 text-center">
-                        <MetricCell value={m.shortlisted} tone="shortlisted" />
+                      <td className="px-2 py-4 text-center">
+                        <MetricCell
+                          value={m.reviewing}
+                          tone="reviewing"
+                          label="reviewing"
+                          onClick={() => openApplicants(opp.id, 'reviewing')}
+                        />
                       </td>
-                      <td className="px-3 py-4 text-center">
-                        <MetricCell value={m.viewed} tone="viewed" />
+                      <td className="px-2 py-4 text-center">
+                        <MetricCell
+                          value={m.shortlisted}
+                          tone="shortlisted"
+                          label="shortlisted"
+                          onClick={() => openApplicants(opp.id, 'shortlisted')}
+                        />
                       </td>
-                      <td className="px-3 py-4 text-center">
-                        <MetricCell value={m.notViewed} tone="notViewed" />
+                      <td className="px-2 py-4 text-center">
+                        <MetricCell
+                          value={m.accepted}
+                          tone="accepted"
+                          label="accepted"
+                          onClick={() => openApplicants(opp.id, 'accepted')}
+                        />
+                      </td>
+                      <td className="px-2 py-4 text-center">
+                        <MetricCell
+                          value={m.rejected}
+                          tone="rejected"
+                          label="rejected"
+                          onClick={() => openApplicants(opp.id, 'rejected')}
+                        />
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             type="button"
                             title="View applicants"
-                            onClick={() => router.push(`/business/opportunities/${opp.id}`)}
+                            onClick={() => openApplicants(opp.id)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white hover:bg-neutral-800"
                           >
                             <Eye className="w-4 h-4" />

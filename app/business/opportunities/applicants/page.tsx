@@ -113,7 +113,13 @@ export default function BusinessApplicants() {
   const opportunityIdFilter = searchParams.get('opportunityId')
   const [applications, setApplications] = React.useState<EnrichedApp[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [filter, setFilter] = React.useState<'all' | JobApplication['status']>('all')
+  const [filter, setFilter] = React.useState<'all' | JobApplication['status']>(() => {
+    const s = searchParams.get('status')
+    if (s && STATUS_OPTIONS.includes(s as JobApplication['status'])) {
+      return s as JobApplication['status']
+    }
+    return 'all'
+  })
   const [keyword, setKeyword] = React.useState('')
   const [locationQuery, setLocationQuery] = React.useState('')
   const [categoryId, setCategoryId] = React.useState(opportunityIdFilter || 'all')
@@ -122,9 +128,11 @@ export default function BusinessApplicants() {
 
   React.useEffect(() => {
     if (opportunityIdFilter) {
-      router.replace(`/business/opportunities/${opportunityIdFilter}`)
+      const status = searchParams.get('status')
+      const qs = status ? `?status=${encodeURIComponent(status)}` : ''
+      router.replace(`/business/opportunities/${opportunityIdFilter}${qs}`)
     }
-  }, [opportunityIdFilter, router])
+  }, [opportunityIdFilter, router, searchParams])
 
   React.useEffect(() => {
     if (opportunityIdFilter) setCategoryId(opportunityIdFilter)

@@ -48,6 +48,17 @@ type EnrichedApp = JobApplication & {
 type TabId = 'applicants' | 'preview'
 type StageFilter = 'all' | 'viewed' | 'shortlisted' | 'interview' | 'final' | 'rejected' | 'pending'
 
+function statusQueryToStage(raw: string | null): StageFilter {
+  const s = String(raw || '').toLowerCase()
+  if (s === 'pending' || s === 'not_viewed' || s === 'submitted') return 'pending'
+  if (s === 'reviewing' || s === 'interview' || s === 'viewed') return s === 'viewed' ? 'viewed' : 'interview'
+  if (s === 'shortlisted') return 'shortlisted'
+  if (s === 'accepted' || s === 'final' || s === 'hired') return 'final'
+  if (s === 'rejected') return 'rejected'
+  if (s === 'all') return 'all'
+  return 'all'
+}
+
 function toDate(value: unknown): Date | null {
   if (!value) return null
   if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
@@ -193,12 +204,15 @@ export default function BusinessOpportunityDetailPage() {
   const { user } = useAuth()
   const id = params.id as string
   const initialTab = searchParams.get('tab') === 'preview' ? 'preview' : 'applicants'
+  const initialStage = statusQueryToStage(
+    searchParams.get('status') || searchParams.get('stage')
+  )
 
   const [opportunity, setOpportunity] = React.useState<BusinessOpportunity | null>(null)
   const [applications, setApplications] = React.useState<EnrichedApp[]>([])
   const [loading, setLoading] = React.useState(true)
   const [tab, setTab] = React.useState<TabId>(initialTab)
-  const [stage, setStage] = React.useState<StageFilter>('all')
+  const [stage, setStage] = React.useState<StageFilter>(initialStage)
   const [experienceFilter, setExperienceFilter] = React.useState('all')
   const [educationFilter, setEducationFilter] = React.useState('all')
   const [perPage, setPerPage] = React.useState(5)
@@ -240,14 +254,28 @@ export default function BusinessOpportunityDetailPage() {
     void load()
   }, [user, router, load])
 
+  React.useEffect(() => {
+    setStage(statusQueryToStage(searchParams.get('status') || searchParams.get('stage')))
+  }, [searchParams])
+
   const stats = React.useMemo(() => {
     const total = applications.length
-    const viewed = applications.filter((a) => a.status !== 'pending').length
+    const pending = applications.filter((a) => {
+      const s = String(a.status || '').toLowerCase()
+      return s === 'pending' || s === 'submitted'
+    }).length
+    const viewed = applications.filter((a) => {
+      const s = String(a.status || '').toLowerCase()
+      return s !== 'pending' && s !== 'submitted'
+    }).length
     const shortlisted = applications.filter((a) => a.status === 'shortlisted').length
     const interview = applications.filter((a) => a.status === 'reviewing').length
-    const finalList = applications.filter((a) => a.status === 'accepted').length
+    const finalList = applications.filter((a) => {
+      const s = String(a.status || '').toLowerCase()
+      return s === 'accepted' || s === 'hired'
+    }).length
     const rejected = applications.filter((a) => a.status === 'rejected').length
-    return { total, viewed, shortlisted, interview, finalList, rejected }
+    return { total, pending, viewed, shortlisted, interview, finalList, rejected }
   }, [applications])
 
   const educationOptions = React.useMemo(() => {
@@ -270,12 +298,15 @@ export default function BusinessOpportunityDetailPage() {
 
   const filtered = React.useMemo(() => {
     return applications.filter((a) => {
-      if (stage === 'viewed' && a.status === 'pending') return false
-      if (stage === 'shortlisted' && a.status !== 'shortlisted') return false
-      if (stage === 'interview' && a.status !== 'reviewing') return false
-      if (stage === 'final' && a.status !== 'accepted') return false
-      if (stage === 'rejected' && a.status !== 'rejected') return false
-      if (stage === 'pending' && a.status !== 'pending') return false
+      const status = String(a.status || '').toLowerCase()
+      const isPending = status === 'pending' || status === 'submitted'
+      const isAccepted = status === 'accepted' || status === 'hired'
+      if (stage === 'viewed' && isPending) return false
+      if (stage === 'shortlisted' && status !== 'shortlisted') return false
+      if (stage === 'interview' && status !== 'reviewing') return false
+      if (stage === 'final' && !isAccepted) return false
+      if (stage === 'rejected' && status !== 'rejected') return false
+      if (stage === 'pending' && !isPending) return false
 
       const education = (a.applicantEducation || a.profileEducation || '').trim()
       const experience = (a.applicantExperience || a.profileExperience || '').trim()
@@ -534,7 +565,7 @@ export default function BusinessOpportunityDetailPage() {
         ) : (
           <>
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-6">
               <StatCard
                 label="Total Applicants"
                 value={stats.total}
@@ -543,11 +574,18 @@ export default function BusinessOpportunityDetailPage() {
                 onClick={() => setStage('all')}
               />
               <StatCard
-                label="Viewed"
-                value={stats.viewed}
-                tone="bg-orange-400 text-white"
-                active={stage === 'viewed'}
-                onClick={() => setStage('viewed')}
+                label="Pending"
+                value={stats.pending}
+                tone="bg-amber-500 text-white"
+                active={stage === 'pending'}
+                onClick={() => setStage('pending')}
+              />
+              <StatCard
+                label="Reviewing"
+                value={stats.interview}
+                tone="bg-orange-500 text-white"
+                active={stage === 'interview'}
+                onClick={() => setStage('interview')}
               />
               <StatCard
                 label="Shortlisted"
@@ -557,14 +595,7 @@ export default function BusinessOpportunityDetailPage() {
                 onClick={() => setStage('shortlisted')}
               />
               <StatCard
-                label="Interview List"
-                value={stats.interview}
-                tone="bg-amber-500 text-white"
-                active={stage === 'interview'}
-                onClick={() => setStage('interview')}
-              />
-              <StatCard
-                label="Final List"
+                label="Accepted"
                 value={stats.finalList}
                 tone="bg-emerald-500 text-white"
                 active={stage === 'final'}
@@ -576,6 +607,13 @@ export default function BusinessOpportunityDetailPage() {
                 tone="bg-rose-500 text-white"
                 active={stage === 'rejected'}
                 onClick={() => setStage('rejected')}
+              />
+              <StatCard
+                label="Viewed"
+                value={stats.viewed}
+                tone="bg-neutral-700 text-white"
+                active={stage === 'viewed'}
+                onClick={() => setStage('viewed')}
               />
             </div>
 
