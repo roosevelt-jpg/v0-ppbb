@@ -21,6 +21,7 @@ import { matchesRoleTypeFilter } from '@/lib/opportunity-utils'
 import { isCharityVolunteerEvent } from '@/lib/charity-event'
 import { parseFirestoreDate } from '@/lib/member-dashboard'
 import { getEventLocationLabel } from '@/lib/event-utils'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -395,8 +396,16 @@ export default function VolunteeringPage() {
               ) : (
                 <div className="space-y-3">
                   {charityEvents.map((evt) => (
-                    <Card key={`evt-${String(evt.id)}`} className="p-4 border border-neutral-200">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <Card key={`evt-${String(evt.id)}`} className="border border-neutral-200 overflow-hidden p-0">
+                      <div className="flex flex-col sm:flex-row">
+                        <EventBannerThumb
+                          event={evt}
+                          title={String(evt.title ?? 'Event')}
+                          size="md"
+                          rounded="rounded-none"
+                          className="sm:!h-auto sm:!min-h-[120px] sm:!w-40"
+                        />
+                        <div className="p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 flex-1 min-w-0">
                         <div>
                           <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-900 text-white">
                             Charity event
@@ -425,6 +434,7 @@ export default function VolunteeringPage() {
                         >
                           View & register
                         </Link>
+                        </div>
                       </div>
                     </Card>
                   ))}
@@ -491,8 +501,16 @@ export default function VolunteeringPage() {
             {registeredCharity.map((evt) => {
               const attended = Boolean(evt.checkedInAt)
               return (
-                <Card key={evt.id} className="p-4 border border-neutral-200">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <Card key={evt.id} className="border border-neutral-200 overflow-hidden p-0">
+                  <div className="flex flex-col sm:flex-row">
+                    <EventBannerThumb
+                      event={evt as never}
+                      title={evt.title || 'Event'}
+                      size="md"
+                      rounded="rounded-none"
+                      className="sm:!h-auto sm:!min-h-[120px] sm:!w-40"
+                    />
+                  <div className="p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 flex-1 min-w-0">
                     <div>
                       <span className="text-xs font-semibold px-2 py-1 rounded bg-rose-100 text-rose-800">
                         Charity event
@@ -523,6 +541,7 @@ export default function VolunteeringPage() {
                             : 'Confirm attendance'}
                       </button>
                     )}
+                  </div>
                   </div>
                 </Card>
               )

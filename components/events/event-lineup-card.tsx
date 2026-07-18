@@ -13,6 +13,7 @@ import {
   getGenderBadgeLabel,
 } from '@/lib/event-utils'
 import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 
 interface EventLineupCardProps {
   event: NormalizedEvent
@@ -41,19 +42,13 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
 
   return (
     <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full w-full shadow-sm hover:shadow-md transition">
-      <div className="relative w-full h-24 bg-neutral-100 overflow-hidden shrink-0">
-        {event.bannerURL ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={event.bannerURL}
-            alt={event.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground">
-            No image
-          </div>
-        )}
+      <div className="relative w-full shrink-0">
+        <EventBannerThumb
+          event={event as never}
+          title={event.title}
+          size="md"
+          rounded="rounded-none"
+        />
         <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1 max-w-[70%]">
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
