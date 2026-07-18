@@ -320,6 +320,7 @@ export default function AdminSetup() {
               } else {
                 throw createErr
               }
+            }
           } else {
             throw signInErr
           }
