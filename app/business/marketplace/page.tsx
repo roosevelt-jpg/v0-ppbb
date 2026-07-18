@@ -145,27 +145,39 @@ export default function Marketplace() {
                   <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
                     <h3 className="text-lg font-semibold text-[#111111] mb-4">Community Members</h3>
                     <div className="space-y-2 max-h-[min(24rem,50vh)] lg:max-h-96 overflow-y-auto">
-                      {members.map((member) => (
-                        <button
-                          key={member.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedMember(member)
-                            setChatOpen(false)
-                            setMessage('')
-                          }}
-                          className={`w-full text-left p-3 min-h-[44px] rounded-lg border transition-colors ${
-                            selectedMember?.id === member.id
-                              ? 'border-[#111111] border-2 bg-neutral-100'
-                              : 'border-[#e4e1da] bg-white hover:bg-neutral-50'
-                          }`}
-                        >
-                          <p className="font-semibold text-[#111111] truncate">{member.displayName}</p>
-                          {member.location ? (
-                            <p className="text-[#888888] text-xs truncate mt-0.5">{member.location}</p>
-                          ) : null}
-                        </button>
-                      ))}
+                      {members.map((member) => {
+                        const selected = selectedMember?.id === member.id
+                        return (
+                          <div
+                            key={member.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => {
+                              setSelectedMember(member)
+                              setChatOpen(false)
+                              setMessage('')
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                setSelectedMember(member)
+                                setChatOpen(false)
+                                setMessage('')
+                              }
+                            }}
+                            className={`w-full text-left p-3 min-h-[44px] rounded-lg border cursor-pointer transition-colors ${
+                              selected
+                                ? 'border-[#111111] border-2 bg-neutral-100'
+                                : 'border-[#e4e1da] bg-white hover:bg-neutral-50'
+                            }`}
+                          >
+                            <p className="font-semibold text-[#111111] truncate">{member.displayName}</p>
+                            {member.location ? (
+                              <p className="text-[#888888] text-xs truncate mt-0.5">{member.location}</p>
+                            ) : null}
+                          </div>
+                        )
+                      })}
                     </div>
                   </Card>
                 </div>
