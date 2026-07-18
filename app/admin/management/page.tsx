@@ -438,7 +438,9 @@ export default function AdminManagementPage() {
 
             <div>
               <h3 className="font-bold text-gray-900 mb-3">Generated Access Codes</h3>
-              <p className="text-sm text-gray-600 mb-4">All generated access codes (used and unused)</p>
+              <p className="text-sm text-gray-600 mb-4">
+                Unused invites are removed automatically after 48 hours
+              </p>
             </div>
 
             {codes.length === 0 ? (

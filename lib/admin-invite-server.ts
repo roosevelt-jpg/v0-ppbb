@@ -4,6 +4,9 @@ import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export const ADMIN_ACCESS_CODES_COLLECTION = 'adminAccessCodes'
 
+/** Unused invites are deleted this long after creation (not just after code expiry). */
+export const UNUSED_INVITE_RETENTION_MS = 48 * 60 * 60 * 1000
+
 export type AdminInviteRecord = {
   id: string
   code: string
@@ -14,6 +17,7 @@ export type AdminInviteRecord = {
   isUsed: boolean
   redeemedUserId?: string | null
   expiresAt?: Date | null
+  createdAt?: Date | null
 }
 
 export function normalizeInviteEmail(value: unknown): string {
@@ -36,6 +40,58 @@ export function parseInviteExpiresAt(data: Record<string, unknown>): Date | null
   return Number.isNaN(d.getTime()) ? null : d
 }
 
+export function parseInviteCreatedAt(data: Record<string, unknown>): Date | null {
+  const raw = data.createdAt
+  if (!raw) return null
+  if (typeof (raw as { toDate?: () => Date }).toDate === 'function') {
+    return (raw as { toDate: () => Date }).toDate()
+  }
+  const d = new Date(String(raw))
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+/**
+ * Unused invite past the 48h retention window.
+ * Prefers createdAt; if missing, uses expiresAt + 24h (typical invite is create+24h expiry).
+ */
+export function isUnusedInvitePastRetention(
+  data: Record<string, unknown>,
+  now = new Date()
+): boolean {
+  if (inviteIsUsed(data)) return false
+  const createdAt = parseInviteCreatedAt(data)
+  if (createdAt) {
+    return now.getTime() - createdAt.getTime() >= UNUSED_INVITE_RETENTION_MS
+  }
+  const expiresAt = parseInviteExpiresAt(data)
+  if (expiresAt) {
+    return now.getTime() - expiresAt.getTime() >= 24 * 60 * 60 * 1000
+  }
+  return false
+}
+
+/** Delete unused invites older than 48 hours. Returns how many docs were removed. */
+export async function purgeStaleUnusedAccessCodes(now = new Date()): Promise<number> {
+  const snap = await getAdminDb().collection(ADMIN_ACCESS_CODES_COLLECTION).get()
+  const stale = snap.docs.filter((docSnap) =>
+    isUnusedInvitePastRetention(docSnap.data() as Record<string, unknown>, now)
+  )
+  if (stale.length === 0) return 0
+
+  const db = getAdminDb()
+  let deleted = 0
+  for (let i = 0; i < stale.length; i += 400) {
+    const chunk = stale.slice(i, i + 400)
+    const batch = db.batch()
+    for (const docSnap of chunk) {
+      batch.delete(docSnap.ref)
+      deleted += 1
+    }
+    await batch.commit()
+  }
+  return deleted
+}
+
 export function mapInviteDoc(
   id: string,
   data: Record<string, unknown>,
@@ -52,6 +108,7 @@ export function mapInviteDoc(
     redeemedUserId:
       typeof data.redeemedUserId === 'string' ? data.redeemedUserId : null,
     expiresAt: parseInviteExpiresAt(data),
+    createdAt: parseInviteCreatedAt(data),
   }
 }
 
@@ -64,14 +121,25 @@ export async function findInviteByCode(code: string): Promise<AdminInviteRecord 
     .limit(1)
     .get()
   if (snap.empty) return null
-  return mapInviteDoc(snap.docs[0].id, snap.docs[0].data() as Record<string, unknown>, normalized)
+  const docSnap = snap.docs[0]
+  const data = docSnap.data() as Record<string, unknown>
+  if (isUnusedInvitePastRetention(data)) {
+    await docSnap.ref.delete().catch(() => undefined)
+    return null
+  }
+  return mapInviteDoc(docSnap.id, data, normalized)
 }
 
 export async function findInviteById(codeId: string): Promise<AdminInviteRecord | null> {
   if (!codeId) return null
   const snap = await getAdminDb().collection(ADMIN_ACCESS_CODES_COLLECTION).doc(codeId).get()
   if (!snap.exists) return null
-  return mapInviteDoc(snap.id, snap.data() as Record<string, unknown>)
+  const data = snap.data() as Record<string, unknown>
+  if (isUnusedInvitePastRetention(data)) {
+    await snap.ref.delete().catch(() => undefined)
+    return null
+  }
+  return mapInviteDoc(snap.id, data)
 }
 
 export async function userProfileExists(uid: string): Promise<boolean> {

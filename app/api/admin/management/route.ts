@@ -12,6 +12,7 @@ import { getUserProfileData, getAdminUserData } from '@/lib/admin-access-server'
 import { getUserRoles } from '@/lib/roles-server'
 import { defaultPermissionsForInviteRole } from '@/lib/admin-invite-permissions'
 import { requireAdminFromRequest } from '@/lib/admin-api-auth'
+import { purgeStaleUnusedAccessCodes } from '@/lib/admin-invite-server'
 import crypto from 'crypto'
 
 function getPublicSiteUrl(): string {
@@ -180,6 +181,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (query === 'access-codes') {
+      // Drop unused invites older than 48 hours before returning the list
+      await purgeStaleUnusedAccessCodes()
+
       const snapshot = await getAdminDb().collection('adminAccessCodes').get()
       const codes = snapshot.docs
         .map((docSnap) => {
