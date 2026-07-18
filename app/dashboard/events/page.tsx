@@ -262,9 +262,11 @@ export default function MyEventsPage() {
                       <Calendar size={14} />
                       {start ? format(start, 'MMM dd, yyyy') : 'Date TBA'}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} />
-                      {String(event.locationName ?? 'Location TBA')}
+                    <div className="flex items-start gap-2 min-w-0">
+                      <MapPin size={14} className="shrink-0 mt-0.5" />
+                      <span className="break-words min-w-0">
+                        {getEventLocationLabel(event as never)}
+                      </span>
                     </div>
                   </div>
                   {event.genderRestriction ? (
@@ -340,9 +342,11 @@ export default function MyEventsPage() {
                         <Calendar size={14} />
                         {start ? format(start, 'MMM dd, yyyy') : 'Date TBA'}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} />
-                        {event.locationName || 'Location TBA'}
+                      <div className="flex items-start gap-2 min-w-0">
+                        <MapPin size={14} className="shrink-0 mt-0.5" />
+                        <span className="break-words min-w-0">
+                          {getEventLocationLabel(event as never)}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Users size={14} />
