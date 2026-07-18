@@ -74,6 +74,36 @@ export interface DirectoryBusiness {
   isActive: boolean
 }
 
+/** Platform shop / merch seller id used across admin offers and /shop. */
+export const PLATFORM_BUSINESS_ID = 'passive-blessings'
+
+/** Fallback directory profile when the platform businesses doc is missing. */
+export function getPlatformDirectoryBusiness(): DirectoryBusiness {
+  return {
+    id: PLATFORM_BUSINESS_ID,
+    name: 'Passive Blessings',
+    description:
+      'Official Passive Blessings shop and community partner listings — merchandise and member offers that support our causes.',
+    category: 'retail',
+    companyType: 'product',
+    logoURL: '',
+    bannerURL: '',
+    ownerName: 'Passive Blessings',
+    ownerId: '',
+    services: ['Merchandise', 'Community', 'Charity'],
+    productImages: [],
+    phone: '',
+    email: 'hello@passive-blessings.com',
+    website: 'https://www.passive-blessings.com',
+    location: 'Dubai, UAE',
+    teamSize: '',
+    socialLinks: {},
+    isSponsor: false,
+    isApproved: true,
+    isActive: true,
+  }
+}
+
 export interface DirectoryOffer {
   id: string
   businessId: string
@@ -571,22 +601,47 @@ export function subscribeToDirectoryBusiness(
   callback: (business: DirectoryBusiness | null) => void,
   onError?: (error: Error) => void
 ): Unsubscribe {
+  const id = String(businessId || '').trim()
+  if (!id) {
+    callback(null)
+    return () => undefined
+  }
+
+  const resolveMissing = () => {
+    if (id === PLATFORM_BUSINESS_ID) {
+      callback(getPlatformDirectoryBusiness())
+      return
+    }
+    callback(null)
+  }
+
   return onSnapshot(
-    doc(db, 'businesses', businessId),
+    doc(db, 'businesses', id),
     (snapshot) => {
       if (!snapshot.exists()) {
-        callback(null)
+        resolveMissing()
         return
       }
       const business = normalizeDirectoryBusiness(
         snapshot.id,
         snapshot.data() as Record<string, unknown>
       )
-      callback(business.isApproved && business.isActive ? business : null)
+      if (business.isApproved && business.isActive) {
+        callback(business)
+        return
+      }
+      // Platform id may exist but be incomplete — still show the official profile
+      if (id === PLATFORM_BUSINESS_ID) {
+        callback({ ...getPlatformDirectoryBusiness(), ...business, isApproved: true, isActive: true })
+        return
+      }
+      callback(null)
     },
     (error) => {
       console.error('[marketplace-directory] business doc listener failed:', error)
       onError?.(error)
+      // Never leave the directory page stuck on the skeleton
+      resolveMissing()
     }
   )
 }
@@ -709,6 +764,8 @@ export function subscribeToBusinessOffers(
     (error) => {
       console.error('[marketplace-directory] business offers listener failed:', error)
       onError?.(error)
+      canonical = []
+      emit()
     }
   )
 
@@ -723,6 +780,8 @@ export function subscribeToBusinessOffers(
     (error) => {
       console.error('[marketplace-directory] legacy business offers listener failed:', error)
       onError?.(error)
+      legacy = []
+      emit()
     }
   )
 
@@ -752,6 +811,8 @@ export function subscribeToBusinessJobs(
     (error) => {
       console.error('[marketplace-directory] business jobs listener failed:', error)
       onError?.(error)
+      canonical = []
+      emit()
     }
   )
 
@@ -766,6 +827,8 @@ export function subscribeToBusinessJobs(
     (error) => {
       console.error('[marketplace-directory] legacy opportunities listener failed:', error)
       onError?.(error)
+      legacy = []
+      emit()
     }
   )
 

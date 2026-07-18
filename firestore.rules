@@ -351,7 +351,17 @@ service cloud.firestore {
     // Business directory profiles — public read for approved+active; owner/admin write
     // Public read also allows referralCode validation for attribution cookies (Part 13C)
     match /businesses/{businessId} {
-      allow read: if resource.data.isApproved == true && resource.data.isActive == true
+      // Missing docs must be readable as empty so client listeners can show not-found
+      // instead of hanging forever on permission-denied.
+      allow get: if resource == null
+        || (resource.data.isApproved == true && resource.data.isActive == true)
+        || isAdmin()
+        || (isAuth() && (
+          resource.data.userId == request.auth.uid
+          || resource.data.ownerId == request.auth.uid
+          || businessId == request.auth.uid
+        ));
+      allow list: if resource.data.isApproved == true && resource.data.isActive == true
         || isAdmin()
         || (isAuth() && (
           resource.data.userId == request.auth.uid

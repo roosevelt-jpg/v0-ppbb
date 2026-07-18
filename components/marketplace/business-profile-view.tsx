@@ -128,6 +128,24 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
     [businessId]
   )
 
+  // Never leave the profile stuck on the skeleton if a listener stalls
+  useEffect(() => {
+    setBusinessReady(false)
+    setOffersReady(false)
+    setJobsReady(false)
+    setDiscountsReady(false)
+    setEventsReady(false)
+    setNotFound(false)
+    const timeout = window.setTimeout(() => {
+      setBusinessReady(true)
+      setOffersReady(true)
+      setJobsReady(true)
+      setDiscountsReady(true)
+      setEventsReady(true)
+    }, 8000)
+    return () => window.clearTimeout(timeout)
+  }, [businessId])
+
   useEffect(() => {
     if (!businessId) return
     let byBusinessId: ProfileEvent[] = []
