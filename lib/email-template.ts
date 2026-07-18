@@ -40,8 +40,8 @@ export function renderSimpleEmailHtml(opts: {
 <body style="margin:0;padding:0;background:#ffffff;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;margin:0 auto;padding:24px 16px;font-family:Arial,Helvetica,sans-serif;">
     <tr>
-      <td style="padding:0 0 20px 0;">
-        <img src="${escapeEmailHtml(opts.logoUrl)}" alt="Passive Blessings" width="140" style="display:block;max-width:140px;height:auto;border:0;" />
+      <td align="center" style="padding:0 0 20px 0;text-align:center;">
+        <img src="${escapeEmailHtml(opts.logoUrl)}" alt="Passive Blessings" width="140" style="display:block;margin:0 auto;max-width:140px;height:auto;border:0;" />
       </td>
     </tr>
     <tr>
