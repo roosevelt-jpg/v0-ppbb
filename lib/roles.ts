@@ -1,5 +1,6 @@
 import type { User, UserRole } from '@/lib/types'
 import { isWelfareOperationalRole } from '@/lib/charity-cases'
+import { hasActiveBusinessMembership } from '@/lib/membership-access'
 
 const ADMIN_PANEL_ROLES: UserRole[] = [
   'admin',
@@ -34,22 +35,24 @@ export function hasRole(
 }
 
 /**
- * Whether the user can access the business portal. True if they have the
- * `business` role or are an admin/super_admin (who can view everything).
- * Business and member roles are completely separate.
+ * Whether the user can access the business portal.
+ * True if they have the `business` role, an admin role, OR an active Business pricing plan
+ * (plan is the source of truth — not a hardcoded role alone).
  */
 export function hasBusinessAccess(
   user: Pick<User, 'role' | 'roles'> | null | undefined
 ): boolean {
   const roles = getUserRoles(user)
-  
-  // Admins can always access
+
   if (roles.includes('admin') || roles.includes('super_admin')) {
     return true
   }
-  
-  // Business users have 'business' role
-  return roles.includes('business')
+
+  if (roles.includes('business')) {
+    return true
+  }
+
+  return hasActiveBusinessMembership(user as Record<string, unknown> | null | undefined)
 }
 
 /** Whether the user has any admin-level access. */

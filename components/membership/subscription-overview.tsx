@@ -7,7 +7,7 @@ import { Crown } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { db } from '@/lib/firebase'
 import { Card } from '@/components/ui/card'
-import { getMemberAssignedPlan } from '@/lib/pricing-utils'
+import { getMemberAssignedPlan, getPlanIncludedItems } from '@/lib/pricing-utils'
 import type { PricingPlan } from '@/lib/pricing-types'
 
 function toDate(value: unknown): Date | null {
@@ -253,6 +253,18 @@ export function MembershipSubscriptionOverview({
                 <p className="text-sm text-neutral-500 mt-0.5">
                   ~{monthsRemaining} month{monthsRemaining === 1 ? '' : 's'} remaining
                 </p>
+              ) : null}
+              {assignedPlan ? (
+                <ul className="mt-3 space-y-1 text-sm text-neutral-600">
+                  {getPlanIncludedItems(assignedPlan)
+                    .slice(0, 6)
+                    .map((item) => (
+                      <li key={item} className="flex gap-2">
+                        <span className="text-neutral-400">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                </ul>
               ) : null}
               {renewalStopped && !isLifetime ? (
                 <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 mt-2 inline-block">

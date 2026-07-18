@@ -97,11 +97,28 @@ export default function MembershipPage() {
     if (!planId) return
     try {
       const plan = plans.find((p) => p.id === planId)
+      const isBusiness = /business|partner|corporate|company/i.test(String(plan?.name || ''))
       await updateDoc(doc(db, 'users', memberId), {
         membershipTier: planId,
         membershipPlanId: planId,
         membershipPlanName: plan?.name ?? planId,
+        membershipStatus: 'active',
+        membershipRenewDate: new Date(
+          new Date().setMonth(new Date().getMonth() + (plan?.billingPeriod === 'yearly' ? 12 : 1))
+        ).toISOString(),
         upgradedAt: new Date(),
+        ...(isBusiness
+          ? {
+              role: 'business',
+              userType: 'business',
+              hasBusinessProfile: true,
+              roles: ['member', 'business'],
+            }
+          : {
+              role: 'member',
+              userType: 'member',
+              roles: ['member'],
+            }),
       })
       audit({
         actionType: 'update',

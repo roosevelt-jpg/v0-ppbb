@@ -122,11 +122,57 @@ function addMonths(from: Date, months: number): Date {
   return d
 }
 
+/** Keep portal role aligned with the pricing plan (Individual → member, Business → business). */
+function portalFieldsFromPlan(
+  plan: { name?: unknown },
+  existing: Record<string, unknown>
+): Record<string, unknown> {
+  const name = String(plan.name || '').toLowerCase()
+  const isBusiness =
+    name.includes('business') ||
+    name.includes('partner') ||
+    name.includes('corporate') ||
+    name.includes('company')
+
+  const roles = new Set<string>()
+  if (typeof existing.role === 'string' && existing.role) roles.add(existing.role)
+  if (Array.isArray(existing.roles)) {
+    for (const r of existing.roles) {
+      if (typeof r === 'string' && r) roles.add(r)
+    }
+  }
+
+  if (isBusiness) {
+    roles.add('member')
+    roles.add('business')
+    return {
+      role: 'business',
+      roles: Array.from(roles),
+      userType: 'business',
+      hasBusinessProfile: true,
+    }
+  }
+
+  roles.add('member')
+  // Don't demote admins; only set primary role when it's a basic account
+  const primary = String(existing.role || '')
+  const keepPrimary =
+    primary === 'admin' ||
+    primary === 'super_admin' ||
+    primary === 'business' ||
+    primary === 'sponsor'
+  return {
+    role: keepPrimary ? primary || 'member' : 'member',
+    roles: Array.from(roles),
+    userType: keepPrimary && primary === 'business' ? 'business' : 'member',
+  }
+}
+
 /** Activate membership on the user after a successful PayPal/Ziina (or manual/promo) payment. */
 export async function completeMembershipPayment(params: {
   userId: string
   planId: string
-  gateway: 'stripe' | 'paypal' | 'ziina' | 'promo'
+  gateway: 'stripe' | 'paypal' | 'ziina' | 'promo' | 'admin_grant'
   paymentReference: string
   amountCents?: number
   currency?: string
@@ -139,6 +185,8 @@ export async function completeMembershipPayment(params: {
   const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
   if (!planSnap.exists) throw new Error('Plan not found')
   const plan = planSnap.data()!
+  const userSnap = await db.collection('users').doc(params.userId).get()
+  const existingUser = (userSnap.data() || {}) as Record<string, unknown>
   const now = new Date()
   const isLifetimePromo =
     params.gateway === 'promo' &&
@@ -161,6 +209,8 @@ export async function completeMembershipPayment(params: {
       membershipStatus: 'active',
       membershipRenewDate: isLifetimePromo ? null : renewDate.toISOString(),
       membershipLifetimeForever: isLifetimePromo ? true : FieldValue.delete(),
+      // Portal access follows the pricing plan (not a hardcoded role alone)
+      ...portalFieldsFromPlan(plan, existingUser),
       ...(params.promoCodeId
         ? {
             membershipPromoCodeId: params.promoCodeId,
@@ -171,6 +221,45 @@ export async function completeMembershipPayment(params: {
     },
     { merge: true }
   )
+
+  const portal = portalFieldsFromPlan(plan, existingUser)
+  if (portal.role === 'business') {
+    const bizName =
+      String(
+        (existingUser.business as { name?: string } | undefined)?.name ||
+          existingUser.businessName ||
+          existingUser.companyName ||
+          [existingUser.firstName, existingUser.lastName].filter(Boolean).join(' ') ||
+          'Business account'
+      ).trim() || 'Business account'
+    await db.collection('businessProfiles').doc(params.userId).set(
+      {
+        id: params.userId,
+        businessName: bizName,
+        membership: 'partner',
+        active: true,
+        updatedAt: now,
+        createdAt: existingUser.createdAt || now,
+      },
+      { merge: true }
+    )
+    await db.collection('businesses').doc(params.userId).set(
+      {
+        name: bizName,
+        businessName: bizName,
+        ownerId: params.userId,
+        userId: params.userId,
+        email: existingUser.email || '',
+        isApproved: true,
+        isActive: true,
+        isVerified: true,
+        status: 'approved',
+        updatedAt: now,
+        createdAt: existingUser.createdAt || now,
+      },
+      { merge: true }
+    )
+  }
 
   await db.collection('subscriptions').doc(params.paymentReference).set(
     {

@@ -1,4 +1,5 @@
 import type { UserRole } from '@/lib/types'
+import { hasActiveBusinessMembership } from '@/lib/membership-access'
 
 /** Keep in sync with lib/roles ADMIN_PANEL_ROLES / hasAdminAccess. */
 const ADMIN_PANEL_ROLES: UserRole[] = [
@@ -37,8 +38,20 @@ export function hasAdminAccessServer(user: { role?: unknown; roles?: unknown } |
   return roles.some((role) => ADMIN_PANEL_ROLES.includes(role))
 }
 
-export function hasBusinessAccessServer(user: { role?: unknown; roles?: unknown } | null): boolean {
+export function hasBusinessAccessServer(
+  user: {
+    role?: unknown
+    roles?: unknown
+    membershipStatus?: unknown
+    membershipPlanId?: unknown
+    membershipPlanName?: unknown
+    membershipTier?: unknown
+    membershipRenewDate?: unknown
+    membershipLifetimeForever?: unknown
+  } | null
+): boolean {
   const roles = getUserRoles(user)
   if (hasAdminAccessServer(user)) return true
-  return roles.includes('business')
+  if (roles.includes('business')) return true
+  return hasActiveBusinessMembership(user as Record<string, unknown> | null)
 }

@@ -1,4 +1,5 @@
 import type { PricingPlan } from '@/lib/pricing-types'
+import { isLegacyHardcodedTier } from '@/lib/membership-access'
 
 /** Merge features + benefits into one deduped list (case-insensitive). */
 export function getPlanIncludedItems(
@@ -23,11 +24,14 @@ function normalizeTierKey(value: string): string {
   return value.trim().toLowerCase()
 }
 
-/** True when the member has an explicit plan/tier assignment on their profile. */
+/** True when the member has an explicit pricing-plan assignment (not a legacy hardcoded tier). */
 export function memberHasAssignedPlan(member: Record<string, unknown>): boolean {
-  return !!(
-    String(member.membershipPlanId || '').trim() || String(member.membershipTier || '').trim()
-  )
+  const planId = String(member.membershipPlanId || '').trim()
+  if (planId && !isLegacyHardcodedTier(planId)) return true
+  const planName = String(member.membershipPlanName || '').trim()
+  if (planName) return true
+  const tier = String(member.membershipTier || '').trim()
+  return Boolean(tier) && !isLegacyHardcodedTier(tier)
 }
 
 /** Match a member record to a pricing plan (by plan ID, name, or legacy slug). */
