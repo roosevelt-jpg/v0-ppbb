@@ -369,14 +369,12 @@ export default function AdminOpportunityDetailPage() {
                 key={card.id}
                 type="button"
                 onClick={() => setStage(card.id)}
-                className={`rounded-lg px-2.5 py-2 text-left transition ${card.tone} ${
+                className={`pb-metric-btn rounded-lg text-left transition ${card.tone} ${
                   stage === card.id ? 'ring-2 ring-neutral-900 ring-offset-1' : ''
                 }`}
               >
-                <p className="text-lg font-bold leading-none">{stats[card.id]}</p>
-                <p className="text-[10px] font-medium mt-1 opacity-90 uppercase tracking-wide">
-                  {card.label}
-                </p>
+                <p className="pb-metric-value">{stats[card.id]}</p>
+                <p className="pb-metric-label opacity-90 uppercase tracking-wide">{card.label}</p>
               </button>
             ))}
           </div>

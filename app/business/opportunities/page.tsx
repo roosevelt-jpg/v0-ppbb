@@ -86,7 +86,7 @@ function MetricCell({
     accepted: 'bg-emerald-100 text-emerald-900 hover:bg-emerald-200',
     rejected: 'bg-rose-100 text-rose-900 hover:bg-rose-200',
   }
-  const className = `inline-flex min-w-[2.75rem] items-center justify-center rounded-md px-2.5 py-1.5 text-sm font-semibold transition-colors ${tones[tone]} ${
+  const className = `pb-metric-btn pb-metric-btn--inline inline-flex min-w-[2.75rem] items-center justify-center rounded-md px-2.5 py-1.5 text-sm font-semibold transition-colors ${tones[tone]} ${
     onClick ? 'cursor-pointer' : ''
   }`
   if (onClick) {
@@ -481,10 +481,10 @@ export default function BusinessOpportunities() {
                               status as keyof Omit<JobMetrics, 'applications'> | undefined
                             )
                           }
-                          className="rounded-md bg-neutral-50 p-2 hover:bg-neutral-100 text-left sm:text-center"
+                          className="pb-metric-btn pb-metric-btn--center rounded-md bg-neutral-50 text-neutral-900 hover:bg-neutral-100"
                         >
-                          <p className="font-semibold text-neutral-900">{m[key]}</p>
-                          <p className="text-neutral-500">{label}</p>
+                          <p className="pb-metric-value text-neutral-900">{m[key]}</p>
+                          <p className="pb-metric-label text-neutral-500 opacity-100">{label}</p>
                         </button>
                       ))}
                     </div>
