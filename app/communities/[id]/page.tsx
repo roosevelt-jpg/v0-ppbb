@@ -203,7 +203,7 @@ export default function CommunityDetailPage() {
               <p className="text-gray-500">No groups available yet</p>
             </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {groups.map((group) => {
                 const membership = userGroups[group.id!]
                 const isCreator = Boolean(user?.id && group.createdBy === user.id)
@@ -215,54 +215,54 @@ export default function CommunityDetailPage() {
                 return (
                   <div
                     key={group.id}
-                    className="bg-white rounded-lg border border-gray-200 p-6 space-y-4 overflow-hidden"
+                    className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-2.5 overflow-hidden"
                   >
                     {group.iconURL && (
                       <img
                         src={group.iconURL}
                         alt={group.name}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-20 sm:h-24 object-cover rounded-md"
                       />
                     )}
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-bold text-black text-lg mb-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-black text-sm sm:text-base mb-0.5 line-clamp-1">
                           {group.name}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs text-gray-600 line-clamp-2">
                           {group.description}
                         </p>
                       </div>
                       {isRestricted && (
-                        <Lock className="text-gray-400" size={20} />
+                        <Lock className="text-gray-400 shrink-0" size={16} />
                       )}
                     </div>
 
                     <span
-                      className={`text-xs font-medium px-3 py-1 rounded-full inline-block ${genderRestrictionBadgeClass(group.genderRestriction)}`}
+                      className={`text-[11px] font-medium px-2 py-0.5 rounded-full inline-block ${genderRestrictionBadgeClass(group.genderRestriction)}`}
                     >
                       {genderRestrictionLabel(group.genderRestriction)}
                     </span>
 
                     {/* Group Stats */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <Users size={14} />
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Users size={12} />
                         {group.memberCount} members
                       </div>
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded capitalize text-gray-700">
+                      <span className="text-[11px] bg-gray-100 px-1.5 py-0.5 rounded capitalize text-gray-700">
                         {group.type.replace('-', ' ')}
                       </span>
                     </div>
 
                     {/* Gender Restriction Badge */}
                     {isRestricted && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-xs">
                         <p className="text-amber-900 font-medium flex items-center gap-1">
-                          <Lock size={14} />
+                          <Lock size={12} />
                           {genderRestrictionLabel(group.genderRestriction)} group
                         </p>
-                        <p className="text-amber-700 text-xs mt-1">
+                        <p className="text-amber-700 text-[11px] mt-0.5">
                           {genderCheck.reason || 'This group has a gender restriction.'}
                         </p>
                       </div>
@@ -273,7 +273,7 @@ export default function CommunityDetailPage() {
                       <button
                         type="button"
                         onClick={() => router.push(`/communities/${communityId}/groups/${group.id}`)}
-                        className="w-full px-4 py-2 rounded-lg font-medium bg-black !text-white hover:bg-gray-900 min-h-[44px]"
+                        className="w-full px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm bg-black !text-white hover:bg-gray-900 min-h-[36px]"
                       >
                         Enter Group
                       </button>
@@ -281,7 +281,7 @@ export default function CommunityDetailPage() {
                       <button
                         type="button"
                         disabled
-                        className="w-full px-4 py-2 rounded-lg font-medium bg-white border border-gray-300 text-black min-h-[44px]"
+                        className="w-full px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm bg-white border border-gray-300 text-black min-h-[36px]"
                       >
                         Pending Approval
                       </button>
@@ -290,7 +290,7 @@ export default function CommunityDetailPage() {
                         type="button"
                         onClick={() => handleJoinGroup(group)}
                         disabled={joiningGroup === group.id || isRestricted}
-                        className={`w-full px-4 py-2 rounded-lg font-medium transition-colors min-h-[44px] ${
+                        className={`w-full px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-colors min-h-[36px] ${
                           isRestricted
                             ? 'bg-white border border-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-black !text-white hover:bg-gray-900'

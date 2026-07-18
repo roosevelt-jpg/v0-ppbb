@@ -51,51 +51,51 @@ function CommunityShortCard({
   const meta = `${categoryLabel(community.category)} · ${formatMemberCount(community.memberCount)}`
 
   return (
-    <article className="bg-white border border-[#e4e1da] rounded-2xl overflow-hidden flex flex-col h-full">
+    <article className="bg-white border border-[#e4e1da] rounded-xl overflow-hidden flex flex-col h-full">
       <div className="relative">
         {cover ? (
           <div
-            className="w-full h-36 sm:h-40 bg-neutral-200 bg-cover bg-center"
+            className="w-full h-20 sm:h-24 bg-neutral-200 bg-cover bg-center"
             style={{ backgroundImage: `url(${cover})` }}
             role="img"
             aria-label=""
           />
         ) : (
-          <div className="w-full h-36 sm:h-40 bg-gradient-to-br from-neutral-800 to-neutral-600" />
+          <div className="w-full h-20 sm:h-24 bg-gradient-to-br from-neutral-800 to-neutral-600" />
         )}
-        <div className="absolute -bottom-5 left-4">
+        <div className="absolute -bottom-3.5 left-3">
           {avatar ? (
             <img
               src={avatar}
               alt=""
-              className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-[3px] border-white object-cover bg-white shadow-sm"
+              className="w-9 h-9 rounded-full border-2 border-white object-cover bg-white shadow-sm"
             />
           ) : (
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-[3px] border-white bg-neutral-900 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+            <div className="w-9 h-9 rounded-full border-2 border-white bg-neutral-900 text-white flex items-center justify-center text-xs font-bold shadow-sm">
               {(community.name || 'C').charAt(0).toUpperCase()}
             </div>
           )}
         </div>
       </div>
 
-      <div className="pt-7 px-4 pb-4 flex flex-col flex-1 gap-3">
-        <div className="min-w-0 space-y-1">
-          <h3 className="font-headline text-lg font-bold text-black line-clamp-2 leading-snug">
+      <div className="pt-5 px-3 pb-3 flex flex-col flex-1 gap-2">
+        <div className="min-w-0 space-y-0.5">
+          <h3 className="font-headline text-sm sm:text-base font-bold text-black line-clamp-2 leading-snug">
             {community.name}
           </h3>
-          <p className="text-sm text-neutral-500 truncate">{meta}</p>
+          <p className="text-xs text-neutral-500 truncate">{meta}</p>
           {community.genderRestriction && community.genderRestriction !== 'mixed' ? (
-            <p className="text-xs text-neutral-400">
+            <p className="text-[11px] text-neutral-400">
               {genderRestrictionLabel(community.genderRestriction)}
             </p>
           ) : null}
         </div>
 
-        <div className="mt-auto grid grid-cols-2 gap-2 pt-1">
+        <div className="mt-auto grid grid-cols-2 gap-1.5 pt-0.5">
           {isJoined ? (
             <Link
               href={href}
-              className="col-span-2 inline-flex items-center justify-center min-h-[44px] px-3 bg-black text-white rounded-xl text-sm font-semibold hover:bg-neutral-900"
+              className="col-span-2 inline-flex items-center justify-center min-h-[36px] px-2.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-900"
             >
               Open community
             </Link>
@@ -105,13 +105,13 @@ function CommunityShortCard({
                 type="button"
                 onClick={onJoin}
                 disabled={joining}
-                className="inline-flex items-center justify-center min-h-[44px] px-3 bg-black text-white rounded-xl text-sm font-semibold hover:bg-neutral-900 disabled:opacity-50"
+                className="inline-flex items-center justify-center min-h-[36px] px-2.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-900 disabled:opacity-50"
               >
                 {joining ? 'Joining…' : 'Join'}
               </button>
               <Link
                 href={href}
-                className="inline-flex items-center justify-center min-h-[44px] px-3 bg-white text-black border border-[#e4e1da] rounded-xl text-sm font-semibold hover:bg-neutral-50"
+                className="inline-flex items-center justify-center min-h-[36px] px-2.5 bg-white text-black border border-[#e4e1da] rounded-lg text-xs font-semibold hover:bg-neutral-50"
               >
                 View
               </Link>
@@ -354,7 +354,7 @@ export default function CommunitiesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
             {listedCommunities.map((community) => (
               <CommunityShortCard
                 key={community.id}
