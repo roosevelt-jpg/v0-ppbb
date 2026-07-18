@@ -124,7 +124,7 @@ export default function NewOpportunity() {
           suitableFor: formData.suitableFor,
           deadline: formData.deadline || null,
           hiringBy: formData.hiringBy || null,
-          description: formData.description || formData.responsibilities,
+          description: htmlToPlainText(formData.description || formData.responsibilities),
           applicationProcess: formData.applicationProcess,
           applicationURL: formData.applicationURL || null,
           isMemberOnly: formData.isMemberOnly,
