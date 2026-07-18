@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access-server'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
+import { getAdminUserData } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 
@@ -11,13 +12,8 @@ export const dynamic = 'force-dynamic'
 const DOC_ID = 'current'
 
 async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
+  const uid = await requireAdminFromRequest(request)
   if (!uid) return null
-  const ok = await isAdminUser(uid)
-  if (!ok) return null
   const adminData = await getAdminUserData(uid)
   return { uid, email: String(adminData?.email || 'admin') }
 }

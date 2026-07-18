@@ -1,5 +1,5 @@
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import {
   loadPendingApprovals,
@@ -11,12 +11,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
-  if (!uid) return null
-  return (await isAdminUser(uid)) ? uid : null
+  return requireAdminFromRequest(request)
 }
 
 export async function GET(request: NextRequest) {

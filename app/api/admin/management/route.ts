@@ -8,9 +8,10 @@ import {
   dispatchAdminInviteEmail,
   dispatchAdminPasswordResetEmail,
 } from '@/lib/gmail-service'
-import { getUserProfileData, verifyIdToken } from '@/lib/admin-access-server'
+import { getUserProfileData, getAdminUserData } from '@/lib/admin-access-server'
 import { getUserRoles } from '@/lib/roles-server'
 import { defaultPermissionsForInviteRole } from '@/lib/admin-invite-permissions'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 import crypto from 'crypto'
 
 function getPublicSiteUrl(): string {
@@ -25,50 +26,28 @@ function isSixDigitAccessCode(code: string): boolean {
   return /^\d{6}$/.test(String(code || '').trim())
 }
 
-async function requireSuperAdmin(request: NextRequest): Promise<
+async function requireManagementAccess(request: NextRequest): Promise<
   | { ok: true; uid: string; email: string; name: string; role: string }
   | { ok: false; response: NextResponse }
 > {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { success: false, error: 'Sign in required' },
-        { status: 401 }
-      ),
-    }
-  }
-
-  const uid = await verifyIdToken(token)
+  const uid = await requireAdminFromRequest(request)
   if (!uid) {
     return {
       ok: false,
       response: NextResponse.json(
-        { success: false, error: 'Invalid session' },
-        { status: 401 }
+        { success: false, error: 'manage_admins permission required' },
+        { status: 403 }
       ),
     }
   }
 
-  const profile = await getUserProfileData(uid)
+  const profile = (await getAdminUserData(uid)) || (await getUserProfileData(uid)) || {}
   const roles = getUserRoles(profile)
   const role =
     (typeof profile?.role === 'string' && profile.role) ||
     roles.find((r) => r === 'super_admin') ||
     roles[0] ||
     ''
-  // Accept role on `role` or inside `roles[]` (invite redeem writes both)
-  if (!roles.includes('super_admin')) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { success: false, error: 'Only super admins can manage admin invitations' },
-        { status: 403 }
-      ),
-    }
-  }
 
   return {
     ok: true,
@@ -124,6 +103,9 @@ async function generateUniqueAccessCode(): Promise<string> {
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await requireManagementAccess(request)
+    if (!auth.ok) return auth.response
+
     const query = request.nextUrl.searchParams.get('query')
 
     if (query === 'admins') {
@@ -239,7 +221,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (action === 'generate-access-code') {
-      const authz = await requireSuperAdmin(request)
+      const authz = await requireManagementAccess(request)
       if (!authz.ok) return authz.response
 
       const { adminName, adminEmail, role, permissions, sendEmail, expiresAt: expiresAtStr } = data
@@ -383,7 +365,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'resend-invite') {
-      const authz = await requireSuperAdmin(request)
+      const authz = await requireManagementAccess(request)
       if (!authz.ok) return authz.response
 
       const { codeId, extendExpiry } = data
@@ -507,7 +489,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'send-password-reset') {
-      const authz = await requireSuperAdmin(request)
+      const authz = await requireManagementAccess(request)
       if (!authz.ok) return authz.response
 
       const email = String(data.email || '')

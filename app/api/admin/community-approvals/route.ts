@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
-import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 
@@ -9,12 +9,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function requireAdmin(request: NextRequest) {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
-  if (!uid || !(await isAdminUser(uid))) return null
-  return uid
+  return requireAdminFromRequest(request)
 }
 
 const PENDING_STATUSES = ['pending_approval', 'pending'] as const

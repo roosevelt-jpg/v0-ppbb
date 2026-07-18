@@ -116,20 +116,14 @@ export async function hasInvitePermissionServer(
  * Server-side route access for scoped admin permissions
  */
 export async function canAccessAdminPathServer(userId: string, pathname: string): Promise<boolean> {
-  const data = await getUserProfileData(userId)
+  const data = await getAdminUserData(userId)
   if (!data) return false
-  const role = String(data.role || '')
-  // Any invite/admin panel role may proceed; path gating uses permissions
-  if (
-    role !== 'admin' &&
-    role !== 'super_admin' &&
-    role !== 'moderator' &&
-    !isWelfareOperationalRole(role)
-  ) {
-    return false
-  }
+  if (!(await isAdminUser(userId))) return false
   return canAccessAdminPath(
-    { role: role as User['role'], permissions: data.permissions as string[] },
+    {
+      role: data.role as User['role'],
+      permissions: data.permissions as string[],
+    },
     pathname
   )
 }

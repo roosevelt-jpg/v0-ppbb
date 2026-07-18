@@ -88,6 +88,8 @@ export async function setAdminUser(
 
     const adminRef = doc(db, 'adminUsers', userId)
 
+    const isFull = permissions.includes('full_access') || adminRole === ('super_admin' as AdminRole)
+
     await setDoc(
       adminRef,
       {
@@ -96,23 +98,11 @@ export async function setAdminUser(
         permissions,
         canApprove: true,
         canDelete: adminRole !== 'analyst',
-        canViewAnalytics:
-          permissions.includes('full_access') ||
-          permissions.includes('view_reports') ||
-          adminRole === 'analyst' ||
-          adminRole === 'founder_admin',
-        canManageUsers:
-          permissions.includes('full_access') ||
-          permissions.includes('manage_members') ||
-          adminRole === 'founder_admin' ||
-          adminRole === 'manager',
-        canManageContent:
-          permissions.includes('full_access') ||
-          permissions.includes('manage_content') ||
-          adminRole === 'founder_admin' ||
-          adminRole === 'moderator',
-        canManageFinance:
-          permissions.includes('full_access') || adminRole === 'founder_admin',
+        // Flags follow invite permissions only — no role-name bypass
+        canViewAnalytics: isFull || permissions.includes('view_reports'),
+        canManageUsers: isFull || permissions.includes('manage_members'),
+        canManageContent: isFull || permissions.includes('manage_content'),
+        canManageFinance: isFull || permissions.includes('manage_beneficiary'),
         adminSince: Timestamp.now(),
       },
       { merge: true }

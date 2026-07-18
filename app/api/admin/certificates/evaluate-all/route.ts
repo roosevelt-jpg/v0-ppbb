@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
-import { evaluateCertificateMilestonesForUser, getMemberVolunteerHours } from '@/lib/certificate-milestones-server'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
+import {
+  evaluateCertificateMilestonesForUser,
+  getMemberVolunteerHours,
+} from '@/lib/certificate-milestones-server'
 import { getAdminDb } from '@/lib/firebase-admin'
 
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization') || ''
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-    if (!token) {
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const uid = await verifyIdToken(token)
-    if (!uid || !(await isAdminUser(uid))) {
-      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
     const db = getAdminDb()
@@ -41,15 +38,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization') || ''
-    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-    if (!token) {
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const uid = await verifyIdToken(token)
-    if (!uid || !(await isAdminUser(uid))) {
-      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
     const userId = request.nextUrl.searchParams.get('userId')

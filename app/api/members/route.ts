@@ -2,33 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { isAccountDeleted } from '@/lib/user-settings'
-import { verifyIdToken, getUserProfileData } from '@/lib/admin-access-server'
-import { hasAdminAccessServer } from '@/lib/roles-server'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 
 async function requireAdmin(request: NextRequest): Promise<
   | { ok: true; uid: string }
   | { ok: false; response: NextResponse }
 > {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) {
-    return {
-      ok: false,
-      response: NextResponse.json({ success: false, error: 'Sign in required' }, { status: 401 }),
-    }
-  }
-  const uid = await verifyIdToken(token)
+  const uid = await requireAdminFromRequest(request)
   if (!uid) {
     return {
       ok: false,
-      response: NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 }),
-    }
-  }
-  const profile = await getUserProfileData(uid)
-  if (!hasAdminAccessServer(profile || {})) {
-    return {
-      ok: false,
-      response: NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 }),
+      response: NextResponse.json(
+        { success: false, error: 'Admin access required (manage_members)' },
+        { status: 403 }
+      ),
     }
   }
   return { ok: true, uid }

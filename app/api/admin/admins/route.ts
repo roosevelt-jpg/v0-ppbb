@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase-admin/firestore'
-import { initializeApp, getApps } from 'firebase-admin/app'
+import { getAdminDb } from '@/lib/firebase-admin'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 
-if (!getApps().length) {
-  initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  })
-}
-
-const db = getFirestore()
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const adminsRef = collection(db, 'adminUsers')
-    const snapshot = await getDocs(adminsRef)
-    
-    const admins = snapshot.docs.map(doc => ({
-      ...doc.data(),
-      id: doc.id,
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const snapshot = await getAdminDb().collection('adminUsers').get()
+    const admins = snapshot.docs.map((docSnap) => ({
+      ...docSnap.data(),
+      id: docSnap.id,
     }))
 
     return NextResponse.json({
@@ -34,20 +32,22 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: any) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { id } = params
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Admin ID is required' },
-        { status: 400 }
-      )
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await deleteDoc(doc(db, 'adminUsers', id))
-    // Also delete from users collection
-    await deleteDoc(doc(db, 'users', id))
+    const { searchParams } = request.nextUrl
+    const id = searchParams.get('id')
+    if (!id) {
+      return NextResponse.json({ error: 'Admin ID is required' }, { status: 400 })
+    }
+
+    const db = getAdminDb()
+    await db.collection('adminUsers').doc(id).delete()
+    await db.collection('users').doc(id).delete().catch(() => undefined)
 
     return NextResponse.json({
       success: true,

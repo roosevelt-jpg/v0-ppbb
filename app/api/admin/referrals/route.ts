@@ -1,18 +1,12 @@
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
-  if (!uid) return null
-  const ok = await isAdminUser(uid)
-  return ok ? uid : null
+  return requireAdminFromRequest(request)
 }
 
 async function bulkUpdateReferralStatus(

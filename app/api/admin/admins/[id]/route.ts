@@ -1,31 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, doc, deleteDoc } from 'firebase-admin/firestore'
-import { initializeApp, getApps } from 'firebase-admin/app'
+import { getAdminDb } from '@/lib/firebase-admin'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 
-if (!getApps().length) {
-  initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  })
-}
-
-const db = getFirestore()
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> | { id: string } }
 ) {
   try {
+    const uid = await requireAdminFromRequest(request)
+    if (!uid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const raw = context.params
+    const params = typeof (raw as Promise<{ id: string }>).then === 'function'
+      ? await (raw as Promise<{ id: string }>)
+      : (raw as { id: string })
     const { id } = params
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Admin ID is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Admin ID is required' }, { status: 400 })
     }
 
-    await deleteDoc(doc(db, 'adminUsers', id))
-    await deleteDoc(doc(db, 'users', id))
+    const db = getAdminDb()
+    await db.collection('adminUsers').doc(id).delete()
+    await db.collection('users').doc(id).delete().catch(() => undefined)
 
     return NextResponse.json({
       success: true,

@@ -1,7 +1,7 @@
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
@@ -11,12 +11,7 @@ export const dynamic = 'force-dynamic'
 const ALLOWED_STATUSES = new Set(['pending', 'reviewed', 'approved', 'rejected'])
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
-  if (!uid) return null
-  return (await isAdminUser(uid)) ? uid : null
+  return requireAdminFromRequest(request)
 }
 
 export async function PATCH(request: NextRequest) {

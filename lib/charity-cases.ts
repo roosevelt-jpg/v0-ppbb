@@ -3,6 +3,8 @@
  * Reads tolerate legacy field names from the older `causes` collection shape.
  */
 
+import { getEffectiveInvitePermissions } from '@/lib/admin-invite-permissions'
+
 export type CharityCaseStatus = 'draft' | 'active' | 'completed' | 'archived'
 
 export const CAUSE_CATEGORIES = [
@@ -180,7 +182,9 @@ export function canUserAccessSensitiveBeneficiaryDocs(
   const candidates: unknown[] = [user.adminRole, user.role]
   if (Array.isArray(user.roles)) candidates.push(...user.roles)
   if (candidates.some((r) => canAccessSensitiveBeneficiaryDocs(r))) return true
+
+  const role = String(user.adminRole || user.role || '')
   const perms = Array.isArray(user.permissions) ? user.permissions.map(String) : []
-  if (perms.includes('full_access') || perms.includes('manage_beneficiary')) return true
-  return false
+  const effective = getEffectiveInvitePermissions(perms, role)
+  return effective.includes('full_access') || effective.includes('manage_beneficiary')
 }

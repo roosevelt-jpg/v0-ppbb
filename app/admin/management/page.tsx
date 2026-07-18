@@ -9,6 +9,7 @@ import { AdminUserCell } from '@/components/admin-user-cell'
 import { formatUserPhoneDisplay } from '@/lib/user-profile'
 import { WELFARE_INVITE_ROLE_OPTIONS, isWelfareOperationalRole } from '@/lib/charity-cases'
 import { useAuth } from '@/lib/auth-context'
+import { INVITE_PERMISSION_OPTIONS } from '@/lib/admin-invite-permissions'
 
 export default function AdminManagementPage() {
   const { firebaseUser } = useAuth()
@@ -39,21 +40,8 @@ export default function AdminManagementPage() {
     ...WELFARE_INVITE_ROLE_OPTIONS,
   ]
 
-  // Available permissions for admins
-  const ADMIN_PERMISSIONS = [
-    { id: 'manage_members', label: 'Manage Members', description: 'Add, edit, and remove members' },
-    { id: 'manage_events', label: 'Manage Events', description: 'Create, edit, and delete events' },
-    { id: 'manage_admins', label: 'Manage Admins', description: 'Create and manage admin accounts' },
-    { id: 'manage_settings', label: 'Manage Settings', description: 'Update site settings and configurations' },
-    { id: 'view_reports', label: 'View Reports', description: 'Access analytics and reporting dashboard' },
-    { id: 'manage_content', label: 'Manage Content', description: 'Edit pages, FAQs, and content' },
-    { id: 'manage_integrations', label: 'Manage Integrations', description: 'Configure external services' },
-    {
-      id: 'manage_beneficiary',
-      label: 'Manage Beneficiary Requests',
-      description: 'Review welfare applications and sensitive documents',
-    },
-  ]
+  // Available permissions for admins — must stay in sync with PERMISSION_ROUTE_PREFIXES
+  const ADMIN_PERMISSIONS = INVITE_PERMISSION_OPTIONS
 
   React.useEffect(() => {
     if (adminRole === 'welfare' || adminRole === 'founder' || adminRole === 'coordinator') {
@@ -66,17 +54,30 @@ export default function AdminManagementPage() {
   }, [adminRole])
 
   React.useEffect(() => {
+    if (!firebaseUser) return
     loadData()
-  }, [activeTab])
+  }, [activeTab, firebaseUser])
 
   const loadData = async () => {
     try {
+      if (!firebaseUser) {
+        setLoading(false)
+        return
+      }
+      const token = await firebaseUser.getIdToken()
+      const headers = { Authorization: `Bearer ${token}` }
       if (activeTab === 'access-codes') {
-        const res = await fetch('/api/admin/management?query=access-codes', { cache: 'no-store' })
+        const res = await fetch('/api/admin/management?query=access-codes', {
+          cache: 'no-store',
+          headers,
+        })
         const json = await res.json()
         if (json.success) setCodes(json.data)
       } else {
-        const res = await fetch('/api/admin/management?query=admins', { cache: 'no-store' })
+        const res = await fetch('/api/admin/management?query=admins', {
+          cache: 'no-store',
+          headers,
+        })
         const json = await res.json()
         if (json.success) setAdmins(json.data)
       }

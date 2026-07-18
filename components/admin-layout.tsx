@@ -101,6 +101,7 @@ export const adminMenuItems = [
 
   // Charity & Support
   { label: 'Charity Cases', href: '/admin/charity', icon: ShieldAlert, group: 'Charity' },
+  { label: 'Beneficiary Requests', href: '/admin/beneficiary-requests', icon: ClipboardList, group: 'Charity' },
   { label: 'Donations', href: '/admin/donations', icon: DollarSign, group: 'Charity' },
   { label: 'Charity Partners', href: '/admin/charity-partners', icon: Landmark, group: 'Charity' },
   { label: 'Donation Verification', href: '/admin/donation-verification', icon: CheckCircle, group: 'Charity' },

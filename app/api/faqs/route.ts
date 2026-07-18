@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { verifyIdToken, getUserProfileData } from '@/lib/admin-access-server'
-import { hasAdminAccessServer } from '@/lib/roles-server'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 
 type FaqStatus = 'published' | 'draft'
 
@@ -19,14 +18,7 @@ interface FaqRow {
 }
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
-  if (!uid) return null
-  const profile = await getUserProfileData(uid)
-  if (!hasAdminAccessServer(profile || {})) return null
-  return uid
+  return requireAdminFromRequest(request)
 }
 
 function mapDoc(id: string, data: Record<string, any>): FaqRow {

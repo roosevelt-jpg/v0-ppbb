@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { Firestore } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { verifyIdToken, getAdminUserData, isAdminUser } from '@/lib/admin-access-server'
+import { requireAdminFromRequest } from '@/lib/admin-api-auth'
+import { getAdminUserData } from '@/lib/admin-access-server'
 import {
   canAccessSensitiveBeneficiaryDocs,
   canUserAccessSensitiveBeneficiaryDocs,
@@ -43,13 +44,8 @@ const DOC_KEY_TO_PATH: Record<string, string> = {
 }
 
 async function requireAdminAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return null
-  const uid = await verifyIdToken(token)
+  const uid = await requireAdminFromRequest(request)
   if (!uid) return null
-  const isAdmin = await isAdminUser(uid)
-  if (!isAdmin) return null
   const adminData = await getAdminUserData(uid)
   const adminRole = String(adminData?.adminRole || adminData?.role || 'admin')
   const permissions = Array.isArray(adminData?.permissions)
