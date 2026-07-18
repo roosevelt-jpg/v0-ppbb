@@ -29,6 +29,7 @@ import {
   AlertCircle,
   X,
 } from 'lucide-react'
+import { htmlToPlainText } from '@/lib/cms-page-content'
 
 const FILTER_TABS: { id: AdminJobFilterTab; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -220,11 +221,21 @@ export function AdminOpportunitiesPageInner() {
           disabled={busy}
           onClick={() => setViewJob(job)}
           className={`${btn} w-8`}
-          aria-label="View"
-          title="View"
+          aria-label="View details"
+          title="View details"
         >
           <Eye className="w-3.5 h-3.5" />
         </button>
+        <a
+          href={`/opportunities/${job.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${btn} w-8`}
+          aria-label="Open public posting"
+          title="Open public posting"
+        >
+          <Briefcase className="w-3.5 h-3.5" />
+        </a>
         <button
           type="button"
           disabled={busy}
@@ -510,21 +521,35 @@ export function AdminOpportunitiesPageInner() {
               <div>
                 <dt className="text-neutral-500 text-xs uppercase tracking-wider">Description</dt>
                 <dd className="whitespace-pre-wrap text-neutral-700">
-                  {viewJob.description || '—'}
+                  {htmlToPlainText(viewJob.description || '') || '—'}
                 </dd>
               </div>
             </dl>
             <ActionButtons job={viewJob} />
-            {viewJob.businessId ? (
+            <div className="mt-4 flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() => router.push(`/directory/${viewJob.businessId}`)}
-                className="mt-4 w-full min-h-[44px] bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
+                onClick={() => {
+                  window.open(`/opportunities/${viewJob.id}`, '_blank', 'noopener,noreferrer')
+                }}
+                className="w-full min-h-[44px] bg-black text-white rounded text-sm font-semibold hover:bg-neutral-800"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                View public profile
+                View public posting
               </button>
-            ) : null}
+              {viewJob.businessId ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.open(`/directory/${viewJob.businessId}`, '_blank', 'noopener,noreferrer')
+                  }}
+                  className="w-full min-h-[44px] bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  View business directory
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
       )}

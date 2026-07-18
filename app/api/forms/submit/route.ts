@@ -74,10 +74,31 @@ function pickFileUrl(responses: Record<string, unknown>, ...keys: string[]): str
         const o = first as Record<string, unknown>
         if (typeof o.url === 'string') return o.url
         if (typeof o.downloadURL === 'string') return o.downloadURL
+        if (typeof o.storagePath === 'string') return o.storagePath
       }
     }
   }
   return ''
+}
+
+function pickFileStoragePath(responses: Record<string, unknown>, ...keys: string[]): string | null {
+  for (const key of keys) {
+    const value = responses[key]
+    if (!value) continue
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const o = value as Record<string, unknown>
+      if (typeof o.storagePath === 'string' && o.storagePath) return o.storagePath
+      if (typeof o.path === 'string' && o.path) return o.path
+    }
+    if (Array.isArray(value) && value[0] && typeof value[0] === 'object') {
+      const o = value[0] as Record<string, unknown>
+      if (typeof o.storagePath === 'string' && o.storagePath) return o.storagePath
+    }
+    if (typeof value === 'string' && value.includes('/') && !value.startsWith('http')) {
+      return value.replace(/^\/+/, '')
+    }
+  }
+  return null
 }
 
 /** Mirror CMS Charity Support submissions into the Beneficiary Requests inbox. */
@@ -130,13 +151,30 @@ async function mirrorCharitySubmissionToBeneficiaryRequests(
       emergencyLevel,
       referralSource: pickResponse(responses, 'referralSource') || null,
       emiratesIdUrl: pickFileUrl(responses, 'emiratesId', 'emiratesIdUrl'),
+      emiratesIdStoragePath: pickFileStoragePath(responses, 'emiratesId', 'emiratesIdUrl'),
       passportUrl: pickFileUrl(responses, 'passport', 'passportUrl'),
+      passportStoragePath: pickFileStoragePath(responses, 'passport', 'passportUrl'),
       visaUrl: pickFileUrl(responses, 'visa', 'visaUrl'),
+      visaStoragePath: pickFileStoragePath(responses, 'visa', 'visaUrl'),
       salaryCertificateUrl: pickFileUrl(responses, 'salaryCertificate', 'salaryCertificateUrl'),
+      salaryCertificateStoragePath: pickFileStoragePath(
+        responses,
+        'salaryCertificate',
+        'salaryCertificateUrl'
+      ),
       bankStatementUrl: pickFileUrl(responses, 'bankStatement', 'bankStatementUrl') || null,
+      bankStatementStoragePath: pickFileStoragePath(responses, 'bankStatement', 'bankStatementUrl'),
       supportingDocumentUrls: [
         pickFileUrl(responses, 'supportingDocs', 'supportingDocuments', 'supportingDocumentUrls'),
       ].filter(Boolean),
+      supportingDocumentPaths: [
+        pickFileStoragePath(
+          responses,
+          'supportingDocs',
+          'supportingDocuments',
+          'supportingDocumentUrls'
+        ),
+      ].filter(Boolean) as string[],
       hasSignedConsent: Boolean(
         responses.consent === true ||
           responses.consent === 'true' ||

@@ -213,8 +213,8 @@ export default function AdminCmsPartnersPage() {
           <div>
             <h1 className="font-headline text-3xl font-bold text-neutral-900">Partners Page</h1>
             <p className="text-sm text-neutral-600 mt-1 font-body">
-              Edit public /partners copy, sponsorship deck PDF, tracks, and map inquiry categories
-              to Admin → Forms.
+              Edit public /partners hero, featured partnership projects, sponsorship deck, tracks,
+              and map inquiry categories to Admin → Forms.
             </p>
           </div>
           <Button
@@ -274,6 +274,247 @@ export default function AdminCmsPartnersPage() {
                 className="w-full min-h-24"
               />
             </div>
+          </div>
+        </Card>
+
+        <Card className="p-4 sm:p-6 space-y-4" id="featured-partnership-projects">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="font-headline text-xl font-bold">Featured partnership projects</h2>
+              <p className="text-xs text-neutral-500 mt-1">
+                Shown on /partners right after “Build alongside us” — title, cover/collage, brief,
+                date, location, partner names. Add at least one project, then Save.
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() =>
+                setConfig((prev) => ({
+                  ...prev,
+                  pageConfig: {
+                    ...prev.pageConfig,
+                    featuredProjects: [
+                      ...(prev.pageConfig.featuredProjects || []),
+                      {
+                        id: `project-${Date.now()}`,
+                        title: 'New project',
+                        brief: '',
+                        date: '',
+                        location: '',
+                        partnerNames: '',
+                        imageURL: '',
+                        galleryURLs: [],
+                        ctaLabel: 'Learn more',
+                        ctaHref: '',
+                      },
+                    ],
+                  },
+                }))
+              }
+              className="h-7 min-h-0 bg-black text-white hover:bg-gray-800 text-xs"
+            >
+              <Plus className="w-3 h-3 mr-1" /> Add project
+            </Button>
+          </div>
+          {(pc.featuredProjects || []).length === 0 ? (
+            <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-8 text-center">
+              <p className="text-sm text-neutral-600">
+                No featured projects yet. Click <span className="font-semibold">Add project</span>{' '}
+                to create one for the public Partners page.
+              </p>
+            </div>
+          ) : null}
+          <div className="space-y-4">
+            {(pc.featuredProjects || []).map((project, i) => (
+              <div key={project.id} className="border border-neutral-200 rounded-lg p-4 space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={project.title}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], title: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Project title"
+                  />
+                  <input
+                    type="text"
+                    value={project.partnerNames}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], partnerNames: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Partner names"
+                  />
+                  <input
+                    type="text"
+                    value={project.date}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], date: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Date (e.g. Jul 2026)"
+                  />
+                  <input
+                    type="text"
+                    value={project.location}
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], location: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px]"
+                    placeholder="Location (e.g. Abu Dhabi / Dubai, UAE)"
+                  />
+                </div>
+                <textarea
+                  value={project.brief}
+                  onChange={(e) =>
+                    setConfig((prev) => {
+                      const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                      featuredProjects[i] = { ...featuredProjects[i], brief: e.target.value }
+                      return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                    })
+                  }
+                  className="w-full min-h-20"
+                  placeholder="Brief description"
+                />
+                <CmsImageUpload
+                  label="Cover photo"
+                  value={project.imageURL || ''}
+                  folder="partners/projects"
+                  preset="content"
+                  onChange={(url) =>
+                    setConfig((prev) => {
+                      const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                      featuredProjects[i] = { ...featuredProjects[i], imageURL: url }
+                      return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                    })
+                  }
+                />
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-neutral-600">
+                    Extra gallery photos (optional collage, max 5)
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {(project.galleryURLs || []).map((url) => (
+                      <div key={url} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" className="h-16 w-20 object-cover rounded border" />
+                        <button
+                          type="button"
+                          className="absolute -top-1.5 -right-1.5 bg-black text-white rounded-full w-5 h-5 text-xs"
+                          onClick={() =>
+                            setConfig((prev) => {
+                              const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                              featuredProjects[i] = {
+                                ...featuredProjects[i],
+                                galleryURLs: (featuredProjects[i].galleryURLs || []).filter(
+                                  (u) => u !== url
+                                ),
+                              }
+                              return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                            })
+                          }
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*,image/gif"
+                    multiple
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || [])
+                      if (!files.length) return
+                      try {
+                        const uploaded: string[] = []
+                        for (const file of files) {
+                          const url = await uploadFileToFirebase(file, 'partners/projects/gallery')
+                          uploaded.push(url)
+                        }
+                        setConfig((prev) => {
+                          const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                          const current = featuredProjects[i].galleryURLs || []
+                          featuredProjects[i] = {
+                            ...featuredProjects[i],
+                            galleryURLs: [...current, ...uploaded].slice(0, 5),
+                          }
+                          return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                        })
+                      } catch (err) {
+                        setMessage({
+                          type: 'error',
+                          text: err instanceof Error ? err.message : 'Gallery upload failed',
+                        })
+                      }
+                      e.target.value = ''
+                    }}
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="text"
+                    value={project.ctaLabel || ''}
+                    placeholder="CTA label"
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], ctaLabel: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px] px-3 border rounded-lg"
+                  />
+                  <input
+                    type="url"
+                    value={project.ctaHref || ''}
+                    placeholder="CTA link (https://…)"
+                    onChange={(e) =>
+                      setConfig((prev) => {
+                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
+                        featuredProjects[i] = { ...featuredProjects[i], ctaHref: e.target.value }
+                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
+                      })
+                    }
+                    className="w-full min-h-[44px] px-3 border rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        pageConfig: {
+                          ...prev.pageConfig,
+                          featuredProjects: (prev.pageConfig.featuredProjects || []).filter(
+                            (_, idx) => idx !== i
+                          ),
+                        },
+                      }))
+                    }
+                    className={BUTTON_ICON_PRIMARY}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
 
@@ -634,238 +875,6 @@ export default function AdminCmsPartnersPage() {
             preset="content"
             onChange={(url) => updatePage('homepageCtaImageURL', url)}
           />
-        </Card>
-
-        <Card className="p-4 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <h2 className="font-headline text-xl font-bold">Featured partnership projects</h2>
-              <p className="text-xs text-neutral-500 mt-1">
-                Shown on /partners right after “Build alongside us” — title, cover/collage, brief, date, location, partner names.
-              </p>
-            </div>
-            <Button
-              type="button"
-              onClick={() =>
-                setConfig((prev) => ({
-                  ...prev,
-                  pageConfig: {
-                    ...prev.pageConfig,
-                    featuredProjects: [
-                      ...(prev.pageConfig.featuredProjects || []),
-                      {
-                        id: `project-${Date.now()}`,
-                        title: 'New project',
-                        brief: '',
-                        date: '',
-                        location: '',
-                        partnerNames: '',
-                        imageURL: '',
-                        galleryURLs: [],
-                        ctaLabel: 'Learn more',
-                        ctaHref: '',
-                      },
-                    ],
-                  },
-                }))
-              }
-              className="h-7 min-h-0 bg-black text-white hover:bg-gray-800 text-xs"
-            >
-              <Plus className="w-3 h-3 mr-1" /> Add project
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {(pc.featuredProjects || []).map((project, i) => (
-              <div key={project.id} className="border border-neutral-200 rounded-lg p-4 space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    value={project.title}
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], title: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="w-full min-h-[44px]"
-                    placeholder="Project title"
-                  />
-                  <input
-                    type="text"
-                    value={project.partnerNames}
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], partnerNames: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="w-full min-h-[44px]"
-                    placeholder="Partner names"
-                  />
-                  <input
-                    type="text"
-                    value={project.date}
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], date: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="w-full min-h-[44px]"
-                    placeholder="Date (e.g. Jul 2026)"
-                  />
-                  <input
-                    type="text"
-                    value={project.location}
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], location: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="w-full min-h-[44px]"
-                    placeholder="Location (e.g. Abu Dhabi / Dubai, UAE)"
-                  />
-                </div>
-                <textarea
-                  value={project.brief}
-                  onChange={(e) =>
-                    setConfig((prev) => {
-                      const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                      featuredProjects[i] = { ...featuredProjects[i], brief: e.target.value }
-                      return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                    })
-                  }
-                  className="w-full min-h-20"
-                  placeholder="Brief description"
-                />
-                <CmsImageUpload
-                  label="Cover photo"
-                  value={project.imageURL || ''}
-                  folder="partners/projects"
-                  preset="content"
-                  onChange={(url) =>
-                    setConfig((prev) => {
-                      const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                      featuredProjects[i] = { ...featuredProjects[i], imageURL: url }
-                      return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                    })
-                  }
-                />
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-neutral-600">
-                    Extra gallery photos (optional collage, max 5)
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {(project.galleryURLs || []).map((url) => (
-                      <div key={url} className="relative">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt="" className="h-16 w-20 object-cover rounded border" />
-                        <button
-                          type="button"
-                          className="absolute -top-1.5 -right-1.5 bg-black text-white rounded-full w-5 h-5 text-xs"
-                          onClick={() =>
-                            setConfig((prev) => {
-                              const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                              featuredProjects[i] = {
-                                ...featuredProjects[i],
-                                galleryURLs: (featuredProjects[i].galleryURLs || []).filter(
-                                  (u) => u !== url
-                                ),
-                              }
-                              return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                            })
-                          }
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*,image/gif"
-                    multiple
-                    onChange={async (e) => {
-                      const files = Array.from(e.target.files || [])
-                      if (!files.length) return
-                      try {
-                        const uploaded: string[] = []
-                        for (const file of files) {
-                          const url = await uploadFileToFirebase(file, 'partners/projects/gallery')
-                          uploaded.push(url)
-                        }
-                        setConfig((prev) => {
-                          const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                          const current = featuredProjects[i].galleryURLs || []
-                          featuredProjects[i] = {
-                            ...featuredProjects[i],
-                            galleryURLs: [...current, ...uploaded].slice(0, 5),
-                          }
-                          return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                        })
-                      } catch (err) {
-                        setMessage({
-                          type: 'error',
-                          text: err instanceof Error ? err.message : 'Gallery upload failed',
-                        })
-                      }
-                      e.target.value = ''
-                    }}
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <input
-                    type="text"
-                    value={project.ctaLabel || ''}
-                    placeholder="CTA label"
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], ctaLabel: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="w-full min-h-[44px] px-3 border rounded-lg"
-                  />
-                  <input
-                    type="url"
-                    value={project.ctaHref || ''}
-                    placeholder="CTA link (https://…)"
-                    onChange={(e) =>
-                      setConfig((prev) => {
-                        const featuredProjects = [...(prev.pageConfig.featuredProjects || [])]
-                        featuredProjects[i] = { ...featuredProjects[i], ctaHref: e.target.value }
-                        return { ...prev, pageConfig: { ...prev.pageConfig, featuredProjects } }
-                      })
-                    }
-                    className="w-full min-h-[44px] px-3 border rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setConfig((prev) => ({
-                        ...prev,
-                        pageConfig: {
-                          ...prev.pageConfig,
-                          featuredProjects: (prev.pageConfig.featuredProjects || []).filter(
-                            (_, idx) => idx !== i
-                          ),
-                        },
-                      }))
-                    }
-                    className={BUTTON_ICON_PRIMARY}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">

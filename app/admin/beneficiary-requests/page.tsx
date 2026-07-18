@@ -29,9 +29,11 @@ type BeneficiaryRow = {
   createdAt?: string | Date | { seconds?: number; _seconds?: number }
   submissionDate?: string | Date | { seconds?: number; _seconds?: number }
   hasSensitiveDocuments?: boolean
+  availableDocuments?: string[]
   sensitiveDocumentsRedacted?: boolean
   reasonCategory?: string
   phoneNumber?: string
+  formSubmissionId?: string
 }
 
 function toDate(value: unknown): Date | null {
@@ -173,6 +175,23 @@ export default function BeneficiaryRequestsAdmin() {
     }
   }
 
+  const openReview = async (row: BeneficiaryRow) => {
+    setSelected(row)
+    try {
+      const json = await adminApiFetch<BeneficiaryRow>(
+        `/api/admin/beneficiary-requests?id=${encodeURIComponent(row.id)}`
+      )
+      if (typeof json.canViewSensitiveDocuments === 'boolean') {
+        setCanViewDocsFromApi(json.canViewSensitiveDocuments)
+      }
+      if (json.success && json.data && typeof json.data === 'object') {
+        setSelected({ ...row, ...json.data, id: row.id })
+      }
+    } catch {
+      /* keep list row */
+    }
+  }
+
   const openSensitiveDoc = async (requestId: string, documentKey: string) => {
     if (!canViewDocs) {
       alert(
@@ -306,7 +325,7 @@ export default function BeneficiaryRequestsAdmin() {
                         {when ? when.toLocaleDateString() : '—'}
                       </p>
                       <div className="flex flex-wrap gap-2 pt-1">
-                        <button type="button" className={btnSecondary} onClick={() => setSelected(r)}>
+                        <button type="button" className={btnSecondary} onClick={() => void openReview(r)}>
                           <Eye className="w-4 h-4 inline mr-1" />
                           Review
                         </button>
@@ -356,7 +375,7 @@ export default function BeneficiaryRequestsAdmin() {
                           <td className="py-3 pr-3 capitalize">{r.status || '—'}</td>
                           <td className="py-3">
                             <div className="flex flex-wrap gap-2">
-                              <button type="button" className="underline" onClick={() => setSelected(r)}>
+                              <button type="button" className="underline" onClick={() => void openReview(r)}>
                                 Review
                               </button>
                               <button
@@ -471,35 +490,48 @@ export default function BeneficiaryRequestsAdmin() {
                   </span>
                 </div>
               ) : (
-                <div className="flex flex-col gap-1.5">
-                  {(
-                    [
-                      ['emiratesIdUrl', 'Emirates ID'],
-                      ['passportUrl', 'Passport'],
-                      ['visaUrl', 'Visa'],
-                      ['salaryCertificateUrl', 'Salary certificate'],
-                      ['bankStatementUrl', 'Bank statement'],
-                    ] as const
-                  ).map(([key, label]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      data-dashboard-control
-                      className={`${btnSecondary} text-left text-xs`}
-                      onClick={() => void openSensitiveDoc(selected.id, key)}
-                    >
-                      View {label}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    data-dashboard-control
-                    className={`${btnSecondary} text-left text-xs`}
-                    onClick={() => void openSensitiveDoc(selected.id, 'supportingDocumentUrls')}
-                  >
-                    View supporting documents
-                  </button>
-                </div>
+                (() => {
+                  const docs = [
+                    ['emiratesIdUrl', 'Emirates ID'],
+                    ['passportUrl', 'Passport'],
+                    ['visaUrl', 'Visa'],
+                    ['salaryCertificateUrl', 'Salary certificate'],
+                    ['bankStatementUrl', 'Bank statement'],
+                    ['supportingDocumentUrls', 'Supporting documents'],
+                  ] as const
+                  const available = new Set(
+                    Array.isArray(selected.availableDocuments)
+                      ? selected.availableDocuments
+                      : selected.hasSensitiveDocuments
+                        ? docs.map(([k]) => k)
+                        : []
+                  )
+                  const present = docs.filter(([key]) => available.has(key))
+                  if (present.length === 0) {
+                    return (
+                      <p className="text-sm text-neutral-500 bg-neutral-50 rounded p-2.5">
+                        No uploaded documents were found on this request. If the applicant used
+                        the charity form, ask them to resubmit with attachments, or check Storage
+                        for this request id.
+                      </p>
+                    )
+                  }
+                  return (
+                    <div className="flex flex-col gap-1.5">
+                      {present.map(([key, label]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          data-dashboard-control
+                          className={`${btnSecondary} text-left text-xs`}
+                          onClick={() => void openSensitiveDoc(selected.id, key)}
+                        >
+                          View {label}
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })()
               )}
             </div>
           </>

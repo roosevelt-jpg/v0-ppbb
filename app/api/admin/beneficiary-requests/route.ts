@@ -43,6 +43,107 @@ const DOC_KEY_TO_PATH: Record<string, string> = {
   bankStatementUrl: 'bankStatementStoragePath',
 }
 
+const DOC_VIEW_KEYS = [
+  'emiratesIdUrl',
+  'passportUrl',
+  'visaUrl',
+  'salaryCertificateUrl',
+  'bankStatementUrl',
+  'supportingDocumentUrls',
+] as const
+
+/** Pull a Storage object path from a raw path or GCS / Firebase download URL. */
+function extractStoragePath(value: string): string | null {
+  const v = value.trim()
+  if (!v) return null
+  if (!/^https?:\/\//i.test(v)) {
+    if (v.includes('/') && !/\s/.test(v)) return v.replace(/^\/+/, '')
+    return null
+  }
+  try {
+    const u = new URL(v)
+    if (u.hostname === 'storage.googleapis.com') {
+      const parts = u.pathname.replace(/^\//, '').split('/')
+      if (parts.length >= 2) return decodeURIComponent(parts.slice(1).join('/'))
+    }
+    if (u.hostname === 'firebasestorage.googleapis.com') {
+      const match = u.pathname.match(/\/o\/(.+)$/)
+      if (match?.[1]) return decodeURIComponent(match[1])
+    }
+  } catch {
+    /* ignore */
+  }
+  return null
+}
+
+function pickFileRef(value: unknown): { url?: string; storagePath?: string } | null {
+  if (!value) return null
+  if (typeof value === 'string' && value.trim()) {
+    const s = value.trim()
+    if (/^https?:\/\//i.test(s)) return { url: s, storagePath: extractStoragePath(s) || undefined }
+    if (s.includes('/')) return { storagePath: s.replace(/^\/+/, '') }
+    return null
+  }
+  if (Array.isArray(value) && value.length > 0) return pickFileRef(value[0])
+  if (typeof value === 'object') {
+    const o = value as Record<string, unknown>
+    const url =
+      (typeof o.url === 'string' && o.url) ||
+      (typeof o.downloadURL === 'string' && o.downloadURL) ||
+      undefined
+    const storagePath =
+      (typeof o.storagePath === 'string' && o.storagePath) ||
+      (typeof o.path === 'string' && o.path) ||
+      (url ? extractStoragePath(url) : null) ||
+      undefined
+    if (url || storagePath) return { url, storagePath: storagePath || undefined }
+  }
+  return null
+}
+
+function pickFileRefFromResponses(
+  responses: Record<string, unknown>,
+  ...keys: string[]
+): { url?: string; storagePath?: string } | null {
+  for (const key of keys) {
+    const ref = pickFileRef(responses[key])
+    if (ref) return ref
+  }
+  return null
+}
+
+async function mintReadableUrl(raw: string): Promise<string | null> {
+  const path = extractStoragePath(raw)
+  if (path) {
+    try {
+      return await getSignedReadUrl(path, 1)
+    } catch (err) {
+      console.error('[beneficiary-requests] signed URL failed for path:', path, err)
+      if (/^https?:\/\//i.test(raw)) return raw
+      return null
+    }
+  }
+  if (/^https?:\/\//i.test(raw)) return raw
+  return null
+}
+
+function hasDocumentForKey(data: Record<string, unknown>, key: string): boolean {
+  if (key === 'supportingDocumentUrls' || key === 'supportingDocuments') {
+    const arr =
+      data.supportingDocumentUrls || data.supportingDocuments || data.supportingDocumentPaths
+    return Array.isArray(arr) && arr.some((item) => Boolean(pickFileRef(item)))
+  }
+  const pathField = DOC_KEY_TO_PATH[key]
+  if (pathField && typeof data[pathField] === 'string' && String(data[pathField]).trim()) {
+    return true
+  }
+  return Boolean(pickFileRef(data[key]))
+}
+
+function listAvailableDocumentKeys(data: Record<string, unknown>): string[] {
+  return DOC_VIEW_KEYS.filter((key) => hasDocumentForKey(data, key))
+}
+
 async function requireAdminAuth(request: NextRequest) {
   const uid = await requireAdminFromRequest(request)
   if (!uid) return null
@@ -98,9 +199,19 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
       }
       const data = snap.data() || {}
-      const url = await resolveDocumentUrl(data, documentKey)
+      let url = await resolveDocumentUrl(data, documentKey)
       if (!url) {
-        return NextResponse.json({ success: false, error: 'Document not found' }, { status: 404 })
+        url = await resolveDocumentUrlFromFormSubmission(db, data, documentKey)
+      }
+      if (!url) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'Document not found for this request. The file may not have been uploaded, or the storage path is missing.',
+          },
+          { status: 404 }
+        )
       }
       return NextResponse.json({
         success: true,
@@ -208,6 +319,22 @@ async function importOrphanedCharityFormSubmissions(
         ? emergencyRaw
         : 'medium'
 
+      const emirates = pickFileRefFromResponses(responses, 'emiratesId', 'emiratesIdUrl')
+      const passport = pickFileRefFromResponses(responses, 'passport', 'passportUrl')
+      const visa = pickFileRefFromResponses(responses, 'visa', 'visaUrl')
+      const salary = pickFileRefFromResponses(
+        responses,
+        'salaryCertificate',
+        'salaryCertificateUrl'
+      )
+      const bank = pickFileRefFromResponses(responses, 'bankStatement', 'bankStatementUrl')
+      const supporting = pickFileRefFromResponses(
+        responses,
+        'supportingDocs',
+        'supportingDocuments',
+        'supportingDocumentUrls'
+      )
+
       const payload = {
         id: mirroredId,
         formSubmissionId: sub.id,
@@ -221,13 +348,20 @@ async function importOrphanedCharityFormSubmissions(
         emergencyLevel,
         reason: String(responses.reason || ''),
         reasonCategory: String(responses.supportType || 'support'),
-        emiratesIdUrl: typeof responses.emiratesId === 'string' ? responses.emiratesId : '',
-        passportUrl: typeof responses.passport === 'string' ? responses.passport : '',
-        visaUrl: typeof responses.visa === 'string' ? responses.visa : '',
-        salaryCertificateUrl:
-          typeof responses.salaryCertificate === 'string' ? responses.salaryCertificate : '',
-        bankStatementUrl:
-          typeof responses.bankStatement === 'string' ? responses.bankStatement : '',
+        emiratesIdUrl: emirates?.url || emirates?.storagePath || '',
+        emiratesIdStoragePath: emirates?.storagePath || null,
+        passportUrl: passport?.url || passport?.storagePath || '',
+        passportStoragePath: passport?.storagePath || null,
+        visaUrl: visa?.url || visa?.storagePath || '',
+        visaStoragePath: visa?.storagePath || null,
+        salaryCertificateUrl: salary?.url || salary?.storagePath || '',
+        salaryCertificateStoragePath: salary?.storagePath || null,
+        bankStatementUrl: bank?.url || bank?.storagePath || '',
+        bankStatementStoragePath: bank?.storagePath || null,
+        supportingDocumentUrls: supporting
+          ? [supporting.url || supporting.storagePath].filter(Boolean)
+          : [],
+        supportingDocumentPaths: supporting?.storagePath ? [supporting.storagePath] : [],
         submissionDate: subData.submittedAt || subData.createdAt || null,
         createdAt: subData.submittedAt || subData.createdAt || null,
       }
@@ -319,56 +453,80 @@ async function resolveDocumentUrl(
   key: string
 ): Promise<string | null> {
   if (key === 'supportingDocumentUrls' || key === 'supportingDocuments') {
-    const arr = data.supportingDocumentUrls || data.supportingDocuments || data.supportingDocumentPaths
-    if (Array.isArray(arr) && arr.length > 0) {
-      const first = arr[0]
-      if (typeof first === 'string') {
-        if (first.startsWith('http')) return first
-        try {
-          return await getSignedReadUrl(first, 1)
-        } catch {
-          return null
+    const arr =
+      data.supportingDocumentUrls || data.supportingDocuments || data.supportingDocumentPaths
+    if (Array.isArray(arr)) {
+      for (const item of arr) {
+        const ref = pickFileRef(item)
+        if (ref?.storagePath) {
+          const signed = await mintReadableUrl(ref.storagePath)
+          if (signed) return signed
         }
-      }
-      if (first && typeof first === 'object') {
-        const n = first as Record<string, unknown>
-        if (typeof n.storagePath === 'string') {
-          try {
-            return await getSignedReadUrl(String(n.storagePath), 1)
-          } catch {
-            /* fall through */
-          }
+        if (ref?.url) {
+          const signed = await mintReadableUrl(ref.url)
+          if (signed) return signed
         }
-        if (typeof n.url === 'string') return n.url
       }
     }
   }
 
   const pathField = DOC_KEY_TO_PATH[key]
   const storagePath = pathField && typeof data[pathField] === 'string' ? String(data[pathField]) : ''
-  if (storagePath) {
-    try {
-      return await getSignedReadUrl(storagePath, 1)
-    } catch (err) {
-      console.error('[beneficiary-requests] signed URL failed:', err)
-    }
+  if (storagePath.trim()) {
+    const signed = await mintReadableUrl(storagePath.trim())
+    if (signed) return signed
   }
 
-  if (typeof data[key] === 'string' && (data[key] as string).startsWith('http')) {
-    return data[key] as string
+  const direct = pickFileRef(data[key])
+  if (direct?.storagePath) {
+    const signed = await mintReadableUrl(direct.storagePath)
+    if (signed) return signed
   }
-  const nested = data[key]
-  if (nested && typeof nested === 'object') {
-    const n = nested as Record<string, unknown>
-    if (typeof n.storagePath === 'string') {
-      try {
-        return await getSignedReadUrl(String(n.storagePath), 1)
-      } catch {
-        /* fall through */
-      }
+  if (direct?.url) {
+    const signed = await mintReadableUrl(direct.url)
+    if (signed) return signed
+  }
+
+  return null
+}
+
+/** Fallback: resolve file from linked formSubmissions.responses when request fields are empty. */
+async function resolveDocumentUrlFromFormSubmission(
+  db: Firestore,
+  data: Record<string, unknown>,
+  key: string
+): Promise<string | null> {
+  const submissionId =
+    (typeof data.formSubmissionId === 'string' && data.formSubmissionId) ||
+    (typeof data.id === 'string' && data.id.startsWith('form_') ? data.id.slice(5) : '')
+  if (!submissionId) return null
+
+  try {
+    const snap = await db.collection('formSubmissions').doc(submissionId).get()
+    if (!snap.exists) return null
+    const responses =
+      snap.data()?.responses && typeof snap.data()?.responses === 'object'
+        ? (snap.data()!.responses as Record<string, unknown>)
+        : {}
+
+    const responseKeys: Record<string, string[]> = {
+      emiratesIdUrl: ['emiratesId', 'emiratesIdUrl'],
+      passportUrl: ['passport', 'passportUrl'],
+      visaUrl: ['visa', 'visaUrl'],
+      salaryCertificateUrl: ['salaryCertificate', 'salaryCertificateUrl'],
+      bankStatementUrl: ['bankStatement', 'bankStatementUrl'],
+      supportingDocumentUrls: ['supportingDocs', 'supportingDocuments', 'supportingDocumentUrls'],
     }
-    if (typeof n.url === 'string') return n.url
-    if (typeof n.downloadURL === 'string') return n.downloadURL
+    const keys = responseKeys[key] || [key]
+    const ref = pickFileRefFromResponses(responses, ...keys)
+    if (!ref) return null
+    if (ref.storagePath) {
+      const signed = await mintReadableUrl(ref.storagePath)
+      if (signed) return signed
+    }
+    if (ref.url) return mintReadableUrl(ref.url)
+  } catch (err) {
+    console.error('[beneficiary-requests] form submission fallback failed:', err)
   }
   return null
 }
@@ -380,6 +538,7 @@ function redactRequest(
 ): Record<string, unknown> {
   const serialized = serializeFirestoreDoc(id, data) as Record<string, unknown>
   const out: Record<string, unknown> = { ...serialized }
+  const availableDocuments = listAvailableDocumentKeys(data)
   // Never send long-lived signed URLs in list payloads — welfare opens via ?document=
   delete out.emiratesIdUrl
   delete out.passportUrl
@@ -392,22 +551,17 @@ function redactRequest(
     for (const key of SENSITIVE_KEYS) {
       if (key in out) delete out[key]
     }
-    out.hasSensitiveDocuments = hasAnySensitive(data)
+    out.hasSensitiveDocuments = availableDocuments.length > 0
+    out.availableDocuments = []
     out.sensitiveDocumentsRedacted = true
     return out
   }
 
-  out.hasSensitiveDocuments = hasAnySensitive(data)
+  out.hasSensitiveDocuments = availableDocuments.length > 0
+  out.availableDocuments = availableDocuments
   return out
 }
 
 function hasAnySensitive(data: Record<string, unknown>): boolean {
-  return SENSITIVE_KEYS.some((key) => {
-    const v = data[key]
-    if (!v) return false
-    if (typeof v === 'string' && v.length > 0) return true
-    if (Array.isArray(v) && v.length > 0) return true
-    if (typeof v === 'object') return true
-    return false
-  })
+  return listAvailableDocumentKeys(data).length > 0
 }

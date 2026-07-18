@@ -78,6 +78,20 @@ export default function VolunteeringPage() {
 
     let cancelled = false
 
+    // Fix older flat per-event credits using each event’s start–end duration
+    void (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (!token || cancelled) return
+        await fetch('/api/volunteering/reconcile-hours', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      } catch (err) {
+        console.error('[v0] Volunteer hours reconcile error:', err)
+      }
+    })()
+
     const loadOpportunities = async () => {
       try {
         const opps = await getAllOpenOpportunities()
@@ -320,7 +334,8 @@ export default function VolunteeringPage() {
     <DashboardPageShell title="Volunteering" subtitle="Give your time and skills to causes that matter">
       <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50">
         <p className="text-sm text-neutral-700">
-          Confirm attendance at charity events to add hours toward your certificates, then{' '}
+          Confirm attendance at charity events to add hours equal to each event’s start–end time
+          toward your certificates, then{' '}
           <Link href="/dashboard/certificates" className="underline font-medium text-neutral-900">
             issue your certificate
           </Link>

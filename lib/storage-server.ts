@@ -97,8 +97,23 @@ export async function uploadBufferToPath(
 }
 
 /** Mint a fresh signed URL for a private Storage object (Admin SDK only). */
-export async function getSignedReadUrl(path: string, days = 7): Promise<string> {
-  const file = getAdminBucket().file(path.replace(/^\/+/, ''))
+export async function getSignedReadUrl(pathOrUrl: string, days = 7): Promise<string> {
+  let path = pathOrUrl.trim().replace(/^\/+/, '')
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      const u = new URL(path)
+      if (u.hostname === 'storage.googleapis.com') {
+        const parts = u.pathname.replace(/^\//, '').split('/')
+        if (parts.length >= 2) path = decodeURIComponent(parts.slice(1).join('/'))
+      } else if (u.hostname === 'firebasestorage.googleapis.com') {
+        const match = u.pathname.match(/\/o\/(.+)$/)
+        if (match?.[1]) path = decodeURIComponent(match[1])
+      }
+    } catch {
+      /* keep original */
+    }
+  }
+  const file = getAdminBucket().file(path)
   const [signed] = await file.getSignedUrl({
     action: 'read',
     expires: Date.now() + days * 24 * 60 * 60 * 1000,

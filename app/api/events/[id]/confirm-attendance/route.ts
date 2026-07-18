@@ -91,11 +91,15 @@ export async function POST(request: NextRequest, context: Ctx) {
     alreadyCredited: credit.reason === 'already_credited',
     notCharityEvent: credit.reason === 'not_charity_event',
     message: credit.credited
-      ? `Attendance confirmed. ${credit.hours} volunteer hour(s) added toward your certificates.`
+      ? credit.adjusted
+        ? `Hours updated to ${credit.hours} based on this event’s start–end time.`
+        : `Attendance confirmed. ${credit.hours} volunteer hour(s) added (event start–end duration).`
       : credit.reason === 'already_credited'
         ? 'Attendance already confirmed — hours were already added.'
         : credit.reason === 'not_charity_event'
           ? 'Attendance noted. Hours are only credited for charity / volunteer events.'
-          : 'Attendance confirmed.',
+          : credit.reason === 'no_duration'
+            ? 'Attendance noted, but this event has no usable start/end time to calculate hours.'
+            : 'Attendance confirmed.',
   })
 }

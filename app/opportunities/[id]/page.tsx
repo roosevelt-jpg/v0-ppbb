@@ -21,6 +21,7 @@ import {
   opportunityMemberBlocksUser,
   daysUntilDeadline,
 } from '@/lib/opportunity-utils'
+import { cmsContentToHtml } from '@/lib/cms-page-content'
 import { isMapsOrWebUrl } from '@/lib/event-utils'
 import { format } from 'date-fns'
 import {
@@ -266,11 +267,9 @@ export default function OpportunityDetailPage() {
                     <h2 className="text-lg font-bold text-neutral-900 mb-3">Job Description</h2>
                     {opportunity.description ? (
                       <div
-                        className="prose prose-sm max-w-none text-neutral-700"
+                        className="prose prose-sm max-w-none text-neutral-700 [&_p]:mb-3 [&_br]:block"
                         dangerouslySetInnerHTML={{
-                          __html: opportunity.description.includes('<')
-                            ? opportunity.description
-                            : `<p>${opportunity.description.replace(/\n/g, '<br>')}</p>`,
+                          __html: cmsContentToHtml(opportunity.description, opportunity.title),
                         }}
                       />
                     ) : (
