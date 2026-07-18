@@ -9,7 +9,10 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
   type GlobalSocialLinks,
 } from '@/lib/platform-config'
-import { FOOTER_PRIMARY_LINKS } from '@/lib/cms-menu-seeds'
+import { FOOTER_LEGAL_LINKS, FOOTER_PRIMARY_LINKS } from '@/lib/cms-menu-seeds'
+import { ensureMenuPagesSeeded, subscribeToMenuPages } from '@/lib/cms-menu-live'
+import { getCmsPageHref, getCmsPageLabel } from '@/lib/cms-page-routes'
+import type { Page } from '@/lib/types'
 import { useCommunityStats } from '@/hooks/use-community-stats'
 
 interface Stats {
@@ -17,6 +20,19 @@ interface Stats {
   volunteerHours: number
   businessPartners: number
   donationsTracked: string
+}
+
+type MenuLink = { id: string; label: string; href: string }
+
+function pagesToLinks(pages: Page[]): MenuLink[] {
+  return pages
+    .filter((p) => p.showInMenu !== false && p.status !== 'draft')
+    .sort((a, b) => (a.menuOrder ?? 0) - (b.menuOrder ?? 0))
+    .map((p) => ({
+      id: p.id,
+      label: getCmsPageLabel(p),
+      href: getCmsPageHref(p),
+    }))
 }
 
 export function Footer() {
@@ -32,11 +48,26 @@ export function Footer() {
     DEFAULT_GLOBAL_SETTINGS.socialLinks
   )
   const [footerBlurb, setFooterBlurb] = useState(DEFAULT_GLOBAL_SETTINGS.siteDescription)
+  const [legalLinks, setLegalLinks] = useState<MenuLink[]>(
+    FOOTER_LEGAL_LINKS.map((l) => ({ id: l.href, label: l.label, href: l.href }))
+  )
 
   useEffect(() => {
     return subscribeToGlobalSettings((s) => {
       setSocialLinks(s.socialLinks || {})
       setFooterBlurb(s.siteDescription || DEFAULT_GLOBAL_SETTINGS.siteDescription)
+    })
+  }, [])
+
+  useEffect(() => {
+    void ensureMenuPagesSeeded()
+    return subscribeToMenuPages('footer-legal', (pages) => {
+      const fromCms = pagesToLinks(pages)
+      if (fromCms.length > 0) {
+        setLegalLinks(fromCms)
+        return
+      }
+      setLegalLinks(FOOTER_LEGAL_LINKS.map((l) => ({ id: l.href, label: l.label, href: l.href })))
     })
   }, [])
 
@@ -80,7 +111,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div>
             <SiteLogo background="dark" variant="footer" href="/" />
             <p className="mt-4 text-sm" style={{ color: '#888888' }}>
@@ -114,6 +145,25 @@ export function Footer() {
             <ul className="space-y-2">
               {linkColB.map((link) => (
                 <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm hover:text-white transition-colors"
+                    style={{ color: '#888888' }}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold mb-4" style={{ color: '#ffffff' }}>
+              Legal
+            </h3>
+            <ul className="space-y-2">
+              {legalLinks.map((link) => (
+                <li key={link.id}>
                   <Link
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"

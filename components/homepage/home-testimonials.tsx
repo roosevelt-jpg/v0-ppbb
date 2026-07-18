@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Quote } from 'lucide-react'
 import {
   subscribeToHomepage,
@@ -8,6 +8,9 @@ import {
   HomepageConfig,
 } from '@/lib/homepage-config'
 import { subscribeToActiveTestimonials, Testimonial } from '@/lib/testimonials'
+
+const AUTOPLAY_MS = 6000
+const SLIDE_MS = 450
 
 function TestimonialsSkeleton() {
   return (
@@ -23,7 +26,7 @@ function TestimonialsSkeleton() {
 function TestimonialSlide({ item }: { item: Testimonial }) {
   if (item.type === 'video' && item.videoURL) {
     return (
-      <div className="bg-white rounded-xl border border-[#e4e1da] overflow-hidden min-w-0">
+      <div className="bg-white rounded-xl border border-[#e4e1da] overflow-hidden min-w-0 h-full">
         <video
           src={item.videoURL}
           controls
@@ -74,6 +77,8 @@ export function HomeTestimonials() {
   const [configReady, setConfigReady] = useState(false)
   const [itemsReady, setItemsReady] = useState(false)
   const [index, setIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const touchStartX = useRef<number | null>(null)
 
   useEffect(() => subscribeToHomepage((data) => {
     setConfig(data)
@@ -86,11 +91,27 @@ export function HomeTestimonials() {
     setIndex(0)
   }), [])
 
+  const multi = testimonials.length > 1
+
+  const goTo = useCallback(
+    (next: number) => {
+      if (!multi) return
+      setIndex(((next % testimonials.length) + testimonials.length) % testimonials.length)
+    },
+    [multi, testimonials.length]
+  )
+
+  useEffect(() => {
+    if (!multi || paused) return
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % testimonials.length)
+    }, AUTOPLAY_MS)
+    return () => clearInterval(timer)
+  }, [multi, paused, testimonials.length])
+
   if (!configReady || !itemsReady) return <TestimonialsSkeleton />
 
   if (testimonials.length === 0) return null
-
-  const current = testimonials[index]
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 overflow-x-hidden">
@@ -99,27 +120,60 @@ export function HomeTestimonials() {
           {config.testimonials.heading}
         </h2>
 
-        <div className="relative min-w-0">
-          <TestimonialSlide item={current} />
+        <div
+          className="relative min-w-0 overflow-hidden"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0]?.clientX ?? null
+            setPaused(true)
+          }}
+          onTouchEnd={(e) => {
+            const start = touchStartX.current
+            touchStartX.current = null
+            setPaused(false)
+            if (start == null || !multi) return
+            const end = e.changedTouches[0]?.clientX
+            if (end == null) return
+            const delta = end - start
+            if (Math.abs(delta) < 40) return
+            goTo(index + (delta < 0 ? 1 : -1))
+          }}
+        >
+          <div
+            className="flex ease-in-out"
+            style={{
+              transform: `translateX(-${index * 100}%)`,
+              transition: `transform ${SLIDE_MS}ms ease-in-out`,
+            }}
+          >
+            {testimonials.map((item) => (
+              <div key={item.id} className="min-w-full w-full flex-shrink-0 px-0.5">
+                <TestimonialSlide item={item} />
+              </div>
+            ))}
+          </div>
         </div>
 
-        {testimonials.length > 1 && (
-          <div className="flex justify-center items-center gap-1.5 mt-4" role="tablist" aria-label="Success stories">
+        {multi && (
+          <div
+            className="flex justify-center items-center gap-1.5 mt-4"
+            role="tablist"
+            aria-label="Success stories"
+          >
             {testimonials.map((t, i) => (
               <button
                 key={t.id}
                 type="button"
                 role="tab"
                 aria-selected={i === index}
-                onClick={() => setIndex(i)}
+                onClick={() => goTo(i)}
                 className="pb-compact-btn inline-flex items-center justify-center h-4 w-4 min-h-0 min-w-0 p-0 rounded-full !bg-transparent hover:!bg-transparent shadow-none border-0"
                 aria-label={`Go to testimonial ${i + 1}`}
               >
                 <span
                   className={`block rounded-full transition-all ${
-                    i === index
-                      ? 'h-1.5 w-1.5 bg-black'
-                      : 'h-1 w-1 bg-neutral-300'
+                    i === index ? 'h-1.5 w-1.5 bg-black' : 'h-1 w-1 bg-neutral-300'
                   }`}
                 />
               </button>

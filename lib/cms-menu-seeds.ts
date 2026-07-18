@@ -28,6 +28,14 @@ export const FOOTER_PRIMARY_LINKS: ReadonlyArray<{ label: string; href: string }
   { label: 'FAQ', href: '/faq' },
 ]
 
+/** Default Legal column links (overridden by CMS pages with menuLocation footer-legal). */
+export const FOOTER_LEGAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
+  { label: 'Privacy Policy', href: '/pages/privacy-policy' },
+  { label: 'Terms & Conditions', href: '/pages/terms-of-service' },
+  { label: 'Code of Conduct', href: '/pages/code-of-conduct' },
+  { label: 'UAE Data Protection Policy', href: '/pages/data-protection' },
+]
+
 /**
  * Footer links per FEEDBACK_P1.2 — single compact list (no separate Workshops tab;
  * Educational Resources combines recordings + learning articles).
@@ -45,7 +53,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
   { slug: 'nav-charity-request', title: 'Charity Support Request', menuLabel: 'Charity Support Request', menuLocation: 'footer-quicklinks', menuOrder: 9, showInMenu: true, status: 'published', externalHref: '/dashboard/charity-requests?apply=1', content: '' },
   { slug: 'nav-educational', title: 'Educational Resources', menuLabel: 'Educational Resources', menuLocation: 'footer-quicklinks', menuOrder: 10, showInMenu: true, status: 'published', externalHref: '/educational-resources', content: '' },
   { slug: 'nav-faq', title: 'FAQ', menuLabel: 'FAQ', menuLocation: 'footer-quicklinks', menuOrder: 11, showInMenu: true, status: 'published', externalHref: '/faq', content: '' },
-  // Legal (not shown in primary footer list; managed via Pages CMS if needed elsewhere)
+  // Legal column in site footer — edit body as plain text in Admin → Pages
   {
     slug: 'privacy-policy',
     title: 'Privacy Policy',
@@ -54,7 +62,8 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     menuOrder: 0,
     showInMenu: true,
     status: 'published',
-    content: '<p>Add your privacy policy content in Admin → Pages (CMS).</p>',
+    content:
+      'Add your privacy policy here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
   },
   {
     slug: 'terms-of-service',
@@ -64,7 +73,8 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     menuOrder: 1,
     showInMenu: true,
     status: 'published',
-    content: '<p>Add your terms and conditions in Admin → Pages (CMS).</p>',
+    content:
+      'Add your terms and conditions here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
   },
   {
     slug: 'code-of-conduct',
@@ -74,7 +84,8 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     menuOrder: 2,
     showInMenu: true,
     status: 'published',
-    content: '<p>Add your community code of conduct in Admin → Pages (CMS).</p>',
+    content:
+      'Add your community code of conduct here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
   },
   {
     slug: 'data-protection',
@@ -84,6 +95,7 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     menuOrder: 3,
     showInMenu: true,
     status: 'published',
-    content: '<p>Manage this content in Admin → Pages (CMS).</p>',
+    content:
+      'Add your UAE data protection policy here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
   },
 ]

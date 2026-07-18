@@ -209,7 +209,10 @@ export default function AdminPages() {
   }
 
   return (
-    <AdminPageLayout title="Pages CMS" subtitle="Create and manage public site pages">
+    <AdminPageLayout
+      title="Pages CMS"
+      subtitle="Edit footer Legal pages and other site pages. Paste plain text — no HTML needed."
+    >
       <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-xl font-bold">All Pages</h2>
         <button type="button" onClick={handleCreateNew} className={`inline-flex items-center gap-2 ${BUTTON_PRIMARY}`}>
