@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { SiteLogo } from '@/components/site-logo'
 import { useAuth } from '@/lib/auth-context'
 import { hasAdminAccess } from '@/lib/roles'
+import { setAdminMfaSession, hasValidAdminMfaSession } from '@/lib/admin-mfa-session'
 
 interface InviteData {
   id: string
@@ -65,7 +66,7 @@ export default function AdminSetup() {
   }, [])
 
   useEffect(() => {
-    if (!authLoading && user && hasAdminAccess(user)) {
+    if (!authLoading && user && hasAdminAccess(user) && hasValidAdminMfaSession(user.id)) {
       storeInvite(null)
       router.replace('/admin')
     }
@@ -353,6 +354,7 @@ export default function AdminSetup() {
 
       await refreshUser()
       storeInvite(null)
+      setAdminMfaSession(firebaseUser.uid)
       setStep(3)
       setTimeout(() => router.push('/admin'), 1500)
     } catch (err: unknown) {

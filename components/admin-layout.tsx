@@ -73,6 +73,7 @@ import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { useAuth } from '@/lib/auth-context'
 import { filterAdminMenuByPermissions } from '@/lib/admin-invite-permissions'
+import { clearAdminMfaSession } from '@/lib/admin-mfa-session'
 
 export const adminMenuItems = [
   // Dashboard & System
@@ -183,7 +184,8 @@ export function AdminSidebar({
 
   const handleLogout = async () => {
     await logoutUser()
-    router.push('/login')
+    clearAdminMfaSession()
+    router.push('/admin/login')
   }
 
   // Group items by category
@@ -381,7 +383,8 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
 
   const handleLogout = async () => {
     await logoutUser()
-    router.push('/login')
+    clearAdminMfaSession()
+    router.push('/admin/login')
   }
 
   return (

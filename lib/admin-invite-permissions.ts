@@ -340,6 +340,8 @@ export function canAccessAdminApi(user: PermissionUser, apiPathname: string): bo
     '/api/admin/access-codes/redeem',
     '/api/admin/access-codes/claim-password',
     '/api/admin/access-codes/bootstrap',
+    '/api/admin/login/request-otp',
+    '/api/admin/login/verify-otp',
   ]
   if (publicAdminApis.some((p) => path === p || path.startsWith(`${p}/`))) {
     return true

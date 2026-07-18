@@ -12,6 +12,7 @@ import { getAdminPageTitle, getWelcomeFirstName } from '@/lib/dashboard-page-tit
 import { logoutUser } from '@/lib/auth'
 import { recordAdminAuditFromUser } from '@/lib/admin-audit'
 import { getUserDisplayName } from '@/lib/user-profile'
+import { clearAdminMfaSession, hasValidAdminMfaSession } from '@/lib/admin-mfa-session'
 
 export default function AdminLayout({
   children,
@@ -48,6 +49,12 @@ export default function AdminLayout({
         return
       }
 
+      if (!hasValidAdminMfaSession(user.id)) {
+        const returnUrl = encodeURIComponent(pathname || '/admin')
+        router.push(`/admin/login?returnUrl=${returnUrl}`)
+        return
+      }
+
       if (!canAccessAdminPath(user, pathname)) {
         router.push('/admin')
         return
@@ -77,6 +84,7 @@ export default function AdminLayout({
       })
     }
     await logoutUser()
+    clearAdminMfaSession()
     router.push('/admin/login')
   }
 
@@ -154,6 +162,23 @@ export default function AdminLayout({
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <p className="text-muted-foreground">Redirecting…</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Admin signed in but email login code not verified for this browser session
+  if (
+    !loading &&
+    !isPublicAdminPage &&
+    user &&
+    hasAdminAccess(user) &&
+    !hasValidAdminMfaSession(user.id)
+  ) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <p className="text-muted-foreground">Confirming login code…</p>
         </div>
       </div>
     )
