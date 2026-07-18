@@ -160,42 +160,73 @@ export default function ShopPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
-                {products.map((product) => (
-                  <article
-                    key={product.id}
-                    className="bg-white border border-neutral-100 rounded-lg overflow-hidden flex flex-col"
-                  >
-                    <div className="aspect-[4/5] bg-neutral-100 overflow-hidden">
-                      {product.imageURL ? (
-                        <img
-                          src={product.imageURL}
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ShoppingBag className="w-10 h-10 text-neutral-300" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4 flex flex-col flex-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      <h3
-                        className="text-lg text-neutral-900 mb-1"
-                        style={{ fontFamily: 'Cormorant Garamond, serif' }}
+                {products.map((product) => {
+                  const href = `/marketplace/${product.id}`
+                  const blurb = product.description?.trim()
+                    ? product.description.trim().slice(0, 110) +
+                      (product.description.trim().length > 110 ? '…' : '')
+                    : null
+                  return (
+                    <article
+                      key={product.id}
+                      className="bg-white border border-neutral-200 rounded-lg overflow-hidden flex flex-col hover:border-neutral-400 transition-colors group"
+                    >
+                      <Link href={href} className="block aspect-[4/5] bg-neutral-100 overflow-hidden">
+                        {product.imageURL ? (
+                          <img
+                            src={product.imageURL}
+                            alt={product.title}
+                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ShoppingBag className="w-10 h-10 text-neutral-300" />
+                          </div>
+                        )}
+                      </Link>
+                      <div
+                        className="p-4 flex flex-col flex-1 gap-2"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
                       >
-                        {product.title}
-                      </h3>
-                      {product.variant ? (
-                        <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2">
-                          {product.variant}
+                        <Link href={href} className="block">
+                          <h3
+                            className="text-lg text-neutral-900 mb-0.5 group-hover:underline"
+                            style={{ fontFamily: 'Cormorant Garamond, serif' }}
+                          >
+                            {product.title}
+                          </h3>
+                          {product.variant ? (
+                            <p className="text-xs uppercase tracking-wider text-neutral-500">
+                              {product.variant}
+                            </p>
+                          ) : null}
+                        </Link>
+                        {blurb ? (
+                          <p className="text-xs text-neutral-600 leading-relaxed line-clamp-2">
+                            {blurb}
+                          </p>
+                        ) : null}
+                        <p className="text-sm font-semibold text-neutral-900 mt-auto pt-1">
+                          {product.currency} {product.price.toLocaleString()}
                         </p>
-                      ) : null}
-                      <p className="text-sm font-semibold text-neutral-900 mt-auto">
-                        {product.currency} {product.price.toLocaleString()}
-                      </p>
-                    </div>
-                  </article>
-                ))}
+                        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                          <Link
+                            href={href}
+                            className="inline-flex min-h-[40px] flex-1 items-center justify-center px-3 rounded border border-neutral-300 text-xs font-semibold text-neutral-900 hover:bg-neutral-50"
+                          >
+                            View details
+                          </Link>
+                          <Link
+                            href={href}
+                            className="inline-flex min-h-[40px] flex-1 items-center justify-center px-3 rounded bg-black text-xs font-semibold text-white hover:bg-neutral-900"
+                          >
+                            Purchase
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
             )}
           </section>
