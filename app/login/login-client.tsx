@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { loginUser, loginWithGoogle, loginWithFacebook } from '@/lib/auth'
+import { loginUser, loginWithGoogle } from '@/lib/auth'
 import { auth } from '@/lib/firebase'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
@@ -22,10 +22,10 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = React.useState(false)
   const [stats, setStats] = React.useState<CommunityStats>({ totalMembers: 0, volunteerHours: 0, businessPartners: 0, totalDonations: 0 })
   const [statsLoading, setStatsLoading] = React.useState(true)
-  const [oauthLoading, setOauthLoading] = React.useState<'google' | 'facebook' | null>(null)
+  const [oauthLoading, setOauthLoading] = React.useState<'google' | null>(null)
   const [authProviders, setAuthProviders] = React.useState({
     google: { enabled: true, configured: false },
-    facebook: { enabled: true, configured: false },
+    facebook: { enabled: false, configured: false },
   })
 
   // Route the user after a successful login. Honor returnUrl or redirect query params first.
@@ -158,7 +158,7 @@ export default function LoginPage() {
     setError('')
     if (!authProviders.google.enabled) {
       setError(
-        'Google Sign-In is not enabled. Add credentials under Admin → Integrations → Google Sign-In, then enable it in Firebase Authentication.'
+        'Google Sign-In is not enabled. Add credentials under Admin → Integrations → Google Sign-In, set status to Active, and enable Google in Firebase Authentication.'
       )
       return
     }
@@ -175,36 +175,6 @@ export default function LoginPage() {
     if (user) {
       const userId = user.id || auth.currentUser?.uid || 'guest'
       logActivity(userId, user.email || '', 'SIGNIN_GOOGLE', 'Signed in with Google', { 
-        timestamp: new Date().toISOString()
-      })
-
-      routeAfterLogin(user)
-    } else {
-      setOauthLoading(null)
-    }
-  }
-
-  const handleFacebookLogin = async () => {
-    setError('')
-    if (!authProviders.facebook.enabled) {
-      setError(
-        'Facebook Login is not enabled. Add credentials under Admin → Integrations → Facebook Login, then enable it in Firebase Authentication.'
-      )
-      return
-    }
-    setOauthLoading('facebook')
-
-    const { user, error: loginError } = await loginWithFacebook()
-
-    if (loginError) {
-      setError(loginError)
-      setOauthLoading(null)
-      return
-    }
-
-    if (user) {
-      const userId = user.id || auth.currentUser?.uid || 'guest'
-      logActivity(userId, user.email || '', 'SIGNIN_FACEBOOK', 'Signed in with Facebook', { 
         timestamp: new Date().toISOString()
       })
 
@@ -238,25 +208,19 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2 mb-3">
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading || socialBusy}
-              className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
-            >
-              {oauthLoading === 'google' ? 'Signing in...' : 'Continue with Google'}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleFacebookLogin}
-              disabled={loading || socialBusy}
-              className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
-            >
-              {oauthLoading === 'facebook' ? 'Signing in...' : 'Continue with Facebook'}
-            </button>
+            {authProviders.google.enabled ? (
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading || socialBusy}
+                className="w-full px-3 py-2 bg-white text-center border border-neutral-200 rounded-lg hover:border-neutral-900 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-xs text-neutral-900"
+              >
+                {oauthLoading === 'google' ? 'Signing in...' : 'Continue with Google'}
+              </button>
+            ) : null}
           </div>
 
+          {authProviders.google.enabled ? (
           <div className="relative mb-3">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-neutral-200"></div>
@@ -265,6 +229,7 @@ export default function LoginPage() {
               <span className="px-2 bg-white text-neutral-400">or sign in with email</span>
             </div>
           </div>
+          ) : null}
 
           <form onSubmit={handleLogin} className="space-y-2">
             <div>

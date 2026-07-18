@@ -67,12 +67,18 @@ export async function isAdminUser(userId: string): Promise<boolean> {
     const legacyAdminSnap = await legacyAdminRef.get()
     if (legacyAdminSnap.exists) return true
     const userSnap = await db.collection('users').doc(userId).get()
-    const role = userSnap.data()?.role
-    return (
+    const data = userSnap.data() || {}
+    const role = data.role
+    const roles = Array.isArray(data.roles) ? data.roles.map(String) : []
+    if (
       role === 'admin' ||
       role === 'super_admin' ||
-      isWelfareOperationalRole(role)
-    )
+      isWelfareOperationalRole(role) ||
+      roles.some((r) => r === 'admin' || r === 'super_admin' || isWelfareOperationalRole(r))
+    ) {
+      return true
+    }
+    return false
   } catch (error) {
     console.error('[v0] Admin check failed:', error)
     return false
@@ -170,12 +176,24 @@ export async function getAdminUserData(userId: string): Promise<Record<string, u
     const membershipRoles = new Set(['member', 'volunteer', 'business', 'sponsor'])
     const roleKey = typeof role === 'string' ? role.trim().toLowerCase() : ''
     const isPanelAdmin = adminSnap.exists || legacyAdminSnap.exists
-    if (isPanelAdmin && (!roleKey || membershipRoles.has(roleKey))) {
-      const flaggedSuper =
-        adminData?.isSuperAdmin === true ||
-        userData?.isSuperAdmin === true ||
-        adminData?.superAdmin === true
-      role = flaggedSuper ? 'super_admin' : 'admin'
+    const rolesList = [
+      ...(Array.isArray(userData?.roles) ? (userData.roles as unknown[]) : []),
+      ...(Array.isArray(adminData?.roles) ? (adminData.roles as unknown[]) : []),
+      ...(Array.isArray(legacyAdminData?.roles) ? (legacyAdminData.roles as unknown[]) : []),
+    ].map((r) => String(r || '').trim().toLowerCase())
+    const flaggedSuper =
+      adminData?.isSuperAdmin === true ||
+      userData?.isSuperAdmin === true ||
+      adminData?.superAdmin === true ||
+      rolesList.includes('super_admin') ||
+      rolesList.includes('superadmin') ||
+      roleKey === 'super_admin' ||
+      roleKey === 'superadmin'
+
+    if (flaggedSuper) {
+      role = 'super_admin'
+    } else if (isPanelAdmin && (!roleKey || membershipRoles.has(roleKey))) {
+      role = 'admin'
     }
 
     return {
@@ -184,6 +202,12 @@ export async function getAdminUserData(userId: string): Promise<Record<string, u
       ...adminData,
       role,
       adminRole: role,
+      roles: Array.from(
+        new Set([
+          ...(Array.isArray(userData?.roles) ? (userData.roles as string[]) : []),
+          ...(role ? [String(role)] : []),
+        ])
+      ),
       // Invite permissions on users/{uid} are the source of truth for menu gating
       permissions:
         (Array.isArray(userData?.permissions) && (userData.permissions as unknown[]).length > 0

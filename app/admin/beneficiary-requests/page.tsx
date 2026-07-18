@@ -174,13 +174,18 @@ export default function BeneficiaryRequestsAdmin() {
   }
 
   const openSensitiveDoc = async (requestId: string, documentKey: string) => {
-    if (!canViewDocs) return
+    if (!canViewDocs) {
+      alert(
+        'Your account cannot open sensitive documents. Super admins and Manage Beneficiary permission holders can view them — sign out and back in, then retry.'
+      )
+      return
+    }
     try {
       const json = await adminApiFetch(
         `/api/admin/beneficiary-requests?id=${encodeURIComponent(requestId)}&document=${encodeURIComponent(documentKey)}`
       )
       if (!json.success || !json.url) {
-        throw new Error(json.error || 'Access denied')
+        throw new Error(json.error || 'Document not found or access denied')
       }
       window.open(json.url, '_blank', 'noopener,noreferrer')
     } catch (err) {

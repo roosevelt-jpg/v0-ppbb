@@ -57,6 +57,7 @@ export default function SignupClient() {
   const [formData, setFormData] = useState({
     memberType: searchParams.get('type') === 'business' ? 'business' : 'member',
     planId: searchParams.get('plan') || '',
+    promoCode: (searchParams.get('promo') || searchParams.get('code') || '').toUpperCase(),
     firstName: '',
     lastName: '',
     email: '',
@@ -341,6 +342,37 @@ export default function SignupClient() {
     }
   }
 
+  const tryRedeemPromo = async (userId: string): Promise<{ ok: true; url: string } | { ok: false; error: string }> => {
+    const code = formData.promoCode.trim()
+    if (!code) return { ok: false, error: '' }
+    const firebaseUser = auth.currentUser
+    if (!firebaseUser || firebaseUser.uid !== userId) {
+      return { ok: false, error: 'Sign in required to redeem promo' }
+    }
+    const idToken = await firebaseUser.getIdToken()
+    const res = await fetch('/api/membership/redeem-promo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ code }),
+    })
+    const data = await res.json()
+    if (!res.ok || !data.success) {
+      return { ok: false, error: data.error || 'Promo code could not be applied' }
+    }
+    // Align selected plan with what the promo granted
+    if (data.data?.planId) {
+      setFormData((prev) => ({ ...prev, planId: data.data.planId }))
+      if (data.data.planName) setPlanName(String(data.data.planName))
+    }
+    return {
+      ok: true,
+      url: data.data?.membershipUrl || '/dashboard/membership?status=success',
+    }
+  }
+
   const handleSubscribe = async () => {
     if (!(await validateStep(5))) return
     const userId = createdUserId || auth.currentUser?.uid
@@ -351,6 +383,18 @@ export default function SignupClient() {
     setCheckingOut(true)
     setError('')
     try {
+      if (formData.promoCode.trim()) {
+        const redeemed = await tryRedeemPromo(userId)
+        if (redeemed.ok) {
+          window.location.href = redeemed.url
+          return
+        }
+        // Promo failed — show message, still allow paid checkout
+        if (redeemed.error) {
+          setError(`${redeemed.error}. You can still subscribe with payment below, or fix the code and try again.`)
+        }
+      }
+
       const plan = selectedPlan || plans.find((p) => p.id === formData.planId)
       const gateway = (plan?.paymentGateway as 'stripe' | 'paypal' | 'ziina') || 'stripe'
       const response = await fetch('/api/checkout', {
@@ -387,11 +431,13 @@ export default function SignupClient() {
       emirate: isUaeCountry(formData.country) ? formData.emirate : formData.country,
       city: resolvedCity,
       state: isUaeCountry(formData.country) ? formData.emirate : undefined,
-      address: formData.address || undefined,
-      placeId: formData.placeId || undefined,
+      address: formData.address || '',
+      placeId: formData.placeId || '',
       latitude: formData.latitude || undefined,
       longitude: formData.longitude || undefined,
-    })
+      lat: formData.latitude || 0,
+      lng: formData.longitude || 0,
+    }) as LocationData
 
     const userData: Record<string, unknown> = {
       uid,
@@ -520,6 +566,16 @@ export default function SignupClient() {
           await persistBusinessDirectory(existingUid, now)
         }
         setCreatedUserId(existingUid)
+        if (formData.promoCode.trim()) {
+          const redeemed = await tryRedeemPromo(existingUid)
+          if (redeemed.ok) {
+            window.location.href = redeemed.url
+            return
+          }
+          if (redeemed.error) {
+            setError(`${redeemed.error}. You can still subscribe on the next step.`)
+          }
+        }
         setCurrentStep(5)
         return
       }
@@ -558,6 +614,18 @@ export default function SignupClient() {
       console.log('[v0] User account created successfully:', firebaseUser.uid)
       setCreatedUserId(firebaseUser.uid)
       setError('')
+
+      if (formData.promoCode.trim()) {
+        const redeemed = await tryRedeemPromo(firebaseUser.uid)
+        if (redeemed.ok) {
+          window.location.href = redeemed.url
+          return
+        }
+        if (redeemed.error) {
+          setError(`${redeemed.error}. You can still subscribe on the next step.`)
+        }
+      }
+
       setCurrentStep(5)
     } catch (err: any) {
       console.error('[v0] Signup error:', err)
@@ -692,6 +760,35 @@ export default function SignupClient() {
                         })}
                       </div>
                     )}
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#333', marginBottom: '0.35rem' }}>
+                        Promo code (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.promoCode}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            promoCode: e.target.value.toUpperCase(),
+                          }))
+                        }
+                        placeholder="e.g. FOUNDERS500"
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '0.65rem 0.75rem',
+                          border: '1px solid #e4e1da',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          fontFamily: 'ui-monospace, monospace',
+                          letterSpacing: '0.04em',
+                        }}
+                      />
+                      <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.35rem', marginBottom: 0 }}>
+                        Have a free-access code? Enter it now — we&apos;ll apply it after you create your account.
+                      </p>
+                    </div>
                   </div>
                 )}
 
@@ -722,8 +819,8 @@ export default function SignupClient() {
                           { value: 'member', label: 'Member', desc: 'Join our community & participate in activities' },
                           { value: 'business', label: 'Business', desc: 'Company partnerships & corporate engagement' },
                         ].map(option => (
-                          <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'default', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff', opacity: formData.memberType !== option.value ? 0.45 : 1 }}>
-                            <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} disabled style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+                          <label key={option.value} style={{ display: 'flex', alignItems: 'center', padding: '0.625rem', border: `1.5px solid ${formData.memberType === option.value ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', transition: 'all 0.2s', backgroundColor: formData.memberType === option.value ? '#f7f6f2' : '#fff' }}>
+                            <input type="radio" name="memberType" value={option.value} checked={formData.memberType === option.value} onChange={handleInputChange} style={{ width: '16px', height: '16px', flexShrink: 0 }} />
                             <div style={{ marginLeft: '0.625rem', flex: 1 }}>
                               <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#111111' }}>{option.label}</p>
                               <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.125rem' }}>{option.desc}</p>
@@ -731,7 +828,41 @@ export default function SignupClient() {
                           </label>
                         ))}
                       </div>
-                      <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.35rem' }}>Set by your membership package</p>
+                      <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.35rem' }}>
+                        Switch Member / Business anytime — useful when testing with a promo code
+                      </p>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.35rem', textTransform: 'uppercase', color: '#666' }}>
+                        Promo / discount code (optional)
+                      </label>
+                      <input
+                        type="text"
+                        name="promoCode"
+                        value={formData.promoCode}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            promoCode: e.target.value.toUpperCase().replace(/\s+/g, ''),
+                          }))
+                        }
+                        placeholder="e.g. PB100FUTURE"
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '0.65rem 0.75rem',
+                          border: '1.5px solid #e4e1da',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          fontFamily: 'ui-monospace, monospace',
+                          letterSpacing: '0.04em',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      <p style={{ fontSize: '0.65rem', color: '#888', marginTop: '0.35rem', marginBottom: 0 }}>
+                        Free-access codes skip payment (forever or 1–12 months, depending on the code).
+                      </p>
                     </div>
 
                     {/* Name Fields */}
@@ -1106,6 +1237,36 @@ export default function SignupClient() {
                         </div>
                       )
                     })}
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#333', marginBottom: '0.35rem' }}>
+                        Promo code (optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.promoCode}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            promoCode: e.target.value.toUpperCase(),
+                          }))
+                        }
+                        placeholder="e.g. FOUNDERS500"
+                        autoComplete="off"
+                        style={{
+                          width: '100%',
+                          padding: '0.65rem 0.75rem',
+                          border: '1px solid #e4e1da',
+                          borderRadius: '0.375rem',
+                          fontSize: '0.875rem',
+                          fontFamily: 'ui-monospace, monospace',
+                          letterSpacing: '0.04em',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.35rem', marginBottom: 0 }}>
+                        Free-access codes skip payment and unlock the plan tied to the code.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

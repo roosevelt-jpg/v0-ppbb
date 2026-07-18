@@ -51,7 +51,10 @@ async function requireAdminAuth(request: NextRequest) {
   const permissions = Array.isArray(adminData?.permissions)
     ? (adminData.permissions as unknown[]).map(String)
     : []
-  return { uid, adminRole, permissions }
+  const roles = Array.isArray(adminData?.roles)
+    ? (adminData.roles as unknown[]).map(String)
+    : []
+  return { uid, adminRole, permissions, roles }
 }
 
 /**
@@ -77,6 +80,7 @@ export async function GET(request: NextRequest) {
       canUserAccessSensitiveBeneficiaryDocs({
         role: admin.adminRole,
         adminRole: admin.adminRole,
+        roles: admin.roles,
         permissions: admin.permissions,
       })
 

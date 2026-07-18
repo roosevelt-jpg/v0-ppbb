@@ -85,18 +85,20 @@ export function MembershipSubscriptionOverview({
     const unsub = onSnapshot(
       query(collection(db, 'subscriptions'), where('userId', '==', user.id)),
       async (snap) => {
-        const docs = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
+        type SubRow = Record<string, unknown> & { id: string }
+        const docs: SubRow[] = snap.docs
+          .map((d): SubRow => ({ id: d.id, ...d.data() }))
           .filter((s) => {
             const status = String(s.status || '')
             return status !== 'cancelled' || s.cancelAtPeriodEnd === true
           })
           .sort((a, b) => {
-            const aT = (a as { updatedAt?: { toMillis?: () => number } }).updatedAt?.toMillis?.() || 0
-            const bT = (b as { updatedAt?: { toMillis?: () => number } }).updatedAt?.toMillis?.() || 0
+            const aT = (a.updatedAt as { toMillis?: () => number } | undefined)?.toMillis?.() || 0
+            const bT = (b.updatedAt as { toMillis?: () => number } | undefined)?.toMillis?.() || 0
             return bT - aT
           })
-        const active = docs.find((s) => String(s.status) === 'active' || s.cancelAtPeriodEnd) || docs[0] || null
+        const active =
+          docs.find((s) => String(s.status) === 'active' || s.cancelAtPeriodEnd) || docs[0] || null
         setSubscription(active)
         if (active?.cancelAtPeriodEnd) setCancelDone(true)
         if (active?.id) {
@@ -105,7 +107,7 @@ export function MembershipSubscriptionOverview({
             const charges = await getDocsFn(collection(db, 'subscriptions', String(active.id), 'charges'))
             setInvoices(
               charges.docs
-                .map((c) => ({ id: c.id, ...c.data() }))
+                .map((c): SubRow => ({ id: c.id, ...c.data() }))
                 .sort((a, b) => {
                   const aD = toDate(a.paidAt || a.createdAt)?.getTime() || 0
                   const bD = toDate(b.paidAt || b.createdAt)?.getTime() || 0
@@ -147,12 +149,25 @@ export function MembershipSubscriptionOverview({
     subscription?.nextBillingDate || subscription?.currentPeriodEnd || subscription?.renewsAt
   )
   const renewDateObj = renewFromSub || toDate(profile?.membershipRenewDate)
-  const renewDate = renewDateObj ? renewDateObj.toLocaleDateString(undefined, { dateStyle: 'medium' }) : '—'
+  const isLifetime =
+    profile?.membershipLifetimeForever === true ||
+    subscription?.lifetime === true ||
+    String(subscription?.interval || '') === 'lifetime' ||
+    (renewDateObj != null && renewDateObj.getFullYear() >= 9999)
+  const renewDate = isLifetime
+    ? 'Lifetime'
+    : renewDateObj
+      ? renewDateObj.toLocaleDateString(undefined, { dateStyle: 'medium' })
+      : '—'
   const monthsRemaining =
-    renewDateObj != null
-      ? Math.max(0, Math.round((renewDateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)))
-      : null
+    isLifetime || renewDateObj == null
+      ? null
+      : Math.max(
+          0,
+          Math.round((renewDateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44))
+        )
 
+  const isPromoSub = String(subscription?.gateway || '') === 'promo'
   const renewalStopped =
     cancelDone ||
     Boolean(subscription?.cancelAtPeriodEnd) ||
@@ -222,15 +237,24 @@ export function MembershipSubscriptionOverview({
                 {activePlanName ? `${activePlanName} plan` : 'Membership'}
               </h3>
               <p className="text-sm text-neutral-600 mt-1">
-                {renewalStopped ? 'Access until' : 'Renews on'}{' '}
-                <span className="font-medium text-neutral-900">{renewDate}</span>
+                {isLifetime ? (
+                  <>
+                    Access:{' '}
+                    <span className="font-medium text-neutral-900">Lifetime (no renewal)</span>
+                  </>
+                ) : (
+                  <>
+                    {renewalStopped ? 'Access until' : 'Renews on'}{' '}
+                    <span className="font-medium text-neutral-900">{renewDate}</span>
+                  </>
+                )}
               </p>
               {monthsRemaining != null ? (
                 <p className="text-sm text-neutral-500 mt-0.5">
                   ~{monthsRemaining} month{monthsRemaining === 1 ? '' : 's'} remaining
                 </p>
               ) : null}
-              {renewalStopped ? (
+              {renewalStopped && !isLifetime ? (
                 <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-2 py-1 mt-2 inline-block">
                   Automatic renewal is off
                 </p>
@@ -246,11 +270,17 @@ export function MembershipSubscriptionOverview({
             </Link>
             <button
               type="button"
-              disabled={cancelling || !subscription || renewalStopped}
+              disabled={cancelling || !subscription || renewalStopped || isLifetime || isPromoSub}
               onClick={() => void handleCancelRenewal()}
               className="min-h-[44px] px-4 border border-red-300 text-red-700 rounded-lg text-sm font-semibold hover:bg-red-50 disabled:opacity-50"
             >
-              {cancelling ? 'Stopping…' : renewalStopped ? 'Renewal stopped' : 'Stop renewal'}
+              {isLifetime || isPromoSub
+                ? 'Promo access'
+                : cancelling
+                  ? 'Stopping…'
+                  : renewalStopped
+                    ? 'Renewal stopped'
+                    : 'Stop renewal'}
             </button>
           </div>
         </div>

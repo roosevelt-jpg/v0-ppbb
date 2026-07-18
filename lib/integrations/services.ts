@@ -104,13 +104,13 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       },
     ],
     docs: 'https://firebase.google.com/docs/auth/web/google-signin',
-    help: 'Create OAuth Web credentials in Google Cloud Console, then enable Google in Firebase Authentication using the same Client ID.',
+    help: 'Create OAuth Web credentials in Google Cloud Console, enable Google in Firebase Authentication → Sign-in method with the same Client ID, then save Client ID here and keep this integration Active with Enable checked.',
   },
   facebookAuth: {
     id: 'facebookAuth',
     name: 'Facebook Login',
     category: 'backend',
-    description: 'Continue with Facebook on login & signup',
+    description: 'Currently disabled on login & signup (not live)',
     icon: '🔐',
     fields: [
       { name: 'appId', label: 'Facebook App ID', type: 'text', required: true, placeholder: '1234567890123456' },
@@ -123,13 +123,13 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       },
       {
         name: 'enabled',
-        label: 'Enable Facebook Login on login page',
+        label: 'Enable Facebook Login (ignored — Facebook is hard-disabled in the app)',
         type: 'checkbox',
         required: false,
       },
     ],
     docs: 'https://firebase.google.com/docs/auth/web/facebook-login',
-    help: 'Add your App ID and Secret in Firebase Authentication > Sign-in method > Facebook, then save the same values here.',
+    help: 'Facebook Login buttons are hidden on login/signup. Credentials can be saved for later; re-enable requires a code change after Meta/Firebase setup works.',
   },
   // Calendars
   googleCalendar: {

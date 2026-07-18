@@ -163,6 +163,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Membership promo codes — Admin SDK redeem; client admin UI uses API
+    match /membershipPromoCodes/{codeId} {
+      allow read, write: if isAdmin();
+    }
+
     // Public contact form submissions (client write) — admin read for /admin/contact-requests
     match /contactRequests/{requestId} {
       allow read, update, delete: if isAdmin();

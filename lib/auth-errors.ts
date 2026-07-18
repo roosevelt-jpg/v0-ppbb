@@ -31,7 +31,7 @@ export function formatAuthError(error: unknown): string {
     return 'This sign-in method is not enabled yet. Ask an admin to configure it under Integrations and Firebase Authentication.'
   }
   if (code.includes('auth/account-exists-with-different-credential')) {
-    return 'An account already exists with this email using a different sign-in method. Try Google, Facebook, or reset your password.'
+    return 'An account already exists with this email using a different sign-in method. Try Continue with Google, or reset your password.'
   }
   if (code.includes('auth/network-request-failed')) {
     return 'Network error. Check your connection and try again.'

@@ -116,21 +116,39 @@ function addBillingPeriod(from: Date, billingPeriod: string): Date {
   return d
 }
 
-/** Activate membership on the user after a successful PayPal/Ziina (or manual) payment. */
+function addMonths(from: Date, months: number): Date {
+  const d = new Date(from)
+  d.setMonth(d.getMonth() + Math.max(1, Math.floor(months)))
+  return d
+}
+
+/** Activate membership on the user after a successful PayPal/Ziina (or manual/promo) payment. */
 export async function completeMembershipPayment(params: {
   userId: string
   planId: string
-  gateway: 'stripe' | 'paypal' | 'ziina'
+  gateway: 'stripe' | 'paypal' | 'ziina' | 'promo'
   paymentReference: string
   amountCents?: number
   currency?: string
+  /** When set (promo grants), overrides plan billing period for renew/period end */
+  benefitDurationMonths?: number
+  promoCodeId?: string
+  promoCode?: string
 }): Promise<{ membershipUrl: string }> {
   const db = getAdminDb()
   const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
   if (!planSnap.exists) throw new Error('Plan not found')
   const plan = planSnap.data()!
   const now = new Date()
-  const renewDate = addBillingPeriod(now, String(plan.billingPeriod || 'monthly'))
+  const isLifetimePromo =
+    params.gateway === 'promo' &&
+    typeof params.benefitDurationMonths === 'number' &&
+    params.benefitDurationMonths === 0
+  const renewDate = isLifetimePromo
+    ? new Date('9999-12-31T23:59:59.000Z')
+    : typeof params.benefitDurationMonths === 'number' && params.benefitDurationMonths > 0
+      ? addMonths(now, params.benefitDurationMonths)
+      : addBillingPeriod(now, String(plan.billingPeriod || 'monthly'))
   const amountCents =
     typeof params.amountCents === 'number' ? params.amountCents : Number(plan.price) || 0
   const currency = (params.currency || plan.currency || 'AED').toString().toUpperCase()
@@ -141,7 +159,14 @@ export async function completeMembershipPayment(params: {
       membershipPlanName: plan.name || params.planId,
       membershipTier: params.planId,
       membershipStatus: 'active',
-      membershipRenewDate: renewDate.toISOString(),
+      membershipRenewDate: isLifetimePromo ? null : renewDate.toISOString(),
+      membershipLifetimeForever: isLifetimePromo ? true : FieldValue.delete(),
+      ...(params.promoCodeId
+        ? {
+            membershipPromoCodeId: params.promoCodeId,
+            membershipPromoCode: params.promoCode || null,
+          }
+        : {}),
       updatedAt: Timestamp.now(),
     },
     { merge: true }
@@ -155,11 +180,26 @@ export async function completeMembershipPayment(params: {
       paymentReference: params.paymentReference,
       amount: amountCents / 100,
       currency: currency.toLowerCase(),
-      interval: plan.billingPeriod === 'yearly' ? 'year' : 'month',
+      interval: isLifetimePromo
+        ? 'lifetime'
+        : typeof params.benefitDurationMonths === 'number' && params.benefitDurationMonths > 0
+          ? 'promo'
+          : plan.billingPeriod === 'yearly'
+            ? 'year'
+            : 'month',
       status: 'active',
       currentPeriodStart: Timestamp.fromDate(now),
       currentPeriodEnd: Timestamp.fromDate(renewDate),
-      nextBillingDate: Timestamp.fromDate(renewDate),
+      nextBillingDate: isLifetimePromo ? null : Timestamp.fromDate(renewDate),
+      cancelAtPeriodEnd: false,
+      ...(params.promoCodeId
+        ? {
+            promoCodeId: params.promoCodeId,
+            promoCode: params.promoCode || null,
+            benefitDurationMonths: params.benefitDurationMonths ?? null,
+            lifetime: isLifetimePromo,
+          }
+        : {}),
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     },
@@ -194,14 +234,21 @@ export async function completeMembershipPayment(params: {
 
   const membershipUrl = `${getPublicAppUrl()}/dashboard/membership?status=success`
   const planName = String(plan.name || params.planId)
+  const isPromo = params.gateway === 'promo'
   sendBrandedEmailToUserSafe({
     userId: params.userId,
-    subject: `Welcome — ${planName} membership activated`,
+    subject: isPromo
+      ? `Welcome — ${planName} (promo) activated`
+      : `Welcome — ${planName} membership activated`,
     purpose: 'Membership activation confirmation',
     headline: 'Membership activated',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
-      `Your ${planName} membership is now active. Thank you for joining Passive Blessings.`,
+      isLifetimePromo
+        ? `Your ${planName} membership is now active for free with no end date. Thank you for joining Passive Blessings.`
+        : isPromo
+          ? `Your ${planName} membership is now active via a promo code. Access continues until ${renewDate.toLocaleDateString()}.`
+          : `Your ${planName} membership is now active. Thank you for joining Passive Blessings.`,
       'You can manage your plan anytime from your member dashboard.'
     ),
     cta: { label: 'Open membership', url: membershipUrl },

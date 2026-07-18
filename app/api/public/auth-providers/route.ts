@@ -14,7 +14,8 @@ export async function GET() {
       {
         success: true,
         data: {
-          google: { enabled: false, configured: false },
+          // Fail open for Google (Firebase Console is source of truth); Facebook stays off.
+          google: { enabled: true, configured: false },
           facebook: { enabled: false, configured: false },
         },
       }

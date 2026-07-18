@@ -31,7 +31,7 @@ export interface UserSubscription {
   currentPeriodStart: any
   currentPeriodEnd: any
   stripeSubscriptionId?: string
-  paymentGateway: 'stripe' | 'paypal' | 'ziina'
+  paymentGateway: 'stripe' | 'paypal' | 'ziina' | 'promo'
   canceledAt?: any
   createdAt: any
   updatedAt: any

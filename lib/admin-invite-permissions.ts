@@ -24,6 +24,7 @@ export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
   manage_members: [
     '/admin/members',
     '/admin/membership',
+    '/admin/promo-codes',
     '/admin/volunteers',
     '/admin/moderation',
     '/admin/businesses',
@@ -253,6 +254,7 @@ export const API_PERMISSION_PREFIXES: {
   { prefix: '/api/admin/approvals', permissions: ['manage_members'] },
   { prefix: '/api/admin/partnerships', permissions: ['manage_members'] },
   { prefix: '/api/admin/discounts', permissions: ['manage_members'] },
+  { prefix: '/api/admin/promo-codes', permissions: ['manage_members'] },
   { prefix: '/api/community-moderation', permissions: ['manage_members'] },
 
   // Events / community

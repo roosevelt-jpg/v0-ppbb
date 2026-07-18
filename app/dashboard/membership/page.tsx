@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/lib/auth-context'
-import { db } from '@/lib/firebase'
+import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Check, Loader2 } from 'lucide-react'
@@ -32,6 +32,9 @@ export default function MembershipPage() {
     ziina: false,
   })
   const [statusBanner, setStatusBanner] = useState<string | null>(null)
+  const [promoCode, setPromoCode] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoMessage, setPromoMessage] = useState<string | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -93,6 +96,50 @@ export default function MembershipPage() {
     return preferred
   }
 
+  const refreshProfile = async () => {
+    if (!user?.id) return
+    const snap = await getDoc(doc(db, 'users', user.id))
+    if (snap.exists()) setProfile(snap.data())
+  }
+
+  const handleRedeemPromo = async () => {
+    const code = promoCode.trim()
+    if (!code || !user?.id) return
+    setPromoLoading(true)
+    setPromoMessage(null)
+    try {
+      const firebaseUser = auth.currentUser
+      if (!firebaseUser) throw new Error('Sign in required')
+      const token = await firebaseUser.getIdToken()
+      const res = await fetch('/api/membership/redeem-promo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ code }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Could not redeem promo code')
+      }
+      setPromoMessage(
+        data.data?.renewDate
+          ? `Activated ${data.data?.planName || 'membership'} until ${new Date(
+              data.data.renewDate
+            ).toLocaleDateString()}.`
+          : `Activated ${data.data?.planName || 'membership'} — free forever.`
+      )
+      setPromoCode('')
+      setStatusBanner('Promo applied. Your membership is active.')
+      await refreshProfile()
+    } catch (err) {
+      setPromoMessage(err instanceof Error ? err.message : 'Redeem failed')
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
   const handleCheckout = async (plan: PricingPlan) => {
     if (!user?.id) return
     setCheckingOut(plan.id)
@@ -131,6 +178,7 @@ export default function MembershipPage() {
     membershipPlanId: profile?.membershipPlanId,
     membershipPlanName: profile?.membershipPlanName,
   }
+  const alreadyUsedPromo = Boolean(profile?.membershipPromoCodeId || profile?.promoCodeId)
 
   return (
     <DashboardPageShell title="Membership" subtitle="Your plan, renewal, and invoices">
@@ -143,6 +191,53 @@ export default function MembershipPage() {
       <div className="mb-8">
         <MembershipSubscriptionOverview manageHref={manageHref} />
       </div>
+
+      <Card className="p-4 sm:p-6 mb-8 border border-neutral-200">
+        <h3 className="text-sm font-semibold text-neutral-900 mb-1">Have a promo code?</h3>
+        <p className="text-xs text-neutral-600 mb-3">
+          Redeem a free-access membership code. Each account can redeem one promo.
+        </p>
+        {alreadyUsedPromo ? (
+          <p className="text-sm text-neutral-700">
+            Promo already applied
+            {profile?.membershipPromoCode ? (
+              <>
+                {' '}
+                (<code className="font-mono text-xs">{String(profile.membershipPromoCode)}</code>)
+              </>
+            ) : null}
+            .
+          </p>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+              placeholder="FOUNDERS500"
+              className="flex-1 min-w-0 px-3 py-2 border border-neutral-200 rounded-lg text-sm font-mono"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              onClick={() => void handleRedeemPromo()}
+              disabled={promoLoading || !promoCode.trim()}
+              className="px-4 py-2 rounded-lg text-sm font-semibold !bg-black !text-white disabled:opacity-50 min-h-[40px]"
+            >
+              {promoLoading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Applying…
+                </span>
+              ) : (
+                'Apply code'
+              )}
+            </button>
+          </div>
+        )}
+        {promoMessage ? (
+          <p className="text-xs mt-2 text-neutral-700">{promoMessage}</p>
+        ) : null}
+      </Card>
 
       {plans.length === 0 ? (
         <Card className="p-6 border border-neutral-200 text-sm text-neutral-600">

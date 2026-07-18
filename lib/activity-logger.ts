@@ -6,7 +6,7 @@ export interface ActivityLog {
   userId: string
   userEmail: string
   action: string
-  actionType: 'SIGNUP_START' | 'SIGNUP_STEP' | 'SIGNUP_COMPLETE' | 'SIGNIN' | 'SIGNIN_FAILED' | 'PROFILE_EDIT' | 'PROFILE_VIEW' | 'LOGIN_PAGE_VISIT' | 'SIGNUP_PAGE_VISIT' | 'POLICY_VIEW' | 'CONSENT_ACCEPTED' | 'OTHER'
+  actionType: 'SIGNUP_START' | 'SIGNUP_STEP' | 'SIGNUP_COMPLETE' | 'SIGNIN' | 'SIGNIN_GOOGLE' | 'SIGNIN_FAILED' | 'PROFILE_EDIT' | 'PROFILE_VIEW' | 'LOGIN_PAGE_VISIT' | 'SIGNUP_PAGE_VISIT' | 'POLICY_VIEW' | 'CONSENT_ACCEPTED' | 'OTHER'
   details: Record<string, any>
   ipAddress?: string
   userAgent?: string

@@ -6,42 +6,34 @@ export type AuthProviderPublicConfig = {
   facebook: { enabled: boolean; configured: boolean }
 }
 
-function isTruthyFlag(value: unknown): boolean {
-  if (value === true || value === 'true' || value === '1' || value === 'on') return true
-  if (value === false || value === 'false' || value === '0' || value === 'off') return false
-  return true
-}
-
-function integrationEnabled(
-  integration: Awaited<ReturnType<typeof getIntegrationServer>>,
-  configured: boolean
+/**
+ * Google: on by default (Firebase Console does the real OAuth).
+ * Hide only when the Integrations row is set to Inactive.
+ */
+function googleSignInEnabled(
+  integration: Awaited<ReturnType<typeof getIntegrationServer>>
 ): boolean {
-  // No integration saved yet — allow Firebase Console config to work out of the box.
   if (!integration) return true
-  if (!configured) return false
-  if (integration.status !== 'active') return false
-  const creds = integration.credentials || {}
-  return isTruthyFlag(creds.enabled ?? true)
+  return integration.status !== 'inactive'
 }
 
-/** Which social login providers are configured via Admin > Integrations. */
+/** Which social login providers are available on public login/signup. */
 export async function getAuthProviderPublicConfig(): Promise<AuthProviderPublicConfig> {
-  const [googleIntegration, facebookIntegration] = await Promise.all([
-    getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'googleAuth').catch(() => null),
-    getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'facebookAuth').catch(() => null),
-  ])
+  const googleIntegration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'googleAuth').catch(
+    () => null
+  )
 
   const googleConfigured = Boolean(googleIntegration?.credentials?.webClientId?.trim())
-  const facebookConfigured = Boolean(facebookIntegration?.credentials?.appId?.trim())
 
+  // Facebook Login is disabled site-wide until Meta app review / Firebase provider is fixed.
   return {
     google: {
       configured: googleConfigured,
-      enabled: integrationEnabled(googleIntegration, googleConfigured || !googleIntegration),
+      enabled: googleSignInEnabled(googleIntegration),
     },
     facebook: {
-      configured: facebookConfigured,
-      enabled: integrationEnabled(facebookIntegration, facebookConfigured || !facebookIntegration),
+      configured: false,
+      enabled: false,
     },
   }
 }

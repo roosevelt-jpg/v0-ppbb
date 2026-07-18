@@ -5,32 +5,61 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isWelfareAdmin() {
-      return isAuth()
-        && firestore.exists(/databases/(default)/documents/adminUsers/$(request.auth.uid))
-        && firestore.get(/databases/(default)/documents/adminUsers/$(request.auth.uid)).data.adminRole in [
-          'welfare', 'founder', 'coordinator', 'founder_admin', 'manager'
-        ];
+    function adminRoleFrom(path) {
+      return firestore.get(path).data.adminRole;
     }
 
-    // Sensitive beneficiary documents — read ONLY for welfare-tier roles.
-    // Part 7C uploads should use these prefixes. Tokenized download URLs must
-    // never be shown to standard admins (API redacts); rules block auth-based
-    // Storage SDK reads for non-welfare roles.
+    function userRoleFrom(path) {
+      return firestore.get(path).data.role;
+    }
+
+    function isSensitiveDocAdmin() {
+      return isAuth() && (
+        (
+          firestore.exists(/databases/(default)/documents/adminUsers/$(request.auth.uid))
+          && adminRoleFrom(/databases/(default)/documents/adminUsers/$(request.auth.uid)) in [
+            'welfare', 'founder', 'coordinator', 'founder_admin', 'manager',
+            'admin', 'super_admin', 'superadmin'
+          ]
+        )
+        || (
+          firestore.exists(/databases/(default)/documents/admin-users/$(request.auth.uid))
+          && (
+            adminRoleFrom(/databases/(default)/documents/admin-users/$(request.auth.uid)) in [
+              'welfare', 'founder', 'coordinator', 'founder_admin', 'manager',
+              'admin', 'super_admin', 'superadmin'
+            ]
+            || userRoleFrom(/databases/(default)/documents/admin-users/$(request.auth.uid)) in [
+              'welfare', 'founder', 'coordinator', 'founder_admin', 'manager',
+              'admin', 'super_admin', 'superadmin'
+            ]
+          )
+        )
+        || (
+          firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+          && userRoleFrom(/databases/(default)/documents/users/$(request.auth.uid)) in [
+            'admin', 'super_admin', 'welfare', 'founder', 'coordinator', 'founder_admin', 'manager'
+          ]
+        )
+      );
+    }
+
+    // Sensitive beneficiary documents — read for welfare-tier + admin / super_admin.
+    // Signed URLs from Admin SDK bypass these rules; this covers client SDK reads.
     match /beneficiary-docs/{allPaths=**} {
-      allow read: if isWelfareAdmin();
+      allow read: if isSensitiveDocAdmin();
       allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
     }
     match /beneficiaryRequests/{allPaths=**} {
-      allow read: if isWelfareAdmin();
+      allow read: if isSensitiveDocAdmin();
       allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
     }
     match /beneficiary-support/{allPaths=**} {
-      allow read: if isWelfareAdmin();
+      allow read: if isSensitiveDocAdmin();
       allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
     }
     match /beneficiary-documents/{allPaths=**} {
-      allow read: if isWelfareAdmin();
+      allow read: if isSensitiveDocAdmin();
       allow write: if isAuth() && request.resource.size < 15 * 1024 * 1024;
     }
 

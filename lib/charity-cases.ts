@@ -186,5 +186,19 @@ export function canUserAccessSensitiveBeneficiaryDocs(
   const role = String(user.adminRole || user.role || '')
   const perms = Array.isArray(user.permissions) ? user.permissions.map(String) : []
   const effective = getEffectiveInvitePermissions(perms, role)
-  return effective.includes('full_access') || effective.includes('manage_beneficiary')
+  if (effective.includes('full_access') || effective.includes('manage_beneficiary')) return true
+
+  // roles[] may hold super_admin while primary role stays "member"
+  if (Array.isArray(user.roles)) {
+    for (const r of user.roles) {
+      const effectiveFromRole = getEffectiveInvitePermissions(perms, String(r || ''))
+      if (
+        effectiveFromRole.includes('full_access') ||
+        effectiveFromRole.includes('manage_beneficiary')
+      ) {
+        return true
+      }
+    }
+  }
+  return false
 }

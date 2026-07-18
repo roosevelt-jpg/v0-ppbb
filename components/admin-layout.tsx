@@ -61,6 +61,7 @@ import {
   FolderOpen,
   Megaphone,
   Newspaper,
+  Ticket,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -114,6 +115,7 @@ export const adminMenuItems = [
 
   // Memberships & Commerce — form inquiries + listings live under Approvals (FEEDBACK)
   { label: 'Membership', href: '/admin/membership', icon: CreditCard, group: 'Memberships' },
+  { label: 'Promo Codes', href: '/admin/promo-codes', icon: Ticket, group: 'Memberships' },
   { label: 'Pricing Plans', href: '/admin/pricing', icon: Tags, group: 'Memberships' },
   { label: 'Approvals', href: '/admin/approvals', icon: BadgeCheck, group: 'Memberships' },
 

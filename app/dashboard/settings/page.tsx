@@ -299,7 +299,7 @@ function SettingsContent() {
     )
     if (firebaseUser && !hasPasswordProvider) {
       setPasswordMessage(
-        'This account uses social sign-in. Manage your password through Google or Facebook, or add a password via Forgot Password on the login page.'
+        'This account uses social sign-in. Manage your password through Google, or add a password via Forgot Password on the login page.'
       )
       return
     }
