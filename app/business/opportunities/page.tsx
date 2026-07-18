@@ -49,7 +49,16 @@ function toDate(value: unknown): Date | null {
 }
 
 function isLiveStatus(status: BusinessOpportunity['status']): boolean {
-  return status === 'open'
+  return status === 'open' || status === 'published' || status === 'active'
+}
+
+function canToggleLive(status: BusinessOpportunity['status']): boolean {
+  return (
+    isLiveStatus(status) ||
+    status === 'closed' ||
+    status === 'filled' ||
+    status === 'paused'
+  )
 }
 
 function MetricCell({
@@ -198,21 +207,24 @@ export default function BusinessOpportunities() {
   }
 
   const handleLiveToggle = async (opp: BusinessOpportunity) => {
-    if (!isLiveStatus(opp.status)) {
+    if (!canToggleLive(opp.status)) {
       if (opp.status === 'pending_approval' || opp.status === 'draft' || opp.status === 'rejected') {
         alert('This job goes live only after admin approval.')
         return
       }
-      // Re-open previously closed jobs still requires admin path — keep closed/filled/archived as pause only
-      alert('Contact admin to republish a closed job, or wait for approval on new posts.')
+      alert('This listing cannot be toggled from its current status.')
       return
     }
 
     setTogglingId(opp.id)
     try {
-      await updateOpportunity(opp.id, { status: 'closed' })
+      const nextStatus = isLiveStatus(opp.status) ? 'closed' : 'open'
+      await updateOpportunity(opp.id, { status: nextStatus })
+      setOpportunities((prev) =>
+        prev.map((o) => (o.id === opp.id ? { ...o, status: nextStatus } : o))
+      )
     } catch (error) {
-      console.error('[v0] Error pausing opportunity:', error)
+      console.error('[v0] Error updating opportunity live status:', error)
       alert('Could not update live status')
     } finally {
       setTogglingId(null)
@@ -404,30 +416,48 @@ export default function BusinessOpportunities() {
                           Deadline:{' '}
                           {deadline ? format(deadline, 'dd MMMM, yyyy') : 'Not set'}
                         </p>
-                        <div className="mt-2.5 flex items-center gap-2">
+                        <div className="mt-3 flex items-center gap-3 min-h-[44px]">
                           <button
                             type="button"
                             role="switch"
                             aria-checked={live}
-                            disabled={togglingId === opp.id || !live}
+                            aria-label={live ? 'Set job closed' : 'Set job live'}
+                            disabled={togglingId === opp.id || !canToggleLive(opp.status)}
                             title={
                               live
-                                ? 'Pause listing (set closed)'
-                                : 'Live after admin approval only'
+                                ? 'Turn off to close this listing'
+                                : canToggleLive(opp.status)
+                                  ? 'Turn on to reopen this listing'
+                                  : 'Live after admin approval only'
                             }
                             onClick={() => void handleLiveToggle(opp)}
-                            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-60 ${
-                              live ? 'bg-emerald-500' : 'bg-neutral-300'
-                            }`}
+                            className="pb-ghost-btn relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-0 p-0 shadow-none transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                            style={{
+                              height: 32,
+                              width: 56,
+                              minHeight: 32,
+                              maxHeight: 32,
+                              minWidth: 56,
+                              padding: 0,
+                              backgroundColor: live ? '#10b981' : '#a3a3a3',
+                            }}
                           >
                             <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${
-                                live ? 'translate-x-4' : 'translate-x-0.5'
-                              }`}
+                              aria-hidden
+                              className="pointer-events-none inline-block rounded-full bg-white shadow-md transition-transform duration-200"
+                              style={{
+                                height: 26,
+                                width: 26,
+                                transform: live ? 'translateX(26px)' : 'translateX(3px)',
+                              }}
                             />
                           </button>
-                          <span className="text-xs font-medium text-neutral-600">
-                            {live ? 'Live' : String(opp.status || '').replace(/_/g, ' ')}
+                          <span
+                            className={`text-sm font-semibold capitalize ${
+                              live ? 'text-emerald-700' : 'text-neutral-600'
+                            }`}
+                          >
+                            {live ? 'Live' : String(opp.status || 'closed').replace(/_/g, ' ')}
                           </span>
                         </div>
                       </td>
