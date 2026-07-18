@@ -48,10 +48,52 @@ export default function AdminPromoCodesPage() {
   const [error, setError] = React.useState<string | null>(null)
 
   const loadCodes = React.useCallback(async () => {
+    setError(null)
     const json = await adminApiFetch<PromoRow[]>('/api/admin/promo-codes')
     if (json.success && Array.isArray(json.data)) {
       setCodes(json.data)
-    } else {
+      setLoading(false)
+      return
+    }
+
+    // Client fallback if the admin API is unavailable
+    try {
+      const { getDocs } = await import('firebase/firestore')
+      const snap = await getDocs(collection(db, 'membershipPromoCodes'))
+      const rows: PromoRow[] = snap.docs
+        .map((d) => {
+          const row = d.data()
+          const codeExpiresAt =
+            row.codeExpiresAt?.toDate?.()?.toISOString?.() ||
+            (typeof row.codeExpiresAt === 'string' ? row.codeExpiresAt : null)
+          const createdAt =
+            row.createdAt?.toDate?.()?.toISOString?.() ||
+            (typeof row.createdAt === 'string' ? row.createdAt : null)
+          return {
+            id: d.id,
+            code: String(row.code || ''),
+            label: String(row.label || ''),
+            description: String(row.description || ''),
+            type: row.type === 'percent_off' ? 'percent_off' : 'free_access',
+            percentOff: Number(row.percentOff) || 100,
+            planId: String(row.planId || ''),
+            planName: String(row.planName || ''),
+            benefitDurationMonths: Number(row.benefitDurationMonths) || 0,
+            maxRedemptions:
+              row.maxRedemptions === null || row.maxRedemptions === undefined
+                ? null
+                : Number(row.maxRedemptions),
+            usedCount: Number(row.usedCount) || 0,
+            codeExpiresAt,
+            status: String(row.status || 'active'),
+            createdAt,
+          }
+        })
+        .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+      setCodes(rows)
+      setError(null)
+    } catch (fallbackErr) {
+      console.error('[promo-codes] fallback load failed:', fallbackErr)
       setError(json.error || 'Failed to load promo codes')
     }
     setLoading(false)

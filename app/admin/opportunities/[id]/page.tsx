@@ -14,6 +14,7 @@ import {
 } from '@/lib/business-queries'
 import { JobApplication } from '@/lib/types'
 import { normalizeOpportunityFromJob } from '@/lib/opportunity-utils'
+import { htmlToPlainText } from '@/lib/cms-page-content'
 import { ArrowLeft, Download } from 'lucide-react'
 import { BUTTON_BACK } from '@/lib/admin-design-system'
 
@@ -125,7 +126,9 @@ export default function AdminOpportunityDetailPage() {
             <p className="text-sm text-neutral-500 mb-4">
               {normalized.companyName || normalized.businessName} · {normalized.status}
             </p>
-            <p className="whitespace-pre-wrap text-sm text-neutral-800">{normalized.description}</p>
+            <p className="whitespace-pre-wrap text-sm text-neutral-800">
+              {htmlToPlainText(normalized.description || '') || '—'}
+            </p>
             <div className="flex flex-wrap gap-2 mt-6">
               <button
                 type="button"

@@ -7,7 +7,6 @@ import {
   incrementCouponUsed,
   incrementTicketSold,
 } from '@/lib/event-luma-server'
-import { notifyMembershipActivated } from '@/lib/member-notifications'
 
 export function getPublicAppUrl(): string {
   return (
@@ -332,17 +331,21 @@ export async function completeMembershipPayment(params: {
     prevPlanId !== params.planId &&
     params.gateway !== 'promo'
 
-  notifyMembershipActivated({
-    userId: params.userId,
-    planName,
-    renewDate: isLifetimePromo ? null : renewDate,
-    isPromo,
-    isLifetime: isLifetimePromo,
-    isUpgrade,
-    previousPlanName: isUpgrade
-      ? String(existingUser.membershipPlanName || prevPlanId || '')
-      : null,
-  })
+  void import('@/lib/member-notifications')
+    .then(({ notifyMembershipActivated }) => {
+      notifyMembershipActivated({
+        userId: params.userId,
+        planName,
+        renewDate: isLifetimePromo ? null : renewDate,
+        isPromo,
+        isLifetime: isLifetimePromo,
+        isUpgrade,
+        previousPlanName: isUpgrade
+          ? String(existingUser.membershipPlanName || prevPlanId || '')
+          : null,
+      })
+    })
+    .catch((err) => console.error('[payment-completion] membership email:', err))
 
   return { membershipUrl }
 }

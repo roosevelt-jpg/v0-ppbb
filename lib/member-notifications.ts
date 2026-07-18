@@ -1,16 +1,24 @@
 /**
  * Branded member lifecycle emails (auth + membership).
  * All go through sendBrandedEmail / sendBrandedEmailToUser (centered logo).
+ *
+ * Avoid top-level `firebase-admin/auth` — it can crash Next serverless bundles
+ * at module load (same pattern as admin-access-server).
  */
 
-import { getAuth } from 'firebase-admin/auth'
-import { getAdminApp, getAdminDb } from '@/lib/firebase-admin'
+import { getAdminDb } from '@/lib/firebase-admin'
 import {
   paragraphs,
   sendBrandedEmail,
   sendBrandedEmailToUser,
   sendBrandedEmailToUserSafe,
 } from '@/lib/platform-email'
+
+async function getAdminAuth() {
+  const { getAuth } = await import('firebase-admin/auth')
+  const { getAdminApp } = await import('@/lib/firebase-admin')
+  return getAuth(getAdminApp())
+}
 
 export function memberSiteUrl(): string {
   return (
@@ -70,7 +78,7 @@ export async function sendEmailVerificationBranded(opts: {
   if (!email.includes('@')) return { ok: false, error: 'Invalid email' }
 
   try {
-    const auth = getAuth(getAdminApp())
+    const auth = await getAdminAuth()
     const link = await auth.generateEmailVerificationLink(email, {
       url: `${memberSiteUrl()}/login`,
       handleCodeInApp: false,
@@ -107,7 +115,7 @@ export async function sendPasswordResetBranded(opts: {
   if (!email.includes('@')) return { ok: false, error: 'Invalid email' }
 
   try {
-    const auth = getAuth(getAdminApp())
+    const auth = await getAdminAuth()
     // Always return success to the client to avoid email enumeration;
     // only send when the Auth user exists.
     try {

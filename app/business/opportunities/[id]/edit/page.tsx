@@ -20,6 +20,7 @@ import {
   roleTypeToLegacyType,
   toDate,
 } from '@/lib/opportunity-utils'
+import { htmlToPlainText } from '@/lib/cms-page-content'
 
 function toDateInput(value: unknown): string {
   const d = toDate(value)
@@ -89,7 +90,7 @@ export default function EditJobPage() {
         suitableFor: Array.isArray(job.suitableFor) ? job.suitableFor.map(String) : [],
         deadline: toDateInput(job.deadline),
         hiringBy: toDateInput(job.hiringBy),
-        description: job.description || '',
+        description: htmlToPlainText(job.description || ''),
       })
       setLoading(false)
     })

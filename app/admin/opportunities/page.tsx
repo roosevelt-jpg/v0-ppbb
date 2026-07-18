@@ -182,7 +182,7 @@ export function AdminOpportunitiesPageInner() {
       category: job.category === '—' ? '' : job.category,
       type: job.type,
       gender: job.gender === 'Any' ? '' : job.gender,
-      description: job.description,
+      description: htmlToPlainText(job.description || ''),
     })
   }
 

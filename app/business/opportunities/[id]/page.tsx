@@ -14,6 +14,7 @@ import {
   updateOpportunity,
 } from '@/lib/business-queries'
 import { BusinessOpportunity, JobApplication } from '@/lib/types'
+import { htmlToPlainText } from '@/lib/cms-page-content'
 import { Button } from '@/components/ui/button'
 import { DashboardModal } from '@/components/dashboard-modal'
 import { db } from '@/lib/firebase'
@@ -234,7 +235,10 @@ export default function BusinessOpportunityDetailPage() {
         return
       }
       setOpportunity(data)
-      setEditForm({ title: data.title, description: data.description || '' })
+      setEditForm({
+        title: data.title,
+        description: htmlToPlainText(data.description || ''),
+      })
       const apps = await getOpportunityApplications(id)
       setApplications(await enrichApplications(apps))
     } catch (err) {
@@ -538,7 +542,7 @@ export default function BusinessOpportunityDetailPage() {
             <div>
               <h2 className="font-semibold text-neutral-900 mb-2">Description</h2>
               <p className="text-sm text-neutral-600 whitespace-pre-wrap">
-                {opportunity.description || '—'}
+                {htmlToPlainText(opportunity.description || '') || '—'}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">

@@ -1,6 +1,5 @@
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { completeMembershipPayment } from '@/lib/payment-completion'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export const MEMBERSHIP_PROMO_COLLECTION = 'membershipPromoCodes'
@@ -326,6 +325,7 @@ export async function redeemMembershipPromo(input: {
 
   const paymentReference = `promo_${redeemedPromo.id}_${input.userId}_${Date.now()}`
   try {
+    const { completeMembershipPayment } = await import('@/lib/payment-completion')
     const result = await completeMembershipPayment({
       userId: input.userId,
       planId: grantedPlanId,
