@@ -29,6 +29,7 @@ import {
   subscribeToMemberNotifications,
   type MemberNotification,
 } from '@/lib/member-dashboard'
+import { getEventLocationLabel } from '@/lib/event-utils'
 import type { User } from '@/lib/types'
 
 function formatMemberDate(value: unknown): string {
@@ -269,21 +270,29 @@ export default function DashboardPage() {
           </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <div key={String(event.id)} className="border border-neutral-200 rounded-xl p-4 bg-white">
-                <h3 className="font-semibold text-neutral-900 line-clamp-2">{String(event.title ?? 'Event')}</h3>
-                <p className="text-sm text-neutral-500 mt-2">
-                  {formatMemberDate(event.startDate)}
-                  {event.locationName ? ` • ${String(event.locationName)}` : ''}
-                </p>
-                <Link
-                  href={`/events/${event.id}`}
-                  className="inline-flex mt-3 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+            {upcomingEvents.map((event) => {
+              const locationLabel = getEventLocationLabel(event as never)
+              return (
+                <div
+                  key={String(event.id)}
+                  className="border border-neutral-200 rounded-xl p-4 bg-white min-w-0 overflow-hidden"
                 >
-                  View
-                </Link>
-              </div>
-            ))}
+                  <h3 className="font-semibold text-neutral-900 line-clamp-2 break-words">
+                    {String(event.title ?? 'Event')}
+                  </h3>
+                  <p className="text-sm text-neutral-500 mt-2 break-words">
+                    {formatMemberDate(event.startDate)}
+                    {locationLabel ? ` • ${locationLabel}` : ''}
+                  </p>
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="inline-flex mt-3 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+                  >
+                    View
+                  </Link>
+                </div>
+              )
+            })}
           </div>
         )}
       </section>

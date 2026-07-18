@@ -22,6 +22,7 @@ import {
   eventVisibleToUser,
   parseFirestoreDate,
 } from '@/lib/member-dashboard'
+import { getEventLocationLabel } from '@/lib/event-utils'
 
 function parseEventDate(value: unknown): Date | null {
   return parseFirestoreDate(value)
