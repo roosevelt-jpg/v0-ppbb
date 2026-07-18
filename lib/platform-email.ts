@@ -1,102 +1,59 @@
 /**
  * Branded transactional email via Gmail SMTP.
- * Layout: Passive Blessings logo → body → purpose + "PB Admin" signature.
+ * Layout: Logo → Greeting → Body → purpose + "PB Admin"
  */
 
 import nodemailer from 'nodemailer'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getGmailSmtpConfig, getEmailBrandLogoUrl } from '@/lib/gmail-service'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
+import {
+  emailParagraph,
+  emailParagraphs,
+  escapeEmailHtml,
+  renderSimpleEmailHtml,
+  type SimpleEmailCta,
+} from '@/lib/email-template'
 
-export type BrandedEmailCta = { label: string; url: string }
+export type BrandedEmailCta = SimpleEmailCta
 
 export type SendBrandedEmailInput = {
   to: string
   subject: string
   /** Short purpose line used in the signature (e.g. "New job application") */
   purpose: string
+  /** Optional greeting line, e.g. "Hi Jordan," */
+  greeting?: string
+  /** @deprecated Prefer greeting + bodyHtml; still rendered as the first body line if set */
   headline?: string
   /** HTML body (paragraphs). Plain text is also fine — wrap in <p> if needed. */
   bodyHtml: string
   cta?: BrandedEmailCta
 }
 
-function getPublicSiteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    'https://www.passive-blessings.com'
-  ).replace(/\/$/, '')
-}
-
-function escapeHtml(value: string): string {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
 export function renderBrandedEmailHtml(opts: {
   logoUrl: string
   purpose: string
+  greeting?: string
   headline?: string
   bodyHtml: string
   cta?: BrandedEmailCta
 }): string {
-  const site = getPublicSiteUrl()
-  const headline = opts.headline
-    ? `<h1 style="margin:0 0 16px 0;font-size:22px;line-height:1.3;color:#111111;font-family:Georgia,'Times New Roman',serif;">${escapeHtml(opts.headline)}</h1>`
-    : ''
-  const cta = opts.cta
-    ? `<p style="margin:24px 0 8px 0;"><a href="${escapeHtml(opts.cta.url)}" style="display:inline-block;background:#111111;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:700;font-size:14px;font-family:Arial,Helvetica,sans-serif;">${escapeHtml(opts.cta.label)}</a></p>`
-    : ''
+  const bodyParts: string[] = []
+  if (opts.headline?.trim()) {
+    bodyParts.push(
+      `<p style="margin:0 0 10px 0;font-weight:700;color:#111;">${escapeEmailHtml(opts.headline.trim())}</p>`
+    )
+  }
+  bodyParts.push(opts.bodyHtml)
 
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Passive Blessings</title>
-</head>
-<body style="margin:0;padding:0;background:#f7f6f2;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f7f6f2;padding:24px 12px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border:1px solid #e4e1da;border-radius:10px;overflow:hidden;">
-          <tr>
-            <td style="padding:28px 28px 12px 28px;text-align:center;border-bottom:1px solid #eee;">
-              <img src="${escapeHtml(opts.logoUrl)}" alt="Passive Blessings" width="180" style="display:block;margin:0 auto;max-width:180px;height:auto;border:0;" />
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:28px;font-family:Arial,Helvetica,sans-serif;color:#333333;font-size:15px;line-height:1.6;">
-              ${headline}
-              <div style="color:#333333;">${opts.bodyHtml}</div>
-              ${cta}
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:32px;border-top:1px solid #e4e1da;">
-                <tr>
-                  <td style="padding-top:20px;font-family:Arial,Helvetica,sans-serif;">
-                    <p style="margin:0 0 4px 0;font-size:13px;color:#555555;line-height:1.5;">
-                      ${escapeHtml(opts.purpose)}
-                    </p>
-                    <p style="margin:0;font-size:14px;font-weight:700;color:#111111;">
-                      PB Admin
-                    </p>
-                    <p style="margin:8px 0 0 0;font-size:12px;color:#999999;">
-                      Passive Blessings · <a href="${site}" style="color:#666666;">${site.replace(/^https?:\/\//, '')}</a>
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
+  return renderSimpleEmailHtml({
+    logoUrl: opts.logoUrl,
+    greeting: opts.greeting,
+    bodyHtml: bodyParts.join(''),
+    purpose: opts.purpose,
+    cta: opts.cta,
+  })
 }
 
 async function resolveLogoUrl(): Promise<string> {
@@ -134,11 +91,13 @@ export async function sendBrandedEmail(
     const html = renderBrandedEmailHtml({
       logoUrl,
       purpose: input.purpose,
+      greeting: input.greeting,
       headline: input.headline,
       bodyHtml: input.bodyHtml,
       cta: input.cta,
     })
     const text = [
+      input.greeting || '',
       input.headline || '',
       input.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
       '',
@@ -184,7 +143,6 @@ async function userAllowsEmail(userId: string): Promise<boolean> {
     const snap = await getAdminDb().collection('users').doc(userId).get()
     if (!snap.exists) return true
     const data = snap.data() || {}
-    // Prefer explicit false; missing means allow
     if (data.emailNotifications === false) return false
     if (data.settings && (data.settings as { emailNotifications?: boolean }).emailNotifications === false) {
       return false
@@ -224,6 +182,7 @@ export async function sendBrandedEmailToUser(opts: {
   userId: string
   subject: string
   purpose: string
+  greeting?: string
   headline?: string
   bodyHtml: string
   cta?: BrandedEmailCta
@@ -246,6 +205,7 @@ export async function sendBrandedEmailToUser(opts: {
       to: email,
       subject: opts.subject,
       purpose: opts.purpose,
+      greeting: opts.greeting,
       headline: opts.headline,
       bodyHtml: opts.bodyHtml,
       cta: opts.cta,
@@ -260,6 +220,7 @@ export function sendBrandedEmailToUserSafe(opts: {
   userId: string
   subject: string
   purpose: string
+  greeting?: string
   headline?: string
   bodyHtml: string
   cta?: BrandedEmailCta
@@ -270,10 +231,5 @@ export function sendBrandedEmailToUserSafe(opts: {
   })
 }
 
-export function paragraph(text: string): string {
-  return `<p style="margin:0 0 12px 0;">${escapeHtml(text)}</p>`
-}
-
-export function paragraphs(...lines: string[]): string {
-  return lines.filter(Boolean).map(paragraph).join('')
-}
+export const paragraph = emailParagraph
+export const paragraphs = emailParagraphs

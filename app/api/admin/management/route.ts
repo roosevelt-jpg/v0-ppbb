@@ -9,6 +9,7 @@ import {
   dispatchAdminPasswordResetEmail,
 } from '@/lib/gmail-service'
 import { getUserProfileData, verifyIdToken } from '@/lib/admin-access-server'
+import { getUserRoles } from '@/lib/roles-server'
 import crypto from 'crypto'
 
 function getPublicSiteUrl(): string {
@@ -17,6 +18,10 @@ function getPublicSiteUrl(): string {
     process.env.NEXT_PUBLIC_APP_URL ||
     'https://www.passive-blessings.com'
   ).replace(/\/$/, '')
+}
+
+function isSixDigitAccessCode(code: string): boolean {
+  return /^\d{6}$/.test(String(code || '').trim())
 }
 
 async function requireSuperAdmin(request: NextRequest): Promise<
@@ -47,8 +52,14 @@ async function requireSuperAdmin(request: NextRequest): Promise<
   }
 
   const profile = await getUserProfileData(uid)
-  const role = typeof profile?.role === 'string' ? profile.role : ''
-  if (role !== 'super_admin') {
+  const roles = getUserRoles(profile)
+  const role =
+    (typeof profile?.role === 'string' && profile.role) ||
+    roles.find((r) => r === 'super_admin') ||
+    roles[0] ||
+    ''
+  // Accept role on `role` or inside `roles[]` (invite redeem writes both)
+  if (!roles.includes('super_admin')) {
     return {
       ok: false,
       response: NextResponse.json(
@@ -63,7 +74,7 @@ async function requireSuperAdmin(request: NextRequest): Promise<
     uid,
     email: String(profile?.email || 'unknown'),
     name: getUserDisplayName(profile as Parameters<typeof getUserDisplayName>[0]),
-    role,
+    role: String(role),
   }
 }
 
@@ -392,7 +403,7 @@ export async function POST(request: NextRequest) {
       }
 
       const codeData = codeSnap.data() || {}
-      const accessCode = String(codeData.code || '').trim().toUpperCase()
+      let accessCode = String(codeData.code || '').trim().toUpperCase()
       const adminEmail = String(codeData.adminEmail || codeData.email || '')
         .trim()
         .toLowerCase()
@@ -409,24 +420,28 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      // Migrate legacy hex invites (e.g. 12-char) to the current 6-digit format
+      let codeMigrated = false
+      if (!isSixDigitAccessCode(accessCode)) {
+        accessCode = await generateUniqueAccessCode()
+        codeMigrated = true
+      }
+
       let expiresAt =
         codeData.expiresAt?.toDate?.() ||
         (codeData.expiresAt ? new Date(codeData.expiresAt) : null)
 
       // Extend unused (or recovery) invites so the resent link stays valid
+      const patch: Record<string, unknown> = {
+        code: accessCode,
+        lastResentAt: new Date(),
+        updatedAt: new Date(),
+      }
       if (extendExpiry !== false) {
         expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
-        await codeRef.update({
-          expiresAt,
-          lastResentAt: new Date(),
-          updatedAt: new Date(),
-        })
-      } else {
-        await codeRef.update({
-          lastResentAt: new Date(),
-          updatedAt: new Date(),
-        })
+        patch.expiresAt = expiresAt
       }
+      await codeRef.update(patch)
 
       let emailSent = false
       let emailError: string | null = null
@@ -468,7 +483,7 @@ export async function POST(request: NextRequest) {
         entityId: String(codeId),
         entityName: adminName,
         status: emailSent ? 'success' : 'failed',
-        details: `Role: ${role}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
+        details: `Role: ${role}; Code: ${accessCode}; Migrated: ${codeMigrated}; Email sent: ${emailSent}${emailError ? `; Error: ${emailError}` : ''}`,
       })
 
       return NextResponse.json({
@@ -481,6 +496,7 @@ export async function POST(request: NextRequest) {
           adminEmail,
           adminName,
           expiresAt,
+          codeMigrated,
         },
         message: emailSent
           ? `Invitation resent to ${adminEmail}`
@@ -513,17 +529,19 @@ export async function POST(request: NextRequest) {
         const { getAdminApp } = await import('@/lib/firebase-admin')
         const auth = getAuth(getAdminApp())
 
+        // Create Auth account if invitee has not finished setup yet, so reset still works
+        let authUserCreated = false
         try {
           await auth.getUserByEmail(email)
         } catch {
-          return NextResponse.json(
-            {
-              success: false,
-              error:
-                'No Firebase login exists for this email yet. Resend the invite and have them finish /admin/setup first.',
-            },
-            { status: 404 }
-          )
+          await auth.createUser({
+            email,
+            emailVerified: false,
+            password: crypto.randomBytes(32).toString('base64url'),
+            displayName: adminName,
+            disabled: false,
+          })
+          authUserCreated = true
         }
 
         const resetLink = await auth.generatePasswordResetLink(email, {
@@ -559,12 +577,13 @@ export async function POST(request: NextRequest) {
           entityId: email,
           entityName: adminName,
           status: 'success',
-          details: 'Password reset link emailed via Admin Management',
+          details: `Password reset link emailed via Admin Management${authUserCreated ? '; Auth account created' : ''}`,
         })
 
         return NextResponse.json({
           success: true,
           emailSent: true,
+          authUserCreated,
           message: `Password reset email sent to ${email}`,
         })
       } catch (resetErr) {

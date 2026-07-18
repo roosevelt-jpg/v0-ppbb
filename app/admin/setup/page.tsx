@@ -284,12 +284,32 @@ export default function AdminSetup() {
             } catch (createErr: unknown) {
               const createCode = authCode(createErr)
               if (createCode === 'auth/email-already-in-use') {
-                throw new Error(
-                  'This email already has a password account. Enter the same password you used the first time and click Finish setup again. If you forgot it, ask a super admin to send a password reset from Admin → Management.'
-                )
-              }
-              // First sign-in failed for another reason and create also failed
-              if (
+                // Auth may already exist from an early password-reset; sync password via invite
+                if (!inviteData?.id) {
+                  throw new Error(
+                    'This email already has a password account. Enter the same password you used the first time, or ask a super admin to send a password reset from Admin → Management.'
+                  )
+                }
+                const claimRes = await fetch('/api/admin/access-codes/claim-password', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    codeId: inviteData.id,
+                    code: inviteData.code || accessCode.trim().toUpperCase(),
+                    email: accountEmail,
+                    password,
+                  }),
+                })
+                const claimJson = await claimRes.json().catch(() => ({}))
+                if (!claimRes.ok || !claimJson.success) {
+                  throw new Error(
+                    (claimJson as { error?: string }).error ||
+                      'This email already has an account. Ask a super admin to send a password reset from Admin → Management.'
+                  )
+                }
+                const signedIn = await signInWithEmailAndPassword(auth, accountEmail, password)
+                firebaseUser = signedIn.user
+              } else if (
                 signInCode === 'auth/wrong-password' ||
                 signInCode === 'auth/invalid-credential' ||
                 signInCode === 'auth/invalid-login-credentials'
@@ -297,9 +317,9 @@ export default function AdminSetup() {
                 throw new Error(
                   'This email already has an account, but that password is incorrect. Use the password from your first setup attempt, or ask a super admin to send a password reset from Admin → Management.'
                 )
+              } else {
+                throw createErr
               }
-              throw createErr
-            }
           } else {
             throw signInErr
           }

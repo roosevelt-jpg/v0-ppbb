@@ -9,6 +9,11 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { mergeGlobalSettings } from '@/lib/global-settings'
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
+import {
+  emailParagraphs,
+  escapeEmailHtml,
+  renderSimpleEmailHtml,
+} from '@/lib/email-template'
 
 function getPublicSiteUrl(): string {
   return (
@@ -133,61 +138,6 @@ function formatInviteRoleLabel(role: string): string {
   return labels[role] || role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-const PERMISSION_LABELS: Record<string, string> = {
-  full_access: 'Full system access',
-  manage_members: 'Manage Members',
-  manage_events: 'Manage Events',
-  manage_admins: 'Manage Admins',
-  manage_settings: 'Manage Settings',
-  view_reports: 'View Reports',
-  view_analytics: 'View Analytics',
-  manage_content: 'Manage Content',
-  manage_integrations: 'Manage Integrations',
-  manage_beneficiary: 'Manage Beneficiary Requests',
-  manage_workshops: 'Manage Workshops',
-  manage_recordings: 'Manage Recordings',
-  manage_team: 'Manage Team',
-  manage_community: 'Manage Community',
-  manage_security: 'Manage Security',
-}
-
-function formatPermissionLabels(permissions: string[]): string {
-  if (!permissions.length || permissions.includes('full_access')) {
-    return '• Full system access'
-  }
-  return permissions
-    .map((p) => `• ${PERMISSION_LABELS[p] || p.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}`)
-    .join('<br>')
-}
-
-function buildInviterSignatureHtml(invitedBy: NonNullable<AdminInviteDetails['invitedBy']>): string {
-  const avatarCell = invitedBy.profilePictureURL
-    ? `<img src="${invitedBy.profilePictureURL}" alt="" width="48" height="48" style="display:block;width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #e0dfd9;" />`
-    : `<div style="width:48px;height:48px;border-radius:50%;background-color:#111111;color:#ffffff;text-align:center;line-height:48px;font-size:16px;font-weight:bold;font-family:Arial,sans-serif;">${invitedBy.initials}</div>`
-
-  return `
-    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:24px;border-top:1px solid #e0dfd9;padding-top:20px;">
-      <tr>
-        <td width="60" valign="top" style="padding-right:12px;">
-          ${avatarCell}
-        </td>
-        <td valign="top" style="font-family:Arial,'Segoe UI',sans-serif;">
-          <p style="margin:0 0 4px 0;font-size:15px;font-weight:bold;color:#111111;">
-            ${invitedBy.name}
-          </p>
-          <p style="margin:0 0 6px 0;font-size:13px;color:#444444;font-weight:600;">
-            ${invitedBy.roleLabel} · Passive Blessings
-          </p>
-          <p style="margin:0;font-size:13px;color:#666666;line-height:1.5;">
-            Welcome to the team. Please complete your admin setup with the access code above.
-            If you have questions about this invitation, reply to this email or contact your inviter directly.
-          </p>
-        </td>
-      </tr>
-    </table>
-  `
-}
-
 /** Dark logo for light email backgrounds — reads platformConfig/globalSettings.logoUrlDark */
 export async function getEmailBrandLogoUrl(): Promise<string> {
   const site = getPublicSiteUrl()
@@ -220,157 +170,41 @@ export const sendAdminInviteEmail = async (
 
   const logoUrl = await getEmailBrandLogoUrl()
   const roleLabel = formatInviteRoleLabel(details.role)
-  const permissionsText = formatPermissionLabels(details.permissions)
+  const greeting = `Hi ${details.adminName},`
+  const bodyHtml = emailParagraphs(
+    `You've been invited to join Passive Blessings as ${roleLabel}.`,
+    `Your 6-digit access code is ${details.accessCode}.`,
+    `Complete setup here: ${details.setupUrl}`,
+    `This code expires ${details.expiresAt.toLocaleString()}.`
+  )
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: bold; color: #000; margin-bottom: 10px; }
-          .subtitle { color: #666; font-size: 14px; }
-          .card { background: #f7f6f2; border: 1px solid #e0dfd9; border-radius: 8px; padding: 20px; margin: 20px 0; }
-          .role-badge { display: inline-block; background: #000; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; margin: 10px 0; }
-          .access-code { background: #fff; border: 2px solid #000; padding: 20px; margin: 15px 0; border-radius: 6px; text-align: center; }
-          .code-label { font-size: 12px; color: #666666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-          .code-value { font-size: 36px; font-family: 'Courier New', monospace; letter-spacing: 4px; color: #111111; font-weight: bold; }
-          .permissions { background: #fff; border-left: 4px solid #000; padding: 15px; margin: 15px 0; }
-          .permissions h4 { margin: 0 0 10px 0; color: #000; }
-          .permissions-list { font-size: 14px; color: #555; line-height: 1.8; }
-          .step { margin: 20px 0; }
-          .step-number { display: inline-block; background: #000; color: #fff; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; margin-right: 10px; }
-          .button { display: inline-block; background: #000; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 15px 0; }
-          .button:hover { background: #333; }
-          .footer { font-size: 12px; color: #999; text-align: center; margin-top: 30px; border-top: 1px solid #e0dfd9; padding-top: 15px; }
-          .warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 12px; margin: 15px 0; color: #856404; font-size: 13px; }
-          .info-row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 14px; }
-          .info-label { font-weight: bold; color: #333; }
-          .info-value { color: #666; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <!-- Header -->
-          <div class="header">
-            <img src="${logoUrl}" alt="Passive Blessings" width="180" style="display:block;max-width:180px;height:auto;margin:0 auto 10px auto;border:0;">
-            <div class="subtitle">Admin Portal</div>
-          </div>
+  const html = renderSimpleEmailHtml({
+    logoUrl,
+    greeting,
+    bodyHtml,
+    purpose: 'Admin invitation',
+    cta: { label: 'Go to Setup', url: details.setupUrl },
+  })
 
-          <!-- Welcome -->
-          <div class="card">
-            <p>Hi <strong>${details.adminName}</strong>,</p>
-            <p>You have been invited to join the Passive Blessings admin team with the following role and permissions.</p>
-          </div>
-
-          <!-- Role & Permissions -->
-          <div class="card">
-            <p><strong>Your Role:</strong></p>
-            <div class="role-badge" style="display:inline-block;background-color:#111111;color:#ffffff;padding:6px 12px;border-radius:4px;font-weight:bold;margin:10px 0;">${roleLabel}</div>
-            
-            <div class="permissions">
-              <h4>Permissions:</h4>
-              <div class="permissions-list">
-                ${permissionsText}
-              </div>
-            </div>
-          </div>
-
-          <!-- Access Code -->
-          <div class="card">
-            <p><strong>Your 6-digit Access Code:</strong></p>
-            <div class="access-code" style="background-color:#ffffff;border:2px solid #111111;padding:20px;margin:15px 0;border-radius:6px;text-align:center;">
-              <div class="code-label" style="font-size:12px;color:#666666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Enter this code on the admin setup page</div>
-              <div class="code-value" style="font-size:36px;font-family:'Courier New',monospace;letter-spacing:8px;color:#111111;font-weight:bold;">${details.accessCode}</div>
-            </div>
-          </div>
-
-          <!-- Setup Instructions -->
-          <div class="card">
-            <p><strong>How to Setup Your Account:</strong></p>
-            
-            <div class="step">
-              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">1</span>
-              <strong>Visit the Setup Page</strong><br>
-              <table cellpadding="0" cellspacing="0" border="0" style="margin:15px 0;">
-                <tr>
-                  <td align="left" bgcolor="#111111" style="border-radius:6px;background-color:#111111;">
-                    <a href="${details.setupUrl}" target="_blank" style="display:inline-block;padding:12px 24px;font-family:Arial,'Segoe UI',sans-serif;font-size:16px;font-weight:bold;color:#ffffff !important;text-decoration:none;border-radius:6px;background-color:#111111;mso-padding-alt:12px 24px;">
-                      <span style="color:#ffffff !important;">Go to Setup</span>
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </div>
-
-            <div class="step">
-              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">2</span>
-              <strong>Enter Your 6-digit Access Code</strong><br>
-              Enter the code shown above on Step 1 of the setup form.
-            </div>
-
-            <div class="step">
-              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">3</span>
-              <strong>Complete Your Profile</strong><br>
-              Enter your name and create a secure password for your account.
-            </div>
-
-            <div class="step">
-              <span class="step-number" style="display:inline-block;background-color:#111111;color:#ffffff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;">4</span>
-              <strong>Access the Admin Dashboard</strong><br>
-              Once setup is complete, you'll be able to access the full admin portal.
-            </div>
-          </div>
-
-          ${details.invitedBy ? buildInviterSignatureHtml(details.invitedBy) : ''}
-
-          <!-- Important Info -->
-          <div class="warning">
-            <strong>⏰ Important:</strong> This access code expires in 24 hours at ${details.expiresAt.toLocaleString()}. If you don't complete setup in time, ask the super admin to generate a new code.
-          </div>
-
-          <div class="card">
-            <div class="info-row">
-              <span class="info-label">Admin Email:</span>
-              <span class="info-value">${details.adminEmail}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Role:</span>
-              <span class="info-value">${roleLabel}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Code Expires:</span>
-              <span class="info-value">${details.expiresAt.toLocaleString()}</span>
-            </div>
-          </div>
-
-          <!-- Security Notice -->
-          <div style="background: #e8f4f8; border-left: 4px solid #0084b4; padding: 12px; margin: 15px 0; border-radius: 4px;">
-            <p style="margin: 0; font-size: 13px; color: #0084b4;">
-              <strong>🔒 Security:</strong> Never share this access code with anyone. If you didn't request this invitation, please contact the super admin immediately.
-            </p>
-          </div>
-
-          <!-- Footer -->
-          <div class="footer">
-            <p style="margin: 0 0 10px 0;">This email was sent to ${details.adminEmail} because you were invited as an admin.</p>
-            <p style="margin: 0;">© ${new Date().getFullYear()} Passive Blessings. All rights reserved.</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `
+  const text = [
+    greeting,
+    '',
+    `You've been invited to join Passive Blessings as ${roleLabel}.`,
+    `Your 6-digit access code is ${details.accessCode}.`,
+    `Complete setup here: ${details.setupUrl}`,
+    `This code expires ${details.expiresAt.toLocaleString()}.`,
+    '',
+    'Admin invitation',
+    'PB Admin',
+  ].join('\n')
 
   try {
     const mailOptions = {
       from: `"${details.fromName || 'Passive Blessings'}" <${gmailEmail}>`,
       to: details.adminEmail,
-      subject: `You're Invited to Join Passive Blessings Admin Team - ${roleLabel}`,
+      subject: `Admin invite — ${roleLabel}`,
       html,
+      text,
     }
 
     console.log('[v0] Sending admin invite email with config:', {
@@ -458,27 +292,18 @@ export async function sendCertificateMilestoneEmail(
     .split(/\n+/)
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<p style="margin:0 0 14px 0;line-height:1.6;color:#333;">${p}</p>`)
+    .map((p) => `<p style="margin:0 0 10px 0;line-height:1.55;color:#333;">${escapeEmailHtml(p)}</p>`)
     .join('')
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <body style="margin:0;padding:0;font-family:Georgia,serif;background:#f7f6f2;">
-        <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
-          <div style="background:#fff;border:3px solid #111;padding:32px;border-radius:4px;">
-            <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:#888;">Passive Blessings</p>
-            <h1 style="margin:0 0 20px 0;font-size:24px;color:#111;">${details.certificateTitle}</h1>
-            ${paragraphs}
-            <p style="margin:20px 0 0 0;font-size:14px;color:#666;">
-              <strong>${details.hours}</strong> volunteer hours logged · View your certificate in your member dashboard.
-            </p>
-          </div>
-          <p style="margin:16px 0 0 0;font-size:11px;color:#999;text-align:center;">© ${new Date().getFullYear()} Passive Blessings</p>
-        </div>
-      </body>
-    </html>
-  `
+  const logoUrl = await getEmailBrandLogoUrl()
+  const html = renderSimpleEmailHtml({
+    logoUrl,
+    greeting: `Hi ${details.memberName},`,
+    bodyHtml:
+      paragraphs +
+      `<p style="margin:0 0 10px 0;">${escapeEmailHtml(details.certificateTitle)} · ${details.hours} volunteer hours.</p>`,
+    purpose: 'Certificate milestone',
+  })
 
   const info = await transporter.sendMail({
     from: `"${details.fromName || 'Passive Blessings'}" <${gmailEmail}>`,
@@ -526,53 +351,28 @@ export async function dispatchAdminPasswordResetEmail(details: {
   const name = details.adminName?.trim() || 'there'
   const loginUrl = `${getPublicSiteUrl()}/admin/login`
   const subject = 'Reset your Passive Blessings admin password'
-  const text = `Hi ${name},
+  const greeting = `Hi ${name},`
+  const text = `${greeting}
 
-A super admin requested a password reset for your Passive Blessings admin account.
+A super admin requested a password reset for your admin account.
 
-Open this link to choose a new password:
-${details.resetLink}
+Choose a new password: ${details.resetLink}
 
-After resetting, sign in at:
-${loginUrl}
+Then sign in at: ${loginUrl}
 
-If you did not expect this email, contact your Passive Blessings administrator.`
+Password reset
+PB Admin`
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <body style="margin:0;padding:0;font-family:Arial,'Segoe UI',sans-serif;background:#f7f6f2;color:#333;">
-        <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
-          <div style="text-align:center;margin-bottom:24px;">
-            <img src="${logoUrl}" alt="Passive Blessings" width="180" style="display:block;max-width:180px;height:auto;margin:0 auto;border:0;">
-            <p style="margin:10px 0 0 0;font-size:14px;color:#666;">Admin Portal</p>
-          </div>
-          <div style="background:#fff;border:1px solid #e0dfd9;padding:28px;border-radius:8px;">
-            <h1 style="margin:0 0 16px 0;font-size:22px;color:#111;">Reset your admin password</h1>
-            <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">Hi <strong>${name}</strong>,</p>
-            <p style="margin:0 0 14px 0;line-height:1.6;color:#333;">
-              A super admin requested a password reset for your Passive Blessings admin account.
-            </p>
-            <p style="margin:24px 0;">
-              <a href="${details.resetLink}"
-                 style="display:inline-block;padding:12px 24px;background:#111;color:#fff !important;text-decoration:none;font-weight:700;border-radius:6px;">
-                <span style="color:#fff !important;">Choose a new password</span>
-              </a>
-            </p>
-            <p style="margin:0 0 14px 0;line-height:1.6;color:#666;font-size:14px;">
-              After resetting, sign in at
-              <a href="${loginUrl}" style="color:#111;">${loginUrl}</a>
-            </p>
-            ${details.requestedBy ? buildInviterSignatureHtml(details.requestedBy) : ''}
-            <p style="margin:16px 0 0 0;line-height:1.6;color:#999;font-size:13px;">
-              If you did not expect this email, contact your Passive Blessings administrator.
-            </p>
-          </div>
-          <p style="margin:16px 0 0 0;font-size:11px;color:#999;text-align:center;">© ${new Date().getFullYear()} Passive Blessings. All rights reserved.</p>
-        </div>
-      </body>
-    </html>
-  `
+  const html = renderSimpleEmailHtml({
+    logoUrl,
+    greeting,
+    bodyHtml: emailParagraphs(
+      'A super admin requested a password reset for your admin account.',
+      `Then sign in at: ${loginUrl}`
+    ),
+    purpose: 'Password reset',
+    cta: { label: 'Choose a new password', url: details.resetLink },
+  })
 
   const info = await transporter.sendMail({
     from: `"${gmailConfig.fromName || 'Passive Blessings'}" <${gmailConfig.gmailEmail}>`,
