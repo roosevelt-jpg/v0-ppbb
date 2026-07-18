@@ -120,7 +120,7 @@ export default function AdminCmsShopPage() {
           {field('donateBannerEyebrow', 'Eyebrow')}
           {field('donateBannerHeadline', 'Headline')}
           {field('donateBannerCTA', 'CTA label')}
-          {field('donateBannerCTAHref', 'CTA href (e.g. /impact)')}
+          {field('donateBannerCTAHref', 'CTA href (e.g. /transparency)')}
         </div>
 
         <p className="text-sm text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>

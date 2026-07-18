@@ -26,6 +26,7 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: '/impact', destination: '/transparency', permanent: true },
       { source: '/admin/community', destination: '/admin/communities', permanent: true },
       { source: '/admin/community/:path*', destination: '/admin/communities', permanent: true },
       { source: '/admin/communities/community', destination: '/admin/communities', permanent: true },

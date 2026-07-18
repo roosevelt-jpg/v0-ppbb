@@ -22,7 +22,7 @@ export const DEFAULT_SHOP_PAGE_CONFIG: ShopPageConfig = {
   donateBannerEyebrow: 'DONATE VIA PURCHASE',
   donateBannerHeadline: 'A portion of every sale funds the meal programme.',
   donateBannerCTA: 'See impact',
-  donateBannerCTAHref: '/impact',
+  donateBannerCTAHref: '/transparency',
 }
 
 export const DEFAULT_SHOP_CONFIG: ShopPlatformConfig = {

@@ -109,7 +109,7 @@ export default function ShopPage() {
                     </h2>
                   </div>
                   <Link
-                    href={page.donateBannerCTAHref || '/impact'}
+                    href={page.donateBannerCTAHref || '/transparency'}
                     className="inline-flex min-h-[44px] items-center justify-center gap-2 bg-white text-black px-6 py-2.5 rounded text-sm font-semibold hover:bg-neutral-100 shrink-0"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                   >
