@@ -105,29 +105,30 @@ export default function CommunityDetailPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8 md:py-12">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 min-w-0">
         <button
+          type="button"
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 sm:mb-6 min-h-[40px]"
         >
           <ChevronLeft size={20} />
           Back
         </button>
 
         {/* Header */}
-        <div className="space-y-4 mb-8">
+        <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 min-w-0">
           {community.bannerURL && (
             <div
-              className="w-full h-40 md:h-56 bg-gray-200 bg-cover bg-center rounded-lg"
+              className="w-full h-36 sm:h-40 md:h-56 bg-gray-200 bg-cover bg-center rounded-lg"
               style={{ backgroundImage: `url(${community.bannerURL})` }}
             />
           )}
 
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-black mb-2">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-black mb-2 break-words">
               {community.name}
             </h1>
-            <p className="text-gray-600 text-base md:text-lg mb-4">
+            <p className="text-gray-600 text-sm sm:text-base md:text-lg mb-4 break-words">
               {community.description}
             </p>
 
@@ -163,28 +164,30 @@ export default function CommunityDetailPage() {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Users size={16} className="text-gray-600" />
-                <p className="text-sm text-gray-600">Members</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                <Users size={14} className="text-gray-600 shrink-0" />
+                <p className="text-xs sm:text-sm text-gray-600 truncate">Members</p>
               </div>
-              <p className="text-2xl font-bold text-black">{community.memberCount}</p>
+              <p className="text-xl sm:text-2xl font-bold text-black">{community.memberCount}</p>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600 mb-1">Groups</p>
-              <p className="text-2xl font-bold text-black">{community.groupCount}</p>
+            <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Groups</p>
+              <p className="text-xl sm:text-2xl font-bold text-black">{community.groupCount}</p>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600 mb-1">Category</p>
-              <p className="text-lg font-bold text-black">{community.category}</p>
+            <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Category</p>
+              <p className="text-sm sm:text-lg font-bold text-black capitalize truncate">
+                {community.category}
+              </p>
             </div>
 
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <p className="text-sm text-gray-600 mb-1">Access</p>
-              <p className="text-lg font-bold text-black capitalize">
+            <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">Access</p>
+              <p className="text-sm sm:text-lg font-bold text-black capitalize truncate">
                 {community.genderRestriction === 'mixed'
                   ? 'All'
                   : community.genderRestriction.replace('-', ' ')}
@@ -194,8 +197,8 @@ export default function CommunityDetailPage() {
         </div>
 
         {/* Groups Section */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-black">Discussion Groups</h2>
+        <div className="space-y-4 sm:space-y-6 min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-black">Discussion Groups</h2>
 
           {groups.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg border border-gray-200">

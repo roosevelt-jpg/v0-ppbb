@@ -91,11 +91,11 @@ function CommunityShortCard({
           ) : null}
         </div>
 
-        <div className="mt-auto grid grid-cols-2 gap-1.5 pt-0.5">
+        <div className="mt-auto grid grid-cols-1 min-[380px]:grid-cols-2 gap-1.5 pt-0.5">
           {isJoined ? (
             <Link
               href={href}
-              className="col-span-2 inline-flex items-center justify-center min-h-[36px] px-2.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-900"
+              className="min-[380px]:col-span-2 inline-flex items-center justify-center min-h-[40px] sm:min-h-[36px] px-2.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-900"
             >
               Open community
             </Link>
@@ -105,13 +105,13 @@ function CommunityShortCard({
                 type="button"
                 onClick={onJoin}
                 disabled={joining}
-                className="inline-flex items-center justify-center min-h-[36px] px-2.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-900 disabled:opacity-50"
+                className="inline-flex items-center justify-center min-h-[40px] sm:min-h-[36px] px-2.5 bg-black text-white rounded-lg text-xs font-semibold hover:bg-neutral-900 disabled:opacity-50"
               >
                 {joining ? 'Joining…' : 'Join'}
               </button>
               <Link
                 href={href}
-                className="inline-flex items-center justify-center min-h-[36px] px-2.5 bg-white text-black border border-[#e4e1da] rounded-lg text-xs font-semibold hover:bg-neutral-50"
+                className="inline-flex items-center justify-center min-h-[40px] sm:min-h-[36px] px-2.5 bg-white text-black border border-[#e4e1da] rounded-lg text-xs font-semibold hover:bg-neutral-50"
               >
                 View
               </Link>
@@ -251,30 +251,30 @@ export default function CommunitiesPage() {
     <div className="min-h-screen bg-[#f7f6f2] flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8 md:space-y-10">
-        <div className="text-center space-y-3">
-          <h1 className="font-headline text-3xl md:text-4xl font-bold text-black">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 space-y-6 sm:space-y-8 md:space-y-10 min-w-0">
+        <div className="text-center space-y-2 sm:space-y-3 px-1">
+          <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold text-black break-words">
             Join a Community
           </h1>
-          <p className="text-base md:text-lg text-neutral-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-neutral-600 max-w-2xl mx-auto">
             Connect with like-minded people and make an impact together
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#e4e1da] p-4 md:p-5 space-y-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-[#e4e1da] p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-4 min-w-0">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
             <input
               type="text"
               placeholder="Search communities…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full min-h-[48px] pl-10 pr-4 py-3 border border-[#e4e1da] rounded-xl focus:ring-2 focus:ring-black focus:border-transparent bg-white text-sm"
+              className="w-full min-h-[44px] pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 border border-[#e4e1da] rounded-xl focus:ring-2 focus:ring-black focus:border-transparent bg-white text-sm"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">Category</label>
               <select
                 value={selectedCategory}
@@ -290,7 +290,7 @@ export default function CommunitiesPage() {
               </select>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">Gender</label>
               <select
                 value={selectedGender}
@@ -304,7 +304,7 @@ export default function CommunitiesPage() {
               </select>
             </div>
 
-            <div className="flex items-end">
+            <div className="flex items-end sm:col-span-2 lg:col-span-1">
               <p className="text-sm text-neutral-500 pb-2">
                 {listedCommunities.length} communities found
               </p>
@@ -313,8 +313,11 @@ export default function CommunitiesPage() {
         </div>
 
         {/* Tabs — Suggestions / Popular / My Groups */}
-        <div className="border-b border-[#e4e1da] pb-3">
-          <nav className="flex flex-wrap gap-2 sm:gap-3" aria-label="Community lists">
+        <div className="border-b border-[#e4e1da] pb-3 min-w-0">
+          <nav
+            className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-3"
+            aria-label="Community lists"
+          >
             {(
               [
                 { id: 'suggestions' as const, label: 'Suggestions' },
@@ -329,7 +332,7 @@ export default function CommunitiesPage() {
                   type="button"
                   data-dashboard-control
                   onClick={() => setListTab(tab.id)}
-                  className={`inline-flex items-center justify-center min-h-[40px] px-4 sm:px-5 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap leading-none transition-colors ${
+                  className={`inline-flex items-center justify-center min-h-[40px] sm:min-h-[44px] px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap leading-none transition-colors text-center ${
                     active
                       ? 'bg-black text-white hover:bg-neutral-900 border border-black'
                       : 'bg-white text-neutral-700 hover:bg-neutral-50 hover:text-black border border-[#e4e1da]'
@@ -343,10 +346,10 @@ export default function CommunitiesPage() {
         </div>
 
         {loading ? (
-          <CommunityListSkeleton count={6} />
+          <CommunityListSkeleton count={8} />
         ) : listedCommunities.length === 0 ? (
-          <div className="text-center py-14 bg-white rounded-2xl border border-[#e4e1da]">
-            <p className="text-neutral-500 text-base">
+          <div className="text-center py-10 sm:py-14 bg-white rounded-xl sm:rounded-2xl border border-[#e4e1da] px-4">
+            <p className="text-neutral-500 text-sm sm:text-base">
               {listTab === 'mine'
                 ? user
                   ? 'You have not joined any communities yet.'
@@ -355,7 +358,7 @@ export default function CommunitiesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-3 md:gap-4">
             {listedCommunities.map((community) => (
               <CommunityShortCard
                 key={community.id}
@@ -370,13 +373,13 @@ export default function CommunitiesPage() {
 
         {/* Categories rail */}
         {categoryTiles.length > 0 ? (
-          <section className="space-y-4 pt-2">
-            <div className="flex items-end justify-between gap-4">
+          <section className="space-y-3 sm:space-y-4 pt-1 sm:pt-2 min-w-0">
+            <div className="flex items-end justify-between gap-3 sm:gap-4">
               <div className="space-y-1 min-w-0">
-                <h2 className="font-headline text-xl sm:text-2xl font-bold text-black">
+                <h2 className="font-headline text-lg sm:text-xl md:text-2xl font-bold text-black">
                   Categories
                 </h2>
-                <p className="text-sm text-neutral-500">
+                <p className="text-xs sm:text-sm text-neutral-500">
                   Find a group by browsing top categories.
                 </p>
               </div>
@@ -402,7 +405,7 @@ export default function CommunitiesPage() {
 
             <div
               ref={categoriesRailRef}
-              className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory"
+              className="flex gap-2.5 sm:gap-4 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 scroll-smooth snap-x snap-mandatory [scrollbar-width:thin]"
             >
               {categoryTiles.map((tile) => {
                 const active = selectedCategory === tile.id
@@ -410,10 +413,11 @@ export default function CommunitiesPage() {
                   <button
                     key={tile.id}
                     type="button"
+                    data-dashboard-control
                     onClick={() =>
                       setSelectedCategory((prev) => (prev === tile.id ? '' : tile.id))
                     }
-                    className={`relative shrink-0 w-[9.5rem] sm:w-44 h-28 sm:h-32 rounded-2xl overflow-hidden snap-start border ${
+                    className={`relative shrink-0 w-[8.25rem] sm:w-44 h-24 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden snap-start border ${
                       active ? 'border-black ring-2 ring-black/20' : 'border-[#e4e1da]'
                     }`}
                   >
@@ -426,11 +430,11 @@ export default function CommunitiesPage() {
                       <div className="absolute inset-0 bg-gradient-to-br from-neutral-800 to-neutral-600" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-3 text-left">
-                      <p className="text-white font-semibold text-sm capitalize truncate">
+                    <div className="absolute inset-x-0 bottom-0 p-2.5 sm:p-3 text-left">
+                      <p className="text-white font-semibold text-xs sm:text-sm capitalize truncate">
                         {tile.label}
                       </p>
-                      <p className="text-white/75 text-xs mt-0.5">
+                      <p className="text-white/75 text-[11px] sm:text-xs mt-0.5">
                         {tile.count} communit{tile.count === 1 ? 'y' : 'ies'}
                       </p>
                     </div>
