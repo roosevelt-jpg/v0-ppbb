@@ -10,6 +10,7 @@ import {
   DEFAULT_NAVIGATION,
   NavigationConfig,
   NavLink,
+  ensureCommunityNavLink,
 } from '@/lib/platform-config'
 
 export default function AdminCmsNavigationPage() {
@@ -45,12 +46,26 @@ export default function AdminCmsNavigationPage() {
   }
 
   const removeLink = (index: number) => {
-    setConfig((prev) => ({
-      ...prev,
-      links: prev.links
-        .filter((_, i) => i !== index)
-        .map((link, i) => ({ ...link, order: i })),
-    }))
+    setConfig((prev) => {
+      const target = prev.links[index]
+      if (
+        target &&
+        (target.href.replace(/\/$/, '').toLowerCase() === '/communities' ||
+          target.label.trim().toLowerCase() === 'community')
+      ) {
+        setMessage({
+          type: 'error',
+          text: 'Community is a required navbar link and cannot be removed.',
+        })
+        return prev
+      }
+      return {
+        ...prev,
+        links: prev.links
+          .filter((_, i) => i !== index)
+          .map((link, i) => ({ ...link, order: i })),
+      }
+    })
   }
 
   const moveLink = (index: number, direction: 'up' | 'down') => {
@@ -70,10 +85,15 @@ export default function AdminCmsNavigationPage() {
     setSaving(true)
     setMessage(null)
     try {
+      const payload: NavigationConfig = {
+        ...config,
+        links: ensureCommunityNavLink(config.links),
+      }
+      setConfig(payload)
       const res = await fetch('/api/platform-config/navigation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(payload),
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Save failed')

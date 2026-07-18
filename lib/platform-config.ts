@@ -8,16 +8,10 @@ import {
   type GlobalSettings,
   type GlobalSocialLinks,
 } from '@/lib/global-settings'
+import { ensureCommunityNavLink, type NavLink } from '@/lib/navigation-ensure'
 
-export type { GlobalSettings, GlobalSocialLinks }
-export { DEFAULT_GLOBAL_SETTINGS, mergeGlobalSettings }
-
-export interface NavLink {
-  label: string
-  href: string
-  order: number
-  isVisible: boolean
-}
+export type { GlobalSettings, GlobalSocialLinks, NavLink }
+export { DEFAULT_GLOBAL_SETTINGS, mergeGlobalSettings, ensureCommunityNavLink }
 
 export interface NavigationConfig {
   links: NavLink[]
@@ -62,8 +56,12 @@ function mergeNavigation(data: Record<string, unknown> | undefined): NavigationC
     return true
   })
 
+  const withCommunity = ensureCommunityNavLink(
+    links.length > 0 ? links : DEFAULT_NAVIGATION.links
+  )
+
   return {
-    links: links.length > 0 ? links : DEFAULT_NAVIGATION.links,
+    links: withCommunity,
     ctaButton: {
       label: (data.ctaButton as { label?: string })?.label || DEFAULT_NAVIGATION.ctaButton.label,
       href: (data.ctaButton as { href?: string })?.href || DEFAULT_NAVIGATION.ctaButton.href,

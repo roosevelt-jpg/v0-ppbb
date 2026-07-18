@@ -60,6 +60,16 @@ export async function POST(
       const { mergeTransparencyConfig } = await import('@/lib/transparency-config')
       nextBody = mergeTransparencyConfig(body)
     }
+    if (section === 'navigation' && body && typeof body === 'object') {
+      const { ensureCommunityNavLink } = await import('@/lib/navigation-ensure')
+      const links = Array.isArray((body as { links?: unknown }).links)
+        ? ((body as { links: Parameters<typeof ensureCommunityNavLink>[0] }).links)
+        : []
+      nextBody = {
+        ...body,
+        links: ensureCommunityNavLink(links),
+      }
+    }
 
     const payload = sanitizeForFirestore({
       ...nextBody,
