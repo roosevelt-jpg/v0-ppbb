@@ -20,6 +20,7 @@ import { getAllOpenOpportunities, getMemberApplications } from '@/lib/business-q
 import { matchesRoleTypeFilter } from '@/lib/opportunity-utils'
 import { isCharityVolunteerEvent } from '@/lib/charity-event'
 import { parseFirestoreDate } from '@/lib/member-dashboard'
+import { getEventLocationLabel } from '@/lib/event-utils'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -497,7 +498,9 @@ export default function VolunteeringPage() {
                         Charity event
                       </span>
                       <h3 className="font-semibold text-neutral-900 mt-2">{evt.title || 'Event'}</h3>
-                      <p className="text-sm text-neutral-500">{evt.locationName || 'Community event'}</p>
+                      <p className="text-sm text-neutral-500 break-words">
+                        {getEventLocationLabel(evt as never)}
+                      </p>
                       <p className="text-xs text-neutral-400 mt-1">
                         {formatDate(evt.startDate as string | Date | undefined)}
                       </p>
