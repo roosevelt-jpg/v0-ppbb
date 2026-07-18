@@ -13,6 +13,8 @@ import {
 import { subscribeToPublishedEvents } from '@/lib/event-queries'
 import type { BusinessOpportunity, BusinessOffer, BusinessLead, BusinessPartnership } from '@/lib/types'
 import type { NormalizedEvent } from '@/lib/event-utils'
+import { getEventLocationLabel } from '@/lib/event-utils'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 import {
   LineChart,
   Line,
@@ -188,21 +190,30 @@ export function BusinessDashboardHomeSections({ businessId }: { businessId: stri
         ) : (
           <div className="space-y-2">
             {networkEvents.map((event) => (
-              <Card key={event.id} className="p-4 flex flex-wrap items-center justify-between gap-3 border-[#e4e1da]">
-                <div>
-                  <p className="font-medium">{event.title}</p>
-                  <p className="text-xs text-neutral-500">
-                    {event.startDate?.toLocaleDateString?.('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}{' '}
-                    · {event.locationName || 'TBC'}
-                  </p>
+              <Card key={event.id} className="p-0 overflow-hidden flex flex-col sm:flex-row border-[#e4e1da]">
+                <EventBannerThumb
+                  event={event as never}
+                  title={event.title}
+                  size="sm"
+                  rounded="rounded-none"
+                  className="!h-24 !w-full sm:!h-auto sm:!w-28 sm:!min-h-[88px]"
+                />
+                <div className="p-4 flex flex-wrap items-center justify-between gap-3 flex-1 min-w-0">
+                  <div className="min-w-0">
+                    <p className="font-medium">{event.title}</p>
+                    <p className="text-xs text-neutral-500 break-words">
+                      {event.startDate?.toLocaleDateString?.('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}{' '}
+                      · {getEventLocationLabel(event as never)}
+                    </p>
+                  </div>
+                  <Link href={`/events/${event.id}`} className="min-h-[36px] inline-flex items-center px-3 bg-black text-white rounded text-sm">
+                    View
+                  </Link>
                 </div>
-                <Link href={`/events/${event.id}`} className="min-h-[36px] inline-flex items-center px-3 bg-black text-white rounded text-sm">
-                  View
-                </Link>
               </Card>
             ))}
           </div>

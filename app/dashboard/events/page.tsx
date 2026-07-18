@@ -23,6 +23,7 @@ import {
   parseFirestoreDate,
 } from '@/lib/member-dashboard'
 import { getEventLocationLabel } from '@/lib/event-utils'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 
 function parseEventDate(value: unknown): Date | null {
   return parseFirestoreDate(value)
@@ -252,7 +253,14 @@ export default function MyEventsPage() {
               const start = parseEventDate(event.startDate)
               const isRegistered = registeredIds.has(event.id)
               return (
-                <Card key={event.id} className="p-4 sm:p-5 border border-neutral-200">
+                <Card key={event.id} className="border border-neutral-200 overflow-hidden p-0">
+                  <EventBannerThumb
+                    event={event}
+                    title={String(event.title ?? 'Event')}
+                    size="md"
+                    rounded="rounded-none"
+                  />
+                  <div className="p-4 sm:p-5">
                   <h3 className="text-lg font-semibold text-neutral-900">{String(event.title ?? 'Event')}</h3>
                   {event.description ? (
                     <p className="text-sm text-neutral-500 mt-1 line-clamp-2">{String(event.description)}</p>
@@ -288,6 +296,7 @@ export default function MyEventsPage() {
                       </button>
                     )}
                   </div>
+                  </div>
                 </Card>
               )
             })}
@@ -317,8 +326,16 @@ export default function MyEventsPage() {
             const attended = Boolean(event.checkedInAt)
             const canCancel = !isPast && !attended
             return (
-              <Card key={event.id} className="p-4 sm:p-5 border border-neutral-200">
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+              <Card key={event.id} className="border border-neutral-200 overflow-hidden p-0">
+                <div className="flex flex-col sm:flex-row">
+                  <EventBannerThumb
+                    event={event as never}
+                    title={String(event.title ?? 'Event')}
+                    size="md"
+                    rounded="rounded-none"
+                    className="sm:h-full sm:min-h-[140px] sm:w-44 sm:max-w-[11rem]"
+                  />
+                  <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between gap-4 flex-1 min-w-0">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link href={`/events/${event.id}`} className="no-underline">
@@ -383,6 +400,7 @@ export default function MyEventsPage() {
                         <Trash2 size={16} />
                       </button>
                     ) : null}
+                  </div>
                   </div>
                 </div>
               </Card>

@@ -8,6 +8,7 @@ import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
 import { getEventLocationLabel, getEventTimeRangeLabel } from '@/lib/event-utils'
 import { openGoogleCalendarForEvent } from '@/lib/google-calendar'
 import { auth } from '@/lib/firebase'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 
 type EventCardEvent = Record<string, unknown> & {
   id?: string
@@ -61,12 +62,6 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
   const title = (typeof event.title === 'string' && event.title.trim()) || 'Untitled event'
   const description =
     typeof event.description === 'string' ? event.description.trim() : ''
-
-  const banner =
-    (typeof event.bannerURL === 'string' && event.bannerURL) ||
-    (typeof event.bannerImage === 'string' && event.bannerImage) ||
-    (typeof event.bannerImageUrl === 'string' ? (event.bannerImageUrl as string) : '') ||
-    ''
 
   const priceLabel = getEventPriceCornerLabel(event)
   const host = hostFromEventDoc(event)
@@ -183,15 +178,8 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
 
   return (
     <div className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden h-full flex flex-col shadow-sm hover:shadow-md transition">
-      <div className="relative w-full h-24 bg-neutral-100 overflow-hidden shrink-0">
-        {banner ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={banner} alt={title} className="absolute inset-0 w-full h-full object-cover" />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground">
-            No image
-          </div>
-        )}
+      <div className="relative w-full shrink-0">
+        <EventBannerThumb event={event} title={title} size="md" rounded="rounded-none" />
         <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black text-white">
           {priceLabel}
         </div>

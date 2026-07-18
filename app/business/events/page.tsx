@@ -10,6 +10,8 @@ import { Plus, Edit2, Trash2 } from 'lucide-react'
 import type { Event } from '@/lib/event-types'
 import { Card } from '@/components/ui/card'
 import { format } from 'date-fns'
+import { getEventLocationLabel } from '@/lib/event-utils'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 
 export default function BusinessEventsPage() {
   const { user } = useAuth()
@@ -145,18 +147,43 @@ export default function BusinessEventsPage() {
                 style={{
                   backgroundColor: '#ffffff',
                   borderColor: '#e4e1da',
-                  padding: '24px',
+                  padding: 0,
+                  overflow: 'hidden',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: 16,
+                  flexDirection: 'row',
+                  alignItems: 'stretch',
+                  gap: 0,
                   flexWrap: 'wrap',
                 }}
               >
-                <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ width: 140, minHeight: 100, flexShrink: 0 }}>
+                  <EventBannerThumb
+                    event={event as never}
+                    title={event.title}
+                    size="md"
+                    rounded="rounded-none"
+                    className="!h-full !min-h-[100px]"
+                  />
+                </div>
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 200,
+                    padding: 24,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 16,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                <div style={{ flex: 1, minWidth: 160 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111111' }}>{event.title}</h3>
                   <p style={{ fontSize: '14px', color: '#888888', marginTop: '4px' }}>
                     {format(new Date(event.startDate), 'MMM dd, yyyy')} • {event.category}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#666666', marginTop: '6px', wordBreak: 'break-word' }}>
+                    {getEventLocationLabel(event as never)}
                   </p>
                   <p style={{ fontSize: '12px', color: '#999999', marginTop: '8px' }}>
                     {event.status.replace(/_/g, ' ').toUpperCase()}
@@ -220,6 +247,7 @@ export default function BusinessEventsPage() {
                   >
                     <Trash2 size={16} />
                   </button>
+                </div>
                 </div>
               </Card>
             ))}

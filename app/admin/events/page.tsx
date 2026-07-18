@@ -10,6 +10,7 @@ import { Plus, Trash2, Edit2, CheckCircle, AlertCircle, XCircle, Eye } from 'luc
 import type { Event, EventStatus } from '@/lib/event-types'
 import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
 import { toEventDate, getEventLocationLabel } from '@/lib/event-utils'
+import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 import {
   ACTION_ROW,
   BUTTON_ICON_COMPACT,
@@ -332,7 +333,7 @@ function EventsPageContent() {
             <table className="w-full min-w-[1200px]">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Event</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created By</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
@@ -347,9 +348,20 @@ function EventsPageContent() {
                 {filteredEvents.map((event) => (
                   <tr key={event.id} className="hover:bg-gray-50">
                     <td className="px-6 py-3 text-sm font-medium text-gray-900">
-                      <Link href={`/admin/events/${event.id}`} className="text-blue-600 hover:underline">
-                        {event.title}
-                      </Link>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <EventBannerThumb
+                          event={event as never}
+                          title={event.title}
+                          size="sm"
+                          rounded="rounded-md"
+                        />
+                        <Link
+                          href={`/admin/events/${event.id}`}
+                          className="text-blue-600 hover:underline line-clamp-2 min-w-0"
+                        >
+                          {event.title}
+                        </Link>
+                      </div>
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
                       <span className="px-2 py-1 bg-gray-100 rounded text-xs">{event.category || 'General'}</span>
