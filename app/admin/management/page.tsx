@@ -52,7 +52,7 @@ export default function AdminManagementPage() {
       setSelectedPermissions(['manage_beneficiary'])
       return
     }
-    if (adminRole === 'founder_admin' || adminRole === 'manager') {
+    if (adminRole === 'super_admin') {
       setSelectedPermissions([])
     }
   }, [adminRole])

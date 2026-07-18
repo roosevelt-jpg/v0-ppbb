@@ -16,7 +16,13 @@ export type InvitePermissionId =
 /** Admin routes gated by each invite permission */
 export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
   full_access: ['/admin'],
-  view_reports: ['/admin/analytics', '/admin/reporting'],
+  view_reports: [
+    '/admin/analytics',
+    '/admin/reporting',
+    '/admin/finance',
+    '/admin/referrals',
+    '/admin/integration-analytics',
+  ],
   manage_content: [
     '/admin/cms',
     '/admin/faq',
@@ -29,48 +35,80 @@ export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
     '/admin/eu-data-protection',
     '/admin/youtube-config',
     '/admin/assets',
+    '/admin/newsletters',
+    '/admin/chatbot',
+    '/admin/contact-submissions',
   ],
   manage_integrations: ['/admin/integrations'],
-  manage_beneficiary: ['/admin/beneficiary-requests', '/admin/charity', '/admin/donation-verification'],
+  manage_beneficiary: [
+    '/admin/beneficiary-requests',
+    '/admin/charity',
+    '/admin/donation-verification',
+    '/admin/donations',
+    '/admin/charity-partners',
+    '/admin/finance/donations',
+  ],
   manage_members: [
     '/admin/members',
     '/admin/membership',
     '/admin/volunteers',
     '/admin/moderation',
+    '/admin/businesses',
+    '/admin/vendor-applications',
+    '/admin/approvals',
+    '/admin/pricing',
   ],
-  manage_events: ['/admin/events', '/admin/workshops', '/admin/recordings'],
-  manage_admins: ['/admin/management'],
-  manage_settings: ['/admin/cms/global', '/admin/location-config', '/admin/health'],
+  manage_events: [
+    '/admin/events',
+    '/admin/workshops',
+    '/admin/recordings',
+    '/admin/opportunities',
+    '/admin/marketplace',
+    '/admin/communities',
+    '/admin/finance/events',
+  ],
+  manage_admins: ['/admin/management', '/admin/security-center', '/admin/audit-logs'],
+  manage_settings: [
+    '/admin/cms/global-settings',
+    '/admin/cms/global',
+    '/admin/location-config',
+    '/admin/health',
+  ],
 }
 
+type PermissionUser = Pick<User, 'role' | 'permissions'> | null | undefined
+
+/**
+ * Resolve invite permissions for menu/route gating.
+ * Explicit checked permissions always win. Empty list = role default
+ * (matches Admin Management copy: "leave empty for full access").
+ */
 export function getEffectiveInvitePermissions(
   permissions: string[] | undefined,
   role?: string
 ): string[] {
   if (role === 'super_admin') return ['full_access']
-  // Founder / manager always retain full operational access, even if an older
-  // invite stored a partial permissions array (which previously hid Integrations).
-  if (role === 'founder_admin' || role === 'manager') {
-    return ['full_access']
+
+  const selected = Array.isArray(permissions)
+    ? permissions.map(String).map((p) => p.trim()).filter(Boolean)
+    : []
+
+  if (selected.length > 0) {
+    if (selected.includes('full_access')) return ['full_access']
+    return Array.from(new Set(selected))
   }
+
+  // No checkboxes selected → role defaults
   if (role === 'welfare' || role === 'founder' || role === 'coordinator') {
-    if (!permissions?.length) return ['manage_beneficiary']
+    return ['manage_beneficiary']
   }
-  if (role === 'admin') {
-    if (!permissions?.length) return ['full_access']
-    if (
-      !permissions.includes('full_access') &&
-      !permissions.includes('manage_integrations')
-    ) {
-      return [...permissions, 'manage_integrations']
-    }
-  }
-  if (!permissions?.length) return ['full_access']
-  return permissions
+
+  // admin, manager, founder_admin, or unknown with empty permissions
+  return ['full_access']
 }
 
 export function hasInvitePermission(
-  user: Pick<User, 'role' | 'permissions'> | null | undefined,
+  user: PermissionUser,
   permission: InvitePermissionId
 ): boolean {
   if (!user) return false
@@ -79,34 +117,17 @@ export function hasInvitePermission(
   return effective.includes(permission)
 }
 
-export function canAccessAdminPath(
-  user: Pick<User, 'role' | 'permissions'> | null | undefined,
-  pathname: string
-): boolean {
+export function canAccessAdminPath(user: PermissionUser, pathname: string): boolean {
   if (!user) return false
   if (user.role === 'super_admin') return true
 
   const path = pathname.split('?')[0]
   if (path === '/admin/setup' || path === '/admin/login') return true
 
-  if (isWelfareOperationalRole(user.role)) {
-    const welfarePaths = [
-      '/admin',
-      '/admin/beneficiary-requests',
-      '/admin/charity',
-      '/admin/donation-verification',
-    ]
-    if (user.role === 'founder_admin' || user.role === 'manager') {
-      // Broader operational access for founder_admin / manager invites
-      const effective = getEffectiveInvitePermissions(user.permissions, user.role)
-      if (effective.includes('full_access')) return true
-    }
-    return welfarePaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
-  }
-
   const effective = getEffectiveInvitePermissions(user.permissions, user.role)
   if (effective.includes('full_access')) return true
 
+  // Pure welfare-tier invites with only manage_beneficiary still reach /admin home
   if (path === '/admin') {
     return effective.length > 0
   }
@@ -119,12 +140,33 @@ export function canAccessAdminPath(
     }
   }
 
+  // Welfare roles without an explicit broader permission set still keep beneficiary routes
+  if (isWelfareOperationalRole(user.role) && !selectedHasNonWelfareScope(effective)) {
+    const welfarePaths = [
+      '/admin/beneficiary-requests',
+      '/admin/charity',
+      '/admin/donation-verification',
+    ]
+    if (welfarePaths.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))) {
+      return true
+    }
+  }
+
   return false
+}
+
+function selectedHasNonWelfareScope(effective: string[]): boolean {
+  return effective.some(
+    (p) =>
+      p !== 'manage_beneficiary' &&
+      p !== 'full_access' &&
+      Boolean(PERMISSION_ROUTE_PREFIXES[p as InvitePermissionId])
+  )
 }
 
 export function filterAdminMenuByPermissions<
   T extends { href: string; label: string }
->(items: T[], user: Pick<User, 'role' | 'permissions'> | null | undefined): T[] {
+>(items: T[], user: PermissionUser): T[] {
   if (!user) return []
   if (user.role === 'super_admin') return items
   const effective = getEffectiveInvitePermissions(user.permissions, user.role)

@@ -123,8 +123,8 @@ export const WELFARE_INVITE_ROLE_OPTIONS = [
   { value: 'welfare', label: 'Welfare', description: 'Review beneficiary requests and sensitive documents' },
   { value: 'founder', label: 'Founder', description: 'Founder-level beneficiary and welfare access' },
   { value: 'coordinator', label: 'Coordinator', description: 'Coordinate welfare cases and document review' },
-  { value: 'founder_admin', label: 'Founder Admin', description: 'Full admin access including sensitive documents' },
-  { value: 'manager', label: 'Manager', description: 'Operational manager with welfare document access' },
+  { value: 'founder_admin', label: 'Founder Admin', description: 'Full admin by default; check permissions below to limit access' },
+  { value: 'manager', label: 'Manager', description: 'Operational manager; check permissions below to limit menu access (empty = full access)' },
 ] as const
 
 /** Normalize role strings from invites / legacy docs (spaces, hyphens, case). */

@@ -137,6 +137,8 @@ export interface User {
   avatarUrl?: string
   profilePictureURL?: string
   role: UserRole
+  /** Invite-scoped admin permission IDs (e.g. manage_members, manage_events) */
+  permissions?: string[]
   // Additional roles a user holds beyond their primary role (e.g. a member who
   // also runs a business). Used to grant access to the business portal.
   roles?: UserRole[]
