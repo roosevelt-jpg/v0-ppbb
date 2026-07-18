@@ -27,6 +27,7 @@ import {
   Flag,
   CheckCircle2,
   AlertCircle,
+  Users,
   X,
 } from 'lucide-react'
 import { htmlToPlainText } from '@/lib/cms-page-content'
@@ -226,16 +227,14 @@ export function AdminOpportunitiesPageInner() {
         >
           <Eye className="w-3.5 h-3.5" />
         </button>
-        <a
-          href={`/opportunities/${job.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={`/admin/opportunities/${job.id}`}
           className={`${btn} w-8`}
-          aria-label="Open public posting"
-          title="Open public posting"
+          aria-label="View applicants"
+          title="View applicants"
         >
-          <Briefcase className="w-3.5 h-3.5" />
-        </a>
+          <Users className="w-3.5 h-3.5" />
+        </Link>
         <button
           type="button"
           disabled={busy}
@@ -419,7 +418,14 @@ export function AdminOpportunitiesPageInner() {
                       {job.company} · {job.type} · {job.category}
                     </p>
                     <p className="text-xs text-neutral-500 mt-1">
-                      {displayStatus(job)} · {job.applications} apps · {formatDate(job.createdAt)}
+                      {displayStatus(job)} ·{' '}
+                      <Link
+                        href={`/admin/opportunities/${job.id}`}
+                        className="underline underline-offset-2 hover:text-neutral-800"
+                      >
+                        {job.applications} applicant{job.applications === 1 ? '' : 's'}
+                      </Link>{' '}
+                      · {formatDate(job.createdAt)}
                     </p>
                     {job.deadline ? (
                       <p className="text-xs text-neutral-500">Deadline {formatDate(job.deadline)}</p>
@@ -462,7 +468,15 @@ export function AdminOpportunitiesPageInner() {
                       <td className="py-3 px-3 capitalize">{job.type}</td>
                       <td className="py-3 px-3">{job.category}</td>
                       <td className="py-3 px-3">{job.gender}</td>
-                      <td className="py-3 px-3">{job.applications}</td>
+                      <td className="py-3 px-3">
+                        <Link
+                          href={`/admin/opportunities/${job.id}`}
+                          className="font-semibold text-neutral-900 underline underline-offset-2 hover:text-neutral-700"
+                          title="View applicants for this job"
+                        >
+                          {job.applications}
+                        </Link>
+                      </td>
                       <td className="py-3 px-3 max-w-[120px] truncate">{job.postedBy}</td>
                       <td className="py-3 px-3 whitespace-nowrap">{formatDate(job.createdAt)}</td>
                       <td className="py-3 px-3 whitespace-nowrap">{formatDate(job.deadline)}</td>
@@ -530,9 +544,21 @@ export function AdminOpportunitiesPageInner() {
               <button
                 type="button"
                 onClick={() => {
+                  setViewJob(null)
+                  router.push(`/admin/opportunities/${viewJob.id}`)
+                }}
+                className="w-full min-h-[44px] bg-black text-white rounded text-sm font-semibold hover:bg-neutral-800 inline-flex items-center justify-center gap-2"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                <Users className="w-4 h-4" />
+                View applicants ({viewJob.applications})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   window.open(`/opportunities/${viewJob.id}`, '_blank', 'noopener,noreferrer')
                 }}
-                className="w-full min-h-[44px] bg-black text-white rounded text-sm font-semibold hover:bg-neutral-800"
+                className="w-full min-h-[44px] bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 View public posting
