@@ -14,7 +14,7 @@ import {
   HOSTING_TOTAL_USD,
   type HostingRecord,
 } from '@/lib/hosting-config'
-import { CheckCircle2, Cloud, Server } from 'lucide-react'
+import { CheckCircle2, Cloud, Mail, Server, ArrowRight } from 'lucide-react'
 
 type HostingApiData = HostingRecord & { stripeConfigured?: boolean }
 
@@ -305,43 +305,120 @@ export default function AdminHostingPage() {
         {loading ? (
           <p className="text-sm text-neutral-500">Loading hosting status…</p>
         ) : isActive ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-6 w-6 text-emerald-700 shrink-0 mt-0.5" />
-              <div>
-                <h2 className="text-lg font-semibold text-emerald-900">Hosting is Active</h2>
-                <p className="mt-1 text-sm text-emerald-800">
-                  Cloud hosting has been paid and is active for Passive Blessings.
-                </p>
-                <dl className="mt-4 grid gap-2 text-sm text-emerald-900/90">
-                  <div className="flex justify-between gap-4">
-                    <dt>Amount paid</dt>
-                    <dd className="font-semibold">
-                      {formatUsd(hosting?.amountPaidUsd || HOSTING_TOTAL_USD)}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt>Billed to</dt>
-                    <dd className="font-semibold text-right">{hosting?.billedTo || HOSTING_BILLED_TO}</dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt>Credentials sent to</dt>
-                    <dd className="font-semibold text-right">{HOSTING_CREDENTIALS_EMAIL}</dd>
-                  </div>
-                  {hosting?.paidAt ? (
+          <div className="space-y-6">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-6 w-6 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <h2 className="text-lg font-semibold text-emerald-900">Hosting is Active</h2>
+                  <p className="mt-1 text-sm text-emerald-800">
+                    Cloud hosting has been paid and is active for Passive Blessings.
+                  </p>
+                  <dl className="mt-4 grid gap-2 text-sm text-emerald-900/90">
                     <div className="flex justify-between gap-4">
-                      <dt>Paid on</dt>
+                      <dt>Amount paid</dt>
                       <dd className="font-semibold">
-                        {new Date(hosting.paidAt).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                        {formatUsd(hosting?.amountPaidUsd || HOSTING_TOTAL_USD)}
                       </dd>
                     </div>
-                  ) : null}
-                </dl>
+                    <div className="flex justify-between gap-4">
+                      <dt>Billed to</dt>
+                      <dd className="font-semibold text-right">
+                        {hosting?.billedTo || HOSTING_BILLED_TO}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt>Credentials sent to</dt>
+                      <dd className="font-semibold text-right">{HOSTING_CREDENTIALS_EMAIL}</dd>
+                    </div>
+                    {hosting?.paidAt ? (
+                      <div className="flex justify-between gap-4">
+                        <dt>Paid on</dt>
+                        <dd className="font-semibold">
+                          {new Date(hosting.paidAt).toLocaleDateString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </div>
               </div>
+            </div>
+
+            <div className="rounded-xl border-2 border-neutral-900 bg-white p-6 sm:p-8">
+              <p className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-2">
+                Next step
+              </p>
+              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 leading-snug">
+                Hosting is Active — proceed with migrating your files to AWS from your current host.
+              </h2>
+              <p className="mt-3 text-sm text-neutral-600">
+                Your Cloud OS, SSL, and storage bucket are ready. Move the Passive Blessings
+                application and media from the current host onto this AWS environment now.
+              </p>
+
+              <ol className="mt-6 space-y-4">
+                <li className="flex gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
+                    1
+                  </span>
+                  <div>
+                    <p className="font-semibold text-neutral-900">Open the AWS login email</p>
+                    <p className="mt-0.5 text-sm text-neutral-600">
+                      Check{' '}
+                      <a
+                        href={`mailto:${HOSTING_CREDENTIALS_EMAIL}`}
+                        className="underline underline-offset-2"
+                      >
+                        {HOSTING_CREDENTIALS_EMAIL}
+                      </a>{' '}
+                      for console access credentials, then sign in to AWS.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
+                    2
+                  </span>
+                  <div>
+                    <p className="font-semibold text-neutral-900">Migrate from your current host</p>
+                    <p className="mt-0.5 text-sm text-neutral-600">
+                      Export or sync your app code, environment config, and uploaded files from the
+                      current host, then deploy them onto the new AWS Cloud OS and storage bucket.
+                    </p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
+                    3
+                  </span>
+                  <div>
+                    <p className="font-semibold text-neutral-900">Attach SSL and go live</p>
+                    <p className="mt-0.5 text-sm text-neutral-600">
+                      Point your domain DNS to AWS, enable the included SSL certificate, verify the
+                      site loads, then retire the previous host when you are satisfied.
+                    </p>
+                  </div>
+                </li>
+              </ol>
+
+              <div className="mt-6 flex items-start gap-2 rounded-lg bg-neutral-900 px-4 py-3 text-sm text-white">
+                <ArrowRight className="h-4 w-4 shrink-0 mt-0.5" />
+                <p>
+                  <span className="font-semibold">Clear instruction:</span> once Hosting shows{' '}
+                  <span className="font-semibold">Active</span>, proceed with the migration of your
+                  files to AWS right from your current host. Do not wait for further setup beyond
+                  the credentials emailed to {HOSTING_CREDENTIALS_EMAIL}.
+                </p>
+              </div>
+
+              <p className="mt-4 flex items-center gap-2 text-xs text-neutral-500">
+                <Mail className="h-3.5 w-3.5" />
+                Questions about access? Contact {HOSTING_CREDENTIALS_EMAIL}
+              </p>
             </div>
           </div>
         ) : (
@@ -350,7 +427,8 @@ export default function AdminHostingPage() {
               <h2 className="text-lg font-semibold text-neutral-900">Pay for hosting</h2>
               <p className="mt-1 text-sm text-neutral-600">
                 Enter card details to pay the total hosting amount of {formatUsd(HOSTING_TOTAL_USD)}.
-                Configure keys under Integrations → Stripe (Hosting) if payment is unavailable.
+                After payment, Hosting becomes Active — then migrate your files to AWS from your
+                current host. Credentials go to {HOSTING_CREDENTIALS_EMAIL}.
               </p>
             </div>
 
