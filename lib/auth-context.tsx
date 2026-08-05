@@ -41,8 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const subscribeProfile = async () => {
           try {
-            // Wait for the auth token before Firestore reads (avoids permission-denied races)
-            await currentUser.getIdToken(true)
+            // Prefer cached token; force-refresh only on permission-denied retry below.
+            await currentUser.getIdToken()
             if (cancelled) return
 
             unsubscribeProfile = onSnapshot(
@@ -66,8 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               (error) => {
                 const code = (error as { code?: string })?.code
                 if (code === 'permission-denied') {
-                  // Retry once with getDoc after token propagation
-                  void getDoc(doc(db, 'users', uid))
+                  // Retry once after a forced token refresh (token may not have propagated yet)
+                  void currentUser
+                    .getIdToken(true)
+                    .then(() => getDoc(doc(db, 'users', uid)))
                     .then((snap) => {
                       if (snap.exists()) {
                         const profile = { id: snap.id, ...snap.data() } as User | BusinessProfile

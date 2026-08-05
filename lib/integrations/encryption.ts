@@ -40,6 +40,7 @@ export function decryptField(encrypted: string): string {
 const ENCRYPTED_FIELDS: Record<string, Set<string>> = {
   paypal: new Set(['clientSecret']),
   stripe: new Set(['secretKey', 'webhookSecret']),
+  stripeHosting: new Set(['secretKey', 'webhookSecret']),
   ziina: new Set(['apiKey', 'apiSecret', 'webhookSecret']),
   firebase: new Set(['privateKey']),
   googleAuth: new Set(['webClientSecret']),

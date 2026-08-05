@@ -13,24 +13,28 @@ import {
   SUPPORTED_LOCALE_CODES,
   isRtlLocale,
 } from '@/lib/supported-languages'
+import enMessages from '@/messages/en.json'
 
 interface ProvidersProps {
   children: React.ReactNode
 }
 
 async function loadMessages(locale: string): Promise<Record<string, unknown>> {
+  if (locale === 'en') return enMessages as Record<string, unknown>
   try {
     const mod = await import(`@/messages/${locale}.json`)
     return mod.default as Record<string, unknown>
   } catch {
-    const fallback = await import('@/messages/en.json')
-    return fallback.default as Record<string, unknown>
+    return enMessages as Record<string, unknown>
   }
 }
 
 export function Providers({ children }: ProvidersProps) {
   const [locale, setLocale] = React.useState('en')
-  const [messages, setMessages] = React.useState<Record<string, unknown> | null>(null)
+  // Start with English so the app never paints a blank shell while locale JSON loads.
+  const [messages, setMessages] = React.useState<Record<string, unknown>>(
+    enMessages as Record<string, unknown>
+  )
 
   React.useEffect(() => {
     const storedLocale = localStorage.getItem(PREFERRED_LANGUAGE_KEY)
@@ -47,16 +51,10 @@ export function Providers({ children }: ProvidersProps) {
     document.documentElement.setAttribute('dir', dir)
     document.documentElement.setAttribute('lang', resolved)
 
-    void loadMessages(resolved).then(setMessages)
+    if (resolved !== 'en') {
+      void loadMessages(resolved).then(setMessages)
+    }
   }, [])
-
-  if (!messages) {
-    return (
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <div className="min-h-screen bg-background" />
-      </ThemeProvider>
-    )
-  }
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
