@@ -11,52 +11,28 @@ import {
   HOSTING_BILLED_TO,
   HOSTING_CREDENTIALS_EMAIL,
   HOSTING_LINE_ITEMS,
+  HOSTING_MONTHLY_USD,
+  HOSTING_PERIOD_LABEL,
+  HOSTING_PERIOD_MONTHS,
+  HOSTING_PLAN_NAME,
   HOSTING_TOTAL_USD,
   type HostingRecord,
 } from '@/lib/hosting-config'
-import { CheckCircle2, Cloud, Mail, Server, ArrowRight } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Cloud, Lock, Mail, Server } from 'lucide-react'
 
 type HostingApiData = HostingRecord & { stripeConfigured?: boolean }
 
-function AwsLogo({ className = '' }: { className?: string }) {
+/** Official AWS co-marketing “Powered by AWS” mark (awsstatic CDN). */
+function AwsCloudLogo({ className = '' }: { className?: string }) {
   return (
-    <svg
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="https://d0.awsstatic.com/logos/powered-by-aws.png"
+      alt="Powered by AWS Cloud Computing"
       className={className}
-      viewBox="0 0 304 182"
-      xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Amazon Web Services"
-    >
-      <title>AWS</title>
-      <path
-        fill="#232F3E"
-        d="M86.4 66.4c0 3.7.4 6.7 1.1 8.9.8 2.2 1.9 4.2 3.5 6.1 1.1 1.2 2.3 2.1 3.4 2.7l-.1.4c-1.6-.1-3.4-.6-5.3-1.5-1.9-.9-3.5-2-4.8-3.3-2.8-2.9-4.5-6.5-5.2-10.8-.7-4.3-.5-8.9.7-13.8 1.2-4.9 3.4-9.3 6.6-13.1 3.2-3.8 7.2-6.7 12-8.7 4.8-2 9.9-2.7 15.3-2.1 3.5.4 6.5 1.3 9 2.8 2.5 1.5 4.4 3.6 5.7 6.3 1.3 2.7 1.9 5.9 1.9 9.6v5.1H86.4zm39.6-8.1c0-3.2-.7-5.8-2.1-7.8-1.4-2-3.6-3.2-6.6-3.6-2.5-.3-5 .2-7.4 1.5-2.4 1.3-4.5 3.2-6.2 5.7-1.7 2.5-3 5.4-3.8 8.6-.8 3.2-1.1 6.4-.8 9.5h26.9v-13.9z"
-      />
-      <path
-        fill="#232F3E"
-        d="M152.8 40.2c4.1 0 7.6.8 10.5 2.4 2.9 1.6 5.1 3.8 6.7 6.6 1.6 2.8 2.4 5.9 2.4 9.4 0 3.7-.9 7-2.6 9.9-1.7 2.9-4.1 5.2-7.1 6.9-3 1.7-6.5 2.5-10.4 2.5-2.1 0-4.1-.3-5.9-.9-1.8-.6-3.4-1.4-4.8-2.5v21.4h-12.6V41.7h11.7l.6 4.2c1.4-1.6 3.1-2.8 5.1-3.7 2-.9 4.2-1.4 6.4-1.4zm-2.8 10.1c-1.9 0-3.5.5-4.9 1.4-1.4.9-2.5 2.2-3.2 3.8-.7 1.6-1.1 3.4-1.1 5.4 0 2 .4 3.7 1.1 5.2.7 1.5 1.8 2.7 3.2 3.5 1.4.8 3 1.2 4.8 1.2 1.9 0 3.5-.5 4.8-1.4 1.3-.9 2.3-2.2 3-3.8.7-1.6 1-3.4 1-5.3 0-2-.3-3.7-1-5.2-.7-1.5-1.7-2.7-3-3.5-1.3-.8-2.9-1.3-4.7-1.3z"
-      />
-      <path
-        fill="#232F3E"
-        d="M196.2 40.2c2.3 0 4.3.3 6.1.9 1.8.6 3.3 1.5 4.5 2.7l-3.9 8.2c-.9-.8-1.9-1.4-3.1-1.8-1.2-.4-2.4-.6-3.7-.6-1.9 0-3.5.5-4.8 1.4-1.3.9-2.3 2.3-2.9 4-.6 1.7-.9 3.7-.9 5.9 0 2.3.3 4.3.9 5.9.6 1.6 1.6 2.9 2.9 3.8 1.3.9 2.9 1.3 4.8 1.3 1.4 0 2.7-.2 4-.7 1.3-.5 2.4-1.2 3.4-2.1l3.9 8c-1.4 1.3-3.1 2.3-5.1 3-2 .7-4.3 1.1-6.9 1.1-4.1 0-7.6-.8-10.6-2.5-3-1.7-5.3-4-6.9-6.9-1.6-2.9-2.4-6.2-2.4-9.9 0-3.6.8-6.8 2.4-9.6 1.6-2.8 3.8-5 6.7-6.6 2.9-1.6 6.3-2.4 10.2-2.4z"
-      />
-      <path
-        fill="#232F3E"
-        d="M232.6 66.5c-1.1 0-2 .1-2.8.4-.8.3-1.4.7-1.9 1.3-.5.6-.7 1.3-.7 2.2 0 .8.2 1.5.7 2 .5.5 1.1.9 1.9 1.1.8.2 1.6.3 2.5.3 1.2 0 2.3-.2 3.3-.5 1-.3 1.8-.8 2.5-1.4v-5.1c-.7.5-1.5.9-2.5 1.2-1 .2-2 .5-3 .5zm15.1-26.3v38.7c0 4.1-.8 7.5-2.4 10.2-1.6 2.7-3.8 4.7-6.6 6-2.8 1.3-6 1.9-9.6 1.9-2.7 0-5.2-.4-7.4-1.1-2.2-.7-4-1.8-5.4-3.1l3.8-8.3c1.1 1 2.4 1.7 3.9 2.2 1.5.5 3 .7 4.5.7 2.3 0 4.1-.6 5.3-1.7 1.2-1.1 1.8-2.9 1.8-5.3v-3.6c-1.3 1.2-2.9 2.2-4.8 2.9-1.9.7-4 1.1-6.3 1.1-3.3 0-6.2-.7-8.6-2.1-2.4-1.4-4.3-3.4-5.6-5.9-1.3-2.5-2-5.5-2-8.8 0-3.4.7-6.4 2.1-9 1.4-2.6 3.4-4.7 5.9-6.2 2.5-1.5 5.5-2.2 8.8-2.2 2.4 0 4.5.4 6.4 1.2 1.9.8 3.5 1.9 4.8 3.3l.6-3.6h11.2zm-12.4 21.5c-.8-.9-1.8-1.5-3.1-2-1.3-.5-2.6-.7-3.9-.7-1.7 0-3.1.4-4.3 1.2-1.2.8-2.1 1.9-2.7 3.3-.6 1.4-.9 2.9-.9 4.6 0 1.7.3 3.2.9 4.5.6 1.3 1.5 2.3 2.7 3 1.2.7 2.6 1.1 4.2 1.1 1.4 0 2.8-.3 4-.9 1.2-.6 2.2-1.4 3-2.5.8-1.1 1.2-2.4 1.2-3.9v-4.5c0-1.2-.4-2.3-1.1-3.2z"
-      />
-      <path
-        fill="#232F3E"
-        d="M277.6 39.5c3.2 0 5.9.5 8.2 1.6 2.3 1.1 4.1 2.6 5.3 4.6 1.2 2 1.8 4.4 1.8 7.1v28.6h-12.6v-4.1c-1.3 1.6-3 2.9-5.1 3.8-2.1.9-4.5 1.4-7.1 1.4-2.9 0-5.4-.5-7.6-1.6-2.2-1.1-3.8-2.6-5-4.6-1.2-2-1.8-4.3-1.8-7 0-2.9.7-5.3 2.1-7.2 1.4-1.9 3.3-3.4 5.7-4.4 2.4-1 5.1-1.5 8.1-1.5 2.1 0 4 .3 5.7.9 1.7.6 3.1 1.4 4.2 2.5v-2.3c0-1.5-.5-2.7-1.5-3.6-1-.9-2.4-1.4-4.2-1.4-1.5 0-2.9.3-4.2.8-1.3.5-2.4 1.2-3.3 2l-4.5-7.5c1.5-1.1 3.3-2 5.4-2.6 2.1-.7 4.4-1.1 6.9-1.1zm-3.4 34.3c1.3 0 2.5-.3 3.6-.8 1.1-.5 2-1.3 2.6-2.3.6-1 .9-2.2.9-3.5v-3.8c-.9-.9-2-1.6-3.3-2.1-1.3-.5-2.6-.7-4-.7-1.6 0-2.9.3-3.9 1-1 .7-1.5 1.7-1.5 3.1 0 1.4.5 2.4 1.6 3.1 1.1.7 2.5 1 4 1z"
-      />
-      <path
-        fill="#FF9900"
-        d="M273.5 143.6c-32.8 24.2-80.5 37.1-121.5 37.1-57.5 0-109.3-21.3-148.4-56.7-3.1-2.8-.3-6.6 3.4-4.4 42.4 24.7 94.8 39.5 148.9 39.5 36.5 0 76.7-7.6 113.7-23.3 5.6-2.4 10.3 3.7 3.9 7.8z"
-      />
-      <path
-        fill="#FF9900"
-        d="M287.1 128.1c-4.2-5.4-27.8-2.5-38.4-1.3-3.2.4-3.7-2.4-.8-4.4 18.7-13.2 49.5-9.4 53.1-5 3.6 4.4-1 35.1-18.5 49.7-2.7 2.2-5.3 1-3.8-1.9 4.8-9.7 15.6-31.4 8.4-37.1z"
-      />
-    </svg>
+      width={160}
+      height={60}
+    />
   )
 }
 
@@ -72,11 +48,12 @@ async function adminFetch(path: string, options?: RequestInit) {
   })
 }
 
-function formatUsd(amount: number) {
+function formatUsd(amount: number, fractions = 0) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    maximumFractionDigits: 0,
+    maximumFractionDigits: fractions,
+    minimumFractionDigits: fractions,
   }).format(amount)
 }
 
@@ -127,7 +104,7 @@ function HostingCheckoutForm({
 
   return (
     <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
-      <div className="rounded-lg border border-[#e4e1da] bg-white p-4">
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
         <PaymentElement
           options={{
             layout: 'tabs',
@@ -139,11 +116,77 @@ function HostingCheckoutForm({
       <button
         type="submit"
         disabled={!stripe || submitting}
-        className="w-full min-h-[44px] rounded-lg bg-neutral-900 px-4 py-3 text-sm font-semibold text-white hover:bg-neutral-800 disabled:opacity-50"
+        className="w-full min-h-[48px] rounded-lg bg-[#673de6] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5a32d1] disabled:opacity-50"
       >
-        {submitting ? 'Processing…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} for hosting`}
+        {submitting ? 'Processing…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} · Continue`}
       </button>
     </form>
+  )
+}
+
+function OrderSummaryCard({
+  isActive,
+  children,
+}: {
+  isActive: boolean
+  children?: React.ReactNode
+}) {
+  return (
+    <aside className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm lg:sticky lg:top-6">
+      <h2 className="text-lg font-bold text-neutral-900">Order summary</h2>
+      <p className="mt-1 text-sm font-semibold text-neutral-800">{HOSTING_PLAN_NAME}</p>
+
+      <ul className="mt-5 space-y-3 text-sm">
+        {HOSTING_LINE_ITEMS.map((item) => (
+          <li key={item.id} className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-neutral-800">
+                {item.label}
+                {item.id === 'ssl' ? ': 1yr' : ''}
+              </p>
+              {'detail' in item && item.detail ? (
+                <p className="text-xs text-neutral-500 mt-0.5">{item.detail}</p>
+              ) : null}
+            </div>
+            <span className="shrink-0 font-semibold text-neutral-900">
+              {formatUsd(item.amountUsd)}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-5 border-t border-neutral-100 pt-4">
+        <div className="flex items-end justify-between gap-3">
+          <span className="text-base font-bold text-neutral-900">Total</span>
+          <span className="text-2xl font-bold text-neutral-900 tracking-tight">
+            {formatUsd(HOSTING_TOTAL_USD)}
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-neutral-500">
+          {formatUsd(HOSTING_MONTHLY_USD)}/mo × {HOSTING_PERIOD_MONTHS} months + SSL + storage
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-lg bg-neutral-50 px-3 py-2.5 text-xs text-neutral-600 space-y-1">
+        <p>
+          <span className="font-semibold text-neutral-800">Billed to:</span> {HOSTING_BILLED_TO}
+        </p>
+        <p>
+          <span className="font-semibold text-neutral-800">Credentials:</span>{' '}
+          {HOSTING_CREDENTIALS_EMAIL}
+        </p>
+        <p className="text-neutral-500">Additional storage usage billed monthly.</p>
+      </div>
+
+      {isActive ? (
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          Active
+        </div>
+      ) : (
+        children
+      )}
+    </aside>
   )
 }
 
@@ -174,13 +217,10 @@ export default function AdminHostingPage() {
     void loadStatus()
   }, [loadStatus])
 
-  // After Stripe redirect (3DS), confirm and activate hosting.
   React.useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    const pi =
-      params.get('payment_intent') ||
-      (params.get('paid') === '1' ? params.get('payment_intent') : null)
+    const pi = params.get('payment_intent')
     if (!pi) return
 
     let cancelled = false
@@ -237,226 +277,156 @@ export default function AdminHostingPage() {
 
   return (
     <AdminPageLayout title="Hosting">
-      <div className="space-y-6 max-w-3xl">
-        <div className="rounded-xl border border-[#e4e1da] bg-white p-6 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-2">
-                Infrastructure
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Cloud Hosting</h1>
-              <p className="mt-2 text-sm text-neutral-600">
-                Platform hosting for Passive Blessings on Amazon Web Services.
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <AwsLogo className="h-12 w-auto max-w-[160px]" />
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                  isActive
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-amber-100 text-amber-900'
-                }`}
-              >
-                {isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Cloud className="h-3.5 w-3.5" />}
-                {isActive ? 'Active' : 'Inactive'}
-              </span>
-            </div>
+      <div className="min-h-[70vh] -mx-1">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">Infrastructure</p>
+            <h1 className="mt-1 text-2xl sm:text-3xl font-bold text-neutral-900">
+              Cloud hosting checkout
+            </h1>
           </div>
-
-          <div className="mt-6 rounded-lg bg-neutral-50 border border-neutral-200 px-4 py-3 text-sm text-neutral-700 space-y-1">
-            <p>
-              <span className="font-semibold text-neutral-900">Billed to:</span> {HOSTING_BILLED_TO}
-            </p>
-            <p>
-              <span className="font-semibold text-neutral-900">Login credentials will be sent to:</span>{' '}
-              <a
-                href={`mailto:${HOSTING_CREDENTIALS_EMAIL}`}
-                className="underline underline-offset-2 text-neutral-900 hover:text-neutral-700"
-              >
-                {HOSTING_CREDENTIALS_EMAIL}
-              </a>
-            </p>
-            <p className="text-neutral-500">
-              Additional cost will be billed monthly for storage used.
-            </p>
-          </div>
+          <a
+            href="https://aws.amazon.com/what-is-cloud-computing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg bg-white border border-neutral-200 px-3 py-2 shadow-sm"
+          >
+            <AwsCloudLogo className="h-10 w-auto object-contain" />
+          </a>
         </div>
 
-        <div className="rounded-xl border border-[#e4e1da] bg-white p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Server className="h-4 w-4 text-neutral-500" />
-            <h2 className="text-lg font-semibold text-neutral-900">Hosting breakdown</h2>
-          </div>
-          <ul className="divide-y divide-neutral-100">
-            {HOSTING_LINE_ITEMS.map((item) => (
-              <li key={item.id} className="flex items-center justify-between py-3 text-sm">
-                <span className="text-neutral-700">{item.label}</span>
-                <span className="font-semibold text-neutral-900">{formatUsd(item.amountUsd)}</span>
-              </li>
-            ))}
-            <li className="flex items-center justify-between py-3 text-base">
-              <span className="font-bold text-neutral-900">Total</span>
-              <span className="font-bold text-neutral-900">{formatUsd(HOSTING_TOTAL_USD)}</span>
-            </li>
-          </ul>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:gap-8 items-start">
+          {/* Left: plan details */}
+          <div className="space-y-5">
+            <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-5">
+                <Server className="h-5 w-5 text-neutral-700" />
+                <h2 className="text-lg font-bold text-neutral-900">{HOSTING_PLAN_NAME}</h2>
+              </div>
 
-        {loading ? (
-          <p className="text-sm text-neutral-500">Loading hosting status…</p>
-        ) : isActive ? (
-          <div className="space-y-6">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-6 w-6 text-emerald-700 shrink-0 mt-0.5" />
-                <div>
-                  <h2 className="text-lg font-semibold text-emerald-900">Hosting is Active</h2>
-                  <p className="mt-1 text-sm text-emerald-800">
-                    Cloud hosting has been paid and is active for Passive Blessings.
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-neutral-600 mb-1.5">Period</p>
+                  <div className="inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm font-semibold text-neutral-900 min-w-[180px]">
+                    {HOSTING_PERIOD_LABEL}
+                  </div>
+                  <p className="mt-2 text-xs text-neutral-500">
+                    1-year term · renews with storage billed monthly for usage. Cancel anytime after
+                    term.
                   </p>
-                  <dl className="mt-4 grid gap-2 text-sm text-emerald-900/90">
-                    <div className="flex justify-between gap-4">
-                      <dt>Amount paid</dt>
-                      <dd className="font-semibold">
-                        {formatUsd(hosting?.amountPaidUsd || HOSTING_TOTAL_USD)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <dt>Billed to</dt>
-                      <dd className="font-semibold text-right">
-                        {hosting?.billedTo || HOSTING_BILLED_TO}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-4">
-                      <dt>Credentials sent to</dt>
-                      <dd className="font-semibold text-right">{HOSTING_CREDENTIALS_EMAIL}</dd>
-                    </div>
-                    {hosting?.paidAt ? (
-                      <div className="flex justify-between gap-4">
-                        <dt>Paid on</dt>
-                        <dd className="font-semibold">
-                          {new Date(hosting.paidAt).toLocaleDateString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </dd>
-                      </div>
-                    ) : null}
-                  </dl>
+                </div>
+                <div className="text-left sm:text-right shrink-0">
+                  <p className="text-3xl font-bold text-neutral-900 tracking-tight">
+                    {formatUsd(HOSTING_MONTHLY_USD)}
+                    <span className="text-base font-semibold text-neutral-500">/mo</span>
+                  </p>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    Billed as {formatUsd(HOSTING_MONTHLY_USD * HOSTING_PERIOD_MONTHS)} for{' '}
+                    {HOSTING_PERIOD_LABEL}
+                  </p>
                 </div>
               </div>
-            </div>
 
-            <div className="rounded-xl border-2 border-neutral-900 bg-white p-6 sm:p-8">
-              <p className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-2">
-                Next step
-              </p>
-              <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 leading-snug">
-                Hosting is Active — proceed with migrating your files to AWS from your current host.
-              </h2>
-              <p className="mt-3 text-sm text-neutral-600">
-                Your Cloud OS, SSL, and storage bucket are ready. Move the Passive Blessings
-                application and media from the current host onto this AWS environment now.
-              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl bg-[#0b1437] px-4 py-3 text-sm text-white">
+                <Lock className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>
+                  Includes <span className="font-semibold">SSL: 1yr</span>, Cloud OS, and storage
+                  bucket for Passive Blessings.
+                </span>
+              </div>
 
-              <ol className="mt-6 space-y-4">
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
-                    1
-                  </span>
-                  <div>
-                    <p className="font-semibold text-neutral-900">Open the AWS login email</p>
-                    <p className="mt-0.5 text-sm text-neutral-600">
-                      Check{' '}
-                      <a
-                        href={`mailto:${HOSTING_CREDENTIALS_EMAIL}`}
-                        className="underline underline-offset-2"
-                      >
-                        {HOSTING_CREDENTIALS_EMAIL}
-                      </a>{' '}
-                      for console access credentials, then sign in to AWS.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
-                    2
-                  </span>
-                  <div>
-                    <p className="font-semibold text-neutral-900">Migrate from your current host</p>
-                    <p className="mt-0.5 text-sm text-neutral-600">
-                      Export or sync your app code, environment config, and uploaded files from the
-                      current host, then deploy them onto the new AWS Cloud OS and storage bucket.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-bold text-white">
-                    3
-                  </span>
-                  <div>
-                    <p className="font-semibold text-neutral-900">Attach SSL and go live</p>
-                    <p className="mt-0.5 text-sm text-neutral-600">
-                      Point your domain DNS to AWS, enable the included SSL certificate, verify the
-                      site loads, then retire the previous host when you are satisfied.
-                    </p>
-                  </div>
-                </li>
-              </ol>
-
-              <div className="mt-6 flex items-start gap-2 rounded-lg bg-neutral-900 px-4 py-3 text-sm text-white">
-                <ArrowRight className="h-4 w-4 shrink-0 mt-0.5" />
+              <div className="mt-4 flex items-start gap-2 text-sm text-emerald-800">
+                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
                 <p>
-                  <span className="font-semibold">Clear instruction:</span> once Hosting shows{' '}
-                  <span className="font-semibold">Active</span>, proceed with the migration of your
-                  files to AWS right from your current host. Do not wait for further setup beyond
-                  the credentials emailed to {HOSTING_CREDENTIALS_EMAIL}.
+                  Login credentials will be sent to{' '}
+                  <a
+                    href={`mailto:${HOSTING_CREDENTIALS_EMAIL}`}
+                    className="font-semibold underline underline-offset-2"
+                  >
+                    {HOSTING_CREDENTIALS_EMAIL}
+                  </a>
+                  .
                 </p>
               </div>
+            </section>
 
-              <p className="mt-4 flex items-center gap-2 text-xs text-neutral-500">
-                <Mail className="h-3.5 w-3.5" />
-                Questions about access? Contact {HOSTING_CREDENTIALS_EMAIL}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-[#e4e1da] bg-white p-6 space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold text-neutral-900">Pay for hosting</h2>
-              <p className="mt-1 text-sm text-neutral-600">
-                Enter card details to pay the total hosting amount of {formatUsd(HOSTING_TOTAL_USD)}.
-                After payment, Hosting becomes Active — then migrate your files to AWS from your
-                current host. Credentials go to {HOSTING_CREDENTIALS_EMAIL}.
-              </p>
-            </div>
+            <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
+              <h3 className="text-base font-bold text-neutral-900 mb-3">What&apos;s included</h3>
+              <ul className="space-y-3 text-sm text-neutral-700">
+                <li className="flex gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    <span className="font-semibold">Cloud OS</span> — {formatUsd(HOSTING_MONTHLY_USD)}
+                    /mo for {HOSTING_PERIOD_LABEL} (
+                    {formatUsd(HOSTING_MONTHLY_USD * HOSTING_PERIOD_MONTHS)})
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    <span className="font-semibold">SSL: 1yr</span> — {formatUsd(120)} certificate
+                    coverage for the term
+                  </span>
+                </li>
+                <li className="flex gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    <span className="font-semibold">Storage bucket</span> — {formatUsd(80)} included;
+                    extra usage billed monthly
+                  </span>
+                </li>
+              </ul>
+            </section>
 
-            {checkoutError ? (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                {checkoutError}
-              </div>
-            ) : null}
-
-            {preparing || !clientSecret || !stripePromise || !paymentIntentId ? (
-              !checkoutError ? (
-                <p className="text-sm text-neutral-500">Preparing secure card payment…</p>
-              ) : null
+            {loading ? (
+              <p className="text-sm text-neutral-500">Loading hosting status…</p>
+            ) : isActive ? (
+              <section className="rounded-2xl border-2 border-neutral-900 bg-white p-5 sm:p-6 shadow-sm space-y-4">
+                <div className="flex items-center gap-2 text-emerald-700">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <h3 className="text-lg font-bold">Hosting is Active</h3>
+                </div>
+                <p className="text-base font-semibold text-neutral-900 leading-snug">
+                  Once hosting is Active, proceed with the migration of your files to AWS right from
+                  your current host.
+                </p>
+                <ol className="space-y-3 text-sm text-neutral-700">
+                  <li className="flex gap-2">
+                    <span className="font-bold text-neutral-900">1.</span>
+                    Open AWS credentials emailed to {HOSTING_CREDENTIALS_EMAIL}.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-bold text-neutral-900">2.</span>
+                    Migrate app files, config, and media from your current host to AWS.
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="font-bold text-neutral-900">3.</span>
+                    Enable SSL, update DNS, verify the site, then retire the old host.
+                  </li>
+                </ol>
+                <div className="flex items-start gap-2 rounded-lg bg-neutral-900 px-4 py-3 text-sm text-white">
+                  <ArrowRight className="h-4 w-4 shrink-0 mt-0.5" />
+                  <p>
+                    Do not wait for further setup beyond the credentials sent to{' '}
+                    {HOSTING_CREDENTIALS_EMAIL}.
+                  </p>
+                </div>
+                {hosting?.paidAt ? (
+                  <p className="text-xs text-neutral-500 flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5" />
+                    Paid {new Date(hosting.paidAt).toLocaleDateString('en-GB')} ·{' '}
+                    {formatUsd(hosting.amountPaidUsd || HOSTING_TOTAL_USD)}
+                  </p>
+                ) : null}
+              </section>
             ) : (
-              <Elements
-                stripe={stripePromise}
-                options={{
-                  clientSecret,
-                  appearance: {
-                    theme: 'stripe',
-                    variables: {
-                      colorPrimary: '#111111',
-                      borderRadius: '8px',
-                    },
-                  },
-                }}
-              >
-                <HostingCheckoutForm
+              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm space-y-4 lg:hidden">
+                <h3 className="text-base font-bold text-neutral-900">Pay with card</h3>
+                <PaymentBlock
+                  checkoutError={checkoutError}
+                  preparing={preparing}
+                  clientSecret={clientSecret}
+                  stripePromise={stripePromise}
                   paymentIntentId={paymentIntentId}
                   onPaid={(record) => {
                     setHosting({ ...record, stripeConfigured: true })
@@ -464,11 +434,92 @@ export default function AdminHostingPage() {
                     setPaymentIntentId(null)
                   }}
                 />
-              </Elements>
+              </section>
             )}
           </div>
-        )}
+
+          {/* Right: order summary */}
+          <OrderSummaryCard isActive={!!isActive}>
+            {!loading && !isActive ? (
+              <div className="mt-5 space-y-3 hidden lg:block">
+                <PaymentBlock
+                  checkoutError={checkoutError}
+                  preparing={preparing}
+                  clientSecret={clientSecret}
+                  stripePromise={stripePromise}
+                  paymentIntentId={paymentIntentId}
+                  onPaid={(record) => {
+                    setHosting({ ...record, stripeConfigured: true })
+                    setClientSecret(null)
+                    setPaymentIntentId(null)
+                  }}
+                />
+              </div>
+            ) : null}
+            {!isActive ? (
+              <p className="mt-4 text-xs text-neutral-500 leading-relaxed">
+                After payment, Hosting becomes Active — then migrate your files to AWS from your
+                current host.
+              </p>
+            ) : null}
+          </OrderSummaryCard>
+        </div>
+
+        {!isActive ? (
+          <p className="mt-6 flex items-center gap-2 text-xs text-neutral-400">
+            <Cloud className="h-3.5 w-3.5" />
+            Powered by Amazon Web Services · Configure Stripe (Hosting) under Integrations if payment
+            is unavailable.
+          </p>
+        ) : null}
       </div>
     </AdminPageLayout>
+  )
+}
+
+function PaymentBlock({
+  checkoutError,
+  preparing,
+  clientSecret,
+  stripePromise,
+  paymentIntentId,
+  onPaid,
+}: {
+  checkoutError: string | null
+  preparing: boolean
+  clientSecret: string | null
+  stripePromise: Promise<Stripe | null> | null
+  paymentIntentId: string | null
+  onPaid: (record: HostingRecord) => void
+}) {
+  return (
+    <>
+      {checkoutError ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+          {checkoutError}
+        </div>
+      ) : null}
+      {preparing || !clientSecret || !stripePromise || !paymentIntentId ? (
+        !checkoutError ? (
+          <p className="text-sm text-neutral-500">Preparing secure card payment…</p>
+        ) : null
+      ) : (
+        <Elements
+          stripe={stripePromise}
+          options={{
+            clientSecret,
+            appearance: {
+              theme: 'stripe',
+              variables: {
+                colorPrimary: '#673de6',
+                borderRadius: '8px',
+              },
+            },
+          }}
+        >
+          <HostingCheckoutForm paymentIntentId={paymentIntentId} onPaid={onPaid} />
+        </Elements>
+      )}
+    </>
   )
 }
