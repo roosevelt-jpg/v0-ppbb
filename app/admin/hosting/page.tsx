@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import React from 'react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import { Elements, PaymentElement, AddressElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { auth } from '@/lib/firebase'
 import {
@@ -140,51 +140,63 @@ function HostingCheckoutForm({
   return (
     <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
       <p className="text-xs text-neutral-500">
-        Card only · Enter the cardholder name, phone, and billing address as on the card · Invoice
-        billed to <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
+        Card only · Enter the cardholder name, phone, and billing address · Invoice billed to{' '}
+        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
       </p>
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <PaymentElement
-          options={{
-            layout: {
-              type: 'tabs',
-              defaultCollapsed: false,
-            },
-            paymentMethodOrder: ['card'],
-            wallets: {
-              applePay: 'never',
-              googlePay: 'never',
-              link: 'never',
-            },
-            defaultValues: {
-              billingDetails: {
+
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm space-y-5">
+        <div>
+          <p className="mb-3 text-sm font-semibold text-neutral-900">Cardholder &amp; billing address</p>
+          <AddressElement
+            options={{
+              mode: 'billing',
+              autocomplete: { mode: 'automatic' },
+              display: { name: 'full' },
+              fields: {
+                phone: 'always',
+              },
+              validation: {
+                phone: { required: 'always' },
+              },
+              defaultValues: {
                 address: {
                   country: 'AE',
                   city: 'Dubai',
                 },
               },
-            },
-            fields: {
-              billingDetails: {
-                // Cardholder (person related to Passive Blessings) — not company invoice name
-                name: 'auto',
-                email: 'auto',
-                phone: 'auto',
-                address: {
-                  country: 'auto',
-                  line1: 'auto',
-                  line2: 'auto',
-                  city: 'auto',
-                  state: 'auto',
-                  postalCode: 'auto',
+            }}
+          />
+        </div>
+
+        <div className="border-t border-neutral-100 pt-4">
+          <p className="mb-3 text-sm font-semibold text-neutral-900">Card details</p>
+          <PaymentElement
+            options={{
+              layout: {
+                type: 'tabs',
+                defaultCollapsed: false,
+              },
+              paymentMethodOrder: ['card'],
+              wallets: {
+                applePay: 'never',
+                googlePay: 'never',
+                link: 'never',
+              },
+              // Name / phone / address come from AddressElement above (required by Stripe)
+              fields: {
+                billingDetails: {
+                  name: 'never',
+                  email: 'auto',
+                  phone: 'never',
+                  address: 'never',
                 },
               },
-            },
-            terms: {
-              card: 'never',
-            },
-          }}
-        />
+              terms: {
+                card: 'never',
+              },
+            }}
+          />
+        </div>
       </div>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       <button
