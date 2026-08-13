@@ -32,7 +32,32 @@ export async function POST(request: NextRequest) {
     const stripe = await getStripeHostingClient()
     const pi = await stripe.paymentIntents.retrieve(paymentIntentId)
 
-    if (pi.status !== 'succeeded') {
+    // Still open / abandoned — tell the admin clearly (shows as Incomplete in Stripe)
+    if (
+      pi.status === 'requires_payment_method' ||
+      pi.status === 'requires_confirmation' ||
+      pi.status === 'canceled'
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Payment was not completed in Stripe (status: ${pi.status}). Enter card details and click Pay again.`,
+        },
+        { status: 400 }
+      )
+    }
+
+    if (pi.status === 'requires_action') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Payment still needs authentication (3D Secure). Complete the bank/card challenge, then return here.',
+        },
+        { status: 400 }
+      )
+    }
+
+    if (pi.status !== 'succeeded' && pi.status !== 'processing') {
       return NextResponse.json(
         { success: false, error: `Payment not completed (status: ${pi.status})` },
         { status: 400 }

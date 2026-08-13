@@ -59,9 +59,11 @@ function formatUsd(amount: number, fractions = 0) {
 
 function HostingCheckoutForm({
   paymentIntentId,
+  clientSecret,
   onPaid,
 }: {
   paymentIntentId: string
+  clientSecret: string
   onPaid: (record: HostingRecord) => void
 }) {
   const stripe = useStripe()
@@ -75,20 +77,38 @@ function HostingCheckoutForm({
     setSubmitting(true)
     setError(null)
     try {
+      // Validate Payment Element fields before confirming (required by Stripe.js)
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        setError(submitError.message || 'Please check your card details')
+        return
+      }
+
       const result = await stripe.confirmPayment({
         elements,
+        clientSecret,
         redirect: 'if_required',
         confirmParams: {
           return_url: `${window.location.origin}/admin/hosting?paid=1`,
         },
       })
+
       if (result.error) {
         setError(result.error.message || 'Payment failed')
         return
       }
+
+      const status = result.paymentIntent?.status
+      if (status && status !== 'succeeded' && status !== 'processing') {
+        setError(`Payment incomplete (${status}). Please try again.`)
+        return
+      }
+
+      // If Stripe redirected for 3DS, this path won't run — return_url handles confirm.
+      const piId = result.paymentIntent?.id || paymentIntentId
       const res = await adminFetch('/api/admin/hosting/confirm', {
         method: 'POST',
-        body: JSON.stringify({ paymentIntentId }),
+        body: JSON.stringify({ paymentIntentId: piId }),
       })
       const json = await res.json()
       if (!res.ok || !json.success) {
@@ -109,13 +129,18 @@ function HostingCheckoutForm({
           options={{
             layout: 'tabs',
             paymentMethodOrder: ['card'],
+            fields: {
+              billingDetails: {
+                address: 'auto',
+              },
+            },
           }}
         />
       </div>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       <button
         type="submit"
-        disabled={!stripe || submitting}
+        disabled={!stripe || !elements || submitting}
         className="w-full min-h-[48px] rounded-lg bg-[#673de6] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5a32d1] disabled:opacity-50"
       >
         {submitting ? 'Processing…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} · Continue`}
@@ -199,6 +224,16 @@ export default function AdminHostingPage() {
   const [stripePromise, setStripePromise] = React.useState<Promise<Stripe | null> | null>(null)
   const [preparing, setPreparing] = React.useState(false)
 
+  const [isDesktop, setIsDesktop] = React.useState(false)
+
+  React.useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const sync = () => setIsDesktop(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
   const loadStatus = React.useCallback(async () => {
     setLoading(true)
     try {
@@ -221,18 +256,22 @@ export default function AdminHostingPage() {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     const pi = params.get('payment_intent')
+    const redirectStatus = params.get('redirect_status')
     if (!pi) return
 
     let cancelled = false
+    // After 3DS / bank redirect, finalize hosting even if redirect_status is missing
     void adminFetch('/api/admin/hosting/confirm', {
       method: 'POST',
-      body: JSON.stringify({ paymentIntentId: pi }),
+      body: JSON.stringify({ paymentIntentId: pi, redirectStatus }),
     })
       .then(async (res) => {
         const json = await res.json()
         if (!cancelled && res.ok && json.success) {
           setHosting({ ...(json.data as HostingRecord), stripeConfigured: true })
           window.history.replaceState({}, '', '/admin/hosting')
+        } else if (!cancelled && !res.ok) {
+          setCheckoutError(json.error || 'Payment could not be confirmed after redirect')
         }
       })
       .catch(() => undefined)
@@ -247,10 +286,14 @@ export default function AdminHostingPage() {
     if (clientSecret) return
 
     let cancelled = false
+    const controller = new AbortController()
     setPreparing(true)
     setCheckoutError(null)
 
-    void adminFetch('/api/admin/hosting/payment-intent', { method: 'POST' })
+    void adminFetch('/api/admin/hosting/payment-intent', {
+      method: 'POST',
+      signal: controller.signal,
+    })
       .then(async (res) => {
         const json = await res.json()
         if (!res.ok || !json.success) throw new Error(json.error || 'Could not start payment')
@@ -260,9 +303,8 @@ export default function AdminHostingPage() {
         setStripePromise(loadStripe(json.data.publishableKey))
       })
       .catch((err) => {
-        if (!cancelled) {
-          setCheckoutError(err instanceof Error ? err.message : 'Could not start payment')
-        }
+        if (cancelled || (err instanceof DOMException && err.name === 'AbortError')) return
+        setCheckoutError(err instanceof Error ? err.message : 'Could not start payment')
       })
       .finally(() => {
         if (!cancelled) setPreparing(false)
@@ -270,6 +312,7 @@ export default function AdminHostingPage() {
 
     return () => {
       cancelled = true
+      controller.abort()
     }
   }, [hosting, clientSecret])
 
@@ -419,8 +462,8 @@ export default function AdminHostingPage() {
                   </p>
                 ) : null}
               </section>
-            ) : (
-              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm space-y-4 lg:hidden">
+            ) : !isDesktop ? (
+              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm space-y-4">
                 <h3 className="text-base font-bold text-neutral-900">Pay with card</h3>
                 <PaymentBlock
                   checkoutError={checkoutError}
@@ -435,13 +478,13 @@ export default function AdminHostingPage() {
                   }}
                 />
               </section>
-            )}
+            ) : null}
           </div>
 
-          {/* Right: order summary */}
+          {/* Right: order summary — desktop payment only (single Elements instance) */}
           <OrderSummaryCard isActive={!!isActive}>
-            {!loading && !isActive ? (
-              <div className="mt-5 space-y-3 hidden lg:block">
+            {!loading && !isActive && isDesktop ? (
+              <div className="mt-5 space-y-3">
                 <PaymentBlock
                   checkoutError={checkoutError}
                   preparing={preparing}
@@ -517,7 +560,11 @@ function PaymentBlock({
             },
           }}
         >
-          <HostingCheckoutForm paymentIntentId={paymentIntentId} onPaid={onPaid} />
+          <HostingCheckoutForm
+            paymentIntentId={paymentIntentId}
+            clientSecret={clientSecret}
+            onPaid={onPaid}
+          />
         </Elements>
       )}
     </>

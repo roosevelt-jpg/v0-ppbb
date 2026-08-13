@@ -33,6 +33,7 @@ export function defaultHostingRecord(): HostingRecord {
     storageNote: 'Additional cost will be billed monthly for storage used.',
     paidAt: null,
     paymentIntentId: null,
+    pendingPaymentIntentId: null,
     paidByAdminId: null,
     paidByEmail: null,
     updatedAt: null,
@@ -52,6 +53,8 @@ export async function getHostingRecord(): Promise<HostingRecord> {
     billedTo: typeof data.billedTo === 'string' ? data.billedTo : HOSTING_BILLED_TO,
     paidAt: toIso(data.paidAt),
     paymentIntentId: typeof data.paymentIntentId === 'string' ? data.paymentIntentId : null,
+    pendingPaymentIntentId:
+      typeof data.pendingPaymentIntentId === 'string' ? data.pendingPaymentIntentId : null,
     paidByAdminId: typeof data.paidByAdminId === 'string' ? data.paidByAdminId : null,
     paidByEmail: typeof data.paidByEmail === 'string' ? data.paidByEmail : null,
     updatedAt: toIso(data.updatedAt),
@@ -71,6 +74,21 @@ export async function ensureHostingDoc(): Promise<HostingRecord> {
     })
   }
   return getHostingRecord()
+}
+
+export async function setPendingHostingPaymentIntent(paymentIntentId: string): Promise<void> {
+  const db = getAdminDb()
+  await db
+    .collection(HOSTING_DOC_PATH.collection)
+    .doc(HOSTING_DOC_PATH.id)
+    .set(
+      {
+        pendingPaymentIntentId: paymentIntentId,
+        amountDueUsd: HOSTING_TOTAL_USD,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    )
 }
 
 export async function markHostingActive(params: {
@@ -93,6 +111,7 @@ export async function markHostingActive(params: {
         storageNote: 'Additional cost will be billed monthly for storage used.',
         paidAt: FieldValue.serverTimestamp(),
         paymentIntentId: params.paymentIntentId,
+        pendingPaymentIntentId: null,
         paidByAdminId: params.adminUid,
         paidByEmail: params.adminEmail,
         updatedAt: FieldValue.serverTimestamp(),

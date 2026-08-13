@@ -50,6 +50,8 @@ export type HostingRecord = {
   storageNote: string
   paidAt: string | null
   paymentIntentId: string | null
+  /** Open PaymentIntent awaiting card confirmation (avoids Incomplete duplicates). */
+  pendingPaymentIntentId: string | null
   paidByAdminId: string | null
   paidByEmail: string | null
   updatedAt: string | null
