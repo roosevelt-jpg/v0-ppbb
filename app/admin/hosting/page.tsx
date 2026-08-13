@@ -585,19 +585,18 @@ export default function AdminHostingPage() {
                 Add US Stripe keys under Admin → Integrations → Stripe (Hosting). Publishable and
                 secret must both be live or both be test.
               </div>
-            ) : (
-              // Mobile / single column: payment under plan details
-              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm lg:hidden">
+            ) : isDesktop === false ? (
+              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
                 <h3 className="text-base font-bold text-neutral-900 mb-4">Pay with card</h3>
                 {checkoutPanel}
               </section>
-            )}
+            ) : null}
           </div>
 
           <OrderSummary isActive={!!isActive}>
-            {/* Desktop: one Elements mount only (avoids elements-store remount bugs) */}
-            {showCheckout ? (
-              <div className="mt-5 hidden lg:block">{checkoutPanel}</div>
+            {/* Exactly one Elements mount — never both mobile + desktop */}
+            {showCheckout && isDesktop === true ? (
+              <div className="mt-5">{checkoutPanel}</div>
             ) : null}
             {!isActive ? (
               <p className="mt-4 text-xs text-neutral-500 leading-relaxed">
