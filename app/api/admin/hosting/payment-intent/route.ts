@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: expectedAmount,
       currency: 'usd',
-      // Card only — no wallets, bank redirects, or Link
+      // Card only — name/address collected in Payment Element / Address Element
       payment_method_types: ['card'],
       description: `Passive Blessings cloud hosting — $${HOSTING_TOTAL_USD}`,
       receipt_email: email,
@@ -122,6 +122,7 @@ export async function POST(request: NextRequest) {
         billedTo: HOSTING_BILLED_TO,
         adminUid: uid,
         amountUsd: String(HOSTING_TOTAL_USD),
+        stripeAccountHint: config.publishableKey.startsWith('pk_live_') ? 'live' : 'test',
       },
     })
 

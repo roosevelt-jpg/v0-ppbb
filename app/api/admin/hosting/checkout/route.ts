@@ -80,8 +80,9 @@ export async function POST(request: NextRequest) {
       mode: 'payment',
       payment_method_types: ['card'],
       customer_email: email,
+      // Name + address only (no phone). Card fields are on Checkout by default.
       billing_address_collection: 'required',
-      phone_number_collection: { enabled: true },
+      phone_number_collection: { enabled: false },
       line_items: HOSTING_LINE_ITEMS.map((item) => ({
         quantity: 1,
         price_data: {
