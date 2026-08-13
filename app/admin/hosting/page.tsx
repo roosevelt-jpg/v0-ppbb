@@ -3,8 +3,6 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
-import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { Elements, PaymentElement, AddressElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { auth } from '@/lib/firebase'
 import {
@@ -55,159 +53,6 @@ function formatUsd(amount: number, fractions = 0) {
     maximumFractionDigits: fractions,
     minimumFractionDigits: fractions,
   }).format(amount)
-}
-
-function HostingCheckoutForm({
-  paymentIntentId,
-  clientSecret,
-  onPaid,
-  onAuthFailed,
-}: {
-  paymentIntentId: string
-  clientSecret: string
-  onPaid: (record: HostingRecord) => void
-  onAuthFailed: (message: string) => void
-}) {
-  const stripe = useStripe()
-  const elements = useElements()
-  const [submitting, setSubmitting] = React.useState(false)
-  const [error, setError] = React.useState<string | null>(null)
-
-  const handlePay = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!stripe || !elements) return
-    setSubmitting(true)
-    setError(null)
-    try {
-      // Validate Payment Element fields before confirming (required by Stripe.js)
-      const { error: submitError } = await elements.submit()
-      if (submitError) {
-        setError(submitError.message || 'Please check your card details')
-        return
-      }
-
-      // Do not override cardholder name — banks use it for 3D Secure.
-      // Invoice billed-to (Passive Blessings, Dubai, UAE) stays on the order summary only.
-      const result = await stripe.confirmPayment({
-        elements,
-        clientSecret,
-        redirect: 'if_required',
-        confirmParams: {
-          return_url: `${window.location.origin}/admin/hosting?paid=1`,
-        },
-      })
-
-      if (result.error) {
-        const code = result.error.code || result.error.decline_code || ''
-        const isAuthFail =
-          code === 'payment_intent_authentication_failure' ||
-          /unable to authenticate/i.test(result.error.message || '')
-        if (isAuthFail) {
-          const msg =
-            'Your bank could not authenticate this card (3D Secure). Use the cardholder name and billing address on the card, complete the bank verification, or try another card.'
-          setError(msg)
-          onAuthFailed(msg)
-          return
-        }
-        setError(result.error.message || 'Payment failed')
-        return
-      }
-
-      const status = result.paymentIntent?.status
-      if (status && status !== 'succeeded' && status !== 'processing') {
-        setError(`Payment incomplete (${status}). Please try again.`)
-        return
-      }
-
-      // If Stripe redirected for 3DS, this path won't run — return_url handles confirm.
-      const piId = result.paymentIntent?.id || paymentIntentId
-      const res = await adminFetch('/api/admin/hosting/confirm', {
-        method: 'POST',
-        body: JSON.stringify({ paymentIntentId: piId }),
-      })
-      const json = await res.json()
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || 'Could not activate hosting after payment')
-      }
-      onPaid(json.data as HostingRecord)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Payment failed')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
-      <p className="text-xs text-neutral-500">
-        Card only · Enter the cardholder name, phone, and billing address · Invoice billed to{' '}
-        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
-      </p>
-
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm space-y-5">
-        <div>
-          <p className="mb-3 text-sm font-semibold text-neutral-900">Cardholder &amp; billing address</p>
-          <AddressElement
-            options={{
-              mode: 'billing',
-              autocomplete: { mode: 'automatic' },
-              display: { name: 'full' },
-              fields: {
-                phone: 'always',
-              },
-              validation: {
-                phone: { required: 'always' },
-              },
-              defaultValues: {
-                address: {
-                  country: 'AE',
-                  city: 'Dubai',
-                },
-              },
-            }}
-          />
-        </div>
-
-        <div className="border-t border-neutral-100 pt-4">
-          <p className="mb-3 text-sm font-semibold text-neutral-900">Card details</p>
-          <PaymentElement
-            options={{
-              layout: {
-                type: 'tabs',
-                defaultCollapsed: false,
-              },
-              paymentMethodOrder: ['card'],
-              wallets: {
-                applePay: 'never',
-                googlePay: 'never',
-                link: 'never',
-              },
-              // Name / phone / address come from AddressElement above (required by Stripe)
-              fields: {
-                billingDetails: {
-                  name: 'never',
-                  email: 'auto',
-                  phone: 'never',
-                  address: 'never',
-                },
-              },
-              terms: {
-                card: 'never',
-              },
-            }}
-          />
-        </div>
-      </div>
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-      <button
-        type="submit"
-        disabled={!stripe || !elements || submitting}
-        className="w-full min-h-[48px] rounded-lg bg-[#673de6] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5a32d1] disabled:opacity-50"
-      >
-        {submitting ? 'Processing…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} · Continue`}
-      </button>
-    </form>
-  )
 }
 
 function OrderSummaryCard({
@@ -276,25 +121,55 @@ function OrderSummaryCard({
   )
 }
 
+function PayWithStripeButton({
+  disabled,
+  onError,
+}: {
+  disabled?: boolean
+  onError: (message: string) => void
+}) {
+  const [submitting, setSubmitting] = React.useState(false)
+
+  const handlePay = async () => {
+    setSubmitting(true)
+    onError('')
+    try {
+      const res = await adminFetch('/api/admin/hosting/checkout', { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok || !json.success || !json.data?.checkoutUrl) {
+        throw new Error(json.error || 'Could not start Stripe checkout')
+      }
+      window.location.assign(json.data.checkoutUrl as string)
+    } catch (err) {
+      onError(err instanceof Error ? err.message : 'Could not start payment')
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-neutral-500 leading-relaxed">
+        You will enter cardholder name, billing address, and card details on Stripe&apos;s secure
+        checkout (best for bank 3D Secure). Invoice remains{' '}
+        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>.
+      </p>
+      <button
+        type="button"
+        disabled={disabled || submitting}
+        onClick={() => void handlePay()}
+        className="w-full min-h-[48px] rounded-lg bg-[#673de6] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5a32d1] disabled:opacity-50"
+      >
+        {submitting ? 'Redirecting to Stripe…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} · Continue`}
+      </button>
+    </div>
+  )
+}
+
 export default function AdminHostingPage() {
   const [hosting, setHosting] = React.useState<HostingApiData | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null)
-  const [clientSecret, setClientSecret] = React.useState<string | null>(null)
-  const [paymentIntentId, setPaymentIntentId] = React.useState<string | null>(null)
-  const [stripePromise, setStripePromise] = React.useState<Promise<Stripe | null> | null>(null)
-  const [preparing, setPreparing] = React.useState(false)
-  const [forceNewCheckout, setForceNewCheckout] = React.useState(false)
-
-  const [isDesktop, setIsDesktop] = React.useState(false)
-
-  React.useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)')
-    const sync = () => setIsDesktop(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
+  const [confirming, setConfirming] = React.useState(false)
 
   const loadStatus = React.useCallback(async () => {
     setLoading(true)
@@ -314,83 +189,54 @@ export default function AdminHostingPage() {
     void loadStatus()
   }, [loadStatus])
 
+  // Return from Stripe Checkout
   React.useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    const pi = params.get('payment_intent')
-    const redirectStatus = params.get('redirect_status')
-    if (!pi) return
+    const sessionId = params.get('session_id')
+    const canceled = params.get('canceled')
+
+    if (canceled) {
+      setCheckoutError('Payment was canceled. You can try again when ready.')
+      window.history.replaceState({}, '', '/admin/hosting')
+      return
+    }
+
+    if (!sessionId) return
 
     let cancelled = false
-    // After 3DS / bank redirect, finalize hosting even if redirect_status is missing
+    setConfirming(true)
     void adminFetch('/api/admin/hosting/confirm', {
       method: 'POST',
-      body: JSON.stringify({ paymentIntentId: pi, redirectStatus }),
+      body: JSON.stringify({ sessionId }),
     })
       .then(async (res) => {
         const json = await res.json()
-        if (!cancelled && res.ok && json.success) {
+        if (cancelled) return
+        if (res.ok && json.success) {
           setHosting({ ...(json.data as HostingRecord), stripeConfigured: true })
-          window.history.replaceState({}, '', '/admin/hosting')
-        } else if (!cancelled && !res.ok) {
-          setCheckoutError(json.error || 'Payment could not be confirmed after redirect')
+          setCheckoutError(null)
+        } else {
+          setCheckoutError(json.error || 'Payment could not be confirmed after Stripe checkout')
+        }
+        window.history.replaceState({}, '', '/admin/hosting')
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCheckoutError('Payment could not be confirmed after Stripe checkout')
         }
       })
-      .catch(() => undefined)
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  React.useEffect(() => {
-    if (!hosting || hosting.status === 'active' || !hosting.stripeConfigured) return
-    if (clientSecret) return
-
-    let cancelled = false
-    const controller = new AbortController()
-    setPreparing(true)
-
-    void adminFetch('/api/admin/hosting/payment-intent', {
-      method: 'POST',
-      signal: controller.signal,
-      body: JSON.stringify({ forceNew: forceNewCheckout }),
-    })
-      .then(async (res) => {
-        const json = await res.json()
-        if (!res.ok || !json.success) throw new Error(json.error || 'Could not start payment')
-        if (cancelled) return
-        setForceNewCheckout(false)
-        // Keep auth-failure guidance visible; clear only generic prepare errors
-        setCheckoutError((prev) =>
-          prev && /authenticate|3D Secure/i.test(prev) ? prev : null
-        )
-        setClientSecret(json.data.clientSecret)
-        setPaymentIntentId(json.data.paymentIntentId)
-        setStripePromise(loadStripe(json.data.publishableKey))
-      })
-      .catch((err) => {
-        if (cancelled || (err instanceof DOMException && err.name === 'AbortError')) return
-        setCheckoutError(err instanceof Error ? err.message : 'Could not start payment')
-      })
       .finally(() => {
-        if (!cancelled) setPreparing(false)
+        if (!cancelled) setConfirming(false)
       })
 
     return () => {
       cancelled = true
-      controller.abort()
     }
-  }, [hosting, clientSecret, forceNewCheckout])
-
-  const resetCheckout = React.useCallback((message?: string) => {
-    if (message) setCheckoutError(message)
-    setClientSecret(null)
-    setPaymentIntentId(null)
-    setForceNewCheckout(true)
   }, [])
 
   const isActive = hosting?.status === 'active'
+  const canPay = !loading && !isActive && !!hosting?.stripeConfigured && !confirming
 
   return (
     <AdminPageLayout title="Hosting">
@@ -413,7 +259,6 @@ export default function AdminHostingPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:gap-8 items-start">
-          {/* Left: plan details */}
           <div className="space-y-5">
             <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-5">
@@ -495,8 +340,10 @@ export default function AdminHostingPage() {
               </ul>
             </section>
 
-            {loading ? (
-              <p className="text-sm text-neutral-500">Loading hosting status…</p>
+            {loading || confirming ? (
+              <p className="text-sm text-neutral-500">
+                {confirming ? 'Confirming payment with Stripe…' : 'Loading hosting status…'}
+              </p>
             ) : isActive ? (
               <section className="rounded-2xl border-2 border-neutral-900 bg-white p-5 sm:p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 text-emerald-700">
@@ -536,43 +383,48 @@ export default function AdminHostingPage() {
                   </p>
                 ) : null}
               </section>
-            ) : !isDesktop ? (
-              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm space-y-4">
+            ) : (
+              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm space-y-4 lg:hidden">
                 <h3 className="text-base font-bold text-neutral-900">Pay with card</h3>
-                <PaymentBlock
-                  checkoutError={checkoutError}
-                  preparing={preparing}
-                  clientSecret={clientSecret}
-                  stripePromise={stripePromise}
-                  paymentIntentId={paymentIntentId}
-                  onPaid={(record) => {
-                    setHosting({ ...record, stripeConfigured: true })
-                    setClientSecret(null)
-                    setPaymentIntentId(null)
-                  }}
-                  onAuthFailed={resetCheckout}
-                />
+                {checkoutError ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+                    {checkoutError}
+                  </div>
+                ) : null}
+                {!hosting?.stripeConfigured ? (
+                  <p className="text-sm text-amber-800">
+                    Configure Stripe (Hosting) under Admin → Integrations first.
+                  </p>
+                ) : (
+                  <PayWithStripeButton
+                    disabled={!canPay}
+                    onError={(msg) => setCheckoutError(msg || null)}
+                  />
+                )}
               </section>
-            ) : null}
+            )}
           </div>
 
-          {/* Right: order summary — desktop payment only (single Elements instance) */}
           <OrderSummaryCard isActive={!!isActive}>
-            {!loading && !isActive && isDesktop ? (
-              <div className="mt-5 space-y-3">
-                <PaymentBlock
-                  checkoutError={checkoutError}
-                  preparing={preparing}
-                  clientSecret={clientSecret}
-                  stripePromise={stripePromise}
-                  paymentIntentId={paymentIntentId}
-                  onPaid={(record) => {
-                    setHosting({ ...record, stripeConfigured: true })
-                    setClientSecret(null)
-                    setPaymentIntentId(null)
-                  }}
-                  onAuthFailed={resetCheckout}
-                />
+            {!loading && !isActive ? (
+              <div className="mt-5 space-y-3 hidden lg:block">
+                {checkoutError ? (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+                    {checkoutError}
+                  </div>
+                ) : null}
+                {!hosting?.stripeConfigured ? (
+                  <p className="text-sm text-amber-800">
+                    Configure Stripe (Hosting) under Admin → Integrations first.
+                  </p>
+                ) : confirming ? (
+                  <p className="text-sm text-neutral-500">Confirming payment with Stripe…</p>
+                ) : (
+                  <PayWithStripeButton
+                    disabled={!canPay}
+                    onError={(msg) => setCheckoutError(msg || null)}
+                  />
+                )}
               </div>
             ) : null}
             {!isActive ? (
@@ -593,60 +445,5 @@ export default function AdminHostingPage() {
         ) : null}
       </div>
     </AdminPageLayout>
-  )
-}
-
-function PaymentBlock({
-  checkoutError,
-  preparing,
-  clientSecret,
-  stripePromise,
-  paymentIntentId,
-  onPaid,
-  onAuthFailed,
-}: {
-  checkoutError: string | null
-  preparing: boolean
-  clientSecret: string | null
-  stripePromise: Promise<Stripe | null> | null
-  paymentIntentId: string | null
-  onPaid: (record: HostingRecord) => void
-  onAuthFailed: (message: string) => void
-}) {
-  return (
-    <>
-      {checkoutError ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
-          {checkoutError}
-        </div>
-      ) : null}
-      {preparing || !clientSecret || !stripePromise || !paymentIntentId ? (
-        !checkoutError ? (
-          <p className="text-sm text-neutral-500">Preparing secure card payment…</p>
-        ) : null
-      ) : (
-        <Elements
-          key={paymentIntentId}
-          stripe={stripePromise}
-          options={{
-            clientSecret,
-            appearance: {
-              theme: 'stripe',
-              variables: {
-                colorPrimary: '#673de6',
-                borderRadius: '8px',
-              },
-            },
-          }}
-        >
-          <HostingCheckoutForm
-            paymentIntentId={paymentIntentId}
-            clientSecret={clientSecret}
-            onPaid={onPaid}
-            onAuthFailed={onAuthFailed}
-          />
-        </Elements>
-      )}
-    </>
   )
 }
