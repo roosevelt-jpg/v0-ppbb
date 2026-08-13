@@ -90,6 +90,16 @@ function HostingCheckoutForm({
         redirect: 'if_required',
         confirmParams: {
           return_url: `${window.location.origin}/admin/hosting?paid=1`,
+          payment_method_data: {
+            billing_details: {
+              name: 'Passive Blessings',
+              address: {
+                city: 'Dubai',
+                country: 'AE',
+                line1: 'Dubai, UAE',
+              },
+            },
+          },
         },
       })
 
@@ -124,15 +134,32 @@ function HostingCheckoutForm({
 
   return (
     <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
+      <p className="text-xs text-neutral-500">
+        Card only · Billed to <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
+      </p>
       <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
         <PaymentElement
           options={{
-            layout: 'tabs',
+            layout: {
+              type: 'tabs',
+              defaultCollapsed: false,
+            },
             paymentMethodOrder: ['card'],
+            wallets: {
+              applePay: 'never',
+              googlePay: 'never',
+              link: 'never',
+            },
             fields: {
               billingDetails: {
-                address: 'auto',
+                name: 'never',
+                email: 'never',
+                phone: 'never',
+                address: 'never',
               },
+            },
+            terms: {
+              card: 'never',
             },
           }}
         />
