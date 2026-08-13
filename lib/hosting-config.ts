@@ -2,6 +2,13 @@
 
 export const HOSTING_BILLED_TO = 'Passive Blessings, Dubai, UAE'
 
+/** Fixed Stripe billing address (invoice entity) — payer only enters name + card. */
+export const HOSTING_BILLING_ADDRESS = {
+  line1: 'Passive Blessings',
+  city: 'Dubai',
+  country: 'AE' as const,
+}
+
 export const HOSTING_CREDENTIALS_EMAIL = 'tech.passiveblessings@gmail.com'
 
 /** Billed as $47/mo for a 1-year (12-month) term. */

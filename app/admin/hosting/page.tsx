@@ -3,10 +3,13 @@
 export const dynamic = 'force-dynamic'
 
 import React from 'react'
+import { loadStripe, type Stripe } from '@stripe/stripe-js'
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { auth } from '@/lib/firebase'
 import {
   HOSTING_BILLED_TO,
+  HOSTING_BILLING_ADDRESS,
   HOSTING_CREDENTIALS_EMAIL,
   HOSTING_LINE_ITEMS,
   HOSTING_MONTHLY_USD,
@@ -20,7 +23,6 @@ import { ArrowRight, CheckCircle2, Cloud, Lock, Mail, Server } from 'lucide-reac
 
 type HostingApiData = HostingRecord & { stripeConfigured?: boolean }
 
-/** Official AWS co-marketing “Powered by AWS” mark (awsstatic CDN). */
 function AwsCloudLogo({ className = '' }: { className?: string }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -55,7 +57,158 @@ function formatUsd(amount: number, fractions = 0) {
   }).format(amount)
 }
 
-function OrderSummaryCard({
+function stripeErrorMessage(err: unknown): string {
+  if (err instanceof Error && err.message) return err.message
+  if (typeof err === 'object' && err !== null && 'message' in err) {
+    const m = (err as { message: unknown }).message
+    if (typeof m === 'string' && m) return m
+  }
+  return 'Payment failed'
+}
+
+/** Name + card only. Billing address is fixed to Passive Blessings, Dubai, UAE. */
+function HostingPayForm({
+  paymentIntentId,
+  clientSecret,
+  onPaid,
+  onNeedNewIntent,
+}: {
+  paymentIntentId: string
+  clientSecret: string
+  onPaid: (record: HostingRecord) => void
+  onNeedNewIntent: (message: string) => void
+}) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [submitting, setSubmitting] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!stripe || !elements) return
+    setSubmitting(true)
+    setError(null)
+
+    try {
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        setError(submitError.message || 'Please check the cardholder name and card details')
+        return
+      }
+
+      const email = auth.currentUser?.email?.trim() || HOSTING_CREDENTIALS_EMAIL
+
+      const result = await stripe.confirmPayment({
+        elements,
+        clientSecret,
+        redirect: 'if_required',
+        confirmParams: {
+          return_url: `${window.location.origin}/admin/hosting?paid=1`,
+          // Fields set to "never" on Payment Element must be supplied here.
+          // Name is collected by the Element; invoice billing address is fixed.
+          payment_method_data: {
+            billing_details: {
+              email,
+              phone: '',
+              address: {
+                line1: HOSTING_BILLING_ADDRESS.line1,
+                city: HOSTING_BILLING_ADDRESS.city,
+                country: HOSTING_BILLING_ADDRESS.country,
+              },
+            },
+          },
+        },
+      })
+
+      if (result.error) {
+        const code = result.error.code || result.error.decline_code || ''
+        const msg = result.error.message || 'Payment failed'
+        const isAuthFail =
+          code === 'payment_intent_authentication_failure' ||
+          /unable to authenticate/i.test(msg)
+
+        if (isAuthFail) {
+          const help =
+            'Bank authentication failed (3D Secure). Complete the bank check in Chrome/Safari, or try another card.'
+          setError(help)
+          onNeedNewIntent(help)
+          return
+        }
+
+        setError(code ? `${msg} (${code})` : msg)
+        return
+      }
+
+      const status = result.paymentIntent?.status
+      if (status && status !== 'succeeded' && status !== 'processing') {
+        setError(`Payment incomplete (${status}). Please try again.`)
+        return
+      }
+
+      const piId = result.paymentIntent?.id || paymentIntentId
+      const res = await adminFetch('/api/admin/hosting/confirm', {
+        method: 'POST',
+        body: JSON.stringify({ paymentIntentId: piId }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || `Could not activate hosting (HTTP ${res.status})`)
+      }
+      onPaid(json.data as HostingRecord)
+    } catch (err) {
+      setError(stripeErrorMessage(err))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
+      <p className="text-xs text-neutral-500 leading-relaxed">
+        Enter <span className="font-semibold text-neutral-800">cardholder name</span> and{' '}
+        <span className="font-semibold text-neutral-800">card details</span> only. Invoice billed to{' '}
+        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>.
+      </p>
+
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <PaymentElement
+          options={{
+            layout: 'tabs',
+            paymentMethodOrder: ['card'],
+            wallets: {
+              applePay: 'never',
+              googlePay: 'never',
+              link: 'never',
+            },
+            fields: {
+              billingDetails: {
+                name: 'auto',
+                email: 'never',
+                phone: 'never',
+                address: 'never',
+              },
+            },
+            terms: {
+              card: 'never',
+            },
+          }}
+        />
+      </div>
+
+      {error ? <p className="text-sm text-rose-600 whitespace-pre-wrap">{error}</p> : null}
+
+      <button
+        type="submit"
+        disabled={!stripe || !elements || submitting}
+        className="w-full min-h-[48px] rounded-lg bg-[#673de6] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5a32d1] disabled:opacity-50"
+      >
+        {submitting ? 'Processing…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} · Continue`}
+      </button>
+    </form>
+  )
+}
+
+function OrderSummary({
   isActive,
   children,
 }: {
@@ -106,7 +259,6 @@ function OrderSummaryCard({
           <span className="font-semibold text-neutral-800">Credentials:</span>{' '}
           {HOSTING_CREDENTIALS_EMAIL}
         </p>
-        <p className="text-neutral-500">Additional storage usage billed monthly.</p>
       </div>
 
       {isActive ? (
@@ -121,51 +273,53 @@ function OrderSummaryCard({
   )
 }
 
-/**
- * Stripe hosted Checkout — name, billing address, and card only (phone off).
- * Uses Stripe (Hosting) credentials from Integrations (US account).
- */
-function PayWithStripeButton({
-  disabled,
-  onError,
+function CheckoutPanel({
+  error,
+  preparing,
+  clientSecret,
+  stripePromise,
+  paymentIntentId,
+  onPaid,
+  onNeedNewIntent,
 }: {
-  disabled?: boolean
-  onError: (message: string) => void
+  error: string | null
+  preparing: boolean
+  clientSecret: string | null
+  stripePromise: Promise<Stripe | null> | null
+  paymentIntentId: string | null
+  onPaid: (record: HostingRecord) => void
+  onNeedNewIntent: (message: string) => void
 }) {
-  const [submitting, setSubmitting] = React.useState(false)
-
-  const handlePay = async () => {
-    setSubmitting(true)
-    onError('')
-    try {
-      const res = await adminFetch('/api/admin/hosting/checkout', { method: 'POST' })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok || !json.success || !json.data?.checkoutUrl) {
-        throw new Error(json.error || 'Could not start Stripe checkout')
-      }
-      window.location.assign(json.data.checkoutUrl as string)
-    } catch (err) {
-      onError(err instanceof Error ? err.message : 'Could not start payment')
-      setSubmitting(false)
-    }
-  }
-
   return (
     <div className="space-y-3">
-      <p className="text-xs text-neutral-500 leading-relaxed">
-        Continues to Stripe Checkout for <span className="font-semibold text-neutral-800">name</span>
-        , <span className="font-semibold text-neutral-800">billing address</span>, and{' '}
-        <span className="font-semibold text-neutral-800">card</span> only (no phone). Invoice remains{' '}
-        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>.
-      </p>
-      <button
-        type="button"
-        disabled={disabled || submitting}
-        onClick={() => void handlePay()}
-        className="w-full min-h-[48px] rounded-lg bg-[#673de6] px-4 py-3 text-sm font-semibold text-white hover:bg-[#5a32d1] disabled:opacity-50"
-      >
-        {submitting ? 'Redirecting to Stripe…' : `Pay ${formatUsd(HOSTING_TOTAL_USD)} · Continue`}
-      </button>
+      {error ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+          {error}
+        </div>
+      ) : null}
+
+      {preparing || !clientSecret || !stripePromise || !paymentIntentId ? (
+        !error ? <p className="text-sm text-neutral-500">Preparing secure card payment…</p> : null
+      ) : (
+        <Elements
+          key={paymentIntentId}
+          stripe={stripePromise}
+          options={{
+            clientSecret,
+            appearance: {
+              theme: 'stripe',
+              variables: { colorPrimary: '#673de6', borderRadius: '8px' },
+            },
+          }}
+        >
+          <HostingPayForm
+            paymentIntentId={paymentIntentId}
+            clientSecret={clientSecret}
+            onPaid={onPaid}
+            onNeedNewIntent={onNeedNewIntent}
+          />
+        </Elements>
+      )}
     </div>
   )
 }
@@ -173,8 +327,21 @@ function PayWithStripeButton({
 export default function AdminHostingPage() {
   const [hosting, setHosting] = React.useState<HostingApiData | null>(null)
   const [loading, setLoading] = React.useState(true)
-  const [checkoutError, setCheckoutError] = React.useState<string | null>(null)
-  const [confirming, setConfirming] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
+  const [clientSecret, setClientSecret] = React.useState<string | null>(null)
+  const [paymentIntentId, setPaymentIntentId] = React.useState<string | null>(null)
+  const [stripePromise, setStripePromise] = React.useState<Promise<Stripe | null> | null>(null)
+  const [preparing, setPreparing] = React.useState(false)
+  const [intentKey, setIntentKey] = React.useState(0)
+  const [isDesktop, setIsDesktop] = React.useState(false)
+
+  React.useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const sync = () => setIsDesktop(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const loadStatus = React.useCallback(async () => {
     setLoading(true)
@@ -184,7 +351,7 @@ export default function AdminHostingPage() {
       if (!res.ok || !json.success) throw new Error(json.error || 'Failed to load')
       setHosting(json.data as HostingApiData)
     } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : 'Failed to load hosting')
+      setError(stripeErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -194,50 +361,31 @@ export default function AdminHostingPage() {
     void loadStatus()
   }, [loadStatus])
 
-  // Return from Stripe Checkout (or legacy PaymentIntent redirect)
+  // After 3DS redirect
   React.useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
-    const paymentIntentId = params.get('payment_intent')
-    const canceled = params.get('canceled')
-
-    if (canceled) {
-      setCheckoutError('Payment was canceled. You can try again when ready.')
-      window.history.replaceState({}, '', '/admin/hosting')
-      return
-    }
-
-    if (!sessionId && !paymentIntentId) return
+    const pi = params.get('payment_intent')
+    if (!pi) return
 
     let cancelled = false
-    setConfirming(true)
     void adminFetch('/api/admin/hosting/confirm', {
       method: 'POST',
-      body: JSON.stringify(
-        sessionId ? { sessionId } : { paymentIntentId }
-      ),
+      body: JSON.stringify({ paymentIntentId: pi }),
     })
       .then(async (res) => {
         const json = await res.json().catch(() => ({}))
         if (cancelled) return
         if (res.ok && json.success) {
           setHosting({ ...(json.data as HostingRecord), stripeConfigured: true })
-          setCheckoutError(null)
+          setError(null)
         } else {
-          setCheckoutError(
-            json.error || 'Payment could not be confirmed. Check Stripe (Hosting) keys and try again.'
-          )
+          setError(json.error || 'Payment could not be confirmed after bank verification')
         }
         window.history.replaceState({}, '', '/admin/hosting')
       })
       .catch(() => {
-        if (!cancelled) {
-          setCheckoutError('Payment could not be confirmed after returning from Stripe')
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setConfirming(false)
+        if (!cancelled) setError('Payment could not be confirmed after bank verification')
       })
 
     return () => {
@@ -245,30 +393,68 @@ export default function AdminHostingPage() {
     }
   }, [])
 
-  const isActive = hosting?.status === 'active'
-  const canPay = !loading && !isActive && !!hosting?.stripeConfigured && !confirming
+  // Create PaymentIntent whenever hosting is ready / intentKey bumps
+  React.useEffect(() => {
+    if (!hosting || hosting.status === 'active' || !hosting.stripeConfigured) return
 
-  const paySection = (
-    <div className="space-y-3">
-      {checkoutError ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
-          {checkoutError}
-        </div>
-      ) : null}
-      {!hosting?.stripeConfigured ? (
-        <p className="text-sm text-amber-800">
-          Configure Stripe (Hosting) under Admin → Integrations with your US publishable + secret
-          keys (same mode: both live or both test).
-        </p>
-      ) : confirming ? (
-        <p className="text-sm text-neutral-500">Confirming payment with Stripe…</p>
-      ) : (
-        <PayWithStripeButton
-          disabled={!canPay}
-          onError={(msg) => setCheckoutError(msg || null)}
-        />
-      )}
-    </div>
+    let cancelled = false
+    const controller = new AbortController()
+    setPreparing(true)
+    setClientSecret(null)
+    setPaymentIntentId(null)
+
+    void adminFetch('/api/admin/hosting/payment-intent', {
+      method: 'POST',
+      signal: controller.signal,
+      body: JSON.stringify({}),
+    })
+      .then(async (res) => {
+        const json = await res.json().catch(() => ({}))
+        if (!res.ok || !json.success) throw new Error(json.error || 'Could not start payment')
+        if (cancelled) return
+        setClientSecret(json.data.clientSecret as string)
+        setPaymentIntentId(json.data.paymentIntentId as string)
+        setStripePromise(loadStripe(json.data.publishableKey as string))
+        setError((prev) => (prev && /3D Secure|authenticate/i.test(prev) ? prev : null))
+      })
+      .catch((err) => {
+        if (cancelled || (err instanceof DOMException && err.name === 'AbortError')) return
+        setError(stripeErrorMessage(err))
+      })
+      .finally(() => {
+        if (!cancelled) setPreparing(false)
+      })
+
+    return () => {
+      cancelled = true
+      controller.abort()
+    }
+  }, [hosting?.status, hosting?.stripeConfigured, intentKey])
+
+  const refreshIntent = React.useCallback((message?: string) => {
+    if (message) setError(message)
+    setIntentKey((k) => k + 1)
+  }, [])
+
+  const onPaid = React.useCallback((record: HostingRecord) => {
+    setHosting({ ...record, stripeConfigured: true })
+    setClientSecret(null)
+    setPaymentIntentId(null)
+    setError(null)
+  }, [])
+
+  const isActive = hosting?.status === 'active'
+
+  const checkout = (
+    <CheckoutPanel
+      error={error}
+      preparing={preparing}
+      clientSecret={clientSecret}
+      stripePromise={stripePromise}
+      paymentIntentId={paymentIntentId}
+      onPaid={onPaid}
+      onNeedNewIntent={refreshIntent}
+    />
   )
 
   return (
@@ -291,7 +477,7 @@ export default function AdminHostingPage() {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8 items-start">
           <div className="space-y-5">
             <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-5">
@@ -305,10 +491,6 @@ export default function AdminHostingPage() {
                   <div className="inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm font-semibold text-neutral-900 min-w-[180px]">
                     {HOSTING_PERIOD_LABEL}
                   </div>
-                  <p className="mt-2 text-xs text-neutral-500">
-                    1-year term · renews with storage billed monthly for usage. Cancel anytime after
-                    term.
-                  </p>
                 </div>
                 <div className="text-left sm:text-right shrink-0">
                   <p className="text-3xl font-bold text-neutral-900 tracking-tight">
@@ -359,33 +541,28 @@ export default function AdminHostingPage() {
                 <li className="flex gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>
-                    <span className="font-semibold">SSL: 1yr</span> — {formatUsd(120)} certificate
-                    coverage for the term
+                    <span className="font-semibold">SSL: 1yr</span> — {formatUsd(120)}
                   </span>
                 </li>
                 <li className="flex gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>
-                    <span className="font-semibold">Storage bucket</span> — {formatUsd(80)} included;
-                    extra usage billed monthly
+                    <span className="font-semibold">Storage bucket</span> — {formatUsd(80)} included
                   </span>
                 </li>
               </ul>
             </section>
 
-            {loading || confirming ? (
-              <p className="text-sm text-neutral-500">
-                {confirming ? 'Confirming payment with Stripe…' : 'Loading hosting status…'}
-              </p>
+            {loading ? (
+              <p className="text-sm text-neutral-500">Loading hosting status…</p>
             ) : isActive ? (
               <section className="rounded-2xl border-2 border-neutral-900 bg-white p-5 sm:p-6 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 text-emerald-700">
                   <CheckCircle2 className="h-5 w-5" />
                   <h3 className="text-lg font-bold">Hosting is Active</h3>
                 </div>
-                <p className="text-base font-semibold text-neutral-900 leading-snug">
-                  Once hosting is Active, proceed with the migration of your files to AWS right from
-                  your current host.
+                <p className="text-base font-semibold text-neutral-900">
+                  Proceed with migrating your files to AWS from your current host.
                 </p>
                 <ol className="space-y-3 text-sm text-neutral-700">
                   <li className="flex gap-2">
@@ -394,19 +571,16 @@ export default function AdminHostingPage() {
                   </li>
                   <li className="flex gap-2">
                     <span className="font-bold text-neutral-900">2.</span>
-                    Migrate app files, config, and media from your current host to AWS.
+                    Migrate app files, config, and media to AWS.
                   </li>
                   <li className="flex gap-2">
                     <span className="font-bold text-neutral-900">3.</span>
-                    Enable SSL, update DNS, verify the site, then retire the old host.
+                    Enable SSL, update DNS, verify, then retire the old host.
                   </li>
                 </ol>
                 <div className="flex items-start gap-2 rounded-lg bg-neutral-900 px-4 py-3 text-sm text-white">
                   <ArrowRight className="h-4 w-4 shrink-0 mt-0.5" />
-                  <p>
-                    Do not wait for further setup beyond the credentials sent to{' '}
-                    {HOSTING_CREDENTIALS_EMAIL}.
-                  </p>
+                  <p>Credentials are sent to {HOSTING_CREDENTIALS_EMAIL}.</p>
                 </div>
                 {hosting?.paidAt ? (
                   <p className="text-xs text-neutral-500 flex items-center gap-1.5">
@@ -416,31 +590,35 @@ export default function AdminHostingPage() {
                   </p>
                 ) : null}
               </section>
-            ) : (
-              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm space-y-4 lg:hidden">
-                <h3 className="text-base font-bold text-neutral-900">Pay with card</h3>
-                {paySection}
+            ) : !hosting?.stripeConfigured ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Add US Stripe keys under Admin → Integrations → Stripe (Hosting). Publishable and
+                secret must both be live or both be test.
+              </div>
+            ) : !isDesktop ? (
+              <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">
+                <h3 className="text-base font-bold text-neutral-900 mb-4">Pay with card</h3>
+                {checkout}
               </section>
-            )}
+            ) : null}
           </div>
 
-          <OrderSummaryCard isActive={!!isActive}>
-            {!loading && !isActive ? (
-              <div className="mt-5 space-y-3 hidden lg:block">{paySection}</div>
+          <OrderSummary isActive={!!isActive}>
+            {!loading && !isActive && isDesktop && hosting?.stripeConfigured ? (
+              <div className="mt-5">{checkout}</div>
             ) : null}
             {!isActive ? (
               <p className="mt-4 text-xs text-neutral-500 leading-relaxed">
-                After payment, Hosting becomes Active — then migrate your files to AWS from your
-                current host.
+                After payment, Hosting becomes Active — then migrate your files to AWS.
               </p>
             ) : null}
-          </OrderSummaryCard>
+          </OrderSummary>
         </div>
 
         {!isActive ? (
           <p className="mt-6 flex items-center gap-2 text-xs text-neutral-400">
             <Cloud className="h-3.5 w-3.5" />
-            Powered by Amazon Web Services · Uses Stripe (Hosting) credentials from Integrations.
+            Powered by Amazon Web Services · Stripe (Hosting) from Integrations
           </p>
         ) : null}
       </div>
