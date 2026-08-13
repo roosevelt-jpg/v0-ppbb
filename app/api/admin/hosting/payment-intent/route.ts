@@ -63,6 +63,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const body = await request.json().catch(() => ({}))
+    const forceNew = Boolean(body?.forceNew)
+
     const db = getAdminDb()
     const userSnap = await db.collection('users').doc(uid).get()
     const userData = userSnap.data() || {}
@@ -80,6 +83,7 @@ export async function POST(request: NextRequest) {
       try {
         const existing = await stripe.paymentIntents.retrieve(pendingId)
         if (
+          !forceNew &&
           REUSABLE_STATUSES.has(existing.status) &&
           existing.amount === expectedAmount &&
           existing.currency === 'usd' &&
@@ -97,7 +101,7 @@ export async function POST(request: NextRequest) {
             },
           })
         }
-        // Stale / wrong amount / already succeeded elsewhere — cancel if still open
+        // After 3DS failure or force refresh — cancel so a clean intent can be created
         if (REUSABLE_STATUSES.has(existing.status)) {
           await stripe.paymentIntents.cancel(existing.id).catch(() => undefined)
         }
@@ -112,7 +116,6 @@ export async function POST(request: NextRequest) {
       // Card only — no wallets, bank redirects, or Link
       payment_method_types: ['card'],
       description: `Passive Blessings cloud hosting — $${HOSTING_TOTAL_USD}`,
-      statement_descriptor_suffix: 'PB HOSTING',
       receipt_email: email,
       metadata: {
         purpose: 'platform_hosting',

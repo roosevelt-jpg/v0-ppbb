@@ -61,10 +61,12 @@ function HostingCheckoutForm({
   paymentIntentId,
   clientSecret,
   onPaid,
+  onAuthFailed,
 }: {
   paymentIntentId: string
   clientSecret: string
   onPaid: (record: HostingRecord) => void
+  onAuthFailed: (message: string) => void
 }) {
   const stripe = useStripe()
   const elements = useElements()
@@ -84,26 +86,29 @@ function HostingCheckoutForm({
         return
       }
 
+      // Do not override cardholder name — banks use it for 3D Secure.
+      // Invoice billed-to (Passive Blessings, Dubai, UAE) stays on the order summary only.
       const result = await stripe.confirmPayment({
         elements,
         clientSecret,
         redirect: 'if_required',
         confirmParams: {
           return_url: `${window.location.origin}/admin/hosting?paid=1`,
-          payment_method_data: {
-            billing_details: {
-              name: 'Passive Blessings',
-              address: {
-                city: 'Dubai',
-                country: 'AE',
-                line1: 'Dubai, UAE',
-              },
-            },
-          },
         },
       })
 
       if (result.error) {
+        const code = result.error.code || result.error.decline_code || ''
+        const isAuthFail =
+          code === 'payment_intent_authentication_failure' ||
+          /unable to authenticate/i.test(result.error.message || '')
+        if (isAuthFail) {
+          const msg =
+            'Your bank could not authenticate this card (3D Secure). Use the cardholder name and billing address on the card, complete the bank verification, or try another card.'
+          setError(msg)
+          onAuthFailed(msg)
+          return
+        }
         setError(result.error.message || 'Payment failed')
         return
       }
@@ -135,7 +140,8 @@ function HostingCheckoutForm({
   return (
     <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
       <p className="text-xs text-neutral-500">
-        Card only · Billed to <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
+        Card only · Enter the cardholder name and billing address as on the card · Invoice billed to{' '}
+        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
       </p>
       <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
         <PaymentElement
@@ -150,12 +156,28 @@ function HostingCheckoutForm({
               googlePay: 'never',
               link: 'never',
             },
+            defaultValues: {
+              billingDetails: {
+                address: {
+                  country: 'AE',
+                  city: 'Dubai',
+                },
+              },
+            },
             fields: {
               billingDetails: {
-                name: 'never',
-                email: 'never',
+                // Cardholder (person related to Passive Blessings) — not company invoice name
+                name: 'auto',
+                email: 'auto',
                 phone: 'never',
-                address: 'never',
+                address: {
+                  country: 'auto',
+                  line1: 'auto',
+                  line2: 'auto',
+                  city: 'auto',
+                  state: 'auto',
+                  postalCode: 'auto',
+                },
               },
             },
             terms: {
@@ -250,6 +272,7 @@ export default function AdminHostingPage() {
   const [paymentIntentId, setPaymentIntentId] = React.useState<string | null>(null)
   const [stripePromise, setStripePromise] = React.useState<Promise<Stripe | null> | null>(null)
   const [preparing, setPreparing] = React.useState(false)
+  const [forceNewCheckout, setForceNewCheckout] = React.useState(false)
 
   const [isDesktop, setIsDesktop] = React.useState(false)
 
@@ -315,16 +338,21 @@ export default function AdminHostingPage() {
     let cancelled = false
     const controller = new AbortController()
     setPreparing(true)
-    setCheckoutError(null)
 
     void adminFetch('/api/admin/hosting/payment-intent', {
       method: 'POST',
       signal: controller.signal,
+      body: JSON.stringify({ forceNew: forceNewCheckout }),
     })
       .then(async (res) => {
         const json = await res.json()
         if (!res.ok || !json.success) throw new Error(json.error || 'Could not start payment')
         if (cancelled) return
+        setForceNewCheckout(false)
+        // Keep auth-failure guidance visible; clear only generic prepare errors
+        setCheckoutError((prev) =>
+          prev && /authenticate|3D Secure/i.test(prev) ? prev : null
+        )
         setClientSecret(json.data.clientSecret)
         setPaymentIntentId(json.data.paymentIntentId)
         setStripePromise(loadStripe(json.data.publishableKey))
@@ -341,7 +369,14 @@ export default function AdminHostingPage() {
       cancelled = true
       controller.abort()
     }
-  }, [hosting, clientSecret])
+  }, [hosting, clientSecret, forceNewCheckout])
+
+  const resetCheckout = React.useCallback((message?: string) => {
+    if (message) setCheckoutError(message)
+    setClientSecret(null)
+    setPaymentIntentId(null)
+    setForceNewCheckout(true)
+  }, [])
 
   const isActive = hosting?.status === 'active'
 
@@ -503,6 +538,7 @@ export default function AdminHostingPage() {
                     setClientSecret(null)
                     setPaymentIntentId(null)
                   }}
+                  onAuthFailed={resetCheckout}
                 />
               </section>
             ) : null}
@@ -523,6 +559,7 @@ export default function AdminHostingPage() {
                     setClientSecret(null)
                     setPaymentIntentId(null)
                   }}
+                  onAuthFailed={resetCheckout}
                 />
               </div>
             ) : null}
@@ -554,6 +591,7 @@ function PaymentBlock({
   stripePromise,
   paymentIntentId,
   onPaid,
+  onAuthFailed,
 }: {
   checkoutError: string | null
   preparing: boolean
@@ -561,6 +599,7 @@ function PaymentBlock({
   stripePromise: Promise<Stripe | null> | null
   paymentIntentId: string | null
   onPaid: (record: HostingRecord) => void
+  onAuthFailed: (message: string) => void
 }) {
   return (
     <>
@@ -575,6 +614,7 @@ function PaymentBlock({
         ) : null
       ) : (
         <Elements
+          key={paymentIntentId}
           stripe={stripePromise}
           options={{
             clientSecret,
@@ -591,6 +631,7 @@ function PaymentBlock({
             paymentIntentId={paymentIntentId}
             clientSecret={clientSecret}
             onPaid={onPaid}
+            onAuthFailed={onAuthFailed}
           />
         </Elements>
       )}
