@@ -140,8 +140,8 @@ function HostingCheckoutForm({
   return (
     <form onSubmit={(e) => void handlePay(e)} className="space-y-4">
       <p className="text-xs text-neutral-500">
-        Card only · Enter the cardholder name and billing address as on the card · Invoice billed to{' '}
-        <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
+        Card only · Enter the cardholder name, phone, and billing address as on the card · Invoice
+        billed to <span className="font-semibold text-neutral-800">{HOSTING_BILLED_TO}</span>
       </p>
       <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
         <PaymentElement
@@ -169,7 +169,7 @@ function HostingCheckoutForm({
                 // Cardholder (person related to Passive Blessings) — not company invoice name
                 name: 'auto',
                 email: 'auto',
-                phone: 'never',
+                phone: 'auto',
                 address: {
                   country: 'auto',
                   line1: 'auto',
