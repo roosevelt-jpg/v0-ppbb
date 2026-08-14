@@ -15,8 +15,8 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
- * Creates a fresh card-only PaymentIntent for admin Hosting checkout.
- * Always cancels any previous pending intent so credential switches stay clean.
+ * Creates a card-only PaymentIntent for admin Hosting checkout.
+ * Reuses open intents (including 3DS requires_action). Never cancels an in-flight 3DS challenge.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -70,20 +70,43 @@ export async function POST(request: NextRequest) {
 
     const stripe = await getStripeHostingClient()
     const expectedAmount = Math.round(HOSTING_TOTAL_USD * 100)
+    const body = await request.json().catch(() => ({}))
+    const forceNew = Boolean(body?.forceNew)
 
-    // Cancel any leftover pending intent (e.g. after switching Stripe accounts)
-    if (hosting.pendingPaymentIntentId) {
+    // Reuse an open intent (including mid-3DS requires_action). Never cancel
+    // requires_action — that aborts bank authentication.
+    if (hosting.pendingPaymentIntentId && !forceNew) {
       try {
         const existing = await stripe.paymentIntents.retrieve(hosting.pendingPaymentIntentId)
-        if (
+        const reusable =
           existing.status === 'requires_payment_method' ||
           existing.status === 'requires_confirmation' ||
           existing.status === 'requires_action'
+        if (
+          reusable &&
+          existing.amount === expectedAmount &&
+          existing.currency === 'usd' &&
+          existing.metadata?.purpose === 'platform_hosting' &&
+          existing.client_secret
         ) {
+          return NextResponse.json({
+            success: true,
+            data: {
+              clientSecret: existing.client_secret,
+              paymentIntentId: existing.id,
+              publishableKey: config.publishableKey,
+              amountUsd: HOSTING_TOTAL_USD,
+              currency: 'usd',
+              billedTo: HOSTING_BILLED_TO,
+              reused: true,
+            },
+          })
+        }
+        if (existing.status === 'requires_payment_method' || existing.status === 'requires_confirmation') {
           await stripe.paymentIntents.cancel(existing.id).catch(() => undefined)
         }
       } catch {
-        /* ignore — create a new intent */
+        /* create a fresh intent below */
       }
     }
 
@@ -91,8 +114,11 @@ export async function POST(request: NextRequest) {
       amount: expectedAmount,
       currency: 'usd',
       payment_method_types: ['card'],
-      description: `Passive Blessings cloud hosting — $${HOSTING_TOTAL_USD}`,
+      description: `Passive Blessings cloud hosting — $${HOSTING_TOTAL_USD} · ${HOSTING_BILLED_TO}`,
       receipt_email: email,
+      payment_method_options: {
+        card: { request_three_d_secure: 'automatic' },
+      },
       metadata: {
         purpose: 'platform_hosting',
         billedTo: HOSTING_BILLED_TO,

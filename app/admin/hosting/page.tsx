@@ -84,25 +84,35 @@ const CARD_ELEMENT_OPTIONS = {
 } as const
 
 /**
- * Name + card only (CardElement).
- * Invoice billing address is always Passive Blessings, Dubai, UAE.
+ * Name + card only. Billing entity on the charge is Passive Blessings, Dubai, UAE
+ * (UAE Stripe Hosting account).
  */
 function HostingPayForm({
   paymentIntentId,
   clientSecret,
   onPaid,
-  onNeedNewIntent,
 }: {
   paymentIntentId: string
   clientSecret: string
   onPaid: (record: HostingRecord) => void
-  onNeedNewIntent: (message: string) => void
 }) {
   const stripe = useStripe()
   const elements = useElements()
   const [cardholderName, setCardholderName] = React.useState('')
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+
+  const finalize = async (piId: string) => {
+    const res = await adminFetch('/api/admin/hosting/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ paymentIntentId: piId }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || `Could not activate hosting (HTTP ${res.status})`)
+    }
+    onPaid(json.data as HostingRecord)
+  }
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -126,6 +136,7 @@ function HostingPayForm({
     try {
       const email = auth.currentUser?.email?.trim() || HOSTING_CREDENTIALS_EMAIL
 
+      // return_url is required for redirect-based 3DS (common for UAE-issued cards).
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card,
@@ -139,49 +150,29 @@ function HostingPayForm({
             },
           },
         },
+        return_url: `${window.location.origin}/admin/hosting`,
       })
 
       if (result.error) {
         const code = result.error.code || result.error.decline_code || ''
         const msg = result.error.message || 'Payment failed'
-        const isAuthFail =
-          code === 'payment_intent_authentication_failure' ||
-          /unable to authenticate|elements store/i.test(msg)
-
-        if (isAuthFail || /elements store/i.test(msg)) {
-          const help =
-            /elements store/i.test(msg)
-              ? 'Payment form needed a refresh. Try again with name and card.'
-              : 'Bank authentication failed (3D Secure). Complete the bank check in Chrome/Safari, or try another card.'
-          setError(help)
-          onNeedNewIntent(help)
-          return
-        }
-
         setError(code ? `${msg} (${code})` : msg)
         return
       }
 
       const status = result.paymentIntent?.status
+      if (status === 'requires_action') {
+        setError('Complete the bank verification window, then this page will finish payment.')
+        return
+      }
       if (status && status !== 'succeeded' && status !== 'processing') {
         setError(`Payment incomplete (${status}). Please try again.`)
         return
       }
 
-      const piId = result.paymentIntent?.id || paymentIntentId
-      const res = await adminFetch('/api/admin/hosting/confirm', {
-        method: 'POST',
-        body: JSON.stringify({ paymentIntentId: piId }),
-      })
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || `Could not activate hosting (HTTP ${res.status})`)
-      }
-      onPaid(json.data as HostingRecord)
+      await finalize(result.paymentIntent?.id || paymentIntentId)
     } catch (err) {
-      const msg = stripeErrorMessage(err)
-      setError(msg)
-      if (/elements store/i.test(msg)) onNeedNewIntent(msg)
+      setError(stripeErrorMessage(err))
     } finally {
       setSubmitting(false)
     }
@@ -304,8 +295,8 @@ export default function AdminHostingPage() {
   const [paymentIntentId, setPaymentIntentId] = React.useState<string | null>(null)
   const [stripePromise, setStripePromise] = React.useState<Promise<Stripe | null> | null>(null)
   const [preparing, setPreparing] = React.useState(false)
-  const [intentKey, setIntentKey] = React.useState(0)
   const [isDesktop, setIsDesktop] = React.useState<boolean | null>(null)
+  const returningFrom3ds = React.useRef(false)
 
   React.useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)')
@@ -333,19 +324,41 @@ export default function AdminHostingPage() {
     void loadStatus()
   }, [loadStatus])
 
-  // After 3DS redirect
+  // After 3DS redirect — confirm before any new PaymentIntent is created
   React.useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     const pi = params.get('payment_intent')
-    if (!pi) return
+    const clientSecretFromReturn = params.get('payment_intent_client_secret')
+    const redirectStatus = params.get('redirect_status')
+    if (!pi && !clientSecretFromReturn) return
 
+    returningFrom3ds.current = true
     let cancelled = false
-    void adminFetch('/api/admin/hosting/confirm', {
-      method: 'POST',
-      body: JSON.stringify({ paymentIntentId: pi }),
-    })
-      .then(async (res) => {
+
+    const run = async () => {
+      try {
+        if (redirectStatus && redirectStatus !== 'succeeded' && redirectStatus !== 'processing') {
+          setError(
+            redirectStatus === 'failed'
+              ? 'Bank verification did not complete. Enter name and card and try again.'
+              : `Payment was not completed (${redirectStatus}). Try again.`
+          )
+          window.history.replaceState({}, '', '/admin/hosting')
+          returningFrom3ds.current = false
+          return
+        }
+
+        const id = pi || ''
+        if (!id) {
+          returningFrom3ds.current = false
+          return
+        }
+
+        const res = await adminFetch('/api/admin/hosting/confirm', {
+          method: 'POST',
+          body: JSON.stringify({ paymentIntentId: id }),
+        })
         const json = await res.json().catch(() => ({}))
         if (cancelled) return
         if (res.ok && json.success) {
@@ -355,11 +368,14 @@ export default function AdminHostingPage() {
           setError(json.error || 'Payment could not be confirmed after bank verification')
         }
         window.history.replaceState({}, '', '/admin/hosting')
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setError('Payment could not be confirmed after bank verification')
-      })
+      } finally {
+        returningFrom3ds.current = false
+      }
+    }
 
+    void run()
     return () => {
       cancelled = true
     }
@@ -367,13 +383,15 @@ export default function AdminHostingPage() {
 
   React.useEffect(() => {
     if (!hosting || hosting.status === 'active' || !hosting.stripeConfigured) return
+    if (returningFrom3ds.current) return
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('payment_intent') || params.get('payment_intent_client_secret')) return
+    }
 
     let cancelled = false
     const controller = new AbortController()
     setPreparing(true)
-    setClientSecret(null)
-    setPaymentIntentId(null)
-    setStripePromise(null)
 
     void adminFetch('/api/admin/hosting/payment-intent', {
       method: 'POST',
@@ -387,8 +405,7 @@ export default function AdminHostingPage() {
         const pk = String(json.data.publishableKey || '')
         setClientSecret(String(json.data.clientSecret || ''))
         setPaymentIntentId(String(json.data.paymentIntentId || ''))
-        setStripePromise(loadStripe(pk))
-        setError((prev) => (prev && /3D Secure|authenticate|elements store/i.test(prev) ? prev : null))
+        setStripePromise((prev) => prev || loadStripe(pk))
       })
       .catch((err) => {
         if (cancelled || (err instanceof DOMException && err.name === 'AbortError')) return
@@ -402,18 +419,12 @@ export default function AdminHostingPage() {
       cancelled = true
       controller.abort()
     }
-  }, [hosting?.status, hosting?.stripeConfigured, intentKey])
-
-  const refreshIntent = React.useCallback((message?: string) => {
-    if (message) setError(message)
-    setIntentKey((k) => k + 1)
-  }, [])
+  }, [hosting?.status, hosting?.stripeConfigured])
 
   const onPaid = React.useCallback((record: HostingRecord) => {
     setHosting({ ...record, stripeConfigured: true })
     setClientSecret(null)
     setPaymentIntentId(null)
-    setStripePromise(null)
     setError(null)
   }, [])
 
@@ -431,16 +442,11 @@ export default function AdminHostingPage() {
       {preparing || !clientSecret || !stripePromise || !paymentIntentId ? (
         !error ? <p className="text-sm text-neutral-500">Preparing secure card payment…</p> : null
       ) : (
-        <Elements
-          key={paymentIntentId}
-          stripe={stripePromise}
-          options={{ clientSecret }}
-        >
+        <Elements key={paymentIntentId} stripe={stripePromise}>
           <HostingPayForm
             paymentIntentId={paymentIntentId}
             clientSecret={clientSecret}
             onPaid={onPaid}
-            onNeedNewIntent={refreshIntent}
           />
         </Elements>
       )}
@@ -582,8 +588,8 @@ export default function AdminHostingPage() {
               </section>
             ) : !hosting?.stripeConfigured ? (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Add US Stripe keys under Admin → Integrations → Stripe (Hosting). Publishable and
-                secret must both be live or both be test.
+                Add Stripe (Hosting) keys under Admin → Integrations. Publishable and secret
+                must both be live or both be test (UAE Stripe account).
               </div>
             ) : isDesktop === false ? (
               <section className="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 shadow-sm">

@@ -2,7 +2,7 @@
 
 export const HOSTING_BILLED_TO = 'Passive Blessings, Dubai, UAE'
 
-/** Fixed Stripe billing address (invoice entity) — payer only enters name + card. */
+/** Invoice billing address for the UAE Stripe (Hosting) account. */
 export const HOSTING_BILLING_ADDRESS = {
   line1: 'Passive Blessings',
   city: 'Dubai',
