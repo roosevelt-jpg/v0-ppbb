@@ -45,7 +45,7 @@ export const SITE_FONT_OPTIONS: FontOption[] = [
   {
     id: 'cormorant-garamond',
     label: 'Cormorant Garamond',
-    stack: "'Cormorant Garamond', Georgia, serif",
+    stack: "var(--font-cormorant-garamond), 'Cormorant Garamond', Georgia, serif",
     googleFamily: 'Cormorant Garamond',
     category: 'serif',
   },
@@ -87,7 +87,7 @@ export const SITE_FONT_OPTIONS: FontOption[] = [
   {
     id: 'inter',
     label: 'Inter',
-    stack: "'Inter', system-ui, sans-serif",
+    stack: "var(--font-inter), 'Inter', system-ui, sans-serif",
     googleFamily: 'Inter',
     category: 'sans',
   },

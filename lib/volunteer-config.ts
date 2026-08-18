@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
+import { mediaUrl } from '@/lib/media-url'
 
 export interface VolunteerPageConfig {
   eyebrow: string
@@ -55,7 +56,7 @@ export function mergeVolunteerPageConfig(data: unknown): VolunteerPageConfig {
     headline: asString(d.headline, defaults.headline),
     body: asString(d.body, defaults.body),
     formLink: asString(d.formLink, defaults.formLink),
-    imageURL: asString(d.imageURL, defaults.imageURL),
+    imageURL: mediaUrl(asString(d.imageURL, defaults.imageURL)),
     pillarOptions: pillars.length > 0 ? pillars : defaults.pillarOptions,
     trackingNote: asString(d.trackingNote, defaults.trackingNote),
   }

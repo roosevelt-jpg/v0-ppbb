@@ -1,5 +1,7 @@
 /** Resolve denormalized host branding for event cards. */
 
+import { mediaUrl } from '@/lib/media-url'
+
 export interface EventHostInfo {
   businessId: string
   businessName: string
@@ -30,13 +32,14 @@ export function resolveEventHostFromUserData(
       businessId: userId || '',
       businessName: 'Admin',
       ownerName: '',
-      businessLogoUrl:
+      businessLogoUrl: mediaUrl(
         asString(data?.logoUrl) ||
-        asString(data?.logoURL) ||
-        asString(data?.logo) ||
-        asString(data?.photoURL) ||
-        asString(data?.avatarUrl) ||
-        '',
+          asString(data?.logoURL) ||
+          asString(data?.logo) ||
+          asString(data?.photoURL) ||
+          asString(data?.avatarUrl) ||
+          ''
+      ),
     }
   }
 
@@ -56,13 +59,14 @@ export function resolveEventHostFromUserData(
     ownerName ||
     'Host'
 
-  const businessLogoUrl =
+  const businessLogoUrl = mediaUrl(
     asString(data?.logoUrl) ||
-    asString(data?.logoURL) ||
-    asString(data?.logo) ||
-    asString(data?.photoURL) ||
-    asString(data?.avatarUrl) ||
-    ''
+      asString(data?.logoURL) ||
+      asString(data?.logo) ||
+      asString(data?.photoURL) ||
+      asString(data?.avatarUrl) ||
+      ''
+  )
 
   return {
     businessId: userId || '',

@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
+import { mediaUrlOrNull } from '@/lib/media-url'
 
 export interface TeamMember {
   id: string
@@ -98,10 +99,11 @@ function mapTeamMemberDoc(id: string, data: Record<string, unknown>): TeamMember
         : typeof data.role === 'string'
           ? data.role
           : '',
-    photoURL:
+    photoURL: mediaUrlOrNull(
       optionalString(data.photoURL) ||
-      optionalString(data.imageUrl) ||
-      optionalString(data.image),
+        optionalString(data.imageUrl) ||
+        optionalString(data.image)
+    ),
     bio: optionalString(data.bio),
     email: optionalString(data.email) || optionalString(social.email),
     whatsappNumber:

@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
+import { mediaUrl, mediaUrlOrNull } from '@/lib/media-url'
 
 export interface AboutHero {
   eyebrow: string
@@ -159,7 +160,7 @@ function mergeStory(data: unknown): AboutStory {
     eyebrow: typeof d.eyebrow === 'string' ? d.eyebrow : DEFAULT_ABOUT.story.eyebrow,
     founderImageURL:
       typeof d.founderImageURL === 'string'
-        ? d.founderImageURL
+        ? mediaUrlOrNull(d.founderImageURL)
         : d.founderImageURL === null
           ? null
           : DEFAULT_ABOUT.story.founderImageURL,
@@ -236,7 +237,7 @@ function mergeMissionVision(data: unknown): AboutMissionVision {
         : DEFAULT_ABOUT.missionVision.visionBody,
     imageURL:
       typeof d.imageURL === 'string'
-        ? d.imageURL
+        ? mediaUrl(d.imageURL)
         : d.imageURL === null
           ? null
           : DEFAULT_ABOUT.missionVision.imageURL,

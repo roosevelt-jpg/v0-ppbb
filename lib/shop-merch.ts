@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where, Unsubscribe } from 'firebase/firestore'
+import { mediaUrl, mediaUrlList } from '@/lib/media-url'
 
 export interface ShopMerchProduct {
   id: string
@@ -29,11 +30,9 @@ export function normalizeMerchOffer(
   id: string,
   data: Record<string, unknown>
 ): ShopMerchProduct {
-  const images = Array.isArray(data.images)
-    ? data.images.filter((u): u is string => typeof u === 'string' && u.length > 0)
-    : []
+  const images = mediaUrlList(data.images)
   const imageURL =
-    asString(data.imageURL) || asString(data.imageUrl) || images[0] || ''
+    mediaUrl(asString(data.imageURL) || asString(data.imageUrl) || images[0] || '')
 
   let variant =
     asString(data.variant) ||

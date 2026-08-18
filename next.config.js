@@ -8,6 +8,16 @@ const nextConfig = {
   // Keep firebase-admin out of the bundler — Auth submodule crashes some
   // Turbopack/standalone serverless chunks when bundled (HTML 500 at import).
   serverExternalPackages: ['firebase-admin'],
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'firebasestorage.googleapis.com' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: 'storage.cloud.google.com' },
+      { protocol: 'https', hostname: '*.firebasestorage.app' },
+      { protocol: 'https', hostname: '*.appspot.com' },
+      { protocol: 'https', hostname: 'hebbkx1anhila5yf.public.blob.vercel-storage.com' },
+    ],
+  },
   async headers() {
     return [
       {

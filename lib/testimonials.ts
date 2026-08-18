@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
+import { mediaUrlOrNull } from '@/lib/media-url'
 
 export type TestimonialType = 'text' | 'video'
 
@@ -39,13 +40,14 @@ function mapTestimonialDoc(id: string, data: Record<string, unknown>): Testimoni
         : typeof data.content === 'string'
           ? data.content
           : '',
-    videoURL: typeof data.videoURL === 'string' ? data.videoURL : null,
-    avatarURL:
+    videoURL: typeof data.videoURL === 'string' ? mediaUrlOrNull(data.videoURL) : null,
+    avatarURL: mediaUrlOrNull(
       typeof data.avatarURL === 'string'
         ? data.avatarURL
         : typeof data.image === 'string'
           ? data.image
-          : null,
+          : null
+    ),
     isActive,
     order: typeof data.order === 'number' ? data.order : 0,
   }

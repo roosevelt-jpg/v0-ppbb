@@ -127,5 +127,29 @@ service firebase.storage {
       allow read: if true;
       allow write: if isAuth() && request.resource.size < 500 * 1024 * 1024;
     }
+
+    // Remaining CMS / public media (team, news, shop, ads, branding, …).
+    // Private prefixes stay denied here so overlapping rules OR with the
+    // sensitive matches above (admin-only / auth-only).
+    match /{folder}/{rest=**} {
+      allow read: if !(folder in [
+        'beneficiary-docs',
+        'beneficiaryRequests',
+        'beneficiary-support',
+        'beneficiary-documents',
+        'donation-proofs',
+        'marketplace-orders'
+      ]);
+      allow write: if isAuth()
+        && !(folder in [
+          'beneficiary-docs',
+          'beneficiaryRequests',
+          'beneficiary-support',
+          'beneficiary-documents',
+          'donation-proofs',
+          'marketplace-orders'
+        ])
+        && request.resource.size < 25 * 1024 * 1024;
+    }
   }
 }

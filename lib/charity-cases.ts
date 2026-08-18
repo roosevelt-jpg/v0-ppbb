@@ -4,6 +4,7 @@
  */
 
 import { getEffectiveInvitePermissions } from '@/lib/admin-invite-permissions'
+import { mediaUrl } from '@/lib/media-url'
 
 export type CharityCaseStatus = 'draft' | 'active' | 'completed' | 'archived'
 
@@ -66,8 +67,8 @@ export function normalizeCharityCase(
     description: String(data.description || ''),
     targetAmount: Number.isFinite(targetAmount) ? targetAmount : 0,
     amountRaised: Number.isFinite(amountRaised) ? amountRaised : 0,
-    bannerImage: String(
-      data.bannerImage || data.image || data.imageUrl || data.bannerURL || ''
+    bannerImage: mediaUrl(
+      String(data.bannerImage || data.image || data.imageUrl || data.bannerURL || '')
     ),
     status,
     partnerId: String(data.partnerId || ''),

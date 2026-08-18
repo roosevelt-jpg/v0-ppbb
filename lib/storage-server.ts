@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { getAdminBucket } from '@/lib/firebase-admin'
+import { firebaseDownloadUrl } from '@/lib/media-url'
 
 interface UploadResult {
   url: string
@@ -35,10 +36,14 @@ export async function uploadBufferToStorage(
     resumable: false,
     metadata: { cacheControl: 'public, max-age=31536000, immutable' },
   })
-  await file.makePublic()
+  try {
+    await file.makePublic()
+  } catch {
+    // Uniform bucket-level access disables object ACLs; public read is via Storage rules.
+  }
 
   return {
-    url: `https://storage.googleapis.com/${bucket.name}/${path}`,
+    url: firebaseDownloadUrl(bucket.name, path),
     path,
     contentType: mimeType,
     size: buffer.length,
@@ -75,8 +80,12 @@ export async function uploadBufferToPath(
 
   let url: string
   if (makePublic) {
-    await file.makePublic()
-    url = `https://storage.googleapis.com/${bucket.name}/${cleanPath}`
+    try {
+      await file.makePublic()
+    } catch {
+      // Uniform bucket-level access: use Firebase download URL + Storage rules.
+    }
+    url = firebaseDownloadUrl(bucket.name, cleanPath)
   } else {
     // Private object — temporary signed URL for authorized app/API consumers only.
     // Do not use for public CMS assets. Firestore should not expose this to unrelated users.

@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
+import { mediaUrl } from '@/lib/media-url'
 
 export type HeroButtonStyle = 'primary' | 'secondary' | 'text'
 
@@ -278,9 +279,9 @@ export const DEFAULT_HOMEPAGE: HomepageConfig = {
 
 function mergeHeroImages(data: Partial<HomepageHero>): HeroImage[] {
   const resolveUrl = (img: Record<string, unknown>): string => {
-    if (typeof img.imageURL === 'string' && img.imageURL.length > 0) return img.imageURL
-    if (typeof img.url === 'string' && img.url.length > 0) return img.url
-    if (typeof img.imageUrl === 'string' && img.imageUrl.length > 0) return img.imageUrl
+    if (typeof img.imageURL === 'string' && img.imageURL.length > 0) return mediaUrl(img.imageURL)
+    if (typeof img.url === 'string' && img.url.length > 0) return mediaUrl(img.url)
+    if (typeof img.imageUrl === 'string' && img.imageUrl.length > 0) return mediaUrl(img.imageUrl)
     return ''
   }
 
@@ -301,12 +302,13 @@ function mergeHeroImages(data: Partial<HomepageHero>): HeroImage[] {
 
   if (fromArray.length > 0) return fromArray
 
-  const legacyUrl =
+  const legacyUrl = mediaUrl(
     typeof data.imageURL === 'string' && data.imageURL
       ? data.imageURL
       : typeof (data as Record<string, unknown>).imageUrl === 'string'
         ? ((data as Record<string, unknown>).imageUrl as string)
         : ''
+  )
 
   if (legacyUrl) {
     return [
@@ -385,9 +387,9 @@ function mergeMission(data: unknown): HomepageMission {
   const d = (data || {}) as Partial<HomepageMission> & { imageUrl?: string }
   const imageURL =
     typeof d.imageURL === 'string'
-      ? d.imageURL
+      ? mediaUrl(d.imageURL)
       : typeof d.imageUrl === 'string'
-        ? d.imageUrl
+        ? mediaUrl(d.imageUrl)
         : d.imageURL === null
           ? null
           : DEFAULT_HOMEPAGE.mission.imageURL
@@ -409,7 +411,7 @@ function mergePillarItem(item: Partial<HomepagePillarItem>, fallback: HomepagePi
     number: typeof item.number === 'string' ? item.number : fallback.number,
     title: typeof item.title === 'string' ? item.title : fallback.title,
     description: typeof item.description === 'string' ? item.description : fallback.description,
-    imageURL: typeof item.imageURL === 'string' ? item.imageURL : fallback.imageURL,
+    imageURL: typeof item.imageURL === 'string' ? mediaUrl(item.imageURL) : mediaUrl(fallback.imageURL),
     ctaLabel: typeof item.ctaLabel === 'string' ? item.ctaLabel : fallback.ctaLabel,
     ctaHref: typeof item.ctaHref === 'string' ? item.ctaHref : fallback.ctaHref,
   }
@@ -519,7 +521,7 @@ function mergeAdvertisingBanner(data: unknown): HomepageAdvertisingBanner {
   const defaults = DEFAULT_HOMEPAGE.advertisingBanner
   return {
     enabled: d.enabled === true,
-    imageURL: typeof d.imageURL === 'string' ? d.imageURL : defaults.imageURL,
+    imageURL: typeof d.imageURL === 'string' ? mediaUrl(d.imageURL) : mediaUrl(defaults.imageURL),
     href: typeof d.href === 'string' ? d.href : defaults.href,
     alt: typeof d.alt === 'string' ? d.alt : defaults.alt,
   }

@@ -48,6 +48,7 @@ export function Logo({ className = '', size = 'md', href = '/' }: LogoProps) {
       width={width}
       height={height}
       className={className}
+      unoptimized
       priority
     />
   )

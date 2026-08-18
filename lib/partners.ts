@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { mediaUrl } from '@/lib/media-url'
 
 export type PartnerType =
   | 'sponsor'
@@ -64,7 +65,7 @@ export function subscribeToActivePartners(callback: (partners: Partner[]) => voi
             return {
               id: d.id,
               name: data.name || '',
-              logoURL: data.logoURL || '',
+              logoURL: mediaUrl(data.logoURL || ''),
               websiteURL: data.websiteURL ?? null,
               type: (data.type || 'partner') as PartnerType,
               isActive: true,
@@ -91,7 +92,7 @@ export function subscribeToAllPartners(callback: (partners: Partner[]) => void):
           return {
             id: d.id,
             name: data.name || '',
-            logoURL: data.logoURL || '',
+            logoURL: mediaUrl(data.logoURL || ''),
             websiteURL: data.websiteURL ?? null,
             type: (data.type || 'partner') as PartnerType,
             isActive: data.isActive !== false,

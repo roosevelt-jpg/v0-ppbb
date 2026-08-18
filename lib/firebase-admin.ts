@@ -165,9 +165,8 @@ export function getAdminDb() {
 
 /**
  * Returns the GCS bucket used for file storage. Uploads go here via the Admin
- * SDK and objects are made public, yielding a stable
- * https://storage.googleapis.com/<bucket>/<path> URL that is stored in
- * Firestore.
+ * SDK. Public CMS files are served as Firebase download URLs (and `/api/media`
+ * as a fallback) so they keep working when object ACLs are disabled.
  */
 export function getAdminBucket() {
   return getStorage(getAdminApp()).bucket(STORAGE_BUCKET)

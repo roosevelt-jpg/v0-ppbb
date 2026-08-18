@@ -3,6 +3,7 @@
 import React from 'react'
 import { usePathname } from 'next/navigation'
 import { isDashboardRoute } from '@/lib/dashboard-routes'
+import { resolvePublicMediaUrl, toMediaProxyUrl } from '@/lib/media-url'
 
 type ContentProtectionProps = {
   children: React.ReactNode
@@ -24,24 +25,84 @@ function isMediaTarget(target: EventTarget | null): boolean {
   )
 }
 
+function rewriteSrc(el: HTMLImageElement | HTMLVideoElement | HTMLSourceElement) {
+  const current = el.getAttribute('src') || ''
+  if (!current || current.startsWith('data:') || current.startsWith('blob:')) return
+  if (current.startsWith('/api/media')) return
+  if (!el.dataset.pbOrig) el.dataset.pbOrig = current
+  const next = resolvePublicMediaUrl(el.dataset.pbOrig)
+  if (!next || next === current || el.dataset.pbRewritten === next) return
+  el.dataset.pbRewritten = next
+  el.setAttribute('src', next)
+}
+
+function attachProxyFallback(el: HTMLImageElement | HTMLVideoElement) {
+  if (el.dataset.pbErr) return
+  el.dataset.pbErr = '1'
+  el.addEventListener('error', () => {
+    const orig = el.dataset.pbOrig || el.getAttribute('src') || ''
+    const proxy = toMediaProxyUrl(orig)
+    if (proxy && el.getAttribute('src') !== proxy) el.setAttribute('src', proxy)
+  })
+}
+
+function applyMediaFix(el: Element) {
+  if (
+    el instanceof HTMLImageElement ||
+    el instanceof HTMLVideoElement ||
+    el instanceof HTMLSourceElement
+  ) {
+    rewriteSrc(el)
+  }
+  if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
+    attachProxyFallback(el)
+  }
+}
+
+function scanMedia(root: ParentNode = document) {
+  if (root instanceof Element) applyMediaFix(root)
+  root.querySelectorAll('img, video, source').forEach((el) => applyMediaFix(el))
+}
+
 /**
- * Soft public-site deterrence: block copy/cut/context-menu/drag/save shortcuts
- * and harden images/videos against casual download.
- * Not foolproof — auth + Firestore rules remain the real access control.
+ * Rewrites broken GCS image URLs site-wide, and on public pages adds soft
+ * deterrence against copy / save. Auth + Storage rules remain the real ACL.
  */
 export function PublicContentGuard() {
   const pathname = usePathname()
-  const active = !isDashboardRoute(pathname)
+  const protect = !isDashboardRoute(pathname)
 
   React.useEffect(() => {
-    if (!active) {
+    scanMedia()
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === 'attributes' && m.target instanceof Element) {
+          applyMediaFix(m.target)
+          continue
+        }
+        m.addedNodes.forEach((node) => {
+          if (node instanceof Element) scanMedia(node)
+        })
+      }
+    })
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src', 'srcset', 'poster'],
+    })
+    return () => observer.disconnect()
+  }, [])
+
+  React.useEffect(() => {
+    if (!protect) {
       document.documentElement.removeAttribute('data-public-content-guard')
       return
     }
 
     document.documentElement.setAttribute('data-public-content-guard', '1')
 
-    const hardenMedia = (root: ParentNode = document) => {
+    const hardenPublic = (root: ParentNode = document) => {
       root.querySelectorAll('img, video').forEach((el) => {
         if (el instanceof HTMLImageElement) {
           el.setAttribute('draggable', 'false')
@@ -54,14 +115,11 @@ export function PublicContentGuard() {
       })
     }
 
-    hardenMedia()
+    hardenPublic()
     const observer = new MutationObserver((mutations) => {
       for (const m of mutations) {
         m.addedNodes.forEach((node) => {
-          if (node instanceof HTMLElement) hardenMedia(node)
-          else if (node instanceof HTMLImageElement || node instanceof HTMLVideoElement) {
-            hardenMedia(node.parentNode || document)
-          }
+          if (node instanceof Element) hardenPublic(node)
         })
       }
     })
@@ -88,7 +146,6 @@ export function PublicContentGuard() {
       if (isEditableTarget(e.target)) return
       const key = e.key.toLowerCase()
       const mod = e.ctrlKey || e.metaKey
-      // Block common save / view-source / print / copy / select-all shortcuts
       if (
         mod &&
         (key === 's' || key === 'u' || key === 'p' || key === 'c' || key === 'x' || key === 'a')
@@ -122,7 +179,7 @@ export function PublicContentGuard() {
       document.removeEventListener('keydown', onKeyDown, true)
       document.removeEventListener('selectstart', onSelectStart, true)
     }
-  }, [active])
+  }, [protect])
 
   return null
 }

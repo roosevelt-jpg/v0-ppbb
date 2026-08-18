@@ -1,5 +1,6 @@
 import type { Timestamp } from 'firebase/firestore'
 import type { Event, GenderRestriction, PricingType } from '@/lib/event-types'
+import { mediaUrl } from '@/lib/media-url'
 
 export type EventsAudienceFilter = 'all' | 'sisters' | 'brothers' | 'mixed' | 'family'
 
@@ -41,7 +42,7 @@ export function getEventBannerURL(data: Record<string, unknown>): string {
     (typeof data.bannerImage === 'string' && data.bannerImage) ||
     (typeof data.bannerImageUrl === 'string' && data.bannerImageUrl) ||
     ''
-  return url
+  return mediaUrl(url)
 }
 
 export function getEventTimeLabel(event: Partial<Event> & { time?: string; startTime?: string }): string {
@@ -167,12 +168,13 @@ export function mapEventDoc(id: string, data: Record<string, unknown>): Normaliz
         : typeof data.ownerName === 'string'
           ? data.ownerName
           : undefined,
-    businessLogoUrl:
+    businessLogoUrl: mediaUrl(
       typeof data.businessLogoUrl === 'string'
         ? data.businessLogoUrl
         : typeof data.businessLogoURL === 'string'
           ? data.businessLogoURL
-          : undefined,
+          : ''
+    ) || undefined,
     startDate: getEventStartDate(data as Partial<Event>),
     endDate: getEventEndDate(data as Partial<Event>),
     timezone: typeof data.timezone === 'string' ? data.timezone : 'Asia/Dubai',

@@ -9,6 +9,7 @@ import {
   where,
   type Unsubscribe,
 } from 'firebase/firestore'
+import { mediaUrl, mediaUrlList } from '@/lib/media-url'
 
 export type MarketplaceDirectoryFilter =
   | 'all'
@@ -172,10 +173,11 @@ export function normalizeDirectoryBusiness(
       ? asStringArray(data.services)
       : asStringArray(data.servicesOffered)
 
-  const productImages =
+  const productImages = mediaUrlList(
     asStringArray(data.productImages).length > 0
       ? asStringArray(data.productImages)
       : asStringArray(data.images)
+  )
 
   const isActive =
     data.isActive === undefined && data.status !== undefined
@@ -213,8 +215,8 @@ export function normalizeDirectoryBusiness(
     description: asString(data.description) || asString(data.oneLineDescription) || asString(data.tagline),
     category: asString(data.category) || asString(data.businessType) || asString(data.type),
     companyType,
-    logoURL: asString(data.logoURL) || asString(data.logo) || asString(data.logoUrl),
-    bannerURL: asString(data.bannerURL) || asString(data.banner) || asString(data.bannerUrl),
+    logoURL: mediaUrl(asString(data.logoURL) || asString(data.logo) || asString(data.logoUrl)),
+    bannerURL: mediaUrl(asString(data.bannerURL) || asString(data.banner) || asString(data.bannerUrl)),
     ownerName:
       asString(data.ownerName) ||
       asString(data.memberName) ||
@@ -262,12 +264,13 @@ export function normalizeDirectoryOffer(
   id: string,
   data: Record<string, unknown>
 ): DirectoryOffer {
-  const images =
+  const images = mediaUrlList(
     asStringArray(data.images).length > 0
       ? asStringArray(data.images)
       : [asString(data.imageURL) || asString(data.imageUrl) || asString((data.image as { url?: string } | undefined)?.url)].filter(
           Boolean
         )
+  )
 
   const memberBenefit =
     typeof data.memberBenefit === 'number'

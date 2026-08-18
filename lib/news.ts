@@ -9,6 +9,7 @@ import {
   limit,
   type Unsubscribe,
 } from 'firebase/firestore'
+import { mediaUrl } from '@/lib/media-url'
 
 export type NewsArticle = {
   id: string
@@ -48,7 +49,13 @@ export function mapNewsDoc(id: string, data: Record<string, unknown>): NewsArtic
     summary: typeof data.summary === 'string' ? data.summary : '',
     category: typeof data.category === 'string' ? data.category : '',
     author: typeof data.author === 'string' ? data.author : 'Passive Blessings',
-    image: typeof data.image === 'string' ? data.image : '',
+    image: mediaUrl(
+      (typeof data.image === 'string' && data.image) ||
+        (typeof data.coverImage === 'string' && data.coverImage) ||
+        (typeof data.imageURL === 'string' && data.imageURL) ||
+        (typeof data.imageUrl === 'string' && data.imageUrl) ||
+        ''
+    ),
     slug: typeof data.slug === 'string' ? data.slug : id,
     body:
       (typeof data.body === 'string' && data.body) ||

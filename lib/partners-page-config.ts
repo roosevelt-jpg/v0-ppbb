@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/firebase'
 import { doc, onSnapshot } from 'firebase/firestore'
+import { mediaUrl, mediaUrlList } from '@/lib/media-url'
 
 export interface PartnersTrack {
   title: string
@@ -191,9 +192,9 @@ function mergeFeaturedProjects(data: unknown): PartnersFeaturedProject[] {
         date: typeof p.date === 'string' ? p.date : '',
         location: typeof p.location === 'string' ? p.location : '',
         partnerNames: typeof p.partnerNames === 'string' ? p.partnerNames : '',
-        imageURL: typeof p.imageURL === 'string' ? p.imageURL : '',
+        imageURL: typeof p.imageURL === 'string' ? mediaUrl(p.imageURL) : '',
         galleryURLs: Array.isArray(p.galleryURLs)
-          ? p.galleryURLs.map((u) => String(u || '').trim()).filter(Boolean).slice(0, 6)
+          ? mediaUrlList(p.galleryURLs.map((u) => String(u || '').trim()).filter(Boolean)).slice(0, 6)
           : [],
         ctaLabel: typeof p.ctaLabel === 'string' ? p.ctaLabel : '',
         ctaHref: typeof p.ctaHref === 'string' ? p.ctaHref : '',
