@@ -24,7 +24,7 @@ import {
   HOSTING_TOTAL_USD,
   type HostingRecord,
 } from '@/lib/hosting-config'
-import { ArrowRight, CheckCircle2, Cloud, Lock, Mail, Server } from 'lucide-react'
+import { CheckCircle2, Cloud, Lock, Server } from 'lucide-react'
 
 type HostingApiData = HostingRecord & { stripeConfigured?: boolean }
 
@@ -223,10 +223,8 @@ function HostingPayForm({
 }
 
 function OrderSummary({
-  isActive,
   children,
 }: {
-  isActive: boolean
   children?: React.ReactNode
 }) {
   return (
@@ -275,15 +273,33 @@ function OrderSummary({
         </p>
       </div>
 
-      {isActive ? (
-        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800">
-          <CheckCircle2 className="h-3.5 w-3.5" />
-          Active
-        </div>
-      ) : (
-        children
-      )}
+      {children}
     </aside>
+  )
+}
+
+function MigrationProgress() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center px-2">
+      <div className="w-full max-w-2xl">
+        <p className="mb-4 text-center text-sm font-semibold text-neutral-800">
+          Migration in progress
+        </p>
+        <div
+          className="flex h-6 w-full overflow-hidden rounded-full bg-neutral-100"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={70}
+          aria-label="Migration in progress"
+        >
+          <div className="h-full w-[42%] bg-emerald-500" />
+          <div className="relative h-full w-[28%] overflow-hidden bg-amber-400">
+            <div className="absolute inset-0 animate-pulse bg-amber-300/80" />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -456,6 +472,12 @@ export default function AdminHostingPage() {
   return (
     <AdminPageLayout title="Hosting">
       <div className="min-h-[70vh] -mx-1">
+        {loading ? (
+          <p className="text-sm text-neutral-500">Loading hosting status…</p>
+        ) : isActive ? (
+          <MigrationProgress />
+        ) : (
+          <>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.16em] text-neutral-500">Infrastructure</p>
@@ -549,44 +571,7 @@ export default function AdminHostingPage() {
               </ul>
             </section>
 
-            {loading ? (
-              <p className="text-sm text-neutral-500">Loading hosting status…</p>
-            ) : isActive ? (
-              <section className="rounded-2xl border-2 border-neutral-900 bg-white p-5 sm:p-6 shadow-sm space-y-4">
-                <div className="flex items-center gap-2 text-emerald-700">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <h3 className="text-lg font-bold">Hosting is Active</h3>
-                </div>
-                <p className="text-base font-semibold text-neutral-900">
-                  Proceed with migrating your files to AWS from your current host.
-                </p>
-                <ol className="space-y-3 text-sm text-neutral-700">
-                  <li className="flex gap-2">
-                    <span className="font-bold text-neutral-900">1.</span>
-                    Open AWS credentials emailed to {HOSTING_CREDENTIALS_EMAIL}.
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-bold text-neutral-900">2.</span>
-                    Migrate app files, config, and media to AWS.
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="font-bold text-neutral-900">3.</span>
-                    Enable SSL, update DNS, verify, then retire the old host.
-                  </li>
-                </ol>
-                <div className="flex items-start gap-2 rounded-lg bg-neutral-900 px-4 py-3 text-sm text-white">
-                  <ArrowRight className="h-4 w-4 shrink-0 mt-0.5" />
-                  <p>Credentials are sent to {HOSTING_CREDENTIALS_EMAIL}.</p>
-                </div>
-                {hosting?.paidAt ? (
-                  <p className="text-xs text-neutral-500 flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5" />
-                    Paid {new Date(hosting.paidAt).toLocaleDateString('en-GB')} ·{' '}
-                    {formatUsd(hosting.amountPaidUsd || HOSTING_TOTAL_USD)}
-                  </p>
-                ) : null}
-              </section>
-            ) : !hosting?.stripeConfigured ? (
+            {!hosting?.stripeConfigured ? (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 Add Stripe (Hosting) keys under Admin → Integrations. Publishable and secret
                 must both be live or both be test (UAE Stripe account).
@@ -599,25 +584,22 @@ export default function AdminHostingPage() {
             ) : null}
           </div>
 
-          <OrderSummary isActive={!!isActive}>
-            {/* Exactly one Elements mount — never both mobile + desktop */}
+          <OrderSummary>
             {showCheckout && isDesktop === true ? (
               <div className="mt-5">{checkoutPanel}</div>
             ) : null}
-            {!isActive ? (
-              <p className="mt-4 text-xs text-neutral-500 leading-relaxed">
-                After payment, Hosting becomes Active — then migrate your files to AWS.
-              </p>
-            ) : null}
+            <p className="mt-4 text-xs text-neutral-500 leading-relaxed">
+              After payment, Hosting becomes Active — then migrate your files to AWS.
+            </p>
           </OrderSummary>
         </div>
 
-        {!isActive ? (
           <p className="mt-6 flex items-center gap-2 text-xs text-neutral-400">
             <Cloud className="h-3.5 w-3.5" />
             Powered by Amazon Web Services · Stripe (Hosting) from Integrations
           </p>
-        ) : null}
+          </>
+        )}
       </div>
     </AdminPageLayout>
   )
