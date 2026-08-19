@@ -11,12 +11,10 @@ import {
   ExternalLink,
   Facebook,
   Instagram,
-  Linkedin,
   MapPin,
   MessageCircle,
   Phone,
   Tag,
-  Twitter,
   UserPlus,
 } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
@@ -504,7 +502,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
                         aria-label="Twitter"
                       >
-                        <Twitter className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     ) : null}
                     {social.linkedin ? (
@@ -515,7 +513,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
                         aria-label="LinkedIn"
                       >
-                        <Linkedin className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     ) : null}
                     {social.instagram ? (
