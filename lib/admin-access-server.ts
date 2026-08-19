@@ -11,7 +11,7 @@ import type { User } from '@/lib/types'
 
 /**
  * Firebase ID token JWKS. Verifying with jose avoids importing `firebase-admin/auth`,
- * which currently crashes some Vercel/Next serverless bundles at module load
+ * which currently crashes some Next.js serverless bundles at module load
  * (HTML 500 before route handlers run). Firestore Admin remains fine.
  */
 const FIREBASE_AUTH_JWKS = createRemoteJWKSet(
@@ -34,7 +34,7 @@ export async function verifyIdToken(token: string): Promise<string | null> {
   try {
     const projectId = firebaseProjectId()
     if (!projectId) {
-      console.error('[v0] Token verification failed: missing Firebase project id')
+      console.error('[admin-access] Token verification failed: missing Firebase project id')
       return null
     }
 

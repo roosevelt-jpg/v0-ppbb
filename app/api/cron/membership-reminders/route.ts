@@ -39,7 +39,7 @@ function isAuthorized(request: NextRequest): boolean {
   const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
   const headerSecret = request.headers.get('x-vercel-cron-secret') || ''
   if (!cronSecret) {
-    // Allow Vercel Cron without secret only when CRON_SECRET is unset (local/dev).
+    // Allow scheduler requests without a shared secret only when CRON_SECRET is unset.
     return Boolean(request.headers.get('x-vercel-cron') === '1' || bearer || headerSecret)
   }
   return bearer === cronSecret || headerSecret === cronSecret

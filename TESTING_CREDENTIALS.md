@@ -357,7 +357,7 @@ businesses/
 - Check `/api/email/send-access-code` route status
 - Verify email service is configured
 - Check Firebase Admin SDK initialization
-- Look for error logs in Vercel
+- Look for error logs in hosting platform
 
 ---
 

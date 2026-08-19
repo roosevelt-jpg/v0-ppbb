@@ -394,7 +394,7 @@ All features from the requirements have been implemented:
 - ✅ Build successful with zero errors
 
 **Next Steps:**
-1. Deploy to Vercel
+1. Deploy to hosting platform
 2. Set up Firestore security rules
 3. Configure email notifications (optional)
 4. Set up PDF receipt generation (optional)

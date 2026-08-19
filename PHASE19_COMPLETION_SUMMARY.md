@@ -6,7 +6,7 @@
 - ✓ Compiled successfully in 15.6 seconds
 - ✓ Zero TypeScript errors
 - ✓ All 77 routes generated
-- ✓ Ready for Vercel deployment
+- ✓ Ready for hosting platform deployment
 
 ---
 
@@ -291,7 +291,7 @@ let sorted = searched.sort(sortComparator)
 - [x] Backward compatible with existing users
 - [x] Firebase permissions configured
 - [x] Documentation complete
-- [x] Ready for Vercel deployment
+- [x] Ready for hosting platform deployment
 
 ### Deploy Command
 ```bash

@@ -35,8 +35,8 @@ Almost all public copy, images, navigation, and page content is **admin-editable
 | Email | SendGrid (newsletters, contact) + Gmail SMTP (admin invites, certificate emails) |
 | AI | Anthropic Claude (chatbot) |
 | i18n | next-intl (12 languages, Arabic RTL) |
-| Hosting | Vercel (documented) |
-| Analytics | Vercel Analytics (production) |
+| Hosting | Node.js / standalone Next.js deployment |
+| Analytics | Optional; provider not required by the app |
 
 **Key config files:**
 
@@ -46,7 +46,7 @@ Almost all public copy, images, navigation, and page content is **admin-editable
 | `firebase.json` | Firestore rules + indexes, Storage rules |
 | `firestore.rules` | Security rules (~779 lines) |
 | `firestore.indexes.json` | Composite indexes |
-| `vercel.json` | Cron (YouTube refresh) |
+| `vercel.json` | Deployment-specific cron configuration |
 
 ---
 
@@ -393,11 +393,11 @@ Configure at **Admin → Integrations** or via env vars.
 
 ## 14. Deployment Checklist (Production)
 
-### Vercel
+### App Deployment
 
-1. Connect GitHub repo `roosevelt-jpg/v0-ppbb`
+1. Provision the production hosting environment
 2. Set all env vars (§4)
-3. Push to `main` → auto-deploy
+3. Build and deploy from `main`
 4. Set `NEXT_PUBLIC_SITE_URL` to production domain
 5. Configure Stripe webhook → `https://{domain}/api/webhooks/stripe`
 
@@ -534,7 +534,7 @@ Read in this order for deeper detail:
 
 - [ ] Clone repo and get `.env.local` from outgoing team (never commit secrets)
 - [ ] Get Firebase Console access (project: `pasiveblessings` or current project ID)
-- [ ] Get Vercel project access
+- [ ] Get production hosting access
 - [ ] Get Stripe dashboard access + webhook secret
 - [ ] Get Gmail app password or SendGrid API key
 - [ ] Run `npm install && npm run dev` locally
@@ -543,7 +543,7 @@ Read in this order for deeper detail:
 - [ ] Run `npm run seed:businesses` on staging if marketplace is empty
 - [ ] Create at least one certificate template (Admin → CMS → Volunteer Certificates) and set Active
 - [ ] Read `firestore.rules` before changing data access patterns
-- [ ] Confirm GitHub `main` is deployed on Vercel
+- [ ] Confirm GitHub `main` is deployed to production
 
 ---
 

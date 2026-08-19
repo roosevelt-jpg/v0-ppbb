@@ -1,4 +1,3 @@
-import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Cormorant_Garamond } from 'next/font/google'
 import './globals.css'
@@ -38,7 +37,6 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  generator: 'v0.app',
   icons: {
     icon: [
       {
@@ -117,7 +115,6 @@ export default function RootLayout({
         <PublicExtras />
         <EUDataProtectionPopup />
         <ChatWidget />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

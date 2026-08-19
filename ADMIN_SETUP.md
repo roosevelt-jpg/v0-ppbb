@@ -189,7 +189,7 @@ FIREBASE_AUTH_DOMAIN=your_domain.firebaseapp.com
 FIREBASE_STORAGE_BUCKET=your_bucket.appspot.com
 ```
 
-For development, these are in `.env.local`. For production deployment to Vercel, set them in project settings.
+For development, these are in `.env.local`. For production deployment to hosting platform, set them in project settings.
 
 ## Next Steps
 

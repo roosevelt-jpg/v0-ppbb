@@ -6,11 +6,11 @@ export async function GET(request: NextRequest) {
     // Get the authorization header
     const authHeader = request.headers.get('authorization')
     
-    // Verify the request is authorized (using a simple token or from Vercel Cron)
+    // Verify the request is authorized with a token or scheduler secret
     const expectedToken = process.env.YOUTUBE_REFRESH_TOKEN
     const cronSecret = request.headers.get('x-vercel-cron-secret')
     
-    // Allow from Vercel Cron or with valid token
+    // Allow from the scheduler or with a valid token
     if (cronSecret !== process.env.CRON_SECRET && authHeader !== `Bearer ${expectedToken}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       lastFetched: updatedConfig.lastFetched,
     })
   } catch (error) {
-    console.error('[v0] Error in YouTube refresh API:', error)
+    console.error('[youtube-refresh] Error in YouTube refresh API:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       lastFetched: updatedConfig.lastFetched,
     })
   } catch (error) {
-    console.error('[v0] Error in YouTube refresh API:', error)
+    console.error('[youtube-refresh] Error in YouTube refresh API:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

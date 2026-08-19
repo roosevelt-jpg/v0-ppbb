@@ -58,7 +58,7 @@ Webhooks allow Stripe to notify your app when payments succeed, fail, or subscri
    ```
    https://yourdomain.com/api/webhooks/stripe
    ```
-   (Use your Vercel deployment URL)
+   (Use your hosting platform deployment URL)
 
 4. Select events to listen for:
    - `customer.subscription.created`
@@ -97,9 +97,9 @@ To test webhooks locally during development:
 
 ## Step 4: Add Environment Variables
 
-### In Vercel
+### In hosting platform
 
-1. Go to [vercel.com](https://vercel.com)
+1. Go to [hosting.com](https://hosting.com)
 2. Open your project
 3. Settings → Environment Variables
 4. Add three variables:
@@ -281,7 +281,7 @@ FIREBASE_ADMIN_CLIENT_EMAIL=...
 For issues:
 
 1. **Stripe Support:** Check Stripe Dashboard → Help
-2. **App Logs:** Check Vercel deployment logs
+2. **App Logs:** Check hosting platform deployment logs
 3. **Firebase:** Check Firestore for data
 4. **Webhooks:** Check Stripe Dashboard → Webhooks → Events
 

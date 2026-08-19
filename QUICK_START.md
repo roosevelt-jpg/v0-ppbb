@@ -19,7 +19,7 @@
 3. Copy: `sk_test_...` and `whsec_...`
 
 ### 2. Add Environment Variables (1 min)
-Vercel Dashboard → Project Settings → Environment Variables:
+hosting platform Dashboard → Project Settings → Environment Variables:
 ```
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -27,7 +27,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 ### 3. Deploy
-That's it! Push to GitHub → Vercel redeploys automatically
+That's it! Push to GitHub → hosting platform redeploys automatically
 
 ---
 
@@ -89,7 +89,7 @@ That's it! Push to GitHub → Vercel redeploys automatically
 
 **Receipt not generating?**
 - Check Firebase Storage permissions
-- Check app logs in Vercel
+- Check app logs in hosting platform
 
 **Subscription not appearing?**
 - Check Firestore `subscriptions` collection
@@ -146,7 +146,7 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
 ## Next Steps
 
 1. ✅ Set Stripe environment variables
-2. ✅ Deploy to Vercel
+2. ✅ Deploy to hosting platform
 3. ✅ Test one-time donation flow
 4. ✅ Test recurring donation flow
 5. ✅ Monitor Stripe dashboard for real transactions
@@ -159,7 +159,7 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
 
 - **Stripe Docs:** https://stripe.com/docs
 - **Firebase Docs:** https://firebase.google.com/docs
-- **Vercel Docs:** https://vercel.com/docs
+- **hosting platform Docs:** https://hosting.com/docs
 
 ---
 

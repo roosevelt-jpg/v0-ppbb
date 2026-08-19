@@ -393,7 +393,7 @@ analyst        → Can view analytics and reports
 
 ### Deployment Steps
 1. Merge `build-passive-blessings` to `main`
-2. Deploy to production Vercel instance
+2. Deploy to production hosting platform instance
 3. Verify Firestore production connection
 4. Run smoke tests
 5. Monitor for errors (first 24 hours)

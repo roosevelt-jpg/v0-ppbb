@@ -19,7 +19,7 @@ This file serves as the index for all platform documentation. Read these in orde
 ### 2. **README.md**
    - Setup instructions
    - Running locally
-   - Deployment to Vercel
+   - Deployment to hosting platform
    - Configuration
    - Features overview
    - ~200 lines
@@ -115,7 +115,7 @@ This file serves as the index for all platform documentation. Read these in orde
 1. Read: **README.md** (Deployment section)
 2. Configure: **ENV_SETUP.md** (environment variables)
 3. Test: **TESTING_GUIDE.md** (key tests only)
-4. Deploy: Follow Vercel integration instructions
+4. Deploy: Follow hosting platform integration instructions
 
 ---
 
@@ -248,7 +248,7 @@ In order of importance:
 - Getting started
 - Installation
 - Running locally
-- Deployment to Vercel
+- Deployment to hosting platform
 - Features overview
 
 ---

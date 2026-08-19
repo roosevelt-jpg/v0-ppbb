@@ -271,7 +271,7 @@ The Passive Blessings platform is a comprehensive nonprofit management system wi
 1. ✅ Set Firebase environment variables
 2. ✅ Configure Firestore security rules (optional but recommended)
 3. ✅ Configure Firebase Storage rules (optional but recommended)
-4. ✅ Deploy to Vercel
+4. ✅ Deploy to hosting platform
 5. ✅ Verify all pages loading
 6. ✅ Test authentication flow
 7. ✅ Test file uploads

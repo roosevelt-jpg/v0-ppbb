@@ -253,7 +253,7 @@ Follow `TESTING_GUIDE.md` with 13 scenarios covering:
 
 ### Deploy Command
 ```bash
-vercel deploy
+hosting deploy
 ```
 
 ### Environment Setup
@@ -347,9 +347,9 @@ All documentation in project root:
 
 ### Team Access
 - Repository: GitHub (connected)
-- Deployment: Vercel (ready)
+- Deployment: hosting platform (ready)
 - Database: Firebase (configured)
-- Monitoring: Available via Vercel dashboard
+- Monitoring: Available via hosting platform dashboard
 
 ---
 

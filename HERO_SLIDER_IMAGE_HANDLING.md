@@ -171,7 +171,7 @@ calculateImageScale(imageWidth, imageHeight, viewportWidth, viewportHeight)
 
 ### CDN Optimization Ready
 - Service includes helpers for CDN integration
-- Supports Cloudinary, imgix, Vercel Blob
+- Supports Cloudinary, imgix, hosting platform Blob
 - Can generate responsive srcSets for optimal delivery
 
 ## Migration from Previous Version

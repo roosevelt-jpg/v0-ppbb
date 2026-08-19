@@ -4,7 +4,7 @@
 
 The YouTube widget now automatically updates videos from your channel daily at 2 AM UTC. The system includes:
 
-1. **Vercel Cron Job** - Triggers `/api/youtube/refresh` endpoint daily
+1. **hosting platform Cron Job** - Triggers `/api/youtube/refresh` endpoint daily
 2. **API Endpoint** - Securely fetches and caches new videos
 3. **Smart Caching** - Videos refresh only if older than 24 hours
 4. **Manual Refresh Option** - Admin panel can manually trigger updates anytime
@@ -13,7 +13,7 @@ The YouTube widget now automatically updates videos from your channel daily at 2
 
 ### 1. Set Environment Variables
 
-Add these to your Vercel project settings:
+Add these to your hosting platform project settings:
 
 ```
 YOUTUBE_REFRESH_TOKEN=your-secret-token-here
@@ -29,7 +29,7 @@ openssl rand -base64 32
 ### 2. How Videos Update
 
 **Daily Automatic Updates:**
-- Runs every day at 2 AM UTC (adjustable in `vercel.json`)
+- Runs every day at 2 AM UTC (adjustable in `hosting.json`)
 - Fetches latest 4 videos from your YouTube channel
 - Updates Firestore automatically
 - Homepage reflects changes within seconds
@@ -40,7 +40,7 @@ openssl rand -base64 32
 
 ### 3. Cron Schedule Format
 
-The `vercel.json` uses cron syntax:
+The `hosting.json` uses cron syntax:
 - `0 2 * * *` = Every day at 2 AM UTC
 - `0 */6 * * *` = Every 6 hours
 - `30 2 * * 1` = Every Monday at 2:30 AM UTC
@@ -50,7 +50,7 @@ The `vercel.json` uses cron syntax:
 **Automatic (GET):**
 ```bash
 GET /api/youtube/refresh
-Header: x-vercel-cron-secret: {CRON_SECRET}
+Header: x-hosting-cron-secret: {CRON_SECRET}
 ```
 
 **Manual (POST):**
@@ -74,7 +74,7 @@ curl -X GET http://localhost:3000/api/youtube/refresh \
 - ✓ Manual refresh from admin panel
 - ✓ Secure with token authentication
 - ✓ Error handling and logging
-- ✓ Vercel Cron integration
+- ✓ hosting platform Cron integration
 - ✓ Firebase integration for persistence
 
 ## Video Refresh Frequency
@@ -82,6 +82,6 @@ curl -X GET http://localhost:3000/api/youtube/refresh \
 - **First load:** Fetches immediately if no videos cached
 - **Subsequent loads:** Uses cache for 24 hours
 - **Manual refresh:** Available anytime in admin panel
-- **Auto refresh:** Runs daily at 2 AM UTC via Vercel Cron
+- **Auto refresh:** Runs daily at 2 AM UTC via hosting platform Cron
 
 The homepage will always show the latest 4 videos from your channel!

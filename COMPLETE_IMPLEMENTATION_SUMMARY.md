@@ -339,10 +339,10 @@ NEXT_PUBLIC_FIREBASE_APP_ID
 
 ## DEPLOYMENT INSTRUCTIONS
 
-1. Set Firebase environment variables in Vercel
+1. Set Firebase environment variables in hosting platform
 2. Configure Firestore security rules
 3. Run `pnpm build` to verify compilation
-4. Deploy to Vercel with `vercel deploy`
+4. Deploy to hosting platform with `hosting deploy`
 5. Test all member and admin functionality
 6. Monitor Firestore usage and performance
 7. Set up email notifications for approvals

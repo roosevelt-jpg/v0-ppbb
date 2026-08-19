@@ -73,7 +73,7 @@ export function ProfileQuickEdit({ open, onOpenChange }: ProfileQuickEditProps) 
       throw new Error(result.error || 'Failed to save profile')
     }
 
-    // Sync Firebase Auth client profile (server avoids firebase-admin/auth — Vercel crash)
+    // Sync Firebase Auth client profile (server avoids firebase-admin/auth bundle crash)
     if (auth.currentUser) {
       try {
         await updateProfile(auth.currentUser, {

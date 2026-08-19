@@ -34,11 +34,6 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 SENDGRID_API_KEY=SG.....
 ```
 
-## Optional: Analytics & Monitoring
-```
-NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your_vercel_analytics_id
-```
-
 ## How to Get These Keys
 
 ### Firebase
@@ -73,15 +68,15 @@ NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your_vercel_analytics_id
 - **NEVER commit `.env.local` to git** - it contains sensitive credentials
 - Public keys (prefixed with `NEXT_PUBLIC_`) are safe to be in the codebase
 - Secret keys must be kept private and configured in your deployment platform
-- For production, configure these in your hosting platform's environment variables (Vercel, etc.)
+- For production, configure these in your hosting platform's environment variables
 - The Admin Dashboard allows runtime configuration of Stripe and SendGrid keys encrypted in Firestore
 - Images uploaded during signup are stored as Base64 in Firestore (no external storage required)
 - Location data is captured automatically when user allows geolocation permission
 - Date/time fields are populated with current values automatically
 
-## Production Deployment (Vercel)
+## Production Deployment
 
-In **Vercel → Project → Settings → Environment Variables**, add at minimum:
+In your hosting environment, add at minimum:
 
 ### Firebase client (public)
 ```
@@ -119,9 +114,9 @@ Redeploy after saving variables. Without Admin credentials, the build and API ro
 
 When deploying to production:
 
-1. **Vercel**: Use the Environment Variables section in your project settings
-2. **Self-hosted**: Create `.env.production.local` with production keys
-3. **All platforms**: Ensure webhook endpoints are accessible and correctly configured
+1. **Managed hosting**: use the environment variable section in your project settings
+2. **Self-hosted**: create `.env.production.local` with production keys
+3. **All platforms**: ensure webhook endpoints are accessible and correctly configured
 
 ## Verifying Setup
 

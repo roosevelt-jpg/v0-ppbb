@@ -56,7 +56,7 @@ Request these before starting:
 2. **EC2 SSH private key** — `passiveblessings-ec2-prod.pem`
 3. **GitHub** — read access to `roosevelt-jpg/v0-ppbb` (or confirm EC2 deploy key still works)
 4. **Production `.env.local`** — full secrets file from owner (never commit to git)
-5. **Domain registrar access** — GoDaddy / Vercel DNS / Route 53 (wherever `passiveblessings.com` DNS lives)
+5. **Domain registrar access** — GoDaddy / Route 53 / current DNS provider for `passiveblessings.com`
 6. **Firebase Console** — project **passiveblessings-cc0ef**
 7. **Stripe dashboard** — main + hosting Stripe keys for production webhooks
 
@@ -487,18 +487,6 @@ Use AWS Console → EC2 → Connect → **EC2 Instance Connect** (browser shell)
 8. Update Stripe webhooks + rebuild if `NEXT_PUBLIC_*` URLs changed  
 9. Run smoke test checklist  
 10. Lock down security groups  
-
----
-
-## 17. Alternative: stay on Vercel
-
-If AWS timeline is not critical, the app already supports Vercel deployment (`HANDOVER.md` §14):
-
-1. Connect GitHub repo to Vercel  
-2. Add env vars  
-3. Deploy `main`  
-
-AWS migration (hosting checkout / ALB) can be completed later without blocking the live site.
 
 ---
 

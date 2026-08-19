@@ -376,7 +376,7 @@ BUSINESS SEES:
 - **Status:** ✅ Live and operational
 - **Last Commit:** cdd6827 (Signup implementation)
 
-### Vercel Deployment
+### hosting platform Deployment
 - Zero-downtime deployments
 - Automatic CI/CD on push
 - Environment variables configured
@@ -478,12 +478,12 @@ npm run start      # Start production server
 ### Deploy to Production
 ```bash
 git push origin HEAD:main  # Push to main branch
-# Vercel automatically deploys on push
+# hosting platform automatically deploys on push
 ```
 
 ### View Logs
 ```bash
-vercel logs [deployment-id]
+hosting logs [deployment-id]
 ```
 
 ---

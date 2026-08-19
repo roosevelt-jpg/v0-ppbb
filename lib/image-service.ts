@@ -881,7 +881,7 @@ export function generateOptimizedImageUrl(
     // imgix format
     return `${url}${url.includes('?') ? '&' : '?'}w=${width}&h=${height}&fit=max&q=${quality}`
   } else if (url.includes('blob.vercel-storage.com')) {
-    // Vercel Blob - no built-in resizing, return as-is
+    // Blob storage URL with no built-in resizing; return as-is
     return url
   }
 

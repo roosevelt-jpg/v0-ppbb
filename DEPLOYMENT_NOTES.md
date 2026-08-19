@@ -69,13 +69,13 @@
 
 To deploy to test.myflynai.com:
 
-1. **Check Vercel Project Connection:**
+1. **Check hosting platform Project Connection:**
    - Project should be connected to `build-passive-blessings` branch
    - Deployment URL: test.myflynai.com
 
 2. **Trigger Deployment:**
    - Push commits to build-passive-blessings (already done)
-   - Vercel will auto-deploy on branch push
+   - hosting platform will auto-deploy on branch push
 
 3. **Test Checklist:**
    - [ ] Firebase Admin SDK credentials save without error
@@ -125,4 +125,4 @@ git push -f origin build-passive-blessings
 
 **Last Updated:** 2026-06-14  
 **Status:** Ready for Testing  
-**Deployment:** Automatic via Vercel webhook
+**Deployment:** Automatic via hosting platform webhook

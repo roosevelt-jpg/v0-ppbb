@@ -106,7 +106,7 @@ Read: **PROJECT_SUMMARY.md** in the project root
 Follow: **TESTING_GUIDE.md** to verify everything works
 
 ### 4. Deploy
-Follow: **README.md** deployment instructions to go live on Vercel
+Follow: **README.md** deployment instructions to go live on hosting platform
 
 ---
 

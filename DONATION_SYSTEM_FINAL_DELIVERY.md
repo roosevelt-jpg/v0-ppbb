@@ -329,7 +329,7 @@ Dashboard: Shows real-time impact
 All features implemented, tested, documented, and production-ready.
 
 **Next steps:**
-1. Deploy to Vercel
+1. Deploy to hosting platform
 2. Configure Firestore security rules
 3. Set up payment partner links
 4. Create initial causes and partners

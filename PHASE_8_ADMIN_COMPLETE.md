@@ -114,7 +114,7 @@ Logo component automatically fetches from Firestore and displays with theme supp
 ## Deployment Checklist
 
 - [ ] Set real Firebase credentials
-- [ ] Deploy to Vercel
+- [ ] Deploy to hosting platform
 - [ ] Create test data in Firestore
 - [ ] Test real-time updates
 - [ ] Verify approval workflows

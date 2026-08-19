@@ -70,7 +70,7 @@ Successfully implemented a comprehensive AI-powered chatbot system for Passive B
 
 ## Environment Setup
 
-Add to Vercel environment variables:
+Add to hosting platform environment variables:
 ```
 ANTHROPIC_API_KEY=your_key_here
 ```

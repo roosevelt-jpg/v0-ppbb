@@ -339,7 +339,7 @@ open http://localhost:3000
    - Displays admin-configured content
    - Uses live data from Firestore
 
-### 4. Deploy to Vercel
+### 4. Deploy to hosting platform
 
 ```bash
 # Push to GitHub
@@ -347,8 +347,8 @@ git add .
 git commit -m "Complete implementation with admin dashboard"
 git push
 
-# Deploy (connects to Vercel automatically)
-# Set environment variables in Vercel project settings
+# Deploy (connects to hosting platform automatically)
+# Set environment variables in hosting platform project settings
 ```
 
 ---
@@ -425,7 +425,7 @@ Quick test:
 
 ## Environment Setup
 
-Required environment variables (set in `.env.local` or Vercel settings):
+Required environment variables (set in `.env.local` or hosting platform settings):
 
 ```
 # Firebase
@@ -456,7 +456,7 @@ SENDGRID_API_KEY=SG...
    - SendGrid for emails
 5. **Create CMS Pages**: Add welcome pages, FAQ, etc.
 6. **Test Complete Flow**: Follow TESTING_GUIDE.md
-7. **Deploy to Vercel**: Push to GitHub and deploy
+7. **Deploy to hosting platform**: Push to GitHub and deploy
 
 ---
 

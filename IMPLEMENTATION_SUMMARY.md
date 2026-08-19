@@ -174,7 +174,7 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
 1. Create Stripe account at stripe.com
 2. Get API keys from Developers → API Keys
 3. Create webhook at Developers → Webhooks
-4. Copy keys to Vercel Settings → Environment Variables
+4. Copy keys to hosting platform Settings → Environment Variables
 
 See `STRIPE_SETUP_GUIDE.md` for detailed instructions.
 
@@ -254,7 +254,7 @@ See `STRIPE_SETUP_GUIDE.md` for detailed instructions.
 Before going live:
 [ ] Create Stripe account
 [ ] Get API keys
-[ ] Set environment variables in Vercel
+[ ] Set environment variables in hosting platform
 [ ] Create webhook in Stripe
 [ ] Test donation flow end-to-end
 [ ] Monitor webhook delivery
@@ -410,7 +410,7 @@ REAL-TIME:
 ### Debugging
 - Check Stripe Dashboard → Events for webhook status
 - Check Firestore console for data
-- Check app logs in Vercel
+- Check app logs in hosting platform
 - Check browser console for errors
 
 ---
@@ -430,4 +430,4 @@ The Passive Blessings donation system is now complete with:
 
 All features are fully integrated, tested, and ready for deployment.
 
-Just add Stripe API keys to Vercel environment variables and you're ready to go!
+Just add Stripe API keys to hosting platform environment variables and you're ready to go!

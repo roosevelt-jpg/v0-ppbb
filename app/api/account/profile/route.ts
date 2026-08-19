@@ -22,7 +22,7 @@ function isValidEmail(value: string): boolean {
  * Syncs admin-users / adminUsers when those docs exist.
  *
  * Intentionally does NOT import firebase-admin/auth — that module crashes some
- * Vercel/Next serverless bundles at load time (HTML 500 before the handler runs).
+ * serverless bundles at load time (HTML 500 before the handler runs).
  * Firebase Auth profile fields are updated on the client after a successful save.
  */
 export async function PATCH(request: NextRequest) {

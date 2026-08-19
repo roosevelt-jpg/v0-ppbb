@@ -188,11 +188,11 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Deployment
 
-### To Vercel
+### Deploy
 ```bash
 git push origin main
-# Vercel auto-deploys
-# Configure env vars in project settings
+# Trigger your deployment pipeline
+# Configure env vars in your hosting environment
 ```
 
 ### Self-Hosted
