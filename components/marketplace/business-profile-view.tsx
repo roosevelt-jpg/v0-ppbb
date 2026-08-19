@@ -9,8 +9,6 @@ import {
   Briefcase,
   Calendar,
   ExternalLink,
-  Facebook,
-  Instagram,
   MapPin,
   MessageCircle,
   Phone,
@@ -491,7 +489,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
                         aria-label="Facebook"
                       >
-                        <Facebook className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     ) : null}
                     {social.twitter ? (
@@ -524,7 +522,7 @@ export function BusinessProfileView({ businessId }: BusinessProfileViewProps) {
                         className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white"
                         aria-label="Instagram"
                       >
-                        <Instagram className="w-4 h-4" />
+                        <ExternalLink className="w-4 h-4" />
                       </a>
                     ) : null}
                   </div>
