@@ -56,7 +56,10 @@ export async function POST(request: NextRequest) {
       success: true,
       email,
       expiresAt: result.expiresAt,
-      message: 'Login code sent to your email',
+      emailSkipped: Boolean(result.emailSkipped),
+      message: result.emailSkipped
+        ? 'Gmail SMTP is not configured — login code skipped. Configure Admin → Integrations → Gmail SMTP.'
+        : 'Login code sent to your email',
     })
   } catch (error) {
     console.error('[admin/login/request-otp]', error)

@@ -6,6 +6,7 @@
 import { createHash, randomInt } from 'crypto'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { getGmailSmtpConfig } from '@/lib/gmail-service'
 import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
 export const ADMIN_LOGIN_OTP_COLLECTION = 'adminLoginOtps'
@@ -21,17 +22,52 @@ export function generateAdminOtpCode(): string {
   return String(randomInt(0, 1_000_000)).padStart(6, '0')
 }
 
+async function markAdminMfaVerified(uid: string): Promise<void> {
+  const db = getAdminDb()
+  await db
+    .collection('users')
+    .doc(uid)
+    .set(
+      {
+        adminMfaVerifiedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    )
+}
+
 export async function createAndSendAdminLoginOtp(opts: {
   uid: string
   email: string
   adminName?: string
-}): Promise<{ ok: boolean; error?: string; expiresAt?: string }> {
+}): Promise<{
+  ok: boolean
+  error?: string
+  expiresAt?: string
+  /** True when Gmail SMTP is not configured — email OTP is skipped so admins can still sign in. */
+  emailSkipped?: boolean
+}> {
   const email = String(opts.email || '')
     .trim()
     .toLowerCase()
   const uid = String(opts.uid || '').trim()
   if (!uid || !email.includes('@')) {
     return { ok: false, error: 'Invalid admin account' }
+  }
+
+  // If SMTP is not set up yet (new Firebase / AWS), skip email OTP so super-admins are not locked out.
+  const smtp = await getGmailSmtpConfig()
+  if (!smtp) {
+    await markAdminMfaVerified(uid)
+    console.warn(
+      '[admin-login-otp] Gmail SMTP not configured — skipping email OTP for',
+      email
+    )
+    return {
+      ok: true,
+      emailSkipped: true,
+      expiresAt: new Date(Date.now() + ADMIN_MFA_SESSION_HOURS * 60 * 60 * 1000).toISOString(),
+    }
   }
 
   const code = generateAdminOtpCode()
@@ -71,7 +107,19 @@ export async function createAndSendAdminLoginOtp(opts: {
   })
 
   if (!result.ok) {
-    return { ok: false, error: result.error || 'Failed to send login code email' }
+    // SMTP configured but send failed — still avoid total lockout; skip OTP this time.
+    await markAdminMfaVerified(uid)
+    console.warn(
+      '[admin-login-otp] Email send failed — skipping OTP for',
+      email,
+      result.error
+    )
+    return {
+      ok: true,
+      emailSkipped: true,
+      error: result.error,
+      expiresAt: new Date(Date.now() + ADMIN_MFA_SESSION_HOURS * 60 * 60 * 1000).toISOString(),
+    }
   }
 
   return { ok: true, expiresAt: expiresAt.toISOString() }

@@ -87,6 +87,11 @@ function AdminLoginForm() {
         setError(json.error || 'Failed to send login code. Please try again.')
         return
       }
+      if (json.emailSkipped && auth.currentUser) {
+        setAdminMfaSession(auth.currentUser.uid)
+        router.replace(safeReturnUrl)
+        return
+      }
       if (json.email) setMaskedEmail(maskEmail(String(json.email)))
       setInfo('We sent a 6-digit code to your email.')
     } catch (err) {
@@ -181,6 +186,18 @@ function AdminLoginForm() {
         await logoutUser()
         clearAdminMfaSession()
         setError(otpJson.error || 'Could not send login code. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      // Gmail SMTP not configured yet — allow login without email OTP
+      if (otpJson.emailSkipped) {
+        setAdminMfaSession(credential.user.uid)
+        completeLoginAudit(profile)
+        setInfo(
+          'Signed in without email code (Gmail SMTP not configured). Add Gmail under Admin → Integrations.'
+        )
+        router.replace(safeReturnUrl)
         setLoading(false)
         return
       }
