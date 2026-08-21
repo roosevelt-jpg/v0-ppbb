@@ -1,0 +1,67 @@
+[debug] [2026-08-21T10:38:38.732Z] ----------------------------------------------------------------------
+[debug] [2026-08-21T10:38:38.736Z] Command:       /home/melody/.nvm/versions/node/v22.23.2/bin/node /home/melody/.nvm/versions/node/v22.23.2/bin/firebase deploy --only storage
+[debug] [2026-08-21T10:38:38.737Z] CLI Version:   15.28.1
+[debug] [2026-08-21T10:38:38.738Z] Platform:      linux
+[debug] [2026-08-21T10:38:38.738Z] Node Version:  v22.23.2
+[debug] [2026-08-21T10:38:38.739Z] Detected Agent: unknown
+[debug] [2026-08-21T10:38:38.740Z] Time:          Fri Aug 21 2026 13:38:38 GMT+0300 (East Africa Time)
+[debug] [2026-08-21T10:38:38.740Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-08-21T10:38:40.360Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-21T10:38:40.361Z] > authorizing via signed-in user (simwamelody@gmail.com)
+[debug] [2026-08-21T10:38:40.361Z] [iam] checking project passiveblessings-cc0ef for permissions ["firebase.projects.get","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]
+[debug] [2026-08-21T10:38:40.381Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:40.381Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:40.383Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/passiveblessings-cc0ef:testIamPermissions [none]
+[debug] [2026-08-21T10:38:40.384Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/passiveblessings-cc0ef:testIamPermissions  x-goog-user-project=passiveblessings-cc0ef
+[debug] [2026-08-21T10:38:40.384Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/passiveblessings-cc0ef:testIamPermissions {"permissions":["firebase.projects.get","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2026-08-21T10:38:47.280Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/passiveblessings-cc0ef:testIamPermissions 200
+[debug] [2026-08-21T10:38:47.290Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/passiveblessings-cc0ef:testIamPermissions {"permissions":["firebase.projects.get","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[info] 
+[info] === Deploying to 'passiveblessings-cc0ef'...
+[info] 
+[info] i  deploying storage 
+[info] i  storage: ensuring required API firebasestorage.googleapis.com is enabled... 
+[debug] [2026-08-21T10:38:47.336Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:47.336Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:47.337Z] >>> [apiv2][query] GET https://firebasestorage.googleapis.com/v1alpha/projects/passiveblessings-cc0ef/defaultBucket [none]
+[debug] [2026-08-21T10:38:48.462Z] <<< [apiv2][status] GET https://firebasestorage.googleapis.com/v1alpha/projects/passiveblessings-cc0ef/defaultBucket 200
+[debug] [2026-08-21T10:38:48.462Z] <<< [apiv2][body] GET https://firebasestorage.googleapis.com/v1alpha/projects/passiveblessings-cc0ef/defaultBucket {"name":"projects/passiveblessings-cc0ef/defaultBucket","location":"US-EAST1","bucket":{"name":"projects/passiveblessings-cc0ef/buckets/passiveblessings-cc0ef.firebasestorage.app"},"storageClass":"REGIONAL"}
+[info] i  firebase.storage: checking storage.rules for compilation errors... 
+[debug] [2026-08-21T10:38:48.466Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:48.466Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:48.467Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef:test [none]
+[debug] [2026-08-21T10:38:48.467Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef:test [omitted]
+[debug] [2026-08-21T10:38:50.027Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef:test 200
+[debug] [2026-08-21T10:38:50.027Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef:test {}
+[info] ✔  firebase.storage: rules file storage.rules compiled successfully 
+[debug] [2026-08-21T10:38:50.030Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:50.030Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:50.030Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases pageSize=10&pageToken=
+[debug] [2026-08-21T10:38:50.985Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases 200
+[debug] [2026-08-21T10:38:50.986Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases {"releases":[{"name":"projects/passiveblessings-cc0ef/releases/cloud.firestore","rulesetName":"projects/passiveblessings-cc0ef/rulesets/caf3aaca-0e48-4c23-b4ba-4b4ebe6182fd","createTime":"2026-08-19T19:23:54.017731Z","updateTime":"2026-08-21T10:36:31.668761Z"},{"name":"projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app","rulesetName":"projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c","createTime":"2026-08-19T11:39:29.284673Z","updateTime":"2026-08-19T19:22:38.755500Z"}]}
+[debug] [2026-08-21T10:38:51.083Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:51.084Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:51.085Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c [none]
+[debug] [2026-08-21T10:38:52.060Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c 200
+[debug] [2026-08-21T10:38:52.060Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c [omitted]
+[info] i  storage: latest version of storage.rules already up to date, skipping upload... 
+[debug] [2026-08-21T10:38:52.070Z] [rules] releasing firebase.storage/passiveblessings-cc0ef.firebasestorage.app with ruleset projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c
+[debug] [2026-08-21T10:38:52.072Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:52.072Z] Checked if tokens are valid: true, expires at: 1787312061592
+[debug] [2026-08-21T10:38:52.073Z] >>> [apiv2][query] PATCH https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app [none]
+[debug] [2026-08-21T10:38:52.073Z] >>> [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app {"release":{"name":"projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app","rulesetName":"projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c"}}
+[debug] [2026-08-21T10:38:52.795Z] <<< [apiv2][status] PATCH https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app 200
+[debug] [2026-08-21T10:38:52.796Z] <<< [apiv2][body] PATCH https://firebaserules.googleapis.com/v1/projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app {"name":"projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app","rulesetName":"projects/passiveblessings-cc0ef/rulesets/bd9cd815-f468-4e13-96b5-4e28e236005c","createTime":"2026-08-19T11:39:29.284673Z","updateTime":"2026-08-21T10:38:52.532050Z"}
+[debug] [2026-08-21T10:38:52.797Z] [rules] updated release projects/passiveblessings-cc0ef/releases/firebase.storage/passiveblessings-cc0ef.firebasestorage.app
+[info] ✔  storage: released rules storage.rules to firebase.storage 
+[info] 
+[info] ✔  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/passiveblessings-cc0ef/overview
+[debug] [2026-08-21T10:39:02.826Z] Error: Timed out.
+    at Timeout._onTimeout (/home/melody/.nvm/versions/node/v22.23.2/lib/node_modules/firebase-tools/lib/utils.js:296:49)
+    at listOnTimeout (node:internal/timers:585:17)
+    at process.processTimers (node:internal/timers:521:7)
+[error] 
+[error] Error: An unexpected error has occurred.
