@@ -9,7 +9,6 @@ Every action users take during signup and signin is recorded in the Firestore `a
 ## Activity Recording Architecture
 
 ### Components
-
 1. **Activity Logger** (`lib/activity-logger.ts`)
    - Centralized logging utility
    - Fetches client IP via `/api/get-ip`
@@ -20,7 +19,6 @@ Every action users take during signup and signin is recorded in the Firestore `a
    - Auto-timestamps with server time
    - Indexed for efficient querying
    - Retention policy ready (configure via Firestore)
-
 3. **Integration Points**
    - Signup page (`app/signup/signup-client.tsx`)
    - Login page (`app/login/login-client.tsx`)

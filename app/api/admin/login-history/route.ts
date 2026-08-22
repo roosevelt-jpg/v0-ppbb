@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminLoginHistory, getAllAdminLoginHistory } from '@/lib/admin-login-tracking'
 import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
-import { initializeApp, getApps } from 'firebase-admin/app'
+import { getAdminApp } from '@/lib/firebase-admin'
 
-if (!getApps().length) {
-  initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  })
-}
-
-const db = getFirestore()
+const db = getFirestore(getAdminApp())
 
 export async function GET(request: NextRequest) {
   try {

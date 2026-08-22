@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateDynamicAccessCode } from '@/lib/admin-login-tracking'
 import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
-import { initializeApp, getApps } from 'firebase-admin/app'
+import { getAdminApp } from '@/lib/firebase-admin'
 
-// Initialize Firebase Admin
-if (!getApps().length) {
-  initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  })
-}
-
-const db = getFirestore()
+const db = getFirestore(getAdminApp())
 
 // Email sending (using SendGrid if configured)
 async function sendAccessCodeEmail(email: string, code: string, adminName: string) {

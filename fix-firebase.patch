@@ -1,0 +1,209 @@
+From 1a9d567373206a6e634075a92c43371a0aaf0144 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 19:05:33 +0000
+Subject: [PATCH] Fix Firebase Admin routes falling back to Application Default
+ Credentials
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+8 API routes (newsletters, conversations, admin login-history, admin
+access-codes generate) called initializeApp() with no credential, relying
+on ADC discovery that only works on real GCP infra. On the EC2/PM2
+deployment this poisons the global firebase-admin default app for the
+whole process the first time one of them runs, breaking Firestore access
+(including admin login checks) for every other route sharing that app —
+matching the repeating "Could not load the default credentials" crash in
+the PM2 logs.
+
+Switched all 8 to the shared, cert()-credentialed getAdminApp() helper
+from lib/firebase-admin.ts instead of initializing their own app.
+---
+ app/api/admin/access-codes/generate/route.ts | 11 ++---------
+ app/api/admin/login-history/route.ts         | 10 ++--------
+ app/api/conversations/[id]/route.ts          | 10 ++--------
+ app/api/newsletters/[id]/analytics/route.ts  | 11 ++---------
+ app/api/newsletters/[id]/route.ts            | 11 ++---------
+ app/api/newsletters/[id]/schedule/route.ts   | 11 ++---------
+ app/api/newsletters/route.ts                 | 11 ++---------
+ app/api/newsletters/subscribe/route.ts       | 11 ++---------
+ 8 files changed, 16 insertions(+), 70 deletions(-)
+
+diff --git a/app/api/admin/access-codes/generate/route.ts b/app/api/admin/access-codes/generate/route.ts
+index 63ab685..50fc149 100644
+--- a/app/api/admin/access-codes/generate/route.ts
++++ b/app/api/admin/access-codes/generate/route.ts
+@@ -1,16 +1,9 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { generateDynamicAccessCode } from '@/lib/admin-login-tracking'
+ import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-// Initialize Firebase Admin
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ // Email sending (using SendGrid if configured)
+ async function sendAccessCodeEmail(email: string, code: string, adminName: string) {
+diff --git a/app/api/admin/login-history/route.ts b/app/api/admin/login-history/route.ts
+index 0ede3ff..907d0ce 100644
+--- a/app/api/admin/login-history/route.ts
++++ b/app/api/admin/login-history/route.ts
+@@ -1,15 +1,9 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getAdminLoginHistory, getAllAdminLoginHistory } from '@/lib/admin-login-tracking'
+ import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function GET(request: NextRequest) {
+   try {
+diff --git a/app/api/conversations/[id]/route.ts b/app/api/conversations/[id]/route.ts
+index a8622ee..6dabd48 100644
+--- a/app/api/conversations/[id]/route.ts
++++ b/app/api/conversations/[id]/route.ts
+@@ -1,14 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getFirestore } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function GET(
+   request: NextRequest,
+diff --git a/app/api/newsletters/[id]/analytics/route.ts b/app/api/newsletters/[id]/analytics/route.ts
+index b611108..a61ffef 100644
+--- a/app/api/newsletters/[id]/analytics/route.ts
++++ b/app/api/newsletters/[id]/analytics/route.ts
+@@ -1,15 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getFirestore, doc, getDoc } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-// Initialize Firebase Admin
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function GET(
+   request: NextRequest,
+diff --git a/app/api/newsletters/[id]/route.ts b/app/api/newsletters/[id]/route.ts
+index 7fd7d98..14455b9 100644
+--- a/app/api/newsletters/[id]/route.ts
++++ b/app/api/newsletters/[id]/route.ts
+@@ -1,15 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getFirestore, doc, getDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-// Initialize Firebase Admin
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function GET(
+   request: NextRequest,
+diff --git a/app/api/newsletters/[id]/schedule/route.ts b/app/api/newsletters/[id]/schedule/route.ts
+index 597a5ff..1dceae0 100644
+--- a/app/api/newsletters/[id]/schedule/route.ts
++++ b/app/api/newsletters/[id]/schedule/route.ts
+@@ -1,15 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getFirestore, doc, updateDoc } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-// Initialize Firebase Admin
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function POST(
+   request: NextRequest,
+diff --git a/app/api/newsletters/route.ts b/app/api/newsletters/route.ts
+index ae4e997..90a7ccf 100644
+--- a/app/api/newsletters/route.ts
++++ b/app/api/newsletters/route.ts
+@@ -1,15 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, getDocs, getDoc, doc, query, orderBy } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-// Initialize Firebase Admin
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function GET(request: NextRequest) {
+   try {
+diff --git a/app/api/newsletters/subscribe/route.ts b/app/api/newsletters/subscribe/route.ts
+index e922ca6..575eaa2 100644
+--- a/app/api/newsletters/subscribe/route.ts
++++ b/app/api/newsletters/subscribe/route.ts
+@@ -1,15 +1,8 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getFirestore, collection, addDoc } from 'firebase-admin/firestore'
+-import { initializeApp, getApps } from 'firebase-admin/app'
++import { getAdminApp } from '@/lib/firebase-admin'
+ 
+-// Initialize Firebase Admin
+-if (!getApps().length) {
+-  initializeApp({
+-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+-  })
+-}
+-
+-const db = getFirestore()
++const db = getFirestore(getAdminApp())
+ 
+ export async function POST(request: NextRequest) {
+   try {
+-- 
+2.43.0
