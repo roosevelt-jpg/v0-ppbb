@@ -1,6 +1,6 @@
 import { getFirestore } from 'firebase-admin/firestore'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
-import { getAdminApp } from '@/lib/firebase-admin'
+import { getAdminApp, FirebaseAdminConfigError } from '@/lib/firebase-admin'
 import {
   canAccessAdminPath,
   hasInvitePermission,
@@ -80,6 +80,10 @@ export async function isAdminUser(userId: string): Promise<boolean> {
     }
     return false
   } catch (error) {
+    // Missing Firebase Admin credentials on this deployment is a server
+    // misconfiguration, not "this user isn't an admin" — let callers
+    // distinguish the two instead of masking it as a 403.
+    if (error instanceof FirebaseAdminConfigError) throw error
     console.error('[v0] Admin check failed:', error)
     return false
   }

@@ -16,6 +16,18 @@ interface AdminCredentials {
 }
 
 /**
+ * Thrown when the server is missing Firebase Admin credentials (env vars not
+ * set on this deployment). Distinct from "user is not an admin" so callers
+ * can surface an actionable message instead of a misleading 403.
+ */
+export class FirebaseAdminConfigError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'FirebaseAdminConfigError'
+  }
+}
+
+/**
  * Robustly parse the GCP_SERVICE_ACCOUNT env var into a service-account object.
  * Tries, in order: direct JSON (the normal case), base64-encoded JSON, and
  * finally a re-escape repair for values whose newlines were unescaped in
@@ -119,7 +131,9 @@ function resolveAdminCredentials(): AdminCredentials {
   }
 
   if (missing.length > 0) {
-    throw new Error(`Firebase credentials not configured. Missing: ${missing.join(', ')}`)
+    throw new FirebaseAdminConfigError(
+      `Firebase credentials not configured. Missing: ${missing.join(', ')}`
+    )
   }
 
   return credentials as AdminCredentials

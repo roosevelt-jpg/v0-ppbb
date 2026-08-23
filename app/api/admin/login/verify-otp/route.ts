@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { verifyAdminLoginOtp } from '@/lib/admin-login-otp'
+import { FirebaseAdminConfigError } from '@/lib/firebase-admin'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -21,7 +22,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!(await isAdminUser(uid))) {
+    let isAdmin: boolean
+    try {
+      isAdmin = await isAdminUser(uid)
+    } catch (error) {
+      if (error instanceof FirebaseAdminConfigError) {
+        console.error('[admin/login/verify-otp]', error.message)
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'Server is missing Firebase Admin credentials (FIREBASE_ADMIN_PROJECT_ID / FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY, or GCP_SERVICE_ACCOUNT). Set these in .env.production.local on the server and restart the app.',
+          },
+          { status: 500 }
+        )
+      }
+      throw error
+    }
+    if (!isAdmin) {
       return NextResponse.json({ success: false, error: 'Not an admin account' }, { status: 403 })
     }
 
