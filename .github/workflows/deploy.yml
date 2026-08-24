@@ -1,0 +1,124 @@
+name: Deploy to AWS EC2
+
+# Builds the app on GitHub's runners (the EC2 instance OOMs on `pnpm build`,
+# see AWS_DEPLOYMENT_HANDOFF.md, "Option A"), ships the standalone bundle to
+# EC2 over SSH, and restarts it under PM2.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Write production env file
+        run: |
+          echo "${{ secrets.PROD_ENV_FILE_B64 }}" | base64 -d > .env.production.local
+          # Fail loudly if the secret was empty/missing rather than shipping an empty build
+          test -s .env.production.local
+
+      - name: Build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          NODE_ENV: production
+        run: pnpm build
+
+      - name: Assemble standalone bundle
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          cp .env.production.local .next/standalone/.env.production.local
+          tar -czf passive-blessings-standalone.tgz -C .next/standalone .
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload artifact to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key passive-blessings-standalone.tgz \
+            "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/passive-blessings-standalone.tgz"
+
+      - name: Extract, restart, and health-check on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" '
+            set -e
+
+            # Stage the new build alongside the current one so we can roll back
+            # if it fails to come up, instead of deploying blind over the old copy.
+            rm -rf ~/app_new
+            mkdir -p ~/app_new
+            tar -xzf ~/passive-blessings-standalone.tgz -C ~/app_new
+            rm -f ~/passive-blessings-standalone.tgz
+
+            rm -rf ~/app_prev
+            [ -d ~/app ] && cp -al ~/app ~/app_prev || true
+
+            rm -rf ~/app
+            mv ~/app_new ~/app
+
+            cd ~/app
+            export NODE_ENV=production
+            export PORT=3000
+            pm2 delete passive-blessings || true
+            pm2 start server.js --name passive-blessings
+            pm2 save
+
+            # Give it a few seconds to boot, then confirm it answers before
+            # calling the deploy a success.
+            ok=""
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              sleep 2
+              if curl -fsS -o /dev/null http://127.0.0.1:3000; then
+                ok=1
+                break
+              fi
+            done
+
+            if [ -z "$ok" ]; then
+              echo "New build failed health check, rolling back..." >&2
+              pm2 logs passive-blessings --lines 80 --nostream || true
+              if [ -d ~/app_prev ]; then
+                rm -rf ~/app
+                mv ~/app_prev ~/app
+                cd ~/app
+                pm2 delete passive-blessings || true
+                pm2 start server.js --name passive-blessings
+                pm2 save
+              fi
+              exit 1
+            fi
+
+            echo "Deploy healthy."
+          '
+
+      - name: Cleanup local SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
