@@ -216,7 +216,8 @@ export default function AdminChatbotPage() {
               Chatbot Management
             </h1>
             <p className="text-neutral-600 mt-1 font-body">
-              Manage support chats. The bot answers from FAQs and AI training docs (no Anthropic API).
+              Manage support chats. The bot answers using Anthropic Claude with your FAQs and training docs
+              (add an API key under Admin → Integrations); it falls back to FAQ-only matching if no key is set.
             </p>
           </div>
         </div>

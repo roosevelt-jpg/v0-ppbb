@@ -58,8 +58,15 @@ export function renderBrandedEmailHtml(opts: {
 
 async function resolveLogoUrl(): Promise<string> {
   try {
+    // Prefer the site's own hosted logo (custom logoUrlDark, or the built-in
+    // /images/pb-logo-black.png fallback that getEmailBrandLogoUrl() returns).
+    // This used to explicitly skip the local fallback in favor of a
+    // third-party Vercel Blob Storage URL left over from the original v0
+    // project; that external URL is no longer reliably reachable (it showed
+    // as a broken image in delivered emails, e.g. the admin login OTP mail),
+    // while the self-hosted asset is served from our own production domain.
     const logo = await getEmailBrandLogoUrl()
-    if (logo && /^https?:\/\//i.test(logo) && !logo.includes('/images/pb-logo-black.png')) {
+    if (logo && /^https?:\/\//i.test(logo)) {
       return logo
     }
   } catch {

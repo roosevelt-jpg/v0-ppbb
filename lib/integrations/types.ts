@@ -1,11 +1,12 @@
 export interface IntegrationService {
   id: string
   name: string
-  category: 'payments' | 'backend' | 'calendars' | 'messaging' | 'storage' | 'webhooks'
+  category: 'payments' | 'backend' | 'ai' | 'calendars' | 'messaging' | 'storage' | 'webhooks'
   description: string
   icon: string
   fields: IntegrationField[]
   docs?: string
+  help?: string
 }
 
 export interface IntegrationField {

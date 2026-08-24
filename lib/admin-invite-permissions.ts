@@ -57,7 +57,6 @@ export const PERMISSION_ROUTE_PREFIXES: Record<InvitePermissionId, string[]> = {
     '/admin/settings',
     '/admin/location-config',
     '/admin/health',
-    '/admin/hosting',
   ],
 
   view_reports: [
@@ -284,7 +283,6 @@ export const API_PERMISSION_PREFIXES: {
   { prefix: '/api/settings', permissions: ['manage_settings'] },
   { prefix: '/api/admin/migrate-global-settings', permissions: ['manage_settings'] },
   { prefix: '/api/platform-config', permissions: ['manage_settings'] },
-  { prefix: '/api/admin/hosting', permissions: ['manage_settings'] },
 
   // Reports
   { prefix: '/api/admin/integration-analytics', permissions: ['view_reports'] },

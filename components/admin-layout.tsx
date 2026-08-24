@@ -62,7 +62,6 @@ import {
   Megaphone,
   Newspaper,
   Ticket,
-  Server,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -161,9 +160,6 @@ export const adminMenuItems = [
   { label: 'Location Config', href: '/admin/location-config', icon: MapPin, group: 'Configuration' },
   { label: 'Integrations', href: '/admin/integrations', icon: Plug, group: 'Configuration' },
   { label: 'Integration Analytics', href: '/admin/integration-analytics', icon: PieChart, group: 'Configuration' },
-
-  // Hosting (bottom of sidebar)
-  { label: 'Hosting', href: '/admin/hosting', icon: Server, group: 'Hosting' },
 ]
 
 export function AdminSidebar({
@@ -216,7 +212,6 @@ export function AdminSidebar({
     'CMS',
     'Assets',
     'Configuration',
-    'Hosting',
   ]
   const sortedGroups = groupOrder.filter(g => groupedItems[g])
 

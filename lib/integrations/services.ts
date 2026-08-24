@@ -27,49 +27,6 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'webhookSecret', label: 'Webhook Secret', type: 'password', required: false, encrypt: true, placeholder: 'whsec_...' },
     ],
   },
-  stripeHosting: {
-    id: 'stripeHosting',
-    name: 'Stripe (Hosting)',
-    category: 'payments',
-    description: 'Separate Stripe account for admin cloud hosting payments',
-    icon: '☁️',
-    fields: [
-      {
-        name: 'publishableKey',
-        label: 'Publishable Key',
-        type: 'text',
-        required: true,
-        placeholder: 'pk_live_... or pk_test_...',
-        help: 'Used only for /admin/hosting card payments — not membership or donations',
-      },
-      {
-        name: 'secretKey',
-        label: 'Secret Key',
-        type: 'password',
-        required: true,
-        encrypt: true,
-        placeholder: 'sk_live_... or sk_test_...',
-      },
-      {
-        name: 'mode',
-        label: 'Mode',
-        type: 'select',
-        required: true,
-        options: [
-          { label: 'Test', value: 'test' },
-          { label: 'Live', value: 'live' },
-        ],
-      },
-      {
-        name: 'webhookSecret',
-        label: 'Webhook Secret',
-        type: 'password',
-        required: false,
-        encrypt: true,
-        placeholder: 'whsec_...',
-      },
-    ],
-  },
   ziina: {
     id: 'ziina',
     name: 'Ziina',
@@ -173,6 +130,26 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     ],
     docs: 'https://firebase.google.com/docs/auth/web/facebook-login',
     help: 'Facebook Login buttons are hidden on login/signup. Credentials can be saved for later; re-enable requires a code change after Meta/Firebase setup works.',
+  },
+  // AI
+  anthropic: {
+    id: 'anthropic',
+    name: 'Anthropic (Claude)',
+    category: 'ai',
+    description: 'Powers the support chatbot with conversational AI (falls back to FAQ-only matching when not configured)',
+    icon: '🤖',
+    fields: [
+      {
+        name: 'apiKey',
+        label: 'API Key',
+        type: 'password',
+        required: true,
+        encrypt: true,
+        placeholder: 'sk-ant-...',
+      },
+    ],
+    docs: 'https://console.anthropic.com/settings/keys',
+    help: 'Create a key in the Anthropic Console and paste it here. Once saved, the support chatbot (Admin → Chatbot) will use Claude to answer conversationally from your FAQs and training docs instead of plain keyword matching.',
   },
   // Calendars
   googleCalendar: {
@@ -429,4 +406,4 @@ export function getServicesByCategory(category: IntegrationService['category']):
   return Object.values(INTEGRATION_SERVICES).filter((s) => s.category === category)
 }
 
-export const CATEGORIES = ['payments', 'backend', 'calendars', 'messaging', 'storage', 'webhooks'] as const
+export const CATEGORIES = ['payments', 'backend', 'ai', 'calendars', 'messaging', 'storage', 'webhooks'] as const
