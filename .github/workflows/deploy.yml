@@ -23,8 +23,9 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 11.22.0
+        # No `version:` here on purpose — this action auto-detects the pnpm
+        # version from package.json's "packageManager" field (11.22.0), and
+        # errors out if both are specified and could drift out of sync.
 
       - name: Setup Node
         uses: actions/setup-node@v4
