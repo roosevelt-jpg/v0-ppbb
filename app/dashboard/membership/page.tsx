@@ -7,7 +7,7 @@ import { doc, getDoc, collection, onSnapshot, query, where } from 'firebase/fire
 import { Card } from '@/components/ui/card'
 import { Check, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
-import { getPlanIncludedItems, memberMatchesPlan } from '@/lib/pricing-utils'
+import { getPlanIncludedItems, memberMatchesPlan, resolveActiveGateway } from '@/lib/pricing-utils'
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import {
   DashboardPageShell,
@@ -96,17 +96,6 @@ export default function MembershipPage() {
     }
   }, [authLoading, user?.id])
 
-  const resolveGateway = (plan: PricingPlan): 'stripe' | 'paypal' | 'ziina' => {
-    const preferred = plan.paymentGateway || 'stripe'
-    if (preferred === 'paypal' && gateways.paypal) return 'paypal'
-    if (preferred === 'ziina' && gateways.ziina) return 'ziina'
-    if (preferred === 'stripe' && gateways.stripe) return 'stripe'
-    if (gateways.stripe) return 'stripe'
-    if (gateways.paypal) return 'paypal'
-    if (gateways.ziina) return 'ziina'
-    return preferred
-  }
-
   const refreshProfile = async () => {
     if (!user?.id) return
     const snap = await getDoc(doc(db, 'users', user.id))
@@ -155,7 +144,10 @@ export default function MembershipPage() {
     if (!user?.id) return
     setCheckingOut(plan.id)
     try {
-      const gateway = resolveGateway(plan)
+      const gateway = resolveActiveGateway(plan, gateways)
+      if (!gateway) {
+        throw new Error('No payment method is configured yet. Please contact support.')
+      }
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -298,7 +290,7 @@ export default function MembershipPage() {
                   ) : isCurrentPlan ? (
                     'Current Plan'
                   ) : (
-                    `Subscribe with ${resolveGateway(plan).replace(/^./, (c) => c.toUpperCase())}`
+                    `Subscribe with ${(resolveActiveGateway(plan, gateways) || 'stripe').replace(/^./, (c) => c.toUpperCase())}`
                   )}
                 </button>
               </Card>

@@ -23,6 +23,8 @@ import {
   formatPlanPriceDetailed,
   getPlanIncludedItems,
   inferSignupTypeFromPlan,
+  resolveActiveGateway,
+  type ConfiguredGateways,
 } from '@/lib/pricing-utils'
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 
@@ -95,6 +97,11 @@ export default function SignupClient() {
   const [plansLoading, setPlansLoading] = useState(true)
   const [createdUserId, setCreatedUserId] = useState<string | null>(null)
   const [checkingOut, setCheckingOut] = useState(false)
+  const [gateways, setGateways] = useState<ConfiguredGateways>({
+    stripe: true,
+    paypal: false,
+    ziina: false,
+  })
   const [businessAddress, setBusinessAddress] = useState<AddressLocationValue>({
     country: 'United Arab Emirates',
     countryCode: 'AE',
@@ -107,6 +114,15 @@ export default function SignupClient() {
     lat: 0,
     lng: 0,
   })
+
+  useEffect(() => {
+    fetch('/api/checkout/gateways')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.data) setGateways(json.data)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const q = query(collection(db, 'pricingPlans'), where('active', '==', true))
@@ -396,7 +412,10 @@ export default function SignupClient() {
       }
 
       const plan = selectedPlan || plans.find((p) => p.id === formData.planId)
-      const gateway = (plan?.paymentGateway as 'stripe' | 'paypal' | 'ziina') || 'stripe'
+      const gateway = plan ? resolveActiveGateway(plan, gateways) : 'stripe'
+      if (!gateway) {
+        throw new Error('No payment method is configured yet. Please contact support.')
+      }
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
