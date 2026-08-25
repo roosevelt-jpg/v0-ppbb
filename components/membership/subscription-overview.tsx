@@ -29,9 +29,10 @@ function formatInvoiceAmount(inv: Record<string, unknown>): string {
   if (inv.amount == null) return String(inv.status || 'paid')
   const amount = Number(inv.amount)
   const currency = String(inv.currency || 'AED').toUpperCase()
-  // Stripe webhooks store major units; some older rows may be cents
-  const display = amount > 1000 && !inv.paidAt ? amount / 100 : amount
-  return `${currency} ${display.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+  // The Stripe webhook always divides Stripe's cent amounts down to major
+  // units before writing (see app/api/webhooks/stripe/route.ts), for both
+  // paid and failed invoices — so `amount` here is already correct as-is.
+  return `${currency} ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
 }
 
 type Props = {
