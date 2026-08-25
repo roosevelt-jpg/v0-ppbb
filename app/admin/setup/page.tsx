@@ -87,19 +87,11 @@ export default function AdminSetup() {
 
     try {
       const code = accessCode.trim().toUpperCase()
-      const ADMIN_ACCESS_CODE = process.env.NEXT_PUBLIC_ADMIN_ACCESS_CODE || 'PB-ADMIN-2025'
-      const hardcodedCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025'].map((c) =>
-        String(c).toUpperCase()
-      )
 
-      if (hardcodedCodes.includes(code)) {
-        setIsEmergencyCode(true)
-        setInviteData(null)
-        storeInvite(null)
-        setStep(2)
-        return
-      }
-
+      // Whether this is a real invite code or an emergency bootstrap code is
+      // decided server-side (bootstrap requires ADMIN_BOOTSTRAP_CODE to be
+      // configured AND that no admin account exists yet) — try the invite
+      // lookup first, and only treat it as an emergency code if that fails.
       const res = await fetch('/api/admin/access-codes/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -245,11 +237,10 @@ export default function AdminSetup() {
     setLoading(true)
 
     try {
-      const role = isEmergencyCode
-        ? accountEmail === 'roosevelt@myflynai.com'
-          ? 'super_admin'
-          : 'admin'
-        : inviteData?.adminRole || 'admin'
+      // For the emergency path, the server always grants super_admin for a
+      // genuine first-time bootstrap and ignores whatever role is sent here
+      // — this is just what's shown/used for the invite path's own request.
+      const role = isEmergencyCode ? 'super_admin' : inviteData?.adminRole || 'admin'
 
       const permissions = isEmergencyCode
         ? ['full_access']
@@ -515,6 +506,36 @@ export default function AdminSetup() {
                   >
                     Sign in here
                   </Link>
+                </p>
+
+                <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--muted-foreground)' }}>
+                  Setting up the very first admin on a fresh deployment?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!accessCode.trim()) {
+                        setError('Enter the emergency bootstrap code above first.')
+                        return
+                      }
+                      setError('')
+                      setIsEmergencyCode(true)
+                      setInviteData(null)
+                      storeInvite(null)
+                      setStep(2)
+                    }}
+                    style={{
+                      color: 'var(--foreground)',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      font: 'inherit',
+                    }}
+                  >
+                    Use an emergency bootstrap code
+                  </button>
                 </p>
               </form>
             </div>
