@@ -69,7 +69,7 @@ export default function CommunityGroupsPage() {
     return (
       <AdminPageLayout title="Community Groups">
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500">Loading groups...</p>
+          <p className="text-gray-500 dark:text-muted-foreground">Loading groups...</p>
         </div>
       </AdminPageLayout>
     )
@@ -83,14 +83,14 @@ export default function CommunityGroupsPage() {
       <div className="space-y-6">
         <Link
           href={`/admin/communities/${communityId}`}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center gap-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900"
         >
           <ChevronLeft size={20} />
           Back to community
         </Link>
 
         <div className="flex flex-wrap justify-between items-center gap-3">
-          <h2 className="text-2xl font-bold text-black">Groups ({groups.length})</h2>
+          <h2 className="text-2xl font-bold text-black dark:text-foreground">Groups ({groups.length})</h2>
           <Link
             href={`/admin/communities/${communityId}/groups/create`}
             className="h-7 min-h-0 flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 font-medium"
@@ -101,8 +101,8 @@ export default function CommunityGroupsPage() {
         </div>
 
         {groups.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500 mb-4">No groups created yet.</p>
+          <div className="text-center py-12 bg-gray-50 dark:bg-muted rounded-lg">
+            <p className="text-gray-500 dark:text-muted-foreground mb-4">No groups created yet.</p>
             <Link
               href={`/admin/communities/${communityId}/groups/create`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
@@ -116,12 +116,12 @@ export default function CommunityGroupsPage() {
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="bg-white rounded-xl border border-[#e4e1da] p-5 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-5 hover:border-neutral-300 transition-colors"
+                className="bg-white dark:bg-card rounded-xl border border-[#e4e1da] dark:border-border p-5 sm:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-5 hover:border-neutral-300 transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-bold text-gray-900 text-lg">{group.name}</h3>
-                    <span className="text-xs capitalize px-2 py-0.5 bg-gray-100 rounded">
+                    <h3 className="font-bold text-gray-900 dark:text-foreground text-lg">{group.name}</h3>
+                    <span className="text-xs capitalize px-2 py-0.5 bg-gray-100 dark:bg-muted rounded">
                       {group.type?.replace('-', ' ') || 'discussion'}
                     </span>
                     {group.status === 'pending_approval' ? (
@@ -130,8 +130,8 @@ export default function CommunityGroupsPage() {
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{group.description}</p>
-                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1">{group.description}</p>
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500 dark:text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Users size={14} />
                       {group.memberCount ?? 0} members
@@ -145,7 +145,7 @@ export default function CommunityGroupsPage() {
                 <div className="flex gap-2 shrink-0">
                   <Link
                     href={`/communities/${communityId}/groups/${group.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-black border border-[#e4e1da] rounded-lg hover:bg-neutral-50 min-h-[40px]"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-black dark:text-foreground border border-[#e4e1da] dark:border-border rounded-lg hover:bg-neutral-50 min-h-[40px]"
                     title="Open group chat"
                   >
                     <MessageCircle size={16} />
@@ -153,7 +153,7 @@ export default function CommunityGroupsPage() {
                   </Link>
                   <Link
                     href={`/admin/communities/${communityId}/groups/${group.id}/edit`}
-                    className="inline-flex items-center justify-center p-2 text-neutral-600 border border-[#e4e1da] rounded-lg hover:bg-neutral-50 min-h-[40px] min-w-[40px]"
+                    className="inline-flex items-center justify-center p-2 text-neutral-600 dark:text-muted-foreground border border-[#e4e1da] dark:border-border rounded-lg hover:bg-neutral-50 min-h-[40px] min-w-[40px]"
                     title="Edit group"
                   >
                     <Edit2 size={16} />

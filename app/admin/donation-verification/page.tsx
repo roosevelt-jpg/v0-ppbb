@@ -104,7 +104,7 @@ export default function DonationVerificationPage() {
   const btnPrimary =
     'min-h-[44px] flex-1 bg-black hover:bg-neutral-900 text-white py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
   const btnSecondary =
-    'min-h-[44px] flex-1 bg-white text-black border border-neutral-300 hover:bg-neutral-50 py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
+    'min-h-[44px] flex-1 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50 py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
   const btnDanger =
     'min-h-[44px] flex-1 bg-black hover:bg-neutral-800 !text-white py-2 px-3 rounded text-sm font-semibold disabled:opacity-50'
 
@@ -114,14 +114,14 @@ export default function DonationVerificationPage() {
     return (
       <div
         key={submission.id}
-        className="border border-neutral-200 rounded-lg p-4 space-y-3"
+        className="border border-neutral-200 dark:border-border rounded-lg p-4 space-y-3"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-semibold text-neutral-900">{submission.donorName || 'Donor'}</p>
-            <p className="text-sm text-neutral-600">Cause: {submission.causeName || '—'}</p>
-            <p className="text-sm text-neutral-600">
+            <p className="font-semibold text-neutral-900 dark:text-foreground">{submission.donorName || 'Donor'}</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">Cause: {submission.causeName || '—'}</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">
               Type:{' '}
               {submission.donationType
                 ? String(submission.donationType).charAt(0).toUpperCase() +
@@ -129,10 +129,10 @@ export default function DonationVerificationPage() {
                 : '—'}
               {submission.partnerName ? ` · ${submission.partnerName}` : ''}
             </p>
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">
               Amount: AED {(submission.amount || 0).toLocaleString()}
             </p>
-            <p className="text-sm text-neutral-600">Ref: {submission.referenceNumber || '—'}</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">Ref: {submission.referenceNumber || '—'}</p>
             {submission.status === 'more_info_requested' && (
               <p className="text-xs text-amber-700 mt-1">
                 More info requested: {submission.infoRequestMessage}
@@ -140,7 +140,7 @@ export default function DonationVerificationPage() {
             )}
           </div>
           <div className="text-left sm:text-right shrink-0">
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-neutral-500 dark:text-muted-foreground">
               {formatDistanceToNow(when, { addSuffix: true })}
             </p>
             {submission.proofImage ? (
@@ -154,23 +154,23 @@ export default function DonationVerificationPage() {
                 View proof
               </a>
             ) : (
-              <p className="text-xs text-neutral-400 mt-1">No proof image</p>
+              <p className="text-xs text-neutral-400 dark:text-muted-foreground mt-1">No proof image</p>
             )}
           </div>
         </div>
 
         {/* Desktop-style meta strip (also works stacked on mobile) */}
-        <div className="hidden lg:grid grid-cols-6 gap-2 text-xs text-neutral-500 border-t border-neutral-100 pt-2">
+        <div className="hidden lg:grid grid-cols-6 gap-2 text-xs text-neutral-500 dark:text-muted-foreground border-t border-neutral-100 dark:border-border pt-2">
           <span>Donor</span>
           <span>Cause</span>
           <span>Amount</span>
           <span>Reference</span>
           <span>Proof</span>
           <span>Date</span>
-          <span className="text-neutral-900 font-medium truncate">{submission.donorName}</span>
-          <span className="text-neutral-900 truncate">{submission.causeName}</span>
-          <span className="text-neutral-900">AED {submission.amount}</span>
-          <span className="text-neutral-900 truncate">{submission.referenceNumber}</span>
+          <span className="text-neutral-900 dark:text-foreground font-medium truncate">{submission.donorName}</span>
+          <span className="text-neutral-900 dark:text-foreground truncate">{submission.causeName}</span>
+          <span className="text-neutral-900 dark:text-foreground">AED {submission.amount}</span>
+          <span className="text-neutral-900 dark:text-foreground truncate">{submission.referenceNumber}</span>
           <span>{submission.proofImage ? 'Yes' : '—'}</span>
           <span>{when.toLocaleDateString()}</span>
         </div>
@@ -225,7 +225,7 @@ export default function DonationVerificationPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
+        <div className="bg-white dark:bg-card rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100 dark:border-border">
           <h2
             className="text-lg mb-4 flex items-center gap-2"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
@@ -239,14 +239,14 @@ export default function DonationVerificationPage() {
           {loading ? (
             <div className="space-y-3 animate-pulse">
               {[1, 2].map((i) => (
-                <div key={i} className="h-28 bg-neutral-100 rounded" />
+                <div key={i} className="h-28 bg-neutral-100 dark:bg-muted rounded" />
               ))}
             </div>
           ) : pending.length === 0 ? (
             <div className="text-center py-12">
-              <ClipboardCheck className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-              <p className="text-neutral-600">No pending submissions</p>
-              <p className="text-sm text-neutral-500 mt-1">
+              <ClipboardCheck className="w-10 h-10 text-neutral-300 dark:text-muted-foreground mx-auto mb-3" />
+              <p className="text-neutral-600 dark:text-muted-foreground">No pending submissions</p>
+              <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1">
                 Proof uploads from /donate will appear here for review.
               </p>
             </div>
@@ -256,28 +256,28 @@ export default function DonationVerificationPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
+          <div className="bg-white dark:bg-card rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100 dark:border-border">
             <h3 className="font-semibold mb-3">Confirmed ({confirmed.length})</h3>
             {confirmed.length === 0 ? (
-              <p className="text-sm text-neutral-500">None yet</p>
+              <p className="text-sm text-neutral-500 dark:text-muted-foreground">None yet</p>
             ) : (
               <ul className="space-y-2 text-sm max-h-64 overflow-y-auto">
                 {confirmed.slice(0, 20).map((s) => (
-                  <li key={s.id} className="border-b border-neutral-100 pb-2">
+                  <li key={s.id} className="border-b border-neutral-100 dark:border-border pb-2">
                     {s.donorName} — AED {s.amount} — {s.causeName}
                   </li>
                 ))}
               </ul>
             )}
           </div>
-          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
+          <div className="bg-white dark:bg-card rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100 dark:border-border">
             <h3 className="font-semibold mb-3">Rejected ({rejected.length})</h3>
             {rejected.length === 0 ? (
-              <p className="text-sm text-neutral-500">None yet</p>
+              <p className="text-sm text-neutral-500 dark:text-muted-foreground">None yet</p>
             ) : (
               <ul className="space-y-2 text-sm max-h-64 overflow-y-auto">
                 {rejected.slice(0, 20).map((s) => (
-                  <li key={s.id} className="border-b border-neutral-100 pb-2">
+                  <li key={s.id} className="border-b border-neutral-100 dark:border-border pb-2">
                     {s.donorName} — {s.rejectionReason || 'Rejected'}
                   </li>
                 ))}

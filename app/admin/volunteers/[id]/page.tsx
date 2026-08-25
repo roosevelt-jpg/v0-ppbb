@@ -94,7 +94,7 @@ export default function VolunteerDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
         <div className="text-center">Loading volunteer details...</div>
       </div>
     )
@@ -102,14 +102,14 @@ export default function VolunteerDetailPage() {
 
   if (error && !volunteer) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
         <div className="text-center text-red-600">{error}</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -120,8 +120,8 @@ export default function VolunteerDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Volunteer Details</h1>
-            <p className="text-neutral-600">Edit and manage volunteer information</p>
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-foreground">Volunteer Details</h1>
+            <p className="text-neutral-600 dark:text-muted-foreground">Edit and manage volunteer information</p>
           </div>
         </div>
 
@@ -140,124 +140,124 @@ export default function VolunteerDetailPage() {
         )}
 
         {/* Profile summary */}
-        <Card className="p-6 border border-neutral-200">
+        <Card className="p-6 border border-neutral-200 dark:border-border">
           <AdminUserProfileSummary user={volunteer} />
         </Card>
 
         {/* Main Info Card */}
-        <Card className="p-6 border border-neutral-200">
-          <h2 className="text-xl font-bold text-neutral-900 mb-4">Basic Information</h2>
+        <Card className="p-6 border border-neutral-200 dark:border-border">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground mb-4">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">First Name</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">First Name</label>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Last Name</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Last Name</label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Phone</label>
               <input
                 type="tel"
                 name="phone"
                 value={formData.phone || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Location</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Location</label>
               <input
                 type="text"
                 name="location"
                 value={typeof formData.location === 'string' ? formData.location : ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Volunteer Hours</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Volunteer Hours</label>
               <input
                 type="number"
                 name="volunteerHours"
                 value={formData.volunteerHours ?? formData.volunteeredHours ?? 0}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Bio</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Bio</label>
             <textarea
               name="bio"
               value={formData.bio || ''}
               onChange={handleInputChange}
               rows={3}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
             />
           </div>
         </Card>
 
         {/* Volunteer Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <Card className="p-4 border border-neutral-200">
+          <Card className="p-4 border border-neutral-200 dark:border-border">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-neutral-600">Total Hours</span>
+              <span className="text-sm text-neutral-600 dark:text-muted-foreground">Total Hours</span>
             </div>
-            <p className="text-2xl font-bold text-neutral-900">{volunteer?.volunteeredHours ?? volunteer?.volunteerHours ?? 0}</p>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-foreground">{volunteer?.volunteeredHours ?? volunteer?.volunteerHours ?? 0}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
+          <Card className="p-4 border border-neutral-200 dark:border-border">
             <div className="flex items-center gap-2 mb-2">
               <MapPin className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-neutral-600">Events</span>
+              <span className="text-sm text-neutral-600 dark:text-muted-foreground">Events</span>
             </div>
-            <p className="text-2xl font-bold text-neutral-900">{volunteerEvents.length}</p>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-foreground">{volunteerEvents.length}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
+          <Card className="p-4 border border-neutral-200 dark:border-border">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="w-4 h-4 text-orange-600" />
-              <span className="text-sm text-neutral-600">Status</span>
+              <span className="text-sm text-neutral-600 dark:text-muted-foreground">Status</span>
             </div>
             <p className="text-lg font-semibold text-orange-600">{volunteer?.active ? 'Active' : 'Inactive'}</p>
           </Card>
         </div>
 
         {/* Events Participated */}
-        <Card className="p-6 border border-neutral-200">
-          <h2 className="text-xl font-bold text-neutral-900 mb-4">Participated Events ({volunteerEvents.length})</h2>
+        <Card className="p-6 border border-neutral-200 dark:border-border">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground mb-4">Participated Events ({volunteerEvents.length})</h2>
           {volunteerEvents.length === 0 ? (
-            <p className="text-neutral-600">No events yet</p>
+            <p className="text-neutral-600 dark:text-muted-foreground">No events yet</p>
           ) : (
             <div className="space-y-2">
               {volunteerEvents.map(event => (
-                <div key={event.id} className="p-3 border border-neutral-200 rounded-lg flex justify-between items-center">
+                <div key={event.id} className="p-3 border border-neutral-200 dark:border-border rounded-lg flex justify-between items-center">
                   <div>
-                    <p className="font-medium text-neutral-900">{event.title || 'Untitled event'}</p>
-                    <p className="text-xs text-neutral-600">{event.date ? String(event.date) : 'Date not provided'}</p>
+                    <p className="font-medium text-neutral-900 dark:text-foreground">{event.title || 'Untitled event'}</p>
+                    <p className="text-xs text-neutral-600 dark:text-muted-foreground">{event.date ? String(event.date) : 'Date not provided'}</p>
                   </div>
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">Event</span>
                 </div>

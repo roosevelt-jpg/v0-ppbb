@@ -117,7 +117,7 @@ export default function FAQManagementPage() {
     >
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             Set status to <strong>Published</strong> to show on the public FAQ page in realtime.
           </p>
           <button
@@ -146,45 +146,45 @@ export default function FAQManagementPage() {
           </div>
         ) : null}
 
-        <div className="bg-white rounded-lg border border-gray-200">
+        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">Loading FAQs…</div>
+            <div className="p-8 text-center text-gray-500 dark:text-muted-foreground">Loading FAQs…</div>
           ) : faqs.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-muted-foreground">
               No FAQs yet. Click “New FAQ” to create one.
             </div>
           ) : (
             <div className="admin-table-scroll">
               <table className="w-full min-w-[720px]">
-                <thead className="border-b border-gray-200 bg-gray-50">
+                <thead className="border-b border-gray-200 dark:border-border bg-gray-50 dark:bg-muted">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">
                       Question
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">
                       Category
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {faqs.map((faq) => (
-                    <tr key={faq.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 max-w-md">
+                    <tr key={faq.id} className="border-b border-gray-100 dark:border-border hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-foreground max-w-md">
                         {faq.question}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{faq.category}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-muted-foreground">{faq.category}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
                             faq.status === 'published'
                               ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-700'
+                              : 'bg-gray-100 dark:bg-muted text-gray-700 dark:text-foreground'
                           }`}
                         >
                           {faq.status}

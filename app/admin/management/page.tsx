@@ -308,7 +308,7 @@ export default function AdminManagementPage() {
     return (
       <AdminPageLayout title="Admin Management">
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500">Loading...</p>
+          <p className="text-gray-500 dark:text-muted-foreground">Loading...</p>
         </div>
       </AdminPageLayout>
     )
@@ -317,7 +317,7 @@ export default function AdminManagementPage() {
   return (
     <AdminPageLayout title="Admin Management">
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-black">Admin Management</h2>
+        <h2 className="text-2xl font-bold text-black dark:text-foreground">Admin Management</h2>
 
         {/* Tabs */}
         <div className="flex gap-3">
@@ -331,7 +331,7 @@ export default function AdminManagementPage() {
               className={`px-6 py-2 font-medium text-sm rounded-full transition-colors ${
                 activeTab === tab
                   ? 'bg-black text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'bg-gray-200 dark:bg-muted text-gray-700 dark:text-foreground hover:bg-gray-300'
               }`}
             >
               {tab === 'access-codes' ? 'Access Codes' : 'Active Admins'}
@@ -342,44 +342,44 @@ export default function AdminManagementPage() {
         {/* Access Codes Tab */}
         {activeTab === 'access-codes' && (
           <div className="space-y-4">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="font-bold text-gray-900 mb-4">Generate New Admin Invitation</h3>
-              <p className="text-sm text-gray-600 mb-4">
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+              <h3 className="font-bold text-gray-900 dark:text-foreground mb-4">Generate New Admin Invitation</h3>
+              <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
                 Invite a new admin with a role and permissions. They receive a branded Passive Blessings
                 email signed by you, with a <strong>6-digit access code</strong> to complete setup at{' '}
-                <code className="text-xs bg-gray-100 px-1 rounded">/admin/setup</code>.
+                <code className="text-xs bg-gray-100 dark:bg-muted px-1 rounded">/admin/setup</code>.
               </p>
               
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Admin Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Admin Name *</label>
                     <input
                       type="text"
                       value={adminName}
                       onChange={(e) => setAdminName(e.target.value)}
                       placeholder="e.g., John Doe"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Email Address *</label>
                     <input
                       type="email"
                       value={adminEmail}
                       onChange={(e) => setAdminEmail(e.target.value)}
                       placeholder="admin@example.com"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Role</label>
                   <select
                     value={adminRole}
                     onChange={(e) => setAdminRole(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                   >
                     {INVITE_ROLE_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -387,7 +387,7 @@ export default function AdminManagementPage() {
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 dark:text-muted-foreground mt-2">
                     {INVITE_ROLE_OPTIONS.find((option) => option.value === adminRole)?.description}
                   </p>
                   {isWelfareOperationalRole(adminRole) && (
@@ -399,11 +399,11 @@ export default function AdminManagementPage() {
 
                 {/* Permissions Selector */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Permissions (Optional)</label>
-                  <p className="text-xs text-gray-500 mb-3">Select specific permissions or leave empty for full access</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-3">Permissions (Optional)</label>
+                  <p className="text-xs text-gray-500 dark:text-muted-foreground mb-3">Select specific permissions or leave empty for full access</p>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {ADMIN_PERMISSIONS.map((permission) => (
-                      <label key={permission.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition">
+                      <label key={permission.id} className="flex items-start gap-3 p-3 border border-gray-200 dark:border-border rounded-lg hover:bg-gray-50 cursor-pointer transition">
                         <input
                           type="checkbox"
                           checked={selectedPermissions.includes(permission.id)}
@@ -417,8 +417,8 @@ export default function AdminManagementPage() {
                           className="w-4 h-4 mt-0.5 cursor-pointer"
                         />
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900 text-sm">{permission.label}</div>
-                          <div className="text-xs text-gray-600">{permission.description}</div>
+                          <div className="font-medium text-gray-900 dark:text-foreground text-sm">{permission.label}</div>
+                          <div className="text-xs text-gray-600 dark:text-muted-foreground">{permission.description}</div>
                         </div>
                       </label>
                     ))}
@@ -437,29 +437,29 @@ export default function AdminManagementPage() {
             </div>
 
             <div>
-              <h3 className="font-bold text-gray-900 mb-3">Generated Access Codes</h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <h3 className="font-bold text-gray-900 dark:text-foreground mb-3">Generated Access Codes</h3>
+              <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
                 Unused invites are removed automatically after 48 hours
               </p>
             </div>
 
             {codes.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No access codes generated yet.</p>
+              <div className="text-center py-12 bg-gray-50 dark:bg-muted rounded-lg">
+                <p className="text-gray-500 dark:text-muted-foreground">No access codes generated yet.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {codes.map((code: any) => (
-                  <div key={code.id} className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div key={code.id} className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <code className="font-mono font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded">
+                        <code className="font-mono font-bold text-gray-900 dark:text-foreground bg-gray-50 dark:bg-muted px-3 py-1 rounded">
                           {visibleCodes.has(code.id) ? code.code : '••••••'}
                         </code>
                         <button
                           type="button"
                           onClick={() => toggleCodeVisibility(code.id)}
-                          className="pb-ghost-btn p-2 text-gray-600 hover:bg-gray-100 rounded min-h-[40px] min-w-[40px] inline-flex items-center justify-center"
+                          className="pb-ghost-btn p-2 text-gray-600 dark:text-muted-foreground hover:bg-gray-100 rounded min-h-[40px] min-w-[40px] inline-flex items-center justify-center"
                           aria-label="Toggle code visibility"
                         >
                           {visibleCodes.has(code.id) ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -467,15 +467,15 @@ export default function AdminManagementPage() {
                         <button
                           type="button"
                           onClick={() => handleCopyCode(code.code)}
-                          className="pb-ghost-btn p-2 text-gray-600 hover:bg-gray-100 rounded min-h-[40px] min-w-[40px] inline-flex items-center justify-center"
+                          className="pb-ghost-btn p-2 text-gray-600 dark:text-muted-foreground hover:bg-gray-100 rounded min-h-[40px] min-w-[40px] inline-flex items-center justify-center"
                           aria-label="Copy code"
                         >
                           <Copy size={16} />
                         </button>
                       </div>
-                      <div className="flex flex-col gap-0.5 text-xs text-gray-600">
+                      <div className="flex flex-col gap-0.5 text-xs text-gray-600 dark:text-muted-foreground">
                         {(code.adminName || code.adminEmail) && (
-                          <p className="font-medium text-gray-900 break-words">
+                          <p className="font-medium text-gray-900 dark:text-foreground break-words">
                             {code.adminName || 'Invitee'}
                             {code.adminEmail ? ` · ${code.adminEmail}` : ''}
                           </p>
@@ -493,7 +493,7 @@ export default function AdminManagementPage() {
                       <span
                         className={`self-start px-2 py-1 rounded text-xs font-medium ${
                           code.used || code.isUsed
-                            ? 'bg-gray-100 text-gray-800'
+                            ? 'bg-gray-100 dark:bg-muted text-gray-800 dark:text-foreground'
                             : 'bg-green-100 text-green-800'
                         }`}
                       >
@@ -537,24 +537,24 @@ export default function AdminManagementPage() {
         {/* Admins Tab */}
         {activeTab === 'admins' && (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">{admins.length} active administrators</p>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground">{admins.length} active administrators</p>
 
             {admins.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No admins found. Generate an access code to create the first admin.</p>
+              <div className="text-center py-12 bg-gray-50 dark:bg-muted rounded-lg">
+                <p className="text-gray-500 dark:text-muted-foreground">No admins found. Generate an access code to create the first admin.</p>
               </div>
             ) : (
-              <div className="bg-white rounded-lg border border-gray-200 min-w-0">
+              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border min-w-0">
                 <div className="admin-table-scroll">
                 <table className="w-full text-sm min-w-[900px]">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
                     <tr>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Admin</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Email</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Phone</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Role</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Created</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Actions</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-foreground">Admin</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-foreground">Email</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-foreground">Phone</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-foreground">Role</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-foreground">Created</th>
+                      <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -567,8 +567,8 @@ export default function AdminManagementPage() {
                             hideSubtitle
                           />
                         </td>
-                        <td className="px-6 py-3 text-gray-600">{admin.email}</td>
-                        <td className="px-6 py-3 text-gray-600 whitespace-nowrap">
+                        <td className="px-6 py-3 text-gray-600 dark:text-muted-foreground">{admin.email}</td>
+                        <td className="px-6 py-3 text-gray-600 dark:text-muted-foreground whitespace-nowrap">
                           {formatUserPhoneDisplay(admin)}
                         </td>
                         <td className="px-6 py-3">
@@ -576,7 +576,7 @@ export default function AdminManagementPage() {
                             {admin.role}
                           </span>
                         </td>
-                        <td className="px-6 py-3 text-gray-600">
+                        <td className="px-6 py-3 text-gray-600 dark:text-muted-foreground">
                           {admin.createdAt ? format(new Date(admin.createdAt), 'MMM dd, yyyy') : '-'}
                         </td>
                         <td className="px-6 py-3">
@@ -590,7 +590,7 @@ export default function AdminManagementPage() {
                                 disabled={
                                   resettingEmail === String(admin.email).trim().toLowerCase()
                                 }
-                                className="p-1 text-black hover:bg-gray-100 rounded"
+                                className="p-1 text-black dark:text-foreground hover:bg-gray-100 rounded"
                                 title="Send password reset email"
                               >
                                 <KeyRound size={16} />

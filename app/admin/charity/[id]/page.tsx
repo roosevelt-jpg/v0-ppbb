@@ -79,7 +79,7 @@ export default function CharityCaseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
         <div className="text-center">Loading charity case details...</div>
       </div>
     )
@@ -87,7 +87,7 @@ export default function CharityCaseDetailPage() {
 
   if (error && !charity) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
         <button onClick={() => router.back()} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
@@ -104,7 +104,7 @@ export default function CharityCaseDetailPage() {
   if (!charity) return null
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-muted">
       <div className="p-8">
         <button onClick={() => router.back()} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Charity Cases
@@ -114,7 +114,7 @@ export default function CharityCaseDetailPage() {
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Heart className="w-6 h-6 text-red-600" />
-              <h1 className="text-3xl font-bold text-neutral-900">{charity.title}</h1>
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-foreground">{charity.title}</h1>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
               charity.status === 'approved' ? 'bg-green-100 text-green-700' :
@@ -144,75 +144,75 @@ export default function CharityCaseDetailPage() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <Card className="p-4 border border-neutral-200">
-              <p className="text-sm text-neutral-600">Target Amount</p>
-              <p className="text-2xl font-bold text-neutral-900 mt-1">{charity.targetAmount} AED</p>
+            <Card className="p-4 border border-neutral-200 dark:border-border">
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground">Target Amount</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-1">{charity.targetAmount} AED</p>
             </Card>
-            <Card className="p-4 border border-neutral-200">
-              <p className="text-sm text-neutral-600">Collected</p>
+            <Card className="p-4 border border-neutral-200 dark:border-border">
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground">Collected</p>
               <p className="text-2xl font-bold text-green-600 mt-1">{charity.collected || 0} AED</p>
             </Card>
-            <Card className="p-4 border border-neutral-200">
-              <p className="text-sm text-neutral-600">Progress</p>
-              <p className="text-2xl font-bold text-neutral-900 mt-1">
+            <Card className="p-4 border border-neutral-200 dark:border-border">
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground">Progress</p>
+              <p className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-1">
                 {charity.targetAmount ? Math.round(((charity.collected || 0) / charity.targetAmount) * 100) : 0}%
               </p>
             </Card>
           </div>
 
-          <Card className="p-6 border border-neutral-200 space-y-6">
+          <Card className="p-6 border border-neutral-200 dark:border-border space-y-6">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Title</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-2">Title</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-2">Description</label>
               <textarea
                 name="description"
                 value={formData.description || ''}
                 onChange={handleInputChange}
                 rows={4}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Target Amount (AED)</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-2">Target Amount (AED)</label>
                 <input
                   type="number"
                   name="targetAmount"
                   value={formData.targetAmount || ''}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">Collected (AED)</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-2">Collected (AED)</label>
                 <input
                   type="number"
                   name="collected"
                   value={formData.collected || ''}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Status</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-2">Status</label>
               <select
                 name="status"
                 value={formData.status || 'pending'}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               >
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>

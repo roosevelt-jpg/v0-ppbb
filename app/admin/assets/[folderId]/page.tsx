@@ -117,7 +117,7 @@ export default function AdminAssetFolderPage() {
   if (loading) {
     return (
       <AdminPageLayout title="Event Assets">
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-gray-500 dark:text-muted-foreground">Loading…</p>
       </AdminPageLayout>
     )
   }
@@ -134,14 +134,14 @@ export default function AdminAssetFolderPage() {
     <AdminPageLayout title="Event Assets">
       <div className="space-y-6">
         <div>
-          <Link href="/admin/assets" className="text-sm text-gray-500 hover:text-black">
+          <Link href="/admin/assets" className="text-sm text-gray-500 dark:text-muted-foreground hover:text-black">
             ← All folders
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-2">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-black">{folder.name}</h1>
+              <h1 className="text-2xl font-bold text-black dark:text-foreground">{folder.name}</h1>
               {folder.eventTitle && !editEvent && (
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-muted-foreground mt-1">
                   Event: {folder.eventTitle}
                   {folder.eventId && (
                     <>
@@ -155,11 +155,11 @@ export default function AdminAssetFolderPage() {
                 </p>
               )}
               {folder.description && (
-                <p className="text-sm text-gray-600 mt-2 max-w-2xl">{folder.description}</p>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground mt-2 max-w-2xl">{folder.description}</p>
               )}
               <div className="flex flex-wrap gap-1 mt-2">
                 {folder.tags.map((tag) => (
-                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                  <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground">
                     {tag}
                   </span>
                 ))}
@@ -168,12 +168,12 @@ export default function AdminAssetFolderPage() {
                 <button
                   type="button"
                   onClick={() => setEditEvent(true)}
-                  className="mt-3 text-xs text-gray-500 underline"
+                  className="mt-3 text-xs text-gray-500 dark:text-muted-foreground underline"
                 >
                   {folder.eventId ? 'Change linked event' : 'Link to an event'}
                 </button>
               ) : (
-                <div className="mt-4 max-w-md space-y-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="mt-4 max-w-md space-y-3 p-4 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-muted">
                   <EventPickerSelect
                     value={eventId}
                     eventTitle={eventTitle}
@@ -197,7 +197,7 @@ export default function AdminAssetFolderPage() {
                         setEventId(folder.eventId || '')
                         setEventTitle(folder.eventTitle || '')
                       }}
-                      className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+                      className="px-3 py-1.5 border border-gray-200 dark:border-border rounded-lg text-sm"
                     >
                       Cancel
                     </button>
@@ -224,12 +224,12 @@ export default function AdminAssetFolderPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
+        <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <Upload className="h-4 w-4" />
             Bulk upload photos & videos
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-muted-foreground">
             Select multiple files at once. Shared tags apply to every file in the batch.
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -237,13 +237,13 @@ export default function AdminAssetFolderPage() {
               value={uploadMeta.tags}
               onChange={(e) => setUploadMeta({ ...uploadMeta, tags: e.target.value })}
               placeholder="Shared tags: keynote, group-photo, day-1"
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
             />
             <input
               value={uploadMeta.description}
               onChange={(e) => setUploadMeta({ ...uploadMeta, description: e.target.value })}
               placeholder="Shared description (optional)"
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              className="border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
             />
           </div>
           <label className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm cursor-pointer hover:bg-gray-900">
@@ -277,12 +277,12 @@ export default function AdminAssetFolderPage() {
         </div>
 
         {files.length === 0 ? (
-          <p className="text-gray-500 text-sm">No files uploaded yet.</p>
+          <p className="text-gray-500 dark:text-muted-foreground text-sm">No files uploaded yet.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {files.map((file) => (
-              <div key={file.id} className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-                <div className="aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
+              <div key={file.id} className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
+                <div className="aspect-video bg-gray-100 dark:bg-muted flex items-center justify-center overflow-hidden">
                   {file.type === 'photo' ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
@@ -299,7 +299,7 @@ export default function AdminAssetFolderPage() {
                       <div className="min-w-0">
                         <p className="font-medium text-sm truncate">{file.name}</p>
                         {file.description && (
-                          <p className="text-xs text-gray-500 line-clamp-2">{file.description}</p>
+                          <p className="text-xs text-gray-500 dark:text-muted-foreground line-clamp-2">{file.description}</p>
                         )}
                         {file.storageProvider === 'google_drive' && (
                           <p className="text-xs text-blue-600">Synced to Google Drive</p>
@@ -317,7 +317,7 @@ export default function AdminAssetFolderPage() {
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {file.tags.map((tag) => (
-                      <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                      <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground">
                         {tag}
                       </span>
                     ))}

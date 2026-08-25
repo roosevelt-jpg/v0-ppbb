@@ -11,9 +11,9 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 function FormEditorSkeleton() {
   return (
     <div className="max-w-4xl space-y-6 animate-pulse">
-      <div className="h-8 bg-neutral-200 rounded w-1/3" />
-      <div className="h-40 bg-neutral-200 rounded" />
-      <div className="h-64 bg-neutral-200 rounded" />
+      <div className="h-8 bg-neutral-200 dark:bg-muted rounded w-1/3" />
+      <div className="h-40 bg-neutral-200 dark:bg-muted rounded" />
+      <div className="h-64 bg-neutral-200 dark:bg-muted rounded" />
     </div>
   )
 }

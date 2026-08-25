@@ -160,9 +160,9 @@ export default function CreateRecordingPage() {
         Back to Recordings
       </Link>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-        <h1 className="text-3xl font-bold text-black mb-2">Upload Recording</h1>
-        <p className="text-sm text-neutral-600 mb-8">
+      <div className="bg-white dark:bg-card rounded-lg shadow-sm border border-gray-200 dark:border-border p-8">
+        <h1 className="text-3xl font-bold text-black dark:text-foreground mb-2">Upload Recording</h1>
+        <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-8">
           Direct file upload max is <strong>500 MB</strong> (not GB). For larger videos, paste a
           YouTube / Vimeo / Drive link — that works without uploading the file here.
         </p>
@@ -175,52 +175,52 @@ export default function CreateRecordingPage() {
 
         <form className="space-y-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Title</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Description</label>
             <textarea
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Type</label>
               <select
                 value={formData.type}
                 onChange={(e) => handleChange('type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
               >
                 <option value="video">Video</option>
                 <option value="audio">Audio</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Speaker</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Speaker</label>
               <input
                 type="text"
                 value={formData.speaker}
                 onChange={(e) => handleChange('speaker', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">
               Recording URL (recommended for large files)
             </label>
             <input
@@ -228,7 +228,7 @@ export default function CreateRecordingPage() {
               value={formData.url}
               onChange={(e) => handleChange('url', e.target.value)}
               placeholder="https://… YouTube, Vimeo, Google Drive, etc."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
             />
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <label className="inline-flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium">
@@ -243,27 +243,27 @@ export default function CreateRecordingPage() {
                 />
               </label>
               {uploadProgress ? (
-                <span className="text-xs text-neutral-600">{uploadProgress}</span>
+                <span className="text-xs text-neutral-600 dark:text-muted-foreground">{uploadProgress}</span>
               ) : null}
               {formData.url ? (
-                <span className="text-xs text-neutral-500 break-all max-w-md">{formData.url}</span>
+                <span className="text-xs text-neutral-500 dark:text-muted-foreground break-all max-w-md">{formData.url}</span>
               ) : null}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Date</label>
               <input
                 type="date"
                 value={formData.date}
                 onChange={(e) => handleChange('date', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Duration (min)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Duration (min)</label>
               <input
                 type="number"
                 min={0}
@@ -271,24 +271,24 @@ export default function CreateRecordingPage() {
                 onChange={(e) =>
                   handleChange('duration', e.target.value ? parseInt(e.target.value, 10) : undefined)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
               />
             </div>
           </div>
 
           {formData.type === 'video' ? (
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">
+              <p className="text-sm font-medium text-gray-700 dark:text-foreground mb-2">
                 Thumbnail image (optional — JPG/PNG only, not the video file)
               </p>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+              <div className="border-2 border-dashed border-gray-300 dark:border-border rounded-lg p-6">
                 {thumbnailPreview ? (
                   <div className="relative">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={thumbnailPreview}
                       alt="Thumbnail preview"
-                      className="w-full h-40 object-cover rounded-lg bg-neutral-100"
+                      className="w-full h-40 object-cover rounded-lg bg-neutral-100 dark:bg-muted"
                     />
                     <button
                       type="button"
@@ -304,9 +304,9 @@ export default function CreateRecordingPage() {
                 ) : (
                   <label className="cursor-pointer block">
                     <div className="flex flex-col items-center justify-center py-8">
-                      <Upload className="text-gray-400 mb-2" size={28} />
-                      <p className="text-gray-600 font-medium">Upload thumbnail image</p>
-                      <p className="text-xs text-neutral-500 mt-1">Max 10 MB</p>
+                      <Upload className="text-gray-400 dark:text-muted-foreground mb-2" size={28} />
+                      <p className="text-gray-600 dark:text-muted-foreground font-medium">Upload thumbnail image</p>
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">Max 10 MB</p>
                     </div>
                     <input
                       type="file"
@@ -320,7 +320,7 @@ export default function CreateRecordingPage() {
             </div>
           ) : null}
 
-          <div className="flex gap-4 pt-6 border-t border-gray-200">
+          <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-border">
             <button
               type="button"
               onClick={() => router.push('/admin/recordings')}

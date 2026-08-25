@@ -226,7 +226,7 @@ export default function AdminLayout({
               type="button"
               data-dashboard-control
               onClick={() => setMobileMenuOpen((o) => !o)}
-              className="lg:hidden inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-md bg-transparent text-neutral-700 hover:bg-neutral-100"
+              className="lg:hidden inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-md bg-transparent text-neutral-700 dark:text-foreground hover:bg-neutral-100"
               aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

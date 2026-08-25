@@ -123,15 +123,15 @@ export default function CreateGroupPage() {
       <div className="max-w-2xl space-y-6">
         <Link
           href={`/admin/communities/${communityId}/groups`}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+          className="flex items-center gap-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900"
         >
           <ChevronLeft size={20} />
           Back to Groups
         </Link>
 
         <div>
-          <h2 className="text-2xl font-bold text-black">Create New Group</h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold text-black dark:text-foreground">Create New Group</h2>
+          <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1">
             Groups support member chat, file sharing, join approval, gender rules, and capacity limits.
           </p>
         </div>

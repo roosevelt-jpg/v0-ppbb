@@ -100,7 +100,7 @@ export default function CreateEventPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full py-12 text-center text-gray-500">Loading event form...</div>
+        <div className="w-full py-12 text-center text-gray-500 dark:text-muted-foreground">Loading event form...</div>
       }
     >
       <CreateEventForm />
@@ -369,7 +369,7 @@ function CreateEventForm() {
 
   if (loading) {
     return (
-      <div className="w-full py-12 text-center text-gray-500 flex items-center justify-center gap-2">
+      <div className="w-full py-12 text-center text-gray-500 dark:text-muted-foreground flex items-center justify-center gap-2">
         <Loader2 className="animate-spin" size={18} />
         Loading event...
       </div>
@@ -383,14 +383,14 @@ function CreateEventForm() {
         Back to Events
       </Link>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-8">
-        <h1 className="text-3xl font-bold text-black mb-2">
+      <div className="bg-white dark:bg-card rounded-lg shadow-sm border border-gray-200 dark:border-border p-4 sm:p-8">
+        <h1 className="text-3xl font-bold text-black dark:text-foreground mb-2">
           {isEditing ? 'Edit Event' : 'Create Event'}
         </h1>
         {existingStatus && (
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="text-sm text-gray-600 dark:text-muted-foreground mb-6">
             Current status:{' '}
-            <span className="font-medium text-black uppercase">
+            <span className="font-medium text-black dark:text-foreground uppercase">
               {existingStatus.replace(/_/g, ' ')}
             </span>
           </p>
@@ -413,72 +413,72 @@ function CreateEventForm() {
 
         <form className="space-y-8">
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Basic Information</h2>
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Basic Information</h2>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Event Title</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Event Title</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleChange('title', e.target.value)}
                 placeholder="e.g., Annual Charity Gala"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Description</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 placeholder="Event description"
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                 required
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Date & Time</h2>
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Date & Time</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Date</label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => handleChange('date', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Start Time</label>
                 <input
                   type="time"
                   value={formData.startTime}
                   onChange={(e) => handleChange('startTime', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">End Time</label>
               <input
                 type="time"
                 value={formData.endTime}
                 onChange={(e) => handleChange('endTime', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Location</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Location</h2>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground">
               Choose country / city, then search the venue address and drag the pin if needed.
             </p>
             <AddressLocationPicker
@@ -501,9 +501,9 @@ function CreateEventForm() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Banner Image</h2>
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Banner Image</h2>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+            <div className="border-2 border-dashed border-gray-300 dark:border-border rounded-lg p-6">
               {imagePreview ? (
                 <div className="relative">
                   <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover rounded-lg" />
@@ -522,8 +522,8 @@ function CreateEventForm() {
               ) : (
                 <label className="cursor-pointer block">
                   <div className="flex flex-col items-center justify-center py-8">
-                    <Upload className="text-gray-400 mb-2" size={28} />
-                    <p className="text-gray-600 font-medium">Click to upload</p>
+                    <Upload className="text-gray-400 dark:text-muted-foreground mb-2" size={28} />
+                    <p className="text-gray-600 dark:text-muted-foreground font-medium">Click to upload</p>
                   </div>
                   <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                 </label>
@@ -532,8 +532,8 @@ function CreateEventForm() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Gallery slideshow</h2>
-            <p className="text-sm text-neutral-600">
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Gallery slideshow</h2>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">
               Extra photos shown as a slideshow on the public event page (up to 12).
             </p>
             {formData.galleryURLs.length > 0 ? (
@@ -557,7 +557,7 @@ function CreateEventForm() {
                 ))}
               </div>
             ) : null}
-            <label className="inline-flex items-center gap-2 cursor-pointer border border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm">
+            <label className="inline-flex items-center gap-2 cursor-pointer border border-dashed border-gray-300 dark:border-border rounded-lg px-4 py-3 text-sm">
               <Upload size={16} />
               {galleryUploading ? 'Uploading…' : 'Add gallery photos'}
               <input
@@ -572,16 +572,16 @@ function CreateEventForm() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Event Type & Audience</h2>
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Event Type & Audience</h2>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">
                 Category (public filter tag) *
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => handleChange('category', e.target.value)}
-                className="w-full min-h-[44px] px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full min-h-[44px] px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                 required
               >
                 {categories.map((cat) => (
@@ -594,7 +594,7 @@ function CreateEventForm() {
                     <option value={formData.category}>{formData.category}</option>
                   )}
               </select>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">
                 Managed in{' '}
                 <Link href="/admin/cms/events" className="underline">
                   CMS → Events
@@ -604,12 +604,12 @@ function CreateEventForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Who can attend?</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-3">Who can attend?</label>
               <div className="space-y-2">
                 {(['mixed', 'ladies-only', 'men-only'] as const).map((option) => (
                   <label
                     key={option}
-                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                    className="flex items-center gap-3 p-3 border border-gray-200 dark:border-border rounded-lg cursor-pointer hover:bg-gray-50"
                   >
                     <input
                       type="radio"
@@ -620,10 +620,10 @@ function CreateEventForm() {
                       className="w-4 h-4"
                     />
                     <div>
-                      <p className="font-medium text-gray-900 capitalize">
+                      <p className="font-medium text-gray-900 dark:text-foreground capitalize">
                         {option.replace('-', ' ')}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-muted-foreground">
                         {option === 'mixed' && 'Everyone is welcome'}
                         {option === 'ladies-only' && 'Exclusively for women'}
                         {option === 'men-only' && 'Exclusively for men'}
@@ -635,8 +635,8 @@ function CreateEventForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Event Tags</label>
-              <p className="text-xs text-gray-600 mb-3">Select all that apply</p>
+              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-3">Event Tags</label>
+              <p className="text-xs text-gray-600 dark:text-muted-foreground mb-3">Select all that apply</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {(
                   [
@@ -655,7 +655,7 @@ function CreateEventForm() {
                 ).map((tag) => (
                   <label
                     key={tag}
-                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                    className="flex items-center gap-2 p-2 border border-gray-200 dark:border-border rounded-lg cursor-pointer hover:bg-gray-50"
                   >
                     <input
                       type="checkbox"
@@ -668,7 +668,7 @@ function CreateEventForm() {
                       }}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm font-medium text-gray-700 capitalize">
+                    <span className="text-sm font-medium text-gray-700 dark:text-foreground capitalize">
                       {tag.replace('-', ' ')}
                     </span>
                   </label>
@@ -694,7 +694,7 @@ function CreateEventForm() {
           />
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-black">Pricing & Payment</h2>
+            <h2 className="text-lg font-semibold text-black dark:text-foreground">Pricing & Payment</h2>
 
             <div className="flex items-center gap-3">
               <input
@@ -704,30 +704,30 @@ function CreateEventForm() {
                 onChange={(e) => handleChange('isPaid', e.target.checked)}
                 className="w-4 h-4"
               />
-              <label htmlFor="isPaid" className="text-sm font-medium text-gray-700">
+              <label htmlFor="isPaid" className="text-sm font-medium text-gray-700 dark:text-foreground">
                 This is a paid event
               </label>
             </div>
 
             {formData.isPaid && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 dark:bg-muted p-4 rounded-lg">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Ticket Price</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Ticket Price</label>
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => handleChange('price', Number(e.target.value) || 0)}
                     placeholder="0.00"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">Currency</label>
                   <select
                     value={formData.currency}
                     onChange={(e) => handleChange('currency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                   >
                     <option value="AED">AED</option>
                     <option value="USD">USD</option>
@@ -737,13 +737,13 @@ function CreateEventForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-2">
                     Payment Gateway
                   </label>
                   <select
                     value={formData.paymentGateway || 'stripe'}
                     onChange={(e) => handleChange('paymentGateway', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
                   >
                     <option value="stripe">Stripe</option>
                     <option value="paypal">PayPal</option>
@@ -754,7 +754,7 @@ function CreateEventForm() {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-border">
             <button
               type="button"
               onClick={() => router.push('/admin/events')}

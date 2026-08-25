@@ -82,7 +82,7 @@ export default function SubmissionDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-neutral-600">Loading submission...</p>
+        <p className="text-neutral-600 dark:text-muted-foreground">Loading submission...</p>
       </div>
     )
   }
@@ -107,7 +107,7 @@ export default function SubmissionDetailPage() {
         </Link>
         <div className="min-w-0">
           <h1 className="text-2xl sm:text-3xl font-bold truncate">Submission Details</h1>
-          <p className="text-neutral-600 mt-1 truncate">{form.title}</p>
+          <p className="text-neutral-600 dark:text-muted-foreground mt-1 truncate">{form.title}</p>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ export default function SubmissionDetailPage() {
         <div
           className={`rounded-lg border px-4 py-3 text-sm ${
             message.type === 'success'
-              ? 'border-neutral-300 bg-neutral-50 text-neutral-900'
+              ? 'border-neutral-300 dark:border-border bg-neutral-50 dark:bg-muted text-neutral-900 dark:text-foreground'
               : 'border-red-200 bg-red-50 text-red-800'
           }`}
         >
@@ -126,22 +126,22 @@ export default function SubmissionDetailPage() {
       <Card className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-neutral-600">Email</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">Email</p>
             <p className="font-semibold mt-1 break-all">{submission.userEmail || 'N/A'}</p>
           </div>
           <div>
-            <p className="text-sm text-neutral-600">Status</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">Status</p>
             <p className="font-semibold mt-1 capitalize">{submission.status}</p>
           </div>
           <div>
-            <p className="text-sm text-neutral-600">Submitted</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">Submitted</p>
             <p className="font-semibold mt-1">
               {new Date(submission.submittedAt).toLocaleString()}
             </p>
           </div>
           {submission.reviewedAt ? (
             <div>
-              <p className="text-sm text-neutral-600">Reviewed</p>
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground">Reviewed</p>
               <p className="font-semibold mt-1">
                 {new Date(submission.reviewedAt).toLocaleString()}
               </p>
@@ -156,18 +156,18 @@ export default function SubmissionDetailPage() {
           {form.sections.map((section) => (
             <div key={section.id}>
               {section.title ? <h3 className="font-semibold mb-3">{section.title}</h3> : null}
-              <div className="space-y-4 pl-4 border-l-2 border-neutral-200">
+              <div className="space-y-4 pl-4 border-l-2 border-neutral-200 dark:border-border">
                 {section.fields.map((field) => {
                   const value = submission.responses[field.id]
                   return (
                     <div key={field.id}>
-                      <p className="text-sm text-neutral-600">{field.label}</p>
+                      <p className="text-sm text-neutral-600 dark:text-muted-foreground">{field.label}</p>
                       {field.type === 'file' && isFileFieldValue(value) ? (
                         <a
                           href={value.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-medium mt-1 text-black underline break-all"
+                          className="font-medium mt-1 text-black dark:text-foreground underline break-all"
                         >
                           {value.name || 'Download attachment'}
                         </a>
@@ -191,10 +191,10 @@ export default function SubmissionDetailPage() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add your review notes here..."
-          className="w-full p-3 border border-neutral-300 rounded text-sm"
+          className="w-full p-3 border border-neutral-300 dark:border-border rounded text-sm"
           rows={4}
         />
-        <p className="text-xs text-neutral-500 mt-2">Notes are saved when you change status.</p>
+        <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2">Notes are saved when you change status.</p>
       </Card>
 
       <div className="flex flex-wrap gap-2 justify-end">

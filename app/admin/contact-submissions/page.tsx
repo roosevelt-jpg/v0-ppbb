@@ -389,7 +389,7 @@ function ContactSubmissionsInner() {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium min-h-[36px] ${
                 categoryFilter === id
                   ? 'bg-black text-white ring-2 ring-offset-1 ring-black'
-                  : 'bg-white text-neutral-800 border border-neutral-300 hover:bg-neutral-50'
+                  : 'bg-white dark:bg-card text-neutral-800 dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50'
               }`}
             >
               {label}
@@ -397,11 +397,11 @@ function ContactSubmissionsInner() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 text-sm font-body text-neutral-600">
+        <div className="flex flex-wrap items-center gap-3 text-sm font-body text-neutral-600 dark:text-muted-foreground">
           <span>
-            <strong className="text-neutral-900">{filtered.length}</strong> showing
+            <strong className="text-neutral-900 dark:text-foreground">{filtered.length}</strong> showing
           </span>
-          <span className="text-neutral-300">·</span>
+          <span className="text-neutral-300 dark:text-muted-foreground">·</span>
           <span>
             <strong className="text-red-600">{unreadCount}</strong> unread
           </span>
@@ -409,19 +409,19 @@ function ContactSubmissionsInner() {
 
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-muted-foreground" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search name, email, phone, message…"
-              className="w-full min-h-[44px] pl-10 pr-4 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white"
+              className="w-full min-h-[44px] pl-10 pr-4 py-2 border border-[#e4e1da] dark:border-border rounded-lg font-body text-sm bg-white dark:bg-card"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white w-full lg:w-40"
+            className="min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg font-body text-sm bg-white dark:bg-card w-full lg:w-40"
           >
             <option value="all">All statuses</option>
             <option value="unread">Unread</option>
@@ -431,7 +431,7 @@ function ContactSubmissionsInner() {
           <select
             value={subjectFilter}
             onChange={(e) => setSubjectFilter(e.target.value)}
-            className="min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white w-full lg:w-64"
+            className="min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg font-body text-sm bg-white dark:bg-card w-full lg:w-64"
           >
             <option value="all">All subjects</option>
             {PARTNERS_CONTACT_SUBJECTS.map((s) => (
@@ -452,23 +452,23 @@ function ContactSubmissionsInner() {
         {loading ? (
           <div className="space-y-3 animate-pulse">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 bg-neutral-200 rounded-lg" />
+              <div key={i} className="h-16 bg-neutral-200 dark:bg-muted rounded-lg" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <Card className="p-10 text-center">
-            <Inbox className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
+            <Inbox className="w-10 h-10 mx-auto text-neutral-400 dark:text-muted-foreground mb-3" />
             <p className="font-headline text-xl font-bold mb-1">No submissions in this category</p>
-            <p className="font-body text-sm text-neutral-600">
+            <p className="font-body text-sm text-neutral-600 dark:text-muted-foreground">
               Partners and Contact page messages appear here. Business partnership requests are
               included under Sponsorship / Partnership.
             </p>
           </Card>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 min-w-0">
-            <div className="xl:col-span-3 admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
+            <div className="xl:col-span-3 admin-table-scroll border border-[#e4e1da] dark:border-border rounded-lg bg-white dark:bg-card min-w-0">
               <table className="w-full min-w-[720px] text-left text-sm font-body">
-                <thead className="bg-neutral-50 border-b border-[#e4e1da]">
+                <thead className="bg-neutral-50 dark:bg-muted border-b border-[#e4e1da] dark:border-border">
                   <tr>
                     <th className="px-3 py-3 font-semibold">Name</th>
                     <th className="px-3 py-3 font-semibold">Subject</th>
@@ -482,19 +482,19 @@ function ContactSubmissionsInner() {
                   {filtered.map((item) => (
                     <tr
                       key={item.id}
-                      className={`border-b border-[#e4e1da] hover:bg-neutral-50 cursor-pointer ${
-                        selected?.id === item.id ? 'bg-neutral-100' : ''
+                      className={`border-b border-[#e4e1da] dark:border-border hover:bg-neutral-50 cursor-pointer ${
+                        selected?.id === item.id ? 'bg-neutral-100 dark:bg-muted' : ''
                       } ${item.status === 'unread' ? 'font-medium' : ''}`}
                       onClick={() => void handleSelect(item)}
                     >
                       <td className="px-3 py-3 break-words max-w-[10rem]">
                         <div>{item.name}</div>
-                        <div className="text-xs text-neutral-500 break-all font-normal">
+                        <div className="text-xs text-neutral-500 dark:text-muted-foreground break-all font-normal">
                           {item.email}
                         </div>
                       </td>
                       <td className="px-3 py-3 break-words max-w-[9rem]">{item.subject}</td>
-                      <td className="px-3 py-3 whitespace-nowrap text-neutral-600">
+                      <td className="px-3 py-3 whitespace-nowrap text-neutral-600 dark:text-muted-foreground">
                         {categoryOf(item) === 'partnership'
                           ? 'Sponsorship / Partnership'
                           : 'Other'}
@@ -506,13 +506,13 @@ function ContactSubmissionsInner() {
                               ? 'bg-red-50 text-red-700'
                               : item.status === 'resolved'
                                 ? 'bg-green-50 text-green-700'
-                                : 'bg-neutral-100 text-neutral-600'
+                                : 'bg-neutral-100 dark:bg-muted text-neutral-600 dark:text-muted-foreground'
                           }`}
                         >
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-3 py-3 whitespace-nowrap text-neutral-600">
+                      <td className="px-3 py-3 whitespace-nowrap text-neutral-600 dark:text-muted-foreground">
                         {item.submittedAt ? item.submittedAt.toLocaleDateString() : '—'}
                       </td>
                       <td className="px-3 py-3">
@@ -541,14 +541,14 @@ function ContactSubmissionsInner() {
               {selected ? (
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
-                    <Mail className="w-5 h-5 text-neutral-500 mt-0.5 shrink-0" />
+                    <Mail className="w-5 h-5 text-neutral-500 dark:text-muted-foreground mt-0.5 shrink-0" />
                     <div className="min-w-0">
                       <h3 className="font-headline text-xl font-bold break-words">
                         {selected.name}
                       </h3>
                       <a
                         href={`mailto:${selected.email}`}
-                        className="font-body text-sm text-neutral-600 break-all underline"
+                        className="font-body text-sm text-neutral-600 dark:text-muted-foreground break-all underline"
                       >
                         {selected.email}
                       </a>
@@ -576,11 +576,11 @@ function ContactSubmissionsInner() {
                   <p className="font-body text-sm">
                     <span className="font-semibold">Source:</span> {sourceLabel(selected.source)}
                   </p>
-                  <p className="font-body text-sm text-neutral-600">
+                  <p className="font-body text-sm text-neutral-600 dark:text-muted-foreground">
                     {selected.submittedAt ? selected.submittedAt.toLocaleString() : 'No date'}
                   </p>
-                  <div className="pt-2 border-t border-[#e4e1da]">
-                    <p className="eyebrow text-neutral-500 mb-2">Message</p>
+                  <div className="pt-2 border-t border-[#e4e1da] dark:border-border">
+                    <p className="eyebrow text-neutral-500 dark:text-muted-foreground mb-2">Message</p>
                     <p className="font-body text-sm whitespace-pre-wrap break-words">
                       {selected.message}
                     </p>
@@ -598,7 +598,7 @@ function ContactSubmissionsInner() {
                   ) : null}
                 </div>
               ) : (
-                <p className="font-body text-sm text-neutral-500 text-center py-8">
+                <p className="font-body text-sm text-neutral-500 dark:text-muted-foreground text-center py-8">
                   Select a row to read the full message.
                 </p>
               )}
@@ -615,7 +615,7 @@ export default function ContactSubmissionsPage() {
     <Suspense
       fallback={
         <AdminPageLayout title="Contact Submissions">
-          <p className="text-sm text-neutral-500 py-8">Loading inbox…</p>
+          <p className="text-sm text-neutral-500 dark:text-muted-foreground py-8">Loading inbox…</p>
         </AdminPageLayout>
       }
     >

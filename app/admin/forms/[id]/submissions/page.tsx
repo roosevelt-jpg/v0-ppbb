@@ -28,7 +28,7 @@ function SubmissionsSkeleton() {
   return (
     <div className="space-y-3 animate-pulse">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-24 bg-neutral-200 rounded-lg" />
+        <div key={i} className="h-24 bg-neutral-200 dark:bg-muted rounded-lg" />
       ))}
     </div>
   )
@@ -140,7 +140,7 @@ export default function FormSubmissionsByFormPage() {
   if (loading) {
     return (
       <div className="space-y-6 max-w-5xl">
-        <div className="h-10 bg-neutral-200 rounded w-1/2 animate-pulse" />
+        <div className="h-10 bg-neutral-200 dark:bg-muted rounded w-1/2 animate-pulse" />
         <SubmissionsSkeleton />
       </div>
     )
@@ -155,10 +155,10 @@ export default function FormSubmissionsByFormPage() {
         </Link>
         <div className="flex-1 min-w-0">
           <h1 className="font-headline text-2xl sm:text-3xl font-bold truncate">{form?.title} — Submissions</h1>
-          <p className="text-neutral-600 font-body mt-1 text-sm sm:text-base">
+          <p className="text-neutral-600 dark:text-muted-foreground font-body mt-1 text-sm sm:text-base">
             {submissions.length} total submission{submissions.length === 1 ? '' : 's'}
             {form?.slug && form.status === 'active' ? (
-              <span className="block sm:inline sm:ml-3 text-neutral-500">
+              <span className="block sm:inline sm:ml-3 text-neutral-500 dark:text-muted-foreground">
                 Public URL: {getPublicFormPath(form.slug)}
               </span>
             ) : null}
@@ -166,7 +166,7 @@ export default function FormSubmissionsByFormPage() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+      <div className="rounded-lg border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-muted px-4 py-3 text-sm text-neutral-700 dark:text-foreground">
         Filter by stage below, then use <strong>Approve</strong> / <strong>Reject</strong> on each
         submission (or open details for notes).
       </div>
@@ -199,7 +199,7 @@ export default function FormSubmissionsByFormPage() {
 
       <div className="space-y-3">
         {filteredSubmissions.length === 0 ? (
-          <Card className="p-8 text-center text-neutral-600 font-body">
+          <Card className="p-8 text-center text-neutral-600 dark:text-muted-foreground font-body">
             <p>No submissions in this stage.</p>
           </Card>
         ) : (
@@ -215,18 +215,18 @@ export default function FormSubmissionsByFormPage() {
                         <span
                           className={`text-xs px-2 py-1 rounded capitalize border ${
                             submission.status === 'pending'
-                              ? 'bg-neutral-100 text-neutral-800 border-neutral-300'
+                              ? 'bg-neutral-100 dark:bg-muted text-neutral-800 dark:text-foreground border-neutral-300 dark:border-border'
                               : submission.status === 'approved'
                                 ? 'bg-black text-white border-black'
                                 : submission.status === 'rejected'
-                                  ? 'bg-white text-neutral-900 border-neutral-400'
-                                  : 'bg-neutral-200 text-neutral-800 border-neutral-300'
+                                  ? 'bg-white dark:bg-card text-neutral-900 dark:text-foreground border-neutral-400 dark:border-border'
+                                  : 'bg-neutral-200 dark:bg-muted text-neutral-800 dark:text-foreground border-neutral-300 dark:border-border'
                           }`}
                         >
                           {submission.status}
                         </span>
                       </div>
-                      <p className="text-sm text-neutral-600 font-body">
+                      <p className="text-sm text-neutral-600 dark:text-muted-foreground font-body">
                         {new Date(submission.submittedAt).toLocaleString()}
                       </p>
                     </div>
@@ -277,9 +277,9 @@ export default function FormSubmissionsByFormPage() {
                   </div>
 
                   {form?.sections.map((section) => (
-                    <div key={section.id} className="border-t border-neutral-100 pt-3">
+                    <div key={section.id} className="border-t border-neutral-100 dark:border-border pt-3">
                       {section.title ? (
-                        <p className="text-xs uppercase tracking-[0.12em] text-neutral-500 font-body mb-2">
+                        <p className="text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-muted-foreground font-body mb-2">
                           {section.title}
                         </p>
                       ) : null}
@@ -288,18 +288,18 @@ export default function FormSubmissionsByFormPage() {
                           const value = submission.responses[field.id]
                           return (
                             <div key={field.id} className="text-sm font-body">
-                              <p className="text-neutral-500">{field.label}</p>
+                              <p className="text-neutral-500 dark:text-muted-foreground">{field.label}</p>
                               {field.type === 'file' && isFileFieldValue(value) ? (
                                 <a
                                   href={value.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-black underline font-medium break-all"
+                                  className="text-black dark:text-foreground underline font-medium break-all"
                                 >
                                   {value.name || 'Download attachment'}
                                 </a>
                               ) : (
-                                <p className="font-medium text-neutral-900 break-words">
+                                <p className="font-medium text-neutral-900 dark:text-foreground break-words">
                                   {formatFieldDisplayValue(value, field.type)}
                                 </p>
                               )}

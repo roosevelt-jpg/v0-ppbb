@@ -183,14 +183,14 @@ export default function DonationsPage() {
   return (
     <AdminPageLayout title="Donations" subtitle="Manage and track all donations">
       <div className="space-y-6">
-        <div className="bg-white border border-neutral-200 rounded-lg p-6">
-          <p className="text-sm font-medium text-neutral-600 uppercase tracking-wide">
+        <div className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-6">
+          <p className="text-sm font-medium text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">
             Total Donations
           </p>
-          <p className="text-4xl font-bold text-neutral-900 mt-2">
+          <p className="text-4xl font-bold text-neutral-900 dark:text-foreground mt-2">
             AED {totalDonations.toLocaleString()}
           </p>
-          <p className="text-xs text-neutral-500 mt-2">
+          <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2">
             {visibleDonations.length} donations
             {actingId ? ' · updating…' : ''}
           </p>
