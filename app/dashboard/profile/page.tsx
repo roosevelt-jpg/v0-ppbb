@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { db } from '@/lib/firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 
@@ -87,14 +88,13 @@ export default function ProfileEditPage() {
         return
       }
 
-      await setDoc(
+      const { id: _id, ...rest } = formData
+      await updateDoc(
         doc(db, 'users', authUser.id),
-        {
-          ...formData,
-          id: authUser.id,
+        sanitizeForFirestore({
+          ...rest,
           updatedAt: new Date(),
-        },
-        { merge: true }
+        })
       )
 
       setSuccess('Profile updated successfully!')
@@ -280,6 +280,21 @@ export default function ProfileEditPage() {
                 ))}
               </select>
             </div>
+          </div>
+        </section>
+
+        {/* About */}
+        <section>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--foreground)' }}>About</h2>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Motivation</label>
+            <textarea
+              name="motivation"
+              placeholder="Tell us about your motivation and interests..."
+              value={formData.motivation || ''}
+              onChange={handleInputChange}
+              style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box', minHeight: '100px', fontFamily: 'inherit' }}
+            />
           </div>
         </section>
 
