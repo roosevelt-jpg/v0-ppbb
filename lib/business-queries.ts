@@ -551,6 +551,14 @@ export function subscribeToPartnershipRequests(
   )
 }
 
+export async function getPartnershipRequestById(
+  requestId: string
+): Promise<PartnershipRequest | null> {
+  const snap = await getDoc(doc(db, 'partnerships', requestId))
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() } as PartnershipRequest
+}
+
 export async function withdrawPartnershipRequest(requestId: string) {
   await updateDoc(doc(db, 'partnerships', requestId), {
     status: 'declined',

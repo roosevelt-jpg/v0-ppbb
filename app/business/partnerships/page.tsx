@@ -169,7 +169,7 @@ export default function PartnershipsPage() {
                         ) : null}
                         {req.status === 'declined' ? (
                           <Link
-                            href="/business/partnerships/new"
+                            href={`/business/partnerships/new?resubmit=${req.id}`}
                             className="text-xs text-neutral-700 dark:text-neutral-200 underline"
                           >
                             Edit & Resubmit
