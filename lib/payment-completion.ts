@@ -167,6 +167,56 @@ function portalFieldsFromPlan(
   }
 }
 
+/**
+ * Look up the `checkoutSessions` doc created server-side when a PayPal/Ziina
+ * membership checkout was initiated, and atomically mark it consumed.
+ *
+ * The return-URL handlers for PayPal and Ziina only get an untrusted query
+ * string back from the browser — a visitor can freely rewrite `userId` or
+ * `planId` in that URL while keeping their own genuinely-completed payment
+ * reference, which would otherwise let a real (but cheap) payment activate
+ * an arbitrary, more expensive plan. It would also let the same return URL
+ * be replayed indefinitely to keep pushing the renewal date forward with no
+ * new payment. This resolves the real userId/planId from the record created
+ * at checkout time (not client-suppliable) and fails once that record has
+ * already been consumed once, closing both gaps.
+ */
+export async function consumeMembershipCheckoutSession(
+  gateway: 'paypal' | 'ziina',
+  matchField: 'subscriptionId' | 'transactionId',
+  matchValue: string
+): Promise<{ userId: string; planId: string }> {
+  const db = getAdminDb()
+  const snap = await db
+    .collection('checkoutSessions')
+    .where('gateway', '==', gateway)
+    .where(matchField, '==', matchValue)
+    .limit(1)
+    .get()
+
+  if (snap.empty) {
+    throw new Error('Checkout session not found')
+  }
+
+  const sessionRef = snap.docs[0].ref
+  return db.runTransaction(async (tx) => {
+    const fresh = await tx.get(sessionRef)
+    const session = fresh.data() || {}
+    if (session.status !== 'pending') {
+      throw new Error('This payment has already been processed')
+    }
+
+    const userId = String(session.userId || '')
+    const planId = String(session.planId || '')
+    if (!userId || !planId) {
+      throw new Error('Checkout session is missing userId/planId')
+    }
+
+    tx.update(sessionRef, { status: 'completed', completedAt: Timestamp.now() })
+    return { userId, planId }
+  })
+}
+
 /** Activate membership on the user after a successful PayPal/Ziina (or manual/promo) payment. */
 export async function completeMembershipPayment(params: {
   userId: string

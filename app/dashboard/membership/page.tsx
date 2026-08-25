@@ -61,11 +61,19 @@ export default function MembershipPage() {
       return
     }
 
-    getDoc(doc(db, 'users', user.id))
-      .then((snap) => {
+    // Live listener (not a one-time getDoc): the redirect back from Stripe
+    // arrives before the webhook has necessarily finished crediting the
+    // membership, and PayPal/Ziina returns happen inline on this same
+    // request cycle — either way, a one-time fetch here could render the
+    // stale "pending_payment" state and never update without a manual
+    // reload. This picks up the change as soon as it lands.
+    const unsubProfile = onSnapshot(
+      doc(db, 'users', user.id),
+      (snap) => {
         if (snap.exists()) setProfile(snap.data())
-      })
-      .catch((err) => console.error('[v0] profile error:', err))
+      },
+      (err) => console.error('[v0] profile error:', err)
+    )
 
     const unsub = onSnapshot(
       query(collection(db, 'pricingPlans'), where('active', '==', true)),
@@ -82,7 +90,10 @@ export default function MembershipPage() {
       }
     )
 
-    return () => unsub()
+    return () => {
+      unsubProfile()
+      unsub()
+    }
   }, [authLoading, user?.id])
 
   const resolveGateway = (plan: PricingPlan): 'stripe' | 'paypal' | 'ziina' => {

@@ -3,6 +3,7 @@ import { capturePayPalOrder, getPayPalSubscription } from '@/lib/paypal-client'
 import {
   completeEventTicketPayment,
   completeMembershipPayment,
+  consumeMembershipCheckoutSession,
   getPublicAppUrl,
 } from '@/lib/payment-completion'
 
@@ -45,10 +46,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Membership subscription return
-    const planId = sp.get('planId') || ''
-    const userId = sp.get('userId') || ''
     const subscriptionId = sp.get('subscription_id') || ''
-    if (!planId || !userId || !subscriptionId) {
+    if (!subscriptionId) {
       return NextResponse.redirect(`${site}/dashboard/membership?status=error&reason=missing_params`)
     }
 
@@ -59,6 +58,17 @@ export async function GET(request: NextRequest) {
         `${site}/dashboard/membership?status=error&reason=subscription_${sub.status || 'unknown'}`
       )
     }
+
+    // Resolve the real userId/planId from the checkout session created
+    // server-side at checkout time — never from this URL's query params,
+    // which a visitor can freely rewrite while keeping their own genuinely
+    // approved subscriptionId. This also makes the return idempotent: a
+    // second visit to the same URL fails here instead of re-crediting.
+    const { userId, planId } = await consumeMembershipCheckoutSession(
+      'paypal',
+      'subscriptionId',
+      subscriptionId
+    )
 
     const { membershipUrl } = await completeMembershipPayment({
       userId,

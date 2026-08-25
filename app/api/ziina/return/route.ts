@@ -3,6 +3,7 @@ import { getZiinaPaymentIntent } from '@/lib/ziina-client'
 import {
   completeEventTicketPayment,
   completeMembershipPayment,
+  consumeMembershipCheckoutSession,
   getPublicAppUrl,
 } from '@/lib/payment-completion'
 
@@ -59,11 +60,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(confirmationUrl)
     }
 
-    const planId = sp.get('planId') || ''
-    const userId = sp.get('userId') || ''
-    if (!planId || !userId) {
-      return NextResponse.redirect(`${site}/dashboard/membership?status=error&reason=missing_params`)
-    }
+    // Resolve the real userId/planId from the checkout session created
+    // server-side at checkout time — never from this URL's query params,
+    // which a visitor can freely rewrite while keeping their own genuinely
+    // completed paymentIntentId. This also makes the return idempotent: a
+    // second visit to the same URL fails here instead of re-crediting.
+    const { userId, planId } = await consumeMembershipCheckoutSession(
+      'ziina',
+      'transactionId',
+      paymentIntentId
+    )
 
     const { membershipUrl } = await completeMembershipPayment({
       userId,
