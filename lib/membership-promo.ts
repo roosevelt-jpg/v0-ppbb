@@ -459,9 +459,10 @@ export async function redeemMembershipPromo(input: {
   } catch (err) {
     // Roll back reservation so the user can retry and the code stays usable.
     // For the trial branch, this only fires when creating the Stripe
-    // Checkout session itself fails (e.g. Stripe not configured) — a member
-    // who reserves the code but abandons checkout is rolled back separately
-    // by the checkout.session.expired webhook handler.
+    // subscription/intent itself fails (e.g. Stripe not configured) — a
+    // member who reserves the code but abandons the embedded card form is
+    // rolled back separately, when their subscription hits
+    // incomplete_expired, in the customer.subscription.updated handler.
     await rollbackMembershipPromoReservation(redeemedPromo.id, input.userId).catch((rollbackErr) => {
       console.error('[redeemMembershipPromo] rollback failed', rollbackErr)
     })
