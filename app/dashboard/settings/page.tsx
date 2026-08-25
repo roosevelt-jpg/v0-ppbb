@@ -324,13 +324,15 @@ function SettingsContent() {
       return
     }
 
-    const uid = authUser?.id ?? firebaseUser?.uid
-    const token = await firebaseUser?.getIdToken()
-    if (!uid || !token) return
-
     setDeleting(true)
     setError(null)
     try {
+      const uid = authUser?.id ?? firebaseUser?.uid
+      const token = await firebaseUser?.getIdToken()
+      if (!uid || !token) {
+        throw new Error('You need to be signed in to delete your account.')
+      }
+
       const res = await fetch('/api/account/delete', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -373,7 +375,15 @@ function SettingsContent() {
         {success ? <p className="text-sm text-green-700">{success}</p> : null}
 
         <Card className="p-6 border border-neutral-200 dark:border-border w-full">
-          <h2 className="text-xl font-bold mb-6 text-neutral-900 dark:text-foreground">Personal Information</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Personal Information</h2>
+            <Link
+              href="/dashboard/profile"
+              className="text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:underline"
+            >
+              More profile details →
+            </Link>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 pb-6 border-b border-neutral-200 dark:border-border">
             <UserAvatar user={user} size="lg" imageUrl={pictureURL || null} />
