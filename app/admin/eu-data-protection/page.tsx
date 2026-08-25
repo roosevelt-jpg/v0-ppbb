@@ -29,6 +29,9 @@ export default function EUDataProtectionAdmin() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [status, setStatus] = useState<'draft' | 'active' | 'archived'>('draft')
   const [requiresAcceptance, setRequiresAcceptance] = useState(true)
+  const [acceptanceStats, setAcceptanceStats] = useState<{ total: number; currentVersion: number } | null>(
+    null
+  )
 
   const loadPolicy = useCallback(async () => {
     setLoading(true)
@@ -67,6 +70,14 @@ export default function EUDataProtectionAdmin() {
   useEffect(() => {
     void loadPolicy()
   }, [loadPolicy])
+
+  useEffect(() => {
+    adminApiFetch<{ total: number; currentVersion: number }>('/api/admin/eu-policy/acceptances')
+      .then((json) => {
+        if (json.success && json.data) setAcceptanceStats(json.data)
+      })
+      .catch((error) => console.error('[v0] Error loading acceptance stats:', error))
+  }, [policy?.version])
 
   const persistPolicy = async (publish: boolean) => {
     if (!title.trim() || !content.trim()) {
@@ -143,6 +154,19 @@ export default function EUDataProtectionAdmin() {
               {message.text}
             </p>
           </Card>
+        )}
+
+        {acceptanceStats && (
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="p-4 border border-neutral-200">
+              <p className="text-sm text-neutral-500">Total acceptances recorded</p>
+              <p className="text-2xl font-semibold text-neutral-900">{acceptanceStats.total}</p>
+            </Card>
+            <Card className="p-4 border border-neutral-200">
+              <p className="text-sm text-neutral-500">Accepted current version (v{policy?.version ?? '—'})</p>
+              <p className="text-2xl font-semibold text-neutral-900">{acceptanceStats.currentVersion}</p>
+            </Card>
+          </div>
         )}
 
         <Card className="p-6 sm:p-8 border border-neutral-200">

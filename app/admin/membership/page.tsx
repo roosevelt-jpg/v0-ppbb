@@ -12,7 +12,7 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore'
-import { Users, AlertCircle, CheckCircle, Download, Trash2 } from 'lucide-react'
+import { Users, AlertCircle, CheckCircle, Download, Trash2, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { AdminSelect } from '@/components/admin-select'
@@ -377,32 +377,44 @@ export default function MembershipPage() {
             return (
               <Card
                 key={`detail-${plan.id}`}
-                className="p-4 sm:p-6 border-2"
-                style={{ borderColor: accent, backgroundColor: `${accent}08` }}
+                className="flex flex-col p-4 sm:p-6 rounded-2xl border border-neutral-200 shadow-sm transition hover:shadow-lg"
+                style={{ borderTop: `4px solid ${accent}`, backgroundColor: `${accent}06` }}
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-headline font-bold truncate" style={{ color: accent }}>
-                      {plan.name}
-                    </h3>
-                    <p className="text-sm font-medium mt-1" style={{ color: accent }}>
-                      {count} member{count === 1 ? '' : 's'} · {formatPlanPrice(plan)}
-                    </p>
-                    {plan.active === false ? (
-                      <p className="text-xs text-neutral-500 mt-1 font-body">Inactive plan</p>
-                    ) : null}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="flex items-center justify-center w-11 h-11 rounded-full text-xl shrink-0"
+                      style={{ backgroundColor: `${accent}1a` }}
+                    >
+                      {plan.icon || '🎯'}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-headline font-bold leading-tight truncate" style={{ color: accent }}>
+                        {plan.name}
+                      </h3>
+                      <p className="text-xs font-semibold font-body mt-0.5" style={{ color: accent }}>
+                        {count} member{count === 1 ? '' : 's'} · {formatPlanPrice(plan)}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-2xl shrink-0">{plan.icon || '🎯'}</span>
+                  {plan.active === false ? (
+                    <span className="px-2 py-1 bg-neutral-200 text-neutral-600 text-xs font-medium rounded-full shrink-0">
+                      Inactive
+                    </span>
+                  ) : null}
                 </div>
                 {plan.description ? (
-                  <p className="text-sm text-neutral-600 font-body mb-3">{plan.description}</p>
+                  <p className="text-sm text-neutral-600 font-body mb-4 pb-4 border-b border-neutral-100">
+                    {plan.description}
+                  </p>
                 ) : null}
-                <div className="space-y-2">
+                <div className="flex-1 space-y-2">
                   {items.length > 0 ? (
                     items.map((item, i) => (
-                      <p key={i} className="text-sm text-neutral-700 font-body">
-                        • {item}
-                      </p>
+                      <div key={i} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: accent }} strokeWidth={2.5} />
+                        <p className="text-sm text-neutral-700 font-body leading-snug">{item}</p>
+                      </div>
                     ))
                   ) : (
                     <p className="text-sm text-neutral-500 font-body">

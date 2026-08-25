@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { db } from '@/lib/firebase'
-import { collection, addDoc } from 'firebase/firestore'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { EUDataProtectionPolicy } from '@/lib/types'
 import { AlertCircle, X } from 'lucide-react'
@@ -76,26 +74,26 @@ export function EUDataProtectionPopup() {
 
     setIsSubmitting(true)
     try {
-      // Store acceptance in localStorage
+      // Store acceptance in localStorage so we don't re-prompt this browser
       localStorage.setItem('eu-data-protection-accepted', 'true')
       localStorage.setItem('eu-data-protection-version', policy.version.toString())
       localStorage.setItem('eu-data-protection-accepted-at', new Date().toISOString())
 
-      // If user is logged in, also record in Firestore
-      if (userId) {
-        try {
-          await addDoc(collection(db, 'policyAcceptances'), {
-            userId: userId,
-            policyId: policy.id,
-            policyVersion: policy.version,
-            acceptedAt: new Date(),
-            userAgent: navigator.userAgent,
-            acceptedAtISO: new Date().toISOString(),
-          })
-        } catch (error) {
-          console.warn('[v0] Could not record acceptance in Firestore:', error)
-          // Continue anyway - localStorage is sufficient
-        }
+      // Record the acceptance server-side for every visitor, logged in or
+      // not — this is the durable, admin-visible proof of consent.
+      try {
+        const token = userId ? await getAuth().currentUser?.getIdToken() : null
+        await fetch('/api/eu-policy/accept', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ policyId: policy.id, policyVersion: policy.version }),
+        })
+      } catch (error) {
+        console.warn('[v0] Could not record acceptance server-side:', error)
+        // Continue anyway - the visitor has still accepted locally
       }
 
       // Close popup

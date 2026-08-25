@@ -9,9 +9,9 @@ import { AdminSelect } from '@/components/admin-select'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { PricingPlan } from '@/lib/pricing-types'
-import { getPlanIncludedItems } from '@/lib/pricing-utils'
+import { getPlanIncludedItems, formatPlanPriceDetailed } from '@/lib/pricing-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
-import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X, Check } from 'lucide-react'
 import { BUTTON_PRIMARY, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 
@@ -408,42 +408,65 @@ export default function PricingManagementPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {plans.map((plan) => {
             const items = getPlanIncludedItems(plan)
+            const accent = plan.color || '#111111'
+            const { amount, period } = formatPlanPriceDetailed(plan)
             return (
             <Card
               key={plan.id}
-              className="p-6 border-2 transition hover:shadow-lg"
-              style={{ borderColor: plan.color || '#e5e7eb' }}
+              className="relative flex flex-col p-6 rounded-2xl border border-neutral-200 shadow-sm transition hover:shadow-xl hover:-translate-y-0.5"
+              style={{ borderTop: `4px solid ${accent}` }}
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{plan.icon}</span>
-                  <div>
-                    <h3 className="font-bold text-lg">{plan.name}</h3>
-                    {plan.description && <p className="text-xs text-neutral-600">{plan.description}</p>}
-                  </div>
+              {!plan.active && (
+                <span className="absolute top-4 right-4 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
+                  Inactive
+                </span>
+              )}
+
+              <div className="flex items-center gap-3 mb-5">
+                <span
+                  className="flex items-center justify-center w-12 h-12 rounded-full text-2xl shrink-0"
+                  style={{ backgroundColor: `${accent}1a` }}
+                >
+                  {plan.icon}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-headline font-bold text-lg leading-tight truncate">{plan.name}</h3>
+                  {plan.description && (
+                    <p className="text-xs text-neutral-500 font-body mt-0.5 line-clamp-2">{plan.description}</p>
+                  )}
                 </div>
-                {!plan.active && (
-                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">Inactive</span>
+              </div>
+
+              <div className="mb-5 pb-5 border-b border-neutral-100">
+                <p className="flex items-baseline gap-1.5">
+                  <span className="text-3xl font-headline font-extrabold text-neutral-900">{amount}</span>
+                  <span className="text-sm text-neutral-500 font-body">/{period}</span>
+                </p>
+              </div>
+
+              <div className="flex-1 space-y-2.5 mb-6">
+                {items.length > 0 ? (
+                  <>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">
+                      What&apos;s Included
+                    </p>
+                    {items.map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <Check
+                          className="w-4 h-4 mt-0.5 shrink-0"
+                          style={{ color: accent }}
+                          strokeWidth={2.5}
+                        />
+                        <p className="text-sm text-neutral-700 font-body leading-snug">{item}</p>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-sm text-neutral-400 font-body italic">No features listed yet.</p>
                 )}
               </div>
 
-              <div className="mb-4 pb-4 border-b border-neutral-200">
-                <p className="text-2xl font-bold">
-                  {plan.currency} {(plan.price / 100).toFixed(2)}
-                </p>
-                <p className="text-xs text-neutral-600">per {plan.billingPeriod}</p>
-              </div>
-
-              {items.length > 0 && (
-                <div className="space-y-1 mb-4">
-                  <p className="text-xs font-semibold text-neutral-600 mb-2">What&apos;s Included:</p>
-                  {items.map((item, idx) => (
-                    <p key={idx} className="text-xs text-neutral-700">• {item}</p>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-4 border-t border-neutral-200">
+              <div className="flex gap-2 pt-4 border-t border-neutral-100">
                 <button
                   type="button"
                   onClick={() => handleEditPlan(plan)}

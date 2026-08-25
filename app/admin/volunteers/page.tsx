@@ -13,8 +13,11 @@ import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
+import { deleteDocument } from '@/lib/admin-queries'
+import { useAdminAudit } from '@/lib/use-admin-audit'
 
 export default function VolunteersPage() {
+  const audit = useAdminAudit()
   const [volunteers, setVolunteers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
   const [selectedVolunteer, setSelectedVolunteer] = React.useState<any>(null)
@@ -131,6 +134,23 @@ export default function VolunteersPage() {
     setEditModalOpen(true)
   }
 
+  const handleDeleteVolunteer = async (volunteer: any) => {
+    if (!confirm(`Are you sure you want to delete ${volunteer.firstName || 'this volunteer'}?`)) return
+
+    const result = await deleteDocument('users', volunteer.id)
+    if (!result.success) {
+      alert('Failed to delete volunteer. Please try again.')
+      return
+    }
+    audit({
+      actionType: 'delete',
+      action: `Deleted volunteer: ${volunteer.id}`,
+      entityType: 'member',
+      entityId: volunteer.id,
+      status: 'success',
+    })
+  }
+
   return (
     <AdminPageLayout
       title="Volunteers"
@@ -144,11 +164,7 @@ export default function VolunteersPage() {
           loading={loading}
           searchPlaceholder="Search by name, email, or location..."
           onEdit={handleEditVolunteer}
-          onDelete={(volunteer) => {
-            if (confirm(`Are you sure you want to delete ${volunteer.firstName}?`)) {
-              console.log('Delete volunteer:', volunteer)
-            }
-          }}
+          onDelete={(volunteer) => void handleDeleteVolunteer(volunteer)}
         />
 
         {/* Edit Volunteer Modal */}
