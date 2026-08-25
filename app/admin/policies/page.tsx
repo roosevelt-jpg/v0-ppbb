@@ -179,7 +179,7 @@ export default function AdminPolicies() {
     return (
       <>
         <div className="p-8">
-          <p style={{ color: '#888888' }}>Loading policies...</p>
+          <p style={{ color: 'var(--muted-foreground)' }}>Loading policies...</p>
         </div>
       </>
     )
@@ -189,8 +189,8 @@ export default function AdminPolicies() {
     <>
       <div className="p-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 style={{ color: '#111111' }} className="text-3xl font-bold">Policies</h1>
-          <Button onClick={() => setShowCreateModal(true)} style={{ backgroundColor: '#111111', color: '#f7f6f2' }}>
+          <h1 style={{ color: 'var(--foreground)' }} className="text-3xl font-bold">Policies</h1>
+          <Button onClick={() => setShowCreateModal(true)} style={{ backgroundColor: 'var(--foreground)', color: 'var(--background)' }}>
             <Plus className="h-4 w-4 mr-2" />
             Add Policy
           </Button>
@@ -199,18 +199,18 @@ export default function AdminPolicies() {
         {/* Custom Policies */}
         {customPolicies.length > 0 && (
           <div className="mb-12">
-            <h2 style={{ color: '#111111' }} className="text-2xl font-bold mb-6">Custom Policies</h2>
+            <h2 style={{ color: 'var(--foreground)' }} className="text-2xl font-bold mb-6">Custom Policies</h2>
             <div className="space-y-4">
               {customPolicies.map((policy) => (
-                <Card key={policy.id} style={{ borderColor: '#e4e1da' }} className="p-6 flex justify-between items-center">
+                <Card key={policy.id} style={{ borderColor: 'var(--border)' }} className="p-6 flex justify-between items-center">
                   <div>
-                    <h3 style={{ color: '#111111' }} className="font-semibold">{policy.title}</h3>
-                    <p style={{ color: '#888888' }} className="text-sm">/{policy.slug}</p>
+                    <h3 style={{ color: 'var(--foreground)' }} className="font-semibold">{policy.title}</h3>
+                    <p style={{ color: 'var(--muted-foreground)' }} className="text-sm">/{policy.slug}</p>
                   </div>
-                  <Button 
-                    onClick={() => handleDeletePolicy(policy.id!)} 
+                  <Button
+                    onClick={() => handleDeletePolicy(policy.id!)}
                     variant="ghost"
-                    style={{ color: '#d32f2f' }}
+                    className="text-red-600 dark:text-red-400"
                     size="sm"
                   >
                     Delete
@@ -222,23 +222,23 @@ export default function AdminPolicies() {
         )}
         
         {/* Template Policies */}
-        <h2 style={{ color: '#111111' }} className="text-2xl font-bold mb-6">Template Policies</h2>
+        <h2 style={{ color: 'var(--foreground)' }} className="text-2xl font-bold mb-6">Template Policies</h2>
         <div className="space-y-6">
           {Object.entries(policies).map(([policyType, policy]) => (
             <Card 
               key={policyType} 
-              style={{ borderColor: '#e4e1da' }}
+              style={{ borderColor: 'var(--border)' }}
               className="p-6"
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 style={{ color: '#111111' }} className="text-xl font-bold">
+                  <h3 style={{ color: 'var(--foreground)' }} className="text-xl font-bold">
                     {policy.title}
                   </h3>
-                  <p style={{ color: '#888888' }} className="text-sm mt-1">
+                  <p style={{ color: 'var(--muted-foreground)' }} className="text-sm mt-1">
                     Slug: /{policy.slug} • Version: {policy.version}
                   </p>
-                  <p style={{ color: '#888888' }} className="text-xs mt-2">
+                  <p style={{ color: 'var(--muted-foreground)' }} className="text-xs mt-2">
                     Last updated: {new Date(policy.lastUpdated).toLocaleString()}
                   </p>
                 </div>
@@ -261,9 +261,9 @@ export default function AdminPolicies() {
               </div>
 
               {editingPolicy === policyType && (
-                <div className="mt-6 space-y-4 pt-6 border-t" style={{ borderColor: '#e4e1da' }}>
+                <div className="mt-6 space-y-4 pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
                   <div>
-                    <label style={{ color: '#333333' }} className="block text-sm font-medium mb-2">
+                    <label style={{ color: 'var(--accent)' }} className="block text-sm font-medium mb-2">
                       Policy Title
                     </label>
                     <input
@@ -275,13 +275,13 @@ export default function AdminPolicies() {
                           [policyType]: { ...policy, title: e.target.value },
                         })
                       }
-                      style={{ borderColor: '#e4e1da', color: '#333333', backgroundColor: '#ffffff' }}
+                      style={{ borderColor: 'var(--border)', color: 'var(--accent)', backgroundColor: 'var(--input)' }}
                       className="w-full px-4 py-2 border rounded-lg"
                     />
                   </div>
 
                   <div>
-                    <label style={{ color: '#333333' }} className="block text-sm font-medium mb-2">
+                    <label style={{ color: 'var(--accent)' }} className="block text-sm font-medium mb-2">
                       Slug (URL path)
                     </label>
                     <input
@@ -293,13 +293,13 @@ export default function AdminPolicies() {
                           [policyType]: { ...policy, slug: e.target.value },
                         })
                       }
-                      style={{ borderColor: '#e4e1da', color: '#333333', backgroundColor: '#ffffff' }}
+                      style={{ borderColor: 'var(--border)', color: 'var(--accent)', backgroundColor: 'var(--input)' }}
                       className="w-full px-4 py-2 border rounded-lg"
                     />
                   </div>
 
                   <div>
-                    <label style={{ color: '#333333' }} className="block text-sm font-medium mb-2">
+                    <label style={{ color: 'var(--accent)' }} className="block text-sm font-medium mb-2">
                       Content
                     </label>
                     <textarea
@@ -310,14 +310,14 @@ export default function AdminPolicies() {
                           [policyType]: { ...policy, content: e.target.value },
                         })
                       }
-                      style={{ borderColor: '#e4e1da', color: '#333333', backgroundColor: '#ffffff' }}
+                      style={{ borderColor: 'var(--border)', color: 'var(--accent)', backgroundColor: 'var(--input)' }}
                       className="w-full px-4 py-2 border rounded-lg font-mono text-sm h-96"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label style={{ color: '#333333' }} className="block text-sm font-medium mb-2">
+                      <label style={{ color: 'var(--accent)' }} className="block text-sm font-medium mb-2">
                         Status
                       </label>
                       <select
@@ -328,7 +328,7 @@ export default function AdminPolicies() {
                             [policyType]: { ...policy, status: e.target.value as 'active' | 'archived' },
                           })
                         }
-                        style={{ borderColor: '#e4e1da', color: '#333333', backgroundColor: '#ffffff' }}
+                        style={{ borderColor: 'var(--border)', color: 'var(--accent)', backgroundColor: 'var(--input)' }}
                         className="w-full px-4 py-2 border rounded-lg"
                       >
                         <option value="active">Active</option>
@@ -337,7 +337,7 @@ export default function AdminPolicies() {
                     </div>
 
                     <div>
-                      <label style={{ color: '#333333' }} className="block text-sm font-medium mb-2">
+                      <label style={{ color: 'var(--accent)' }} className="block text-sm font-medium mb-2">
                         Effective Date
                       </label>
                       <input
@@ -349,7 +349,7 @@ export default function AdminPolicies() {
                             [policyType]: { ...policy, effectiveDate: new Date(e.target.value) },
                           })
                         }
-                        style={{ borderColor: '#e4e1da', color: '#333333', backgroundColor: '#ffffff' }}
+                        style={{ borderColor: 'var(--border)', color: 'var(--accent)', backgroundColor: 'var(--input)' }}
                         className="w-full px-4 py-2 border rounded-lg"
                       />
                     </div>
@@ -359,7 +359,7 @@ export default function AdminPolicies() {
                     <Button
                       onClick={() => handleSavePolicy(policyType)}
                       disabled={saving}
-                      style={{ backgroundColor: '#111111', color: '#ffffff' }}
+                      style={{ backgroundColor: 'var(--foreground)', color: 'var(--background)' }}
                       className="flex-1"
                     >
                       <Save className="h-4 w-4 mr-2" />
@@ -379,22 +379,21 @@ export default function AdminPolicies() {
         </div>
 
         {/* Preview URLs */}
-        <Card style={{ borderColor: '#e4e1da' }} className="p-6 mt-8 bg-[#f7f6f2]">
-          <h3 style={{ color: '#111111' }} className="text-lg font-bold mb-4">
+        <Card style={{ borderColor: 'var(--border)', backgroundColor: 'var(--secondary)' }} className="p-6 mt-8">
+          <h3 style={{ color: 'var(--foreground)' }} className="text-lg font-bold mb-4">
             Public Policy URLs
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {Object.entries(policies).map(([policyType, policy]) => (
               <div key={policyType}>
-                <p style={{ color: '#888888' }} className="text-xs font-medium uppercase mb-2">
+                <p style={{ color: 'var(--muted-foreground)' }} className="text-xs font-medium uppercase mb-2">
                   {policy.title}
                 </p>
                 <a
                   href={`/pages/${policy.slug === 'terms-conditions' ? 'terms-of-service' : policy.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#1565C0' }}
-                  className="text-sm font-mono break-all hover:underline"
+                  className="text-sm font-mono break-all hover:underline text-blue-600 dark:text-blue-400"
                 >
                   /pages/{policy.slug === 'terms-conditions' ? 'terms-of-service' : policy.slug}
                 </a>
@@ -407,32 +406,32 @@ export default function AdminPolicies() {
       {/* Create Policy Modal */}
       {showCreateModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Card style={{ borderColor: '#e4e1da', width: '90%', maxWidth: '500px' }} className="p-8 space-y-4">
-            <h2 style={{ color: '#111111' }} className="text-2xl font-bold">Create New Policy</h2>
+          <Card style={{ borderColor: 'var(--border)', width: '90%', maxWidth: '500px' }} className="p-8 space-y-4">
+            <h2 style={{ color: 'var(--foreground)' }} className="text-2xl font-bold">Create New Policy</h2>
             <input
               type="text"
               placeholder="Policy Title"
               value={newPolicy.title}
               onChange={(e) => setNewPolicy({ ...newPolicy, title: e.target.value })}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e4e1da', borderRadius: '6px', backgroundColor: '#f7f6f2', color: '#111111', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--secondary)', color: 'var(--foreground)', boxSizing: 'border-box' }}
             />
             <input
               type="text"
               placeholder="URL Slug"
               value={newPolicy.slug}
               onChange={(e) => setNewPolicy({ ...newPolicy, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e4e1da', borderRadius: '6px', backgroundColor: '#f7f6f2', color: '#111111', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--secondary)', color: 'var(--foreground)', boxSizing: 'border-box' }}
             />
             <textarea
               placeholder="Policy Content"
               value={newPolicy.content}
               onChange={(e) => setNewPolicy({ ...newPolicy, content: e.target.value })}
               rows={6}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #e4e1da', borderRadius: '6px', backgroundColor: '#f7f6f2', color: '#111111', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid var(--border)', borderRadius: '6px', backgroundColor: 'var(--secondary)', color: 'var(--foreground)', boxSizing: 'border-box' }}
             />
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button onClick={handleCreatePolicy} style={{ backgroundColor: '#111111', color: '#f7f6f2' }} disabled={saving}>
+              <Button onClick={handleCreatePolicy} style={{ backgroundColor: 'var(--foreground)', color: 'var(--background)' }} disabled={saving}>
                 {saving ? 'Creating...' : 'Create'}
               </Button>
             </div>
