@@ -118,7 +118,7 @@ export default function LeadsPage() {
 
   const dailyChart = React.useMemo(() => {
     const days: Record<string, number> = {}
-    for (let i = 29; i >= 0; i--) {
+    for (let i = dateRange - 1; i >= 0; i--) {
       const d = new Date()
       d.setDate(d.getDate() - i)
       days[d.toISOString().slice(0, 10)] = 0
@@ -133,7 +133,7 @@ export default function LeadsPage() {
       date: new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
       count,
     }))
-  }, [inRange])
+  }, [inRange, dateRange])
 
   const sourceChart = React.useMemo(() => {
     const counts: Record<string, number> = {}
@@ -232,7 +232,7 @@ export default function LeadsPage() {
       {inRange.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5">
-            <h3 className="font-semibold mb-4">Daily leads (30 days)</h3>
+            <h3 className="font-semibold mb-4">Daily leads ({dateRange} days)</h3>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={dailyChart}>
                 <CartesianGrid strokeDasharray="3 3" />
