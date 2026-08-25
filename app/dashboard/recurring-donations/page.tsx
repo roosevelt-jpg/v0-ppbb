@@ -1,20 +1,22 @@
 'use client'
 
 import React from 'react'
-import { auth, db } from '@/lib/firebase'
-import { collection, onSnapshot, query, where, updateDoc, doc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Pause, Play, Trash2, Calendar, DollarSign, CheckCircle, AlertCircle } from 'lucide-react'
+import { Plus, Pause, Play, Trash2, Calendar, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
+import { useAuth } from '@/lib/auth-context'
 
 export default function RecurringDonationsPage() {
+  const { firebaseUser, loading: authLoading } = useAuth()
   const [subscriptions, setSubscriptions] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [sidebarOpen, setSidebarOpen] = React.useState(false)
+  const [actionError, setActionError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    const firebaseUser = auth.currentUser
+    if (authLoading) return
     if (!firebaseUser) {
       setLoading(false)
       return
@@ -40,52 +42,61 @@ export default function RecurringDonationsPage() {
     )
 
     return () => unsubscribe()
-  }, [])
+  }, [authLoading, firebaseUser])
 
   const handlePauseSubscription = async (subscriptionId: string) => {
     if (!confirm('Pause this recurring donation?')) return
+    setActionError(null)
     try {
       const response = await fetch('/api/subscriptions/pause', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscriptionId }),
       })
-      if (response.ok) {
-        console.log('[v0] Subscription paused')
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}))
+        throw new Error(json.error || 'Failed to pause this donation.')
       }
     } catch (error) {
       console.error('[v0] Error pausing subscription:', error)
+      setActionError(error instanceof Error ? error.message : 'Failed to pause this donation.')
     }
   }
 
   const handleResumeSubscription = async (subscriptionId: string) => {
+    setActionError(null)
     try {
       const response = await fetch('/api/subscriptions/resume', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscriptionId }),
       })
-      if (response.ok) {
-        console.log('[v0] Subscription resumed')
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}))
+        throw new Error(json.error || 'Failed to resume this donation.')
       }
     } catch (error) {
       console.error('[v0] Error resuming subscription:', error)
+      setActionError(error instanceof Error ? error.message : 'Failed to resume this donation.')
     }
   }
 
   const handleCancelSubscription = async (subscriptionId: string) => {
     if (!confirm('Cancel this recurring donation? You can restart anytime.')) return
+    setActionError(null)
     try {
       const response = await fetch('/api/subscriptions/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subscriptionId }),
       })
-      if (response.ok) {
-        console.log('[v0] Subscription cancelled')
+      if (!response.ok) {
+        const json = await response.json().catch(() => ({}))
+        throw new Error(json.error || 'Failed to cancel this donation.')
       }
     } catch (error) {
       console.error('[v0] Error cancelling subscription:', error)
+      setActionError(error instanceof Error ? error.message : 'Failed to cancel this donation.')
     }
   }
 
@@ -126,7 +137,12 @@ export default function RecurringDonationsPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-white/5">
-            <div className="flex-1 p-8">
+      <div className="flex-1 p-8">
+        {actionError ? (
+          <p className="mb-6 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2 dark:bg-red-950 dark:border-red-900 dark:text-red-300">
+            {actionError}
+          </p>
+        ) : null}
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100">

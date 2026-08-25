@@ -21,6 +21,10 @@ import {
   Package,
   FolderOpen,
   Store,
+  Wallet,
+  Sparkles,
+  Repeat,
+  Star,
 } from 'lucide-react'
 import { logoutUser } from '@/lib/auth'
 import { BusinessPortalSwitcher } from '@/components/business-portal-switcher'
@@ -48,6 +52,10 @@ const memberMenuItems = [
   { label: 'Certificates', href: '/dashboard/certificates', icon: Award },
   { label: 'Membership', href: '/dashboard/membership', icon: Crown },
   { label: 'My Communities', href: '/dashboard/communities', icon: Users },
+  { label: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
+  { label: 'AI Matches', href: '/dashboard/ai-matches', icon: Sparkles },
+  { label: 'Recurring Donations', href: '/dashboard/recurring-donations', icon: Repeat },
+  { label: 'Community Reputation', href: '/dashboard/community-reputation', icon: Star },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
