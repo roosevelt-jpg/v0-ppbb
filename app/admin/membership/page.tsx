@@ -153,6 +153,10 @@ export default function MembershipPage() {
     setIsProcessing(true)
     try {
       const plan = plans.find((p) => p.id === bulkTierTarget)
+      const isBusiness = /business|partner|corporate|company/i.test(String(plan?.name || ''))
+      const renewDate = new Date(
+        new Date().setMonth(new Date().getMonth() + (plan?.billingPeriod === 'yearly' ? 12 : 1))
+      ).toISOString()
       const batch = writeBatch(db)
       selectedMembers.forEach((memberId) => {
         const userRef = doc(db, 'users', memberId)
@@ -160,8 +164,22 @@ export default function MembershipPage() {
           membershipTier: bulkTierTarget,
           membershipPlanId: bulkTierTarget,
           membershipPlanName: plan?.name ?? bulkTierTarget,
+          membershipStatus: 'active',
+          membershipRenewDate: renewDate,
           lastTierChange: new Date(),
           bulkUpdateApplied: true,
+          ...(isBusiness
+            ? {
+                role: 'business',
+                userType: 'business',
+                hasBusinessProfile: true,
+                roles: ['member', 'business'],
+              }
+            : {
+                role: 'member',
+                userType: 'member',
+                roles: ['member'],
+              }),
         })
       })
       await batch.commit()
