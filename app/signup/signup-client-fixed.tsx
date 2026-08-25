@@ -383,9 +383,11 @@ export default function SignupClient() {
       setFormData((prev) => ({ ...prev, planId: data.data.planId }))
       if (data.data.planName) setPlanName(String(data.data.planName))
     }
+    // A trial-enabled code isn't active yet — redirect to Stripe Checkout to
+    // collect the card. Otherwise the code granted the plan directly.
     return {
       ok: true,
-      url: data.data?.membershipUrl || '/dashboard/membership?status=success',
+      url: data.data?.checkoutUrl || data.data?.membershipUrl || '/dashboard/membership?status=success',
     }
   }
 

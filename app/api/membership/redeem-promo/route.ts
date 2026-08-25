@@ -31,8 +31,13 @@ export async function POST(request: NextRequest) {
         planName: result.planName,
         renewDate: result.renewDate,
         membershipUrl: result.membershipUrl,
+        // Set instead of membershipUrl for a trial-enabled code — the
+        // caller must redirect here so the member enters a card via Stripe
+        // before anything activates.
+        checkoutUrl: result.checkoutUrl,
         code: result.promo.code,
         benefitDurationMonths: result.promo.benefitDurationMonths,
+        trialEnabled: result.promo.trialEnabled,
       },
     })
   } catch (error) {

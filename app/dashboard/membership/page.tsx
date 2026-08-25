@@ -124,6 +124,15 @@ export default function MembershipPage() {
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Could not redeem promo code')
       }
+
+      // Trial-enabled code — nothing is active yet. Redirect to Stripe
+      // Checkout to collect a card; membership activates via webhook once
+      // that completes.
+      if (data.data?.checkoutUrl) {
+        window.location.href = data.data.checkoutUrl
+        return
+      }
+
       setPromoMessage(
         data.data?.renewDate
           ? `Activated ${data.data?.planName || 'membership'} until ${new Date(

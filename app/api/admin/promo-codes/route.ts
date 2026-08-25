@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
         body.benefitDurationMonths === 'forever' || body.benefitDurationMonths === 0
           ? 0
           : Number(body.benefitDurationMonths) || 1,
+      trialEnabled: body.trialEnabled === true,
       maxRedemptions,
       codeExpiresAt,
       createdBy: uid,
@@ -132,6 +133,9 @@ export async function PATCH(request: NextRequest) {
     }
     if (body.benefitDurationMonths !== undefined) {
       patch.benefitDurationMonths = Number(body.benefitDurationMonths)
+    }
+    if (body.trialEnabled !== undefined) {
+      patch.trialEnabled = body.trialEnabled === true
     }
 
     const promo = await updateMembershipPromoCode(id, patch)

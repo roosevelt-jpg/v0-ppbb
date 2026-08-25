@@ -21,6 +21,7 @@ type PromoRow = {
   planId: string
   planName: string
   benefitDurationMonths: number
+  trialEnabled: boolean
   maxRedemptions: number | null
   usedCount: number
   codeExpiresAt: string | null
@@ -34,6 +35,7 @@ const EMPTY_FORM = {
   description: '',
   planId: '',
   benefitDurationMonths: 3 as number | 'forever',
+  trialEnabled: false,
   maxRedemptions: '500',
   codeExpiresAt: '',
 }
@@ -79,6 +81,7 @@ export default function AdminPromoCodesPage() {
             planId: String(row.planId || ''),
             planName: String(row.planName || ''),
             benefitDurationMonths: Number(row.benefitDurationMonths) || 0,
+            trialEnabled: Boolean(row.trialEnabled),
             maxRedemptions:
               row.maxRedemptions === null || row.maxRedemptions === undefined
                 ? null
@@ -154,6 +157,7 @@ export default function AdminPromoCodesPage() {
           planId: form.planId,
           benefitDurationMonths:
             form.benefitDurationMonths === 'forever' ? 0 : Number(form.benefitDurationMonths) || 1,
+          trialEnabled: form.benefitDurationMonths !== 'forever' && form.trialEnabled,
           maxRedemptions: form.maxRedemptions.trim() === '' ? null : Number(form.maxRedemptions),
           codeExpiresAt: form.codeExpiresAt || null,
         }),
@@ -288,6 +292,37 @@ export default function AdminPromoCodesPage() {
                   Choose forever, or any duration from 1–12 months.
                 </p>
               </div>
+              <div className="sm:col-span-2">
+                <label
+                  className={`flex items-start gap-2 rounded-lg border p-3 ${
+                    form.benefitDurationMonths === 'forever'
+                      ? 'border-neutral-200 bg-neutral-50 opacity-60 cursor-not-allowed'
+                      : 'border-neutral-200 cursor-pointer'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 cursor-pointer"
+                    checked={form.trialEnabled && form.benefitDurationMonths !== 'forever'}
+                    disabled={form.benefitDurationMonths === 'forever'}
+                    onChange={(e) => setForm({ ...form, trialEnabled: e.target.checked })}
+                  />
+                  <span className="text-xs">
+                    <span className="block font-medium text-neutral-900">
+                      Enable real trial (card required, auto-bills via Stripe)
+                    </span>
+                    <span className="block text-neutral-500 mt-0.5">
+                      On: the member enters a card at checkout and Stripe automatically bills the
+                      plan price the moment the trial ends — a genuine free-trial-then-pay flow.
+                      Off (default): the plan is granted directly for the duration above, no card
+                      collected, no billing — access simply lapses when the duration is up.
+                      {form.benefitDurationMonths === 'forever'
+                        ? ' Not available for a forever/lifetime duration — there is nothing to bill.'
+                        : ''}
+                    </span>
+                  </span>
+                </label>
+              </div>
               <div>
                 <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Max redemptions (blank = unlimited)
@@ -360,6 +395,18 @@ export default function AdminPromoCodesPage() {
                     · Used {row.usedCount}
                     {row.maxRedemptions != null ? ` / ${row.maxRedemptions}` : ' (unlimited)'}
                   </p>
+                  {row.benefitDurationMonths > 0 ? (
+                    <p className="text-xs">
+                      {row.trialEnabled ? (
+                        <span className="text-amber-700">
+                          Real trial — card required, auto-bills via Stripe after {row.benefitDurationMonths}{' '}
+                          month{row.benefitDurationMonths === 1 ? '' : 's'}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-500">Free grant only — no card, no billing</span>
+                      )}
+                    </p>
+                  ) : null}
                   {row.codeExpiresAt ? (
                     <p className="text-xs text-neutral-500">
                       Code expires {format(new Date(row.codeExpiresAt), 'MMM d, yyyy h:mm a')}

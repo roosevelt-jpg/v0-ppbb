@@ -16,6 +16,104 @@ export function getPublicAppUrl(): string {
   ).replace(/\/$/, '')
 }
 
+/**
+ * Create a Stripe Checkout session for a membership plan, optionally with a
+ * trial period. Shared by the plain signup/dashboard checkout path and the
+ * trial-promo redemption path so both get the same self-healing product/
+ * price resolution (see the comment on the retrieve-before-trust checks
+ * below — cached Stripe ids only stay valid for whichever Stripe account/
+ * mode created them).
+ */
+export async function createStripeMembershipCheckout(params: {
+  planId: string
+  userId: string
+  trialDays?: number
+  extraMetadata?: Record<string, string>
+}): Promise<{ sessionId: string; checkoutUrl: string }> {
+  const { getStripeClient } = await import('@/lib/get-stripe-client')
+  const stripe = await getStripeClient()
+  const db = getAdminDb()
+  const site = getPublicAppUrl()
+
+  const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
+  if (!planSnap.exists) throw new Error('Plan not found')
+  const plan = planSnap.data() as Record<string, unknown>
+
+  let productId = plan.stripeProductId as string | undefined
+  if (productId) {
+    const exists = await stripe.products.retrieve(productId).then(
+      () => true,
+      () => false
+    )
+    if (!exists) productId = undefined
+  }
+  if (!productId) {
+    const product = await stripe.products.create({
+      name: String(plan.name || 'Membership'),
+      description: String(plan.description || ''),
+      metadata: { planId: params.planId },
+    })
+    productId = product.id
+    await db.collection('pricingPlans').doc(params.planId).update({ stripeProductId: productId })
+  }
+
+  let priceId = productId === plan.stripeProductId ? (plan.stripePriceId as string | undefined) : undefined
+  if (priceId) {
+    const exists = await stripe.prices.retrieve(priceId).then(
+      () => true,
+      () => false
+    )
+    if (!exists) priceId = undefined
+  }
+  if (!priceId) {
+    const price = await stripe.prices.create({
+      unit_amount: Number(plan.price) || 0,
+      currency: String(plan.currency || 'aed').toLowerCase(),
+      recurring: {
+        interval: plan.billingPeriod === 'yearly' ? 'year' : 'month',
+      },
+      product: productId,
+    })
+    priceId = price.id
+    await db.collection('pricingPlans').doc(params.planId).update({ stripePriceId: priceId })
+  }
+
+  const userSnap = await db.collection('users').doc(params.userId).get()
+  const email = (userSnap.data()?.email as string) || undefined
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'subscription',
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${site}/dashboard/membership?status=success`,
+    cancel_url: `${site}/dashboard/membership?status=canceled`,
+    customer_email: email,
+    ...(params.trialDays && params.trialDays > 0
+      ? { subscription_data: { trial_period_days: params.trialDays } }
+      : {}),
+    metadata: {
+      type: 'membership',
+      userId: params.userId,
+      planId: params.planId,
+      ...(params.extraMetadata || {}),
+    },
+  })
+
+  if (!session.url) throw new Error('Stripe did not return a checkout URL')
+
+  await db.collection('checkoutSessions').add({
+    userId: params.userId,
+    planId: params.planId,
+    sessionId: session.id,
+    gateway: 'stripe',
+    status: 'pending',
+    trialDays: params.trialDays || null,
+    createdAt: FieldValue.serverTimestamp(),
+  })
+
+  return { sessionId: session.id, checkoutUrl: session.url }
+}
+
 /** Mark an event registration paid and update event counters (idempotent). */
 export async function completeEventTicketPayment(params: {
   registrationId: string
@@ -229,6 +327,16 @@ export async function completeMembershipPayment(params: {
   benefitDurationMonths?: number
   promoCodeId?: string
   promoCode?: string
+  /**
+   * Stripe's own current_period_end (or trial_end) for this subscription,
+   * when available — takes priority over benefitDurationMonths/billing-
+   * period math below. This matters most for a trial checkout: without it,
+   * renewDate would be set to "one plan billing period from now" at the
+   * moment checkout completes (day 0 of the trial), not the actual trial
+   * end Stripe is tracking — membership-expire would then downgrade the
+   * member mid-trial, before Stripe has attempted to charge them at all.
+   */
+  renewDateOverride?: Date
 }): Promise<{ membershipUrl: string }> {
   const db = getAdminDb()
   const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
@@ -243,9 +351,11 @@ export async function completeMembershipPayment(params: {
     params.benefitDurationMonths === 0
   const renewDate = isLifetimePromo
     ? new Date('9999-12-31T23:59:59.000Z')
-    : typeof params.benefitDurationMonths === 'number' && params.benefitDurationMonths > 0
-      ? addMonths(now, params.benefitDurationMonths)
-      : addBillingPeriod(now, String(plan.billingPeriod || 'monthly'))
+    : params.renewDateOverride
+      ? params.renewDateOverride
+      : typeof params.benefitDurationMonths === 'number' && params.benefitDurationMonths > 0
+        ? addMonths(now, params.benefitDurationMonths)
+        : addBillingPeriod(now, String(plan.billingPeriod || 'monthly'))
   const amountCents =
     typeof params.amountCents === 'number' ? params.amountCents : Number(plan.price) || 0
   const currency = (params.currency || plan.currency || 'AED').toString().toUpperCase()
@@ -258,6 +368,7 @@ export async function completeMembershipPayment(params: {
       membershipStatus: 'active',
       membershipRenewDate: isLifetimePromo ? null : renewDate.toISOString(),
       membershipLifetimeForever: isLifetimePromo ? true : FieldValue.delete(),
+      membershipExpiredAt: FieldValue.delete(),
       // Portal access follows the pricing plan (not a hardcoded role alone)
       ...portalFieldsFromPlan(plan, existingUser),
       ...(params.promoCodeId
