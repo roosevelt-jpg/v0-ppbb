@@ -62,6 +62,7 @@ import {
   Megaphone,
   Newspaper,
   Ticket,
+  Gauge,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -78,6 +79,7 @@ import { clearAdminMfaSession } from '@/lib/admin-mfa-session'
 export const adminMenuItems = [
   // Dashboard & System
   { label: 'Overview', href: '/admin', icon: BarChart3, group: 'Dashboard' },
+  { label: 'Dashboard Plus', href: '/admin/dashboard-enhanced', icon: Gauge, group: 'Dashboard' },
   { label: 'System Health', href: '/admin/health', icon: Activity, group: 'Dashboard' },
   { label: 'Analytics', href: '/admin/analytics', icon: TrendingUp, group: 'Dashboard' },
   { label: 'Reporting', href: '/admin/reporting', icon: FileChartColumn, group: 'Dashboard' },

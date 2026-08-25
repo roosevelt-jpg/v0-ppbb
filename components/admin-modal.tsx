@@ -25,13 +25,18 @@ export function AdminModal({
   isLoading = false,
 }: AdminModalProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const formRef = React.useRef<HTMLFormElement>(null)
 
   if (!isOpen) return null
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async () => {
+    // Collects values from any named field inside `children` — this modal
+    // never sees the caller's field state directly, so it relies on the
+    // body being rendered as normal form fields with `name` attributes.
+    const data = formRef.current ? Object.fromEntries(new FormData(formRef.current)) : {}
     setIsSubmitting(true)
     try {
-      await onSubmit(formData)
+      await onSubmit(data)
       onClose()
     } finally {
       setIsSubmitting(false)
@@ -75,7 +80,9 @@ export function AdminModal({
         </div>
 
         {/* Body */}
-        <div className="p-6">{children}</div>
+        <form ref={formRef} className="p-6" onSubmit={(e) => e.preventDefault()}>
+          {children}
+        </form>
 
         {/* Footer */}
         <div className="flex gap-2 p-6 border-t border-border" style={{ justifyContent: 'flex-end' }}>
@@ -87,7 +94,7 @@ export function AdminModal({
             Cancel
           </Button>
           <Button
-            onClick={() => handleSubmit({})}
+            onClick={() => handleSubmit()}
             disabled={isSubmitting || isLoading}
             className="bg-foreground text-background"
           >

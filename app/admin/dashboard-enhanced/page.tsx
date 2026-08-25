@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { collection, query, getDocs } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
@@ -111,8 +112,10 @@ export default function AdminDashboardEnhanced() {
             {systemHealth === 'warning' && 'System experiencing minor issues. Review logs for details.'}
             {systemHealth === 'critical' && 'Critical issues detected. Immediate action required.'}
           </p>
-          <button
+          <Link
+            href="/admin/health"
             style={{
+              display: 'inline-block',
               padding: '0.5rem 1.5rem',
               backgroundColor: 'var(--foreground)',
               color: 'var(--background)',
@@ -120,11 +123,11 @@ export default function AdminDashboardEnhanced() {
               borderRadius: '0.375rem',
               fontSize: '0.875rem',
               fontWeight: '600',
-              cursor: 'pointer',
+              textDecoration: 'none',
             }}
           >
             View Details
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -221,7 +224,7 @@ export default function AdminDashboardEnhanced() {
           gap: '1rem',
         }}>
           {[
-            { label: 'View Admins', href: '/admin/access-control' },
+            { label: 'View Admins', href: '/admin/management' },
             { label: 'Audit Logs', href: '/admin/audit-logs' },
             { label: 'Integrations', href: '/admin/integrations' },
             { label: 'Security Center', href: '/admin/security-center' },
