@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyIdToken, isAdminUser } from '@/lib/admin-access-server'
 import { generateDynamicAccessCode } from '@/lib/admin-login-tracking'
 import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
@@ -10,7 +11,7 @@ async function sendAccessCodeEmail(email: string, code: string, adminName: strin
     const sendgridApiKey = process.env.SENDGRID_API_KEY
     if (!sendgridApiKey) {
       console.warn('[v0] SendGrid API key not configured, skipping email')
-      return true
+      return false
     }
 
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -38,29 +39,57 @@ async function sendAccessCodeEmail(email: string, code: string, adminName: strin
 
 export async function POST(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const uid = await verifyIdToken(token)
+    if (!uid) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!(await isAdminUser(uid))) {
+      return NextResponse.json({ error: 'Not an admin account' }, { status: 403 })
+    }
+
+    const creatorQuery = query(
+      collection(db, 'users'),
+      where('id', '==', uid),
+      where('role', '==', 'super_admin')
+    )
+    const creatorSnapshot = await getDocs(creatorQuery)
+    if (creatorSnapshot.empty) {
+      return NextResponse.json({ error: 'Only super admins can generate access codes' }, { status: 403 })
+    }
+
     const body = await request.json()
-    const { adminEmail, adminName, adminRole, permissions, createdBy } = body
+    const { adminEmail, adminName, adminRole, permissions } = body
 
     if (!adminEmail || !adminName || !adminRole) {
       return NextResponse.json({ error: 'Missing required fields: adminEmail, adminName, adminRole' }, { status: 400 })
     }
 
-    if (createdBy) {
-      const creatorQuery = query(collection(db, 'users'), where('id', '==', createdBy), where('role', '==', 'super_admin'))
-      const creatorSnapshot = await getDocs(creatorQuery)
-      if (creatorSnapshot.empty) {
-        return NextResponse.json({ error: 'Only super admins can generate access codes' }, { status: 403 })
-      }
-    }
+    const accessCode = await generateDynamicAccessCode(
+      String(adminEmail).trim().toLowerCase(),
+      String(adminName).trim(),
+      String(adminRole),
+      Array.isArray(permissions) ? permissions : [],
+      uid
+    )
 
-    const accessCode = await generateDynamicAccessCode(adminEmail, adminName, adminRole || 'admin', permissions || [], createdBy || 'system')
     if (!accessCode) {
       return NextResponse.json({ error: 'Failed to generate access code' }, { status: 500 })
     }
 
-    await sendAccessCodeEmail(adminEmail, accessCode.code, adminName)
+    const emailSent = await sendAccessCodeEmail(adminEmail, accessCode.code, adminName)
+    if (!emailSent) {
+      return NextResponse.json({ error: 'Access code was generated but could not be emailed. The code was not delivered.' }, { status: 503 })
+    }
 
-    return NextResponse.json({ success: true, accessCodeId: accessCode.id, code: accessCode.code, expiresAt: accessCode.expiresAt, message: 'Access code generated and sent to email' })
+    return NextResponse.json({
+      success: true,
+      accessCodeId: accessCode.id,
+      expiresAt: accessCode.expiresAt,
+      message: 'Access code generated and sent to email',
+    })
   } catch (error) {
     console.error('[v0] Access code generation error:', error)
     return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to generate access code' }, { status: 500 })
