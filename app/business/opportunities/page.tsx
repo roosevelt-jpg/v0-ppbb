@@ -5,7 +5,6 @@ import React from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { DashboardModal } from '@/components/dashboard-modal'
 import {
   subscribeToBusinessOpportunities,
   deleteOpportunity,
@@ -106,19 +105,11 @@ export default function BusinessOpportunities() {
   const [metricsByOpp, setMetricsByOpp] = React.useState<Record<string, JobMetrics>>({})
   const [loading, setLoading] = React.useState(true)
   const [loadError, setLoadError] = React.useState<string | null>(null)
-  const [selectedOpp, setSelectedOpp] = React.useState<BusinessOpportunity | null>(null)
-  const [isEditingModal, setIsEditingModal] = React.useState(false)
-  const [saving, setSaving] = React.useState(false)
   const [togglingId, setTogglingId] = React.useState<string | null>(null)
   const [titleQuery, setTitleQuery] = React.useState('')
   const [dateQuery, setDateQuery] = React.useState('')
   const [perPage, setPerPage] = React.useState(5)
   const [page, setPage] = React.useState(1)
-  const [editForm, setEditForm] = React.useState({
-    title: '',
-    description: '',
-    status: 'pending_approval' as BusinessOpportunity['status'],
-  })
 
   React.useEffect(() => {
     if (!user) return
@@ -167,44 +158,6 @@ export default function BusinessOpportunities() {
 
     return () => unsubscribe()
   }, [user, router])
-
-  const openEditModal = (opp: BusinessOpportunity) => {
-    setSelectedOpp(opp)
-    setEditForm({
-      title: opp.title,
-      description: opp.description || '',
-      status: opp.status,
-    })
-    setIsEditingModal(true)
-  }
-
-  const handleSaveEdit = async () => {
-    if (!selectedOpp) return
-    if (!editForm.title.trim()) {
-      alert('Title is required')
-      return
-    }
-    if (editForm.status === 'open') {
-      alert('Jobs go live only after admin approval.')
-      return
-    }
-
-    setSaving(true)
-    try {
-      await updateOpportunity(selectedOpp.id, {
-        title: editForm.title.trim(),
-        description: editForm.description.trim(),
-        status: editForm.status,
-      })
-      setIsEditingModal(false)
-      setSelectedOpp(null)
-    } catch (error) {
-      console.error('[v0] Error updating opportunity:', error)
-      alert('Error updating opportunity')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this opportunity?')) {
@@ -500,7 +453,7 @@ export default function BusinessOpportunities() {
                       <button
                         type="button"
                         title="Edit job"
-                        onClick={() => openEditModal(opp)}
+                        onClick={() => router.push(`/business/opportunities/${opp.id}/edit`)}
                         className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[#111] px-3 text-sm text-white"
                       >
                         <Edit2 className="w-4 h-4" /> Edit
@@ -658,7 +611,7 @@ export default function BusinessOpportunities() {
                           <button
                             type="button"
                             title="Edit job"
-                            onClick={() => openEditModal(opp)}
+                            onClick={() => router.push(`/business/opportunities/${opp.id}/edit`)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white hover:bg-neutral-800"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -710,80 +663,6 @@ export default function BusinessOpportunities() {
           ) : null}
         </>
       )}
-
-      <DashboardModal
-        open={isEditingModal && !!selectedOpp}
-        title="Edit opportunity"
-        onClose={() => {
-          setIsEditingModal(false)
-          setSelectedOpp(null)
-        }}
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setIsEditingModal(false)
-                setSelectedOpp(null)
-              }}
-              className="min-h-[44px] w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveEdit}
-              disabled={saving}
-              className="min-h-[44px] w-full sm:w-auto bg-[#111] text-white"
-            >
-              {saving ? 'Saving…' : 'Save changes'}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Title</label>
-            <input
-              type="text"
-              value={editForm.title}
-              onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Description</label>
-            <textarea
-              value={editForm.description}
-              onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-              rows={5}
-              className="w-full rounded-lg border border-neutral-300 dark:border-border px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Status</label>
-            <select
-              value={editForm.status}
-              onChange={(e) =>
-                setEditForm((f) => ({
-                  ...f,
-                  status: e.target.value as BusinessOpportunity['status'],
-                }))
-              }
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
-            >
-              <option value="pending_approval">Pending approval</option>
-              <option value="closed">Closed</option>
-              <option value="filled">Filled</option>
-              <option value="archived">Archived</option>
-            </select>
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
-              Open/published status is set by admin after approval.
-            </p>
-          </div>
-        </div>
-      </DashboardModal>
     </div>
   )
 }

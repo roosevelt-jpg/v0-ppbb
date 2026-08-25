@@ -16,7 +16,6 @@ import {
 import { BusinessOpportunity, JobApplication } from '@/lib/types'
 import { htmlToPlainText } from '@/lib/cms-page-content'
 import { Button } from '@/components/ui/button'
-import { DashboardModal } from '@/components/dashboard-modal'
 import { db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { format } from 'date-fns'
@@ -219,9 +218,6 @@ export default function BusinessOpportunityDetailPage() {
   const [perPage, setPerPage] = React.useState(5)
   const [page, setPage] = React.useState(1)
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null)
-  const [isEditing, setIsEditing] = React.useState(false)
-  const [saving, setSaving] = React.useState(false)
-  const [editForm, setEditForm] = React.useState({ title: '', description: '' })
   const [shareNote, setShareNote] = React.useState('')
 
   const load = React.useCallback(async () => {
@@ -235,10 +231,6 @@ export default function BusinessOpportunityDetailPage() {
         return
       }
       setOpportunity(data)
-      setEditForm({
-        title: data.title,
-        description: htmlToPlainText(data.description || ''),
-      })
       const apps = await getOpportunityApplications(id)
       setApplications(await enrichApplications(apps))
     } catch (err) {
@@ -412,32 +404,6 @@ export default function BusinessOpportunityDetailPage() {
     }
   }
 
-  const handleSaveEdit = async () => {
-    if (!opportunity) return
-    if (!editForm.title.trim()) {
-      alert('Title is required')
-      return
-    }
-    setSaving(true)
-    try {
-      await updateOpportunity(opportunity.id, {
-        title: editForm.title.trim(),
-        description: editForm.description.trim(),
-      })
-      setOpportunity({
-        ...opportunity,
-        title: editForm.title.trim(),
-        description: editForm.description.trim(),
-      })
-      setIsEditing(false)
-    } catch (err) {
-      console.error(err)
-      alert('Could not save changes')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   if (loading) {
     return <div className="p-8 text-center text-neutral-500 dark:text-muted-foreground">Loading applicants…</div>
   }
@@ -477,7 +443,7 @@ export default function BusinessOpportunityDetailPage() {
                 type="button"
                 variant="outline"
                 className="min-h-[40px]"
-                onClick={() => setIsEditing(true)}
+                onClick={() => router.push(`/business/opportunities/${opportunity.id}/edit`)}
               >
                 <Edit2 className="w-4 h-4 mr-1.5" />
                 Edit
@@ -901,46 +867,6 @@ export default function BusinessOpportunityDetailPage() {
         )}
       </div>
 
-      <DashboardModal
-        open={isEditing}
-        title="Edit job"
-        onClose={() => setIsEditing(false)}
-        footer={
-          <>
-            <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              className="bg-[#111] text-white"
-              disabled={saving}
-              onClick={() => void handleSaveEdit()}
-            >
-              {saving ? 'Saving…' : 'Save'}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input
-              value={editForm.title}
-              onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
-              value={editForm.description}
-              onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-              rows={5}
-              className="w-full rounded-lg border border-neutral-300 dark:border-border px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-      </DashboardModal>
     </div>
   )
 }
