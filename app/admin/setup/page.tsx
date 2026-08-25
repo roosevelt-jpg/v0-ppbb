@@ -394,7 +394,7 @@ export default function AdminSetup() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
             <SiteLogo background="light" variant="primary" href="/" linked />
           </div>
-          <p style={{ fontSize: '16px', color: '#666' }}>Admin Dashboard Setup</p>
+          <p style={{ fontSize: '16px', color: 'var(--muted-foreground)' }}>Admin Dashboard Setup</p>
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '40px' }}>
@@ -405,7 +405,7 @@ export default function AdminSetup() {
                 flex: 1,
                 height: '6px',
                 borderRadius: '3px',
-                backgroundColor: step >= n ? '#000' : '#e0e0e0',
+                backgroundColor: step >= n ? 'var(--foreground)' : 'var(--border)',
                 transition: 'all 0.3s',
               }}
             />
@@ -414,11 +414,11 @@ export default function AdminSetup() {
 
         <div
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--card)',
             borderRadius: '12px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             padding: 'clamp(20px, 5vw, 40px)',
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--border)',
             boxSizing: 'border-box',
           }}
         >
@@ -427,7 +427,7 @@ export default function AdminSetup() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
                 Step 1 of 3
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: '16px', color: 'var(--muted-foreground)', marginBottom: '30px', lineHeight: '1.5' }}>
                 Enter the 6-digit access code from your invitation email
               </p>
 
@@ -442,7 +442,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     6-digit Access Code
@@ -458,13 +458,15 @@ export default function AdminSetup() {
                     style={{
                       width: '100%',
                       padding: '14px 16px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--border)',
                       borderRadius: '8px',
                       fontSize: '20px',
                       letterSpacing: '0.2em',
                       fontFamily: 'ui-monospace, monospace',
                       boxSizing: 'border-box',
                       textAlign: 'center',
+                      backgroundColor: 'var(--input)',
+                      color: 'var(--foreground)',
                     }}
                     required
                   />
@@ -505,11 +507,11 @@ export default function AdminSetup() {
                   {loading ? 'Verifying...' : 'Continue'}
                 </button>
 
-                <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
                   Already have an admin account?{' '}
                   <Link
                     href={adminLoginHref}
-                    style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}
+                    style={{ color: 'var(--foreground)', fontWeight: 600, textDecoration: 'underline' }}
                   >
                     Sign in here
                   </Link>
@@ -523,7 +525,7 @@ export default function AdminSetup() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
                 Step 2 of 3
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: '16px', color: 'var(--muted-foreground)', marginBottom: '30px', lineHeight: '1.5' }}>
                 {inviteData?.recovery
                   ? 'Your login already exists from an earlier attempt. Enter the same password and finish setup — we will create your admin profile.'
                   : 'Create your admin account password. If you already tried once, use the same password and continue.'}
@@ -540,7 +542,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Email Address
@@ -571,7 +573,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Password
@@ -600,7 +602,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Confirm Password
@@ -689,10 +691,10 @@ export default function AdminSetup() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
                 Step 3 of 3
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '20px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: '16px', color: 'var(--muted-foreground)', marginBottom: '20px', lineHeight: '1.5' }}>
                 Your admin account is ready. Redirecting to the dashboard…
               </p>
-              <Link href="/admin" style={{ color: '#000', fontWeight: '600', textDecoration: 'none' }}>
+              <Link href="/admin" style={{ color: 'var(--foreground)', fontWeight: '600', textDecoration: 'none' }}>
                 Go to dashboard now
               </Link>
             </div>

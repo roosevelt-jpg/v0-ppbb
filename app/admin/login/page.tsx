@@ -285,9 +285,11 @@ function AdminLoginForm() {
     width: '100%',
     padding: '12px',
     fontSize: '16px',
-    border: '1px solid #ddd',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
     boxSizing: 'border-box',
+    backgroundColor: 'var(--input)',
+    color: 'var(--foreground)',
   }
 
   const buttonStyle: React.CSSProperties = {
@@ -346,18 +348,18 @@ function AdminLoginForm() {
               />
             </Link>
           </div>
-          <p style={{ fontSize: '15px', color: '#666', margin: 0 }}>
+          <p style={{ fontSize: '15px', color: 'var(--muted-foreground)', margin: 0 }}>
             Admin sign-in · Step {step} of 3
           </p>
         </div>
 
         <div
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--card)',
             borderRadius: '12px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             padding: 'clamp(20px, 5vw, 32px)',
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--border)',
           }}
         >
           {step === 1 && (
@@ -372,7 +374,7 @@ function AdminLoginForm() {
                     fontSize: '14px',
                     fontWeight: 500,
                     marginBottom: '8px',
-                    color: '#000',
+                    color: 'var(--foreground)',
                   }}
                 >
                   Email Address
@@ -389,12 +391,10 @@ function AdminLoginForm() {
               </div>
               {error && (
                 <div
+                  className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300"
                   style={{
                     padding: '12px',
-                    backgroundColor: '#fee',
-                    border: '1px solid #fcc',
                     borderRadius: '8px',
-                    color: '#c00',
                     fontSize: '14px',
                   }}
                 >
@@ -405,10 +405,10 @@ function AdminLoginForm() {
                 <div
                   style={{
                     padding: '12px',
-                    backgroundColor: '#f5f5f5',
-                    border: '1px solid #e0e0e0',
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#333',
+                    color: 'var(--foreground)',
                     fontSize: '14px',
                   }}
                 >
@@ -426,7 +426,7 @@ function AdminLoginForm() {
               onSubmit={handlePasswordSubmit}
               style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
             >
-              <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--muted-foreground)' }}>
                 Signing in as <strong>{email}</strong>
               </p>
               <div>
@@ -436,7 +436,7 @@ function AdminLoginForm() {
                     fontSize: '14px',
                     fontWeight: 500,
                     marginBottom: '8px',
-                    color: '#000',
+                    color: 'var(--foreground)',
                   }}
                 >
                   Password
@@ -453,12 +453,10 @@ function AdminLoginForm() {
               </div>
               {error && (
                 <div
+                  className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300"
                   style={{
                     padding: '12px',
-                    backgroundColor: '#fee',
-                    border: '1px solid #fcc',
                     borderRadius: '8px',
-                    color: '#c00',
                     fontSize: '14px',
                   }}
                 >
@@ -478,7 +476,7 @@ function AdminLoginForm() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#666',
+                  color: 'var(--muted-foreground)',
                   fontSize: '14px',
                   cursor: 'pointer',
                   textDecoration: 'underline',
@@ -494,7 +492,7 @@ function AdminLoginForm() {
               onSubmit={handleOtpSubmit}
               style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
             >
-              <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--muted-foreground)' }}>
                 Enter the 6-digit code we emailed to{' '}
                 <strong>{maskedEmail || email}</strong>.
               </p>
@@ -505,7 +503,7 @@ function AdminLoginForm() {
                     fontSize: '14px',
                     fontWeight: 500,
                     marginBottom: '8px',
-                    color: '#000',
+                    color: 'var(--foreground)',
                   }}
                 >
                   Login code
@@ -527,10 +525,10 @@ function AdminLoginForm() {
                 <div
                   style={{
                     padding: '12px',
-                    backgroundColor: '#f5f5f5',
-                    border: '1px solid #e0e0e0',
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#333',
+                    color: 'var(--foreground)',
                     fontSize: '14px',
                   }}
                 >
@@ -539,12 +537,10 @@ function AdminLoginForm() {
               )}
               {error && (
                 <div
+                  className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300"
                   style={{
                     padding: '12px',
-                    backgroundColor: '#fee',
-                    border: '1px solid #fcc',
                     borderRadius: '8px',
-                    color: '#c00',
                     fontSize: '14px',
                   }}
                 >
@@ -561,7 +557,7 @@ function AdminLoginForm() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#666',
+                  color: 'var(--muted-foreground)',
                   fontSize: '14px',
                   cursor: 'pointer',
                   textDecoration: 'underline',
@@ -584,7 +580,7 @@ function AdminLoginForm() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#666',
+                  color: 'var(--muted-foreground)',
                   fontSize: '14px',
                   cursor: 'pointer',
                   textDecoration: 'underline',
@@ -595,11 +591,11 @@ function AdminLoginForm() {
             </form>
           )}
 
-          <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '20px' }}>
+          <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '20px' }}>
             New admin with an invitation code?{' '}
             <Link
               href="/admin/setup"
-              style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}
+              style={{ color: 'var(--foreground)', fontWeight: 600, textDecoration: 'underline' }}
             >
               Complete setup
             </Link>

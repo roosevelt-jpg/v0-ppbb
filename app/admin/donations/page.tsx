@@ -47,7 +47,7 @@ export default function DonationsPage() {
       label: 'Donor',
       width: '200px',
       render: (value: any) => (
-        <span style={{ fontWeight: 500, color: '#111111' }}>{value || 'Anonymous'}</span>
+        <span style={{ fontWeight: 500, color: 'var(--foreground)' }}>{value || 'Anonymous'}</span>
       ),
     },
     {
@@ -55,7 +55,7 @@ export default function DonationsPage() {
       label: 'Amount (AED)',
       width: '150px',
       render: (value: any) => (
-        <span style={{ fontWeight: 600, color: '#2e7d32' }}>{value || 0}</span>
+        <span className="text-green-700 dark:text-green-400" style={{ fontWeight: 600 }}>{value || 0}</span>
       ),
     },
     {
@@ -63,7 +63,7 @@ export default function DonationsPage() {
       label: 'Type',
       width: '120px',
       render: (value: any) => (
-        <span style={{ color: '#888888', textTransform: 'capitalize' }}>
+        <span style={{ color: 'var(--muted-foreground)', textTransform: 'capitalize' }}>
           {value || 'monetary'}
         </span>
       ),
@@ -72,7 +72,7 @@ export default function DonationsPage() {
       key: 'targetCase',
       label: 'Target Case',
       width: '200px',
-      render: (value: any) => <span style={{ color: '#888888' }}>{value || 'General'}</span>,
+      render: (value: any) => <span style={{ color: 'var(--muted-foreground)' }}>{value || 'General'}</span>,
     },
     {
       key: 'status',
@@ -80,23 +80,16 @@ export default function DonationsPage() {
       width: '120px',
       render: (value: any) => (
         <span
+          className={
+            value === 'completed'
+              ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300'
+              : value === 'pending'
+                ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+                : value === 'archived'
+                  ? 'bg-muted text-muted-foreground'
+                  : 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300'
+          }
           style={{
-            backgroundColor:
-              value === 'completed'
-                ? '#e8f5e9'
-                : value === 'pending'
-                  ? '#fff3e0'
-                  : value === 'archived'
-                    ? '#f5f5f5'
-                    : '#ffebee',
-            color:
-              value === 'completed'
-                ? '#2e7d32'
-                : value === 'pending'
-                  ? '#e65100'
-                  : value === 'archived'
-                    ? '#616161'
-                    : '#c62828',
             padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '12px',
@@ -115,7 +108,7 @@ export default function DonationsPage() {
         if (!value) return '-'
         const date = value.toDate ? value.toDate() : new Date(value)
         return (
-          <span style={{ color: '#888888' }}>
+          <span style={{ color: 'var(--muted-foreground)' }}>
             {formatDistanceToNow(date, { addSuffix: true })}
           </span>
         )
@@ -132,12 +125,11 @@ export default function DonationsPage() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
-            color: '#0066cc',
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: 500,
           }}
-          className="hover:underline"
+          className="text-blue-600 dark:text-blue-400 hover:underline"
         >
           View Details →
         </a>

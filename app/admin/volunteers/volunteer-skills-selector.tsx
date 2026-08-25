@@ -46,7 +46,7 @@ export function VolunteerSkillsSelector({
 
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
+      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '12px' }}>
         Select Skills
       </label>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
@@ -59,9 +59,9 @@ export function VolunteerSkillsSelector({
               onClick={() => toggleSkill(skill)}
               style={{
                 padding: '10px 12px',
-                border: isSelected ? '2px solid #111111' : '1px solid #ddd',
-                backgroundColor: isSelected ? '#111111' : '#fff',
-                color: isSelected ? '#fff' : '#111111',
+                border: isSelected ? '2px solid var(--foreground)' : '1px solid var(--border)',
+                backgroundColor: isSelected ? 'var(--foreground)' : 'var(--card)',
+                color: isSelected ? 'var(--background)' : 'var(--foreground)',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontSize: '13px',
@@ -90,7 +90,7 @@ export function VolunteerDepartmentSelector({
 }) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
+      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '12px' }}>
         Select Department
       </label>
       <select
@@ -102,10 +102,12 @@ export function VolunteerDepartmentSelector({
         style={{
           width: '100%',
           padding: '10px 12px',
-          border: '1px solid #ddd',
+          border: '1px solid var(--border)',
           borderRadius: '6px',
           fontSize: '14px',
           fontFamily: 'inherit',
+          backgroundColor: 'var(--card)',
+          color: 'var(--foreground)',
         }}
       >
         <option value="">-- Select Department --</option>

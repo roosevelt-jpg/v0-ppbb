@@ -67,7 +67,7 @@ export default function VolunteersPage() {
       label: 'Email',
       width: '220px',
       render: (value: unknown) => (
-        <span style={{ color: '#888888' }}>{String(value || '—')}</span>
+        <span style={{ color: 'var(--muted-foreground)' }}>{String(value || '—')}</span>
       ),
     },
     {
@@ -75,20 +75,20 @@ export default function VolunteersPage() {
       label: 'Phone',
       width: '150px',
       render: (_: unknown, row: Record<string, unknown>) => (
-        <span style={{ color: '#888888' }}>{formatUserPhoneDisplay(row as Parameters<typeof formatUserPhoneDisplay>[0])}</span>
+        <span style={{ color: 'var(--muted-foreground)' }}>{formatUserPhoneDisplay(row as Parameters<typeof formatUserPhoneDisplay>[0])}</span>
       ),
     },
     {
       key: 'location',
       label: 'Location',
       width: '150px',
-      render: (value: any) => <span style={{ color: '#888888' }}>{value || '-'}</span>,
+      render: (value: any) => <span style={{ color: 'var(--muted-foreground)' }}>{value || '-'}</span>,
     },
     {
       key: 'volunteeredHours',
       label: 'Hours',
       width: '100px',
-      render: (value: any) => <span style={{ fontWeight: 600, color: '#111111' }}>{value || 0}</span>,
+      render: (value: any) => <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>{value || 0}</span>,
     },
     {
       key: 'status',
@@ -96,9 +96,12 @@ export default function VolunteersPage() {
       width: '100px',
       render: (value: any) => (
         <span
+          className={
+            value === 'active'
+              ? 'bg-secondary text-secondary-foreground'
+              : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+          }
           style={{
-            backgroundColor: value === 'active' ? '#f3f4f6' : '#fff3e0',
-            color: value === 'active' ? '#111111' : '#e65100',
             padding: '4px 8px',
             borderRadius: '4px',
             fontSize: '12px',
@@ -116,7 +119,7 @@ export default function VolunteersPage() {
       render: (value: any) => {
         if (!value) return '-'
         const date = value.toDate ? value.toDate() : new Date(value)
-        return <span style={{ color: '#888888' }}>{formatDistanceToNow(date, { addSuffix: true })}</span>
+        return <span style={{ color: 'var(--muted-foreground)' }}>{formatDistanceToNow(date, { addSuffix: true })}</span>
       },
     },
     {
