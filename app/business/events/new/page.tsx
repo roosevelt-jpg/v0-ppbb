@@ -286,11 +286,11 @@ function BusinessEventForm() {
   }
 
   if (loading) {
-    return <div style={{ padding: 40, color: '#888' }}>Loading event...</div>
+    return <div style={{ padding: 40, color: 'var(--muted-foreground)' }}>Loading event...</div>
   }
 
   return (
-    <div className="min-h-full bg-[#fafafa]">
+    <div className="min-h-full bg-[#fafafa] dark:bg-neutral-950">
       <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href="/business/events"
@@ -304,7 +304,7 @@ function BusinessEventForm() {
           {isEditing ? 'Edit Event' : 'Create New Event'}
         </h1>
         {existingStatus && (
-          <p className="mb-6 text-sm text-neutral-500">
+          <p className="mb-6 text-sm text-neutral-500 dark:text-muted-foreground">
             Status: {existingStatus.replace(/_/g, ' ').toUpperCase()}
           </p>
         )}
@@ -312,13 +312,11 @@ function BusinessEventForm() {
 
         {approvalNotes && (
           <div
+            className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300"
             style={{
               padding: 16,
-              backgroundColor: '#fff8e1',
-              border: '1px solid #ffe082',
               borderRadius: 6,
               marginBottom: 24,
-              color: '#e65100',
             }}
           >
             <p style={{ fontWeight: 600, marginBottom: 4 }}>Admin requested changes</p>
@@ -328,12 +326,9 @@ function BusinessEventForm() {
 
         {error && (
           <div
+            className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300"
             style={{
               padding: '16px',
-              backgroundColor: '#ffebee',
-              borderColor: '#ffcccc',
-              color: '#c62828',
-              border: '1px solid',
               borderRadius: '6px',
               marginBottom: '24px',
             }}
@@ -344,12 +339,12 @@ function BusinessEventForm() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Basic Information
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                   Event Title *
                 </label>
                 <input
@@ -359,7 +354,7 @@ function BusinessEventForm() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                   }}
@@ -367,7 +362,7 @@ function BusinessEventForm() {
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                   Description *
                 </label>
                 <textarea
@@ -377,7 +372,7 @@ function BusinessEventForm() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                     resize: 'vertical',
@@ -387,7 +382,7 @@ function BusinessEventForm() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                     Category
                   </label>
                   <select
@@ -396,7 +391,7 @@ function BusinessEventForm() {
                     style={{
                       width: '100%',
                       padding: '12px',
-                      border: '1px solid #e4e1da',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                       fontSize: '14px',
                     }}
@@ -410,7 +405,7 @@ function BusinessEventForm() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                     Audience
                   </label>
                   <select
@@ -419,7 +414,7 @@ function BusinessEventForm() {
                     style={{
                       width: '100%',
                       padding: '12px',
-                      border: '1px solid #e4e1da',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                       fontSize: '14px',
                     }}
@@ -434,10 +429,10 @@ function BusinessEventForm() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Event Banner
             </h2>
-            <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg cursor-pointer text-sm font-medium mb-3">
+            <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 dark:border-border rounded-lg cursor-pointer text-sm font-medium mb-3">
               {uploadingBanner ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               {uploadingBanner ? 'Uploading…' : 'Upload banner (JPG, PNG, WebP)'}
               <input
@@ -470,7 +465,7 @@ function BusinessEventForm() {
               />
             </label>
             {uploadingBanner && bannerProgress > 0 ? (
-              <div className="w-full h-2 bg-neutral-200 rounded-full mb-3 overflow-hidden">
+              <div className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full mb-3 overflow-hidden">
                 <div
                   className="h-full bg-black transition-all duration-300"
                   style={{ width: `${bannerProgress}%` }}
@@ -487,10 +482,10 @@ function BusinessEventForm() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Photo gallery slideshow
             </h2>
-            <p className="text-sm text-neutral-500 mb-3">
+            <p className="text-sm text-neutral-500 dark:text-muted-foreground mb-3">
               Previous event images shown beside the description on the public event page (max 12).
             </p>
             {formData.galleryURLs.length > 0 ? (
@@ -552,7 +547,7 @@ function BusinessEventForm() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Tags
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -571,7 +566,7 @@ function BusinessEventForm() {
                   className={`px-3 py-1 rounded-full text-xs font-medium border ${
                     formData.tags.includes(tag)
                       ? '!bg-black !text-white border-black'
-                      : '!bg-white !text-black border-neutral-300'
+                      : '!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border-neutral-300 dark:border-border'
                   }`}
                 >
                   {tag}
@@ -581,10 +576,10 @@ function BusinessEventForm() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Location
             </h2>
-            <p className="text-sm text-neutral-600 mb-3">
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-3">
               Select country / city, search the venue address, then drag the pin to the exact spot.
             </p>
             <AddressLocationPicker
@@ -607,12 +602,12 @@ function BusinessEventForm() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Date & Time
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                   Start Date *
                 </label>
                 <input
@@ -622,14 +617,14 @@ function BusinessEventForm() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                   Start Time *
                 </label>
                 <input
@@ -639,14 +634,14 @@ function BusinessEventForm() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                   }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                   End Time
                 </label>
                 <input
@@ -656,7 +651,7 @@ function BusinessEventForm() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                   }}
@@ -664,13 +659,13 @@ function BusinessEventForm() {
               </div>
             </div>
             <div className="mt-4">
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                 Timezone
               </label>
               <select
                 value={formData.timezone}
                 onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-md text-sm"
               >
                 <option value="Asia/Dubai">Asia/Dubai (GST)</option>
                 <option value="UTC">UTC</option>
@@ -679,7 +674,7 @@ function BusinessEventForm() {
               </select>
             </div>
             <div className="mt-4">
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                 Max Attendees (optional)
               </label>
               <input
@@ -688,14 +683,14 @@ function BusinessEventForm() {
                 value={formData.maxAttendees}
                 onChange={(e) => setFormData({ ...formData, maxAttendees: e.target.value })}
                 placeholder="Leave blank for unlimited"
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-md text-sm"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111111' }}>Speakers</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)' }}>Speakers</h2>
               <button
                 type="button"
                 onClick={() =>
@@ -710,7 +705,7 @@ function BusinessEventForm() {
               </button>
             </div>
             {formData.speakers.map((speaker, idx) => (
-              <div key={idx} className="border border-neutral-200 rounded-lg p-4 mb-3 space-y-2">
+              <div key={idx} className="border border-neutral-200 dark:border-border rounded-lg p-4 mb-3 space-y-2">
                 <div className="flex justify-end">
                   <button
                     type="button"
@@ -811,7 +806,7 @@ function BusinessEventForm() {
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111111' }}>Agenda</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)' }}>Agenda</h2>
               <button
                 type="button"
                 onClick={() =>
@@ -829,9 +824,9 @@ function BusinessEventForm() {
               </button>
             </div>
             {formData.agenda.map((item, idx) => (
-              <div key={idx} className="border border-neutral-200 rounded-lg p-4 mb-3 grid gap-2 sm:grid-cols-2">
+              <div key={idx} className="border border-neutral-200 dark:border-border rounded-lg p-4 mb-3 grid gap-2 sm:grid-cols-2">
                 <div className="flex items-center gap-2 sm:col-span-2">
-                  <span className="text-neutral-400 cursor-grab text-xs">⋮⋮</span>
+                  <span className="text-neutral-400 dark:text-neutral-500 cursor-grab text-xs">⋮⋮</span>
                   <button
                     type="button"
                     disabled={idx === 0}
@@ -938,12 +933,12 @@ function BusinessEventForm() {
           </div>
 
           <div>
-            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: '#111111' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px', color: 'var(--foreground)' }}>
               Pricing
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                   Event Type
                 </label>
                 <select
@@ -952,7 +947,7 @@ function BusinessEventForm() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     fontSize: '14px',
                   }}
@@ -963,7 +958,7 @@ function BusinessEventForm() {
               </div>
               {formData.pricingType !== 'free' && (
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#111111' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                     Price (AED)
                   </label>
                   <input
@@ -975,7 +970,7 @@ function BusinessEventForm() {
                     style={{
                       width: '100%',
                       padding: '12px',
-                      border: '1px solid #e4e1da',
+                      border: '1px solid var(--border)',
                       borderRadius: '6px',
                       fontSize: '14px',
                     }}
@@ -1022,7 +1017,7 @@ function BusinessEventForm() {
               gap: '12px',
               justifyContent: 'flex-end',
               paddingTop: '24px',
-              borderTop: '1px solid #e4e1da',
+              borderTop: '1px solid var(--border)',
               flexWrap: 'wrap',
             }}
           >
@@ -1030,9 +1025,9 @@ function BusinessEventForm() {
               onClick={() => router.back()}
               style={{
                 padding: '12px 24px',
-                backgroundColor: '#ffffff',
-                color: '#111111',
-                border: '1px solid #e4e1da',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
+                border: '1px solid var(--border)',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 500,
@@ -1045,9 +1040,9 @@ function BusinessEventForm() {
               disabled={saving}
               style={{
                 padding: '12px 24px',
-                backgroundColor: '#ffffff',
-                color: '#111111',
-                border: '1px solid #e4e1da',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
+                border: '1px solid var(--border)',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontWeight: 500,

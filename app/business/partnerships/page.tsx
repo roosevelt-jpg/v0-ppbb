@@ -124,10 +124,10 @@ export default function PartnershipsPage() {
           }
         />
       ) : (
-        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto table-scroll">
+        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl overflow-x-auto table-scroll">
           <table className="w-full text-sm min-w-[800px]">
             <thead>
-              <tr className="border-b text-left text-xs uppercase text-neutral-500">
+              <tr className="border-b text-left text-xs uppercase text-neutral-500 dark:text-muted-foreground">
                 <th className="py-3 px-4">Type</th>
                 <th className="py-3 px-4">Title</th>
                 <th className="py-3 px-4">Submitted</th>
@@ -140,7 +140,7 @@ export default function PartnershipsPage() {
               {filtered.map((req) => {
                 const submitted = toDate(req.submittedAt)
                 return (
-                  <tr key={req.id} className="border-b border-neutral-100">
+                  <tr key={req.id} className="border-b border-neutral-100 dark:border-border">
                     <td className="py-3 px-4">{req.type}</td>
                     <td className="py-3 px-4 font-medium">{req.title}</td>
                     <td className="py-3 px-4 whitespace-nowrap">
@@ -148,12 +148,12 @@ export default function PartnershipsPage() {
                     </td>
                     <td className="py-3 px-4">
                       <span
-                        className={`px-2 py-1 rounded text-xs capitalize ${STATUS_BADGES[req.status] || 'bg-neutral-100'}`}
+                        className={`px-2 py-1 rounded text-xs capitalize ${STATUS_BADGES[req.status] || 'bg-neutral-100 dark:bg-neutral-800'}`}
                       >
                         {req.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-neutral-500 max-w-[200px] truncate">
+                    <td className="py-3 px-4 text-neutral-500 dark:text-muted-foreground max-w-[200px] truncate">
                       {req.adminNotes || '—'}
                     </td>
                     <td className="py-3 px-4">
@@ -170,7 +170,7 @@ export default function PartnershipsPage() {
                         {req.status === 'declined' ? (
                           <Link
                             href="/business/partnerships/new"
-                            className="text-xs text-neutral-700 underline"
+                            className="text-xs text-neutral-700 dark:text-neutral-200 underline"
                           >
                             Edit & Resubmit
                           </Link>

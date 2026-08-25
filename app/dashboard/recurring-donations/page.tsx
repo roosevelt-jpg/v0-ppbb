@@ -125,24 +125,24 @@ export default function RecurringDonationsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-white/5">
             <div className="flex-1 p-8">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100">
-            <p className="text-gray-600 text-sm">Active Subscriptions</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm">Active Subscriptions</p>
             <p className="text-3xl font-bold mt-2">{activeSubscriptions.length}</p>
-            <p className="text-sm text-gray-600 mt-2">Monthly giving</p>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground mt-2">Monthly giving</p>
           </Card>
 
           <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100">
-            <p className="text-gray-600 text-sm">Monthly Total</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm">Monthly Total</p>
             <p className="text-3xl font-bold mt-2">AED {totalMonthlyDonation.toLocaleString()}</p>
-            <p className="text-sm text-gray-600 mt-2">Recurring donations</p>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground mt-2">Recurring donations</p>
           </Card>
 
           <Card className="p-6 bg-gradient-to-br from-purple-50 to-purple-100">
-            <p className="text-gray-600 text-sm">Start New Donation</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm">Start New Donation</p>
             <Link href="/donate?recurring=true">
               <Button className="mt-4 w-full">
                 <Plus className="h-4 w-4 mr-2" />
@@ -166,10 +166,10 @@ export default function RecurringDonationsPage() {
                         <p className="font-bold">{subscription.metadata?.causeName || 'Monthly Donation'}</p>
                       </div>
 
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">
                         <span className="font-semibold">Frequency:</span> Monthly
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">
                         <Calendar className="w-4 h-4 inline mr-1" />
                         Next Billing: {getNextBillingDate(subscription)}
                       </p>
@@ -177,7 +177,7 @@ export default function RecurringDonationsPage() {
 
                     <div className="text-right mr-4">
                       <p className="text-2xl font-bold">AED {subscription.amount}</p>
-                      <p className="text-sm text-gray-600">per month</p>
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">per month</p>
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -213,12 +213,12 @@ export default function RecurringDonationsPage() {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="font-bold">{subscription.metadata?.causeName || 'Monthly Donation'}</p>
-                      <p className="text-sm text-gray-600">Currently paused</p>
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">Currently paused</p>
                     </div>
 
                     <div className="text-right mr-4">
                       <p className="text-2xl font-bold">AED {subscription.amount}</p>
-                      <p className="text-sm text-gray-600">per month</p>
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">per month</p>
                     </div>
 
                     <button
@@ -245,7 +245,7 @@ export default function RecurringDonationsPage() {
                   <div className="flex justify-between items-start opacity-75">
                     <div>
                       <p className="font-bold">{subscription.metadata?.causeName || 'Monthly Donation'}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-muted-foreground">
                         Cancelled on {new Date(subscription.cancelledAt?.toDate?.() || new Date()).toLocaleDateString()}
                       </p>
                     </div>
@@ -260,7 +260,7 @@ export default function RecurringDonationsPage() {
         {/* Empty State */}
         {subscriptions.length === 0 && !loading && (
           <Card className="p-8 text-center">
-            <p className="text-gray-600 mb-4">You haven&apos;t set up any recurring donations yet</p>
+            <p className="text-gray-600 dark:text-muted-foreground mb-4">You haven&apos;t set up any recurring donations yet</p>
             <Link href="/donate?recurring=true">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />

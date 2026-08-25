@@ -110,7 +110,7 @@ export default function BusinessPartnershipNewPage() {
           </p>
         </div>
         {!ready ? (
-          <div className="h-64 animate-pulse bg-neutral-100 rounded-lg" />
+          <div className="h-64 animate-pulse bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
         ) : (
           <>
             <div>
@@ -124,7 +124,7 @@ export default function BusinessPartnershipNewPage() {
                   setInquiryCategoryId(e.target.value)
                   setFormKey((k) => k + 1)
                 }}
-                className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg font-body text-sm bg-white dark:bg-card focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -135,7 +135,7 @@ export default function BusinessPartnershipNewPage() {
             </div>
 
             {charitySelected ? (
-              <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+              <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Charity support uses our beneficiary request form.
                 </p>
@@ -148,7 +148,7 @@ export default function BusinessPartnershipNewPage() {
                 </button>
               </div>
             ) : linkedFormHref ? (
-              <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+              <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3">
                 <p className="text-sm text-muted-foreground">
                   This category opens the form linked in Admin → CMS → Partners.
                 </p>

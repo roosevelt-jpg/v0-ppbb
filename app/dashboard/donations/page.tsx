@@ -93,7 +93,7 @@ function DonationsContent() {
       case 'refunded':
         return <XCircle className="w-5 h-5 text-red-600" />
       default:
-        return <Clock className="w-5 h-5 text-neutral-400" />
+        return <Clock className="w-5 h-5 text-neutral-400 dark:text-neutral-500" />
     }
   }
 
@@ -103,18 +103,18 @@ function DonationsContent() {
   return (
     <DashboardPageShell title="My Donations" subtitle="Your giving history and impact">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-6">
-        <Card className="pb-stat-card p-3 border border-neutral-200">
-          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">Total Donated</p>
+        <Card className="pb-stat-card p-3 border border-neutral-200 dark:border-border">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Total Donated</p>
           <p className="pb-stat-value font-headline text-xl font-bold mt-1">
             AED {totalDonated.toLocaleString()}
           </p>
         </Card>
-        <Card className="pb-stat-card p-3 border border-neutral-200">
-          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">Causes Supported</p>
+        <Card className="pb-stat-card p-3 border border-neutral-200 dark:border-border">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Causes Supported</p>
           <p className="pb-stat-value font-headline text-xl font-bold mt-1">{causesSupported}</p>
         </Card>
-        <Card className="pb-stat-card p-3 border border-neutral-200">
-          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">Last Donation</p>
+        <Card className="pb-stat-card p-3 border border-neutral-200 dark:border-border">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Last Donation</p>
           <p className="pb-stat-value text-base font-semibold mt-1">
             {donations[0] ? parseDonationDate(donations[0]) : '—'}
           </p>
@@ -144,7 +144,7 @@ function DonationsContent() {
         ) : (
           <div className="space-y-4">
             {donations.map((donation) => (
-              <Card key={donation.id} className="p-4 border border-neutral-200">
+              <Card key={donation.id} className="p-4 border border-neutral-200 dark:border-border">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -152,14 +152,14 @@ function DonationsContent() {
                       <p className="font-bold truncate">{donation.causeName || donation.charityName || 'Donation'}</p>
                     </div>
                     {donation.partnerName ? (
-                      <p className="text-sm text-neutral-500">Partner: {donation.partnerName}</p>
+                      <p className="text-sm text-neutral-500 dark:text-muted-foreground">Partner: {donation.partnerName}</p>
                     ) : null}
                     {(donation as { donationType?: string }).donationType ? (
-                      <p className="text-sm text-neutral-500 capitalize">
+                      <p className="text-sm text-neutral-500 dark:text-muted-foreground capitalize">
                         Type: {(donation as { donationType?: string }).donationType}
                       </p>
                     ) : null}
-                    <p className="text-sm text-neutral-500">{parseDonationDate(donation)}</p>
+                    <p className="text-sm text-neutral-500 dark:text-muted-foreground">{parseDonationDate(donation)}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">
@@ -170,7 +170,7 @@ function DonationsContent() {
                         href={donation.receiptURL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-900 mt-2"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-900 dark:text-foreground mt-2"
                       >
                         <Download className="w-4 h-4" /> Receipt
                       </a>
@@ -198,7 +198,7 @@ function DonationsContent() {
             const goal = Number(c.goalAmount ?? 0)
             const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0
             return (
-              <Card key={c.id} className="overflow-hidden border border-neutral-200">
+              <Card key={c.id} className="overflow-hidden border border-neutral-200 dark:border-border">
                 {c.bannerImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={c.bannerImage} alt="" className="w-full h-40 object-cover" />
@@ -206,14 +206,14 @@ function DonationsContent() {
                 <div className="p-4">
                   <h3 className="font-bold">{c.title ?? 'Charity case'}</h3>
                   {c.description ? (
-                    <p className="text-sm text-neutral-500 mt-2 line-clamp-2">{c.description}</p>
+                    <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
                   ) : null}
                   {goal > 0 ? (
                     <div className="mt-3">
-                      <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
                         <div className="h-full bg-black rounded-full" style={{ width: `${pct}%` }} />
                       </div>
-                      <p className="text-xs text-neutral-500 mt-1">
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
                         AED {raised.toLocaleString()} of AED {goal.toLocaleString()}
                       </p>
                     </div>

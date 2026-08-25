@@ -12,7 +12,7 @@ import { DmInbox } from '@/components/dm/dm-inbox'
 function MessagesFallback() {
   return (
     <div className="flex justify-center py-16">
-      <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+      <Loader2 className="w-6 h-6 animate-spin text-neutral-400 dark:text-neutral-500" />
     </div>
   )
 }
@@ -22,8 +22,8 @@ export default function BusinessMessagesPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Messages</h1>
-          <p className="text-sm text-neutral-600">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-foreground">Messages</h1>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             Direct messages with members — stays in the Business Portal.
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function BusinessMessagesPage() {
           <ArrowLeft className="w-4 h-4" /> Back to Network
         </Link>
       </div>
-      <div className="border border-neutral-200 rounded-lg overflow-hidden bg-white min-h-[70vh] p-3 sm:p-4">
+      <div className="border border-neutral-200 dark:border-border rounded-lg overflow-hidden bg-white dark:bg-card min-h-[70vh] p-3 sm:p-4">
         <Suspense fallback={<MessagesFallback />}>
           <DmInbox />
         </Suspense>

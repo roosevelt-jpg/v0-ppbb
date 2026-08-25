@@ -31,11 +31,11 @@ const STATUS_CONFIG: Record<
     icon: Clock,
     label: 'Awaiting shop fulfillment',
   },
-  processing: { color: 'bg-neutral-100 text-neutral-900', icon: Clock, label: 'Processing' },
-  shipped: { color: 'bg-neutral-100 text-neutral-900', icon: Truck, label: 'Shipped' },
+  processing: { color: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-foreground', icon: Clock, label: 'Processing' },
+  shipped: { color: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-foreground', icon: Truck, label: 'Shipped' },
   delivered: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Delivered' },
   cancelled: { color: 'bg-red-100 text-red-800', icon: Clock, label: 'Cancelled' },
-  enquiry: { color: 'bg-neutral-100 text-neutral-800', icon: Clock, label: 'Enquiry' },
+  enquiry: { color: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-foreground', icon: Clock, label: 'Enquiry' },
 }
 
 export default function OrdersPage() {
@@ -107,13 +107,13 @@ export default function OrdersPage() {
             const total = Number(order.total ?? order.amount ?? 0)
 
             return (
-              <Card key={String(order.id)} className="p-5 border border-neutral-200 space-y-3">
+              <Card key={String(order.id)} className="p-5 border border-neutral-200 dark:border-border space-y-3">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
                   <div>
                     <h3 className="font-semibold">
                       {String(order.offerTitle || `Order #${String(order.id).slice(0, 8).toUpperCase()}`)}
                     </h3>
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-neutral-500 dark:text-muted-foreground">
                       {order.createdAt
                         ? new Date(
                             (order.createdAt as { toMillis?: () => number }).toMillis?.() ??
@@ -133,28 +133,28 @@ export default function OrdersPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                   <div>
-                    <p className="text-xs text-neutral-500">Total</p>
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">Total</p>
                     <p className="font-semibold">
                       {String(order.currency || 'AED')} {total.toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-neutral-500">Payment</p>
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">Payment</p>
                     <p className="font-semibold flex items-center gap-1">
                       <Banknote className="w-3.5 h-3.5" />
                       {paymentMethodLabel(paymentMethod)}
                     </p>
-                    <p className="text-xs text-neutral-500 capitalize">
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground capitalize">
                       {String(order.paymentStatus || '').replace(/_/g, ' ')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-neutral-500">Delivery partner</p>
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">Delivery partner</p>
                     <p className="font-semibold">
                       {String(order.deliveryPartnerLabel || 'Arranged by shop')}
                     </p>
                     {typeof order.trackingNumber === 'string' && order.trackingNumber ? (
-                      <p className="text-xs text-neutral-500">Tracking: {order.trackingNumber}</p>
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">Tracking: {order.trackingNumber}</p>
                     ) : null}
                   </div>
                 </div>
@@ -163,16 +163,16 @@ export default function OrdersPage() {
                   <div className="grid sm:grid-cols-2 gap-3 text-sm">
                     {order.deliveryAddress ? (
                       <div>
-                        <p className="text-xs text-neutral-500">Delivery address</p>
-                        <pre className="whitespace-pre-wrap font-sans text-neutral-800 mt-0.5">
+                        <p className="text-xs text-neutral-500 dark:text-muted-foreground">Delivery address</p>
+                        <pre className="whitespace-pre-wrap font-sans text-neutral-800 dark:text-foreground mt-0.5">
                           {formatMarketplaceAddress(order.deliveryAddress as MarketplaceAddress)}
                         </pre>
                       </div>
                     ) : null}
                     {order.invoiceAddress ? (
                       <div>
-                        <p className="text-xs text-neutral-500">Invoice address</p>
-                        <pre className="whitespace-pre-wrap font-sans text-neutral-800 mt-0.5">
+                        <p className="text-xs text-neutral-500 dark:text-muted-foreground">Invoice address</p>
+                        <pre className="whitespace-pre-wrap font-sans text-neutral-800 dark:text-foreground mt-0.5">
                           {formatMarketplaceAddress(order.invoiceAddress as MarketplaceAddress)}
                         </pre>
                       </div>

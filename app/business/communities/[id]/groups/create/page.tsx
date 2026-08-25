@@ -112,17 +112,17 @@ export default function BusinessCreateGroupPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--secondary)' }}>
       <div className="max-w-6xl mx-auto p-8">
         <Link
           href="/business/communities"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          className="inline-flex items-center gap-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900 mb-6"
         >
           <ChevronLeft size={20} />
           Back to Communities
         </Link>
 
-        <h2 className="text-2xl font-bold text-black mb-6">Create New Group</h2>
+        <h2 className="text-2xl font-bold text-black dark:text-foreground mb-6">Create New Group</h2>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
@@ -130,33 +130,33 @@ export default function BusinessCreateGroupPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-6 max-w-2xl">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6 space-y-6 max-w-2xl">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Group Name *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">Group Name *</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Prayer Circle, Book Club"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">Description</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="What is this group about?"
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Gender Restriction</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-neutral-200 mb-3">Gender Restriction</label>
             <div className="space-y-2">
               {[
                 { value: 'mixed', label: 'All (Mixed)' },
@@ -173,7 +173,7 @@ export default function BusinessCreateGroupPage() {
                     disabled={loading}
                     className="w-4 h-4"
                   />
-                  <span className="text-gray-700">{option.label}</span>
+                  <span className="text-gray-700 dark:text-neutral-200">{option.label}</span>
                 </label>
               ))}
             </div>
@@ -187,16 +187,16 @@ export default function BusinessCreateGroupPage() {
               disabled={loading}
               className="w-4 h-4"
             />
-            <span className="text-sm text-gray-700">Require approval before members can join</span>
+            <span className="text-sm text-gray-700 dark:text-neutral-200">Require approval before members can join</span>
           </label>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Group Icon (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-neutral-200 mb-2">Group Icon (optional)</label>
             <div className="flex gap-4">
               {iconPreview && (
                 <img src={iconPreview} alt="Preview" className="w-20 h-20 rounded-lg object-cover" />
               )}
-              <label className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800">
                 <Upload size={18} className="mr-2" />
                 Choose File
                 <input type="file" accept="image/*" onChange={handleIconChange} disabled={loading} className="hidden" />
@@ -214,7 +214,7 @@ export default function BusinessCreateGroupPage() {
             </button>
             <Link
               href={`/communities/${communityId}`}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium text-center flex items-center justify-center"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-border text-gray-700 dark:text-neutral-200 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-800 font-medium text-center flex items-center justify-center"
             >
               Cancel
             </Link>

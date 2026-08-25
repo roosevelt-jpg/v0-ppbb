@@ -439,13 +439,13 @@ export default function BusinessOpportunityDetailPage() {
   }
 
   if (loading) {
-    return <div className="p-8 text-center text-neutral-500">Loading applicants…</div>
+    return <div className="p-8 text-center text-neutral-500 dark:text-muted-foreground">Loading applicants…</div>
   }
 
   if (!opportunity) {
     return (
       <div className="p-8 text-center">
-        <p className="text-neutral-500 mb-4">Opportunity not found.</p>
+        <p className="text-neutral-500 dark:text-muted-foreground mb-4">Opportunity not found.</p>
         <Button type="button" onClick={() => router.push('/business/opportunities')}>
           Back to Job List
         </Button>
@@ -457,16 +457,16 @@ export default function BusinessOpportunityDetailPage() {
   const expired = toDate(opportunity.deadline) || toDate(opportunity.hiringBy)
 
   return (
-    <div className="min-h-full bg-[#f5f5f5]">
+    <div className="min-h-full bg-[#f5f5f5] dark:bg-neutral-950">
       {/* Header */}
-      <div className="bg-white border-b border-neutral-200 px-4 sm:px-6 lg:px-8 py-5">
+      <div className="bg-white dark:bg-card border-b border-neutral-200 dark:border-border px-4 sm:px-6 lg:px-8 py-5">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-foreground leading-tight">
                 {opportunity.title}
               </h1>
-              <p className="mt-2 text-sm text-neutral-500">
+              <p className="mt-2 text-sm text-neutral-500 dark:text-muted-foreground">
                 Job Posted {posted ? format(posted, 'dd MMM yyyy') : '—'}
                 <span className="mx-2 text-neutral-300">|</span>
                 {expired ? `Expired ${format(expired, 'dd MMM yyyy')}` : 'No deadline set'}
@@ -494,7 +494,7 @@ export default function BusinessOpportunityDetailPage() {
           </div>
           {shareNote ? <p className="mt-2 text-xs text-emerald-700">{shareNote}</p> : null}
 
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200">
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 dark:border-border">
             <div className="flex gap-1">
               {(
                 [
@@ -508,8 +508,8 @@ export default function BusinessOpportunityDetailPage() {
                   onClick={() => setTab(t.id)}
                   className={`px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
                     tab === t.id
-                      ? 'border-neutral-900 text-neutral-900'
-                      : 'border-transparent text-neutral-500 hover:text-neutral-800'
+                      ? 'border-neutral-900 text-neutral-900 dark:text-foreground'
+                      : 'border-transparent text-neutral-500 dark:text-muted-foreground hover:text-neutral-800'
                   }`}
                 >
                   {t.label}
@@ -518,7 +518,7 @@ export default function BusinessOpportunityDetailPage() {
             </div>
             <Link
               href="/business/opportunities"
-              className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 pb-2"
+              className="inline-flex items-center gap-1.5 text-sm text-neutral-500 dark:text-muted-foreground hover:text-neutral-900 pb-2"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Job List
@@ -529,7 +529,7 @@ export default function BusinessOpportunityDetailPage() {
 
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {tab === 'preview' ? (
-          <div className="bg-white border border-neutral-200 rounded-lg p-5 sm:p-6 space-y-4">
+          <div className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-5 sm:p-6 space-y-4">
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
@@ -540,26 +540,26 @@ export default function BusinessOpportunityDetailPage() {
               </Button>
             </div>
             <div>
-              <h2 className="font-semibold text-neutral-900 mb-2">Description</h2>
-              <p className="text-sm text-neutral-600 whitespace-pre-wrap">
+              <h2 className="font-semibold text-neutral-900 dark:text-foreground mb-2">Description</h2>
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground whitespace-pre-wrap">
                 {htmlToPlainText(opportunity.description || '') || '—'}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-              <div className="rounded-md bg-neutral-50 p-3">
-                <p className="text-xs text-neutral-500">Category</p>
+              <div className="rounded-md bg-neutral-50 dark:bg-white/5 p-3">
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground">Category</p>
                 <p className="font-medium">{opportunity.category || '—'}</p>
               </div>
-              <div className="rounded-md bg-neutral-50 p-3">
-                <p className="text-xs text-neutral-500">Type</p>
+              <div className="rounded-md bg-neutral-50 dark:bg-white/5 p-3">
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground">Type</p>
                 <p className="font-medium capitalize">{opportunity.type || '—'}</p>
               </div>
-              <div className="rounded-md bg-neutral-50 p-3">
-                <p className="text-xs text-neutral-500">Location</p>
+              <div className="rounded-md bg-neutral-50 dark:bg-white/5 p-3">
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground">Location</p>
                 <p className="font-medium">{formatOppLocation(opportunity)}</p>
               </div>
-              <div className="rounded-md bg-neutral-50 p-3">
-                <p className="text-xs text-neutral-500">Status</p>
+              <div className="rounded-md bg-neutral-50 dark:bg-white/5 p-3">
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground">Status</p>
                 <p className="font-medium capitalize">
                   {String(opportunity.status || '').replace(/_/g, ' ')}
                 </p>
@@ -623,33 +623,33 @@ export default function BusinessOpportunityDetailPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5">
               {/* Filters */}
-              <aside className="bg-white border border-neutral-200 rounded-lg p-4 h-fit">
-                <p className="text-sm font-bold text-neutral-900 mb-3">Filtered By:</p>
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">Position</label>
+              <aside className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-4 h-fit">
+                <p className="text-sm font-bold text-neutral-900 dark:text-foreground mb-3">Filtered By:</p>
+                <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1">Position</label>
                 <select
                   disabled
-                  className="w-full h-9 rounded-md border border-neutral-300 bg-neutral-50 px-2 text-sm mb-3"
+                  className="w-full h-9 rounded-md border border-neutral-300 dark:border-border bg-neutral-50 dark:bg-white/5 px-2 text-sm mb-3"
                   value={opportunity.title}
                 >
                   <option>{opportunity.title}</option>
                 </select>
 
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">Job Type</label>
+                <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1">Job Type</label>
                 <select
                   disabled
-                  className="w-full h-9 rounded-md border border-neutral-300 bg-neutral-50 px-2 text-sm mb-3 capitalize"
+                  className="w-full h-9 rounded-md border border-neutral-300 dark:border-border bg-neutral-50 dark:bg-white/5 px-2 text-sm mb-3 capitalize"
                   value={opportunity.type || ''}
                 >
                   <option className="capitalize">{opportunity.type || '—'}</option>
                 </select>
 
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">
+                <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1">
                   Experience Level
                 </label>
                 <select
                   value={experienceFilter}
                   onChange={(e) => setExperienceFilter(e.target.value)}
-                  className="w-full h-9 rounded-md border border-neutral-300 bg-white px-2 text-sm mb-3"
+                  className="w-full h-9 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-2 text-sm mb-3"
                 >
                   <option value="all">All</option>
                   {experienceOptions.map((opt) => (
@@ -659,13 +659,13 @@ export default function BusinessOpportunityDetailPage() {
                   ))}
                 </select>
 
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">
+                <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1">
                   Education Level
                 </label>
                 <select
                   value={educationFilter}
                   onChange={(e) => setEducationFilter(e.target.value)}
-                  className="w-full h-9 rounded-md border border-neutral-300 bg-white px-2 text-sm"
+                  className="w-full h-9 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-2 text-sm"
                 >
                   <option value="all">All</option>
                   {educationOptions.map((opt) => (
@@ -680,7 +680,7 @@ export default function BusinessOpportunityDetailPage() {
               <section>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold text-neutral-600">Download By:</span>
+                    <span className="text-xs font-semibold text-neutral-600 dark:text-muted-foreground">Download By:</span>
                     <button
                       type="button"
                       onClick={exportCsv}
@@ -693,14 +693,14 @@ export default function BusinessOpportunityDetailPage() {
                       type="button"
                       onClick={exportCsv}
                       title="Download list"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card text-neutral-700 dark:text-neutral-200"
                     >
                       <FileText className="w-4 h-4" />
                     </button>
                     <select
                       value={stage}
                       onChange={(e) => setStage(e.target.value as StageFilter)}
-                      className="h-8 rounded-md border border-neutral-300 bg-white px-2 text-xs"
+                      className="h-8 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-2 text-xs"
                     >
                       <option value="all">All Applicants</option>
                       <option value="pending">Not Viewed</option>
@@ -712,11 +712,11 @@ export default function BusinessOpportunityDetailPage() {
                     </select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-xs font-semibold text-neutral-600">Show per page</label>
+                    <label className="text-xs font-semibold text-neutral-600 dark:text-muted-foreground">Show per page</label>
                     <select
                       value={perPage}
                       onChange={(e) => setPerPage(Number(e.target.value))}
-                      className="h-8 rounded-md border border-neutral-300 bg-white px-2 text-xs"
+                      className="h-8 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-2 text-xs"
                     >
                       {[5, 10, 20, 50].map((n) => (
                         <option key={n} value={n}>
@@ -728,11 +728,11 @@ export default function BusinessOpportunityDetailPage() {
                 </div>
 
                 {paged.length === 0 ? (
-                  <div className="rounded-lg border border-neutral-200 bg-white p-10 text-center text-neutral-500">
+                  <div className="rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card p-10 text-center text-neutral-500 dark:text-muted-foreground">
                     No applicants in this view.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+                  <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card">
                     <table className="w-full min-w-[720px] text-left text-sm">
                       <thead>
                         <tr className="bg-neutral-900 text-white">
@@ -752,10 +752,10 @@ export default function BusinessOpportunityDetailPage() {
                           const applied = toDate(app.createdAt)
 
                           return (
-                            <tr key={app.id} className="border-t border-neutral-100 align-top">
+                            <tr key={app.id} className="border-t border-neutral-100 dark:border-border align-top">
                               <td className="px-4 py-4">
                                 <div className="flex gap-3">
-                                  <div className="w-12 h-12 rounded-md overflow-hidden bg-neutral-200 shrink-0 flex items-center justify-center">
+                                  <div className="w-12 h-12 rounded-md overflow-hidden bg-neutral-200 dark:bg-neutral-700 shrink-0 flex items-center justify-center">
                                     {photo ? (
                                       // eslint-disable-next-line @next/next/no-img-element
                                       <img
@@ -764,42 +764,42 @@ export default function BusinessOpportunityDetailPage() {
                                         className="w-full h-full object-cover"
                                       />
                                     ) : (
-                                      <span className="font-semibold text-neutral-700">
+                                      <span className="font-semibold text-neutral-700 dark:text-neutral-200">
                                         {app.applicantName?.charAt(0)?.toUpperCase() || '?'}
                                       </span>
                                     )}
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="font-bold text-neutral-900">
+                                    <p className="font-bold text-neutral-900 dark:text-foreground">
                                       {app.applicantName || 'Applicant'}
                                     </p>
-                                    <p className="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+                                    <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-0.5 flex items-center gap-1">
                                       <MapPin className="w-3 h-3 shrink-0" />
                                       <span className="truncate">{location}</span>
                                     </p>
-                                    <p className="text-[11px] text-neutral-400 mt-1">
+                                    <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1">
                                       Applied On:{' '}
                                       {applied ? format(applied, 'dd MMM yyyy') : '—'}
                                     </p>
-                                    <p className="text-[10px] uppercase tracking-wide text-neutral-500 mt-1 font-semibold">
+                                    <p className="text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mt-1 font-semibold">
                                       {app.status}
                                     </p>
                                   </div>
                                 </div>
                               </td>
                               <td className="px-4 py-4">
-                                <p className="font-semibold text-neutral-900">{title}</p>
-                                <ul className="mt-2 space-y-1 text-xs text-neutral-600">
+                                <p className="font-semibold text-neutral-900 dark:text-foreground">{title}</p>
+                                <ul className="mt-2 space-y-1 text-xs text-neutral-600 dark:text-muted-foreground">
                                   <li className="flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                                    <Clock className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" />
                                     Volunteer Hours : {hours}
                                   </li>
                                   <li className="flex items-center gap-1.5">
-                                    <GraduationCap className="w-3.5 h-3.5 text-neutral-400" />
+                                    <GraduationCap className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" />
                                     Education : {education}
                                   </li>
                                   <li className="flex items-center gap-1.5">
-                                    <Briefcase className="w-3.5 h-3.5 text-neutral-400" />
+                                    <Briefcase className="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500" />
                                     Experience : {experience}
                                   </li>
                                 </ul>
@@ -808,13 +808,13 @@ export default function BusinessOpportunityDetailPage() {
                                     type="button"
                                     onClick={() => void handleDownloadCv(app)}
                                     disabled={downloadingId === app.id}
-                                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-900 underline underline-offset-2 disabled:opacity-60"
+                                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-900 dark:text-foreground underline underline-offset-2 disabled:opacity-60"
                                   >
                                     <Download className="w-3.5 h-3.5" />
                                     {downloadingId === app.id ? 'Downloading…' : 'Download CV'}
                                   </button>
                                 ) : (
-                                  <span className="mt-3 inline-block text-xs text-neutral-400">
+                                  <span className="mt-3 inline-block text-xs text-neutral-400 dark:text-neutral-500">
                                     No CV uploaded
                                   </span>
                                 )}
@@ -852,7 +852,7 @@ export default function BusinessOpportunityDetailPage() {
                                     <button
                                       type="button"
                                       onClick={() => void handleStatus(app.id, 'reviewing')}
-                                      className="inline-flex items-center justify-center h-8 px-3 rounded-md border border-neutral-300 bg-white text-neutral-700 text-[11px] font-semibold"
+                                      className="inline-flex items-center justify-center h-8 px-3 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card text-neutral-700 dark:text-neutral-200 text-[11px] font-semibold"
                                     >
                                       Mark viewed
                                     </button>
@@ -868,7 +868,7 @@ export default function BusinessOpportunityDetailPage() {
                 )}
 
                 {totalPages > 1 ? (
-                  <div className="mt-4 flex items-center justify-between text-sm text-neutral-600">
+                  <div className="mt-4 flex items-center justify-between text-sm text-neutral-600 dark:text-muted-foreground">
                     <span>
                       Showing {(pageSafe - 1) * perPage + 1}–
                       {Math.min(pageSafe * perPage, filtered.length)} of {filtered.length}
@@ -927,7 +927,7 @@ export default function BusinessOpportunityDetailPage() {
             <input
               value={editForm.title}
               onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 px-3 text-sm"
+              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
             />
           </div>
           <div>
@@ -936,7 +936,7 @@ export default function BusinessOpportunityDetailPage() {
               value={editForm.description}
               onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
               rows={5}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-neutral-300 dark:border-border px-3 py-2 text-sm"
             />
           </div>
         </div>

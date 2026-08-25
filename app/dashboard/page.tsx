@@ -210,14 +210,14 @@ export default function DashboardPage() {
             <Link
               key={card.label}
               href={card.href}
-              className="block rounded-xl border border-neutral-200 bg-white p-5 hover:shadow-md transition-shadow"
+              className="block rounded-xl border border-neutral-200 dark:border-border bg-white dark:bg-card p-5 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{card.label}</p>
-                  <p className="text-2xl font-bold text-neutral-900 mt-2">{card.value}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">{card.label}</p>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-2">{card.value}</p>
                 </div>
-                <Icon className="w-5 h-5 text-neutral-400" />
+                <Icon className="w-5 h-5 text-neutral-400 dark:text-neutral-500" />
               </div>
             </Link>
           )
@@ -227,27 +227,27 @@ export default function DashboardPage() {
       {notifications.length > 0 ? (
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Bell className="w-5 h-5 text-neutral-700" />
-            <h2 className="text-xl font-bold text-neutral-900">Notifications</h2>
+            <Bell className="w-5 h-5 text-neutral-700 dark:text-neutral-200" />
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Notifications</h2>
           </div>
           <div className="space-y-2">
             {notifications.map((n) => (
               <div
                 key={n.id}
-                className="flex items-start justify-between gap-3 border border-neutral-200 rounded-xl p-4 bg-white"
+                className="flex items-start justify-between gap-3 border border-neutral-200 dark:border-border rounded-xl p-4 bg-white dark:bg-card"
               >
                 <div className="min-w-0">
-                  <p className="font-semibold text-neutral-900 text-sm">
+                  <p className="font-semibold text-neutral-900 dark:text-foreground text-sm">
                     {n.title ?? 'Notification'}
                   </p>
-                  <p className="text-sm text-neutral-500 mt-1 break-words">
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1 break-words">
                     {n.message ?? n.body ?? ''}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => dismissNotification(n.id)}
-                  className="shrink-0 !bg-white !text-neutral-500 border border-neutral-200 p-1.5 rounded-lg"
+                  className="shrink-0 !bg-white dark:!bg-neutral-800 !text-neutral-500 border border-neutral-200 dark:border-border p-1.5 rounded-lg"
                   aria-label="Dismiss"
                 >
                   <X className="w-4 h-4" />
@@ -260,13 +260,13 @@ export default function DashboardPage() {
 
       <section className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-neutral-900">Upcoming Events</h2>
-          <Link href="/dashboard/events" className="text-sm font-medium text-neutral-600 hover:text-black">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Upcoming Events</h2>
+          <Link href="/dashboard/events" className="text-sm font-medium text-neutral-600 dark:text-muted-foreground hover:text-black">
             View All Events
           </Link>
         </div>
         {upcomingEvents.length === 0 ? (
-          <p className="text-sm text-neutral-500 border border-neutral-200 rounded-xl p-6 bg-white">
+          <p className="text-sm text-neutral-500 dark:text-muted-foreground border border-neutral-200 dark:border-border rounded-xl p-6 bg-white dark:bg-card">
             No upcoming events right now. Check back soon.
           </p>
         ) : (
@@ -276,7 +276,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={String(event.id)}
-                  className="border border-neutral-200 rounded-xl bg-white min-w-0 overflow-hidden flex flex-col"
+                  className="border border-neutral-200 dark:border-border rounded-xl bg-white dark:bg-card min-w-0 overflow-hidden flex flex-col"
                 >
                   <EventBannerThumb
                     event={event}
@@ -285,10 +285,10 @@ export default function DashboardPage() {
                     rounded="rounded-none"
                   />
                   <div className="p-4 flex flex-col flex-1 min-w-0">
-                    <h3 className="font-semibold text-neutral-900 line-clamp-2 break-words">
+                    <h3 className="font-semibold text-neutral-900 dark:text-foreground line-clamp-2 break-words">
                       {String(event.title ?? 'Event')}
                     </h3>
-                    <p className="text-sm text-neutral-500 mt-2 break-words">
+                    <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-2 break-words">
                       {formatMemberDate(event.startDate)}
                       {locationLabel ? ` • ${locationLabel}` : ''}
                     </p>
@@ -308,13 +308,13 @@ export default function DashboardPage() {
 
       <section className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-neutral-900">Recent Applications</h2>
-          <Link href="/dashboard/opportunities" className="text-sm font-medium text-neutral-600 hover:text-black">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Recent Applications</h2>
+          <Link href="/dashboard/opportunities" className="text-sm font-medium text-neutral-600 dark:text-muted-foreground hover:text-black">
             View All
           </Link>
         </div>
         {applications.length === 0 ? (
-          <p className="text-sm text-neutral-500 border border-neutral-200 rounded-xl p-6 bg-white">
+          <p className="text-sm text-neutral-500 dark:text-muted-foreground border border-neutral-200 dark:border-border rounded-xl p-6 bg-white dark:bg-card">
             No job applications yet.
           </p>
         ) : (
@@ -322,13 +322,13 @@ export default function DashboardPage() {
             {applications.map((app) => (
               <div
                 key={String(app.id)}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-neutral-200 rounded-xl p-4 bg-white"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-neutral-200 dark:border-border rounded-xl p-4 bg-white dark:bg-card"
               >
                 <div>
-                  <p className="font-semibold text-neutral-900">{String(app.title ?? 'Role')}</p>
-                  <p className="text-sm text-neutral-500">{String(app.company ?? '')}</p>
+                  <p className="font-semibold text-neutral-900 dark:text-foreground">{String(app.title ?? 'Role')}</p>
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground">{String(app.company ?? '')}</p>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 capitalize">
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 capitalize">
                   {String(app.status ?? 'submitted')}
                 </span>
               </div>
@@ -338,13 +338,13 @@ export default function DashboardPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-neutral-900 mb-4">Quick Links</h2>
+        <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground mb-4">Quick Links</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {quickLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-semibold text-neutral-900 hover:bg-neutral-100"
+              className="flex items-center justify-between rounded-xl border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5 px-4 py-3 text-sm font-semibold text-neutral-900 dark:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               {link.label}
               <ArrowRight className="w-4 h-4" />

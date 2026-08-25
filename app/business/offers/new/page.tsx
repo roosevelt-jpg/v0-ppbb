@@ -123,13 +123,13 @@ export default function NewOffer() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--secondary)' }}>
       {/* Header */}
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
+      <div style={{ backgroundColor: 'var(--card)', borderBottom: '1px solid #e4e1da', padding: '32px' }}>
         <div className="max-w-2xl mx-auto">
           <h1
             style={{
-              color: '#111111',
+              color: 'var(--foreground)',
               fontSize: '32px',
               fontWeight: 700,
               fontFamily: 'Cormorant Garamond, serif',
@@ -137,7 +137,7 @@ export default function NewOffer() {
           >
             Post New Offer
           </h1>
-          <p style={{ color: '#888888', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
+          <p style={{ color: 'var(--muted-foreground)', marginTop: '8px', fontFamily: 'Inter, sans-serif' }}>
             Share a product or service — submitted for admin approval before it goes live
           </p>
         </div>
@@ -145,11 +145,11 @@ export default function NewOffer() {
 
       {/* Form */}
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '32px' }}>
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+        <Card style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', padding: '24px' }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Title */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+              <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Offer Title *
               </label>
               <input
@@ -162,9 +162,9 @@ export default function NewOffer() {
                 style={{
                   width: '100%',
                   padding: '12px 16px',
-                  border: '1px solid #e4e1da',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
-                  color: '#111111',
+                  color: 'var(--foreground)',
                 }}
               />
             </div>
@@ -172,7 +172,7 @@ export default function NewOffer() {
             {/* Type and Category */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Type *
                 </label>
                 <select
@@ -182,9 +182,9 @@ export default function NewOffer() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                   }}
                 >
                   {OFFER_TYPES.map((t) => (
@@ -195,7 +195,7 @@ export default function NewOffer() {
                 </select>
               </div>
               <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Category *
                 </label>
                 <select
@@ -206,9 +206,9 @@ export default function NewOffer() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                     minHeight: '44px',
                   }}
                 >
@@ -224,7 +224,7 @@ export default function NewOffer() {
 
             {/* Variant — colour / size line for product cards */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+              <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Variant (colour / size)
               </label>
               <input
@@ -236,20 +236,20 @@ export default function NewOffer() {
                 style={{
                   width: '100%',
                   padding: '12px 16px',
-                  border: '1px solid #e4e1da',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
-                  color: '#111111',
+                  color: 'var(--foreground)',
                   minHeight: '44px',
                 }}
               />
-              <p style={{ color: '#888888', fontSize: '12px', marginTop: '6px' }}>
+              <p style={{ color: 'var(--muted-foreground)', fontSize: '12px', marginTop: '6px' }}>
                 Optional — shown on marketplace product cards when relevant.
               </p>
             </div>
 
             {/* Description */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+              <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Description *
               </label>
               <RichTextEditor
@@ -260,10 +260,10 @@ export default function NewOffer() {
             </div>
 
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+              <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Product / Service Images (max 5)
               </label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 rounded-lg cursor-pointer text-sm font-medium">
+              <label className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-300 dark:border-border rounded-lg cursor-pointer text-sm font-medium">
                 {uploadingImages ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -301,7 +301,7 @@ export default function NewOffer() {
             {/* Pricing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Price (AED) *
                 </label>
                 <input
@@ -314,14 +314,14 @@ export default function NewOffer() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                   }}
                 />
               </div>
               <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Original Price (AED)
                 </label>
                 <input
@@ -333,9 +333,9 @@ export default function NewOffer() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                   }}
                 />
               </div>
@@ -344,7 +344,7 @@ export default function NewOffer() {
             {/* Discount and Valid Until */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Discount %
                 </label>
                 <input
@@ -358,14 +358,14 @@ export default function NewOffer() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                   }}
                 />
               </div>
               <div>
-                <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                   Valid Until
                 </label>
                 <input
@@ -376,9 +376,9 @@ export default function NewOffer() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    color: '#111111',
+                    color: 'var(--foreground)',
                   }}
                 />
               </div>
@@ -386,7 +386,7 @@ export default function NewOffer() {
 
             {/* Member Benefit */}
             <div>
-              <label style={{ color: '#111111', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+              <label style={{ color: 'var(--foreground)', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
                 Member Benefit (%)
               </label>
               <input
@@ -400,9 +400,9 @@ export default function NewOffer() {
                 style={{
                   width: '100%',
                   padding: '12px 16px',
-                  border: '1px solid #e4e1da',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
-                  color: '#111111',
+                  color: 'var(--foreground)',
                 }}
               />
             </div>
@@ -428,7 +428,7 @@ export default function NewOffer() {
               >
                 Approval
               </p>
-              <p style={{ color: '#111111', fontSize: '14px' }}>
+              <p style={{ color: 'var(--foreground)', fontSize: '14px' }}>
                 Offers are submitted as <strong>pending approval</strong>. They appear on the
                 marketplace or shop only after an admin publishes them.
               </p>
@@ -452,9 +452,9 @@ export default function NewOffer() {
                 disabled={isSaving || uploadingImages}
                 onClick={() => void submitOffer(true)}
                 style={{
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
-                  border: '1px solid #e4e1da',
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--foreground)',
+                  border: '1px solid var(--border)',
                   padding: '12px 24px',
                 }}
               >
@@ -464,8 +464,8 @@ export default function NewOffer() {
                 type="button"
                 onClick={() => router.back()}
                 style={{
-                  backgroundColor: '#e4e1da',
-                  color: '#111111',
+                  backgroundColor: 'var(--muted)',
+                  color: 'var(--foreground)',
                   padding: '12px 24px',
                 }}
               >

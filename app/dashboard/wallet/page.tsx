@@ -60,7 +60,7 @@ export default function DigitalWalletPage() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#111111', marginBottom: '32px' }}>Digital Wallet</h1>
+      <h1 style={{ fontSize: '32px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '32px' }}>Digital Wallet</h1>
 
       {/* Balance Card */}
       <div
@@ -82,8 +82,8 @@ export default function DigitalWalletPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
         {/* Withdrawal Section */}
-        <div style={{ padding: '24px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #eee' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111111', marginBottom: '16px' }}>Withdraw Funds</h3>
+        <div style={{ padding: '24px', backgroundColor: 'var(--card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '16px' }}>Withdraw Funds</h3>
           <form onSubmit={handleWithdraw} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <input
               type="number"
@@ -94,7 +94,7 @@ export default function DigitalWalletPage() {
               max={wallet.balance}
               style={{
                 padding: '10px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--border)',
                 borderRadius: '6px',
                 fontSize: '14px',
               }}
@@ -119,26 +119,26 @@ export default function DigitalWalletPage() {
         </div>
 
         {/* Earn More Section */}
-        <div style={{ padding: '24px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #eee' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111111', marginBottom: '16px' }}>Ways to Earn</h3>
+        <div style={{ padding: '24px', backgroundColor: 'var(--card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '16px' }}>Ways to Earn</h3>
           <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <li style={{ fontSize: '13px', color: '#666' }}>Refer new members</li>
-            <li style={{ fontSize: '13px', color: '#666' }}>Volunteer hours</li>
-            <li style={{ fontSize: '13px', color: '#666' }}>Donate to causes</li>
-            <li style={{ fontSize: '13px', color: '#666' }}>Complete surveys</li>
+            <li style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Refer new members</li>
+            <li style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Volunteer hours</li>
+            <li style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Donate to causes</li>
+            <li style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Complete surveys</li>
           </ul>
         </div>
       </div>
 
       {/* Transaction History */}
-      <div style={{ marginTop: '32px', padding: '24px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #eee' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111111', marginBottom: '16px' }}>Transaction History</h3>
+      <div style={{ marginTop: '32px', padding: '24px', backgroundColor: 'var(--card)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+        <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '16px' }}>Transaction History</h3>
 
         {wallet.transactions && wallet.transactions.length > 0 ? (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
+                <tr style={{ backgroundColor: 'var(--secondary)', borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: 600 }}>Date</th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: 600 }}>Type</th>
                   <th style={{ padding: '12px', textAlign: 'left', fontSize: '13px', fontWeight: 600 }}>Amount</th>
@@ -147,7 +147,7 @@ export default function DigitalWalletPage() {
               </thead>
               <tbody>
                 {wallet.transactions.map((txn, index) => (
-                  <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
+                  <tr key={index} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '12px', fontSize: '13px' }}>
                       {new Date(txn.date).toLocaleDateString()}
                     </td>
@@ -156,8 +156,8 @@ export default function DigitalWalletPage() {
                         style={{
                           display: 'inline-block',
                           padding: '4px 8px',
-                          backgroundColor: txn.type === 'earn' ? '#e8f5e9' : '#ffebee',
-                          color: txn.type === 'earn' ? '#2e7d32' : '#c62828',
+                          backgroundColor: txn.type === 'earn' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                          color: txn.type === 'earn' ? '#16a34a' : '#dc2626',
                           borderRadius: '4px',
                           fontSize: '11px',
                           fontWeight: 600,
@@ -169,7 +169,7 @@ export default function DigitalWalletPage() {
                     <td style={{ padding: '12px', fontSize: '13px', fontWeight: 600 }}>
                       {txn.type === 'earn' ? '+' : '-'} AED {txn.amount.toLocaleString()}
                     </td>
-                    <td style={{ padding: '12px', fontSize: '13px', color: '#666' }}>
+                    <td style={{ padding: '12px', fontSize: '13px', color: 'var(--muted-foreground)' }}>
                       {txn.description}
                     </td>
                   </tr>
@@ -178,7 +178,7 @@ export default function DigitalWalletPage() {
             </table>
           </div>
         ) : (
-          <p style={{ fontSize: '13px', color: '#999' }}>No transactions yet</p>
+          <p style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>No transactions yet</p>
         )}
       </div>
     </div>

@@ -191,12 +191,12 @@ export default function LeadsPage() {
           { label: 'Conversion Rate', value: `${conversionRate}%`, icon: TrendingUp },
           { label: 'Avg Value', value: `AED ${avgValue.toFixed(0)}`, icon: DollarSign },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white border border-[#e4e1da] rounded-xl p-5">
+          <div key={stat.label} className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5">
             <div className="flex items-center gap-3">
               <stat.icon className="w-7 h-7 text-neutral-300" />
               <div>
-                <p className="text-sm text-neutral-500">{stat.label}</p>
-                <p className="text-2xl font-semibold text-neutral-900">{stat.value}</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">{stat.label}</p>
+                <p className="text-2xl font-semibold text-neutral-900 dark:text-foreground">{stat.value}</p>
               </div>
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function LeadsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        <span className="text-sm text-neutral-500 self-center mr-2">Source:</span>
+        <span className="text-sm text-neutral-500 dark:text-muted-foreground self-center mr-2">Source:</span>
         {sourceTypes.map((s) => (
           <DashboardTabButton
             key={s}
@@ -217,7 +217,7 @@ export default function LeadsPage() {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-8">
-        <span className="text-sm text-neutral-500 self-center mr-2">Date range:</span>
+        <span className="text-sm text-neutral-500 dark:text-muted-foreground self-center mr-2">Date range:</span>
         {([7, 30, 90] as const).map((d) => (
           <DashboardTabButton
             key={d}
@@ -231,7 +231,7 @@ export default function LeadsPage() {
 
       {inRange.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white border border-[#e4e1da] rounded-xl p-5">
+          <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5">
             <h3 className="font-semibold mb-4">Daily leads (30 days)</h3>
             <ResponsiveContainer width="100%" height={220}>
               <LineChart data={dailyChart}>
@@ -239,11 +239,11 @@ export default function LeadsPage() {
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#111" strokeWidth={2} />
+                <Line type="monotone" dataKey="count" stroke="var(--foreground)" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="bg-white border border-[#e4e1da] rounded-xl p-5">
+          <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5">
             <h3 className="font-semibold mb-4">Leads by source</h3>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={sourceChart}>
@@ -251,7 +251,7 @@ export default function LeadsPage() {
                 <XAxis dataKey="source" tick={{ fontSize: 10 }} />
                 <YAxis allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#111" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -265,10 +265,10 @@ export default function LeadsPage() {
           description="Leads are generated when members view your profile, listings, or opportunities."
         />
       ) : (
-        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto table-scroll">
+        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl overflow-x-auto table-scroll">
           <table className="w-full text-sm min-w-[720px]">
             <thead>
-              <tr className="border-b text-left text-xs uppercase text-neutral-500">
+              <tr className="border-b text-left text-xs uppercase text-neutral-500 dark:text-muted-foreground">
                 <th className="py-3 px-4">Source</th>
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">User</th>
@@ -282,10 +282,10 @@ export default function LeadsPage() {
                 const src = getSourceType(lead)
                 const created = toDate(lead.createdAt)
                 return (
-                  <tr key={lead.id} className="border-b border-neutral-100">
+                  <tr key={lead.id} className="border-b border-neutral-100 dark:border-border">
                     <td className="py-3 px-4">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${SOURCE_BADGES[src] || 'bg-neutral-100'}`}
+                        className={`px-2 py-1 rounded text-xs font-medium ${SOURCE_BADGES[src] || 'bg-neutral-100 dark:bg-neutral-800'}`}
                       >
                         {src}
                       </span>
@@ -295,7 +295,7 @@ export default function LeadsPage() {
                     </td>
                     <td className="py-3 px-4">
                       <p className="font-medium">{lead.name}</p>
-                      <p className="text-xs text-neutral-500">{lead.email}</p>
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">{lead.email}</p>
                     </td>
                     <td className="py-3 px-4">
                       {lead.status === 'converted' || lead.converted ? 'Yes' : 'No'}

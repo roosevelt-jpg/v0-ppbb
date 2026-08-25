@@ -61,14 +61,14 @@ export default function Payments() {
       <section className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
           <div>
-            <h2 className="text-lg font-semibold text-neutral-900">Membership & renewal</h2>
-            <p className="text-sm text-neutral-600">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Membership & renewal</h2>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">
               Renewal date, months remaining, invoices, and stop renewal
             </p>
           </div>
           <Link
             href="/business/membership"
-            className="text-sm underline text-neutral-700 hover:text-black"
+            className="text-sm underline text-neutral-700 dark:text-neutral-200 hover:text-black"
           >
             Browse membership plans
           </Link>
@@ -78,34 +78,34 @@ export default function Payments() {
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900">Marketplace & business payments</h2>
-          <p className="text-sm text-neutral-600">Commissions, payouts, and other business charges</p>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Marketplace & business payments</h2>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">Commissions, payouts, and other business charges</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
+          <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
             <div className="flex items-center gap-4">
-              <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
+              <DollarSign className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
               <div>
-                <p className="text-neutral-500 text-sm">Total Payments</p>
-                <p className="text-neutral-900 text-2xl font-semibold">{payments.length}</p>
+                <p className="text-neutral-500 dark:text-muted-foreground text-sm">Total Payments</p>
+                <p className="text-neutral-900 dark:text-foreground text-2xl font-semibold">{payments.length}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
+          <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
             <div className="flex items-center gap-4">
-              <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
+              <DollarSign className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
               <div>
-                <p className="text-neutral-500 text-sm">Completed</p>
-                <p className="text-neutral-900 text-2xl font-semibold">AED {completedAmount}</p>
+                <p className="text-neutral-500 dark:text-muted-foreground text-sm">Completed</p>
+                <p className="text-neutral-900 dark:text-foreground text-2xl font-semibold">AED {completedAmount}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4 sm:p-6 border-[#e4e1da] bg-white text-neutral-900">
+          <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
             <div className="flex items-center gap-4">
-              <DollarSign className="w-8 h-8 text-neutral-900 opacity-30" />
+              <DollarSign className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
               <div>
-                <p className="text-neutral-500 text-sm">Pending</p>
+                <p className="text-neutral-500 dark:text-muted-foreground text-sm">Pending</p>
                 <p className="text-red-600 text-2xl font-semibold">AED {pendingAmount}</p>
               </div>
             </div>
@@ -113,10 +113,10 @@ export default function Payments() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8 text-neutral-500">Loading payments...</div>
+          <div className="text-center py-8 text-neutral-500 dark:text-muted-foreground">Loading payments...</div>
         ) : error ? (
-          <Card className="p-8 text-center border-[#e4e1da] bg-white text-neutral-900">
-            <p className="text-neutral-500 mb-4">{error}</p>
+          <Card className="p-8 text-center border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
+            <p className="text-neutral-500 dark:text-muted-foreground mb-4">{error}</p>
             <Button
               type="button"
               onClick={() => window.location.reload()}
@@ -126,28 +126,28 @@ export default function Payments() {
             </Button>
           </Card>
         ) : payments.length === 0 ? (
-          <Card className="p-8 sm:p-12 text-center border-[#e4e1da] bg-white text-neutral-900">
-            <p className="text-neutral-500">No marketplace payments yet</p>
+          <Card className="p-8 sm:p-12 text-center border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
+            <p className="text-neutral-500 dark:text-muted-foreground">No marketplace payments yet</p>
           </Card>
         ) : (
-          <Card className="p-4 sm:p-6 border-[#e4e1da] overflow-x-auto table-scroll">
+          <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border overflow-x-auto table-scroll">
             <table className="w-full border-collapse min-w-[480px]">
               <thead>
-                <tr className="border-b border-[#e4e1da]">
-                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Date</th>
-                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Type</th>
-                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Amount</th>
-                  <th className="p-3 text-left text-neutral-500 font-semibold text-sm">Status</th>
+                <tr className="border-b border-[#e4e1da] dark:border-border">
+                  <th className="p-3 text-left text-neutral-500 dark:text-muted-foreground font-semibold text-sm">Date</th>
+                  <th className="p-3 text-left text-neutral-500 dark:text-muted-foreground font-semibold text-sm">Type</th>
+                  <th className="p-3 text-left text-neutral-500 dark:text-muted-foreground font-semibold text-sm">Amount</th>
+                  <th className="p-3 text-left text-neutral-500 dark:text-muted-foreground font-semibold text-sm">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.map((payment) => (
-                  <tr key={payment.id} className="border-b border-[#e4e1da]">
-                    <td className="p-3 text-neutral-900 text-sm">
+                  <tr key={payment.id} className="border-b border-[#e4e1da] dark:border-border">
+                    <td className="p-3 text-neutral-900 dark:text-foreground text-sm">
                       {new Date(payment.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="p-3 text-neutral-900 text-sm">{payment.type}</td>
-                    <td className="p-3 text-neutral-900 font-semibold text-sm">
+                    <td className="p-3 text-neutral-900 dark:text-foreground text-sm">{payment.type}</td>
+                    <td className="p-3 text-neutral-900 dark:text-foreground font-semibold text-sm">
                       AED {payment.amount}
                     </td>
                     <td className="p-3">

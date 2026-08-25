@@ -10,7 +10,7 @@ export default function MemberRecordingsRemoved() {
     router.replace('/dashboard')
   }, [router])
   return (
-    <div className="p-8 text-sm text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="p-8 text-sm text-neutral-500 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
       Recordings are not available in the member dashboard. Redirecting…
     </div>
   )

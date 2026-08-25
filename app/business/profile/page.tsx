@@ -175,11 +175,11 @@ export default function BusinessProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
-      <div className="bg-white border-b border-[#e4e1da] px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-screen bg-[#faf9f7] dark:bg-neutral-950">
+      <div className="bg-white dark:bg-card border-b border-[#e4e1da] dark:border-border px-4 py-6 sm:px-6 sm:py-8">
         <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#111111]">Business Profile</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] dark:text-foreground">Business Profile</h1>
             <p className="text-[#888888] mt-2 text-sm sm:text-base">Manage your business information</p>
           </div>
           {!isEditing && (
@@ -195,22 +195,22 @@ export default function BusinessProfile() {
       </div>
 
       <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
-        <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
+        <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-4 sm:p-6">
           <div className="flex flex-col gap-6">
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Business Name *</label>
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Business Name *</label>
               <input
                 type="text"
                 name="businessName"
                 value={formData.businessName}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] dark:border-border rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Business Type</label>
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Business Type</label>
               <input
                 type="text"
                 name="businessType"
@@ -218,12 +218,12 @@ export default function BusinessProfile() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 placeholder="e.g., Technology, Retail, Services"
-                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] dark:border-border rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Description</label>
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Description</label>
               {isEditing ? (
                 <RichTextEditor
                   value={formData.businessDescription}
@@ -235,33 +235,33 @@ export default function BusinessProfile() {
               ) : (
                 <RichTextContent
                   html={formData.businessDescription || 'No description yet.'}
-                  className="text-sm text-neutral-700"
+                  className="text-sm text-neutral-700 dark:text-neutral-200"
                 />
               )}
             </div>
 
             {/* Services tags — shown on marketplace directory cards */}
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Services tags</label>
-              <p className="text-xs text-neutral-500 mb-2">
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Services tags</label>
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-2">
                 Add the services you offer. These appear on your marketplace profile.
               </p>
 
               <div className="flex flex-wrap gap-2 min-h-[28px]">
                 {formData.services.length === 0 && !isEditing ? (
-                  <p className="text-sm text-neutral-500">No service tags yet. Click Edit to add some.</p>
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground">No service tags yet. Click Edit to add some.</p>
                 ) : (
                   formData.services.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200"
+                      className="inline-flex items-center gap-1 text-sm px-3 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-foreground border border-neutral-200 dark:border-border"
                     >
                       {tag}
                       {isEditing ? (
                         <button
                           type="button"
                           onClick={() => removeServiceTag(tag)}
-                          className="ml-0.5 rounded-full p-0.5 hover:bg-neutral-200"
+                          className="ml-0.5 rounded-full p-0.5 hover:bg-neutral-200 dark:hover:bg-neutral-700"
                           aria-label={`Remove ${tag}`}
                         >
                           <X className="w-3.5 h-3.5" />
@@ -280,7 +280,7 @@ export default function BusinessProfile() {
                     onChange={(e) => setTagDraft(e.target.value)}
                     onKeyDown={handleTagKeyDown}
                     placeholder="Type a service and press Enter"
-                    className="flex-1 min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg"
+                    className="flex-1 min-h-[44px] px-4 py-3 border border-[#e4e1da] dark:border-border rounded-lg"
                     maxLength={48}
                   />
                   <Button
@@ -297,7 +297,7 @@ export default function BusinessProfile() {
             </div>
 
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Website</label>
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Website</label>
               <input
                 type="url"
                 name="businessWebsite"
@@ -305,31 +305,31 @@ export default function BusinessProfile() {
                 onChange={handleChange}
                 disabled={!isEditing}
                 placeholder="https://example.com"
-                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] dark:border-border rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Business Email</label>
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Business Email</label>
               <input
                 type="email"
                 name="businessEmail"
                 value={formData.businessEmail}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] dark:border-border rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-[#111111] mb-2">Business Phone</label>
+              <label className="block font-semibold text-[#111111] dark:text-foreground mb-2">Business Phone</label>
               <input
                 type="tel"
                 name="businessPhone"
                 value={formData.businessPhone}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] rounded-lg disabled:bg-neutral-100"
+                className="w-full min-h-[44px] px-4 py-3 border border-[#e4e1da] dark:border-border rounded-lg disabled:bg-neutral-100"
               />
             </div>
 
@@ -345,7 +345,7 @@ export default function BusinessProfile() {
                 </Button>
                 <Button
                   onClick={() => setIsEditing(false)}
-                  className="min-h-[44px] bg-[#e4e1da] text-[#111111] hover:bg-neutral-300"
+                  className="min-h-[44px] bg-[#e4e1da] text-[#111111] dark:text-foreground hover:bg-neutral-300"
                 >
                   Cancel
                 </Button>
@@ -356,30 +356,30 @@ export default function BusinessProfile() {
 
         <BusinessShippingSettings />
 
-        <Card className="bg-white border-[#e4e1da] p-4 sm:p-6 mt-6">
-          <h3 className="text-lg font-semibold text-[#111111] mb-4">Membership Information</h3>
+        <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-4 sm:p-6 mt-6">
+          <h3 className="text-lg font-semibold text-[#111111] dark:text-foreground mb-4">Membership Information</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <p className="text-sm text-[#888888]">Membership Tier</p>
-              <p className="font-semibold text-[#111111] mt-1">
+              <p className="font-semibold text-[#111111] dark:text-foreground mt-1">
                 {user.businessProfile?.membership || 'Partner'}
               </p>
             </div>
             <div>
               <p className="text-sm text-[#888888]">Member Since</p>
-              <p className="font-semibold text-[#111111] mt-1">
+              <p className="font-semibold text-[#111111] dark:text-foreground mt-1">
                 {user.memberSince ? new Date(user.memberSince).toLocaleDateString() : 'N/A'}
               </p>
             </div>
             <div>
               <p className="text-sm text-[#888888]">Active Opportunities</p>
-              <p className="font-semibold text-[#111111] mt-1">
+              <p className="font-semibold text-[#111111] dark:text-foreground mt-1">
                 {user.businessProfile?.activeOpportunities || 0}
               </p>
             </div>
             <div>
               <p className="text-sm text-[#888888]">Revenue Generated</p>
-              <p className="font-semibold text-[#111111] mt-1">
+              <p className="font-semibold text-[#111111] dark:text-foreground mt-1">
                 AED {user.businessProfile?.revenue || 0}
               </p>
             </div>

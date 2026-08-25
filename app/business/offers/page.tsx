@@ -121,17 +121,17 @@ export default function BusinessOffers() {
       </div>
 
         {error ? (
-          <Card className="p-8 text-center border-[#e4e1da]">
-            <p className="text-neutral-500 mb-4">{error}</p>
+          <Card className="p-8 text-center border-[#e4e1da] dark:border-border">
+            <p className="text-neutral-500 dark:text-muted-foreground mb-4">{error}</p>
             <Button type="button" onClick={() => window.location.reload()}>
               Retry
             </Button>
           </Card>
         ) : loading ? (
-          <div className="text-center py-8 text-neutral-500">Loading offers...</div>
+          <div className="text-center py-8 text-neutral-500 dark:text-muted-foreground">Loading offers...</div>
         ) : offers.length === 0 ? (
-          <Card className="p-8 sm:p-12 text-center border-[#e4e1da]">
-            <p className="text-neutral-500 mb-4">No offers posted yet</p>
+          <Card className="p-8 sm:p-12 text-center border-[#e4e1da] dark:border-border">
+            <p className="text-neutral-500 dark:text-muted-foreground mb-4">No offers posted yet</p>
             <Button
               type="button"
               onClick={() => router.push('/business/offers/new')}
@@ -143,23 +143,23 @@ export default function BusinessOffers() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {offers.map((offer) => (
-              <Card key={offer.id} className="p-4 sm:p-6 border-[#e4e1da] flex flex-col">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">{offer.title}</h3>
-                <span className="inline-block bg-neutral-100 text-neutral-900 px-3 py-1 rounded text-xs w-fit">
+              <Card key={offer.id} className="p-4 sm:p-6 border-[#e4e1da] dark:border-border flex flex-col">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-foreground mb-2">{offer.title}</h3>
+                <span className="inline-block bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-foreground px-3 py-1 rounded text-xs w-fit">
                   {offer.type}
                 </span>
-                <p className="text-neutral-500 mt-3 text-sm line-clamp-3 flex-1">
+                <p className="text-neutral-500 dark:text-muted-foreground mt-3 text-sm line-clamp-3 flex-1">
                   {(offer.description || '').substring(0, 120)}
                   {(offer.description || '').length > 120 ? '…' : ''}
                 </p>
                 <div className="mt-4 space-y-2">
                   {offer.price != null && (
-                    <p className="text-neutral-900 font-semibold">
+                    <p className="text-neutral-900 dark:text-foreground font-semibold">
                       AED {offer.price}
                       {offer.discountPercentage ? ` (${offer.discountPercentage}% off)` : ''}
                     </p>
                   )}
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-500 dark:text-muted-foreground">
                     <span>Views: {offer.views ?? 0}</span>
                     <span>Conversions: {offer.conversions ?? 0}</span>
                   </div>
@@ -169,7 +169,7 @@ export default function BusinessOffers() {
                         ? 'text-amber-700'
                         : offer.status === 'published' || offer.status === 'active'
                           ? 'text-green-700'
-                          : 'text-neutral-500'
+                          : 'text-neutral-500 dark:text-muted-foreground'
                     }`}
                   >
                     {String(offer.status || '').replace(/_/g, ' ')}
@@ -234,35 +234,35 @@ export default function BusinessOffers() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Title</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Title</label>
             <input
               type="text"
               value={editForm.title}
               onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 px-3 text-sm"
+              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Description</label>
             <textarea
               value={editForm.description}
               onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
               rows={4}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-neutral-300 dark:border-border px-3 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Price (AED)</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Price (AED)</label>
             <input
               type="number"
               min="0"
               value={editForm.price}
               onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 px-3 text-sm"
+              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Status</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-1">Status</label>
             <select
               value={editForm.status}
               onChange={(e) =>
@@ -271,7 +271,7 @@ export default function BusinessOffers() {
                   status: e.target.value as BusinessOffer['status'],
                 }))
               }
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 px-3 text-sm"
+              className="w-full min-h-[44px] rounded-lg border border-neutral-300 dark:border-border px-3 text-sm"
             >
               <option value="pending_approval">Pending approval</option>
               <option value="archived">Archived</option>

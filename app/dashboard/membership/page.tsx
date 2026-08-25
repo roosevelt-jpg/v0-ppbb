@@ -240,7 +240,7 @@ export default function MembershipPage() {
       </Dialog>
 
       {statusBanner ? (
-        <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
+        <Card className="p-4 mb-6 border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5 text-sm text-neutral-700 dark:text-neutral-200">
           {statusBanner}
         </Card>
       ) : null}
@@ -249,13 +249,13 @@ export default function MembershipPage() {
         <MembershipSubscriptionOverview manageHref={manageHref} />
       </div>
 
-      <Card className="p-4 sm:p-6 mb-8 border border-neutral-200">
-        <h3 className="text-sm font-semibold text-neutral-900 mb-1">Have a promo code?</h3>
-        <p className="text-xs text-neutral-600 mb-3">
+      <Card className="p-4 sm:p-6 mb-8 border border-neutral-200 dark:border-border">
+        <h3 className="text-sm font-semibold text-neutral-900 dark:text-foreground mb-1">Have a promo code?</h3>
+        <p className="text-xs text-neutral-600 dark:text-muted-foreground mb-3">
           Redeem a free-access membership code. Each account can redeem one promo.
         </p>
         {alreadyUsedPromo ? (
-          <p className="text-sm text-neutral-700">
+          <p className="text-sm text-neutral-700 dark:text-neutral-200">
             Promo already applied
             {profile?.membershipPromoCode ? (
               <>
@@ -272,7 +272,7 @@ export default function MembershipPage() {
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
               placeholder="FOUNDERS500"
-              className="flex-1 min-w-0 px-3 py-2 border border-neutral-200 rounded-lg text-sm font-mono"
+              className="flex-1 min-w-0 px-3 py-2 border border-neutral-200 dark:border-border rounded-lg text-sm font-mono"
               autoComplete="off"
             />
             <button
@@ -292,12 +292,12 @@ export default function MembershipPage() {
           </div>
         )}
         {promoMessage ? (
-          <p className="text-xs mt-2 text-neutral-700">{promoMessage}</p>
+          <p className="text-xs mt-2 text-neutral-700 dark:text-neutral-200">{promoMessage}</p>
         ) : null}
       </Card>
 
       {plans.length === 0 ? (
-        <Card className="p-6 border border-neutral-200 text-sm text-neutral-600">
+        <Card className="p-6 border border-neutral-200 dark:border-border text-sm text-neutral-600 dark:text-muted-foreground">
           No membership plans are available yet. Check back soon or contact support.
         </Card>
       ) : (
@@ -309,19 +309,19 @@ export default function MembershipPage() {
             // Plan" button instead of a working Subscribe button.
             const isCurrentPlan = memberMatchesPlan(memberRecord, plan) && hasActiveMembership(memberRecord)
             return (
-              <Card key={plan.id} className="p-6 border-2 border-neutral-200 flex flex-col">
+              <Card key={plan.id} className="p-6 border-2 border-neutral-200 dark:border-border flex flex-col">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">{plan.icon}</span>
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                 </div>
                 {plan.description ? (
-                  <p className="text-sm text-neutral-600 mb-4">{plan.description}</p>
+                  <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-4">{plan.description}</p>
                 ) : null}
-                <div className="mb-4 pb-4 border-b border-neutral-200">
+                <div className="mb-4 pb-4 border-b border-neutral-200 dark:border-border">
                   <span className="text-3xl font-bold">
                     {plan.currency} {(plan.price / 100).toFixed(0)}
                   </span>
-                  <span className="text-neutral-600">/{plan.billingPeriod}</span>
+                  <span className="text-neutral-600 dark:text-muted-foreground">/{plan.billingPeriod}</span>
                 </div>
                 <ul className="space-y-2 mb-6 flex-1">
                   {getPlanIncludedItems(plan).map((item, idx) => (
@@ -337,7 +337,7 @@ export default function MembershipPage() {
                   disabled={checkingOut === plan.id || isCurrentPlan}
                   className={`w-full py-2.5 rounded-lg text-sm font-semibold ${
                     isCurrentPlan
-                      ? '!bg-white !text-black border border-gray-300'
+                      ? '!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-gray-300 dark:border-border'
                       : '!bg-black !text-white'
                   } disabled:opacity-50`}
                 >

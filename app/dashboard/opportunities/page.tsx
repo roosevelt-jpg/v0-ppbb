@@ -14,8 +14,8 @@ import {
 } from '@/components/dashboard-states'
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-neutral-100 text-neutral-700',
-  submitted: 'bg-neutral-100 text-neutral-700',
+  pending: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200',
+  submitted: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200',
   reviewing: 'bg-blue-100 text-blue-800',
   shortlisted: 'bg-green-100 text-green-800',
   accepted: 'bg-green-100 text-green-800',
@@ -53,7 +53,7 @@ export default function DashboardOpportunitiesPage() {
         <BusinessFeatureLink
           featureLabel="Post a Job"
           href="/business/opportunities/new"
-          className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 !bg-white !text-black border border-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50"
+          className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 !bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-neutral-300 dark:border-border rounded-lg text-sm font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800"
         >
           Post a Job
         </BusinessFeatureLink>
@@ -82,7 +82,7 @@ export default function DashboardOpportunitiesPage() {
           </button>
         </div>
       ) : loadingApps ? (
-        <div className="text-center py-12 text-neutral-500">Loading your applications...</div>
+        <div className="text-center py-12 text-neutral-500 dark:text-muted-foreground">Loading your applications...</div>
       ) : applications.length === 0 ? (
         <DashboardEmptyState
           title="No applications yet"
@@ -102,22 +102,22 @@ export default function DashboardOpportunitiesPage() {
           {applications.map((app) => (
             <div
               key={app.id}
-              className="border border-neutral-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white"
+              className="border border-neutral-200 dark:border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-card"
             >
               <div className="min-w-0">
-                <h3 className="font-semibold text-neutral-900">{app.opportunityTitle}</h3>
-                <div className="flex items-center gap-1 text-sm text-neutral-500 mt-1">
+                <h3 className="font-semibold text-neutral-900 dark:text-foreground">{app.opportunityTitle}</h3>
+                <div className="flex items-center gap-1 text-sm text-neutral-500 dark:text-muted-foreground mt-1">
                   <Building2 className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">{app.businessName}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-neutral-500 mt-1">
+                <div className="flex items-center gap-1 text-xs text-neutral-500 dark:text-muted-foreground mt-1">
                   <Clock className="w-3 h-3 shrink-0" />
                   <span>Applied {new Date(app.createdAt as string | Date).toLocaleDateString()}</span>
                 </div>
               </div>
               <span
                 className={`text-xs font-semibold px-3 py-1 rounded-full capitalize shrink-0 ${
-                  STATUS_STYLES[app.status] || 'bg-neutral-100 text-neutral-700'
+                  STATUS_STYLES[app.status] || 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200'
                 }`}
               >
                 {app.status}

@@ -56,14 +56,14 @@ export default function VolunteerMatchingPage() {
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#111111', marginBottom: '8px' }}>AI-Powered Matches</h1>
-      <p style={{ fontSize: '14px', color: '#666', marginBottom: '32px' }}>
+      <h1 style={{ fontSize: '32px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '8px' }}>AI-Powered Matches</h1>
+      <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginBottom: '32px' }}>
         We've found {matches.length} opportunities perfectly tailored to your skills and availability.
       </p>
 
       {/* Filters */}
-      <div style={{ marginBottom: '32px', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-        <label style={{ fontSize: '13px', fontWeight: 600, color: '#111111', marginRight: '16px' }}>
+      <div style={{ marginBottom: '32px', padding: '16px', backgroundColor: 'var(--secondary)', borderRadius: '8px' }}>
+        <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--foreground)', marginRight: '16px' }}>
           Minimum Match Score: {filters.minScore}%
           <input
             type="range"
@@ -77,8 +77,8 @@ export default function VolunteerMatchingPage() {
       </div>
 
       {matches.length === 0 ? (
-        <div style={{ padding: '40px', backgroundColor: '#f9f9f9', borderRadius: '8px', textAlign: 'center' }}>
-          <p style={{ color: '#666' }}>No matches found at this score level. Lower the minimum score to see more opportunities.</p>
+        <div style={{ padding: '40px', backgroundColor: 'var(--secondary)', borderRadius: '8px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--muted-foreground)' }}>No matches found at this score level. Lower the minimum score to see more opportunities.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '16px' }}>
@@ -87,9 +87,9 @@ export default function VolunteerMatchingPage() {
               key={match.id}
               style={{
                 padding: '20px',
-                backgroundColor: '#fff',
+                backgroundColor: 'var(--card)',
                 borderRadius: '8px',
-                border: '1px solid #eee',
+                border: '1px solid var(--border)',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
@@ -97,10 +97,10 @@ export default function VolunteerMatchingPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111111', margin: 0 }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
                     Opportunity Match
                   </h3>
-                  <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
                     Perfect match for your profile
                   </p>
                 </div>
@@ -115,8 +115,8 @@ export default function VolunteerMatchingPage() {
                     width: '80px',
                     height: '80px',
                     borderRadius: '50%',
-                    backgroundColor: match.matchScore >= 80 ? '#e8f5e9' : match.matchScore >= 60 ? '#fff3e0' : '#f3e5f5',
-                    color: match.matchScore >= 80 ? '#2e7d32' : match.matchScore >= 60 ? '#f57f17' : '#6a1b9a',
+                    backgroundColor: match.matchScore >= 80 ? 'rgba(34,197,94,0.15)' : match.matchScore >= 60 ? 'rgba(249,115,22,0.15)' : 'rgba(168,85,247,0.15)',
+                    color: match.matchScore >= 80 ? '#16a34a' : match.matchScore >= 60 ? '#ea580c' : '#9333ea',
                   }}
                 >
                   <div style={{ fontSize: '24px', fontWeight: 700 }}>
@@ -137,8 +137,8 @@ export default function VolunteerMatchingPage() {
                       style={{
                         display: 'inline-block',
                         padding: '4px 8px',
-                        backgroundColor: '#e0f2f1',
-                        color: '#00695c',
+                        backgroundColor: 'rgba(20,184,166,0.15)',
+                        color: '#0d9488',
                         borderRadius: '4px',
                         fontSize: '12px',
                         fontWeight: 500,

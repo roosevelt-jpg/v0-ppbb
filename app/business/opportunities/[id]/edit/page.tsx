@@ -33,7 +33,7 @@ function asText(value: unknown): string {
 }
 
 const fieldClass =
-  'w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg bg-white text-sm'
+  'w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg bg-white dark:bg-card text-sm'
 
 export default function EditJobPage() {
   const params = useParams()
@@ -160,10 +160,10 @@ export default function EditJobPage() {
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-8">
       <h1 className="text-2xl font-bold mb-2">Edit Job / Gig</h1>
-      <p className="text-sm text-neutral-600 mb-6">
+      <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-6">
         Same fields as the shared opportunity form (single Role Type — no separate Employment Type)
       </p>
-      <form onSubmit={handleSave} className="space-y-5 bg-white border border-[#e4e1da] rounded-lg p-6">
+      <form onSubmit={handleSave} className="space-y-5 bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-6">
         <div>
           <label className="block text-sm font-semibold mb-1">1. Job Title / Opportunity Name *</label>
           <input

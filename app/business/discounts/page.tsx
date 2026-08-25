@@ -43,7 +43,7 @@ export default function BusinessDiscountsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Member Discounts</h1>
-          <p className="text-neutral-600 text-sm">Codes and offers exclusive to Passive Blessings members</p>
+          <p className="text-neutral-600 dark:text-muted-foreground text-sm">Codes and offers exclusive to Passive Blessings members</p>
         </div>
         <Link href="/business/discounts/create" className="inline-flex items-center gap-2 min-h-[44px] px-4 bg-black text-white rounded-lg font-semibold">
           <Plus size={18} /> Create Discount
@@ -53,17 +53,17 @@ export default function BusinessDiscountsPage() {
       {error ? (
         <p className="text-sm text-red-600">{error}</p>
       ) : loading ? (
-        <p className="text-neutral-500">Loading discounts…</p>
+        <p className="text-neutral-500 dark:text-muted-foreground">Loading discounts…</p>
       ) : discounts.length === 0 ? (
         <div className="text-center py-12 border border-dashed rounded-lg">
-          <p className="text-neutral-600 mb-4">No member discounts yet.</p>
-          <Link href="/business/discounts/create" className="text-black font-semibold underline">Create your first discount</Link>
+          <p className="text-neutral-600 dark:text-muted-foreground mb-4">No member discounts yet.</p>
+          <Link href="/business/discounts/create" className="text-black dark:text-foreground font-semibold underline">Create your first discount</Link>
         </div>
       ) : (
         <>
           <div className="md:hidden space-y-3">
             {discounts.map((d) => (
-              <div key={d.id} className="bg-white border border-[#e4e1da] rounded-lg p-4 space-y-2">
+              <div key={d.id} className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold text-sm break-words">{d.title}</p>
                   <button
@@ -75,7 +75,7 @@ export default function BusinessDiscountsPage() {
                     <Trash2 size={16} />
                   </button>
                 </div>
-                <p className="text-xs text-neutral-500 capitalize">{d.status.replace(/_/g, ' ')}</p>
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground capitalize">{d.status.replace(/_/g, ' ')}</p>
                 {d.discountCode ? <p className="text-sm font-mono break-all">{d.discountCode}</p> : null}
                 <p className="text-sm">
                   {d.discountType === 'percent' ? `${d.discountValue}%` : `${d.currency || 'AED'} ${d.discountValue}`}
@@ -85,9 +85,9 @@ export default function BusinessDiscountsPage() {
               </div>
             ))}
           </div>
-          <div className="hidden md:block overflow-x-auto table-scroll bg-white border border-[#e4e1da] rounded-lg">
+          <div className="hidden md:block overflow-x-auto table-scroll bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg">
           <table className="w-full min-w-[640px]">
-            <thead className="bg-neutral-50 border-b">
+            <thead className="bg-neutral-50 dark:bg-white/5 border-b">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Title</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Code</th>

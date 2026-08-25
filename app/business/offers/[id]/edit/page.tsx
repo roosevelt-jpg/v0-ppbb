@@ -54,10 +54,10 @@ export default function EditOfferPage() {
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-8">
       <h1 className="text-2xl font-bold mb-2">Edit Offer</h1>
-      <p className="text-sm text-neutral-600 mb-6">
+      <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-6">
         Type is Product or Service. Category is industry — not the same as type.
       </p>
-      <form onSubmit={handleSave} className="space-y-4 bg-white border rounded-lg p-6">
+      <form onSubmit={handleSave} className="space-y-4 bg-white dark:bg-card border rounded-lg p-6">
         <div>
           <label className="block text-sm font-medium mb-1">Offer Title *</label>
           <input

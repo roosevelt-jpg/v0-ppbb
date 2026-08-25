@@ -90,10 +90,10 @@ export default function BusinessOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
-      <div className="bg-white border-b border-[#e4e1da] px-4 py-6 sm:px-6">
+    <div className="min-h-screen bg-[#faf9f7] dark:bg-neutral-950">
+      <div className="bg-white dark:bg-card border-b border-[#e4e1da] dark:border-border px-4 py-6 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-2xl font-bold text-[#111111]">Marketplace Orders</h1>
+          <h1 className="text-2xl font-bold text-[#111111] dark:text-foreground">Marketplace Orders</h1>
           <p className="text-sm text-[#888888] mt-1">
             When a customer buys, you are notified here. Arrange pickup with your preferred delivery
             partner, then mark the order shipped.
@@ -103,12 +103,12 @@ export default function BusinessOrdersPage() {
 
       <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-4">
         {loading ? (
-          <p className="text-neutral-500 text-sm">Loading orders…</p>
+          <p className="text-neutral-500 dark:text-muted-foreground text-sm">Loading orders…</p>
         ) : error ? (
           <p className="text-red-700 text-sm">{error}</p>
         ) : orders.length === 0 ? (
-          <Card className="p-8 text-center text-neutral-500 border border-neutral-200">
-            <Package className="w-10 h-10 mx-auto mb-3 text-neutral-400" />
+          <Card className="p-8 text-center text-neutral-500 dark:text-muted-foreground border border-neutral-200 dark:border-border">
+            <Package className="w-10 h-10 mx-auto mb-3 text-neutral-400 dark:text-neutral-500" />
             No marketplace orders yet.
           </Card>
         ) : (
@@ -123,13 +123,13 @@ export default function BusinessOrdersPage() {
             const total = Number(order.total ?? order.amount ?? 0)
             const busy = busyId === order.id
             return (
-              <Card key={order.id} className="p-5 border border-neutral-200 space-y-3">
+              <Card key={order.id} className="p-5 border border-neutral-200 dark:border-border space-y-3">
                 <div className="flex flex-wrap justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold text-[#111111]">
+                    <h3 className="font-semibold text-[#111111] dark:text-foreground">
                       {order.offerTitle || 'Order'}
                     </h3>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                       #{order.id.slice(0, 8).toUpperCase()} · {date}
                     </p>
                   </div>
@@ -137,8 +137,8 @@ export default function BusinessOrdersPage() {
                     <p className="font-semibold">
                       {order.currency || 'AED'} {total.toFixed(2)}
                     </p>
-                    <p className="text-neutral-600">{paymentMethodLabel(order.paymentMethod)}</p>
-                    <p className="text-xs text-neutral-500 capitalize">
+                    <p className="text-neutral-600 dark:text-muted-foreground">{paymentMethodLabel(order.paymentMethod)}</p>
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground capitalize">
                       {String(order.status || '').replace(/_/g, ' ')} ·{' '}
                       {String(order.fulfillmentStatus || '').replace(/_/g, ' ')}
                     </p>
@@ -147,20 +147,20 @@ export default function BusinessOrdersPage() {
 
                 <div className="grid sm:grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-xs font-semibold uppercase text-neutral-500">Delivery</p>
-                    <pre className="whitespace-pre-wrap font-sans text-neutral-800 mt-1">
+                    <p className="text-xs font-semibold uppercase text-neutral-500 dark:text-muted-foreground">Delivery</p>
+                    <pre className="whitespace-pre-wrap font-sans text-neutral-800 dark:text-foreground mt-1">
                       {formatMarketplaceAddress(order.deliveryAddress)}
                     </pre>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase text-neutral-500">Invoice</p>
-                    <pre className="whitespace-pre-wrap font-sans text-neutral-800 mt-1">
+                    <p className="text-xs font-semibold uppercase text-neutral-500 dark:text-muted-foreground">Invoice</p>
+                    <pre className="whitespace-pre-wrap font-sans text-neutral-800 dark:text-foreground mt-1">
                       {formatMarketplaceAddress(order.invoiceAddress)}
                     </pre>
                   </div>
                 </div>
 
-                <p className="text-sm text-neutral-700">
+                <p className="text-sm text-neutral-700 dark:text-neutral-200">
                   <Truck className="w-4 h-4 inline mr-1" />
                   Preferred partner:{' '}
                   <span className="font-medium">{order.deliveryPartnerLabel || 'Arrange yourself'}</span>

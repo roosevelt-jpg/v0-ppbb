@@ -64,7 +64,7 @@ export default function CreateDiscountPage() {
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-8">
       <h1 className="text-2xl font-bold mb-6">Create Member Discount</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white border border-[#e4e1da] rounded-lg p-6">
+      <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-6">
         <div>
           <label className="block text-sm font-medium mb-1">Title *</label>
           <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full min-h-[44px] px-3 border rounded-lg" />

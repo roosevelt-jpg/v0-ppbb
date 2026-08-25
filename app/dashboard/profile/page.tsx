@@ -119,49 +119,55 @@ export default function ProfileEditPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', color: '#111' }}>Edit Profile</h1>
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--foreground)' }}>Edit Profile</h1>
 
       {error && (
-        <div style={{ padding: '1rem', marginBottom: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-          <AlertCircle style={{ width: '1.25rem', height: '1.25rem', color: '#dc2626', flexShrink: 0 }} />
-          <p style={{ fontSize: '0.875rem', color: '#991b1b' }}>{error}</p>
+        <div
+          className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900"
+          style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}
+        >
+          <AlertCircle className="text-red-600 dark:text-red-400" style={{ width: '1.25rem', height: '1.25rem', flexShrink: 0 }} />
+          <p className="text-red-800 dark:text-red-300" style={{ fontSize: '0.875rem' }}>{error}</p>
         </div>
       )}
 
       {success && (
-        <div style={{ padding: '1rem', marginBottom: '1rem', backgroundColor: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-          <CheckCircle style={{ width: '1.25rem', height: '1.25rem', color: '#16a34a', flexShrink: 0 }} />
-          <p style={{ fontSize: '0.875rem', color: '#166534' }}>{success}</p>
+        <div
+          className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900"
+          style={{ padding: '1rem', marginBottom: '1rem', borderRadius: '0.5rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}
+        >
+          <CheckCircle className="text-green-600 dark:text-green-400" style={{ width: '1.25rem', height: '1.25rem', flexShrink: 0 }} />
+          <p className="text-green-800 dark:text-green-300" style={{ fontSize: '0.875rem' }}>{success}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         {/* Personal Information */}
         <section>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: '#111' }}>Personal Information</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--foreground)' }}>Personal Information</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>First Name</label>
-              <input type="text" name="firstName" value={formData.firstName || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>First Name</label>
+              <input type="text" name="firstName" value={formData.firstName || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Middle Name</label>
-              <input type="text" name="middleName" value={formData.middleName || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Middle Name</label>
+              <input type="text" name="middleName" value={formData.middleName || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Last Name</label>
-              <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Last Name</label>
+              <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Date of Birth</label>
-              <input type="date" name="dateOfBirth" value={formData.dateOfBirth || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Date of Birth</label>
+              <input type="date" name="dateOfBirth" value={formData.dateOfBirth || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Gender</label>
-              <select name="gender" value={formData.gender || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Gender</label>
+              <select name="gender" value={formData.gender || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
                 <option value="">Select gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -169,44 +175,44 @@ export default function ProfileEditPage() {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Nationality</label>
-              <input type="text" name="nationality" value={formData.nationality || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Nationality</label>
+              <input type="text" name="nationality" value={formData.nationality || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
           </div>
         </section>
 
         {/* Contact Information */}
         <section>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: '#111' }}>Contact Information</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--foreground)' }}>Contact Information</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Email</label>
-              <input type="email" value={formData.email || ''} disabled style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box', backgroundColor: '#f7f6f2', color: '#999' }} />
-              <p style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.25rem' }}>Email cannot be changed</p>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Email</label>
+              <input type="email" value={formData.email || ''} disabled style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box', backgroundColor: 'var(--background)', color: 'var(--muted-foreground)' }} />
+              <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>Email cannot be changed</p>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>WhatsApp Number</label>
-              <input type="tel" name="whatsappNumber" value={formData.whatsappNumber || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>WhatsApp Number</label>
+              <input type="tel" name="whatsappNumber" value={formData.whatsappNumber || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
           </div>
         </section>
 
         {/* Professional Information */}
         <section>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: '#111' }}>Professional Information</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--foreground)' }}>Professional Information</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Job Title / Occupation</label>
-              <input type="text" name="profession" value={formData.profession || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Job Title / Occupation</label>
+              <input type="text" name="profession" value={formData.profession || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Employer / Company</label>
-              <input type="text" name="employer" value={formData.employer || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Employer / Company</label>
+              <input type="text" name="employer" value={formData.employer || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
           </div>
 
           <div style={{ marginTop: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: '#111' }}>Skills</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--foreground)' }}>Skills</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               {SKILLS.map(skill => (
                 <button
@@ -215,8 +221,8 @@ export default function ProfileEditPage() {
                   onClick={() => handleSkillToggle(skill)}
                   style={{
                     padding: '0.5rem 1rem',
-                    backgroundColor: (formData.skills || []).includes(skill) ? '#111111' : '#f7f6f2',
-                    color: (formData.skills || []).includes(skill) ? '#ffffff' : '#111111',
+                    backgroundColor: (formData.skills || []).includes(skill) ? '#111111' : 'var(--secondary)',
+                    color: (formData.skills || []).includes(skill) ? '#ffffff' : 'var(--foreground)',
                     border: 'none',
                     borderRadius: '9999px',
                     fontSize: '0.875rem',
@@ -234,9 +240,9 @@ export default function ProfileEditPage() {
 
         {/* Volunteer Information */}
         <section>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: '#111' }}>Volunteer Information</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--foreground)' }}>Volunteer Information</h2>
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: '#111' }}>Available Days</label>
+            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--foreground)' }}>Available Days</label>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               {['Weekdays', 'Weekends', 'Flexible'].map(day => (
                 <button
@@ -245,8 +251,8 @@ export default function ProfileEditPage() {
                   onClick={() => handleVolunteerDayToggle(day)}
                   style={{
                     padding: '0.75rem 1rem',
-                    backgroundColor: (formData.volunteerAvailability?.days || []).includes(day) ? '#111111' : '#f7f6f2',
-                    color: (formData.volunteerAvailability?.days || []).includes(day) ? '#ffffff' : '#111111',
+                    backgroundColor: (formData.volunteerAvailability?.days || []).includes(day) ? '#111111' : 'var(--secondary)',
+                    color: (formData.volunteerAvailability?.days || []).includes(day) ? '#ffffff' : 'var(--foreground)',
                     border: 'none',
                     borderRadius: '0.5rem',
                     fontWeight: 600,
@@ -262,12 +268,12 @@ export default function ProfileEditPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Hours Per Month</label>
-              <input type="number" value={formData.volunteerAvailability?.hoursPerMonth || ''} onChange={(e) => setFormData(prev => ({ ...prev, volunteerAvailability: { ...prev.volunteerAvailability, hoursPerMonth: parseInt(e.target.value) || 0 } }))} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Hours Per Month</label>
+              <input type="number" value={formData.volunteerAvailability?.hoursPerMonth || ''} onChange={(e) => setFormData(prev => ({ ...prev, volunteerAvailability: { ...prev.volunteerAvailability, hoursPerMonth: parseInt(e.target.value) || 0 } }))} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#111' }}>Preferred Department</label>
-              <select value={formData.volunteerAvailability?.preferredDepartment || ''} onChange={(e) => setFormData(prev => ({ ...prev, volunteerAvailability: { ...prev.volunteerAvailability, preferredDepartment: e.target.value } }))} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Preferred Department</label>
+              <select value={formData.volunteerAvailability?.preferredDepartment || ''} onChange={(e) => setFormData(prev => ({ ...prev, volunteerAvailability: { ...prev.volunteerAvailability, preferredDepartment: e.target.value } }))} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
                 <option value="">Select department</option>
                 {DEPARTMENTS.map(dept => (
                   <option key={dept} value={dept}>{dept}</option>
@@ -279,10 +285,10 @@ export default function ProfileEditPage() {
 
         {/* Form Actions */}
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <button type="button" onClick={() => router.back()} style={{ padding: '0.75rem 1.5rem', backgroundColor: '#f7f6f2', color: '#111111', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}>
+          <button type="button" onClick={() => router.back()} style={{ padding: '0.75rem 1.5rem', backgroundColor: 'var(--background)', color: 'var(--foreground)', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}>
             Cancel
           </button>
-          <button type="submit" disabled={saving} style={{ padding: '0.75rem 1.5rem', backgroundColor: saving ? '#cccccc' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '1rem' }}>
+          <button type="submit" disabled={saving} style={{ padding: '0.75rem 1.5rem', backgroundColor: saving ? 'var(--muted)' : '#111111', color: '#ffffff', border: 'none', borderRadius: '0.5rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '1rem' }}>
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>

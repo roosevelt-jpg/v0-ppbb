@@ -56,7 +56,7 @@ export default function MyCommunities() {
       subtitle="WhatsApp-style communities — join groups to chat, share, and discuss"
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-neutral-600 dark:text-muted-foreground">
           {communities.length === 0
             ? 'Browse public communities and join groups that match your profile.'
             : `${communities.length} communit${communities.length === 1 ? 'y' : 'ies'} joined`}
@@ -82,19 +82,19 @@ export default function MyCommunities() {
           {communities.map((community) => (
             <div
               key={community.id}
-              className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-card rounded-xl border border-neutral-200 dark:border-border overflow-hidden hover:shadow-md transition-shadow"
             >
               {community.bannerURL && (
                 <div
-                  className="w-full h-36 bg-neutral-100 bg-cover bg-center"
+                  className="w-full h-36 bg-neutral-100 dark:bg-neutral-800 bg-cover bg-center"
                   style={{ backgroundImage: `url(${community.bannerURL})` }}
                 />
               )}
 
               <div className="p-4 space-y-3">
                 <div>
-                  <h3 className="font-bold text-neutral-900 text-lg line-clamp-2">{community.name}</h3>
-                  <p className="text-xs text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-neutral-900 dark:text-foreground text-lg line-clamp-2">{community.name}</h3>
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                     <span
                       className={`px-2 py-0.5 rounded-full font-medium ${genderRestrictionBadgeClass(community.genderRestriction)}`}
                     >
@@ -104,14 +104,14 @@ export default function MyCommunities() {
                   </p>
                 </div>
 
-                <p className="text-sm text-neutral-600 line-clamp-2">{community.description}</p>
+                <p className="text-sm text-neutral-600 dark:text-muted-foreground line-clamp-2">{community.description}</p>
 
                 {community.tags && community.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {community.tags.slice(0, 2).map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-neutral-100 rounded text-xs text-neutral-700"
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-neutral-100 dark:bg-neutral-800 rounded text-xs text-neutral-700 dark:text-neutral-200"
                       >
                         <Tag size={12} />
                         {tag}
@@ -120,8 +120,8 @@ export default function MyCommunities() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
-                  <div className="flex items-center gap-1 text-sm text-neutral-600">
+                <div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-border">
+                  <div className="flex items-center gap-1 text-sm text-neutral-600 dark:text-muted-foreground">
                     <Users size={14} />
                     {community.memberCount || 0} members
                   </div>
