@@ -55,40 +55,47 @@ export function Dialog({
         padding: '0',
       }}>
         <div
+          className="border-border bg-card"
           style={{
-            border: '1px solid #e4e1da',
+            border: '1px solid',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             borderRadius: '8px',
-            backgroundColor: '#ffffff',
           }}
         >
           {/* Header */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid #e4e1da',
-            padding: pad,
-            gap: '10px',
-          }}>
+          <div
+            className="border-border"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid',
+              padding: pad,
+              gap: '10px',
+            }}
+          >
             <div>
-              <h2 style={{
-                fontSize: compact ? '15px' : '18px',
-                fontWeight: '600',
-                color: '#111111',
-                margin: '0',
-                lineHeight: 1.3,
-              }}>
+              <h2
+                className="text-card-foreground"
+                style={{
+                  fontSize: compact ? '15px' : '18px',
+                  fontWeight: '600',
+                  margin: '0',
+                  lineHeight: 1.3,
+                }}
+              >
                 {title}
               </h2>
               {description && (
-                <p style={{
-                  fontSize: compact ? '12px' : '14px',
-                  marginTop: compact ? '2px' : '4px',
-                  color: '#888888',
-                  margin: '0',
-                  lineHeight: 1.35,
-                }}>
+                <p
+                  className="text-muted-foreground"
+                  style={{
+                    fontSize: compact ? '12px' : '14px',
+                    marginTop: compact ? '2px' : '4px',
+                    margin: '0',
+                    lineHeight: 1.35,
+                  }}
+                >
                   {description}
                 </p>
               )}
@@ -97,11 +104,10 @@ export function Dialog({
               type="button"
               onClick={() => onOpenChange(false)}
               aria-label="Close"
+              className="bg-foreground text-background"
               style={{
-                background: '#111111',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#ffffff',
                 padding: compact ? '4px' : '6px',
                 display: 'flex',
                 alignItems: 'center',
@@ -120,10 +126,11 @@ export function Dialog({
           <div style={{ padding: pad }}>{children}</div>
 
           {/* Footer */}
-          {footer && <div style={{
-            borderTop: '1px solid #e4e1da',
-            padding: footerPad,
-          }}>{footer}</div>}
+          {footer && (
+            <div className="border-border" style={{ borderTop: '1px solid', padding: footerPad }}>
+              {footer}
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -54,9 +54,8 @@ export function AdminModal({
       }}
     >
       <Card
+        className="bg-card border-border"
         style={{
-          backgroundColor: '#ffffff',
-          borderColor: '#e4e1da',
           width: '90%',
           maxWidth: '800px',
           maxHeight: '90vh',
@@ -64,14 +63,12 @@ export function AdminModal({
         }}
       >
         {/* Header */}
-        <div
-          className="flex items-center justify-between p-6 border-b"
-          style={{ borderColor: '#e4e1da' }}
-        >
-          <h2 style={{ color: '#111111', fontSize: '18px', fontWeight: 600 }}>{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <h2 className="text-card-foreground" style={{ fontSize: '18px', fontWeight: 600 }}>{title}</h2>
           <button
             onClick={onClose}
-            style={{ color: '#888888', cursor: 'pointer', background: 'none', border: 'none' }}
+            className="text-muted-foreground"
+            style={{ cursor: 'pointer', background: 'none', border: 'none' }}
           >
             <X className="h-5 w-5" />
           </button>
@@ -81,25 +78,18 @@ export function AdminModal({
         <div className="p-6">{children}</div>
 
         {/* Footer */}
-        <div className="flex gap-2 p-6 border-t" style={{ borderColor: '#e4e1da', justifyContent: 'flex-end' }}>
+        <div className="flex gap-2 p-6 border-t border-border" style={{ justifyContent: 'flex-end' }}>
           <Button
             onClick={onClose}
             disabled={isSubmitting || isLoading}
-            style={{
-              backgroundColor: '#f7f6f2',
-              color: '#111111',
-              border: '1px solid #e4e1da',
-            }}
+            className="bg-secondary text-secondary-foreground border border-border"
           >
             Cancel
           </Button>
           <Button
             onClick={() => handleSubmit({})}
             disabled={isSubmitting || isLoading}
-            style={{
-              backgroundColor: '#111111',
-              color: '#f7f6f2',
-            }}
+            className="bg-foreground text-background"
           >
             {isSubmitting ? 'Saving...' : submitLabel}
           </Button>
