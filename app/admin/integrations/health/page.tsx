@@ -56,16 +56,16 @@ function IntegrationHealthPageContent() {
     setRefreshing(false)
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusClass = (status: string) => {
     switch (status) {
       case 'operational':
-        return '#10b981'
+        return 'text-green-600 dark:text-green-400'
       case 'degraded':
-        return '#f59e0b'
+        return 'text-amber-600 dark:text-amber-400'
       case 'down':
-        return '#ef4444'
+        return 'text-red-600 dark:text-red-400'
       default:
-        return '#888888'
+        return 'text-muted-foreground'
     }
   }
 
@@ -81,18 +81,18 @@ function IntegrationHealthPageContent() {
       {/* Header */}
       <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
             Integration Health
           </h1>
-          <p style={{ color: '#888888' }}>Real-time status and uptime monitoring for all connected services</p>
+          <p style={{ color: 'var(--muted-foreground)' }}>Real-time status and uptime monitoring for all connected services</p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: '#111111',
-            color: '#ffffff',
+            backgroundColor: 'var(--foreground)',
+            color: 'var(--background)',
             border: 'none',
             borderRadius: '0.375rem',
             fontSize: '0.875rem',
@@ -112,10 +112,12 @@ function IntegrationHealthPageContent() {
       {/* Status Banner */}
       {summary && (
         <div
+          className={
+            summary.overallStatus === 'operational'
+              ? 'bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800'
+              : 'bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800'
+          }
           style={{
-            backgroundColor: summary.overallStatus === 'operational' ? '#d1fae5' : '#fee2e2',
-            color: summary.overallStatus === 'operational' ? '#065f46' : '#991b1b',
-            border: `1px solid ${summary.overallStatus === 'operational' ? '#6ee7b7' : '#fca5a5'}`,
             borderRadius: '0.5rem',
             padding: '1rem',
             marginBottom: '2rem',
@@ -143,97 +145,97 @@ function IntegrationHealthPageContent() {
       {/* Stats Grid */}
       {summary && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1rem' }}>
-            <p style={{ color: '#888888', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+          <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Operational
             </p>
-            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#10b981' }}>{summary.operational}</p>
+            <p className="text-green-600 dark:text-green-400" style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>{summary.operational}</p>
           </div>
 
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1rem' }}>
-            <p style={{ color: '#888888', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+          <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Degraded
             </p>
-            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#f59e0b' }}>{summary.degraded}</p>
+            <p className="text-amber-600 dark:text-amber-400" style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>{summary.degraded}</p>
           </div>
 
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1rem' }}>
-            <p style={{ color: '#888888', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+          <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Down
             </p>
-            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#ef4444' }}>{summary.down}</p>
+            <p className="text-red-600 dark:text-red-400" style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>{summary.down}</p>
           </div>
 
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1rem' }}>
-            <p style={{ color: '#888888', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+          <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Not Configured
             </p>
-            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#888888' }}>{summary.notConfigured}</p>
+            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--muted-foreground)' }}>{summary.notConfigured}</p>
           </div>
 
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1rem' }}>
-            <p style={{ color: '#888888', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+          <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1rem' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '0.75rem', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
               Avg Latency
             </p>
-            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111111' }}>{summary.avgLatency}ms</p>
+            <p style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{summary.avgLatency}ms</p>
           </div>
         </div>
       )}
 
       {/* Services Table */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#888888' }}>Loading...</div>
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>Loading...</div>
       ) : (
-        <div className="admin-table-scroll min-w-0" style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem' }}>
+        <div className="admin-table-scroll min-w-0" style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem' }}>
           <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ backgroundColor: '#f9f8f5', borderBottom: '1px solid #e4e1da' }}>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>
+              <tr style={{ backgroundColor: 'var(--secondary)', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
                   Integration
                 </th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
                   Status
                 </th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
                   Latency
                 </th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
                   Last Checked
                 </th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
                   Uptime (90d)
                 </th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: '#888888', textTransform: 'uppercase' }}>
+                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '600', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
                   Action
                 </th>
               </tr>
             </thead>
             <tbody>
               {health.map((h) => (
-                <tr key={h.serviceId} style={{ borderBottom: '1px solid #e4e1da' }}>
-                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#111111', fontWeight: '500' }}>
+                <tr key={h.serviceId} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: 'var(--foreground)', fontWeight: '500' }}>
                     {h.serviceName}
                   </td>
                   <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
                     <span
+                      className={getStatusClass(h.status)}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '0.5rem',
-                        color: getStatusColor(h.status),
                         fontWeight: '600',
                       }}
                     >
                       {getStatusIcon(h.status)} {h.status}
                     </span>
                   </td>
-                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#111111' }}>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: 'var(--foreground)' }}>
                     {h.latency > 0 ? `${h.latency}ms` : '—'}
                   </td>
-                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#888888' }}>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
                     {h.lastChecked ? new Date(h.lastChecked).toLocaleString() : 'Never'}
                   </td>
-                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#111111' }}>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: 'var(--foreground)' }}>
                     {h.uptime90d > 0 ? `${h.uptime90d}%` : '—'}
                   </td>
                   <td style={{ padding: '1rem' }}>
@@ -242,12 +244,12 @@ function IntegrationHealthPageContent() {
                       style={{
                         display: 'inline-block',
                         padding: '0.35rem 0.75rem',
-                        backgroundColor: '#f9f8f5',
-                        border: '1px solid #e4e1da',
+                        backgroundColor: 'var(--secondary)',
+                        border: '1px solid var(--border)',
                         borderRadius: '0.25rem',
                         fontSize: '0.75rem',
                         fontWeight: '600',
-                        color: '#111111',
+                        color: 'var(--foreground)',
                         textDecoration: 'none',
                         cursor: 'pointer',
                       }}
