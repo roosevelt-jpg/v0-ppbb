@@ -4,7 +4,8 @@ import { generateDynamicAccessCode } from '@/lib/admin-login-tracking'
 import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 async function sendAccessCodeEmail(email: string, code: string, adminName: string) {
   try {
@@ -25,7 +26,7 @@ async function sendAccessCodeEmail(email: string, code: string, adminName: strin
         from: { email: 'noreply@passiveblessings.com', name: 'Passive Blessings' },
         content: [{
           type: 'text/html',
-          value: `<h2>Admin Access Code</h2><p>Hello ${adminName},</p><p>Your access code to log in to the admin dashboard is:</p><h1 style="color: #111111; font-size: 32px; letter-spacing: 2px;">${code}</h1><p><strong>This code will expire in 24 hours.</strong></p><p>If you did not request this code, please ignore this email.</p><p>For security, this code is unique and single-use.</p><hr/><p><small>Do not share this code with anyone. Our team will never ask for your access code.</small></p>`,
+          value: `<h2>Admin Access Code</h2><p>Hello ${adminName},</p><p>Your access code to log in to the admin dashboard is:</p><h1 style="color: #111111; font-size: 32px; letter-spacing: 2px;">${code}</h1><p><strong>This code will expire in 24 hours.</strong></p><p>If you did not request this code, please ignore this email.</p><p>For security, this code is unique and single-use.</p><hr/><p><small>Do not share this code with anyone. Our team will never ask you for your access code.</small></p>`,
         }],
       }),
     })
@@ -50,6 +51,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not an admin account' }, { status: 403 })
     }
 
+    // Firebase Admin credentials are resolved only when the route is invoked,
+    // not while Next.js is collecting page data during `next build`.
+    const db = getFirestore(getAdminApp())
     const creatorQuery = query(
       collection(db, 'users'),
       where('id', '==', uid),
