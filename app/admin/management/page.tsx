@@ -291,16 +291,22 @@ export default function AdminManagementPage() {
 
   const handleDeleteAdmin = async (id: string) => {
     if (!confirm('Are you sure?')) return
+    if (!firebaseUser) return
     try {
+      const token = await firebaseUser.getIdToken()
       const res = await fetch(`/api/admin/management?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
       })
       const json = await res.json()
       if (json.success) {
         setAdmins(admins.filter(a => a.id !== id))
+      } else {
+        alert(json.error || 'Failed to delete admin')
       }
     } catch (error) {
       console.error('[v0] Error deleting admin:', error)
+      alert('Failed to delete admin')
     }
   }
 
