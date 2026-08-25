@@ -29,6 +29,19 @@ function servicesFromProfile(profile: Record<string, unknown> | undefined | null
   return []
 }
 
+function buildFormDataFromUser(user: { businessProfile?: Record<string, unknown> } | null | undefined) {
+  const bp = (user?.businessProfile || {}) as Record<string, unknown>
+  return {
+    businessName: String(bp.businessName || ''),
+    businessType: String(bp.businessType || ''),
+    businessDescription: String(bp.businessDescription || ''),
+    businessWebsite: String(bp.businessWebsite || ''),
+    businessEmail: String(bp.businessEmail || ''),
+    businessPhone: String(bp.businessPhone || ''),
+    services: servicesFromProfile(bp),
+  }
+}
+
 export default function BusinessProfile() {
   const { user, refreshUser } = useAuth()
   const [isEditing, setIsEditing] = React.useState(false)
@@ -45,27 +58,8 @@ export default function BusinessProfile() {
   })
 
   React.useEffect(() => {
-    if (!user?.businessProfile && !user) return
-    const bp = (user.businessProfile || {}) as Record<string, unknown>
-    setFormData({
-      businessName: String(bp.businessName || user.businessProfile?.businessName || ''),
-      businessType: String(bp.businessType || user.businessProfile?.businessType || ''),
-      businessDescription: String(
-        bp.businessDescription || user.businessProfile?.businessDescription || ''
-      ),
-      businessWebsite: String(bp.businessWebsite || user.businessProfile?.businessWebsite || ''),
-      businessEmail: String(
-        bp.businessEmail ||
-          (user.businessProfile as { businessEmail?: string } | undefined)?.businessEmail ||
-          ''
-      ),
-      businessPhone: String(
-        bp.businessPhone ||
-          (user.businessProfile as { businessPhone?: string } | undefined)?.businessPhone ||
-          ''
-      ),
-      services: servicesFromProfile(bp),
-    })
+    if (!user) return
+    setFormData(buildFormDataFromUser(user))
   }, [user])
 
   if (!user || !hasBusinessAccess(user)) {
@@ -344,7 +338,10 @@ export default function BusinessProfile() {
                   {isSaving ? 'Saving…' : 'Save Changes'}
                 </Button>
                 <Button
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => {
+                    setFormData(buildFormDataFromUser(user))
+                    setIsEditing(false)
+                  }}
                   className="min-h-[44px] bg-[#e4e1da] text-[#111111] dark:text-foreground hover:bg-neutral-300"
                 >
                   Cancel
