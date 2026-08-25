@@ -211,8 +211,8 @@ export default function AdminCmsPartnersPage() {
       <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Partners Page</h1>
-            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1 font-body">
+            <h1 className="font-headline text-3xl font-bold text-neutral-900">Partners Page</h1>
+            <p className="text-sm text-neutral-600 mt-1 font-body">
               Edit public /partners hero, featured partnership projects, sponsorship deck, tracks,
               and map inquiry categories to Admin → Forms.
             </p>
@@ -281,7 +281,7 @@ export default function AdminCmsPartnersPage() {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Featured partnership projects</h2>
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 Shown on /partners right after “Build alongside us” — title, cover/collage, brief,
                 date, location, partner names. Add at least one project, then Save.
               </p>
@@ -317,8 +317,8 @@ export default function AdminCmsPartnersPage() {
             </Button>
           </div>
           {(pc.featuredProjects || []).length === 0 ? (
-            <div className="rounded-lg border border-dashed border-neutral-300 dark:border-border bg-neutral-50 dark:bg-muted px-4 py-8 text-center">
-              <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+            <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-8 text-center">
+              <p className="text-sm text-neutral-600">
                 No featured projects yet. Click <span className="font-semibold">Add project</span>{' '}
                 to create one for the public Partners page.
               </p>
@@ -326,7 +326,7 @@ export default function AdminCmsPartnersPage() {
           ) : null}
           <div className="space-y-4">
             {(pc.featuredProjects || []).map((project, i) => (
-              <div key={project.id} className="border border-neutral-200 dark:border-border rounded-lg p-4 space-y-3">
+              <div key={project.id} className="border border-neutral-200 rounded-lg p-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <input
                     type="text"
@@ -407,7 +407,7 @@ export default function AdminCmsPartnersPage() {
                   }
                 />
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-neutral-600 dark:text-muted-foreground">
+                  <p className="text-xs font-medium text-neutral-600">
                     Extra gallery photos (optional collage, max 5)
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -558,7 +558,7 @@ export default function AdminCmsPartnersPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1 font-body">Sponsorship deck PDF</label>
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-3 font-body">
+              <p className="text-xs text-neutral-500 mb-3 font-body">
                 Upload a PDF → Firebase Storage → URL stored in Firestore only.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 items-start">
@@ -583,7 +583,7 @@ export default function AdminCmsPartnersPage() {
                       href={pc.sponsorshipDeckPDFUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="h-7 min-h-0 inline-flex items-center px-4 py-2 bg-white dark:bg-card text-black dark:text-foreground border rounded-lg text-sm font-body hover:bg-neutral-50"
+                      className="h-7 min-h-0 inline-flex items-center px-4 py-2 bg-white text-black border rounded-lg text-sm font-body hover:bg-neutral-50"
                     >
                       Open current PDF
                     </a>
@@ -599,7 +599,7 @@ export default function AdminCmsPartnersPage() {
                 )}
               </div>
               {pc.sponsorshipDeckPDFUrl && (
-                <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2 break-all font-body">
+                <p className="text-xs text-neutral-500 mt-2 break-all font-body">
                   {pc.sponsorshipDeckPDFUrl}
                 </p>
               )}
@@ -611,14 +611,14 @@ export default function AdminCmsPartnersPage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Tracks</h2>
-              <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1 font-body">
+              <p className="text-sm text-neutral-600 mt-1 font-body">
                 Title + description pairs. Reorder with the arrows.
               </p>
             </div>
             <Button
               type="button"
               onClick={addTrack}
-              className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50"
+              className="h-7 min-h-0 bg-white text-black border border-neutral-300 hover:bg-neutral-50"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add track
@@ -650,10 +650,10 @@ export default function AdminCmsPartnersPage() {
             {pc.tracks.map((track, index) => (
               <div
                 key={index}
-                className="border border-neutral-200 dark:border-border rounded-lg p-4 space-y-3 bg-neutral-50 dark:bg-muted/50"
+                className="border border-neutral-200 rounded-lg p-4 space-y-3 bg-neutral-50/50"
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-neutral-700 dark:text-foreground font-body">Track {index + 1}</p>
+                  <p className="text-sm font-medium text-neutral-700 font-body">Track {index + 1}</p>
                   <div className="flex items-center gap-1">
                     <Button
                       type="button"
@@ -750,11 +750,11 @@ export default function AdminCmsPartnersPage() {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-neutral-200 dark:border-border space-y-3">
+          <div className="pt-4 border-t border-neutral-200 space-y-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <h3 className="font-semibold text-sm">Inquiry categories → forms</h3>
-                <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+                <p className="text-xs text-neutral-500 mt-1">
                   Optional: link a custom form (Admin → Forms). If linked, Partners uses that form.
                   Otherwise the embedded partnership inquiry form is shown. Charity categories still
                   open the beneficiary request flow. General Contact stays on /contact only.
@@ -864,7 +864,7 @@ export default function AdminCmsPartnersPage() {
 
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Homepage partnership image</h2>
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+          <p className="text-xs text-neutral-500">
             Shown beside “Partner with Passive Blessings” on the homepage. Falls back to the first
             featured project image if empty.
           </p>

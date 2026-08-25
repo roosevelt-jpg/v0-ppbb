@@ -50,21 +50,21 @@ export default function AdminGroupMessagesPage() {
           </p>
           <Link
             href="/admin/communities"
-            className="h-7 min-h-0 px-4 py-2 bg-white dark:bg-card text-black dark:text-foreground border border-gray-300 dark:border-border rounded-lg text-sm font-medium hover:bg-gray-50 inline-flex items-center"
+            className="h-7 min-h-0 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 inline-flex items-center"
           >
             Back to Community Management
           </Link>
         </div>
 
         {loading ? (
-          <p className="text-gray-500 dark:text-muted-foreground py-12 text-center">Loading messages...</p>
+          <p className="text-gray-500 py-12 text-center">Loading messages...</p>
         ) : messages.length === 0 ? (
-          <p className="text-gray-500 dark:text-muted-foreground py-12 text-center bg-gray-50 dark:bg-muted rounded-lg">No group messages yet.</p>
+          <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No group messages yet.</p>
         ) : (
-          <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-lg min-w-0">
+          <div className="bg-white border border-gray-200 rounded-lg min-w-0">
             <div className="admin-table-scroll">
               <table className="w-full min-w-[640px]">
-                <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-semibold">When</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Sender</th>
@@ -76,14 +76,14 @@ export default function AdminGroupMessagesPage() {
                 <tbody className="divide-y divide-gray-200">
                   {messages.map((msg) => (
                     <tr key={`${msg.communityId}-${msg.groupId}-${msg.id}`} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-muted-foreground whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                         {msg.timestamp ? format(new Date(msg.timestamp), 'MMM dd, HH:mm') : '-'}
                       </td>
                       <td className="px-4 py-3 text-sm font-medium">{msg.senderName || 'Unknown'}</td>
-                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-foreground max-w-md truncate">
+                      <td className="px-4 py-3 text-sm text-gray-700 max-w-md truncate">
                         {msg.content || msg.text || ''}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-muted-foreground">{msg.groupId}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{msg.groupId}</td>
                       <td className="px-4 py-3 text-sm">
                         <Link
                           href={`/communities/${msg.communityId}/groups/${msg.groupId}`}

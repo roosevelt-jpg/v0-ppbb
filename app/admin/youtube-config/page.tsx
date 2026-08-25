@@ -130,12 +130,12 @@ export default function YouTubeConfigPage() {
       )}
 
       {/* Configuration Form */}
-      <div className="bg-white dark:bg-card rounded-lg border border-neutral-200 dark:border-border p-6 mb-8">
+      <div className="bg-white rounded-lg border border-neutral-200 p-6 mb-8">
         <h2 className="text-xl font-semibold mb-6">Configuration</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
               YouTube Channel ID *
             </label>
             <input
@@ -143,15 +143,15 @@ export default function YouTubeConfigPage() {
               value={formData.channelId}
               onChange={e => setFormData(prev => ({ ...prev, channelId: e.target.value }))}
               placeholder="UC_x5XG1OV2P6uZZ5FSM9Ttw"
-              className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             />
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+            <p className="text-xs text-neutral-500 mt-1">
               Find it in your YouTube channel URL: youtube.com/channel/YOUR_CHANNEL_ID
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">
+            <label className="block text-sm font-medium text-neutral-700 mb-1">
               YouTube Data API Key *
             </label>
             <input
@@ -159,9 +159,9 @@ export default function YouTubeConfigPage() {
               value={formData.apiKey}
               onChange={e => setFormData(prev => ({ ...prev, apiKey: e.target.value }))}
               placeholder="Enter your API key"
-              className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             />
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+            <p className="text-xs text-neutral-500 mt-1">
               Get your API key from{' '}
               <a
                 href="https://console.cloud.google.com"
@@ -176,13 +176,13 @@ export default function YouTubeConfigPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
                 Videos to Display
               </label>
               <select
                 value={formData.maxVideosDisplay}
                 onChange={e => setFormData(prev => ({ ...prev, maxVideosDisplay: parseInt(e.target.value) }))}
-                className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               >
                 <option value="1">1 Video</option>
                 <option value="2">2 Videos</option>
@@ -194,7 +194,7 @@ export default function YouTubeConfigPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
                 Refresh Interval (Hours)
               </label>
               <input
@@ -203,9 +203,9 @@ export default function YouTubeConfigPage() {
                 onChange={e => setFormData(prev => ({ ...prev, refreshInterval: parseInt(e.target.value) }))}
                 min="1"
                 max="168"
-                className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
               />
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 Every interval, the homepage rotates through your video pool — even if nothing new was uploaded.
               </p>
             </div>
@@ -219,7 +219,7 @@ export default function YouTubeConfigPage() {
               onChange={e => setFormData(prev => ({ ...prev, autoRefresh: e.target.checked }))}
               className="w-4 h-4"
             />
-            <label htmlFor="autoRefresh" className="text-sm font-medium text-neutral-700 dark:text-foreground">
+            <label htmlFor="autoRefresh" className="text-sm font-medium text-neutral-700">
               Auto-refresh videos on schedule
             </label>
           </div>
@@ -275,7 +275,7 @@ export default function YouTubeConfigPage() {
                 href={`https://www.youtube.com/watch?v=${video.videoId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white dark:bg-card rounded-lg border border-neutral-200 dark:border-border overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="relative bg-black aspect-video overflow-hidden">
                   <img
@@ -286,16 +286,16 @@ export default function YouTubeConfigPage() {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="font-semibold text-neutral-900 dark:text-foreground line-clamp-2 mb-2">
+                  <h3 className="font-semibold text-neutral-900 line-clamp-2 mb-2">
                     {video.title}
                   </h3>
 
-                  <div className="flex justify-between items-center text-xs text-neutral-600 dark:text-muted-foreground">
+                  <div className="flex justify-between items-center text-xs text-neutral-600">
                     <span>{formatViewCount(video.viewCount)} views</span>
                     {video.duration && <span>{formatDuration(video.duration)}</span>}
                   </div>
 
-                  <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2">
+                  <p className="text-xs text-neutral-500 mt-2">
                     {new Date(video.publishedAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -303,7 +303,7 @@ export default function YouTubeConfigPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-neutral-50 dark:bg-muted rounded-lg text-neutral-600 dark:text-muted-foreground">
+          <div className="text-center py-12 bg-neutral-50 rounded-lg text-neutral-600">
             <p>No videos fetched yet. Save your configuration and fetch videos.</p>
           </div>
         )}

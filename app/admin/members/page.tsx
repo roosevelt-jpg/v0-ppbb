@@ -194,7 +194,7 @@ export default function AdminMembersPage() {
         subtitle="Individuals can volunteer and join the PB team · Business members are managed separately"
       >
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500 dark:text-muted-foreground">Loading members...</p>
+          <p className="text-gray-500">Loading members...</p>
         </div>
       </AdminPageLayout>
     )
@@ -208,13 +208,13 @@ export default function AdminMembersPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-black dark:text-foreground">All Members</h2>
-            <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1">
+            <h2 className="text-2xl font-bold text-black">All Members</h2>
+            <p className="text-sm text-gray-600 mt-1">
               Select one or more members to update their role/status or delete them.
             </p>
           </div>
           {selectedList.length === 0 ? (
-            <p className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-muted-foreground">
+            <p className="inline-flex items-center gap-2 text-sm text-gray-500">
               <CheckSquare className="w-4 h-4" />
               Use the checkboxes to multi-select
             </p>
@@ -228,17 +228,17 @@ export default function AdminMembersPage() {
         ) : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-4 min-w-0">
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">Individual members</p>
-            <p className="text-2xl font-bold text-black dark:text-foreground">{individualCount}</p>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
+            <p className="text-sm text-gray-600">Individual members</p>
+            <p className="text-2xl font-bold text-black">{individualCount}</p>
           </div>
-          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-4 min-w-0">
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">Volunteers / PB team</p>
-            <p className="text-2xl font-bold text-black dark:text-foreground">{volunteerCount}</p>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
+            <p className="text-sm text-gray-600">Volunteers / PB team</p>
+            <p className="text-2xl font-bold text-black">{volunteerCount}</p>
           </div>
-          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-4 min-w-0">
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">Business accounts (see Business Members)</p>
-            <p className="text-2xl font-bold text-black dark:text-foreground">{businessCount}</p>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 min-w-0">
+            <p className="text-sm text-gray-600">Business accounts (see Business Members)</p>
+            <p className="text-2xl font-bold text-black">{businessCount}</p>
           </div>
         </div>
 
@@ -262,8 +262,8 @@ export default function AdminMembersPage() {
             ))}
           </div>
 
-          <div className="flex-1 flex items-center gap-2 bg-white dark:bg-card rounded-md border border-gray-200 dark:border-border px-2.5 min-w-0 h-8">
-            <Search size={14} className="text-gray-400 dark:text-muted-foreground shrink-0" />
+          <div className="flex-1 flex items-center gap-2 bg-white rounded-md border border-gray-200 px-2.5 min-w-0 h-8">
+            <Search size={14} className="text-gray-400 shrink-0" />
             <input
               type="text"
               placeholder="Search by name, email, or location..."
@@ -272,22 +272,22 @@ export default function AdminMembersPage() {
                 setSearch(e.target.value)
                 setLoading(true)
               }}
-              className="flex-1 py-1 outline-none bg-transparent text-xs text-gray-700 dark:text-foreground"
+              className="flex-1 py-1 outline-none bg-transparent text-xs text-gray-700"
             />
           </div>
         </div>
 
         {selectedList.length > 0 ? (
-          <div className="sticky top-2 z-20 flex flex-wrap items-center gap-2 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-2.5 py-2 shadow-none">
-            <p className="text-[11px] font-semibold text-black dark:text-foreground w-full sm:w-auto">
+          <div className="sticky top-2 z-20 flex flex-wrap items-center gap-2 rounded-md border border-neutral-300 bg-white px-2.5 py-2 shadow-none">
+            <p className="text-[11px] font-semibold text-black w-full sm:w-auto">
               {selectedList.length} member{selectedList.length === 1 ? '' : 's'} selected
             </p>
-            <label className="text-[10px] font-medium text-neutral-600 dark:text-muted-foreground">
+            <label className="text-[10px] font-medium text-neutral-600">
               Set status
               <select
                 value={bulkStatus}
                 onChange={(e) => setBulkStatus(e.target.value)}
-                className="mt-0.5 block h-6 min-h-0 rounded-md border border-neutral-300 dark:border-border px-2 text-[11px] bg-white dark:bg-card"
+                className="mt-0.5 block h-6 min-h-0 rounded-md border border-neutral-300 px-2 text-[11px] bg-white"
               >
                 <option value="">—</option>
                 <option value="active">Active</option>
@@ -295,12 +295,12 @@ export default function AdminMembersPage() {
                 <option value="suspended">Suspended</option>
               </select>
             </label>
-            <label className="text-[10px] font-medium text-neutral-600 dark:text-muted-foreground">
+            <label className="text-[10px] font-medium text-neutral-600">
               Set type / role
               <select
                 value={bulkRole}
                 onChange={(e) => setBulkRole(e.target.value)}
-                className="mt-0.5 block h-6 min-h-0 rounded-md border border-neutral-300 dark:border-border px-2 text-[11px] bg-white dark:bg-card"
+                className="mt-0.5 block h-6 min-h-0 rounded-md border border-neutral-300 px-2 text-[11px] bg-white"
               >
                 <option value="">—</option>
                 <option value="member">Individual member</option>
@@ -337,13 +337,13 @@ export default function AdminMembersPage() {
         ) : null}
 
         {displayMembers.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-muted rounded-lg">
-            <p className="text-gray-500 dark:text-muted-foreground">No members found matching your filters.</p>
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">No members found matching your filters.</p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border admin-table-scroll min-w-0">
+          <div className="bg-white rounded-lg border border-gray-200 admin-table-scroll min-w-0">
             <table className="w-full min-w-[1080px]">
-              <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left">
                     <input
@@ -354,17 +354,17 @@ export default function AdminMembersPage() {
                       className="h-4 w-4 accent-black"
                     />
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Member</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Email</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Phone</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Type</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Location</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
                     Volunteer Hours
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Joined</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground whitespace-nowrap">
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Joined</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">
                     Profile
                   </th>
                 </tr>
@@ -375,7 +375,7 @@ export default function AdminMembersPage() {
                   return (
                     <tr
                       key={member.id}
-                      className={selected ? 'bg-neutral-100 dark:bg-muted' : 'hover:bg-gray-50'}
+                      className={selected ? 'bg-neutral-100' : 'hover:bg-gray-50'}
                     >
                       <td className="px-4 py-3">
                         <input
@@ -389,22 +389,22 @@ export default function AdminMembersPage() {
                       <td className="px-6 py-3 text-sm">
                         <AdminUserCell user={member} />
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground hidden md:table-cell">
+                      <td className="px-6 py-3 text-sm text-gray-600 hidden md:table-cell">
                         {member.email}
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground whitespace-nowrap">
+                      <td className="px-6 py-3 text-sm text-gray-600 whitespace-nowrap">
                         {formatUserPhoneDisplay(member)}
                       </td>
                       <td className="px-6 py-3 text-sm">
-                        <span className="px-2 py-0.5 bg-neutral-100 dark:bg-muted text-neutral-900 dark:text-foreground rounded text-[10px] font-medium capitalize">
+                        <span className="px-2 py-0.5 bg-neutral-100 text-neutral-900 rounded text-[10px] font-medium capitalize">
                           {member.role || member.userType || 'member'}
                         </span>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
+                      <td className="px-6 py-3 text-sm text-gray-600">
                         {member.location?.city || member.emirate || member.location || '-'}
                       </td>
                       <td className="px-6 py-3 text-sm">
-                        <span className="font-medium text-gray-900 dark:text-foreground">
+                        <span className="font-medium text-gray-900">
                           {member.volunteerHours || 0} hrs
                         </span>
                       </td>
@@ -413,13 +413,13 @@ export default function AdminMembersPage() {
                           className={`px-2 py-1 rounded text-xs font-medium ${
                             member.status === 'active'
                               ? 'bg-neutral-900 text-white'
-                              : 'bg-gray-100 dark:bg-muted text-gray-800 dark:text-foreground'
+                              : 'bg-gray-100 text-gray-800'
                           }`}
                         >
                           {member.status || 'active'}
                         </span>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
+                      <td className="px-6 py-3 text-sm text-gray-600">
                         {member.dateJoined
                           ? new Date(member.dateJoined).toLocaleDateString()
                           : member.joinedAt

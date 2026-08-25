@@ -212,25 +212,25 @@ export default function AdminCmsGlobalSettingsPage() {
   }
 
   const fieldClass =
-    'w-full min-h-[44px] border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm bg-white dark:bg-card'
+    'w-full min-h-[44px] border border-neutral-300 rounded px-3 py-2.5 text-sm bg-white'
 
   return (
     <AdminPageLayout title="Global Settings">
       <div className="space-y-6 w-full min-w-0">
         <div>
           <p
-            className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+            className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             CMS
           </p>
           <h1
-            className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground"
+            className="text-2xl sm:text-3xl text-neutral-900"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
             Global Settings
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
             Single source for platform branding, typography, colors, contact details, social links,
             and WhatsApp. API
             credentials live on{' '}
@@ -262,7 +262,7 @@ export default function AdminCmsGlobalSettingsPage() {
         )}
 
         {migrationReport && (
-          <p className="text-xs text-neutral-600 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-xs text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>
             {migrationReport}
           </p>
         )}
@@ -271,13 +271,13 @@ export default function AdminCmsGlobalSettingsPage() {
         <Card className="p-4 sm:p-6 space-y-4 w-full min-w-0">
           <div>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Site branding
             </p>
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground"
+              className="text-xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Name & logos
@@ -325,11 +325,11 @@ export default function AdminCmsGlobalSettingsPage() {
                   key: 'light-bg',
                   label: 'Logo (light backgrounds — sidebars)',
                   src: DEFAULT_LOGO_ON_LIGHT_BG,
-                  previewBg: 'bg-neutral-100 dark:bg-muted',
+                  previewBg: 'bg-neutral-100',
                 },
               ] as const
             ).map((item) => (
-              <div key={item.key} className="border border-dashed border-neutral-300 dark:border-border rounded-lg p-4">
+              <div key={item.key} className="border border-dashed border-neutral-300 rounded-lg p-4">
                 <label className="block text-sm font-medium mb-2">{item.label}</label>
                 <div
                   className={`mb-3 flex h-20 items-center justify-center rounded ${item.previewBg}`}
@@ -340,7 +340,7 @@ export default function AdminCmsGlobalSettingsPage() {
                     className="h-16 w-auto max-w-full object-contain bg-transparent"
                   />
                 </div>
-                <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+                <p className="text-xs text-neutral-500">
                   Built-in original brand mark. Site chrome always uses these (admin uploads are
                   disabled for logos).
                 </p>
@@ -348,10 +348,10 @@ export default function AdminCmsGlobalSettingsPage() {
             ))}
           </div>
 
-          <div className="mt-4 border border-dashed border-neutral-300 dark:border-border rounded-lg p-4 max-w-md">
+          <div className="mt-4 border border-dashed border-neutral-300 rounded-lg p-4 max-w-md">
             <label className="block text-sm font-medium mb-2">Favicon</label>
             {settings.faviconUrl ? (
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded bg-neutral-100 dark:bg-muted border border-neutral-200 dark:border-border">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded bg-neutral-100 border border-neutral-200">
                 <img
                   src={settings.faviconUrl}
                   alt="Favicon"
@@ -359,13 +359,13 @@ export default function AdminCmsGlobalSettingsPage() {
                 />
               </div>
             ) : (
-              <p className="text-xs text-neutral-400 dark:text-muted-foreground mb-3">No favicon yet</p>
+              <p className="text-xs text-neutral-400 mb-3">No favicon yet</p>
             )}
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-2">
+            <p className="text-xs text-neutral-500 mb-2">
               Browser tab icon. Auto-resized to <strong>64×64</strong> PNG (PNG, JPG,
               WebP, GIF, ICO, or SVG).
             </p>
-            <label className="h-7 min-h-0 inline-flex w-full items-center justify-center gap-2 px-4 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
+            <label className="h-7 min-h-0 inline-flex w-full items-center justify-center gap-2 px-4 bg-white text-black border border-neutral-300 rounded text-sm font-semibold cursor-pointer hover:bg-neutral-50">
               <Upload className="w-4 h-4" />
               {uploading === 'favicon'
                 ? 'Uploading…'
@@ -390,13 +390,13 @@ export default function AdminCmsGlobalSettingsPage() {
         <Card className="p-4 sm:p-6 space-y-4 w-full min-w-0">
           <div>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Contact
             </p>
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground"
+              className="text-xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Public contact details
@@ -437,13 +437,13 @@ export default function AdminCmsGlobalSettingsPage() {
         <Card className="p-4 sm:p-6 space-y-4 w-full min-w-0">
           <div>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               WhatsApp
             </p>
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground"
+              className="text-xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Floating channel button
@@ -458,7 +458,7 @@ export default function AdminCmsGlobalSettingsPage() {
               className={fieldClass}
               placeholder="https://whatsapp.com/channel/..."
             />
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+            <p className="text-xs text-neutral-500 mt-1">
               Shown as a floating green button on public pages. Leave empty to hide.
             </p>
           </div>
@@ -468,13 +468,13 @@ export default function AdminCmsGlobalSettingsPage() {
         <Card className="p-4 sm:p-6 space-y-4 w-full min-w-0">
           <div>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Social media
             </p>
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground"
+              className="text-xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Footer & contact icons
@@ -501,18 +501,18 @@ export default function AdminCmsGlobalSettingsPage() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
               <p
-                className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+                className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Appearance
               </p>
               <h2
-                className="text-xl text-neutral-900 dark:text-foreground"
+                className="text-xl text-neutral-900"
                 style={{ fontFamily: 'Cormorant Garamond, serif' }}
               >
                 Typography & colors
               </h2>
-              <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Choose fonts for headings, titles, subheadings, body content, and buttons, plus brand
                 colors. Changes apply site-wide after you save.
               </p>
@@ -520,21 +520,21 @@ export default function AdminCmsGlobalSettingsPage() {
             <button
               type="button"
               onClick={handleResetTheme}
-              className="px-4 !bg-white dark:bg-card !text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-sm font-semibold hover:!bg-neutral-50 dark:bg-muted shrink-0"
+              className="px-4 !bg-white !text-black border border-neutral-300 rounded text-sm font-semibold hover:!bg-neutral-50 shrink-0"
             >
               Reset to defaults
             </button>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-foreground uppercase tracking-wide">Fonts</h3>
+            <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">Fonts</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(Object.keys(FONT_ROLE_LABELS) as SiteFontRole[]).map((role) => (
                 <div key={role}>
                   <label className="block text-sm font-medium mb-1">
                     {FONT_ROLE_LABELS[role].label}
                   </label>
-                  <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-1.5">{FONT_ROLE_LABELS[role].hint}</p>
+                  <p className="text-xs text-neutral-500 mb-1.5">{FONT_ROLE_LABELS[role].hint}</p>
                   <select
                     value={settings.theme?.fonts?.[role] || DEFAULT_SITE_THEME.fonts[role]}
                     onChange={(e) => handleThemeFontChange(role, e.target.value)}
@@ -552,7 +552,7 @@ export default function AdminCmsGlobalSettingsPage() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-foreground uppercase tracking-wide">Colors</h3>
+            <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wide">Colors</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {COLOR_FIELD_LABELS.map(({ key, label, hint }) => {
                 const value =
@@ -560,13 +560,13 @@ export default function AdminCmsGlobalSettingsPage() {
                 return (
                   <div key={key}>
                     <label className="block text-sm font-medium mb-1">{label}</label>
-                    <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-1.5">{hint}</p>
+                    <p className="text-xs text-neutral-500 mb-1.5">{hint}</p>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
                         value={value.length === 7 ? value : '#111111'}
                         onChange={(e) => handleThemeColorChange(key, e.target.value)}
-                        className="h-11 w-14 shrink-0 border border-neutral-300 dark:border-border rounded cursor-pointer bg-white dark:bg-card p-1"
+                        className="h-11 w-14 shrink-0 border border-neutral-300 rounded cursor-pointer bg-white p-1"
                         aria-label={label}
                       />
                       <input
@@ -584,7 +584,7 @@ export default function AdminCmsGlobalSettingsPage() {
           </div>
 
           <div
-            className="rounded-lg border border-neutral-200 dark:border-border p-4 space-y-3"
+            className="rounded-lg border border-neutral-200 p-4 space-y-3"
             style={{
               background: settings.theme?.colors?.background || DEFAULT_SITE_THEME.colors.background,
               color: settings.theme?.colors?.foreground || DEFAULT_SITE_THEME.colors.foreground,
@@ -659,19 +659,19 @@ export default function AdminCmsGlobalSettingsPage() {
         <Card className="p-4 sm:p-6 space-y-3 w-full min-w-0">
           <div>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Integrations
             </p>
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground"
+              className="text-xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               API credentials & services
             </h2>
           </div>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>
             Payment gateways, Gmail SMTP, Maps, calendars, and webhooks are managed on the dedicated
             Integrations page (Firestore <code className="text-xs">integrations/</code> collection).
             This settings page does not store API keys.
@@ -689,18 +689,18 @@ export default function AdminCmsGlobalSettingsPage() {
         <Card className="p-4 sm:p-6 space-y-4 w-full min-w-0">
           <div>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Referrals
             </p>
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground"
+              className="text-xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Business referral defaults
             </h2>
-            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
               Stored in platformConfig/referrals.
             </p>
           </div>

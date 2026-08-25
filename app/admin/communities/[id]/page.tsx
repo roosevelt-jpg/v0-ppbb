@@ -104,7 +104,7 @@ export default function AdminCommunityDetailPage() {
   if (loading) {
     return (
       <AdminPageLayout title="Community Details">
-        <div className="flex items-center justify-center py-12 text-gray-500 dark:text-muted-foreground">Loading…</div>
+        <div className="flex items-center justify-center py-12 text-gray-500">Loading…</div>
       </AdminPageLayout>
     )
   }
@@ -113,7 +113,7 @@ export default function AdminCommunityDetailPage() {
     return (
       <AdminPageLayout title="Community Not Found">
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-muted-foreground mb-4">Community not found</p>
+          <p className="text-gray-500 mb-4">Community not found</p>
           <Link href="/admin/communities" className="px-4 py-2 bg-black text-white rounded-lg">
             Back to Communities
           </Link>
@@ -132,15 +132,15 @@ export default function AdminCommunityDetailPage() {
 
         {community.bannerURL && (
           <div
-            className="w-full h-40 bg-gray-200 dark:bg-muted bg-cover bg-center rounded-lg"
+            className="w-full h-40 bg-gray-200 bg-cover bg-center rounded-lg"
             style={{ backgroundImage: `url(${community.bannerURL})` }}
           />
         )}
 
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-black dark:text-foreground">{community.name}</h1>
-            <p className="text-gray-600 dark:text-muted-foreground mt-2">{community.description}</p>
+            <h1 className="text-3xl font-bold text-black">{community.name}</h1>
+            <p className="text-gray-600 mt-2">{community.description}</p>
           </div>
           <Link
             href={`/admin/communities/create?id=${communityId}`}
@@ -175,21 +175,21 @@ export default function AdminCommunityDetailPage() {
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-black dark:text-foreground">Groups ({groups.length})</h2>
+          <h2 className="text-xl font-bold text-black">Groups ({groups.length})</h2>
           {groups.length === 0 ? (
-            <p className="text-gray-500 dark:text-muted-foreground py-8 text-center bg-gray-50 dark:bg-muted rounded-lg">No groups yet.</p>
+            <p className="text-gray-500 py-8 text-center bg-gray-50 rounded-lg">No groups yet.</p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {groups.map((group) => (
-                <div key={group.id} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-lg p-4 space-y-2">
+                <div key={group.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-black dark:text-foreground">{group.name}</h3>
-                    <span className="text-xs capitalize px-2 py-0.5 bg-gray-100 dark:bg-muted rounded">
+                    <h3 className="font-bold text-black">{group.name}</h3>
+                    <span className="text-xs capitalize px-2 py-0.5 bg-gray-100 rounded">
                       {group.type?.replace('-', ' ') || 'discussion'}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground">{group.description}</p>
-                  <p className="text-xs text-gray-500 dark:text-muted-foreground">
+                  <p className="text-sm text-gray-600">{group.description}</p>
+                  <p className="text-xs text-gray-500">
                     {genderRestrictionLabel(group.genderRestriction)} · {group.memberCount} members
                     {group.requiresApproval ? ' · approval required' : ''}
                   </p>
@@ -226,16 +226,16 @@ export default function AdminCommunityDetailPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Shield size={20} />
-            <h2 className="text-xl font-bold text-black dark:text-foreground">Members ({members.length})</h2>
+            <h2 className="text-xl font-bold text-black">Members ({members.length})</h2>
           </div>
           {members.map((member) => (
             <div
               key={member.id}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-gray-200 dark:border-border rounded-lg p-4 bg-white dark:bg-card"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-gray-200 rounded-lg p-4 bg-white"
             >
               <div>
                 <p className="font-medium">{member.userName || 'Member'}</p>
-                <p className="text-sm text-gray-500 dark:text-muted-foreground">{member.userEmail}</p>
+                <p className="text-sm text-gray-500">{member.userEmail}</p>
               </div>
               <div className={ACTION_ROW}>
                 {member.memberStatus === 'active' ? (

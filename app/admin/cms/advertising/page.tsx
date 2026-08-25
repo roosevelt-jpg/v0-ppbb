@@ -16,7 +16,7 @@ export default function AdminAdvertisingPage() {
 
   return (
     <AdminPageLayout title="Advertising">
-      <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+      <p className="text-sm text-neutral-600">
         Redirecting to Volunteer &amp; Ads → Homepage advertising…
       </p>
     </AdminPageLayout>

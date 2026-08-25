@@ -137,7 +137,7 @@ function CreateCommunityForm() {
   if (loadingExisting) {
     return (
       <AdminPageLayout title="Edit Community" subtitle="Loading…">
-        <p className="text-gray-500 dark:text-muted-foreground">Loading community…</p>
+        <p className="text-gray-500">Loading community…</p>
       </AdminPageLayout>
     )
   }
@@ -148,38 +148,38 @@ function CreateCommunityForm() {
       subtitle={editId ? 'Update community details' : 'Add a new community to the platform'}
     >
       <div className="w-full max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-card p-8 rounded-lg border border-gray-200 dark:border-border">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg border border-gray-200">
           <div>
-            <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Community Name *</label>
+            <label className="block text-sm font-medium text-black mb-2">Community Name *</label>
             <input
               type="text"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Technology Enthusiasts"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Description *</label>
+            <label className="block text-sm font-medium text-black mb-2">Description *</label>
             <textarea
               required
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Describe the community purpose and focus..."
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Category *</label>
+              <label className="block text-sm font-medium text-black mb-2">Category *</label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black"
               >
                 <option value="general">General</option>
                 <option value="interest">Interest</option>
@@ -191,11 +191,11 @@ function CreateCommunityForm() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Visibility *</label>
+              <label className="block text-sm font-medium text-black mb-2">Visibility *</label>
               <select
                 value={formData.visibility}
                 onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black"
               >
                 <option value="public">Public</option>
                 <option value="private">Private</option>
@@ -205,11 +205,11 @@ function CreateCommunityForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Gender restriction</label>
+            <label className="block text-sm font-medium text-black mb-2">Gender restriction</label>
             <select
               value={formData.genderRestriction}
               onChange={(e) => setFormData({ ...formData, genderRestriction: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black"
             >
               <option value="mixed">Mixed (all genders)</option>
               <option value="male">Men only</option>
@@ -218,19 +218,19 @@ function CreateCommunityForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Community Rules (one per line)</label>
+            <label className="block text-sm font-medium text-black mb-2">Community Rules (one per line)</label>
             <textarea
               value={formData.rules}
               onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
               placeholder="Be respectful&#10;No spam"
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Community Icon</label>
+              <label className="block text-sm font-medium text-black mb-2">Community Icon</label>
               <input
                 type="file"
                 accept="image/*"
@@ -248,7 +248,7 @@ function CreateCommunityForm() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-black dark:text-foreground mb-2">Community Banner</label>
+              <label className="block text-sm font-medium text-black mb-2">Community Banner</label>
               <input
                 type="file"
                 accept="image/*"
@@ -291,7 +291,7 @@ function CreateCommunityForm() {
 
 export default function CreateCommunityPage() {
   return (
-    <Suspense fallback={<AdminPageLayout title="Community"><p className="text-gray-500 dark:text-muted-foreground">Loading…</p></AdminPageLayout>}>
+    <Suspense fallback={<AdminPageLayout title="Community"><p className="text-gray-500">Loading…</p></AdminPageLayout>}>
       <CreateCommunityForm />
     </Suspense>
   )

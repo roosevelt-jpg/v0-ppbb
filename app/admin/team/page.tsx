@@ -265,7 +265,7 @@ export default function AdminTeamPage() {
     return (
       <AdminPageLayout title="Team Members">
         <div className="flex items-center justify-center py-12">
-          <p className="text-neutral-500 dark:text-muted-foreground">Loading team members…</p>
+          <p className="text-neutral-500">Loading team members…</p>
         </div>
       </AdminPageLayout>
     )
@@ -276,8 +276,8 @@ export default function AdminTeamPage() {
       <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Team (About)</h1>
-            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
+            <h1 className="font-headline text-3xl font-bold text-neutral-900">Team (About)</h1>
+            <p className="text-sm text-neutral-600 mt-1">
               Manage leadership profiles shown on the About page. Section labels are edited at{' '}
               <a href="/admin/cms/about" className="underline font-medium">
                 /admin/cms/about
@@ -400,7 +400,7 @@ export default function AdminTeamPage() {
                       className="h-16 w-16 rounded-full object-cover border"
                     />
                   ) : (
-                    <div className="h-16 w-16 rounded-full bg-neutral-200 dark:bg-muted flex items-center justify-center text-sm font-bold text-neutral-600 dark:text-muted-foreground">
+                    <div className="h-16 w-16 rounded-full bg-neutral-200 flex items-center justify-center text-sm font-bold text-neutral-600">
                       {getTeamInitials(form.name || 'NA')}
                     </div>
                   )}
@@ -426,7 +426,7 @@ export default function AdminTeamPage() {
                 <Button
                   type="button"
                   onClick={resetForm}
-                  className="bg-neutral-200 dark:bg-muted text-neutral-900 dark:text-foreground hover:bg-neutral-300"
+                  className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300"
                 >
                   Cancel
                 </Button>
@@ -438,7 +438,7 @@ export default function AdminTeamPage() {
         <Card className="p-4 sm:p-6 min-w-0">
           <h2 className="font-headline text-xl font-bold mb-4">All team members</h2>
           {members.length === 0 ? (
-            <p className="text-sm text-neutral-500 dark:text-muted-foreground">
+            <p className="text-sm text-neutral-500">
               No team members yet. Seed defaults or add one above.
             </p>
           ) : (
@@ -465,7 +465,7 @@ export default function AdminTeamPage() {
                             className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-neutral-200 dark:bg-muted flex items-center justify-center text-xs font-bold text-neutral-600 dark:text-muted-foreground">
+                          <div className="h-10 w-10 rounded-full bg-neutral-200 flex items-center justify-center text-xs font-bold text-neutral-600">
                             {getTeamInitials(member.name)}
                           </div>
                         )}
@@ -489,7 +489,7 @@ export default function AdminTeamPage() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(member)}
-                        className={`px-3 py-2 rounded text-xs font-medium ${ member.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 dark:bg-muted text-neutral-600 dark:text-muted-foreground' }`}
+                        className={`px-3 py-2 rounded text-xs font-medium ${ member.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600' }`}
                       >
                         {member.isActive ? 'Active' : 'Hidden'}
                       </button>
@@ -517,7 +517,7 @@ export default function AdminTeamPage() {
                         <Button
                           type="button"
                           onClick={() => startEdit(member)}
-                          className="bg-neutral-200 dark:bg-muted text-neutral-900 dark:text-foreground hover:bg-neutral-300 text-xs"
+                          className="bg-neutral-200 text-neutral-900 hover:bg-neutral-300 text-xs"
                         >
                           Edit
                         </Button>

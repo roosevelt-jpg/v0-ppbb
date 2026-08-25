@@ -333,19 +333,19 @@ export default function AdminPartnersLogosPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="min-w-0">
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               CMS
             </p>
             <h1
-              className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground"
+              className="text-2xl sm:text-3xl text-neutral-900"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Partners &amp; Logos
             </h1>
             <p
-              className="text-sm text-neutral-600 dark:text-muted-foreground mt-1"
+              className="text-sm text-neutral-600 mt-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Manage logos that appear in the homepage marquee and Partners page
@@ -393,12 +393,12 @@ export default function AdminPartnersLogosPage() {
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
-            <div className="h-16 bg-neutral-100 dark:bg-muted rounded" />
-            <div className="h-16 bg-neutral-100 dark:bg-muted rounded" />
-            <div className="h-16 bg-neutral-100 dark:bg-muted rounded" />
+            <div className="h-16 bg-neutral-100 rounded" />
+            <div className="h-16 bg-neutral-100 rounded" />
+            <div className="h-16 bg-neutral-100 rounded" />
           </div>
         ) : partners.length === 0 ? (
-          <p className="text-sm text-neutral-500 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
             No partners yet. Seed defaults or add one.
           </p>
         ) : (
@@ -412,19 +412,19 @@ export default function AdminPartnersLogosPage() {
                   onDragStart={() => onDragStart(index)}
                   onDragOver={(e) => onDragOver(e, index)}
                   onDrop={() => onDrop(index)}
-                  className={`border border-[#e4e1da] dark:border-border rounded-lg bg-white dark:bg-card p-4 space-y-3 ${
+                  className={`border border-[#e4e1da] rounded-lg bg-white p-4 space-y-3 ${
                     dragOverIndex === index ? 'ring-2 ring-black' : ''
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <button
                       type="button"
-                      className="mt-1 min-w-[44px] inline-flex items-center justify-center text-neutral-400 dark:text-muted-foreground cursor-grab"
+                      className="mt-1 min-w-[44px] inline-flex items-center justify-center text-neutral-400 cursor-grab"
                       aria-label="Drag to reorder"
                     >
                       <GripVertical className="w-5 h-5" />
                     </button>
-                    <div className="h-12 w-12 shrink-0 border rounded flex items-center justify-center bg-neutral-50 dark:bg-muted overflow-hidden">
+                    <div className="h-12 w-12 shrink-0 border rounded flex items-center justify-center bg-neutral-50 overflow-hidden">
                       {partner.logoURL ? (
                         <img
                           src={partner.logoURL}
@@ -432,17 +432,17 @@ export default function AdminPartnersLogosPage() {
                           className="h-12 w-12 object-contain"
                         />
                       ) : (
-                        <span className="text-[10px] text-neutral-400 dark:text-muted-foreground px-1 text-center">No logo</span>
+                        <span className="text-[10px] text-neutral-400 px-1 text-center">No logo</span>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p
-                        className="font-semibold text-neutral-900 dark:text-foreground truncate"
+                        className="font-semibold text-neutral-900 truncate"
                         style={{ fontFamily: 'Inter, sans-serif' }}
                       >
                         {partner.name}
                       </p>
-                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-0.5">
+                      <p className="text-xs text-neutral-500 mt-0.5">
                         {typeLabel(partner.type)} · Order {partner.order}
                       </p>
                       {partner.websiteURL ? (
@@ -450,7 +450,7 @@ export default function AdminPartnersLogosPage() {
                           href={partner.websiteURL}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-neutral-600 dark:text-muted-foreground underline break-all"
+                          className="text-xs text-neutral-600 underline break-all"
                         >
                           {partner.websiteURL}
                         </a>
@@ -488,10 +488,10 @@ export default function AdminPartnersLogosPage() {
             </ul>
 
             {/* Desktop table */}
-            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] dark:border-border rounded-lg bg-white dark:bg-card min-w-0">
+            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
               <table className="w-full text-sm min-w-[960px]" style={{ fontFamily: 'Inter, sans-serif' }}>
                 <thead>
-                  <tr className="border-b text-left text-neutral-500 dark:text-muted-foreground text-xs uppercase tracking-wider">
+                  <tr className="border-b text-left text-neutral-500 text-xs uppercase tracking-wider">
                     <th className="py-3 px-3 w-10" />
                     <th className="py-3 px-3">Logo</th>
                     <th className="py-3 px-3">Name</th>
@@ -510,11 +510,11 @@ export default function AdminPartnersLogosPage() {
                       onDragStart={() => onDragStart(index)}
                       onDragOver={(e) => onDragOver(e, index)}
                       onDrop={() => onDrop(index)}
-                      className={`border-b border-neutral-100 dark:border-border ${
-                        dragOverIndex === index ? 'bg-neutral-50 dark:bg-muted' : ''
+                      className={`border-b border-neutral-100 ${
+                        dragOverIndex === index ? 'bg-neutral-50' : ''
                       }`}
                     >
-                      <td className="py-3 px-3 text-neutral-400 dark:text-muted-foreground cursor-grab">
+                      <td className="py-3 px-3 text-neutral-400 cursor-grab">
                         <GripVertical className="w-4 h-4" />
                       </td>
                       <td className="py-3 px-3">
@@ -525,10 +525,10 @@ export default function AdminPartnersLogosPage() {
                             className="h-12 w-12 object-contain border rounded p-0.5"
                           />
                         ) : (
-                          <span className="text-xs text-neutral-400 dark:text-muted-foreground">—</span>
+                          <span className="text-xs text-neutral-400">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-3 font-medium text-neutral-900 dark:text-foreground">{partner.name}</td>
+                      <td className="py-3 px-3 font-medium text-neutral-900">{partner.name}</td>
                       <td className="py-3 px-3">{typeLabel(partner.type)}</td>
                       <td className="py-3 px-3 max-w-[180px]">
                         {partner.websiteURL ? (
@@ -536,19 +536,19 @@ export default function AdminPartnersLogosPage() {
                             href={partner.websiteURL}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-neutral-600 dark:text-muted-foreground underline truncate block"
+                            className="text-neutral-600 underline truncate block"
                           >
                             {partner.websiteURL.replace(/^https?:\/\//, '')}
                           </a>
                         ) : (
-                          <span className="text-neutral-400 dark:text-muted-foreground">—</span>
+                          <span className="text-neutral-400">—</span>
                         )}
                       </td>
                       <td className="py-3 px-3">
                         <button
                           type="button"
                           onClick={() => toggleActive(partner)}
-                          className={`px-3 rounded text-xs font-semibold ${ partner.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 dark:bg-muted text-neutral-600 dark:text-muted-foreground' }`}
+                          className={`px-3 rounded text-xs font-semibold ${ partner.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600' }`}
                         >
                           {partner.isActive ? 'Active' : 'Hidden'}
                         </button>
@@ -599,25 +599,25 @@ export default function AdminPartnersLogosPage() {
             aria-label="Close"
             onClick={closeModal}
           />
-          <div className="relative bg-white dark:bg-card rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6">
+          <div className="relative bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6">
             <button
               type="button"
               onClick={closeModal}
-              className="absolute top-3 right-3 min-w-[44px] inline-flex items-center justify-center text-neutral-500 dark:text-muted-foreground"
+              className="absolute top-3 right-3 min-w-[44px] inline-flex items-center justify-center text-neutral-500"
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
             <h2
               id="partner-modal-title"
-              className="text-2xl text-neutral-900 dark:text-foreground mb-4 pr-10"
+              className="text-2xl text-neutral-900 mb-4 pr-10"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               {editingId ? 'Edit Partner' : 'Add Partner'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                   Partner Name *
                 </label>
                 <input
@@ -625,15 +625,15 @@ export default function AdminPartnersLogosPage() {
                   value={form.name}
                   onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                   required
-                  className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+                  className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                   Logo upload {editingId ? '' : '*'}
                 </label>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <label className="h-7 min-h-0 inline-flex items-center justify-center gap-2 px-4 border border-neutral-300 dark:border-border rounded cursor-pointer hover:bg-neutral-50 bg-white dark:bg-card text-black dark:text-foreground text-sm font-medium">
+                  <label className="h-7 min-h-0 inline-flex items-center justify-center gap-2 px-4 border border-neutral-300 rounded cursor-pointer hover:bg-neutral-50 bg-white text-black text-sm font-medium">
                     <Upload className="w-4 h-4" />
                     {uploading ? 'Uploading…' : 'Choose logo'}
                     <input
@@ -652,12 +652,12 @@ export default function AdminPartnersLogosPage() {
                     />
                   ) : null}
                 </div>
-                <p className="text-xs text-neutral-400 dark:text-muted-foreground mt-1">
+                <p className="text-xs text-neutral-400 mt-1">
                   Stored at partners/&#123;id&#125;/logo.ext in Firebase Storage
                 </p>
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                   Partner type
                 </label>
                 <select
@@ -665,7 +665,7 @@ export default function AdminPartnersLogosPage() {
                   onChange={(e) =>
                     setForm((p) => ({ ...p, type: e.target.value as PartnerType }))
                   }
-                  className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+                  className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
                 >
                   {PARTNER_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>
@@ -675,7 +675,7 @@ export default function AdminPartnersLogosPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                   Website URL (optional)
                 </label>
                 <input
@@ -683,12 +683,12 @@ export default function AdminPartnersLogosPage() {
                   value={form.websiteURL}
                   onChange={(e) => setForm((p) => ({ ...p, websiteURL: e.target.value }))}
                   placeholder="https://"
-                  className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+                  className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                     Order
                   </label>
                   <input
@@ -697,7 +697,7 @@ export default function AdminPartnersLogosPage() {
                     onChange={(e) =>
                       setForm((p) => ({ ...p, order: parseInt(e.target.value, 10) || 0 }))
                     }
-                    className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+                    className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
                   />
                 </div>
                 <div className="flex items-end">
@@ -723,7 +723,7 @@ export default function AdminPartnersLogosPage() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="min-h-[44px] px-5 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-sm font-semibold"
+                  className="min-h-[44px] px-5 bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
                 >
                   Cancel
                 </button>

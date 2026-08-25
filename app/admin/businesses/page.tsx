@@ -200,7 +200,7 @@ function BusinessesPageInner() {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilter(tab.id)}
-                className={`h-7 min-h-0 px-4 py-2 rounded-lg font-body text-sm font-semibold ${ filter === tab.id ? 'bg-black text-white' : 'bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50' }`}
+                className={`h-7 min-h-0 px-4 py-2 rounded-lg font-body text-sm font-semibold ${ filter === tab.id ? 'bg-black text-white' : 'bg-white text-black border border-[#e4e1da] hover:bg-neutral-50' }`}
               >
                 {tab.label}
               </button>
@@ -210,21 +210,21 @@ function BusinessesPageInner() {
             <Button
               type="button"
               onClick={() => (window.location.href = '/admin/vendor-applications')}
-              className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+              className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
             >
               Vendor applications
             </Button>
             <Button
               type="button"
               onClick={() => (window.location.href = '/admin/contact-submissions?category=partnership')}
-              className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+              className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
             >
               Sponsor inquiries
             </Button>
             <Button
               type="button"
               onClick={() => void fetchBusinesses()}
-              className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+              className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -237,7 +237,7 @@ function BusinessesPageInner() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, category, owner, email…"
-          className="w-full min-h-[44px] px-4 py-2 border border-[#e4e1da] dark:border-border rounded-lg font-body text-sm bg-white dark:bg-card"
+          className="w-full min-h-[44px] px-4 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white"
         />
 
         {message && (
@@ -260,14 +260,14 @@ function BusinessesPageInner() {
         {loading ? (
           <div className="space-y-3 animate-pulse">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-24 bg-neutral-200 dark:bg-muted rounded-lg" />
+              <div key={i} className="h-24 bg-neutral-200 rounded-lg" />
             ))}
           </div>
         ) : businesses.length === 0 ? (
           <Card className="p-10 text-center">
-            <Store className="w-10 h-10 mx-auto text-neutral-400 dark:text-muted-foreground mb-3" />
+            <Store className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
             <p className="font-headline text-xl font-bold mb-1">No businesses found</p>
-            <p className="font-body text-sm text-neutral-600 dark:text-muted-foreground">
+            <p className="font-body text-sm text-neutral-600">
               Pending listing submissions will appear here for approval.
             </p>
           </Card>
@@ -286,7 +286,7 @@ function BusinessesPageInner() {
                   <div className="flex flex-col lg:flex-row lg:items-start gap-4 justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-headline text-xl font-bold text-neutral-900 dark:text-foreground break-words">
+                        <h3 className="font-headline text-xl font-bold text-neutral-900 break-words">
                           {biz.name}
                         </h3>
                         {!biz.isApproved && (
@@ -325,7 +325,7 @@ function BusinessesPageInner() {
                           </span>
                         )}
                       </div>
-                      <p className="font-body text-sm text-neutral-600 dark:text-muted-foreground break-words flex flex-wrap items-center gap-2">
+                      <p className="font-body text-sm text-neutral-600 break-words flex flex-wrap items-center gap-2">
                         {biz.ownerName ? (
                           <AdminUserCell
                             user={{
@@ -340,14 +340,14 @@ function BusinessesPageInner() {
                           [biz.category, biz.ownerName, biz.email].filter(Boolean).join(' · ')
                         )}
                       </p>
-                      <p className="font-body text-xs text-neutral-500 dark:text-muted-foreground">
+                      <p className="font-body text-xs text-neutral-500">
                         Phone: {formatRecordPhoneDisplay(biz.phone)}
                       </p>
-                      <p className="font-body text-xs text-neutral-500 dark:text-muted-foreground">ID: {biz.id}</p>
+                      <p className="font-body text-xs text-neutral-500">ID: {biz.id}</p>
                       {biz.isApproved && biz.referralCode ? (
-                        <p className="font-body text-xs text-neutral-600 dark:text-muted-foreground">
+                        <p className="font-body text-xs text-neutral-600">
                           Referral code:{' '}
-                          <span className="font-mono text-neutral-900 dark:text-foreground">{biz.referralCode}</span>
+                          <span className="font-mono text-neutral-900">{biz.referralCode}</span>
                           {' · '}
                           Rate:{' '}
                           {typeof biz.referralContributionPercent === 'number'
@@ -375,7 +375,7 @@ function BusinessesPageInner() {
                           type="button"
                           disabled={busy}
                           onClick={() => editReferralPercent(biz)}
-                          className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+                          className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         >
                           Referral %
                         </Button>
@@ -384,7 +384,7 @@ function BusinessesPageInner() {
                         type="button"
                         disabled={busy || biz.isVerified}
                         onClick={() => void runAction(biz.id, 'verify')}
-                        className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+                        className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                       >
                         <BadgeCheck className="w-4 h-4 mr-1.5" />
                         Verify
@@ -394,7 +394,7 @@ function BusinessesPageInner() {
                           type="button"
                           disabled={busy}
                           onClick={() => void runAction(biz.id, 'suspend')}
-                          className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+                          className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         >
                           <Ban className="w-4 h-4 mr-1.5" />
                           Suspend
@@ -404,7 +404,7 @@ function BusinessesPageInner() {
                           type="button"
                           disabled={busy}
                           onClick={() => void runAction(biz.id, 'approve')}
-                          className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+                          className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         >
                           Reactivate
                         </Button>
@@ -415,7 +415,7 @@ function BusinessesPageInner() {
                         onClick={() =>
                           void runAction(biz.id, biz.featured ? 'unfeature' : 'feature')
                         }
-                        className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+                        className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                       >
                         <Star className="w-4 h-4 mr-1.5" />
                         {biz.featured ? 'Unfeature' : 'Feature'}
@@ -429,7 +429,7 @@ function BusinessesPageInner() {
                             biz.isSponsor ? 'unmark_sponsor' : 'mark_sponsor'
                           )
                         }
-                        className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50"
+                        className="h-7 min-h-0 bg-white text-black border border-[#e4e1da] hover:bg-neutral-50"
                         title="Blue tick on public directory cards"
                       >
                         <BadgeCheck className="w-4 h-4 mr-1.5 text-[#1D9BF0]" />
@@ -468,7 +468,7 @@ export default function BusinessesPage() {
     <React.Suspense
       fallback={
         <AdminPageLayout title="Businesses" subtitle="Loading…">
-          <p className="text-neutral-500 dark:text-muted-foreground py-12 text-center">Loading businesses…</p>
+          <p className="text-neutral-500 py-12 text-center">Loading businesses…</p>
         </AdminPageLayout>
       }
     >

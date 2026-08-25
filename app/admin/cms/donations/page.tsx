@@ -43,7 +43,7 @@ export default function AdminCmsDonationsPage() {
   const field = (key: keyof DonationsPlatformConfig, label: string, multiline = false) => (
     <div className="space-y-1">
       <label
-        className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground"
+        className="block text-xs uppercase tracking-wider text-neutral-500"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         {label}
@@ -53,7 +53,7 @@ export default function AdminCmsDonationsPage() {
           value={config[key]}
           onChange={(e) => setConfig({ ...config, [key]: e.target.value })}
           rows={4}
-          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
       ) : (
@@ -61,7 +61,7 @@ export default function AdminCmsDonationsPage() {
           type="text"
           value={config[key]}
           onChange={(e) => setConfig({ ...config, [key]: e.target.value })}
-          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
       )}
@@ -91,17 +91,17 @@ export default function AdminCmsDonationsPage() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-card rounded-lg border border-neutral-100 dark:border-border shadow-sm p-4 sm:p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-neutral-100 shadow-sm p-4 sm:p-6 space-y-4">
           <h2 className="text-lg" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
             Payment fallback
           </h2>
           {field('beitAlKhairURL', 'Beit Al Khair payment URL')}
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+          <p className="text-xs text-neutral-500">
             Used when a cause has no assigned charity partner payment link.
           </p>
         </div>
 
-        <div className="bg-white dark:bg-card rounded-lg border border-neutral-100 dark:border-border shadow-sm p-4 sm:p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-neutral-100 shadow-sm p-4 sm:p-6 space-y-4">
           <h2 className="text-lg" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
             Page header
           </h2>
@@ -110,7 +110,7 @@ export default function AdminCmsDonationsPage() {
           {field('pageBody', 'Body', true)}
         </div>
 
-        <div className="bg-white dark:bg-card rounded-lg border border-neutral-100 dark:border-border shadow-sm p-4 sm:p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-neutral-100 shadow-sm p-4 sm:p-6 space-y-4">
           <h2 className="text-lg" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
             Legal partnership block
           </h2>

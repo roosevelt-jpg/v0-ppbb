@@ -248,19 +248,19 @@ export default function AnalyticsPage() {
             <div>
               <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Key Performance Indicators</h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-neutral-200 dark:border-border">
-                  <span style={{ color: 'var(--muted-foreground)' }}>Conversion Rate</span>
-                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>
+                <div className="flex justify-between items-center pb-4 border-b border-neutral-200">
+                  <span style={{ color: '#888888' }}>Conversion Rate</span>
+                  <span style={{ color: '#111111', fontWeight: 600 }}>
                     {analytics.conversionRate || analytics.totalVolunteers > 0 ? Math.round((analytics.totalVolunteers / Math.max(analytics.totalMembers, 1)) * 100) : 0}%
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-neutral-200 dark:border-border">
-                  <span style={{ color: 'var(--muted-foreground)' }}>Monthly Growth</span>
-                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>{analytics.monthlyGrowth || 12}%</span>
+                <div className="flex justify-between items-center pb-4 border-b border-neutral-200">
+                  <span style={{ color: '#888888' }}>Monthly Growth</span>
+                  <span style={{ color: '#111111', fontWeight: 600 }}>{analytics.monthlyGrowth || 12}%</span>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-neutral-200 dark:border-border">
-                  <span style={{ color: 'var(--muted-foreground)' }}>Donation Average</span>
-                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>AED {analytics.totalDonations > 0 ? Math.round(analytics.totalDonations / Math.max(analytics.totalVolunteers, 1)) : 0}</span>
+                <div className="flex justify-between items-center pb-4 border-b border-neutral-200">
+                  <span style={{ color: '#888888' }}>Donation Average</span>
+                  <span style={{ color: '#111111', fontWeight: 600 }}>AED {analytics.totalDonations > 0 ? Math.round(analytics.totalDonations / Math.max(analytics.totalVolunteers, 1)) : 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span style={{ color: 'var(--muted-foreground)' }}>Active Rate</span>

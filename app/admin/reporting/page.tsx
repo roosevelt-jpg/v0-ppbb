@@ -162,7 +162,7 @@ export default function ReportingPage() {
       <div className="space-y-5 min-w-0">
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <Calendar className="w-4 h-4 text-neutral-600 dark:text-muted-foreground shrink-0" />
+            <Calendar className="w-4 h-4 text-neutral-600 shrink-0" />
             <div className="flex flex-wrap gap-1.5">
               {(['week', 'month', 'year', 'all'] as const).map((range) => (
                 <button
@@ -182,7 +182,7 @@ export default function ReportingPage() {
               ))}
             </div>
           </div>
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+          <p className="text-xs text-neutral-500">
             Exports include the Passive Blessings logo on PDF and Word files.
           </p>
         </div>
@@ -216,14 +216,14 @@ export default function ReportingPage() {
 
         {categories.map((category) => (
           <div key={category} className="space-y-2.5">
-            <h2 className="text-base font-bold text-neutral-900 dark:text-foreground font-headline">
+            <h2 className="text-base font-bold text-neutral-900 font-headline">
               {REPORT_CATEGORY_LABELS[category]}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
               {REPORT_DEFINITIONS.filter((r) => r.category === category).map((report) => (
                 <div key={report.type} className={ACTION_CARD}>
-                  <h3 className="font-semibold text-neutral-900 dark:text-foreground">{report.title}</h3>
-                  <p className="text-neutral-600 dark:text-muted-foreground flex-1">{report.description}</p>
+                  <h3 className="font-semibold text-neutral-900">{report.title}</h3>
+                  <p className="text-neutral-600 flex-1">{report.description}</p>
                   <div className="mt-3 flex flex-col gap-1.5">
                     <button
                       type="button"
@@ -244,13 +244,13 @@ export default function ReportingPage() {
         {selectedReport && (
           <div className="admin-modal-overlay p-4">
             <div className="admin-modal-content admin-modal-content--wide max-h-[90vh] w-full">
-              <div className="p-4 sm:p-6 border-b border-neutral-200 dark:border-border flex-shrink-0 flex items-center justify-between gap-4">
+              <div className="p-4 sm:p-6 border-b border-neutral-200 flex-shrink-0 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <h2 className="text-xl sm:text-2xl font-bold font-headline truncate">
                     {reportData?.type || 'Loading report…'}
                   </h2>
                   {reportData?.description ? (
-                    <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">{reportData.description}</p>
+                    <p className="text-sm text-neutral-600 mt-1">{reportData.description}</p>
                   ) : null}
                 </div>
                 <button
@@ -266,8 +266,8 @@ export default function ReportingPage() {
               <div className="p-4 overflow-y-auto flex-1 min-h-0">
                 {reportLoading ? (
                   <div className="animate-pulse space-y-3">
-                    <div className="h-12 bg-neutral-200 dark:bg-muted rounded-lg" />
-                    <div className="h-40 bg-neutral-200 dark:bg-muted rounded-lg" />
+                    <div className="h-12 bg-neutral-200 rounded-lg" />
+                    <div className="h-40 bg-neutral-200 rounded-lg" />
                   </div>
                 ) : reportData ? (
                   <>
@@ -298,20 +298,20 @@ export default function ReportingPage() {
                           ))}
                     </div>
 
-                    <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-3">
+                    <p className="text-sm text-neutral-600 mb-3">
                       Showing {reportData.details.length} record
                       {reportData.details.length === 1 ? '' : 's'} · Range: {reportData.dateRange}
                     </p>
 
-                    <div className="border border-neutral-200 dark:border-border rounded-lg min-w-0">
+                    <div className="border border-neutral-200 rounded-lg min-w-0">
                       <AdminTableScroll>
                         <table className="w-full text-sm min-w-[720px]">
-                          <thead className="bg-neutral-100 dark:bg-muted border-b border-neutral-200 dark:border-border">
+                          <thead className="bg-neutral-100 border-b border-neutral-200">
                             <tr>
                               {reportColumns.map((key) => (
                                 <th
                                   key={key}
-                                  className="px-4 py-3 text-left font-semibold text-neutral-900 dark:text-foreground whitespace-nowrap"
+                                  className="px-4 py-3 text-left font-semibold text-neutral-900 whitespace-nowrap"
                                 >
                                   {key.charAt(0).toUpperCase() + key.slice(1)}
                                 </th>
@@ -323,7 +323,7 @@ export default function ReportingPage() {
                               <tr>
                                 <td
                                   colSpan={reportColumns.length || 1}
-                                  className="px-4 py-8 text-center text-neutral-500 dark:text-muted-foreground"
+                                  className="px-4 py-8 text-center text-neutral-500"
                                 >
                                   No records found for this date range
                                 </td>
@@ -332,12 +332,12 @@ export default function ReportingPage() {
                               reportData.details.map((item, idx) => (
                                 <tr
                                   key={item.id?.toString() || idx}
-                                  className="border-b border-neutral-200 dark:border-border hover:bg-neutral-50"
+                                  className="border-b border-neutral-200 hover:bg-neutral-50"
                                 >
                                   {reportColumns.map((key) => (
                                     <td
                                       key={key}
-                                      className="px-4 py-3 text-neutral-700 dark:text-foreground whitespace-nowrap"
+                                      className="px-4 py-3 text-neutral-700 whitespace-nowrap"
                                     >
                                       {formatReportValue(item[key])}
                                     </td>
@@ -353,14 +353,14 @@ export default function ReportingPage() {
                 ) : reportError ? (
                   <p className="text-red-600">{reportError}</p>
                 ) : (
-                  <p className="text-neutral-600 dark:text-muted-foreground">Failed to load report data.</p>
+                  <p className="text-neutral-600">Failed to load report data.</p>
                 )}
               </div>
 
-              <div className="p-4 sm:p-6 border-t border-neutral-200 dark:border-border flex-shrink-0 flex flex-col gap-3">
+              <div className="p-4 sm:p-6 border-t border-neutral-200 flex-shrink-0 flex flex-col gap-3">
                 {selectedReport ? (
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <p className="text-sm text-neutral-600 dark:text-muted-foreground shrink-0">Export branded report:</p>
+                    <p className="text-sm text-neutral-600 shrink-0">Export branded report:</p>
                     {exportButtons(selectedReport, true)}
                   </div>
                 ) : null}

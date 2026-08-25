@@ -47,7 +47,7 @@ export default function AdminCmsShopPage() {
   ) => (
     <div className="space-y-1">
       <label
-        className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground"
+        className="block text-xs uppercase tracking-wider text-neutral-500"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         {label}
@@ -62,7 +62,7 @@ export default function AdminCmsShopPage() {
             })
           }
           rows={3}
-          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
       ) : (
@@ -75,7 +75,7 @@ export default function AdminCmsShopPage() {
               pageConfig: { ...config.pageConfig, [key]: e.target.value },
             })
           }
-          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
       )}
@@ -105,7 +105,7 @@ export default function AdminCmsShopPage() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-card rounded-lg border border-neutral-100 dark:border-border shadow-sm p-4 sm:p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-neutral-100 shadow-sm p-4 sm:p-6 space-y-4">
           <h2 className="text-lg" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
             Page hero
           </h2>
@@ -113,7 +113,7 @@ export default function AdminCmsShopPage() {
           {field('body', 'Body', true)}
         </div>
 
-        <div className="bg-white dark:bg-card rounded-lg border border-neutral-100 dark:border-border shadow-sm p-4 sm:p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-neutral-100 shadow-sm p-4 sm:p-6 space-y-4">
           <h2 className="text-lg" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
             Donate via purchase banner
           </h2>
@@ -123,7 +123,7 @@ export default function AdminCmsShopPage() {
           {field('donateBannerCTAHref', 'CTA href (e.g. /transparency)')}
         </div>
 
-        <p className="text-sm text-neutral-600 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-sm text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>
           Merch products are managed via the existing business offer form — set Category to{' '}
           <strong>Merchandise</strong> and Status to <strong>Published</strong>.
         </p>

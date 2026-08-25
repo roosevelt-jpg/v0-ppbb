@@ -71,8 +71,8 @@ export function FAQEditor({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white dark:bg-card rounded-t-2xl sm:rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white dark:bg-card border-b border-gray-200 dark:border-border p-4 sm:p-6 flex justify-between items-center z-10">
+      <div className="bg-white rounded-t-2xl sm:rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 flex justify-between items-center z-10">
           <h2 className="text-xl font-bold">{faq?.id ? 'Edit FAQ' : 'New FAQ'}</h2>
           <button
             type="button"
@@ -92,37 +92,37 @@ export function FAQEditor({
           ) : null}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-foreground mb-2">Question</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Question</label>
             <input
               type="text"
               value={formData.question}
               onChange={(e) => handleChange('question', e.target.value)}
               placeholder="Enter FAQ question"
-              className="w-full px-4 py-2 border border-gray-200 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-foreground mb-2">Answer</label>
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-1">Plain text — line breaks are preserved.</p>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Answer</label>
+            <p className="text-xs text-neutral-500 mb-1">Plain text — line breaks are preserved.</p>
             <textarea
               value={formData.answer}
               onChange={(e) => handleChange('answer', e.target.value)}
               placeholder="Enter FAQ answer"
               rows={8}
-              className="w-full px-4 py-2 border border-gray-200 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black whitespace-pre-wrap"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black whitespace-pre-wrap"
               required
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-foreground mb-2">Category</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
               <select
                 value={formData.category}
                 onChange={(e) => handleChange('category', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -133,11 +133,11 @@ export function FAQEditor({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-foreground mb-2">Status</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
               <select
                 value={formData.status}
                 onChange={(e) => handleChange('status', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               >
                 <option value="draft">Draft (hidden)</option>
                 <option value="published">Published (live on /faq)</option>
@@ -145,7 +145,7 @@ export function FAQEditor({
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-border">
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}

@@ -163,12 +163,12 @@ export default function SecurityCenterPage() {
   return (
     <AdminPageLayout title="Security Center" subtitle="System security monitoring and recommendations">
       <div className="space-y-6 min-w-0">
-        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-6 sm:p-8 text-center">
+        <div className="bg-white border border-[#e4e1da] rounded-lg p-6 sm:p-8 text-center">
           <ShieldCheck
             className="h-12 w-12 mx-auto mb-4"
             style={{ color: securityScore > 80 ? '#10b981' : '#f59e0b' }}
           />
-          <p className="text-sm text-neutral-500 dark:text-muted-foreground mb-1">Security Score</p>
+          <p className="text-sm text-neutral-500 mb-1">Security Score</p>
           <p
             className="text-4xl sm:text-5xl font-bold font-headline"
             style={{
@@ -177,14 +177,14 @@ export default function SecurityCenterPage() {
           >
             {loading ? '…' : `${securityScore.toFixed(1)}%`}
           </p>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-3">
+          <p className="text-sm text-neutral-600 mt-3">
             {securityScore > 80
               ? 'System is secure'
               : securityScore > 60
                 ? 'Monitor closely'
                 : 'Review immediately'}
           </p>
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2">
+          <p className="text-xs text-neutral-500 mt-2">
             Checklist progress: {completedCount}/{CHECKLIST_ITEMS.length}
           </p>
         </div>
@@ -209,7 +209,7 @@ export default function SecurityCenterPage() {
 
         {recommendations.length > 0 && (
           <div>
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-foreground mb-3">Security Recommendations</h2>
+            <h2 className="text-base font-semibold text-neutral-900 mb-3">Security Recommendations</h2>
             <div className="space-y-2">
               {recommendations.map((rec) => (
                 <div
@@ -232,7 +232,7 @@ export default function SecurityCenterPage() {
                     >
                       {rec.title}
                     </p>
-                    <p className="text-sm text-neutral-600 dark:text-muted-foreground">{rec.description}</p>
+                    <p className="text-sm text-neutral-600">{rec.description}</p>
                   </div>
                   <button
                     type="button"
@@ -251,12 +251,12 @@ export default function SecurityCenterPage() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-4 sm:p-6">
+        <div className="bg-white border border-[#e4e1da] rounded-lg p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-foreground">Security Checklist</h2>
+            <h2 className="text-base font-semibold text-neutral-900">Security Checklist</h2>
             <Link
               href="/admin/audit-logs"
-              className="text-sm font-medium text-neutral-700 dark:text-foreground underline underline-offset-2"
+              className="text-sm font-medium text-neutral-700 underline underline-offset-2"
             >
               Open Audit Logs →
             </Link>
@@ -280,13 +280,13 @@ export default function SecurityCenterPage() {
                   <span className="min-w-0">
                     <span
                       className={`block text-sm font-medium ${
-                        completed ? 'text-green-700' : 'text-neutral-700 dark:text-foreground'
+                        completed ? 'text-green-700' : 'text-neutral-700'
                       }`}
                     >
                       {check.label}
                       {savingKey === check.key ? '…' : ''}
                     </span>
-                    <span className="block text-xs text-neutral-500 dark:text-muted-foreground mt-0.5">{check.hint}</span>
+                    <span className="block text-xs text-neutral-500 mt-0.5">{check.hint}</span>
                   </span>
                 </label>
               )

@@ -97,7 +97,7 @@ export default function CommunityApprovalsPage() {
       <div className="space-y-6">
         <Link
           href="/admin/communities"
-          className="inline-flex items-center gap-2 text-sm text-neutral-600 dark:text-muted-foreground hover:text-neutral-900"
+          className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to communities
@@ -110,7 +110,7 @@ export default function CommunityApprovalsPage() {
         )}
 
         {loading ? (
-          <p className="text-neutral-500 dark:text-muted-foreground">Loading pending approvals…</p>
+          <p className="text-neutral-500">Loading pending approvals…</p>
         ) : (
           <>
             <section className="space-y-3">
@@ -119,18 +119,18 @@ export default function CommunityApprovalsPage() {
                 Pending communities ({communities.length})
               </h2>
               {communities.length === 0 ? (
-                <p className="text-sm text-neutral-500 dark:text-muted-foreground">No communities awaiting approval.</p>
+                <p className="text-sm text-neutral-500">No communities awaiting approval.</p>
               ) : (
                 <div className="space-y-3">
                   {communities.map((c) => (
                     <div
                       key={c.id}
-                      className="rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+                      className="rounded-lg border border-neutral-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center gap-4"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-neutral-900 dark:text-foreground">{c.name}</p>
-                        <p className="text-sm text-neutral-600 dark:text-muted-foreground line-clamp-2">{c.description}</p>
-                        <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+                        <p className="font-semibold text-neutral-900">{c.name}</p>
+                        <p className="text-sm text-neutral-600 line-clamp-2">{c.description}</p>
+                        <p className="text-xs text-neutral-500 mt-1">
                           {genderRestrictionLabel(c.genderRestriction)} · Business submission
                         </p>
                       </div>
@@ -166,18 +166,18 @@ export default function CommunityApprovalsPage() {
                 Pending groups ({groups.length})
               </h2>
               {groups.length === 0 ? (
-                <p className="text-sm text-neutral-500 dark:text-muted-foreground">No groups awaiting approval.</p>
+                <p className="text-sm text-neutral-500">No groups awaiting approval.</p>
               ) : (
                 <div className="space-y-3">
                   {groups.map((g) => (
                     <div
                       key={`${g.communityId}-${g.id}`}
-                      className="rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+                      className="rounded-lg border border-neutral-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center gap-4"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-neutral-900 dark:text-foreground">{g.name}</p>
-                        <p className="text-sm text-neutral-600 dark:text-muted-foreground line-clamp-2">{g.description}</p>
-                        <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+                        <p className="font-semibold text-neutral-900">{g.name}</p>
+                        <p className="text-sm text-neutral-600 line-clamp-2">{g.description}</p>
+                        <p className="text-xs text-neutral-500 mt-1">
                           {genderRestrictionLabel(g.genderRestriction)} · Community {g.communityId}
                         </p>
                       </div>

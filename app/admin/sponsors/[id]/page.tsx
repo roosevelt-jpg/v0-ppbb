@@ -16,7 +16,7 @@ export default function AdminSponsorDetailRedirectPage() {
   }, [router, id])
 
   return (
-    <div className="p-8 text-center text-sm text-neutral-500 dark:text-muted-foreground">
+    <div className="p-8 text-center text-sm text-neutral-500">
       Redirecting… Sponsors are managed as Business Members.
     </div>
   )

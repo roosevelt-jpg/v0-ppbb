@@ -312,7 +312,7 @@ export default function CharityCasesPage() {
   const legacyCount = cases.filter((c) => c.sourceCollection === 'causes').length
 
   const inputClass =
-    'w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-neutral-900'
+    'w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-neutral-900'
   const btnPrimary =
     'min-h-[44px] bg-black hover:bg-neutral-900 text-white px-4 py-2 rounded text-sm font-semibold'
   const btnSecondary =
@@ -333,9 +333,9 @@ export default function CharityCasesPage() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-card rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100 dark:border-border">
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
           <h2
-            className="text-lg mb-4 text-neutral-900 dark:text-foreground"
+            className="text-lg mb-4 text-neutral-900"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
             Create Cause
@@ -393,7 +393,7 @@ export default function CharityCasesPage() {
               ))}
             </select>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+              <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                 Banner image
               </label>
               <div className="flex flex-wrap items-center gap-2">
@@ -428,7 +428,7 @@ export default function CharityCasesPage() {
           </form>
         </div>
 
-        <div className="bg-white dark:bg-card rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100 dark:border-border">
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-neutral-100">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
             <div>
               <h2
@@ -437,7 +437,7 @@ export default function CharityCasesPage() {
               >
                 All Causes
               </h2>
-              <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1">
+              <p className="text-sm text-neutral-500 mt-1">
                 {cases.length} total · {activeCount} active
                 {legacyCount > 0 ? ` · ${legacyCount} from legacy list` : ''}
               </p>
@@ -464,7 +464,7 @@ export default function CharityCasesPage() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium min-h-[40px] ${
                   filter === tab
                     ? 'bg-black text-white'
-                    : 'bg-white dark:bg-card border border-neutral-300 dark:border-border text-black dark:text-foreground'
+                    : 'bg-white border border-neutral-300 text-black'
                 }`}
               >
                 {tab === 'all'
@@ -481,16 +481,16 @@ export default function CharityCasesPage() {
           {loading ? (
             <div className="space-y-3 animate-pulse">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-neutral-100 dark:bg-muted rounded" />
+                <div key={i} className="h-16 bg-neutral-100 rounded" />
               ))}
             </div>
           ) : filteredCases.length === 0 ? (
             <div className="text-center py-12">
-              <HeartHandshake className="w-10 h-10 text-neutral-300 dark:text-muted-foreground mx-auto mb-3" />
-              <p className="text-neutral-600 dark:text-muted-foreground mb-1">
+              <HeartHandshake className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+              <p className="text-neutral-600 mb-1">
                 {cases.length === 0 ? 'No charity cases yet' : 'No causes in this filter'}
               </p>
-              <p className="text-sm text-neutral-500 dark:text-muted-foreground">
+              <p className="text-sm text-neutral-500">
                 Create a cause above and set status to Active to publish on /donate.
               </p>
             </div>
@@ -501,7 +501,7 @@ export default function CharityCasesPage() {
                 {filteredCases.map((c) => {
                   const pct = progressPercent(c.amountRaised, c.targetAmount)
                   return (
-                    <div key={`${c.sourceCollection}-${c.id}`} className="border border-neutral-200 dark:border-border rounded-lg p-4 space-y-3">
+                    <div key={`${c.sourceCollection}-${c.id}`} className="border border-neutral-200 rounded-lg p-4 space-y-3">
                       <div className="flex gap-3">
                         {c.bannerImage ? (
                           <img
@@ -510,15 +510,15 @@ export default function CharityCasesPage() {
                             className="w-16 h-16 object-cover rounded"
                           />
                         ) : (
-                          <div className="w-16 h-16 bg-neutral-100 dark:bg-muted rounded" />
+                          <div className="w-16 h-16 bg-neutral-100 rounded" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-neutral-900 dark:text-foreground truncate">{c.title}</p>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground uppercase tracking-wide">
+                          <p className="font-semibold text-neutral-900 truncate">{c.title}</p>
+                          <p className="text-xs text-neutral-500 uppercase tracking-wide">
                             {c.category} · {c.status}
                             {c.sourceCollection === 'causes' ? ' · legacy' : ''}
                           </p>
-                          <p className="text-xs text-neutral-600 dark:text-muted-foreground mt-1">
+                          <p className="text-xs text-neutral-600 mt-1">
                             AED {c.amountRaised.toLocaleString()} / {c.targetAmount.toLocaleString()} (
                             {pct}%)
                           </p>
@@ -569,7 +569,7 @@ export default function CharityCasesPage() {
               <div className="hidden md:block admin-table-scroll -mx-1 min-w-0">
                 <table className="w-full text-sm min-w-[720px]">
                   <thead>
-                    <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground border-b">
+                    <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 border-b">
                       <th className="py-3 pr-3">Cause</th>
                       <th className="py-3 pr-3">Category</th>
                       <th className="py-3 pr-3">Progress</th>
@@ -584,7 +584,7 @@ export default function CharityCasesPage() {
                       const created =
                         (c.createdAt as { toDate?: () => Date })?.toDate?.() || null
                       return (
-                        <tr key={`${c.sourceCollection}-${c.id}`} className="border-b border-neutral-100 dark:border-border align-top">
+                        <tr key={`${c.sourceCollection}-${c.id}`} className="border-b border-neutral-100 align-top">
                           <td className="py-3 pr-3">
                             <div className="flex gap-2 items-center">
                               {c.bannerImage ? (
@@ -607,7 +607,7 @@ export default function CharityCasesPage() {
                           <td className="py-3 pr-3">{c.category}</td>
                           <td className="py-3 pr-3">
                             AED {c.amountRaised.toLocaleString()} / {c.targetAmount.toLocaleString()}
-                            <div className="w-28 bg-neutral-200 dark:bg-muted h-1.5 rounded mt-1">
+                            <div className="w-28 bg-neutral-200 h-1.5 rounded mt-1">
                               <div
                                 className="bg-neutral-900 h-1.5 rounded"
                                 style={{ width: `${pct}%` }}
@@ -622,14 +622,14 @@ export default function CharityCasesPage() {
                                   : c.status === 'completed'
                                     ? 'bg-purple-100 text-purple-800'
                                     : c.status === 'archived'
-                                      ? 'bg-neutral-200 dark:bg-muted text-neutral-700 dark:text-foreground'
+                                      ? 'bg-neutral-200 text-neutral-700'
                                       : 'bg-amber-100 text-amber-800'
                               }`}
                             >
                               {c.status}
                             </span>
                           </td>
-                          <td className="py-3 pr-3 text-neutral-500 dark:text-muted-foreground">
+                          <td className="py-3 pr-3 text-neutral-500">
                             {created
                               ? formatDistanceToNow(created, { addSuffix: true })
                               : '—'}
@@ -692,7 +692,7 @@ export default function CharityCasesPage() {
 
       {editing && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white dark:bg-card rounded-t-2xl sm:rounded-lg w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-6">
+          <div className="bg-white rounded-t-2xl sm:rounded-lg w-full max-w-2xl max-h-[92vh] overflow-y-auto p-5 sm:p-6">
             <h2
               className="text-xl mb-4"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
@@ -751,7 +751,7 @@ export default function CharityCasesPage() {
                 ))}
               </select>
               <div className="md:col-span-2">
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                   Banner
                 </label>
                 <input

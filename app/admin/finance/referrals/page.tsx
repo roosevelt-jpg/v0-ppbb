@@ -106,7 +106,7 @@ function statusBadgeClass(status: string): string {
   if (status === 'paid') return 'bg-green-100 text-green-800'
   if (status === 'confirmed') return 'bg-blue-100 text-blue-800'
   if (status === 'pending') return 'bg-amber-100 text-amber-800'
-  return 'bg-neutral-100 dark:bg-muted text-neutral-700 dark:text-foreground'
+  return 'bg-neutral-100 text-neutral-700'
 }
 
 async function getIdToken(): Promise<string | null> {
@@ -403,21 +403,21 @@ export default function FinanceReferralsPage() {
   }
 
   const StatCard = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
-    <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-5 min-w-0">
+    <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-5 min-w-0">
       <p
-        className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+        className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground break-words"
+        className="text-2xl sm:text-3xl text-neutral-900 break-words"
         style={{ fontFamily: 'Cormorant Garamond, serif' }}
       >
         {loading ? '—' : value}
       </p>
       {hint ? (
-        <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <p className="text-xs text-neutral-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
           {hint}
         </p>
       ) : null}
@@ -425,16 +425,16 @@ export default function FinanceReferralsPage() {
   )
 
   const EmptyCharts = () => (
-    <div className="rounded-lg border border-dashed border-[#e4e1da] dark:border-border bg-white dark:bg-card p-8 sm:p-10 text-center">
-      <Share2 className="w-10 h-10 mx-auto text-neutral-400 dark:text-muted-foreground mb-3" />
+    <div className="rounded-lg border border-dashed border-[#e4e1da] bg-white p-8 sm:p-10 text-center">
+      <Share2 className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
       <h2
-        className="text-xl text-neutral-900 dark:text-foreground mb-1"
+        className="text-xl text-neutral-900 mb-1"
         style={{ fontFamily: 'Cormorant Garamond, serif' }}
       >
         No referral conversions yet
       </h2>
       <p
-        className="text-sm text-neutral-500 dark:text-muted-foreground max-w-lg mx-auto"
+        className="text-sm text-neutral-500 max-w-lg mx-auto"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         Attribution and business referral links are live. Charts and totals will populate when a
@@ -449,20 +449,20 @@ export default function FinanceReferralsPage() {
       <div className="space-y-6 w-full min-w-0">
         <div>
           <p
-            className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+            className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Finance
           </p>
           <h1
-            className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground"
+            className="text-2xl sm:text-3xl text-neutral-900"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
             Business Referrals
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
             Take-rate tracking: contribution amounts are money owed{' '}
-            <span className="font-semibold text-neutral-800 dark:text-foreground">to Passive Blessings by businesses</span>
+            <span className="font-semibold text-neutral-800">to Passive Blessings by businesses</span>
             , not payouts owed to businesses.
           </p>
         </div>
@@ -515,19 +515,19 @@ export default function FinanceReferralsPage() {
         {/* Charts + leaderboard */}
         {loading ? (
           <div className="space-y-4 animate-pulse">
-            <div className="h-64 bg-neutral-100 dark:bg-muted rounded-lg" />
+            <div className="h-64 bg-neutral-100 rounded-lg" />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="h-64 bg-neutral-100 dark:bg-muted rounded-lg" />
-              <div className="h-64 bg-neutral-100 dark:bg-muted rounded-lg" />
+              <div className="h-64 bg-neutral-100 rounded-lg" />
+              <div className="h-64 bg-neutral-100 rounded-lg" />
             </div>
           </div>
         ) : referrals.length === 0 ? (
           <EmptyCharts />
         ) : (
           <div className="space-y-4">
-            <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6 min-w-0">
+            <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6 min-w-0">
               <h2
-                className="text-lg sm:text-xl text-neutral-900 dark:text-foreground mb-4"
+                className="text-lg sm:text-xl text-neutral-900 mb-4"
                 style={{ fontFamily: 'Cormorant Garamond, serif' }}
               >
                 Monthly Referral Revenue
@@ -559,15 +559,15 @@ export default function FinanceReferralsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6 min-w-0">
+              <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6 min-w-0">
                 <h2
-                  className="text-lg sm:text-xl text-neutral-900 dark:text-foreground mb-4"
+                  className="text-lg sm:text-xl text-neutral-900 mb-4"
                   style={{ fontFamily: 'Cormorant Garamond, serif' }}
                 >
                   Top 5 by Contribution
                 </h2>
                 {top5Chart.length === 0 ? (
-                  <p className="text-sm text-neutral-500 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <p className="text-sm text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
                     No contributions yet.
                   </p>
                 ) : (
@@ -606,21 +606,21 @@ export default function FinanceReferralsPage() {
                 )}
               </div>
 
-              <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6 min-w-0">
+              <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6 min-w-0">
                 <h2
-                  className="text-lg sm:text-xl text-neutral-900 dark:text-foreground mb-1"
+                  className="text-lg sm:text-xl text-neutral-900 mb-1"
                   style={{ fontFamily: 'Cormorant Garamond, serif' }}
                 >
                   Top Contributing Businesses
                 </h2>
                 <p
-                  className="text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-muted-foreground mb-4"
+                  className="text-xs uppercase tracking-[0.12em] text-neutral-500 mb-4"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   Leaderboard · by contribution to PB
                 </p>
                 {leaderboard.length === 0 ? (
-                  <p className="text-sm text-neutral-500 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <p className="text-sm text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
                     No contributions ranked yet.
                   </p>
                 ) : (
@@ -628,18 +628,18 @@ export default function FinanceReferralsPage() {
                     {leaderboard.map((a, i) => (
                       <li
                         key={a.id}
-                        className="flex items-center gap-3 py-2 border-b border-[#f0eee8] dark:border-border last:border-0 min-w-0"
+                        className="flex items-center gap-3 py-2 border-b border-[#f0eee8] last:border-0 min-w-0"
                       >
-                        <span className="w-6 h-6 shrink-0 rounded-full bg-neutral-100 dark:bg-muted text-neutral-700 dark:text-foreground text-xs font-semibold flex items-center justify-center">
+                        <span className="w-6 h-6 shrink-0 rounded-full bg-neutral-100 text-neutral-700 text-xs font-semibold flex items-center justify-center">
                           {i + 1}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-neutral-900 dark:text-foreground truncate">{a.name}</p>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+                          <p className="text-sm font-medium text-neutral-900 truncate">{a.name}</p>
+                          <p className="text-xs text-neutral-500">
                             {a.conversions} conversion{a.conversions === 1 ? '' : 's'}
                           </p>
                         </div>
-                        <p className="text-sm font-semibold text-neutral-900 dark:text-foreground shrink-0">
+                        <p className="text-sm font-semibold text-neutral-900 shrink-0">
                           {formatAed(a.contributed)}
                         </p>
                       </li>
@@ -650,9 +650,9 @@ export default function FinanceReferralsPage() {
             </div>
 
             {/* Pending payouts summary */}
-            <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-neutral-900 text-white p-4 sm:p-6">
+            <div className="rounded-lg border border-[#e4e1da] bg-neutral-900 text-white p-4 sm:p-6">
               <p
-                className="text-xs uppercase tracking-[0.15em] text-neutral-400 dark:text-muted-foreground mb-1"
+                className="text-xs uppercase tracking-[0.15em] text-neutral-400 mb-1"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Pending contributions owed to Passive Blessings
@@ -663,7 +663,7 @@ export default function FinanceReferralsPage() {
               >
                 {formatAed(stats.pendingContributions)}
               </p>
-              <p className="text-sm text-neutral-400 dark:text-muted-foreground mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <p className="text-sm text-neutral-400 mt-2" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Sum of contributionAmount where status is not paid. This is the platform take-rate
                 businesses owe PB — not money PB owes businesses.
               </p>
@@ -676,12 +676,12 @@ export default function FinanceReferralsPage() {
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-3">
             <div>
               <h2
-                className="text-lg sm:text-xl text-neutral-900 dark:text-foreground"
+                className="text-lg sm:text-xl text-neutral-900"
                 style={{ fontFamily: 'Cormorant Garamond, serif' }}
               >
                 All Referral Businesses
               </h2>
-              <p className="text-sm text-neutral-500 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <p className="text-sm text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Businesses with a referralCode — expand a row for individual conversion records.
               </p>
             </div>
@@ -690,29 +690,29 @@ export default function FinanceReferralsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search business or code…"
-              className="w-full sm:w-64 border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm bg-white dark:bg-card"
+              className="w-full sm:w-64 border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm bg-white"
               style={{ fontFamily: 'Inter, sans-serif' }}
             />
           </div>
 
           {loading ? (
             <div className="space-y-3 animate-pulse">
-              <div className="h-20 bg-neutral-100 dark:bg-muted rounded" />
-              <div className="h-20 bg-neutral-100 dark:bg-muted rounded" />
-              <div className="h-20 bg-neutral-100 dark:bg-muted rounded" />
+              <div className="h-20 bg-neutral-100 rounded" />
+              <div className="h-20 bg-neutral-100 rounded" />
+              <div className="h-20 bg-neutral-100 rounded" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-[#e4e1da] dark:border-border bg-white dark:bg-card p-8 text-center">
-              <Share2 className="w-9 h-9 mx-auto text-neutral-400 dark:text-muted-foreground mb-2" />
+            <div className="rounded-lg border border-dashed border-[#e4e1da] bg-white p-8 text-center">
+              <Share2 className="w-9 h-9 mx-auto text-neutral-400 mb-2" />
               <p
-                className="text-lg text-neutral-900 dark:text-foreground"
+                className="text-lg text-neutral-900"
                 style={{ fontFamily: 'Cormorant Garamond, serif' }}
               >
                 {businesses.length === 0
                   ? 'No businesses with referral codes yet'
                   : 'No matches'}
               </p>
-              <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <p className="text-sm text-neutral-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
                 {businesses.length === 0
                   ? 'Codes are generated when a business is approved.'
                   : 'Try a different search.'}
@@ -727,7 +727,7 @@ export default function FinanceReferralsPage() {
                   return (
                     <div
                       key={a.id}
-                      className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 min-w-0"
+                      className="rounded-lg border border-[#e4e1da] bg-white p-4 min-w-0"
                     >
                       <button
                         type="button"
@@ -740,8 +740,8 @@ export default function FinanceReferralsPage() {
                           <ChevronRight className="w-4 h-4 mt-1 shrink-0" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-neutral-900 dark:text-foreground truncate">{a.name}</p>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground font-mono">{a.referralCode}</p>
+                          <p className="font-semibold text-neutral-900 truncate">{a.name}</p>
+                          <p className="text-xs text-neutral-500 font-mono">{a.referralCode}</p>
                         </div>
                         {a.dominantStatus !== 'none' && (
                           <span
@@ -753,32 +753,32 @@ export default function FinanceReferralsPage() {
                       </button>
                       <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground uppercase tracking-wide">Rate</p>
+                          <p className="text-xs text-neutral-500 uppercase tracking-wide">Rate</p>
                           <p>{a.referralContributionPercent ?? '—'}%</p>
                         </div>
                         <div>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground uppercase tracking-wide">
+                          <p className="text-xs text-neutral-500 uppercase tracking-wide">
                             Conversions
                           </p>
                           <p>{a.conversions}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground uppercase tracking-wide">Revenue</p>
+                          <p className="text-xs text-neutral-500 uppercase tracking-wide">Revenue</p>
                           <p>{formatAed(a.revenue)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-neutral-500 dark:text-muted-foreground uppercase tracking-wide">To PB</p>
+                          <p className="text-xs text-neutral-500 uppercase tracking-wide">To PB</p>
                           <p>{formatAed(a.contributed)}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2">
+                      <p className="text-xs text-neutral-500 mt-2">
                         Status: {a.pending} pending · {a.confirmed} confirmed · {a.paid} paid
                       </p>
                       <div className="flex flex-wrap gap-2 mt-3">
                         <button
                           type="button"
                           onClick={() => setExpandedId(open ? null : a.id)}
-                          className="min-h-[44px] px-3 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-xs font-semibold"
+                          className="min-h-[44px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold"
                         >
                           {open ? 'Hide Detail' : 'View Detail'}
                         </button>
@@ -786,7 +786,7 @@ export default function FinanceReferralsPage() {
                           type="button"
                           disabled={actingId === a.id || a.pending === 0}
                           onClick={() => confirmPending(a.id, a.name)}
-                          className="min-h-[44px] px-3 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-xs font-semibold disabled:opacity-40"
+                          className="min-h-[44px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40"
                         >
                           Confirm Pending
                         </button>
@@ -811,32 +811,32 @@ export default function FinanceReferralsPage() {
               </div>
 
               {/* Desktop table */}
-              <div className="hidden md:block admin-table-scroll rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card min-w-0">
+              <div className="hidden md:block admin-table-scroll rounded-lg border border-[#e4e1da] bg-white min-w-0">
                 <table
                   className="w-full text-sm text-left min-w-[840px]"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
-                  <thead className="bg-neutral-50 dark:bg-muted border-b border-[#e4e1da] dark:border-border">
+                  <thead className="bg-neutral-50 border-b border-[#e4e1da]">
                     <tr>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         Business
                       </th>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         Contrib %
                       </th>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         Conversions
                       </th>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         Revenue
                       </th>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         To PB
                       </th>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         Status
                       </th>
-                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground font-medium">
+                      <th className="px-3 py-3 text-xs uppercase tracking-wide text-neutral-500 font-medium">
                         Actions
                       </th>
                     </tr>
@@ -846,7 +846,7 @@ export default function FinanceReferralsPage() {
                       const open = expandedId === a.id
                       return (
                         <React.Fragment key={a.id}>
-                          <tr className="border-b border-[#f0eee8] dark:border-border align-top">
+                          <tr className="border-b border-[#f0eee8] align-top">
                             <td className="px-3 py-3">
                               <button
                                 type="button"
@@ -859,8 +859,8 @@ export default function FinanceReferralsPage() {
                                   <ChevronRight className="w-4 h-4 shrink-0" />
                                 )}
                                 <span>
-                                  <span className="font-medium text-neutral-900 dark:text-foreground block">{a.name}</span>
-                                  <span className="text-xs text-neutral-500 dark:text-muted-foreground font-mono">
+                                  <span className="font-medium text-neutral-900 block">{a.name}</span>
+                                  <span className="text-xs text-neutral-500 font-mono">
                                     {a.referralCode}
                                   </span>
                                 </span>
@@ -883,7 +883,7 @@ export default function FinanceReferralsPage() {
                                     {a.dominantStatus}
                                   </span>
                                 )}
-                                <span className="text-xs text-neutral-500 dark:text-muted-foreground block w-full mt-0.5">
+                                <span className="text-xs text-neutral-500 block w-full mt-0.5">
                                   {a.pending}p / {a.confirmed}c / {a.paid}paid
                                 </span>
                               </div>
@@ -893,7 +893,7 @@ export default function FinanceReferralsPage() {
                                 <button
                                   type="button"
                                   onClick={() => setExpandedId(open ? null : a.id)}
-                                  className="min-h-[40px] px-3 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-xs font-semibold"
+                                  className="min-h-[40px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold"
                                 >
                                   {open ? 'Hide' : 'View Detail'}
                                 </button>
@@ -901,7 +901,7 @@ export default function FinanceReferralsPage() {
                                   type="button"
                                   disabled={actingId === a.id || a.pending === 0}
                                   onClick={() => confirmPending(a.id, a.name)}
-                                  className="min-h-[40px] px-3 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-xs font-semibold disabled:opacity-40"
+                                  className="min-h-[40px] px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40"
                                 >
                                   Confirm
                                 </button>
@@ -917,7 +917,7 @@ export default function FinanceReferralsPage() {
                             </td>
                           </tr>
                           {open && (
-                            <tr className="bg-neutral-50 dark:bg-muted border-b border-[#e4e1da] dark:border-border">
+                            <tr className="bg-neutral-50 border-b border-[#e4e1da]">
                               <td colSpan={7} className="px-3 py-3">
                                 <DetailList records={a.records} />
                               </td>
@@ -940,7 +940,7 @@ export default function FinanceReferralsPage() {
 function DetailList({ records }: { records: ReferralRow[] }) {
   if (records.length === 0) {
     return (
-      <p className="text-sm text-neutral-500 dark:text-muted-foreground py-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <p className="text-sm text-neutral-500 py-2" style={{ fontFamily: 'Inter, sans-serif' }}>
         No conversion records for this business yet.
       </p>
     )
@@ -950,7 +950,7 @@ function DetailList({ records }: { records: ReferralRow[] }) {
     <div className="mt-2 admin-table-scroll min-w-0" style={{ fontFamily: 'Inter, sans-serif' }}>
       <table className="w-full text-xs sm:text-sm min-w-[640px]">
         <thead>
-          <tr className="text-left text-neutral-500 dark:text-muted-foreground border-b border-[#e4e1da] dark:border-border">
+          <tr className="text-left text-neutral-500 border-b border-[#e4e1da]">
             <th className="py-2 pr-2 font-medium">Type</th>
             <th className="py-2 pr-2 font-medium">Date</th>
             <th className="py-2 pr-2 font-medium">Revenue</th>
@@ -963,13 +963,13 @@ function DetailList({ records }: { records: ReferralRow[] }) {
           {records.map((r) => {
             const href = relatedHref(r)
             return (
-              <tr key={r.id} className="border-b border-[#f0eee8] dark:border-border last:border-0">
+              <tr key={r.id} className="border-b border-[#f0eee8] last:border-0">
                 <td className="py-2 pr-2 capitalize">{r.conversionType}</td>
                 <td className="py-2 pr-2 whitespace-nowrap">{formatDate(asDate(r.createdAt))}</td>
                 <td className="py-2 pr-2 whitespace-nowrap">{formatAed(r.revenueAmount)}</td>
                 <td className="py-2 pr-2 whitespace-nowrap">
                   {formatAed(r.contributionAmount)}
-                  <span className="text-neutral-400 dark:text-muted-foreground ml-1">({r.contributionPercent}%)</span>
+                  <span className="text-neutral-400 ml-1">({r.contributionPercent}%)</span>
                 </td>
                 <td className="py-2 pr-2">
                   <span
@@ -982,13 +982,13 @@ function DetailList({ records }: { records: ReferralRow[] }) {
                   {href && r.relatedDocId ? (
                     <Link
                       href={href}
-                      className="inline-flex items-center gap-1 text-neutral-800 dark:text-foreground underline min-h-[36px]"
+                      className="inline-flex items-center gap-1 text-neutral-800 underline min-h-[36px]"
                     >
                       <span className="font-mono truncate max-w-[140px]">{r.relatedDocId}</span>
                       <ExternalLink className="w-3 h-3 shrink-0" />
                     </Link>
                   ) : r.relatedDocId ? (
-                    <span className="font-mono text-neutral-600 dark:text-muted-foreground">{r.relatedDocId}</span>
+                    <span className="font-mono text-neutral-600">{r.relatedDocId}</span>
                   ) : (
                     '—'
                   )}

@@ -190,8 +190,8 @@ export default function AdminCmsTestimonialsPage() {
     <AdminPageLayout title="Testimonials CMS">
       <div className="space-y-6 w-full min-w-0">
         <div>
-          <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Testimonials</h1>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
+          <h1 className="font-headline text-3xl font-bold text-neutral-900">Testimonials</h1>
+          <p className="text-sm text-neutral-600 mt-1">
             Manage up to {MAX_TESTIMONIALS} text or video testimonials. Section heading is edited on{' '}
             <a href="/admin/cms/homepage" className="underline font-medium">
               Homepage CMS
@@ -324,7 +324,7 @@ export default function AdminCmsTestimonialsPage() {
         <Card className="p-4 sm:p-6 min-w-0">
           <h2 className="font-headline text-xl font-bold mb-4">All testimonials</h2>
           {testimonials.length === 0 ? (
-            <p className="text-sm text-neutral-500 dark:text-muted-foreground">No testimonials yet.</p>
+            <p className="text-sm text-neutral-500">No testimonials yet.</p>
           ) : (
             <div className="admin-table-scroll">
             <table className="w-full min-w-[640px] text-sm">
@@ -347,7 +347,7 @@ export default function AdminCmsTestimonialsPage() {
                       <button
                         type="button"
                         onClick={() => void toggleActive(item)}
-                        className={`px-3 py-2 rounded text-xs font-medium min-w-[44px] ${ item.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 dark:bg-muted text-neutral-600 dark:text-muted-foreground' }`}
+                        className={`px-3 py-2 rounded text-xs font-medium min-w-[44px] ${ item.isActive ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600' }`}
                       >
                         {item.isActive ? 'Active' : 'Hidden'}
                       </button>

@@ -13,7 +13,7 @@ export default function AdminTeamCreateRedirect() {
 
   return (
     <AdminPageLayout title="Team Members">
-      <p className="text-sm text-neutral-600 dark:text-muted-foreground">Redirecting to team management…</p>
+      <p className="text-sm text-neutral-600">Redirecting to team management…</p>
     </AdminPageLayout>
   )
 }

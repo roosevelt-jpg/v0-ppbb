@@ -40,25 +40,25 @@ export default function EventsFinancePage() {
     <AdminPageLayout title="Events Finance">
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card style={{ padding: '20px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Total Revenue</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
+            <p className="text-xs text-gray-600">Total Revenue</p>
             <p className="text-2xl font-bold mt-2">AED {totalRevenue.toFixed(2)}</p>
           </Card>
-          <Card style={{ padding: '20px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">PB Commission</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
+            <p className="text-xs text-gray-600">PB Commission</p>
             <p className="text-2xl font-bold mt-2">AED {totalPBCut.toFixed(2)}</p>
           </Card>
-          <Card style={{ padding: '20px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Business Payout</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
+            <p className="text-xs text-gray-600">Business Payout</p>
             <p className="text-2xl font-bold mt-2">AED {totalBusinessCut.toFixed(2)}</p>
           </Card>
-          <Card style={{ padding: '20px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Pending Payout</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
+            <p className="text-xs text-gray-600">Pending Payout</p>
             <p className="text-2xl font-bold mt-2 text-orange-600">AED {pendingPayout.toFixed(2)}</p>
           </Card>
         </div>
 
-        <Card style={{ padding: '24px' }}>
+        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Events Financial Report</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -68,8 +68,8 @@ export default function EventsFinancePage() {
                   onClick={() => setFilter(f)}
                   style={{
                     padding: '8px 16px',
-                    backgroundColor: filter === f ? 'var(--primary)' : 'var(--muted)',
-                    color: filter === f ? 'var(--primary-foreground)' : 'var(--foreground)',
+                    backgroundColor: filter === f ? '#111111' : '#e4e1da',
+                    color: filter === f ? '#ffffff' : '#111111',
                     border: 'none',
                     borderRadius: '4px',
                     cursor: 'pointer',
@@ -89,7 +89,7 @@ export default function EventsFinancePage() {
             <div className="admin-table-scroll min-w-0">
               <table style={{ width: '100%', minWidth: '640px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                  <tr style={{ borderBottom: '2px solid #e4e1da' }}>
                     <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>Event</th>
                     <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>Revenue</th>
                     <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>PB Cut</th>
@@ -99,7 +99,7 @@ export default function EventsFinancePage() {
                 </thead>
                 <tbody>
                   {events.map(event => (
-                    <tr key={event.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <tr key={event.id} style={{ borderBottom: '1px solid #e4e1da' }}>
                       <td style={{ padding: '12px', fontWeight: 500 }}>{event.title}</td>
                       <td style={{ padding: '12px' }}>AED {event.totalRevenue?.toFixed(2)}</td>
                       <td style={{ padding: '12px' }}>AED {(event.pbRevenue || event.pbCommissionAmount || 0).toFixed(2)}</td>

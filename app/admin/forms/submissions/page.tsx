@@ -84,7 +84,7 @@ export default function FormSubmissionsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600 dark:text-muted-foreground">Loading submissions...</p>
+        <p className="text-gray-600">Loading submissions...</p>
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function FormSubmissionsPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold">{form?.title} - Submissions</h1>
-          <p className="text-gray-600 dark:text-muted-foreground mt-1">Total submissions: {submissions.length}</p>
+          <p className="text-gray-600 mt-1">Total submissions: {submissions.length}</p>
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export default function FormSubmissionsPage() {
 
       <div className="space-y-3">
         {filteredSubmissions.length === 0 ? (
-          <Card className="p-8 text-center text-gray-600 dark:text-muted-foreground">
+          <Card className="p-8 text-center text-gray-600">
             <p>No submissions found.</p>
           </Card>
         ) : (
@@ -140,7 +140,7 @@ export default function FormSubmissionsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold">{submission.userEmail || 'Anonymous'}</p>
-                  <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1">
+                  <p className="text-sm text-gray-600 mt-1">
                     Submitted: {new Date(submission.submittedAt).toLocaleString()}
                   </p>
                   <span

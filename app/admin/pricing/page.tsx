@@ -195,7 +195,7 @@ export default function PricingManagementPage() {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900"></div>
-          <p className="mt-4 text-neutral-600 dark:text-muted-foreground">Loading pricing plans...</p>
+          <p className="mt-4 text-neutral-600">Loading pricing plans...</p>
         </div>
       </div>
     )
@@ -219,10 +219,10 @@ export default function PricingManagementPage() {
         </div>
 
       {showAddForm && (
-        <Card className="p-4 sm:p-6 border border-neutral-200 dark:border-border space-y-4">
+        <Card className="p-4 sm:p-6 border border-neutral-200 space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-headline font-bold">{editingId ? 'Edit Plan' : 'Create New Plan'}</h2>
-            <button onClick={handleCancel} className="text-neutral-500 dark:text-muted-foreground hover:text-neutral-700" aria-label="Close form">
+            <button onClick={handleCancel} className="text-neutral-500 hover:text-neutral-700" aria-label="Close form">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -234,7 +234,7 @@ export default function PricingManagementPage() {
                 type="text"
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
                 placeholder="e.g., Standard, Gold, Platinum"
               />
             </div>
@@ -245,7 +245,7 @@ export default function PricingManagementPage() {
                 type="number"
                 value={formData.price || 0}
                 onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
-                className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
                 placeholder="e.g., 9900 for $99.00"
               />
             </div>
@@ -301,7 +301,7 @@ export default function PricingManagementPage() {
               <textarea
                 value={formData.description || ''}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
                 placeholder="Brief description of this plan"
                 rows={2}
               />
@@ -329,7 +329,7 @@ export default function PricingManagementPage() {
                 type="number"
                 value={formData.order || 0}
                 onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
                 placeholder="Lower numbers appear first"
               />
             </div>
@@ -340,18 +340,18 @@ export default function PricingManagementPage() {
                   type="checkbox"
                   checked={formData.active ?? true}
                   onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                  className="w-4 h-4 rounded border-neutral-300 dark:border-border accent-black"
+                  className="w-4 h-4 rounded border-neutral-300 accent-black"
                 />
                 <span className="text-sm font-medium">Active</span>
               </label>
             </div>
           </div>
 
-          <div className="border-t border-neutral-200 dark:border-border pt-4">
+          <div className="border-t border-neutral-200 pt-4">
             <h3 className="font-semibold mb-3">What&apos;s Included</h3>
             <div className="space-y-2">
               {includedItems.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-neutral-50 dark:bg-muted p-3 rounded-lg gap-2">
+                <div key={idx} className="flex items-center justify-between bg-neutral-50 p-3 rounded-lg gap-2">
                   <span className="text-sm">{item}</span>
                   <button
                     type="button"
@@ -369,7 +369,7 @@ export default function PricingManagementPage() {
                   value={newIncludedItem}
                   onChange={(e) => setNewIncludedItem(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddIncludedItem())}
-                  className="flex-1 border border-neutral-300 dark:border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
+                  className="flex-1 border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900"
                   placeholder="Add a feature or benefit..."
                 />
                 <button
@@ -383,7 +383,7 @@ export default function PricingManagementPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-neutral-200 dark:border-border">
+          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-neutral-200">
             <button
               type="button"
               onClick={handleSavePlan}
@@ -413,7 +413,7 @@ export default function PricingManagementPage() {
             return (
             <Card
               key={plan.id}
-              className="relative flex flex-col p-6 rounded-2xl border border-neutral-200 dark:border-border shadow-sm transition hover:shadow-xl hover:-translate-y-0.5"
+              className="relative flex flex-col p-6 rounded-2xl border border-neutral-200 shadow-sm transition hover:shadow-xl hover:-translate-y-0.5"
               style={{ borderTop: `4px solid ${accent}` }}
             >
               {!plan.active && (
@@ -432,22 +432,22 @@ export default function PricingManagementPage() {
                 <div className="min-w-0">
                   <h3 className="font-headline font-bold text-lg leading-tight truncate">{plan.name}</h3>
                   {plan.description && (
-                    <p className="text-xs text-neutral-500 dark:text-muted-foreground font-body mt-0.5 line-clamp-2">{plan.description}</p>
+                    <p className="text-xs text-neutral-500 font-body mt-0.5 line-clamp-2">{plan.description}</p>
                   )}
                 </div>
               </div>
 
-              <div className="mb-5 pb-5 border-b border-neutral-100 dark:border-border">
+              <div className="mb-5 pb-5 border-b border-neutral-100">
                 <p className="flex items-baseline gap-1.5">
-                  <span className="text-3xl font-headline font-extrabold text-neutral-900 dark:text-foreground">{amount}</span>
-                  <span className="text-sm text-neutral-500 dark:text-muted-foreground font-body">/{period}</span>
+                  <span className="text-3xl font-headline font-extrabold text-neutral-900">{amount}</span>
+                  <span className="text-sm text-neutral-500 font-body">/{period}</span>
                 </p>
               </div>
 
               <div className="flex-1 space-y-2.5 mb-6">
                 {items.length > 0 ? (
                   <>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">
                       What&apos;s Included
                     </p>
                     {items.map((item, idx) => (
@@ -457,16 +457,16 @@ export default function PricingManagementPage() {
                           style={{ color: accent }}
                           strokeWidth={2.5}
                         />
-                        <p className="text-sm text-neutral-700 dark:text-foreground font-body leading-snug">{item}</p>
+                        <p className="text-sm text-neutral-700 font-body leading-snug">{item}</p>
                       </div>
                     ))}
                   </>
                 ) : (
-                  <p className="text-sm text-neutral-400 dark:text-muted-foreground font-body italic">No features listed yet.</p>
+                  <p className="text-sm text-neutral-400 font-body italic">No features listed yet.</p>
                 )}
               </div>
 
-              <div className="flex gap-2 pt-4 border-t border-neutral-100 dark:border-border">
+              <div className="flex gap-2 pt-4 border-t border-neutral-100">
                 <button
                   type="button"
                   onClick={() => handleEditPlan(plan)}
@@ -490,8 +490,8 @@ export default function PricingManagementPage() {
       )}
 
       {!showAddForm && plans.length === 0 && (
-        <Card className="p-12 border border-neutral-200 dark:border-border text-center">
-          <p className="text-neutral-600 dark:text-muted-foreground mb-4">No pricing plans yet. Create your first plan to get started.</p>
+        <Card className="p-12 border border-neutral-200 text-center">
+          <p className="text-neutral-600 mb-4">No pricing plans yet. Create your first plan to get started.</p>
           <button
             onClick={() => setShowAddForm(true)}
             className={`${BUTTON_PRIMARY} inline-flex items-center gap-2`}

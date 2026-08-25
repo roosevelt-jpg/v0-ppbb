@@ -16,11 +16,11 @@ function AuditLogsSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="h-20 bg-neutral-200 dark:bg-muted rounded-lg" />
-        <div className="h-20 bg-neutral-200 dark:bg-muted rounded-lg" />
+        <div className="h-20 bg-neutral-200 rounded-lg" />
+        <div className="h-20 bg-neutral-200 rounded-lg" />
       </div>
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-24 bg-neutral-200 dark:bg-muted rounded-lg" />
+        <div key={i} className="h-24 bg-neutral-200 rounded-lg" />
       ))}
     </div>
   )
@@ -131,26 +131,26 @@ export default function AuditLogsPage() {
   return (
     <div className="w-full max-w-6xl mx-auto">
       <div className="mb-6 sm:mb-8">
-        <p className="font-body text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1">Security</p>
-        <h1 className="font-headline text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-foreground">Audit Logs</h1>
-        <p className="font-body text-sm text-neutral-600 dark:text-muted-foreground mt-1">Complete activity trail of admin actions</p>
+        <p className="font-body text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1">Security</p>
+        <h1 className="font-headline text-2xl sm:text-3xl font-bold text-neutral-900">Audit Logs</h1>
+        <p className="font-body text-sm text-neutral-600 mt-1">Complete activity trail of admin actions</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 min-w-0">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-muted-foreground" />
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
           <input
             type="search"
             placeholder="Search by admin, action, route…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground text-sm font-body"
+            className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-lg bg-white text-neutral-900 text-sm font-body"
           />
         </div>
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="px-4 py-2.5 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-sm font-body min-w-[140px]"
+          className="px-4 py-2.5 border border-neutral-300 rounded-lg bg-white text-sm font-body min-w-[140px]"
         >
           {AUDIT_ACTION_FILTER_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -165,23 +165,23 @@ export default function AuditLogsPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
-        <div className="bg-neutral-50 dark:bg-muted border border-neutral-200 dark:border-border rounded-lg p-4">
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground font-body uppercase tracking-wide">Total Logs</p>
-          <p className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-1">{filteredLogs.length}</p>
+        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+          <p className="text-xs text-neutral-500 font-body uppercase tracking-wide">Total Logs</p>
+          <p className="text-2xl font-bold text-neutral-900 mt-1">{filteredLogs.length}</p>
         </div>
-        <div className="bg-neutral-50 dark:bg-muted border border-neutral-200 dark:border-border rounded-lg p-4">
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground font-body uppercase tracking-wide">Success Rate</p>
+        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+          <p className="text-xs text-neutral-500 font-body uppercase tracking-wide">Success Rate</p>
           <p className="text-2xl font-bold text-green-600 mt-1">{successRate.toFixed(1)}%</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg overflow-hidden">
+      <div className="bg-white border border-neutral-200 rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-6">
             <AuditLogsSkeleton />
           </div>
         ) : filteredLogs.length === 0 ? (
-          <div className="p-8 text-center text-neutral-600 dark:text-muted-foreground font-body text-sm">
+          <div className="p-8 text-center text-neutral-600 font-body text-sm">
             No audit logs found. Actions will appear here as admins use the panel.
           </div>
         ) : (
@@ -189,23 +189,23 @@ export default function AuditLogsPage() {
             {filteredLogs.map((log) => (
               <div
                 key={log.id}
-                className={`border-b border-neutral-200 dark:border-border last:border-b-0 ${
-                  expandedLog === log.id ? 'bg-neutral-50 dark:bg-muted' : 'bg-white dark:bg-card hover:bg-neutral-50'
+                className={`border-b border-neutral-200 last:border-b-0 ${
+                  expandedLog === log.id ? 'bg-neutral-50' : 'bg-white hover:bg-neutral-50'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)}
-                  className="pb-ghost-btn w-full h-auto max-h-none min-h-0 p-4 text-left flex items-start gap-3 text-neutral-900 dark:text-foreground"
+                  className="pb-ghost-btn w-full h-auto max-h-none min-h-0 p-4 text-left flex items-start gap-3 text-neutral-900"
                 >
                   <ChevronDown
-                    className={`h-4 w-4 flex-shrink-0 mt-1 text-neutral-500 dark:text-muted-foreground transition-transform ${
+                    className={`h-4 w-4 flex-shrink-0 mt-1 text-neutral-500 transition-transform ${
                       expandedLog === log.id ? 'rotate-180' : ''
                     }`}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="font-semibold text-neutral-900 dark:text-foreground font-body text-sm sm:text-base">{log.action}</span>
+                      <span className="font-semibold text-neutral-900 font-body text-sm sm:text-base">{log.action}</span>
                       <span
                         className={`text-xs px-2 py-0.5 rounded font-medium ${
                           log.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -213,14 +213,14 @@ export default function AuditLogsPage() {
                       >
                         {log.status}
                       </span>
-                      <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 dark:bg-muted text-neutral-700 dark:text-foreground font-body">
+                      <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 font-body">
                         {log.actionType}
                       </span>
-                      <span className="text-xs text-neutral-500 dark:text-muted-foreground ml-auto font-body whitespace-nowrap">
+                      <span className="text-xs text-neutral-500 ml-auto font-body whitespace-nowrap">
                         {format(new Date(log.timestamp), 'MMM d, yyyy HH:mm:ss')}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-neutral-600 dark:text-muted-foreground font-body truncate">
+                    <p className="text-xs sm:text-sm text-neutral-600 font-body truncate">
                       {log.adminName} ({log.adminRole}) · {log.adminEmail}
                       {log.route ? ` · ${log.route}` : ''}
                       {log.entityName ? ` · ${log.entityName}` : ''}
@@ -229,30 +229,30 @@ export default function AuditLogsPage() {
                 </button>
 
                 {expandedLog === log.id && (
-                  <div className="px-4 pb-4 pt-0 bg-neutral-50 dark:bg-muted border-t border-neutral-100 dark:border-border">
+                  <div className="px-4 pb-4 pt-0 bg-neutral-50 border-t border-neutral-100">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7 text-sm font-body">
                       <div>
-                        <p className="font-semibold text-neutral-900 dark:text-foreground mb-2">Security</p>
-                        <div className="space-y-2 text-neutral-700 dark:text-foreground">
+                        <p className="font-semibold text-neutral-900 mb-2">Security</p>
+                        <div className="space-y-2 text-neutral-700">
                           <div className="flex items-start gap-2">
-                            <Globe className="h-4 w-4 mt-0.5 text-neutral-500 dark:text-muted-foreground flex-shrink-0" />
+                            <Globe className="h-4 w-4 mt-0.5 text-neutral-500 flex-shrink-0" />
                             <span className="font-mono text-xs break-all">{log.ipAddress || '—'}</span>
                           </div>
                           <div className="flex items-start gap-2">
-                            <Monitor className="h-4 w-4 mt-0.5 text-neutral-500 dark:text-muted-foreground flex-shrink-0" />
+                            <Monitor className="h-4 w-4 mt-0.5 text-neutral-500 flex-shrink-0" />
                             <span>
                               {log.deviceBrowser} on {log.deviceOs}
                             </span>
                           </div>
                           <div className="flex items-start gap-2">
-                            <Smartphone className="h-4 w-4 mt-0.5 text-neutral-500 dark:text-muted-foreground flex-shrink-0" />
+                            <Smartphone className="h-4 w-4 mt-0.5 text-neutral-500 flex-shrink-0" />
                             <span className="capitalize">{log.deviceType || 'desktop'}</span>
                           </div>
                         </div>
                       </div>
                       <div>
-                        <p className="font-semibold text-neutral-900 dark:text-foreground mb-2">Context</p>
-                        <dl className="space-y-1 text-neutral-700 dark:text-foreground text-xs sm:text-sm">
+                        <p className="font-semibold text-neutral-900 mb-2">Context</p>
+                        <dl className="space-y-1 text-neutral-700 text-xs sm:text-sm">
                           <div>
                             <dt className="inline font-medium">Entity: </dt>
                             <dd className="inline">{log.entityType}{log.entityId ? ` (${log.entityId})` : ''}</dd>
@@ -260,7 +260,7 @@ export default function AuditLogsPage() {
                           {log.details ? (
                             <div>
                               <dt className="font-medium">Details</dt>
-                              <dd className="mt-1 text-neutral-600 dark:text-muted-foreground">{log.details}</dd>
+                              <dd className="mt-1 text-neutral-600">{log.details}</dd>
                             </div>
                           ) : null}
                           {log.failureReason ? (
@@ -271,8 +271,8 @@ export default function AuditLogsPage() {
                           ) : null}
                           {log.userAgent ? (
                             <div className="mt-2">
-                              <dt className="font-medium text-neutral-500 dark:text-muted-foreground">User agent</dt>
-                              <dd className="font-mono text-[10px] sm:text-xs break-all text-neutral-500 dark:text-muted-foreground">{log.userAgent}</dd>
+                              <dt className="font-medium text-neutral-500">User agent</dt>
+                              <dd className="font-mono text-[10px] sm:text-xs break-all text-neutral-500">{log.userAgent}</dd>
                             </div>
                           ) : null}
                         </dl>

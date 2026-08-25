@@ -101,7 +101,7 @@ export default function EditGroupPage() {
   if (pageLoading) {
     return (
       <AdminPageLayout title="Edit Group">
-        <div className="py-12 text-center text-gray-500 dark:text-muted-foreground">Loading group…</div>
+        <div className="py-12 text-center text-gray-500">Loading group…</div>
       </AdminPageLayout>
     )
   }
@@ -111,7 +111,7 @@ export default function EditGroupPage() {
       <AdminPageLayout title="Edit Group">
         <div className="py-12 text-center">
           <p className="text-red-600 mb-4">{error || 'Group not found'}</p>
-          <Link href={`/admin/communities/${communityId}/groups`} className="text-black dark:text-foreground underline">
+          <Link href={`/admin/communities/${communityId}/groups`} className="text-black underline">
             Back to groups
           </Link>
         </div>
@@ -124,13 +124,13 @@ export default function EditGroupPage() {
       <div className="max-w-2xl space-y-6">
         <Link
           href={`/admin/communities/${communityId}/groups`}
-          className="flex items-center gap-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
         >
           <ChevronLeft size={20} />
           Back to Groups
         </Link>
 
-        <h2 className="text-2xl font-bold text-black dark:text-foreground">Edit Group</h2>
+        <h2 className="text-2xl font-bold text-black">Edit Group</h2>
 
         <AdminGroupForm
           communityId={communityId}

@@ -144,49 +144,49 @@ export default function AdminCmsLearningPage() {
           </div>
         ) : null}
 
-        <Card className="p-6 border border-gray-200 dark:border-border space-y-4">
-          <h2 className="text-lg font-bold text-black dark:text-foreground">Add resource</h2>
-          <p className="text-sm text-gray-600 dark:text-muted-foreground">
+        <Card className="p-6 border border-gray-200 space-y-4">
+          <h2 className="text-lg font-bold text-black">Add resource</h2>
+          <p className="text-sm text-gray-600">
             Spiritual Development buttons map to: <strong>Daily Meditations</strong>,{' '}
             <strong>Community Reflections</strong>, and <strong>Wisdom Articles</strong>.
           </p>
           <form onSubmit={handleAdd} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Title *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
               <input
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Author</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Author</label>
               <input
                 value={form.author}
                 onChange={(e) => setForm({ ...form, author: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 placeholder="Optional author name"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Spiritual section *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Spiritual section *</label>
                 <select
                   value={form.category}
                   onChange={(e) =>
                     setForm({ ...form, category: e.target.value as LearningResourceCategory })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   {SPIRITUAL_CATEGORY_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -197,11 +197,11 @@ export default function AdminCmsLearningPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Format</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value as LearningResourceType })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   {LEARNING_TYPE_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -212,18 +212,18 @@ export default function AdminCmsLearningPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Link URL (YouTube, article, etc.)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Link URL (YouTube, article, etc.)</label>
               <input
                 type="url"
                 value={form.url}
                 onChange={(e) => setForm({ ...form, url: e.target.value })}
                 placeholder="https://..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Or upload file</label>
-              <label className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-border rounded-lg cursor-pointer hover:bg-gray-50">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Or upload file</label>
+              <label className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
                 <Upload size={16} />
                 {uploading ? 'Uploading…' : 'Choose file'}
                 <input
@@ -242,22 +242,22 @@ export default function AdminCmsLearningPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Duration (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duration (optional)</label>
                 <input
                   value={form.duration}
                   onChange={(e) => setForm({ ...form, duration: e.target.value })}
                   placeholder="e.g. 10 min"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-foreground mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
                   value={form.status}
                   onChange={(e) =>
                     setForm({ ...form, status: e.target.value as 'draft' | 'published' })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-border rounded-lg"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="published">Published (visible to members)</option>
                   <option value="draft">Draft</option>
@@ -272,19 +272,19 @@ export default function AdminCmsLearningPage() {
         </Card>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-bold text-black dark:text-foreground">All resources ({resources.length})</h2>
+          <h2 className="text-lg font-bold text-black">All resources ({resources.length})</h2>
           {resources.length === 0 ? (
-            <p className="text-gray-500 dark:text-muted-foreground text-sm">No resources yet. Add meditations, reflections, or articles above.</p>
+            <p className="text-gray-500 text-sm">No resources yet. Add meditations, reflections, or articles above.</p>
           ) : (
             resources.map((resource) => (
-              <Card key={resource.id} className="p-4 border border-gray-200 dark:border-border flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+              <Card key={resource.id} className="p-4 border border-gray-200 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                 <div className="min-w-0">
-                  <p className="font-semibold text-black dark:text-foreground">{resource.title}</p>
-                  <p className="text-xs text-gray-500 dark:text-muted-foreground capitalize mt-1">
+                  <p className="font-semibold text-black">{resource.title}</p>
+                  <p className="text-xs text-gray-500 capitalize mt-1">
                     {resource.category} · {resource.type} · {resource.status}
                   </p>
                   {resource.description ? (
-                    <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1 line-clamp-2">{resource.description}</p>
+                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">{resource.description}</p>
                   ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2 shrink-0">

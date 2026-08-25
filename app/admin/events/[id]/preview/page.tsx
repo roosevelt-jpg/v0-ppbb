@@ -37,7 +37,7 @@ export default function AdminEventPreviewPage() {
   if (loading) {
     return (
       <AdminPageLayout title="Event Preview">
-        <div className="py-12 text-center text-gray-500 dark:text-muted-foreground">Loading preview...</div>
+        <div className="py-12 text-center text-gray-500">Loading preview...</div>
       </AdminPageLayout>
     )
   }
@@ -45,7 +45,7 @@ export default function AdminEventPreviewPage() {
   if (!event) {
     return (
       <AdminPageLayout title="Event Preview">
-        <div className="py-12 text-center text-gray-500 dark:text-muted-foreground">Event not found</div>
+        <div className="py-12 text-center text-gray-500">Event not found</div>
       </AdminPageLayout>
     )
   }
@@ -57,14 +57,14 @@ export default function AdminEventPreviewPage() {
           <button
             type="button"
             onClick={() => router.push('/admin/events')}
-            className="flex items-center gap-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
           >
             <ChevronLeft size={20} />
             Back to Events
           </button>
           <Link
             href={`/admin/events/create?id=${eventId}`}
-            className="h-7 min-h-0 px-4 py-2 bg-white dark:bg-card text-black dark:text-foreground border border-gray-300 dark:border-border rounded-lg text-sm font-medium hover:bg-gray-50 inline-flex items-center"
+            className="h-7 min-h-0 px-4 py-2 bg-white text-black border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 inline-flex items-center"
           >
             Edit Event
           </Link>

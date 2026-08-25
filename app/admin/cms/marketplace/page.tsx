@@ -153,8 +153,8 @@ export default function AdminCmsMarketplacePage() {
       <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Marketplace Page</h1>
-            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
+            <h1 className="font-headline text-3xl font-bold text-neutral-900">Marketplace Page</h1>
+            <p className="text-sm text-neutral-600 mt-1">
               Edit public /marketplace hero, membership, and benefits copy. Business directory
               listing is managed separately.
             </p>
@@ -218,7 +218,7 @@ export default function AdminCmsMarketplacePage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Hero image (beside text)</label>
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-2">
+              <p className="text-xs text-neutral-500 mb-2">
                 Shown beside the first marketplace text block. Falls back to membership image if empty.
               </p>
               {pc.heroImageURL ? (
@@ -262,7 +262,7 @@ export default function AdminCmsMarketplacePage() {
                 className="w-full"
                 placeholder="https://whatsapp.com/channel/..."
               />
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 WhatsApp CTA was removed from the public marketplace per feedback; field kept for
                 legacy config only.
               </p>
@@ -330,12 +330,12 @@ export default function AdminCmsMarketplacePage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Membership image</label>
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-3">
+              <p className="text-xs text-neutral-500 mb-3">
                 Landscape market/bazaar image (4:3). Stored as a Firebase Storage URL only.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
                 <div className="w-full max-w-[24rem] shrink-0">
-                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 dark:border-border aspect-[4/3] bg-neutral-50 dark:bg-muted">
+                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 aspect-[4/3] bg-neutral-50">
                     {pc.membershipImageURL ? (
                       <img
                         src={pc.membershipImageURL}
@@ -343,7 +343,7 @@ export default function AdminCmsMarketplacePage() {
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500 dark:text-muted-foreground">
+                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500">
                         No image yet
                       </div>
                     )}
@@ -386,14 +386,14 @@ export default function AdminCmsMarketplacePage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Benefits</h2>
-              <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
+              <p className="text-sm text-neutral-600 mt-1">
                 Title + description pairs. Reorder with the arrows.
               </p>
             </div>
             <Button
               type="button"
               onClick={addBenefit}
-              className="h-7 min-h-0 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50"
+              className="h-7 min-h-0 bg-white text-black border border-neutral-300 hover:bg-neutral-50"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add benefit
@@ -425,10 +425,10 @@ export default function AdminCmsMarketplacePage() {
             {pc.benefits.map((benefit, index) => (
               <div
                 key={index}
-                className="border border-neutral-200 dark:border-border rounded-lg p-4 space-y-3 bg-neutral-50 dark:bg-muted/50"
+                className="border border-neutral-200 rounded-lg p-4 space-y-3 bg-neutral-50/50"
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <p className="text-sm font-medium text-neutral-700 dark:text-foreground">Benefit {index + 1}</p>
+                  <p className="text-sm font-medium text-neutral-700">Benefit {index + 1}</p>
                   <div className="flex items-center gap-1">
                     <Button
                       type="button"
@@ -436,7 +436,7 @@ export default function AdminCmsMarketplacePage() {
                       size="sm"
                       disabled={index === 0}
                       onClick={() => moveBenefit(index, 'up')}
-                      className="min-h-[40px] bg-white dark:bg-card text-black dark:text-foreground border"
+                      className="min-h-[40px] bg-white text-black border"
                       aria-label="Move up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -447,7 +447,7 @@ export default function AdminCmsMarketplacePage() {
                       size="sm"
                       disabled={index === pc.benefits.length - 1}
                       onClick={() => moveBenefit(index, 'down')}
-                      className="min-h-[40px] bg-white dark:bg-card text-black dark:text-foreground border"
+                      className="min-h-[40px] bg-white text-black border"
                       aria-label="Move down"
                     >
                       <ChevronDown className="w-4 h-4" />

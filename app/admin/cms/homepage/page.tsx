@@ -229,8 +229,8 @@ export default function AdminCmsHomepagePage() {
       <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Homepage</h1>
-            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
+            <h1 className="font-headline text-3xl font-bold text-neutral-900">Homepage</h1>
+            <p className="text-sm text-neutral-600 mt-1">
               Edit all homepage sections (2A–2I). Live sync via Firestore.
             </p>
           </div>
@@ -294,7 +294,7 @@ export default function AdminCmsHomepagePage() {
             </div>
           </div>
 
-          <div className="space-y-4 pt-2 border-t border-neutral-200 dark:border-border">
+          <div className="space-y-4 pt-2 border-t border-neutral-200">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h3 className="font-semibold text-sm">Hero images (slider)</h3>
               <label className={BUTTON_LABEL_COMPACT}>
@@ -387,7 +387,7 @@ export default function AdminCmsHomepagePage() {
             </div>
 
             {config.hero.images.length === 0 ? (
-              <p className="text-sm text-neutral-500 dark:text-muted-foreground">No hero images yet. Add one or more above.</p>
+              <p className="text-sm text-neutral-500">No hero images yet. Add one or more above.</p>
             ) : (
               <div className="space-y-3">
                 {config.hero.images.map((img, i) => (
@@ -399,7 +399,7 @@ export default function AdminCmsHomepagePage() {
                       <img
                         src={img.imageURL}
                         alt=""
-                        className="w-full h-20 object-cover rounded border border-neutral-200 dark:border-border"
+                        className="w-full h-20 object-cover rounded border border-neutral-200"
                       />
                     </div>
                     <div className="md:col-span-7">
@@ -547,7 +547,7 @@ export default function AdminCmsHomepagePage() {
         {/* 2C Marquee settings */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Partners marquee (2C)</h2>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             Partner logos are managed at{' '}
             <a href="/admin/partners" className="underline font-medium">
               /admin/partners
@@ -793,7 +793,7 @@ export default function AdminCmsHomepagePage() {
         {/* 2F Events section */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Upcoming Events (2F)</h2>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             Event cards are loaded from the <code className="text-xs">events</code> collection (published,
             future dates). Configure section labels here.
           </p>
@@ -978,7 +978,7 @@ export default function AdminCmsHomepagePage() {
                     className="w-full"
                     placeholder="/path or __whatsapp__"
                   />
-                  <p className="text-[10px] text-neutral-500 dark:text-muted-foreground mt-1">
+                  <p className="text-[10px] text-neutral-500 mt-1">
                     Use <code>__whatsapp__</code> (or label “Join Our Whatsapp”) to open the Global
                     Settings WhatsApp channel URL.
                   </p>
@@ -1012,7 +1012,7 @@ export default function AdminCmsHomepagePage() {
         {/* Horizontal advertising strip */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Advertising banner</h2>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             Full-width horizontal promo under the hero (image or GIF). Used for paid business
             advertising placements.
           </p>
@@ -1091,7 +1091,7 @@ export default function AdminCmsHomepagePage() {
         {/* 2H Social feeds */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Social Feeds (2H)</h2>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             Control homepage display for social feeds. YouTube Channel ID, API key, and video fetch
             live at{' '}
             <a href="/admin/youtube-config" className="underline font-medium">
@@ -1159,7 +1159,7 @@ export default function AdminCmsHomepagePage() {
                 />
               </div>
             </div>
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+            <p className="text-xs text-neutral-500">
               Video source data comes from the existing YouTube config page — not duplicated here.
             </p>
           </div>
@@ -1250,7 +1250,7 @@ export default function AdminCmsHomepagePage() {
         {/* 2I Testimonials heading */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Testimonials (2I)</h2>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             Testimonial content is managed at{' '}
             <a href="/admin/cms/testimonials" className="underline font-medium">
               /admin/cms/testimonials

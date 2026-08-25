@@ -95,7 +95,7 @@ export default function IntegrationAnalyticsPage() {
           <select
             value={selectedService}
             onChange={(e) => setSelectedService(e.target.value)}
-            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg text-sm bg-white dark:bg-card"
+            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg text-sm bg-white"
           >
             {services.map((s) => (
               <option key={s.id} value={s.id}>
@@ -107,7 +107,7 @@ export default function IntegrationAnalyticsPage() {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(Number(e.target.value))}
-            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg text-sm bg-white dark:bg-card"
+            className="w-full sm:w-auto min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg text-sm bg-white"
           >
             <option value={1}>Last 1 hour</option>
             <option value={6}>Last 6 hours</option>
@@ -118,8 +118,8 @@ export default function IntegrationAnalyticsPage() {
         </div>
 
         {service ? (
-          <p className="text-sm text-neutral-500 dark:text-muted-foreground">
-            Monitoring <span className="font-medium text-neutral-800 dark:text-foreground">{service.name}</span>
+          <p className="text-sm text-neutral-500">
+            Monitoring <span className="font-medium text-neutral-800">{service.name}</span>
           </p>
         ) : null}
 
@@ -147,14 +147,14 @@ export default function IntegrationAnalyticsPage() {
                   >
                     {alert.message}
                   </p>
-                  <p className="text-xs text-neutral-600 dark:text-muted-foreground mt-0.5">
+                  <p className="text-xs text-neutral-600 mt-0.5">
                     {format(new Date(alert.timestamp), 'MMM dd, yyyy HH:mm')}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => void handleResolveAlert(alert.id)}
-                  className="p-2 rounded bg-white dark:bg-card text-neutral-500 dark:text-muted-foreground hover:text-neutral-800 min-w-[44px] flex items-center justify-center"
+                  className="p-2 rounded bg-white text-neutral-500 hover:text-neutral-800 min-w-[44px] flex items-center justify-center"
                   aria-label="Dismiss alert"
                 >
                   <X className="h-4 w-4" />
@@ -165,47 +165,47 @@ export default function IntegrationAnalyticsPage() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-5">
-            <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-1">Total Calls</p>
-            <p className="text-3xl font-bold text-neutral-900 dark:text-foreground">{stats.totalCalls}</p>
+          <div className="bg-white border border-[#e4e1da] rounded-lg p-5">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Total Calls</p>
+            <p className="text-3xl font-bold text-neutral-900">{stats.totalCalls}</p>
             <p className="text-sm text-emerald-600 mt-2 inline-flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
               {stats.successfulCalls} successful
             </p>
           </div>
 
-          <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-5">
-            <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-1">Success Rate</p>
-            <p className="text-3xl font-bold text-neutral-900 dark:text-foreground">{stats.successRate.toFixed(1)}%</p>
+          <div className="bg-white border border-[#e4e1da] rounded-lg p-5">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Success Rate</p>
+            <p className="text-3xl font-bold text-neutral-900">{stats.successRate.toFixed(1)}%</p>
             <p className="text-sm text-red-500 mt-2">{stats.failedCalls} failed</p>
           </div>
 
-          <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg p-5">
-            <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-1">Avg Response Time</p>
-            <p className="text-3xl font-bold text-neutral-900 dark:text-foreground">{stats.avgResponseTime.toFixed(0)}ms</p>
-            <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-2 inline-flex items-center gap-1">
+          <div className="bg-white border border-[#e4e1da] rounded-lg p-5">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Avg Response Time</p>
+            <p className="text-3xl font-bold text-neutral-900">{stats.avgResponseTime.toFixed(0)}ms</p>
+            <p className="text-sm text-neutral-500 mt-2 inline-flex items-center gap-1">
               <Zap className="h-3 w-3" />
               {stats.maxResponseTime.toFixed(0)}ms peak
             </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-lg overflow-hidden min-w-0">
-          <div className="px-5 py-4 border-b border-[#e4e1da] dark:border-border">
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-foreground">Recent Activity</h2>
+        <div className="bg-white border border-[#e4e1da] rounded-lg overflow-hidden min-w-0">
+          <div className="px-5 py-4 border-b border-[#e4e1da]">
+            <h2 className="text-base font-semibold text-neutral-900">Recent Activity</h2>
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-neutral-500 dark:text-muted-foreground text-sm">Loading activity…</div>
+            <div className="p-8 text-center text-neutral-500 text-sm">Loading activity…</div>
           ) : usage.length === 0 ? (
-            <div className="p-8 text-center text-neutral-500 dark:text-muted-foreground text-sm">
+            <div className="p-8 text-center text-neutral-500 text-sm">
               No activity in the selected time range. Usage is logged when integrations are called.
             </div>
           ) : (
             <div className="admin-table-scroll min-w-0">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
-                  <tr className="bg-neutral-50 dark:bg-muted border-b border-[#e4e1da] dark:border-border text-left text-neutral-500 dark:text-muted-foreground">
+                  <tr className="bg-neutral-50 border-b border-[#e4e1da] text-left text-neutral-500">
                     <th className="px-4 py-3 font-medium">Timestamp</th>
                     <th className="px-4 py-3 font-medium">Endpoint</th>
                     <th className="px-4 py-3 font-medium">Status</th>
@@ -214,11 +214,11 @@ export default function IntegrationAnalyticsPage() {
                 </thead>
                 <tbody>
                   {usage.slice(0, 20).map((entry) => (
-                    <tr key={entry.id} className="border-b border-[#f0eee8] dark:border-border last:border-0">
-                      <td className="px-4 py-3 text-neutral-600 dark:text-muted-foreground whitespace-nowrap">
+                    <tr key={entry.id} className="border-b border-[#f0eee8] last:border-0">
+                      <td className="px-4 py-3 text-neutral-600 whitespace-nowrap">
                         {format(new Date(entry.timestamp), 'HH:mm:ss')}
                       </td>
-                      <td className="px-4 py-3 text-neutral-600 dark:text-muted-foreground font-mono text-xs">
+                      <td className="px-4 py-3 text-neutral-600 font-mono text-xs">
                         {entry.method} {entry.endpoint}
                       </td>
                       <td className="px-4 py-3">
@@ -232,7 +232,7 @@ export default function IntegrationAnalyticsPage() {
                           {entry.statusCode}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-neutral-600 dark:text-muted-foreground">
+                      <td className="px-4 py-3 text-neutral-600">
                         {Number(entry.responseTime).toFixed(0)}ms
                       </td>
                     </tr>

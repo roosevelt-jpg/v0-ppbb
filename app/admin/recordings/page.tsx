@@ -73,7 +73,7 @@ export default function AdminRecordingsPage() {
     return (
       <AdminPageLayout title="Recordings">
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500 dark:text-muted-foreground">Loading recordings...</p>
+          <p className="text-gray-500">Loading recordings...</p>
         </div>
       </AdminPageLayout>
     )
@@ -97,7 +97,7 @@ export default function AdminRecordingsPage() {
                 {s === 'all' ? 'All' : s === 'published' ? 'Published' : 'Draft'}
               </button>
             ))}
-            <span className="text-neutral-300 dark:text-muted-foreground px-1">|</span>
+            <span className="text-neutral-300 px-1">|</span>
             {(['all', 'audio', 'video'] as const).map((t) => (
               <button
                 key={t}
@@ -118,41 +118,41 @@ export default function AdminRecordingsPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-muted rounded-lg">
-            <p className="text-gray-500 dark:text-muted-foreground">No recordings found. Upload your first recording!</p>
+          <div className="text-center py-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">No recordings found. Upload your first recording!</p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border min-w-0">
+          <div className="bg-white rounded-lg border border-gray-200 min-w-0">
             <div className="admin-table-scroll">
               <table className="w-full min-w-[800px]">
-                <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Title</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Type</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Speaker</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Duration</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Status</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Actions</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Title</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Speaker</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Duration</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filtered.map((recording: any) => (
                     <tr key={recording.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-3 text-sm font-medium text-gray-900 dark:text-foreground">{recording.title}</td>
+                      <td className="px-6 py-3 text-sm font-medium text-gray-900">{recording.title}</td>
                       <td className="px-6 py-3 text-sm">
                         <span
                           className={`px-2 py-1 rounded text-xs font-medium inline-flex items-center gap-1 w-fit ${
                             recording.type === 'audio'
-                              ? 'bg-neutral-100 dark:bg-muted text-neutral-800 dark:text-foreground'
-                              : 'bg-neutral-200 dark:bg-muted text-neutral-900 dark:text-foreground'
+                              ? 'bg-neutral-100 text-neutral-800'
+                              : 'bg-neutral-200 text-neutral-900'
                           }`}
                         >
                           {recording.type === 'audio' ? <Music size={14} /> : <Video size={14} />}
                           {recording.type}
                         </span>
                       </td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">{recording.speaker || '—'}</td>
-                      <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
+                      <td className="px-6 py-3 text-sm text-gray-600">{recording.speaker || '—'}</td>
+                      <td className="px-6 py-3 text-sm text-gray-600">
                         {recording.duration ? `${recording.duration}m` : '—'}
                       </td>
                       <td className="px-6 py-3 text-sm">
@@ -160,7 +160,7 @@ export default function AdminRecordingsPage() {
                           className={`px-2 py-1 rounded text-xs font-medium ${
                             recording.status === 'published'
                               ? 'bg-black text-white'
-                              : 'bg-neutral-100 dark:bg-muted text-neutral-700 dark:text-foreground'
+                              : 'bg-neutral-100 text-neutral-700'
                           }`}
                         >
                           {recording.status || 'draft'}

@@ -114,7 +114,7 @@ export default function EventDetailPage() {
     return (
       <AdminPageLayout title="Event Details">
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500 dark:text-muted-foreground">Loading event...</p>
+          <p className="text-gray-500">Loading event...</p>
         </div>
       </AdminPageLayout>
     )
@@ -124,7 +124,7 @@ export default function EventDetailPage() {
     return (
       <AdminPageLayout title="Event Details">
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-muted-foreground">Event not found</p>
+          <p className="text-gray-500">Event not found</p>
         </div>
       </AdminPageLayout>
     )
@@ -141,7 +141,7 @@ export default function EventDetailPage() {
       case 'changes_requested':
         return 'bg-orange-100 text-orange-800'
       default:
-        return 'bg-gray-100 dark:bg-muted text-gray-800 dark:text-foreground'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -150,7 +150,7 @@ export default function EventDetailPage() {
       <div className="max-w-5xl mx-auto space-y-6">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-foreground mb-4"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
         >
           <ChevronLeft size={20} />
           Back
@@ -158,8 +158,8 @@ export default function EventDetailPage() {
 
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-black dark:text-foreground">{event.title}</h1>
-            <p className="text-gray-600 dark:text-muted-foreground mt-1">{event.description}</p>
+            <h1 className="text-3xl font-bold text-black">{event.title}</h1>
+            <p className="text-gray-600 mt-1">{event.description}</p>
           </div>
           <span className={`px-4 py-2 rounded-full font-medium text-sm ${getStatusColor(event.status)}`}>
             {event.status?.replace(/_/g, ' ').toUpperCase()}
@@ -167,43 +167,43 @@ export default function EventDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card style={{ padding: '16px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Date</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '16px' }}>
+            <p className="text-xs text-gray-600">Date</p>
             <p className="text-sm font-semibold mt-1">{format(new Date(event.startDate), 'MMM dd, yyyy')}</p>
           </Card>
-          <Card style={{ padding: '16px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Category</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '16px' }}>
+            <p className="text-xs text-gray-600">Category</p>
             <p className="text-sm font-semibold mt-1">{event.category}</p>
           </Card>
-          <Card style={{ padding: '16px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Attendees</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '16px' }}>
+            <p className="text-xs text-gray-600">Attendees</p>
             <p className="text-sm font-semibold mt-1">{event.currentAttendees}/{event.maxAttendees || '∞'}</p>
           </Card>
-          <Card style={{ padding: '16px' }}>
-            <p className="text-xs text-gray-600 dark:text-muted-foreground">Revenue</p>
+          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '16px' }}>
+            <p className="text-xs text-gray-600">Revenue</p>
             <p className="text-sm font-semibold mt-1">AED {event.totalRevenue}</p>
           </Card>
         </div>
 
         <div className="grid grid-cols-3 gap-6">
           <div className="col-span-2 space-y-6">
-            <Card style={{ padding: '24px' }}>
+            <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
               <h3 className="text-lg font-semibold mb-4">Location</h3>
               <div className="space-y-2 text-sm">
                 <p><strong>{event.locationName}</strong></p>
-                <p className="text-gray-600 dark:text-muted-foreground">{event.locationAddress}</p>
+                <p className="text-gray-600">{event.locationAddress}</p>
               </div>
             </Card>
 
             {event.speakers && event.speakers.length > 0 && (
-              <Card style={{ padding: '24px' }}>
+              <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
                 <h3 className="text-lg font-semibold mb-4">Speakers</h3>
                 <div className="space-y-3">
                   {event.speakers.map((speaker, idx) => (
-                    <div key={idx} className="pb-3 border-b border-gray-200 dark:border-border last:border-0">
+                    <div key={idx} className="pb-3 border-b border-gray-200 last:border-0">
                       <p className="font-medium">{speaker.name}</p>
-                      {speaker.title && <p className="text-xs text-gray-600 dark:text-muted-foreground">{speaker.title}</p>}
-                      {speaker.bio && <p className="text-sm text-gray-700 dark:text-foreground mt-1">{speaker.bio}</p>}
+                      {speaker.title && <p className="text-xs text-gray-600">{speaker.title}</p>}
+                      {speaker.bio && <p className="text-sm text-gray-700 mt-1">{speaker.bio}</p>}
                     </div>
                   ))}
                 </div>
@@ -211,12 +211,12 @@ export default function EventDetailPage() {
             )}
 
             {event.agenda && event.agenda.length > 0 && (
-              <Card style={{ padding: '24px' }}>
+              <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
                 <h3 className="text-lg font-semibold mb-4">Agenda</h3>
                 <div className="space-y-2">
                   {event.agenda.map((item, idx) => (
                     <div key={idx} className="flex gap-4 text-sm">
-                      <span className="font-mono font-semibold text-gray-700 dark:text-foreground min-w-16">{item.time}</span>
+                      <span className="font-mono font-semibold text-gray-700 min-w-16">{item.time}</span>
                       <span>{item.title}</span>
                     </div>
                   ))}
@@ -240,12 +240,10 @@ export default function EventDetailPage() {
                   style={{
                     width: '100%',
                     padding: '12px',
-                    border: '1px solid var(--border)',
+                    border: '1px solid #e4e1da',
                     borderRadius: '6px',
                     marginBottom: '12px',
                     fontSize: '13px',
-                    backgroundColor: 'var(--input)',
-                    color: 'var(--foreground)',
                   }}
                 />
                 <div className="space-y-2">
@@ -310,12 +308,12 @@ export default function EventDetailPage() {
               </Card>
             )}
 
-            <Card style={{ padding: '24px' }}>
+            <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
               <h3 className="font-semibold mb-4">Info</h3>
               <div className="space-y-2 text-sm">
-                <p><span className="text-gray-600 dark:text-muted-foreground">Created:</span> {format(new Date(event.createdAt), 'MMM dd, yyyy')}</p>
+                <p><span className="text-gray-600">Created:</span> {format(new Date(event.createdAt), 'MMM dd, yyyy')}</p>
                 {event.approvedAt && (
-                  <p><span className="text-gray-600 dark:text-muted-foreground">Approved:</span> {format(new Date(event.approvedAt), 'MMM dd, yyyy')}</p>
+                  <p><span className="text-gray-600">Approved:</span> {format(new Date(event.approvedAt), 'MMM dd, yyyy')}</p>
                 )}
               </div>
             </Card>
@@ -326,8 +324,7 @@ export default function EventDetailPage() {
                 style={{
                   width: '100%',
                   padding: '10px',
-                  backgroundColor: 'var(--muted)',
-                  color: 'var(--foreground)',
+                  backgroundColor: '#e4e1da',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',
@@ -343,8 +340,8 @@ export default function EventDetailPage() {
                 style={{
                   width: '100%',
                   padding: '10px',
-                  backgroundColor: 'var(--primary)',
-                  color: 'var(--primary-foreground)',
+                  backgroundColor: '#111111',
+                  color: '#ffffff',
                   border: 'none',
                   borderRadius: '6px',
                   cursor: 'pointer',

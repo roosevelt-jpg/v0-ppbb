@@ -71,7 +71,7 @@ export default function CommunitiesPage() {
               placeholder="Search communities..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-border rounded-lg bg-white dark:bg-card text-black dark:text-foreground placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-black placeholder-gray-500"
             />
           </div>
           <Link
@@ -104,7 +104,7 @@ export default function CommunitiesPage() {
               className={`px-4 py-2 rounded-full whitespace-nowrap transition text-sm font-medium ${
                 categoryFilter === cat
                   ? 'bg-black text-white'
-                  : 'bg-gray-200 dark:bg-muted text-black dark:text-foreground hover:bg-gray-300'
+                  : 'bg-gray-200 text-black hover:bg-gray-300'
               }`}
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -114,9 +114,9 @@ export default function CommunitiesPage() {
 
         {/* Communities List */}
         {loading ? (
-          <div className="text-center py-12 text-gray-600 dark:text-muted-foreground">Loading communities...</div>
+          <div className="text-center py-12 text-gray-600">Loading communities...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-600 dark:text-muted-foreground">No communities found</div>
+          <div className="text-center py-12 text-gray-600">No communities found</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(community => {
@@ -128,20 +128,20 @@ export default function CommunitiesPage() {
               return (
               <div
                 key={community.id}
-                className="border border-gray-200 dark:border-border rounded-lg p-4 hover:border-gray-300 transition flex flex-col min-h-[160px]"
+                className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition flex flex-col min-h-[160px]"
               >
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-bold text-black dark:text-foreground mb-1 line-clamp-2">{community.name}</h3>
+                  <h3 className="text-base font-bold text-black mb-1 line-clamp-2">{community.name}</h3>
                   <div className="flex flex-wrap gap-1.5 mb-2">
-                    <span className="inline-block px-2 py-0.5 bg-gray-100 dark:bg-muted text-gray-700 dark:text-foreground rounded text-xs font-medium capitalize">
+                    <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs font-medium capitalize">
                       {community.category || 'general'}
                     </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-neutral-100 dark:bg-muted text-neutral-700 dark:text-foreground rounded text-xs font-medium">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded text-xs font-medium">
                       <Users className="w-3 h-3" />
                       {memberCount} {memberCount === 1 ? 'member' : 'members'}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-muted-foreground line-clamp-2 mb-3">
+                  <p className="text-xs text-gray-500 line-clamp-2 mb-3">
                     {community.description || 'No description'}
                   </p>
                 </div>

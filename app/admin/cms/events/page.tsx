@@ -96,8 +96,8 @@ export default function AdminCmsEventsPage() {
       <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Events Page</h1>
-            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
+            <h1 className="font-headline text-3xl font-bold text-neutral-900">Events Page</h1>
+            <p className="text-sm text-neutral-600 mt-1">
               Edit public /events copy and category filter tags (Tech, Education, Social, …). These
               categories power the public filter bar, calendar colours, and event cards. Event
               records are managed at{' '}
@@ -292,7 +292,7 @@ export default function AdminCmsEventsPage() {
 
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Volunteer & ad banners</h2>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
+          <p className="text-sm text-neutral-600">
             Shown on the public /events page beside the lineup (volunteer promo + optional ad strip).
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,7 +355,7 @@ export default function AdminCmsEventsPage() {
 
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Hero photo gallery</h2>
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+          <p className="text-xs text-neutral-500">
             Previous event images shown as a slideshow beside the Events page hero text (max 12).
           </p>
           <div className="flex flex-wrap gap-2">
@@ -415,14 +415,14 @@ export default function AdminCmsEventsPage() {
               e.target.value = ''
             }}
           />
-          <p className="text-xs text-neutral-500 dark:text-muted-foreground">Images are auto-resized before upload.</p>
+          <p className="text-xs text-neutral-500">Images are auto-resized before upload.</p>
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h2 className="font-headline text-xl font-bold">Category filter tags</h2>
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+              <p className="text-xs text-neutral-500 mt-1">
                 These appear on /events as filter buttons (ALL + each tag). Assign one when creating
                 an event so cards, calendar dots, and filters stay in sync.
               </p>
@@ -492,7 +492,7 @@ export default function AdminCmsEventsPage() {
             ))}
           </div>
           {config.filterTabs.length > 1 && (
-            <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+            <p className="text-xs text-neutral-500">
               Live filters:{' '}
               {config.filterTabs.map((t) => t.label).join(' · ')}
             </p>

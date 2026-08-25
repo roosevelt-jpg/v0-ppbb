@@ -223,7 +223,7 @@ export default function BeneficiaryRequestsAdmin() {
       case 'pending':
         return <Clock className="w-4 h-4 text-amber-600" />
       default:
-        return <AlertCircle className="w-4 h-4 text-neutral-400 dark:text-muted-foreground" />
+        return <AlertCircle className="w-4 h-4 text-neutral-400" />
     }
   }
 
@@ -244,7 +244,7 @@ export default function BeneficiaryRequestsAdmin() {
         )}
 
         {usingFirestoreFallback && !error && (
-          <div className="bg-neutral-50 dark:bg-muted border border-neutral-200 dark:border-border text-neutral-700 dark:text-foreground text-sm rounded p-3">
+          <div className="bg-neutral-50 border border-neutral-200 text-neutral-700 text-sm rounded p-3">
             Showing requests from the database. Document viewing still requires the secure API.
           </div>
         )}
@@ -266,7 +266,7 @@ export default function BeneficiaryRequestsAdmin() {
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="border border-neutral-300 dark:border-border rounded px-3 py-2 min-h-[36px] text-sm"
+            className="border border-neutral-300 rounded px-3 py-2 min-h-[36px] text-sm"
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
@@ -278,7 +278,7 @@ export default function BeneficiaryRequestsAdmin() {
           <select
             value={filters.emergencyLevel}
             onChange={(e) => setFilters({ ...filters, emergencyLevel: e.target.value })}
-            className="border border-neutral-300 dark:border-border rounded px-3 py-2 min-h-[36px] text-sm"
+            className="border border-neutral-300 rounded px-3 py-2 min-h-[36px] text-sm"
           >
             <option value="">All emergency levels</option>
             <option value="low">Low</option>
@@ -291,18 +291,18 @@ export default function BeneficiaryRequestsAdmin() {
           </button>
         </div>
 
-        <div className="bg-white dark:bg-card rounded-lg border border-neutral-100 dark:border-border shadow-sm p-4 sm:p-6">
+        <div className="bg-white rounded-lg border border-neutral-100 shadow-sm p-4 sm:p-6">
           {loading ? (
             <div className="space-y-3 animate-pulse">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-14 bg-neutral-100 dark:bg-muted rounded" />
+                <div key={i} className="h-14 bg-neutral-100 rounded" />
               ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12">
-              <Inbox className="w-10 h-10 text-neutral-300 dark:text-muted-foreground mx-auto mb-3" />
-              <p className="text-neutral-600 dark:text-muted-foreground">No beneficiary requests</p>
-              <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1">
+              <Inbox className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+              <p className="text-neutral-600">No beneficiary requests</p>
+              <p className="text-sm text-neutral-500 mt-1">
                 Submissions from the charity support form will appear here.
               </p>
             </div>
@@ -312,16 +312,16 @@ export default function BeneficiaryRequestsAdmin() {
                 {filtered.map((r) => {
                   const when = toDate(r.submissionDate || r.createdAt)
                   return (
-                    <div key={r.id} className="border border-neutral-200 dark:border-border rounded-lg p-4 space-y-2">
+                    <div key={r.id} className="border border-neutral-200 rounded-lg p-4 space-y-2">
                       <div className="flex items-center gap-2">
                         {statusIcon(r.status)}
                         <span className="font-semibold">{r.fullName || r.name || '—'}</span>
                       </div>
-                      <p className="text-sm text-neutral-600 dark:text-muted-foreground">{r.email || '—'}</p>
-                      <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">
+                      <p className="text-sm text-neutral-600">{r.email || '—'}</p>
+                      <p className="text-xs uppercase tracking-wide text-neutral-500">
                         {r.emergencyLevel || '—'} · {r.status || '—'}
                       </p>
-                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+                      <p className="text-xs text-neutral-500">
                         {when ? when.toLocaleDateString() : '—'}
                       </p>
                       <div className="flex flex-wrap gap-2 pt-1">
@@ -354,7 +354,7 @@ export default function BeneficiaryRequestsAdmin() {
               <div className="hidden md:block admin-table-scroll min-w-0">
                 <table className="w-full text-sm min-w-[700px]">
                   <thead>
-                    <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground border-b">
+                    <tr className="text-left text-xs uppercase tracking-wider text-neutral-500 border-b">
                       <th className="py-3 pr-3">Name</th>
                       <th className="py-3 pr-3">Email</th>
                       <th className="py-3 pr-3">Emergency</th>
@@ -367,7 +367,7 @@ export default function BeneficiaryRequestsAdmin() {
                     {filtered.map((r) => {
                       const when = toDate(r.submissionDate || r.createdAt)
                       return (
-                        <tr key={r.id} className="border-b border-neutral-100 dark:border-border">
+                        <tr key={r.id} className="border-b border-neutral-100">
                           <td className="py-3 pr-3 font-medium">{r.fullName || r.name || '—'}</td>
                           <td className="py-3 pr-3">{r.email || '—'}</td>
                           <td className="py-3 pr-3 capitalize">{r.emergencyLevel || '—'}</td>
@@ -380,7 +380,7 @@ export default function BeneficiaryRequestsAdmin() {
                               </button>
                               <button
                                 type="button"
-                                className="underline text-neutral-900 dark:text-foreground"
+                                className="underline text-neutral-900"
                                 disabled={acting}
                                 onClick={() => void runAction(r.id, 'accept')}
                               >
@@ -452,37 +452,37 @@ export default function BeneficiaryRequestsAdmin() {
           <>
             <dl className="space-y-2 text-sm">
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs">Name</dt>
+                <dt className="text-neutral-500 text-xs">Name</dt>
                 <dd className="font-medium">{selected.fullName || selected.name}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs">Email</dt>
+                <dt className="text-neutral-500 text-xs">Email</dt>
                 <dd>{selected.email}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs">Phone</dt>
+                <dt className="text-neutral-500 text-xs">Phone</dt>
                 <dd>{selected.phoneNumber || '—'}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs">Emergency</dt>
+                <dt className="text-neutral-500 text-xs">Emergency</dt>
                 <dd className="capitalize">{selected.emergencyLevel}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs">Status</dt>
+                <dt className="text-neutral-500 text-xs">Status</dt>
                 <dd className="capitalize">{selected.status}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs">Category</dt>
+                <dt className="text-neutral-500 text-xs">Category</dt>
                 <dd>{selected.reasonCategory || '—'}</dd>
               </div>
             </dl>
 
-            <div className="border-t border-neutral-200 dark:border-border mt-3 pt-3">
-              <p className="text-[10px] uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-2">
+            <div className="border-t border-neutral-200 mt-3 pt-3">
+              <p className="text-[10px] uppercase tracking-wider text-neutral-500 mb-2">
                 Sensitive documents
               </p>
               {!canViewDocs ? (
-                <div className="flex gap-2 items-start text-sm text-neutral-600 dark:text-muted-foreground bg-neutral-50 dark:bg-muted p-2.5 rounded">
+                <div className="flex gap-2 items-start text-sm text-neutral-600 bg-neutral-50 p-2.5 rounded">
                   <FileWarning className="w-4 h-4 shrink-0 text-amber-600" />
                   <span>
                     Documents are hidden for your role. Super admin, admin, and welfare-tier
@@ -509,7 +509,7 @@ export default function BeneficiaryRequestsAdmin() {
                   const present = docs.filter(([key]) => available.has(key))
                   if (present.length === 0) {
                     return (
-                      <p className="text-sm text-neutral-500 dark:text-muted-foreground bg-neutral-50 dark:bg-muted rounded p-2.5">
+                      <p className="text-sm text-neutral-500 bg-neutral-50 rounded p-2.5">
                         No uploaded documents were found on this request. If the applicant used
                         the charity form, ask them to resubmit with attachments, or check Storage
                         for this request id.

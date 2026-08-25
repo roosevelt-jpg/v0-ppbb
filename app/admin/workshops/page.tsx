@@ -11,7 +11,7 @@ export default function AdminWorkshopsRedirectPage() {
   }, [router])
 
   return (
-    <div className="p-8 text-sm text-neutral-600 dark:text-muted-foreground">
+    <div className="p-8 text-sm text-neutral-600">
       Workshops are created under Events (use category Workshop). Redirecting…
     </div>
   )

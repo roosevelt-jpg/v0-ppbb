@@ -315,7 +315,7 @@ function AdminMarketplacePageInner() {
       subtitle="Moderate business offers, and list Passive Blessings products for the shop"
     >
       <div className="space-y-6">
-        <div className="rounded-lg border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-muted px-4 py-3 text-sm text-neutral-700 dark:text-foreground">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
           <p>
             <strong>Marketplace</strong> is the community directory of business offers & discounts.
             <strong> PB products</strong> (hoodies, gifts, merch) also live here — use{' '}
@@ -357,11 +357,11 @@ function AdminMarketplacePageInner() {
         {showCreate && section === 'offers' && (
           <form
             onSubmit={createPbProduct}
-            className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 sm:p-6 space-y-4"
+            className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 space-y-4"
           >
             <div>
-              <h3 className="font-semibold text-neutral-900 dark:text-foreground">New Passive Blessings product</h3>
-              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+              <h3 className="font-semibold text-neutral-900">New Passive Blessings product</h3>
+              <p className="text-xs text-neutral-500 mt-1">
                 Seller will be listed as Passive Blessings. Merchandise items show on the public shop.
               </p>
             </div>
@@ -453,8 +453,8 @@ function AdminMarketplacePageInner() {
                 />
               </label>
               <div className="text-sm sm:col-span-2 space-y-2">
-                <span className="font-medium text-neutral-800 dark:text-foreground">Product image</span>
-                <p className="text-xs text-neutral-500 dark:text-muted-foreground">
+                <span className="font-medium text-neutral-800">Product image</span>
+                <p className="text-xs text-neutral-500">
                   Upload an image directly (not a link). JPG, PNG, WebP, or GIF up to 10 MB.
                 </p>
                 {createForm.imageURL ? (
@@ -463,7 +463,7 @@ function AdminMarketplacePageInner() {
                     <img
                       src={createForm.imageURL}
                       alt="Product preview"
-                      className="w-full aspect-square object-cover rounded-lg border border-neutral-200 dark:border-border"
+                      className="w-full aspect-square object-cover rounded-lg border border-neutral-200"
                     />
                     <button
                       type="button"
@@ -535,10 +535,10 @@ function AdminMarketplacePageInner() {
         </div>
 
         {loading && section === 'offers' ? (
-          <p className="text-gray-500 dark:text-muted-foreground py-12 text-center">Loading marketplace listings…</p>
+          <p className="text-gray-500 py-12 text-center">Loading marketplace listings…</p>
         ) : section === 'discounts' ? (
           filteredDiscounts.length === 0 ? (
-            <p className="text-gray-500 dark:text-muted-foreground py-12 text-center bg-gray-50 dark:bg-muted rounded-lg">No discounts found.</p>
+            <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No discounts found.</p>
           ) : (
             <>
             <div className="md:hidden space-y-3">
@@ -548,14 +548,14 @@ function AdminMarketplacePageInner() {
                   <div
                     key={row.id}
                     id={`marketplace-row-${row.id}`}
-                    className={`bg-white dark:bg-card border rounded-lg p-4 space-y-2 ${
+                    className={`bg-white border rounded-lg p-4 space-y-2 ${
                       highlightId === row.id
                         ? 'border-black ring-2 ring-black/20'
-                        : 'border-gray-200 dark:border-border'
+                        : 'border-gray-200'
                     }`}
                   >
                     <p className="font-semibold text-sm break-words">{row.title}</p>
-                    <p className="text-xs text-gray-600 dark:text-muted-foreground break-all">{row.businessId}</p>
+                    <p className="text-xs text-gray-600 break-all">{row.businessId}</p>
                     <p className="text-sm">
                       {row.discountType === 'fixed'
                         ? `AED ${row.discountValue ?? 0}`
@@ -589,9 +589,9 @@ function AdminMarketplacePageInner() {
                 )
               })}
             </div>
-            <div className="hidden md:block bg-white dark:bg-card border border-gray-200 dark:border-border rounded-lg overflow-x-auto">
+            <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-x-auto">
               <table className="w-full min-w-[720px]">
-                <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Title</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Business</th>
@@ -608,11 +608,11 @@ function AdminMarketplacePageInner() {
                         key={row.id}
                         id={`marketplace-row-${row.id}`}
                         className={`hover:bg-gray-50 ${
-                          highlightId === row.id ? 'bg-neutral-100 dark:bg-muted ring-2 ring-inset ring-black/30' : ''
+                          highlightId === row.id ? 'bg-neutral-100 ring-2 ring-inset ring-black/30' : ''
                         }`}
                       >
                         <td className="px-4 py-3 text-sm font-medium">{row.title}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-muted-foreground">{row.businessId}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.businessId}</td>
                         <td className="px-4 py-3 text-sm">
                           {row.discountType === 'fixed'
                             ? `AED ${row.discountValue ?? 0}`
@@ -654,7 +654,7 @@ function AdminMarketplacePageInner() {
             </>
           )
         ) : filtered.length === 0 ? (
-          <p className="text-gray-500 dark:text-muted-foreground py-12 text-center bg-gray-50 dark:bg-muted rounded-lg">No listings found.</p>
+          <p className="text-gray-500 py-12 text-center bg-gray-50 rounded-lg">No listings found.</p>
         ) : (
           <>
           <div className="md:hidden space-y-3">
@@ -665,14 +665,14 @@ function AdminMarketplacePageInner() {
                 <div
                   key={offer.id}
                   id={`marketplace-row-${offer.id}`}
-                  className={`bg-white dark:bg-card border rounded-lg p-4 space-y-2 ${
+                  className={`bg-white border rounded-lg p-4 space-y-2 ${
                     highlightId === offer.id
                       ? 'border-black ring-2 ring-black/20'
-                      : 'border-gray-200 dark:border-border'
+                      : 'border-gray-200'
                   }`}
                 >
                   <p className="font-semibold text-sm break-words">{offer.title}</p>
-                  <p className="text-xs text-gray-600 dark:text-muted-foreground">{offer.businessName || offer.businessId}</p>
+                  <p className="text-xs text-gray-600">{offer.businessName || offer.businessId}</p>
                   <p className="text-sm capitalize">
                     {offer.type || offer.category} · {offer.price != null ? `AED ${offer.price}` : '—'} · {status.replace(/_/g, ' ')}
                   </p>
@@ -712,9 +712,9 @@ function AdminMarketplacePageInner() {
               )
             })}
           </div>
-          <div className="hidden md:block bg-white dark:bg-card border border-gray-200 dark:border-border rounded-lg overflow-x-auto">
+          <div className="hidden md:block bg-white border border-gray-200 rounded-lg overflow-x-auto">
             <table className="w-full min-w-[720px]">
-              <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold">Title</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold">Business</th>
@@ -734,17 +734,17 @@ function AdminMarketplacePageInner() {
                       key={offer.id}
                       id={`marketplace-row-${offer.id}`}
                       className={`hover:bg-gray-50 ${
-                        highlightId === offer.id ? 'bg-neutral-100 dark:bg-muted ring-2 ring-inset ring-black/30' : ''
+                        highlightId === offer.id ? 'bg-neutral-100 ring-2 ring-inset ring-black/30' : ''
                       }`}
                     >
                       <td className="px-4 py-3 text-sm font-medium">{offer.title}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-muted-foreground">{offer.businessName || offer.businessId}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{offer.businessName || offer.businessId}</td>
                       <td className="px-4 py-3 text-sm capitalize">{offer.type || offer.category}</td>
                       <td className="px-4 py-3 text-sm">
                         {offer.price != null ? `AED ${offer.price}` : '—'}
                       </td>
                       <td className="px-4 py-3 text-sm capitalize">{status.replace(/_/g, ' ')}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-muted-foreground">{formatDate(offer.createdAt)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{formatDate(offer.createdAt)}</td>
                       <td className="px-4 py-3 text-right">
                         <div className={`${ACTION_ROW} justify-end`}>
                           {isPending && (
@@ -798,7 +798,7 @@ function AdminMarketplacePageInner() {
 function AdminMarketplacePageFallback() {
   return (
     <AdminPageLayout title="Marketplace" subtitle="Loading…">
-      <p className="text-gray-500 dark:text-muted-foreground py-12 text-center">Loading marketplace…</p>
+      <p className="text-gray-500 py-12 text-center">Loading marketplace…</p>
     </AdminPageLayout>
   )
 }

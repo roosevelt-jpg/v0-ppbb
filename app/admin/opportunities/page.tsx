@@ -201,11 +201,11 @@ export function AdminOpportunitiesPageInner() {
   }
 
   const StatCard = ({ label, value }: { label: string; value: number }) => (
-    <div className="pb-stat-card rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-3 min-w-0">
-      <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-0.5">
+    <div className="pb-stat-card rounded-lg border border-[#e4e1da] bg-white p-3 min-w-0">
+      <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 mb-0.5">
         {label}
       </p>
-      <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 dark:text-foreground">
+      <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900">
         {loading ? '—' : value}
       </p>
     </div>
@@ -296,18 +296,18 @@ export function AdminOpportunitiesPageInner() {
       <div className="space-y-6 w-full min-w-0">
         <div>
           <p
-            className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+            className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Community
           </p>
           <h1
-            className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground"
+            className="text-2xl sm:text-3xl text-neutral-900"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
             All Opportunities
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
             Monitor all job and opportunity postings across the platform
           </p>
         </div>
@@ -346,7 +346,7 @@ export function AdminOpportunitiesPageInner() {
                 key={t.id}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className={`h-7 min-h-0 shrink-0 px-3 sm:px-4 rounded text-sm font-semibold whitespace-nowrap ${ tab === t.id ? 'bg-black text-white' : 'bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50' }`}
+                className={`h-7 min-h-0 shrink-0 px-3 sm:px-4 rounded text-sm font-semibold whitespace-nowrap ${ tab === t.id ? 'bg-black text-white' : 'bg-white text-black border border-neutral-300 hover:bg-neutral-50' }`}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {t.label}
@@ -354,13 +354,13 @@ export function AdminOpportunitiesPageInner() {
             ))}
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by title, company, or category..."
-              className="w-full border border-neutral-300 dark:border-border rounded pl-10 pr-3 py-2.5 min-h-[44px] text-sm bg-white dark:bg-card"
+              className="w-full border border-neutral-300 rounded pl-10 pr-3 py-2.5 min-h-[44px] text-sm bg-white"
               style={{ fontFamily: 'Inter, sans-serif' }}
             />
           </div>
@@ -369,20 +369,20 @@ export function AdminOpportunitiesPageInner() {
         {/* Content */}
         {loading ? (
           <div className="space-y-3 animate-pulse">
-            <div className="h-20 bg-neutral-100 dark:bg-muted rounded" />
-            <div className="h-20 bg-neutral-100 dark:bg-muted rounded" />
-            <div className="h-20 bg-neutral-100 dark:bg-muted rounded" />
+            <div className="h-20 bg-neutral-100 rounded" />
+            <div className="h-20 bg-neutral-100 rounded" />
+            <div className="h-20 bg-neutral-100 rounded" />
           </div>
         ) : jobs.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[#e4e1da] dark:border-border bg-white dark:bg-card p-8 sm:p-12 text-center">
-            <Briefcase className="w-10 h-10 mx-auto text-neutral-400 dark:text-muted-foreground mb-3" />
+          <div className="rounded-lg border border-dashed border-[#e4e1da] bg-white p-8 sm:p-12 text-center">
+            <Briefcase className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
             <h2
-              className="text-xl text-neutral-900 dark:text-foreground mb-1"
+              className="text-xl text-neutral-900 mb-1"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               No jobs posted yet
             </h2>
-            <p className="text-sm text-neutral-500 dark:text-muted-foreground mb-5" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-sm text-neutral-500 mb-5" style={{ fontFamily: 'Inter, sans-serif' }}>
               Business members submit jobs for approval. They will appear here in real time.
             </p>
             <Link
@@ -394,7 +394,7 @@ export function AdminOpportunitiesPageInner() {
             </Link>
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-neutral-500 dark:text-muted-foreground py-8 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-500 py-8 text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
             No opportunities match this filter or search.
           </p>
         ) : (
@@ -404,20 +404,20 @@ export function AdminOpportunitiesPageInner() {
               {filtered.map((job) => (
                 <li
                   key={job.id}
-                  className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3"
+                  className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3"
                 >
                   <div className="min-w-0">
                     <Link
                       href={`/admin/opportunities/${job.id}`}
-                      className="font-semibold text-neutral-900 dark:text-foreground break-words hover:underline"
+                      className="font-semibold text-neutral-900 break-words hover:underline"
                       style={{ fontFamily: 'Inter, sans-serif' }}
                     >
                       {job.title}
                     </Link>
-                    <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                    <p className="text-xs text-neutral-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
                       {job.company} · {job.type} · {job.category}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+                    <p className="text-xs text-neutral-500 mt-1">
                       {displayStatus(job)} ·{' '}
                       <Link
                         href={`/admin/opportunities/${job.id}`}
@@ -428,7 +428,7 @@ export function AdminOpportunitiesPageInner() {
                       · {formatDate(job.createdAt)}
                     </p>
                     {job.deadline ? (
-                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">Deadline {formatDate(job.deadline)}</p>
+                      <p className="text-xs text-neutral-500">Deadline {formatDate(job.deadline)}</p>
                     ) : null}
                   </div>
                   <ActionButtons job={job} />
@@ -437,10 +437,10 @@ export function AdminOpportunitiesPageInner() {
             </ul>
 
             {/* Desktop table */}
-            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] dark:border-border rounded-lg bg-white dark:bg-card min-w-0">
+            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
               <table className="w-full text-sm min-w-[1100px]" style={{ fontFamily: 'Inter, sans-serif' }}>
                 <thead>
-                  <tr className="border-b text-left text-neutral-500 dark:text-muted-foreground text-xs uppercase tracking-wider">
+                  <tr className="border-b text-left text-neutral-500 text-xs uppercase tracking-wider">
                     <th className="py-3 px-3">Title</th>
                     <th className="py-3 px-3">Company</th>
                     <th className="py-3 px-3">Type</th>
@@ -456,8 +456,8 @@ export function AdminOpportunitiesPageInner() {
                 </thead>
                 <tbody>
                   {filtered.map((job) => (
-                    <tr key={job.id} className="border-b border-neutral-100 dark:border-border align-top">
-                      <td className="py-3 px-3 font-medium text-neutral-900 dark:text-foreground max-w-[180px]">
+                    <tr key={job.id} className="border-b border-neutral-100 align-top">
+                      <td className="py-3 px-3 font-medium text-neutral-900 max-w-[180px]">
                         <Link href={`/admin/opportunities/${job.id}`} className="line-clamp-2 hover:underline">
                           {job.title}
                         </Link>
@@ -471,7 +471,7 @@ export function AdminOpportunitiesPageInner() {
                       <td className="py-3 px-3">
                         <Link
                           href={`/admin/opportunities/${job.id}`}
-                          className="font-semibold text-neutral-900 dark:text-foreground underline underline-offset-2 hover:text-neutral-700"
+                          className="font-semibold text-neutral-900 underline underline-offset-2 hover:text-neutral-700"
                           title="View applicants for this job"
                         >
                           {job.applications}
@@ -502,7 +502,7 @@ export function AdminOpportunitiesPageInner() {
             aria-label="Close"
             onClick={() => setViewJob(null)}
           />
-          <div className="relative bg-white dark:bg-card rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6">
+          <div className="relative bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6">
             <button
               type="button"
               onClick={() => setViewJob(null)}
@@ -512,29 +512,29 @@ export function AdminOpportunitiesPageInner() {
               <X className="w-5 h-5" />
             </button>
             <p
-              className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Opportunity
             </p>
             <h2
-              className="text-2xl text-neutral-900 dark:text-foreground mb-2 pr-10"
+              className="text-2xl text-neutral-900 mb-2 pr-10"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               {viewJob.title}
             </h2>
             <dl className="space-y-2 text-sm mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs uppercase tracking-wider">Company</dt>
+                <dt className="text-neutral-500 text-xs uppercase tracking-wider">Company</dt>
                 <dd>{viewJob.company}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs uppercase tracking-wider">Status</dt>
+                <dt className="text-neutral-500 text-xs uppercase tracking-wider">Status</dt>
                 <dd className="capitalize">{displayStatus(viewJob)}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500 dark:text-muted-foreground text-xs uppercase tracking-wider">Description</dt>
-                <dd className="whitespace-pre-wrap text-neutral-700 dark:text-foreground">
+                <dt className="text-neutral-500 text-xs uppercase tracking-wider">Description</dt>
+                <dd className="whitespace-pre-wrap text-neutral-700">
                   {htmlToPlainText(viewJob.description || '') || '—'}
                 </dd>
               </div>
@@ -558,7 +558,7 @@ export function AdminOpportunitiesPageInner() {
                 onClick={() => {
                   window.open(`/opportunities/${viewJob.id}`, '_blank', 'noopener,noreferrer')
                 }}
-                className="w-full min-h-[44px] bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-sm font-semibold"
+                className="w-full min-h-[44px] bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 View public posting
@@ -569,7 +569,7 @@ export function AdminOpportunitiesPageInner() {
                   onClick={() => {
                     window.open(`/directory/${viewJob.businessId}`, '_blank', 'noopener,noreferrer')
                   }}
-                  className="w-full min-h-[44px] bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-sm font-semibold"
+                  className="w-full min-h-[44px] bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
                   style={{ fontFamily: 'Inter, sans-serif' }}
                 >
                   View business directory
@@ -589,7 +589,7 @@ export function AdminOpportunitiesPageInner() {
             aria-label="Close"
             onClick={() => setEditJob(null)}
           />
-          <div className="relative bg-white dark:bg-card rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6">
+          <div className="relative bg-white rounded-t-2xl sm:rounded-lg shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 sm:p-6">
             <button
               type="button"
               onClick={() => setEditJob(null)}
@@ -599,7 +599,7 @@ export function AdminOpportunitiesPageInner() {
               <X className="w-5 h-5" />
             </button>
             <h2
-              className="text-2xl text-neutral-900 dark:text-foreground mb-4 pr-10"
+              className="text-2xl text-neutral-900 mb-4 pr-10"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               Edit Opportunity
@@ -614,27 +614,27 @@ export function AdminOpportunitiesPageInner() {
                 ] as const
               ).map(([key, label]) => (
                 <div key={key}>
-                  <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                  <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                     {label}
                   </label>
                   <input
                     type="text"
                     value={editForm[key]}
                     onChange={(e) => setEditForm((p) => ({ ...p, [key]: e.target.value }))}
-                    className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+                    className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
                     required={key === 'title'}
                   />
                 </div>
               ))}
               <div>
-                <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-1">
+                <label className="block text-xs uppercase tracking-wider text-neutral-500 mb-1">
                   Description
                 </label>
                 <textarea
                   value={editForm.description}
                   onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
                   rows={4}
-                  className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
+                  className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -648,7 +648,7 @@ export function AdminOpportunitiesPageInner() {
                 <button
                   type="button"
                   onClick={() => setEditJob(null)}
-                  className="min-h-[44px] px-5 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-sm font-semibold"
+                  className="min-h-[44px] px-5 bg-white text-black border border-neutral-300 rounded text-sm font-semibold"
                 >
                   Cancel
                 </button>
@@ -666,7 +666,7 @@ export default function AdminOpportunitiesPage() {
     <React.Suspense
       fallback={
         <AdminPageLayout title="Opportunities" subtitle="Loading…">
-          <p className="text-neutral-500 dark:text-muted-foreground py-12 text-center">Loading opportunities…</p>
+          <p className="text-neutral-500 py-12 text-center">Loading opportunities…</p>
         </AdminPageLayout>
       }
     >

@@ -10,7 +10,7 @@ export default function DonationCausesRedirect() {
     router.replace('/admin/charity')
   }, [router])
   return (
-    <div className="p-8 text-sm text-neutral-600 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="p-8 text-sm text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>
       Redirecting to Charity Cases…
     </div>
   )

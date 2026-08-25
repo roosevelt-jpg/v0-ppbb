@@ -129,10 +129,10 @@ function IntegrationsPageContent() {
     <div style={{ padding: '2rem' }}>
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111', marginBottom: '0.5rem' }}>
           Integrations
         </h1>
-        <p style={{ color: 'var(--muted-foreground)' }}>Manage API credentials, webhooks, and third-party services</p>
+        <p style={{ color: '#888888' }}>Manage API credentials, webhooks, and third-party services</p>
       </div>
 
       {loadError && (
@@ -153,45 +153,45 @@ function IntegrationsPageContent() {
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1.5rem' }}>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1.5rem' }}>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Total Integrations
           </p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{allServices.length}</p>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Available & categories</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111' }}>{allServices.length}</p>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginTop: '0.5rem' }}>Available & categories</p>
         </div>
 
-        <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1.5rem' }}>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1.5rem' }}>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Active
           </p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{active}</p>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Configured & live</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111' }}>{active}</p>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginTop: '0.5rem' }}>Configured & live</p>
         </div>
 
-        <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1.5rem' }}>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1.5rem' }}>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Pending Setup
           </p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--foreground)' }}>{pending}</p>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Awaiting credentials</p>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#111111' }}>{pending}</p>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginTop: '0.5rem' }}>Awaiting credentials</p>
         </div>
 
-        <div style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '1.5rem' }}>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e4e1da', borderRadius: '0.5rem', padding: '1.5rem' }}>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Last Updated
           </p>
-          <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--foreground)' }}>
+          <p style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111111' }}>
             {lastUpdatedMs ? 'Recent' : '—'}
           </p>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.875rem', marginTop: '0.5rem' }}>{lastUpdatedLabel}</p>
+          <p style={{ color: '#888888', fontSize: '0.875rem', marginTop: '0.5rem' }}>{lastUpdatedLabel}</p>
         </div>
       </div>
 
       {/* Search & Filter */}
       <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '250px', position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <Search className="absolute left-3 h-4 w-4 text-gray-400 dark:text-muted-foreground" style={{ pointerEvents: 'none' }} />
+          <Search className="absolute left-3 h-4 w-4 text-gray-400" style={{ pointerEvents: 'none' }} />
           <input
             type="search"
             name="integration-search"
@@ -215,10 +215,10 @@ function IntegrationsPageContent() {
               paddingRight: searchTerm ? '2.5rem' : '1rem',
               paddingTop: '0.5rem',
               paddingBottom: '0.5rem',
-              border: '1px solid var(--border)',
+              border: '1px solid #e4e1da',
               borderRadius: '0.5rem',
               fontSize: '0.875rem',
-              backgroundColor: 'var(--card)',
+              backgroundColor: '#ffffff',
             }}
           />
           {searchTerm && (
@@ -231,7 +231,7 @@ function IntegrationsPageContent() {
                 backgroundColor: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'var(--muted-foreground)',
+                color: '#888888',
               }}
             >
               <X className="h-4 w-4" />
@@ -241,8 +241,8 @@ function IntegrationsPageContent() {
 
         <a href="/admin/integrations/health" style={{
           padding: '0.5rem 1rem',
-          backgroundColor: 'var(--primary)',
-          color: 'var(--primary-foreground)',
+          backgroundColor: '#111111',
+          color: '#ffffff',
           border: 'none',
           borderRadius: '0.375rem',
           fontSize: '0.875rem',
@@ -260,9 +260,9 @@ function IntegrationsPageContent() {
           onClick={() => setSelectedCategory(null)}
           style={{
             padding: '0.5rem 1rem',
-            backgroundColor: selectedCategory === null ? 'var(--primary)' : 'var(--card)',
-            color: selectedCategory === null ? 'var(--primary-foreground)' : 'var(--foreground)',
-            border: `1px solid ${selectedCategory === null ? 'var(--primary)' : 'var(--border)'}`,
+            backgroundColor: selectedCategory === null ? '#111111' : '#ffffff',
+            color: selectedCategory === null ? '#ffffff' : '#111111',
+            border: `1px solid ${selectedCategory === null ? '#111111' : '#e4e1da'}`,
             borderRadius: '0.375rem',
             fontSize: '0.875rem',
             fontWeight: '600',
@@ -277,9 +277,9 @@ function IntegrationsPageContent() {
             onClick={() => setSelectedCategory(category)}
             style={{
               padding: '0.5rem 1rem',
-              backgroundColor: selectedCategory === category ? 'var(--primary)' : 'var(--card)',
-              color: selectedCategory === category ? 'var(--primary-foreground)' : 'var(--foreground)',
-              border: `1px solid ${selectedCategory === category ? 'var(--primary)' : 'var(--border)'}`,
+              backgroundColor: selectedCategory === category ? '#111111' : '#ffffff',
+              color: selectedCategory === category ? '#ffffff' : '#111111',
+              border: `1px solid ${selectedCategory === category ? '#111111' : '#e4e1da'}`,
               borderRadius: '0.375rem',
               fontSize: '0.875rem',
               fontWeight: '600',
@@ -294,9 +294,9 @@ function IntegrationsPageContent() {
 
       {/* Services Grid */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>Loading...</div>
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#888888' }}>Loading...</div>
       ) : filteredServices.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#888888' }}>
           {searchTerm ? 'No integrations match your search' : 'No integrations found'}
         </div>
       ) : (
