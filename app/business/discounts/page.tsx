@@ -16,6 +16,20 @@ export default function BusinessDiscountsPage() {
   const [discounts, setDiscounts] = React.useState<BusinessDiscount[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [deletingId, setDeletingId] = React.useState<string | null>(null)
+
+  const handleDeleteDiscount = async (id: string) => {
+    if (!confirm('Delete this discount code? This cannot be undone.')) return
+    setDeletingId(id)
+    try {
+      await deleteBusinessDiscount(id)
+    } catch (err) {
+      console.error('[v0] Error deleting discount:', err)
+      alert('Failed to delete discount. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   React.useEffect(() => {
     if (user && !hasBusinessAccess(user)) router.push('/login')
@@ -68,8 +82,9 @@ export default function BusinessDiscountsPage() {
                   <p className="font-semibold text-sm break-words">{d.title}</p>
                   <button
                     type="button"
-                    onClick={() => void deleteBusinessDiscount(d.id)}
-                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center bg-black !text-white hover:bg-neutral-800 rounded shrink-0"
+                    onClick={() => void handleDeleteDiscount(d.id)}
+                    disabled={deletingId === d.id}
+                    className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center bg-black !text-white hover:bg-neutral-800 rounded shrink-0 disabled:opacity-50"
                     aria-label="Delete discount"
                   >
                     <Trash2 size={16} />
@@ -108,7 +123,12 @@ export default function BusinessDiscountsPage() {
                   <td className="px-4 py-3 text-sm">{d.usageCount}{d.usageLimit != null ? ` / ${d.usageLimit}` : ''}</td>
                   <td className="px-4 py-3 text-sm capitalize">{d.status.replace(/_/g, ' ')}</td>
                   <td className="px-4 py-3 text-right">
-                    <button type="button" onClick={() => void deleteBusinessDiscount(d.id)} className="pb-compact-btn h-6 w-6 min-h-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 inline-flex items-center justify-center rounded">
+                    <button
+                      type="button"
+                      onClick={() => void handleDeleteDiscount(d.id)}
+                      disabled={deletingId === d.id}
+                      className="pb-compact-btn h-6 w-6 min-h-0 p-0 rounded-md bg-black !text-white hover:bg-neutral-800 inline-flex items-center justify-center rounded disabled:opacity-50"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </td>
