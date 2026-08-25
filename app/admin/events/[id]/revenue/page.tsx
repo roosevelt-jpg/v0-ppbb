@@ -5,16 +5,18 @@ import React from 'react'
 import { useParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
+import { auth } from '@/lib/firebase'
 import type { Event, EventRegistration, Payout } from '@/lib/event-types'
 
 export default function EventRevenuePage() {
   const params = useParams()
   const eventId = params.id as string
-  
+
   const [event, setEvent] = React.useState<Event | null>(null)
   const [registrations, setRegistrations] = React.useState<EventRegistration[]>([])
   const [payouts, setPayouts] = React.useState<Payout[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     loadData()
@@ -22,13 +24,25 @@ export default function EventRevenuePage() {
 
   const loadData = async () => {
     try {
-      const res = await fetch(`/api/events?id=${eventId}`)
-      const json = await res.json()
-      if (json.success) {
-        setEvent(Array.isArray(json.data) ? json.data[0] : json.data)
+      const eventRes = await fetch(`/api/events?id=${eventId}`)
+      const eventJson = await eventRes.json()
+      if (eventJson.success) {
+        setEvent(Array.isArray(eventJson.data) ? eventJson.data[0] : eventJson.data)
       }
+
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) throw new Error('Not signed in')
+      const guestsRes = await fetch(`/api/events/${eventId}/guests`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const guestsJson = await guestsRes.json()
+      if (!guestsJson.success) {
+        throw new Error(guestsJson.error || 'Failed to load registrations')
+      }
+      setRegistrations(guestsJson.data || [])
     } catch (err) {
-      console.error('[v0] Error loading event:', err)
+      console.error('[v0] Error loading event revenue:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load event revenue')
     } finally {
       setLoading(false)
     }
@@ -37,7 +51,7 @@ export default function EventRevenuePage() {
   if (loading || !event) {
     return (
       <AdminPageLayout title="Event Revenue">
-        <div className="text-center py-12">Loading...</div>
+        <div className="text-center py-12">{error || 'Loading...'}</div>
       </AdminPageLayout>
     )
   }
