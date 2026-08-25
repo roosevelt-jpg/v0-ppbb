@@ -17,6 +17,7 @@ import {
   type OfferMarketplaceTabId,
 } from '@/lib/offer-categories'
 import { BusinessDirectorySection } from '@/components/marketplace/business-directory-section'
+import { MarketplaceCheckoutPanel } from '@/components/marketplace/marketplace-checkout-panel'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 
@@ -44,13 +45,15 @@ function unitPrice(product: BusinessOffer): number {
 }
 
 export default function MarketplacePage() {
-  const { user } = useAuth()
+  const { user, firebaseUser } = useAuth()
   const [products, setProducts] = useState<BusinessOffer[]>([])
   const [filter, setFilter] = useState<OfferMarketplaceTabId | 'all'>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [orderMessage, setOrderMessage] = useState<string | null>(null)
 
   const isBusinessMember = hasBusinessAccess(user)
 
@@ -273,6 +276,10 @@ export default function MarketplacePage() {
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  setCartOpen(true)
+                  setCheckoutOpen(true)
+                }}
                 className="min-h-[44px] bg-black text-white px-6 py-2 rounded-lg text-sm font-semibold"
               >
                 Proceed to Checkout
@@ -352,8 +359,45 @@ export default function MarketplacePage() {
                   </li>
                 ))}
               </ul>
+
+              {checkoutOpen && cart.length > 0 ? (
+                <>
+                  {cart.length > 1 ? (
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground pt-3">
+                      Items are checked out one at a time — starting with {cart[0].title}. It will
+                      be removed from your cart once the order is placed.
+                    </p>
+                  ) : null}
+                  <MarketplaceCheckoutPanel
+                    offerId={cart[0].productId}
+                    price={cart[0].price}
+                    currency="AED"
+                    onCancel={() => setCheckoutOpen(false)}
+                    onSuccessMessage={(msg) => {
+                      setOrderMessage(msg)
+                      setCheckoutOpen(false)
+                      handleRemoveFromCart(cart[0].key)
+                    }}
+                    getToken={async () => firebaseUser?.getIdToken()}
+                  />
+                </>
+              ) : null}
             </div>
           ) : null}
+        </div>
+      ) : null}
+
+      {orderMessage ? (
+        <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-900 px-4 py-3 text-sm text-green-800 dark:text-green-300 shadow-lg flex items-start justify-between gap-3">
+          <span>{orderMessage}</span>
+          <button
+            type="button"
+            onClick={() => setOrderMessage(null)}
+            aria-label="Dismiss"
+            className="shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       ) : null}
     </DashboardPageShell>
