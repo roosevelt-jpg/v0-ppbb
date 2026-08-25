@@ -10,7 +10,7 @@ import {
   ensurePayPalBillingPlan,
 } from '@/lib/paypal-client'
 import { createZiinaPaymentIntent } from '@/lib/ziina-client'
-import { createStripeMembershipCheckout, getPublicAppUrl } from '@/lib/payment-completion'
+import { createStripeMembershipIntent, getPublicAppUrl } from '@/lib/payment-completion'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -75,8 +75,8 @@ async function handleStripeCheckout(
   planId: string
 ) {
   try {
-    const { sessionId, checkoutUrl } = await createStripeMembershipCheckout({ planId, userId })
-    return NextResponse.json({ sessionId, checkoutUrl, gateway: 'stripe' })
+    const { clientSecret, mode, subscriptionId } = await createStripeMembershipIntent({ planId, userId })
+    return NextResponse.json({ clientSecret, mode, subscriptionId, gateway: 'stripe' })
   } catch (error) {
     console.error('[checkout] Stripe:', error)
     return NextResponse.json(

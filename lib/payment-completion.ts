@@ -1,3 +1,4 @@
+import type Stripe from 'stripe'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { recordReferralConversion } from '@/lib/referral-conversion-server'
@@ -17,23 +18,61 @@ export function getPublicAppUrl(): string {
 }
 
 /**
- * Create a Stripe Checkout session for a membership plan, optionally with a
- * trial period. Shared by the plain signup/dashboard checkout path and the
- * trial-promo redemption path so both get the same self-healing product/
- * price resolution (see the comment on the retrieve-before-trust checks
- * below — cached Stripe ids only stay valid for whichever Stripe account/
- * mode created them).
+ * Get or create the Stripe Customer for this user, reusing it across every
+ * future subscription instead of creating a new one each time.
  */
-export async function createStripeMembershipCheckout(params: {
+async function getOrCreateStripeCustomer(
+  stripe: Stripe,
+  db: FirebaseFirestore.Firestore,
+  userId: string
+): Promise<string> {
+  const userSnap = await db.collection('users').doc(userId).get()
+  const userData = userSnap.data() || {}
+  const existingId = userData.stripeCustomerId as string | undefined
+
+  if (existingId) {
+    const exists = await stripe.customers.retrieve(existingId).then(
+      (c) => !c.deleted,
+      () => false
+    )
+    if (exists) return existingId
+  }
+
+  const customer = await stripe.customers.create({
+    email: (userData.email as string) || undefined,
+    name: [userData.firstName, userData.lastName].filter(Boolean).join(' ') || undefined,
+    metadata: { userId },
+  })
+  await db.collection('users').doc(userId).set({ stripeCustomerId: customer.id }, { merge: true })
+  return customer.id
+}
+
+/**
+ * Create a Stripe Subscription in `default_incomplete` mode and return the
+ * client secret for whichever intent it produced — a card is collected via
+ * an embedded Stripe Elements form on our own page (never a redirect to a
+ * Stripe-hosted page). Shared by the plain signup/dashboard checkout path
+ * and the trial-promo redemption path, so both get the same self-healing
+ * product/price resolution.
+ *
+ * With a trial (trialDays set), the subscription has nothing to charge
+ * immediately — Stripe produces a `pending_setup_intent` instead, just to
+ * save the card for later. Without a trial, it produces a real
+ * `latest_invoice.payment_intent` for the first charge. Either way the
+ * frontend confirms the same way: stripe.confirmPayment / confirmSetup
+ * with `redirect: 'if_required'`, which only pops an in-page 3DS modal
+ * when the card's bank actually requires one, and otherwise never
+ * navigates away from our own page at all.
+ */
+export async function createStripeMembershipIntent(params: {
   planId: string
   userId: string
   trialDays?: number
   extraMetadata?: Record<string, string>
-}): Promise<{ sessionId: string; checkoutUrl: string }> {
+}): Promise<{ clientSecret: string; mode: 'payment' | 'setup'; subscriptionId: string }> {
   const { getStripeClient } = await import('@/lib/get-stripe-client')
   const stripe = await getStripeClient()
   const db = getAdminDb()
-  const site = getPublicAppUrl()
 
   const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
   if (!planSnap.exists) throw new Error('Plan not found')
@@ -78,19 +117,18 @@ export async function createStripeMembershipCheckout(params: {
     await db.collection('pricingPlans').doc(params.planId).update({ stripePriceId: priceId })
   }
 
-  const userSnap = await db.collection('users').doc(params.userId).get()
-  const email = (userSnap.data()?.email as string) || undefined
+  const customerId = await getOrCreateStripeCustomer(stripe, db, params.userId)
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${site}/dashboard/membership?status=success`,
-    cancel_url: `${site}/dashboard/membership?status=canceled`,
-    customer_email: email,
-    ...(params.trialDays && params.trialDays > 0
-      ? { subscription_data: { trial_period_days: params.trialDays } }
-      : {}),
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: priceId }],
+    payment_behavior: 'default_incomplete',
+    payment_settings: {
+      save_default_payment_method: 'on_subscription',
+      payment_method_types: ['card'],
+    },
+    trial_period_days: params.trialDays && params.trialDays > 0 ? params.trialDays : undefined,
+    expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
     metadata: {
       type: 'membership',
       userId: params.userId,
@@ -99,19 +137,20 @@ export async function createStripeMembershipCheckout(params: {
     },
   })
 
-  if (!session.url) throw new Error('Stripe did not return a checkout URL')
+  const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent | null
+  const paymentIntent = (subscription.latest_invoice as Stripe.Invoice | null)
+    ?.payment_intent as Stripe.PaymentIntent | null | undefined
 
-  await db.collection('checkoutSessions').add({
-    userId: params.userId,
-    planId: params.planId,
-    sessionId: session.id,
-    gateway: 'stripe',
-    status: 'pending',
-    trialDays: params.trialDays || null,
-    createdAt: FieldValue.serverTimestamp(),
-  })
+  const clientSecret = setupIntent?.client_secret || paymentIntent?.client_secret
+  if (!clientSecret) {
+    throw new Error('Stripe did not return a client secret for this subscription')
+  }
 
-  return { sessionId: session.id, checkoutUrl: session.url }
+  return {
+    clientSecret,
+    mode: setupIntent ? 'setup' : 'payment',
+    subscriptionId: subscription.id,
+  }
 }
 
 /** Mark an event registration paid and update event counters (idempotent). */

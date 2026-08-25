@@ -122,41 +122,6 @@ export async function POST(req: NextRequest) {
             }
           }
         } else if (
-          session.metadata?.type === 'membership' &&
-          session.metadata.userId &&
-          session.metadata.planId
-        ) {
-          const { completeMembershipPayment } = await import('@/lib/payment-completion')
-
-          // Prefer Stripe's own current_period_end (equals trial_end during
-          // a trial) over our own date math — see the comment on
-          // renewDateOverride in completeMembershipPayment.
-          let renewDateOverride: Date | undefined
-          const subscriptionId = (event.data.object as any).subscription as string | undefined
-          if (subscriptionId) {
-            try {
-              const { stripe } = await import('@/lib/stripe-utils')
-              const sub = await stripe.subscriptions.retrieve(subscriptionId)
-              if (sub.current_period_end) {
-                renewDateOverride = new Date(sub.current_period_end * 1000)
-              }
-            } catch (err) {
-              console.error('[v0] Could not retrieve subscription for renewDate:', err)
-            }
-          }
-
-          await completeMembershipPayment({
-            userId: session.metadata.userId,
-            planId: session.metadata.planId,
-            gateway: 'stripe',
-            paymentReference: session.id,
-            amountCents:
-              typeof session.amount_total === 'number' ? session.amount_total : undefined,
-            promoCodeId: session.metadata.promoCodeId || undefined,
-            promoCode: session.metadata.promoCode || undefined,
-            renewDateOverride,
-          })
-        } else if (
           session.metadata?.type === 'advertising' &&
           session.metadata.advertisingRequestId
         ) {
@@ -173,23 +138,10 @@ export async function POST(req: NextRequest) {
               { merge: true }
             )
         }
-        break
-      }
-
-      case 'checkout.session.expired': {
-        // Only meaningful for a trial-promo checkout that was reserved but
-        // never completed — roll the redemption back so the code stays
-        // usable and doesn't count against maxRedemptions for a card that
-        // was never actually entered.
-        const session = event.data.object as { metadata?: Record<string, string> }
-        const promoCodeId = session.metadata?.promoCodeId
-        const userId = session.metadata?.userId
-        if (promoCodeId && userId) {
-          const { rollbackMembershipPromoReservation } = await import('@/lib/membership-promo')
-          await rollbackMembershipPromoReservation(promoCodeId, userId).catch((err) =>
-            console.error('[v0] Promo rollback on checkout expiry failed:', err)
-          )
-        }
+        // Membership no longer goes through Checkout Sessions at all — an
+        // embedded card form on our own page creates the Subscription
+        // directly (see createStripeMembershipIntent), so activation is
+        // handled below in customer.subscription.updated instead.
         break
       }
 
@@ -199,18 +151,27 @@ export async function POST(req: NextRequest) {
         const customerId = subscription.customer
         const subscriptionId = subscription.id
 
-        // Get customer email
-        const { stripe } = await import('@/lib/stripe-utils')
-        const customer = await stripe.customers.retrieve(customerId)
-        const email = (customer as any).email
-
-        const usersSnap = await db.collection('users').where('email', '==', email).limit(1).get()
-        const userId = usersSnap.docs[0]?.id
+        // The embedded-checkout flow puts userId/planId directly on the
+        // Subscription's own metadata at creation time (createStripeMembershipIntent).
+        // Fall back to a customer-email lookup for anything else that ends
+        // up here without it.
+        let userId = subscription.metadata?.userId as string | undefined
+        if (!userId) {
+          const { stripe } = await import('@/lib/stripe-utils')
+          const customer = await stripe.customers.retrieve(customerId)
+          const email = (customer as any).email
+          const usersSnap = await db.collection('users').where('email', '==', email).limit(1).get()
+          userId = usersSnap.docs[0]?.id
+        }
 
         if (!userId) {
-          console.error('[v0] User not found for email:', email)
+          console.error('[v0] User not found for subscription:', subscriptionId)
           return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
+
+        const subRef = db.collection('subscriptions').doc(subscriptionId)
+        const prevSnap = await subRef.get()
+        const prevStatus = prevSnap.exists ? (prevSnap.data()?.status as string | undefined) : undefined
 
         const subscriptionData = {
           userId,
@@ -230,6 +191,49 @@ export async function POST(req: NextRequest) {
 
         await db.collection('subscriptions').doc(subscriptionId).set(subscriptionData, { merge: true })
         console.log('[v0] Subscription saved:', subscriptionId)
+
+        const isActiveNow = ['active', 'trialing'].includes(subscription.status)
+        const wasActiveBefore = ['active', 'trialing'].includes(prevStatus || '')
+
+        if (
+          subscription.metadata?.type === 'membership' &&
+          subscription.metadata.planId &&
+          isActiveNow &&
+          !wasActiveBefore
+        ) {
+          // The subscription just transitioned into active/trialing for the
+          // first time — the member confirmed their card on the embedded
+          // form and Stripe accepted it. Fires here rather than at
+          // subscription creation because `customer.subscription.created`
+          // arrives immediately with status 'incomplete', before the
+          // member has entered anything — activating there would grant
+          // access before payment is actually confirmed.
+          const { completeMembershipPayment } = await import('@/lib/payment-completion')
+          await completeMembershipPayment({
+            userId,
+            planId: subscription.metadata.planId,
+            gateway: 'stripe',
+            paymentReference: subscriptionId,
+            promoCodeId: subscription.metadata.promoCodeId || undefined,
+            promoCode: subscription.metadata.promoCode || undefined,
+            renewDateOverride: subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000)
+              : undefined,
+          })
+        } else if (
+          subscription.status === 'incomplete_expired' &&
+          subscription.metadata?.promoCodeId &&
+          prevStatus !== 'incomplete_expired'
+        ) {
+          // A trial-promo reservation whose member never finished entering
+          // a card — Stripe auto-expires the subscription (default 23
+          // hours). Roll the reservation back so the code isn't burned.
+          const { rollbackMembershipPromoReservation } = await import('@/lib/membership-promo')
+          await rollbackMembershipPromoReservation(
+            subscription.metadata.promoCodeId,
+            userId
+          ).catch((err) => console.error('[v0] Promo rollback on subscription expiry failed:', err))
+        }
         break
       }
 

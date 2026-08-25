@@ -253,11 +253,14 @@ export type RedeemMembershipPromoResult = {
   membershipUrl: string | null
   /**
    * Set when the code is trial-enabled: the plan isn't active yet — the
-   * caller must redirect here so the member enters a card via Stripe
-   * Checkout. Membership activates once Stripe confirms checkout, via the
-   * same webhook path a regular paid signup uses.
+   * caller must render an embedded Stripe card form with this client
+   * secret and confirm it (stripe.confirmPayment or confirmSetup depending
+   * on `intentMode`, never a redirect to a Stripe-hosted page). Membership
+   * activates once Stripe confirms the card, via the webhook's
+   * customer.subscription.updated handler.
    */
-  checkoutUrl: string | null
+  clientSecret: string | null
+  intentMode: 'payment' | 'setup' | null
   renewDate: string | null
 }
 
@@ -395,13 +398,13 @@ export async function redeemMembershipPromo(input: {
 
   try {
     if (redeemedPromo.trialEnabled) {
-      const { createStripeMembershipCheckout } = await import('@/lib/payment-completion')
+      const { createStripeMembershipIntent } = await import('@/lib/payment-completion')
       const now = new Date()
       const trialEnd = new Date(now)
       trialEnd.setMonth(trialEnd.getMonth() + benefitMonths)
       const trialDays = Math.max(1, Math.round((trialEnd.getTime() - now.getTime()) / 86400000))
 
-      const { checkoutUrl } = await createStripeMembershipCheckout({
+      const { clientSecret, mode } = await createStripeMembershipIntent({
         planId: grantedPlanId,
         userId: input.userId,
         trialDays,
@@ -416,7 +419,8 @@ export async function redeemMembershipPromo(input: {
         planId: grantedPlanId,
         planName: grantedPlanName,
         membershipUrl: null,
-        checkoutUrl,
+        clientSecret,
+        intentMode: mode,
         renewDate: null,
       }
     }
@@ -448,7 +452,8 @@ export async function redeemMembershipPromo(input: {
       planId: grantedPlanId,
       planName: grantedPlanName,
       membershipUrl: result.membershipUrl,
-      checkoutUrl: null,
+      clientSecret: null,
+      intentMode: null,
       renewDate: renewDate ? renewDate.toISOString() : null,
     }
   } catch (err) {

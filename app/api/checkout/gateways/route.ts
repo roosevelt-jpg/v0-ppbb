@@ -18,6 +18,9 @@ export async function GET() {
     success: true,
     data: {
       stripe: Boolean(stripe?.secretKey),
+      // Publishable keys are safe to expose client-side by design — this is
+      // what stripe.js needs to render the embedded card form.
+      stripePublishableKey: stripe?.publishableKey || null,
       paypal: Boolean(paypal?.clientId && paypal?.clientSecret),
       ziina: Boolean(ziina?.apiToken),
     },

@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { auth, db } from '@/lib/firebase'
 import { doc, getDoc, collection, onSnapshot, query, where } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
+import { Dialog } from '@/components/dialog'
 import { Check, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
 import { getPlanIncludedItems, memberMatchesPlan, resolveActiveGateway } from '@/lib/pricing-utils'
@@ -16,6 +17,7 @@ import {
   DashboardErrorState,
 } from '@/components/dashboard-states'
 import { MembershipSubscriptionOverview } from '@/components/membership/subscription-overview'
+import { StripeCardCheckout } from '@/components/stripe-card-checkout'
 import { usePathname } from 'next/navigation'
 
 export default function MembershipPage() {
@@ -32,10 +34,15 @@ export default function MembershipPage() {
     paypal: false,
     ziina: false,
   })
+  const [stripePublishableKey, setStripePublishableKey] = useState<string | null>(null)
   const [statusBanner, setStatusBanner] = useState<string | null>(null)
   const [promoCode, setPromoCode] = useState('')
   const [promoLoading, setPromoLoading] = useState(false)
   const [promoMessage, setPromoMessage] = useState<string | null>(null)
+  const [activeIntent, setActiveIntent] = useState<{
+    clientSecret: string
+    mode: 'payment' | 'setup'
+  } | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -51,6 +58,7 @@ export default function MembershipPage() {
       .then((r) => r.json())
       .then((json) => {
         if (json?.data) setGateways(json.data)
+        if (json?.data?.stripePublishableKey) setStripePublishableKey(json.data.stripePublishableKey)
       })
       .catch(() => {})
   }, [])
@@ -125,11 +133,10 @@ export default function MembershipPage() {
         throw new Error(data.error || 'Could not redeem promo code')
       }
 
-      // Trial-enabled code — nothing is active yet. Redirect to Stripe
-      // Checkout to collect a card; membership activates via webhook once
-      // that completes.
-      if (data.data?.checkoutUrl) {
-        window.location.href = data.data.checkoutUrl
+      // Trial-enabled code — nothing is active yet. Show the embedded card
+      // form; membership activates via webhook once the card is confirmed.
+      if (data.data?.clientSecret) {
+        setActiveIntent({ clientSecret: data.data.clientSecret, mode: data.data.intentMode || 'setup' })
         return
       }
 
@@ -169,7 +176,17 @@ export default function MembershipPage() {
         }),
       })
       const data = await response.json()
-      if (!response.ok || !data.checkoutUrl) {
+      if (!response.ok) {
+        throw new Error(data.error || `Checkout failed (${gateway})`)
+      }
+
+      if (gateway === 'stripe') {
+        if (!data.clientSecret) throw new Error('Stripe did not return a client secret')
+        setActiveIntent({ clientSecret: data.clientSecret, mode: data.mode || 'payment' })
+        return
+      }
+
+      if (!data.checkoutUrl) {
         throw new Error(data.error || `Checkout failed (${gateway})`)
       }
       window.location.href = data.checkoutUrl
@@ -193,8 +210,35 @@ export default function MembershipPage() {
   }
   const alreadyUsedPromo = Boolean(profile?.membershipPromoCodeId || profile?.promoCodeId)
 
+  const handleCardSuccess = () => {
+    setActiveIntent(null)
+    setPromoCode('')
+    setStatusBanner('Payment confirmed. Your membership is updating.')
+  }
+
   return (
     <DashboardPageShell title="Membership" subtitle="Your plan, renewal, and invoices">
+      <Dialog
+        open={Boolean(activeIntent)}
+        onOpenChange={(open) => {
+          if (!open) setActiveIntent(null)
+        }}
+        title="Enter card details"
+        description="Your card is processed securely by Stripe — it's never seen by our servers."
+        maxWidth="26rem"
+        compact={false}
+      >
+        {activeIntent && stripePublishableKey ? (
+          <StripeCardCheckout
+            publishableKey={stripePublishableKey}
+            clientSecret={activeIntent.clientSecret}
+            mode={activeIntent.mode}
+            onSuccess={handleCardSuccess}
+            onCancel={() => setActiveIntent(null)}
+          />
+        ) : null}
+      </Dialog>
+
       {statusBanner ? (
         <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50 text-sm text-neutral-700">
           {statusBanner}
