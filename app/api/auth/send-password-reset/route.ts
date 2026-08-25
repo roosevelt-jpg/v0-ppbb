@@ -20,9 +20,19 @@ export async function POST(request: NextRequest) {
 
     const result = await sendPasswordResetBranded({ email })
     if (!result.ok) {
-      // Still return success to the client for enumeration safety when user missing;
-      // only fail hard on transport errors after a known user.
+      // sendPasswordResetBranded already normalizes "no such user" to ok:true
+      // for enumeration safety — result.ok === false here always means a real
+      // send failure (e.g. Gmail SMTP not configured in Admin -> Integrations),
+      // not that the account doesn't exist. Telling the user "check your email"
+      // for a link that was never sent left them with no way to know or recover.
       console.error('[auth/send-password-reset]', result.error)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Could not send the reset email right now. Please try again shortly or contact support.',
+        },
+        { status: 502 }
+      )
     }
 
     return NextResponse.json({
