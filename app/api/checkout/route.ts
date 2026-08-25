@@ -80,7 +80,22 @@ async function handleStripeCheckout(
     const db = getAdminDb()
     const site = getPublicAppUrl()
 
+    // Cached stripeProductId/stripePriceId on the plan doc are only valid
+    // for whichever Stripe account + mode (test/live) created them — if the
+    // Stripe credentials in Admin → Integrations were ever changed (a new
+    // account, or switching from test to live keys), every previously
+    // cached id becomes a dangling reference that Stripe rejects with "No
+    // such price"/"No such product". Retrieving before trusting the cache
+    // (and clearing + recreating on a miss) makes checkout self-healing
+    // instead of permanently broken until someone edits the plan by hand.
     let productId = plan.stripeProductId as string | undefined
+    if (productId) {
+      const exists = await stripe.products.retrieve(productId).then(
+        () => true,
+        () => false
+      )
+      if (!exists) productId = undefined
+    }
     if (!productId) {
       const product = await stripe.products.create({
         name: String(plan.name || 'Membership'),
@@ -91,7 +106,16 @@ async function handleStripeCheckout(
       await db.collection('pricingPlans').doc(planId).update({ stripeProductId: productId })
     }
 
-    let priceId = plan.stripePriceId as string | undefined
+    // A stale product forces a stale price too — a price object is
+    // permanently tied to the product it was created under.
+    let priceId = productId === plan.stripeProductId ? (plan.stripePriceId as string | undefined) : undefined
+    if (priceId) {
+      const exists = await stripe.prices.retrieve(priceId).then(
+        () => true,
+        () => false
+      )
+      if (!exists) priceId = undefined
+    }
     if (!priceId) {
       const price = await stripe.prices.create({
         unit_amount: Number(plan.price) || 0,

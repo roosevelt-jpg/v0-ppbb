@@ -440,7 +440,7 @@ export default function BusinessOpportunities() {
                           maxHeight: 32,
                           minWidth: 56,
                           padding: 0,
-                          backgroundColor: live ? '#10b981' : '#a3a3a3',
+                          backgroundColor: live ? '#10b981' : '#111111',
                         }}
                       >
                         <span
@@ -575,7 +575,7 @@ export default function BusinessOpportunities() {
                               maxHeight: 32,
                               minWidth: 56,
                               padding: 0,
-                              backgroundColor: live ? '#10b981' : '#a3a3a3',
+                              backgroundColor: live ? '#10b981' : '#111111',
                             }}
                           >
                             <span
