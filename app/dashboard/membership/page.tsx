@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Check, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
 import { getPlanIncludedItems, memberMatchesPlan, resolveActiveGateway } from '@/lib/pricing-utils'
+import { hasActiveMembership } from '@/lib/membership-access'
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import {
   DashboardPageShell,
@@ -249,7 +250,11 @@ export default function MembershipPage() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {plans.map((plan) => {
-            const isCurrentPlan = memberMatchesPlan(memberRecord, plan)
+            // Plan-id match alone isn't enough once a membership can expire:
+            // an expired member still has membershipPlanId set to their old
+            // plan, and without this check they'd see a disabled "Current
+            // Plan" button instead of a working Subscribe button.
+            const isCurrentPlan = memberMatchesPlan(memberRecord, plan) && hasActiveMembership(memberRecord)
             return (
               <Card key={plan.id} className="p-6 border-2 border-neutral-200 flex flex-col">
                 <div className="flex items-center gap-2 mb-2">
