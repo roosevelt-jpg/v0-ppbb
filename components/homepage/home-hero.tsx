@@ -16,7 +16,7 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
     return (
       <Link
         href={button.href}
-        className={`${base} px-5 py-3 min-h-[44px] bg-black text-white rounded-lg hover:bg-gray-800`}
+        className={`${base} px-5 py-3 min-h-[44px] bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-200`}
       >
         {button.label}
       </Link>
@@ -26,14 +26,14 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
     return (
       <Link
         href={button.href}
-        className={`${base} px-5 py-3 min-h-[44px] bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50`}
+        className={`${base} px-5 py-3 min-h-[44px] bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800`}
       >
         {button.label}
       </Link>
     )
   }
   return (
-    <Link href={button.href} className={`${base} py-3 min-h-[44px] text-black underline underline-offset-4 hover:text-gray-700`}>
+    <Link href={button.href} className={`${base} py-3 min-h-[44px] text-black underline underline-offset-4 hover:text-gray-700 dark:text-neutral-50 dark:hover:text-neutral-300`}>
       {button.label}
     </Link>
   )
@@ -44,15 +44,15 @@ function HeroSkeleton() {
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10">
       <div className="max-w-[80rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 lg:items-stretch animate-pulse">
         <div className="order-2 lg:order-1 lg:col-span-5 space-y-4">
-          <div className="h-3 w-48 bg-neutral-200 rounded" />
-          <div className="h-10 w-full max-w-md bg-neutral-200 rounded" />
-          <div className="h-20 w-full bg-neutral-200 rounded" />
+          <div className="h-3 w-48 bg-neutral-200 dark:bg-neutral-800 rounded" />
+          <div className="h-10 w-full max-w-md bg-neutral-200 dark:bg-neutral-800 rounded" />
+          <div className="h-20 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
           <div className="flex gap-3">
-            <div className="h-10 w-36 bg-neutral-200 rounded" />
-            <div className="h-10 w-24 bg-neutral-200 rounded" />
+            <div className="h-10 w-36 bg-neutral-200 dark:bg-neutral-800 rounded" />
+            <div className="h-10 w-24 bg-neutral-200 dark:bg-neutral-800 rounded" />
           </div>
         </div>
-        <div className="order-1 lg:order-2 lg:col-span-7 aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:h-full bg-neutral-200 rounded-2xl min-h-0" />
+        <div className="order-1 lg:order-2 lg:col-span-7 aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:h-full bg-neutral-200 dark:bg-neutral-800 rounded-2xl min-h-0" />
       </div>
     </section>
   )

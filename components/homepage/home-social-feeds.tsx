@@ -13,10 +13,10 @@ import { getRotatedYouTubeVideos } from '@/lib/youtube-service'
 
 function SocialSkeleton() {
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] animate-pulse overflow-x-hidden">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] dark:bg-neutral-950 animate-pulse overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto space-y-8">
-        <div className="h-8 w-48 bg-neutral-200 rounded" />
-        <div className="h-40 bg-neutral-200 rounded-lg" />
+        <div className="h-8 w-48 bg-neutral-200 dark:bg-neutral-800 rounded" />
+        <div className="h-40 bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
       </div>
     </section>
   )
@@ -32,8 +32,8 @@ function PlaceholderBlock({
   message: string
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[#e4e1da] p-6 sm:p-8 text-center min-w-0">
-      <Icon className="h-10 w-10 text-neutral-400 mx-auto mb-4" />
+    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-[#e4e1da] dark:border-neutral-800 p-6 sm:p-8 text-center min-w-0">
+      <Icon className="h-10 w-10 text-neutral-400 dark:text-neutral-500 mx-auto mb-4" />
       <h3 className="font-headline text-xl sm:text-2xl font-bold mb-2 break-words">{heading}</h3>
       <p className="font-body text-sm text-muted-foreground break-words">{message}</p>
     </div>
@@ -91,7 +91,7 @@ export function HomeSocialFeeds() {
 
   if (!showYoutube && !showInstagram) {
     return (
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] overflow-x-hidden">
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 bg-[#f7f6f2] dark:bg-neutral-950 overflow-x-hidden">
         <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <PlaceholderBlock
             icon={Play}

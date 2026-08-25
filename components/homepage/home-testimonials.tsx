@@ -16,8 +16,8 @@ function TestimonialsSkeleton() {
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 animate-pulse overflow-x-hidden">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
-        <div className="h-10 w-64 bg-neutral-200 rounded mx-auto mb-10" />
-        <div className="h-48 bg-neutral-200 rounded-xl" />
+        <div className="h-10 w-64 bg-neutral-200 dark:bg-neutral-800 rounded mx-auto mb-10" />
+        <div className="h-48 bg-neutral-200 dark:bg-neutral-800 rounded-xl" />
       </div>
     </section>
   )
@@ -26,7 +26,7 @@ function TestimonialsSkeleton() {
 function TestimonialSlide({ item }: { item: Testimonial }) {
   if (item.type === 'video' && item.videoURL) {
     return (
-      <div className="bg-white rounded-xl border border-[#e4e1da] overflow-hidden min-w-0 h-full">
+      <div className="bg-white dark:bg-neutral-900 rounded-xl border border-[#e4e1da] dark:border-neutral-800 overflow-hidden min-w-0 h-full">
         <video
           src={item.videoURL}
           controls
@@ -34,7 +34,7 @@ function TestimonialSlide({ item }: { item: Testimonial }) {
           playsInline
         />
         <div className="p-4 sm:p-5">
-          <p className="font-bold text-sm sm:text-base break-words">{item.name}</p>
+          <p className="font-bold text-sm sm:text-base break-words text-foreground">{item.name}</p>
           {item.role && (
             <p className="text-xs sm:text-sm text-muted-foreground break-words">{item.role}</p>
           )}
@@ -44,9 +44,9 @@ function TestimonialSlide({ item }: { item: Testimonial }) {
   }
 
   return (
-    <blockquote className="bg-white rounded-xl border border-[#e4e1da] p-5 sm:p-6 min-w-0 h-full flex flex-col">
-      <Quote className="h-6 w-6 text-neutral-300 mb-4 flex-shrink-0" />
-      <p className="font-body text-sm sm:text-base text-[#333333] italic leading-relaxed mb-6 flex-1 break-words">
+    <blockquote className="bg-white dark:bg-neutral-900 rounded-xl border border-[#e4e1da] dark:border-neutral-800 p-5 sm:p-6 min-w-0 h-full flex flex-col">
+      <Quote className="h-6 w-6 text-neutral-300 dark:text-neutral-600 mb-4 flex-shrink-0" />
+      <p className="font-body text-sm sm:text-base text-[#333333] dark:text-neutral-300 italic leading-relaxed mb-6 flex-1 break-words">
         {item.quote}
       </p>
       <footer className="flex items-center gap-3">
@@ -58,7 +58,7 @@ function TestimonialSlide({ item }: { item: Testimonial }) {
             className="w-10 h-10 rounded-full object-cover flex-shrink-0"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-neutral-100 flex-shrink-0" />
+          <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 flex-shrink-0" />
         )}
         <div className="min-w-0">
           <p className="font-bold text-sm break-words">{item.name}</p>
@@ -173,7 +173,7 @@ export function HomeTestimonials() {
               >
                 <span
                   className={`block rounded-full transition-all ${
-                    i === index ? 'h-1.5 w-1.5 bg-black' : 'h-1 w-1 bg-neutral-300'
+                    i === index ? 'h-1.5 w-1.5 bg-black dark:bg-neutral-50' : 'h-1 w-1 bg-neutral-300 dark:bg-neutral-700'
                   }`}
                 />
               </button>
