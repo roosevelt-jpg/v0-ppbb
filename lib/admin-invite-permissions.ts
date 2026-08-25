@@ -272,7 +272,6 @@ export const API_PERMISSION_PREFIXES: {
 
   // Admins / security
   { prefix: '/api/admin/management', permissions: ['manage_admins'] },
-  { prefix: '/api/admin/admins', permissions: ['manage_admins'] },
   { prefix: '/api/admin/audit-log', permissions: ['manage_admins'] },
   { prefix: '/api/admin/login-history', permissions: ['manage_admins'] },
   { prefix: '/api/admin/send-access-code', permissions: ['manage_admins'] },
