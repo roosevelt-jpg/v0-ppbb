@@ -17,7 +17,11 @@ export async function GET() {
   return NextResponse.json({
     success: true,
     data: {
-      stripe: Boolean(stripe?.secretKey),
+      // Both keys are required: the secret key to actually charge, and the
+      // publishable key for stripe.js to render the embedded card form.
+      // Reporting "configured" on the secret key alone let checkout resolve
+      // to Stripe and open a card-entry dialog with nothing inside it.
+      stripe: Boolean(stripe?.secretKey && stripe?.publishableKey),
       // Publishable keys are safe to expose client-side by design — this is
       // what stripe.js needs to render the embedded card form.
       stripePublishableKey: stripe?.publishableKey || null,

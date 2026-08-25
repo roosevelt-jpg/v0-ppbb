@@ -733,6 +733,11 @@ export default function SignupClient() {
             }}
             onCancel={() => setActiveIntent(null)}
           />
+        ) : activeIntent ? (
+          <p style={{ fontSize: '0.875rem', color: '#c62828' }}>
+            Card payments aren't fully configured right now. Please try again shortly or contact
+            support.
+          </p>
         ) : null}
       </Dialog>
 

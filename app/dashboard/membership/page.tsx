@@ -236,6 +236,11 @@ export default function MembershipPage() {
             onSuccess={handleCardSuccess}
             onCancel={() => setActiveIntent(null)}
           />
+        ) : activeIntent ? (
+          <p className="text-sm text-red-600 dark:text-red-400">
+            Card payments aren't fully configured right now. Please try again shortly or contact
+            support.
+          </p>
         ) : null}
       </Dialog>
 
