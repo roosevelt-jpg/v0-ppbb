@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getFirestore, collection, addDoc } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
 
 export async function POST(request: NextRequest) {
+  const db = getFirestore(getAdminApp())
   try {
     const body = await request.json()
     const { email } = body

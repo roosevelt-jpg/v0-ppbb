@@ -4,6 +4,8 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization') || ''

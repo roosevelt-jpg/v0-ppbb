@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, getDocs, getDoc, doc, query, orderBy } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
 
 export async function GET(request: NextRequest) {
   try {
+    const db = getFirestore(getAdminApp())
     const q = query(collection(db, 'newsletters'), orderBy('createdAt', 'desc'))
     const snapshot = await getDocs(q)
     const newsletters = snapshot.docs.map(doc => ({
@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const db = getFirestore(getAdminApp())
     const body = await request.json()
     const { title, subject, content, template, status = 'draft', scheduledFor } = body
 

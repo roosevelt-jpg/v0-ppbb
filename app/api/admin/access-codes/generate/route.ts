@@ -3,7 +3,6 @@ import { generateDynamicAccessCode } from '@/lib/admin-login-tracking'
 import { getFirestore, collection, query, where, getDocs } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
 
 // Email sending (using SendGrid if configured)
 async function sendAccessCodeEmail(email: string, code: string, adminName: string) {
@@ -55,6 +54,7 @@ async function sendAccessCodeEmail(email: string, code: string, adminName: strin
 }
 
 export async function POST(request: NextRequest) {
+  const db = getFirestore(getAdminApp())
   try {
     const body = await request.json()
     const { adminEmail, adminName, adminRole, permissions, createdBy } = body

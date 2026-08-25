@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getFirestore } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const conversationId = params.id
 
@@ -37,6 +37,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const conversationId = params.id
     const updates = await request.json()
@@ -62,6 +63,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const conversationId = params.id
 

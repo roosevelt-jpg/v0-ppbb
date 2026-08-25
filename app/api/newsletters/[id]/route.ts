@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getFirestore, doc, getDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const docRef = doc(db, 'newsletters', params.id)
     const docSnap = await getDoc(docRef)
@@ -44,6 +44,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const body = await request.json()
     const { title, subject, content, template, status, scheduledFor } = body
@@ -79,6 +80,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const docRef = doc(db, 'newsletters', params.id)
     await deleteDoc(docRef)

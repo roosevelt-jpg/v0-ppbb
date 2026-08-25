@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getFirestore, doc, getDoc } from 'firebase-admin/firestore'
 import { getAdminApp } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const db = getFirestore(getAdminApp())
   try {
     const docRef = doc(db, 'newsletters', params.id)
     const docSnap = await getDoc(docRef)
