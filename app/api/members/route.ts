@@ -167,24 +167,44 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'bulk-update') {
+      // This endpoint only requires manage_members (not manage_admins), so
+      // the role value must be restricted to the plain member types the
+      // admin UI's own dropdown offers — never an admin-panel role like
+      // 'admin'/'super_admin', or a member-management-scoped admin could
+      // grant themselves (or anyone) elevated access through this API.
+      const ALLOWED_ROLES = new Set(['member', 'volunteer', 'business'])
+      const ALLOWED_STATUSES = new Set(['active', 'inactive', 'suspended'])
+
       const allowed: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() }
       if (typeof body.status === 'string' && body.status.trim()) {
-        allowed.status = body.status.trim()
-        if (body.status.trim() === 'active') {
+        const status = body.status.trim()
+        if (!ALLOWED_STATUSES.has(status)) {
+          return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 })
+        }
+        allowed.status = status
+        if (status === 'active') {
           allowed.active = true
           allowed.accountDeleted = false
         }
-        if (body.status.trim() === 'inactive' || body.status.trim() === 'suspended') {
+        if (status === 'inactive' || status === 'suspended') {
           allowed.active = false
         }
       }
       if (typeof body.role === 'string' && body.role.trim()) {
-        allowed.role = body.role.trim()
-        allowed.userType = body.role.trim()
+        const role = body.role.trim()
+        if (!ALLOWED_ROLES.has(role)) {
+          return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 })
+        }
+        allowed.role = role
+        allowed.userType = role
       }
       if (typeof body.userType === 'string' && body.userType.trim()) {
-        allowed.userType = body.userType.trim()
-        if (!allowed.role) allowed.role = body.userType.trim()
+        const userType = body.userType.trim()
+        if (!ALLOWED_ROLES.has(userType)) {
+          return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 })
+        }
+        allowed.userType = userType
+        if (!allowed.role) allowed.role = userType
       }
 
       if (Object.keys(allowed).length <= 1) {
@@ -223,11 +243,20 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { id, ids, ...updateData } = body
 
+    // Same plain-member-only roles as the bulk-update action above — this
+    // endpoint only requires manage_members, so it must never be able to
+    // grant an admin-panel role like 'admin'/'super_admin'.
+    const ALLOWED_ROLES = new Set(['member', 'volunteer', 'business'])
+    const ALLOWED_STATUSES = new Set(['active', 'inactive', 'suspended'])
+
     // Bulk update (legacy path)
     if (Array.isArray(ids) && ids.length > 0) {
       const normalized = normalizeIds(ids)
       const allowed: Record<string, unknown> = { updatedAt: FieldValue.serverTimestamp() }
       if (typeof updateData.status === 'string') {
+        if (!ALLOWED_STATUSES.has(updateData.status)) {
+          return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 })
+        }
         allowed.status = updateData.status
         if (updateData.status === 'active') {
           allowed.active = true
@@ -238,10 +267,16 @@ export async function PUT(request: NextRequest) {
         }
       }
       if (typeof updateData.role === 'string') {
+        if (!ALLOWED_ROLES.has(updateData.role)) {
+          return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 })
+        }
         allowed.role = updateData.role
         allowed.userType = updateData.role
       }
       if (typeof updateData.userType === 'string') {
+        if (!ALLOWED_ROLES.has(updateData.userType)) {
+          return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 })
+        }
         allowed.userType = updateData.userType
         if (!allowed.role) allowed.role = updateData.userType
       }
@@ -252,6 +287,16 @@ export async function PUT(request: NextRequest) {
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing member ID' }, { status: 400 })
     }
+
+    if (typeof updateData.role === 'string' && !ALLOWED_ROLES.has(updateData.role)) {
+      return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 })
+    }
+    if (typeof updateData.userType === 'string' && !ALLOWED_ROLES.has(updateData.userType)) {
+      return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 })
+    }
+    // Never let a plain member-edit request touch admin-panel permissions.
+    delete updateData.permissions
+    delete updateData.roles
 
     updateData.updatedAt = FieldValue.serverTimestamp()
     await getAdminDb().collection('users').doc(id).set(updateData, { merge: true })
