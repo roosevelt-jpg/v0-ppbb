@@ -162,17 +162,17 @@ export default function CertificatesPage() {
       title="Certificates"
       subtitle="Issue and print certificates you’ve earned through volunteer service"
     >
-      <Card className="p-4 sm:p-5 mb-8 border border-neutral-200 bg-neutral-50 space-y-3">
+      <Card className="p-4 sm:p-5 mb-8 border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h2 className="font-semibold text-neutral-900">Issue certificates</h2>
-            <p className="text-sm text-neutral-600 mt-1">
+            <h2 className="font-semibold text-neutral-900 dark:text-foreground">Issue certificates</h2>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
               Claim milestone certificates yourself based on your logged volunteer hours
               {hoursDisplay != null ? (
                 <>
                   {' '}
                   — currently{' '}
-                  <span className="font-semibold text-neutral-900">
+                  <span className="font-semibold text-neutral-900 dark:text-foreground">
                     {hoursDisplay} hour{hoursDisplay === 1 ? '' : 's'}
                   </span>
                 </>
@@ -183,13 +183,13 @@ export default function CertificatesPage() {
           {issueButton}
         </div>
         {syncMessage ? (
-          <p className="text-sm text-neutral-700 bg-white border border-neutral-200 rounded-lg px-3 py-2">
+          <p className="text-sm text-neutral-700 dark:text-neutral-200 bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg px-3 py-2">
             {syncMessage}
           </p>
         ) : null}
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-500 dark:text-muted-foreground">
           Hours come from charity events you attend — confirm attendance under{' '}
-          <Link href="/dashboard/volunteering" className="underline font-medium text-neutral-800">
+          <Link href="/dashboard/volunteering" className="underline font-medium text-neutral-800 dark:text-foreground">
             Volunteering
           </Link>{' '}
           or My Events, then issue here.
@@ -197,7 +197,7 @@ export default function CertificatesPage() {
       </Card>
 
       <section className="mb-10">
-        <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Badges</h2>
+        <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-foreground">Your Badges</h2>
         {badges.length === 0 ? (
           <DashboardEmptyState
             icon={<Award className="w-12 h-12" />}
@@ -207,7 +207,7 @@ export default function CertificatesPage() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {badges.map((badge) => (
-              <Card key={String(badge.id)} className="p-4 text-center border border-neutral-200">
+              <Card key={String(badge.id)} className="p-4 text-center border border-neutral-200 dark:border-border">
                 <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center bg-neutral-900 rounded-full text-white">
                   <Award size={32} />
                 </div>
@@ -219,7 +219,7 @@ export default function CertificatesPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold mb-4 text-neutral-900">Your Certificates</h2>
+        <h2 className="text-xl font-bold mb-4 text-neutral-900 dark:text-foreground">Your Certificates</h2>
         {certificates.length === 0 ? (
           <DashboardEmptyState
             icon={<Award className="w-12 h-12" />}
@@ -230,7 +230,7 @@ export default function CertificatesPage() {
                 {issueButton}
                 <Link
                   href="/dashboard/volunteering"
-                  className="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 border border-neutral-300 rounded-lg text-sm font-semibold"
+                  className="min-h-[44px] inline-flex items-center justify-center px-5 py-2.5 border border-neutral-300 dark:border-border rounded-lg text-sm font-semibold"
                 >
                   Go to Volunteering
                 </Link>
@@ -265,7 +265,7 @@ export default function CertificatesPage() {
                     <Printer size={16} />
                     Print / Save PDF
                   </button>
-                  <span className="text-xs text-neutral-500 self-center">
+                  <span className="text-xs text-neutral-500 dark:text-muted-foreground self-center">
                     Issued {cert.issuedAt.toLocaleDateString('en-GB')} · {cert.hoursAtIssuance} hours
                   </span>
                 </div>
@@ -276,7 +276,7 @@ export default function CertificatesPage() {
       </section>
 
       {previewCert ? (
-        <div className="hidden print:block fixed inset-0 bg-white p-8 z-[9999]">
+        <div className="hidden print:block fixed inset-0 bg-white dark:bg-card p-8 z-[9999]">
           <CertificateDesignPreview
             data={{
               title: previewCert.title,

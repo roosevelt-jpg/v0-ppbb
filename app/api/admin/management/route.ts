@@ -3,7 +3,7 @@ import { getAdminDb } from '@/lib/firebase-admin'
 import { getUserDisplayName, getUserProfilePictureURL, getUserInitials } from '@/lib/user-profile'
 import { auditFromApiRequest } from '@/lib/audit-log-server'
 import { formatAdminRoleLabel } from '@/lib/audit-log-shared'
-import { auditAdminApiAction, tryResolveAdminUid } from '@/lib/audit-api-helper'
+import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import {
   dispatchAdminInviteEmail,
   dispatchAdminPasswordResetEmail,
@@ -664,12 +664,31 @@ export async function POST(request: NextRequest) {
 // Update admin user
 export async function PUT(request: NextRequest) {
   try {
-    const adminUid = await tryResolveAdminUid(request)
+    const authz = await requireManagementAccess(request)
+    if (!authz.ok) return authz.response
+    const adminUid = authz.uid
+
     const body = await request.json()
     const { id, ...updateData } = body
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
+    }
+
+    const targetSnap = await getAdminDb().collection('admin-users').doc(id).get()
+    const targetData = targetSnap.data() as Record<string, unknown> | undefined
+    const targetIsSuperAdmin = targetData?.role === 'super_admin'
+    const requestingSuperAdmin = authz.role === 'super_admin'
+
+    // Only a super admin may touch an existing super admin's record, or
+    // promote anyone else to super admin — otherwise a caller with only
+    // manage_admins permission could grant themselves (or anyone) the top
+    // role, or silently edit a super admin's permissions.
+    if ((targetIsSuperAdmin || updateData.role === 'super_admin') && !requestingSuperAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Only a super admin can grant or modify super admin access' },
+        { status: 403 }
+      )
     }
 
     updateData.updatedAt = new Date()
@@ -681,17 +700,15 @@ export async function PUT(request: NextRequest) {
 
     await getAdminDb().collection('admin-users').doc(id).update(updateData)
 
-    if (adminUid) {
-      await auditAdminApiAction(request, adminUid, {
-        actionType: 'update',
-        action: `Updated admin user: ${updateData.email || updateData.name || id}`,
-        entityType: 'admin',
-        entityId: id,
-        entityName: String(updateData.name || updateData.email || id),
-        status: 'success',
-        details: updateData.role ? `Role: ${updateData.role}` : '',
-      })
-    }
+    await auditAdminApiAction(request, adminUid, {
+      actionType: 'update',
+      action: `Updated admin user: ${updateData.email || updateData.name || id}`,
+      entityType: 'admin',
+      entityId: id,
+      entityName: String(updateData.name || updateData.email || id),
+      status: 'success',
+      details: updateData.role ? `Role: ${updateData.role}` : '',
+    })
 
     return NextResponse.json({ success: true, message: 'Admin user updated' })
   } catch (error) {
@@ -703,7 +720,10 @@ export async function PUT(request: NextRequest) {
 // Delete admin user
 export async function DELETE(request: NextRequest) {
   try {
-    const adminUid = await tryResolveAdminUid(request)
+    const authz = await requireManagementAccess(request)
+    if (!authz.ok) return authz.response
+    const adminUid = authz.uid
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -711,22 +731,46 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing admin ID' }, { status: 400 })
     }
 
+    if (id === adminUid) {
+      return NextResponse.json(
+        { success: false, error: "You can't delete your own admin account." },
+        { status: 400 }
+      )
+    }
+
     const snap = await getAdminDb().collection('admin-users').doc(id).get()
     const data = snap.data() as Record<string, unknown> | undefined
     const label = String(data?.name || data?.email || id)
 
+    if (data?.role === 'super_admin') {
+      if (authz.role !== 'super_admin') {
+        return NextResponse.json(
+          { success: false, error: 'Only a super admin can delete a super admin account' },
+          { status: 403 }
+        )
+      }
+      const remainingSuperAdmins = await getAdminDb()
+        .collection('admin-users')
+        .where('role', '==', 'super_admin')
+        .get()
+      if (remainingSuperAdmins.size <= 1) {
+        return NextResponse.json(
+          { success: false, error: 'Cannot delete the last remaining super admin' },
+          { status: 400 }
+        )
+      }
+    }
+
     await getAdminDb().collection('admin-users').doc(id).delete()
 
-    if (adminUid) {
-      await auditAdminApiAction(request, adminUid, {
-        actionType: 'delete',
-        action: `Deleted admin user: ${label}`,
-        entityType: 'admin',
-        entityId: id,
-        entityName: label,
-        status: 'success',
-      })
-    }
+    await auditAdminApiAction(request, adminUid, {
+      actionType: 'delete',
+      action: `Deleted admin user: ${label}`,
+      entityType: 'admin',
+      entityId: id,
+      entityName: label,
+      status: 'success',
+    })
 
     return NextResponse.json({ success: true, message: 'Admin user deleted' })
   } catch (error) {

@@ -107,7 +107,7 @@ export default function BusinessCommunitiesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-500">Loading communities...</p>
+        <p className="text-gray-500 dark:text-muted-foreground">Loading communities...</p>
       </div>
     )
   }
@@ -115,23 +115,21 @@ export default function BusinessCommunitiesPage() {
   const list = tab === 'mine' ? communities : tab === 'joined' ? joined : explore
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#faf9f7' }}>
-      <div style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e4e1da', padding: '24px 32px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--secondary)' }}>
+      <div style={{ backgroundColor: 'var(--card)', borderBottom: '1px solid #e4e1da', padding: '24px 32px' }}>
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between px-4 sm:px-0">
           <div>
-            <h1 style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>Communities</h1>
-            <p style={{ color: '#888888', marginTop: '4px' }}>
+            <h1 style={{ color: 'var(--foreground)', fontSize: '28px', fontWeight: 700 }}>Communities</h1>
+            <p style={{ color: 'var(--muted-foreground)', marginTop: '4px' }}>
               Manage yours, explore others, and join to engage — same directory as the member portal
             </p>
             {showApprovalsHint ? (
               <p
+                className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-900 text-amber-800 dark:text-amber-300"
                 style={{
                   marginTop: '12px',
                   padding: '12px',
-                  backgroundColor: '#fffbeb',
-                  border: '1px solid #fcd34d',
                   borderRadius: '8px',
-                  color: '#92400e',
                   fontSize: '14px',
                   maxWidth: '560px',
                 }}
@@ -166,7 +164,7 @@ export default function BusinessCommunitiesPage() {
               type="button"
               onClick={() => setTab(t.id)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold border ${
-                tab === t.id ? 'bg-black text-white border-black' : 'bg-white text-black border-neutral-300'
+                tab === t.id ? 'bg-black text-white border-black' : 'bg-white dark:bg-card text-black dark:text-foreground border-neutral-300 dark:border-border'
               }`}
             >
               {t.label}
@@ -174,7 +172,7 @@ export default function BusinessCommunitiesPage() {
           ))}
           <Link
             href="/communities"
-            className="px-4 py-2 rounded-lg text-sm font-semibold border border-neutral-300 bg-white text-black"
+            className="px-4 py-2 rounded-lg text-sm font-semibold border border-neutral-300 dark:border-border bg-white dark:bg-card text-black dark:text-foreground"
           >
             Full directory
           </Link>
@@ -183,14 +181,14 @@ export default function BusinessCommunitiesPage() {
         {list.length === 0 ? (
           <div
             style={{
-              backgroundColor: '#ffffff',
+              backgroundColor: 'var(--card)',
               borderRadius: '12px',
-              border: '1px solid #e4e1da',
+              border: '1px solid var(--border)',
               padding: '48px 32px',
               textAlign: 'center',
             }}
           >
-            <p style={{ color: '#888888', marginBottom: '16px' }}>
+            <p style={{ color: 'var(--muted-foreground)', marginBottom: '16px' }}>
               {tab === 'mine'
                 ? 'No communities yet'
                 : tab === 'joined'
@@ -229,9 +227,9 @@ export default function BusinessCommunitiesPage() {
                 <div
                   key={community.id}
                   style={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'var(--card)',
                     borderRadius: '12px',
-                    border: '1px solid #e4e1da',
+                    border: '1px solid var(--border)',
                     padding: '20px',
                   }}
                 >
@@ -242,11 +240,12 @@ export default function BusinessCommunitiesPage() {
                       className="w-full h-32 object-cover rounded-lg mb-4"
                     />
                   )}
-                  <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
+                  <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>
                     {community.name}
                   </h3>
                   {tab === 'mine' && isPendingApproval(community.status) ? (
                     <span
+                      className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-900 text-amber-800 dark:text-amber-300"
                       style={{
                         display: 'inline-block',
                         marginBottom: '8px',
@@ -254,15 +253,13 @@ export default function BusinessCommunitiesPage() {
                         borderRadius: '999px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        backgroundColor: '#fffbeb',
-                        color: '#92400e',
-                        border: '1px solid #fcd34d',
                       }}
                     >
                       Pending admin approval
                     </span>
                   ) : tab === 'mine' && community.status === 'archived' ? (
                     <span
+                      className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-300"
                       style={{
                         display: 'inline-block',
                         marginBottom: '8px',
@@ -270,18 +267,15 @@ export default function BusinessCommunitiesPage() {
                         borderRadius: '999px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        backgroundColor: '#fef2f2',
-                        color: '#991b1b',
-                        border: '1px solid #fecaca',
                       }}
                     >
                       Rejected / archived
                     </span>
                   ) : null}
-                  <p style={{ color: '#888888', fontSize: '14px', marginBottom: '12px' }}>
+                  <p style={{ color: 'var(--muted-foreground)', fontSize: '14px', marginBottom: '12px' }}>
                     {community.description}
                   </p>
-                  <p style={{ color: '#666666', fontSize: '12px', marginBottom: '12px' }}>
+                  <p style={{ color: 'var(--muted-foreground)', fontSize: '12px', marginBottom: '12px' }}>
                     <span
                       className={`inline-block px-2 py-0.5 rounded-full font-medium ${genderRestrictionBadgeClass(community.genderRestriction)}`}
                     >
@@ -295,8 +289,8 @@ export default function BusinessCommunitiesPage() {
                       <span
                         key={tag}
                         style={{
-                          backgroundColor: '#f0f0f0',
-                          color: '#666666',
+                          backgroundColor: 'var(--muted)',
+                          color: 'var(--muted-foreground)',
                           padding: '4px 8px',
                           borderRadius: '4px',
                           fontSize: '12px',
@@ -339,7 +333,7 @@ export default function BusinessCommunitiesPage() {
                       <button
                         type="button"
                         onClick={() => router.push(`/business/communities/${community.id}/groups/create`)}
-                        className="flex-1 min-h-[44px] bg-white border border-neutral-300 text-neutral-900 px-4 rounded-md text-sm font-semibold hover:bg-neutral-50"
+                        className="flex-1 min-h-[44px] bg-white dark:bg-card border border-neutral-300 dark:border-border text-neutral-900 dark:text-foreground px-4 rounded-md text-sm font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800"
                       >
                         Add Group
                       </button>
@@ -349,7 +343,7 @@ export default function BusinessCommunitiesPage() {
                         <button
                           type="button"
                           onClick={() => router.push(`/business/communities/create?edit=${community.id}`)}
-                          className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 rounded-md text-neutral-900 hover:bg-neutral-200"
+                          className="min-h-[44px] min-w-[44px] px-3 bg-neutral-100 dark:bg-neutral-800 rounded-md text-neutral-900 dark:text-foreground hover:bg-neutral-200 dark:hover:bg-neutral-700"
                           aria-label="Edit community"
                         >
                           <Edit2 size={16} className="mx-auto" />

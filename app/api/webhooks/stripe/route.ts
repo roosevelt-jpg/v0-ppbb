@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { constructWebhookEvent } from '@/lib/stripe-utils'
-import { db } from '@/lib/firebase'
-import { doc, setDoc, updateDoc, Timestamp, query, collection, where, getDocs } from 'firebase/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
+import { Timestamp, FieldValue } from 'firebase-admin/firestore'
 import {
   constructStripeWebhookEvent,
   handleMarketplaceCheckoutCompleted,
@@ -33,6 +33,15 @@ export async function POST(req: NextRequest) {
 
     console.log('[v0] Processing webhook event:', event.type)
 
+    // Admin SDK throughout this handler, not the client SDK: Firestore
+    // rules require an authenticated matching user for both `subscriptions`
+    // and `users` writes, and this is a server-to-server webhook with no
+    // Firebase Auth session at all. Every client-SDK write here used to be
+    // an unauthenticated request that Firestore rules reject outright —
+    // subscription tracking (and everything downstream of it, including
+    // renewal dates) was failing silently on every single event.
+    const db = getAdminDb()
+
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as {
@@ -48,15 +57,12 @@ export async function POST(req: NextRequest) {
           await handleMarketplaceCheckoutCompleted(event.data.object as never)
           await markCheckoutSessionProcessed(session.id)
         } else if (session.metadata?.type === 'event_ticket' && session.metadata.registrationId) {
-          const { getAdminDb } = await import('@/lib/firebase-admin')
-          const { Timestamp, FieldValue } = await import('firebase-admin/firestore')
           const {
             generateCheckInCode,
             generateQrToken,
             incrementTicketSold,
             incrementCouponUsed,
           } = await import('@/lib/event-luma-server')
-          const db = getAdminDb()
           const regRef = db.collection('eventRegistrations').doc(session.metadata.registrationId)
           const regSnap = await regRef.get()
           if (regSnap.exists && regSnap.data()?.paymentStatus !== 'paid') {
@@ -116,63 +122,57 @@ export async function POST(req: NextRequest) {
             }
           }
         } else if (
-          session.metadata?.type === 'membership' &&
-          session.metadata.userId &&
-          session.metadata.planId
-        ) {
-          const { completeMembershipPayment } = await import('@/lib/payment-completion')
-          await completeMembershipPayment({
-            userId: session.metadata.userId,
-            planId: session.metadata.planId,
-            gateway: 'stripe',
-            paymentReference: session.id,
-            amountCents:
-              typeof session.amount_total === 'number' ? session.amount_total : undefined,
-          })
-        } else if (
           session.metadata?.type === 'advertising' &&
           session.metadata.advertisingRequestId
         ) {
-          const { getAdminDb } = await import('@/lib/firebase-admin')
-          const { Timestamp: AdminTs } = await import('firebase-admin/firestore')
-          const adminDb = getAdminDb()
-          await adminDb
+          await db
             .collection('advertisingRequests')
             .doc(session.metadata.advertisingRequestId)
             .set(
               {
                 status: 'paid',
-                paidAt: AdminTs.now(),
+                paidAt: Timestamp.now(),
                 stripeSessionId: session.id,
-                updatedAt: AdminTs.now(),
+                updatedAt: Timestamp.now(),
               },
               { merge: true }
             )
         }
+        // Membership no longer goes through Checkout Sessions at all — an
+        // embedded card form on our own page creates the Subscription
+        // directly (see createStripeMembershipIntent), so activation is
+        // handled below in customer.subscription.updated instead.
         break
       }
+
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as any
         const customerId = subscription.customer
         const subscriptionId = subscription.id
 
-        // Get customer email
-        const { stripe } = await import('@/lib/stripe-utils')
-        const customer = await stripe.customers.retrieve(customerId)
-        const email = (customer as any).email
-
-        // Get user ID from Firestore by email
-        const usersQuery = query(collection(db, 'users'), where('email', '==', email))
-        const usersSnapshot = await getDocs(usersQuery)
-        const userId = usersSnapshot.docs[0]?.id
+        // The embedded-checkout flow puts userId/planId directly on the
+        // Subscription's own metadata at creation time (createStripeMembershipIntent).
+        // Fall back to a customer-email lookup for anything else that ends
+        // up here without it.
+        let userId = subscription.metadata?.userId as string | undefined
+        if (!userId) {
+          const { stripe } = await import('@/lib/stripe-utils')
+          const customer = await stripe.customers.retrieve(customerId)
+          const email = (customer as any).email
+          const usersSnap = await db.collection('users').where('email', '==', email).limit(1).get()
+          userId = usersSnap.docs[0]?.id
+        }
 
         if (!userId) {
-          console.error('[v0] User not found for email:', email)
+          console.error('[v0] User not found for subscription:', subscriptionId)
           return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
-        // Save subscription to Firestore
+        const subRef = db.collection('subscriptions').doc(subscriptionId)
+        const prevSnap = await subRef.get()
+        const prevStatus = prevSnap.exists ? (prevSnap.data()?.status as string | undefined) : undefined
+
         const subscriptionData = {
           userId,
           stripeSubscriptionId: subscriptionId,
@@ -189,8 +189,51 @@ export async function POST(req: NextRequest) {
           updatedAt: Timestamp.now(),
         }
 
-        await setDoc(doc(db, 'subscriptions', subscriptionId), subscriptionData)
+        await db.collection('subscriptions').doc(subscriptionId).set(subscriptionData, { merge: true })
         console.log('[v0] Subscription saved:', subscriptionId)
+
+        const isActiveNow = ['active', 'trialing'].includes(subscription.status)
+        const wasActiveBefore = ['active', 'trialing'].includes(prevStatus || '')
+
+        if (
+          subscription.metadata?.type === 'membership' &&
+          subscription.metadata.planId &&
+          isActiveNow &&
+          !wasActiveBefore
+        ) {
+          // The subscription just transitioned into active/trialing for the
+          // first time — the member confirmed their card on the embedded
+          // form and Stripe accepted it. Fires here rather than at
+          // subscription creation because `customer.subscription.created`
+          // arrives immediately with status 'incomplete', before the
+          // member has entered anything — activating there would grant
+          // access before payment is actually confirmed.
+          const { completeMembershipPayment } = await import('@/lib/payment-completion')
+          await completeMembershipPayment({
+            userId,
+            planId: subscription.metadata.planId,
+            gateway: 'stripe',
+            paymentReference: subscriptionId,
+            promoCodeId: subscription.metadata.promoCodeId || undefined,
+            promoCode: subscription.metadata.promoCode || undefined,
+            renewDateOverride: subscription.current_period_end
+              ? new Date(subscription.current_period_end * 1000)
+              : undefined,
+          })
+        } else if (
+          subscription.status === 'incomplete_expired' &&
+          subscription.metadata?.promoCodeId &&
+          prevStatus !== 'incomplete_expired'
+        ) {
+          // A trial-promo reservation whose member never finished entering
+          // a card — Stripe auto-expires the subscription (default 23
+          // hours). Roll the reservation back so the code isn't burned.
+          const { rollbackMembershipPromoReservation } = await import('@/lib/membership-promo')
+          await rollbackMembershipPromoReservation(
+            subscription.metadata.promoCodeId,
+            userId
+          ).catch((err) => console.error('[v0] Promo rollback on subscription expiry failed:', err))
+        }
         break
       }
 
@@ -198,8 +241,7 @@ export async function POST(req: NextRequest) {
         const subscription = event.data.object as any
         const subscriptionId = subscription.id
 
-        // Mark subscription as cancelled
-        await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+        await db.collection('subscriptions').doc(subscriptionId).update({
           status: 'cancelled',
           cancelledAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
@@ -215,6 +257,15 @@ export async function POST(req: NextRequest) {
             email: subscription.metadata?.email || null,
           })
           if (userId) {
+            // The subscription is genuinely gone (cancelled, or Stripe gave
+            // up retrying a failed card) — without this, hasActiveMembership
+            // keeps returning true forever since it short-circuits on
+            // status === 'active' before ever checking a renew date.
+            await db.collection('users').doc(userId).set(
+              { membershipStatus: 'cancelled', updatedAt: Timestamp.now() },
+              { merge: true }
+            )
+
             const endsAt = subscription.current_period_end
               ? new Date(subscription.current_period_end * 1000)
               : null
@@ -225,7 +276,7 @@ export async function POST(req: NextRequest) {
             })
           }
         } catch (mailErr) {
-          console.error('[v0] Cancel email failed:', mailErr)
+          console.error('[v0] Cancel handling failed:', mailErr)
         }
 
         console.log('[v0] Subscription cancelled:', subscriptionId)
@@ -237,7 +288,6 @@ export async function POST(req: NextRequest) {
         const subscriptionId = invoice.subscription
 
         if (subscriptionId) {
-          // Log charge
           const periodEndSec = invoice.lines?.data?.[0]?.period?.end
           const paidAtSec = invoice.status_transitions?.paid_at || invoice.created
           const chargeData = {
@@ -253,43 +303,59 @@ export async function POST(req: NextRequest) {
             createdAt: Timestamp.now(),
           }
 
-          await setDoc(doc(db, 'subscriptions', subscriptionId, 'charges', invoice.id), chargeData)
+          await db
+            .collection('subscriptions')
+            .doc(subscriptionId)
+            .collection('charges')
+            .doc(invoice.id)
+            .set(chargeData)
 
-          // Update subscription next billing date
           if (periodEndSec) {
-            await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+            await db.collection('subscriptions').doc(subscriptionId).update({
               nextBillingDate: Timestamp.fromDate(new Date(periodEndSec * 1000)),
               paymentStatus: 'succeeded',
               updatedAt: Timestamp.now(),
             })
           }
 
-          // Renewal emails for recurring cycles (first payment already covered by checkout activation)
-          const billingReason = String(invoice.billing_reason || '')
-          if (billingReason === 'subscription_cycle' || billingReason === 'subscription_update') {
-            try {
-              const {
-                notifyMembershipRenewed,
-                resolveUserIdForSubscription,
-              } = await import('@/lib/member-notifications')
-              const customerEmail =
-                typeof invoice.customer_email === 'string' ? invoice.customer_email : null
-              const userId = await resolveUserIdForSubscription({
-                subscriptionId,
-                email: customerEmail,
-              })
-              if (userId) {
-                notifyMembershipRenewed({
-                  userId,
-                  planName: invoice.lines?.data?.[0]?.description || undefined,
-                  amount: invoice.amount_paid / 100,
-                  currency: String(invoice.currency || 'aed').toUpperCase(),
-                  nextBillingDate: periodEndSec ? new Date(periodEndSec * 1000) : null,
-                })
-              }
-            } catch (mailErr) {
-              console.error('[v0] Renewal email failed:', mailErr)
+          const customerEmail =
+            typeof invoice.customer_email === 'string' ? invoice.customer_email : null
+          try {
+            const { resolveUserIdForSubscription } = await import('@/lib/member-notifications')
+            const userId = await resolveUserIdForSubscription({ subscriptionId, email: customerEmail })
+
+            // Push the user doc's membershipRenewDate forward on every
+            // successful charge — completeMembershipPayment only ever sets
+            // it once, at checkout completion. Without this, membership-
+            // expire would downgrade every paying Stripe subscriber (trial
+            // or not) the moment their *first* billing period ends, even
+            // though they're still actively paying every cycle.
+            if (userId && periodEndSec) {
+              await db.collection('users').doc(userId).set(
+                {
+                  membershipStatus: 'active',
+                  membershipRenewDate: new Date(periodEndSec * 1000).toISOString(),
+                  membershipExpiredAt: FieldValue.delete(),
+                  updatedAt: Timestamp.now(),
+                },
+                { merge: true }
+              )
             }
+
+            // Renewal emails for recurring cycles (first payment already covered by checkout activation)
+            const billingReason = String(invoice.billing_reason || '')
+            if (userId && (billingReason === 'subscription_cycle' || billingReason === 'subscription_update')) {
+              const { notifyMembershipRenewed } = await import('@/lib/member-notifications')
+              notifyMembershipRenewed({
+                userId,
+                planName: invoice.lines?.data?.[0]?.description || undefined,
+                amount: invoice.amount_paid / 100,
+                currency: String(invoice.currency || 'aed').toUpperCase(),
+                nextBillingDate: periodEndSec ? new Date(periodEndSec * 1000) : null,
+              })
+            }
+          } catch (mailErr) {
+            console.error('[v0] Renewal handling failed:', mailErr)
           }
 
           console.log('[v0] Charge logged for subscription:', subscriptionId)
@@ -302,7 +368,6 @@ export async function POST(req: NextRequest) {
         const subscriptionId = invoice.subscription
 
         if (subscriptionId) {
-          // Log failed charge
           const chargeData = {
             stripeInvoiceId: invoice.id,
             stripeSubscriptionId: subscriptionId,
@@ -313,10 +378,14 @@ export async function POST(req: NextRequest) {
             createdAt: Timestamp.now(),
           }
 
-          await setDoc(doc(db, 'subscriptions', subscriptionId, 'charges', invoice.id), chargeData)
+          await db
+            .collection('subscriptions')
+            .doc(subscriptionId)
+            .collection('charges')
+            .doc(invoice.id)
+            .set(chargeData)
 
-          // Update subscription status
-          await updateDoc(doc(db, 'subscriptions', subscriptionId), {
+          await db.collection('subscriptions').doc(subscriptionId).update({
             paymentStatus: 'failed',
             lastPaymentError: invoice.last_finalization_error?.message,
             updatedAt: Timestamp.now(),

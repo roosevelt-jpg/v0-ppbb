@@ -65,7 +65,7 @@ export function SponsorTagsSelector({
 
   return (
     <div>
-      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#111111', marginBottom: '12px' }}>
+      <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '12px' }}>
         Sponsor Tags
       </label>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
@@ -76,8 +76,8 @@ export function SponsorTagsSelector({
             onClick={() => toggleTag(tagOption.value)}
             style={{
               padding: '10px 12px',
-              border: selectedTags.includes(tagOption.value) ? `2px solid ${tagOption.color}` : '1px solid #ddd',
-              backgroundColor: selectedTags.includes(tagOption.value) ? `${tagOption.color}20` : '#fff',
+              border: selectedTags.includes(tagOption.value) ? `2px solid ${tagOption.color}` : '1px solid var(--border)',
+              backgroundColor: selectedTags.includes(tagOption.value) ? `${tagOption.color}20` : 'var(--card)',
               borderRadius: '6px',
               cursor: 'pointer',
               textAlign: 'left',
@@ -88,7 +88,7 @@ export function SponsorTagsSelector({
             <div style={{ fontSize: '13px', fontWeight: 600, color: tagOption.color }}>
               {tagOption.label}
             </div>
-            <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--muted-foreground)', marginTop: '2px' }}>
               {tagOption.description}
             </div>
           </button>

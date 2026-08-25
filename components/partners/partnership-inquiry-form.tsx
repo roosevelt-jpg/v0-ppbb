@@ -21,6 +21,8 @@ type Props = {
   cancelHref?: string
   onSuccess?: () => void
   className?: string
+  /** Prefill fields, e.g. when resubmitting a declined request. */
+  initialValues?: Partial<Pick<PartnershipInquiryPayload, 'title' | 'description'>>
 }
 
 /**
@@ -34,14 +36,15 @@ export function PartnershipInquiryForm({
   cancelHref,
   onSuccess,
   className = '',
+  initialValues,
 }: Props) {
   const { user, firebaseUser } = useAuth()
   const [form, setForm] = useState({
     submitterName: '',
     submitterEmail: '',
     phone: '',
-    title: '',
-    description: '',
+    title: initialValues?.title || '',
+    description: initialValues?.description || '',
   })
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)

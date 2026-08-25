@@ -40,7 +40,7 @@ export default function EventsPage() {
       fallback={
         <AdminPageLayout title="Events">
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-500">Loading events...</p>
+            <p className="text-gray-500 dark:text-muted-foreground">Loading events...</p>
           </div>
         </AdminPageLayout>
       }
@@ -199,7 +199,7 @@ function EventsPageContent() {
       case 'changes_requested':
         return 'bg-orange-100 text-orange-800'
       case 'draft':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 dark:bg-muted text-gray-800 dark:text-foreground'
       case 'published':
         return 'bg-green-100 text-green-800'
       case 'rejected':
@@ -209,7 +209,7 @@ function EventsPageContent() {
       case 'completed':
         return 'bg-blue-100 text-blue-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 dark:bg-muted text-gray-800 dark:text-foreground'
     }
   }
 
@@ -230,7 +230,7 @@ function EventsPageContent() {
     return (
       <AdminPageLayout title="Events">
         <div className="flex items-center justify-center py-12">
-          <p className="text-gray-500">Loading events...</p>
+          <p className="text-gray-500 dark:text-muted-foreground">Loading events...</p>
         </div>
       </AdminPageLayout>
     )
@@ -240,7 +240,7 @@ function EventsPageContent() {
     <AdminPageLayout title="Events">
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
-          <h2 className="text-2xl font-bold text-black">Events</h2>
+          <h2 className="text-2xl font-bold text-black dark:text-foreground">Events</h2>
           <Link
             href="/admin/events/create"
             className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2 bg-black !text-white rounded-lg hover:bg-gray-900 transition-colors min-h-[40px]"
@@ -251,7 +251,7 @@ function EventsPageContent() {
         </div>
 
         {/* Status Tabs */}
-        <div className="flex gap-2 border-b border-gray-200 overflow-x-auto">
+        <div className="flex gap-2 border-b border-gray-200 dark:border-border overflow-x-auto">
           {(['all', 'pending_approval', 'draft', 'published', 'changes_requested', 'rejected', 'cancelled', 'completed'] as const).map((tab) => {
             const count = tab === 'all' ? events.length : tab === 'pending_approval' ? pendingCount : getEventsByStatus(tab).length
             const label = tab === 'all' ? 'All Events' 
@@ -282,23 +282,23 @@ function EventsPageContent() {
         </div>
 
         {activeTab === 'published' && (
-          <div className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-white p-4">
-            <label className="text-sm text-gray-700">
+          <div className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card p-4">
+            <label className="text-sm text-gray-700 dark:text-foreground">
               Published from
               <input
                 type="date"
                 value={publishedFrom}
                 onChange={(e) => setPublishedFrom(e.target.value)}
-                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+                className="mt-1 block rounded-md border border-gray-300 dark:border-border px-3 py-1.5 text-sm"
               />
             </label>
-            <label className="text-sm text-gray-700">
+            <label className="text-sm text-gray-700 dark:text-foreground">
               Published to
               <input
                 type="date"
                 value={publishedTo}
                 onChange={(e) => setPublishedTo(e.target.value)}
-                className="mt-1 block rounded-md border border-gray-300 px-3 py-1.5 text-sm"
+                className="mt-1 block rounded-md border border-gray-300 dark:border-border px-3 py-1.5 text-sm"
               />
             </label>
             {(publishedFrom || publishedTo) && (
@@ -308,27 +308,27 @@ function EventsPageContent() {
                   setPublishedFrom('')
                   setPublishedTo('')
                 }}
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+                className="rounded-md border border-gray-300 dark:border-border px-3 py-1.5 text-sm hover:bg-gray-50"
               >
                 Clear dates
               </button>
             )}
-            <p className="text-xs text-gray-500 w-full sm:w-auto sm:ml-auto">
+            <p className="text-xs text-gray-500 dark:text-muted-foreground w-full sm:w-auto sm:ml-auto">
               Current &amp; upcoming events appear first
             </p>
           </div>
         )}
 
         {filteredEvents.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">
+          <div className="text-center py-12 bg-gray-50 dark:bg-muted rounded-lg">
+            <p className="text-gray-500 dark:text-muted-foreground">
               {activeTab === 'pending_approval' 
                 ? 'No events pending approval.' 
                 : `No ${activeTab === 'all' ? '' : activeTab} events found.`}
             </p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 min-w-0">
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border min-w-0">
             <ul className="lg:hidden divide-y divide-gray-100">
               {filteredEvents.map((event) => (
                 <li key={event.id} className="p-4 space-y-3">
@@ -346,12 +346,12 @@ function EventsPageContent() {
                       >
                         {event.title}
                       </Link>
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-muted-foreground">
                         {event.category || 'General'} ·{' '}
                         {event.createdByRole === 'business' ? 'Business' : 'Admin'}
                       </p>
-                      <p className="mt-1 text-xs text-gray-500 break-words">{locationDisplay(event)}</p>
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-muted-foreground break-words">{locationDisplay(event)}</p>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-muted-foreground">
                         {(() => {
                           const date = toEventDate(event.startDate)
                           return date ? format(date, 'MMM dd, yyyy') : '-'
@@ -402,23 +402,23 @@ function EventsPageContent() {
             </ul>
             <div className="hidden lg:block admin-table-scroll">
             <table className="w-full min-w-[1200px]">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gray-50 dark:bg-muted border-b border-gray-200 dark:border-border">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Event</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created By</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Submitted</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Revenue</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Event</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Category</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Created By</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Location</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Date</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Submitted</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Revenue</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredEvents.map((event) => (
                   <tr key={event.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                    <td className="px-6 py-3 text-sm font-medium text-gray-900 dark:text-foreground">
                       <div className="flex items-center gap-3 min-w-0">
                         <EventBannerThumb
                           event={event as never}
@@ -434,26 +434,26 @@ function EventsPageContent() {
                         </Link>
                       </div>
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">
-                      <span className="px-2 py-1 bg-gray-100 rounded text-xs">{event.category || 'General'}</span>
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
+                      <span className="px-2 py-1 bg-gray-100 dark:bg-muted rounded text-xs">{event.category || 'General'}</span>
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <span>{event.createdByRole === 'business' ? 'Business' : 'Admin'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600 max-w-[200px]">
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground max-w-[200px]">
                       <span className="line-clamp-2" title={locationDisplay(event)}>
                         {locationDisplay(event)}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
                       {(() => {
                         const date = toEventDate(event.startDate)
                         return date ? format(date, 'MMM dd, yyyy') : '-'
                       })()}
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
                       {(() => {
                         const date = submittedDisplayDate(event)
                         return date ? format(date, 'MMM dd, yyyy') : '-'
@@ -465,7 +465,7 @@ function EventsPageContent() {
                         {event.status.replace(/_/g, ' ').toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-sm text-gray-600">
+                    <td className="px-6 py-3 text-sm text-gray-600 dark:text-muted-foreground">
                       {event.pricingType === 'free' ? 'Free' : `AED ${event.totalRevenue || 0}`}
                     </td>
                     <td className="px-6 py-3 text-sm">

@@ -80,10 +80,10 @@ export default function Marketplace() {
   const showMobileDetail = Boolean(selectedMember)
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
-      <div className="bg-white border-b border-[#e4e1da] px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-screen bg-[#faf9f7] dark:bg-neutral-950">
+      <div className="bg-white dark:bg-card border-b border-[#e4e1da] dark:border-border px-4 py-6 sm:px-6 sm:py-8">
         <div className="max-w-6xl mx-auto min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#111111]">Marketplace & Networking</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] dark:text-foreground">Marketplace & Networking</h1>
           <p className="text-[#888888] mt-2 text-sm sm:text-base">
             Connect with community members who opted into the member directory
           </p>
@@ -96,16 +96,16 @@ export default function Marketplace() {
             <button
               type="button"
               onClick={() => setChatOpen(false)}
-              className="inline-flex items-center gap-2 text-sm font-medium text-[#111111] underline"
+              className="inline-flex items-center gap-2 text-sm font-medium text-[#111111] dark:text-foreground underline"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to {selectedMember.displayName}’s profile
             </button>
-            <Card className="bg-white border-[#e4e1da] p-2 sm:p-4 overflow-hidden">
+            <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-2 sm:p-4 overflow-hidden">
               <Suspense
                 fallback={
                   <div className="flex justify-center py-16">
-                    <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+                    <Loader2 className="w-6 h-6 animate-spin text-neutral-400 dark:text-neutral-500" />
                   </div>
                 }
               >
@@ -127,7 +127,7 @@ export default function Marketplace() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search members by name, location, or bio…"
-              className="w-full mb-6 min-h-[44px] px-4 py-3 border border-neutral-300 rounded-lg text-sm"
+              className="w-full mb-6 min-h-[44px] px-4 py-3 border border-neutral-300 dark:border-border rounded-lg text-sm"
             />
 
             {error ? <p className="text-sm text-red-600 mb-4">{error}</p> : null}
@@ -135,15 +135,15 @@ export default function Marketplace() {
             {loading ? (
               <div className="text-center py-8">Loading members…</div>
             ) : members.length === 0 ? (
-              <Card className="bg-white border-[#e4e1da] p-8 sm:p-12 text-center">
-                <Users className="w-12 h-12 mx-auto mb-4 text-neutral-400" />
+              <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-8 sm:p-12 text-center">
+                <Users className="w-12 h-12 mx-auto mb-4 text-neutral-400 dark:text-neutral-500" />
                 <p className="text-[#888888]">No members in the directory yet.</p>
               </Card>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 min-w-0">
                 <div className={`lg:col-span-1 min-w-0 ${showMobileDetail ? 'hidden lg:block' : 'block'}`}>
-                  <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
-                    <h3 className="text-lg font-semibold text-[#111111] mb-4">Community Members</h3>
+                  <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-4 sm:p-6">
+                    <h3 className="text-lg font-semibold text-[#111111] dark:text-foreground mb-4">Community Members</h3>
                     <div className="space-y-2 max-h-[min(24rem,50vh)] lg:max-h-96 overflow-y-auto">
                       {members.map((member) => {
                         const selected = selectedMember?.id === member.id
@@ -167,11 +167,11 @@ export default function Marketplace() {
                             }}
                             className={`w-full text-left p-3 min-h-[44px] rounded-lg border cursor-pointer transition-colors ${
                               selected
-                                ? 'border-[#111111] border-2 bg-neutral-100'
-                                : 'border-[#e4e1da] bg-white hover:bg-neutral-50'
+                                ? 'border-[#111111] border-2 bg-neutral-100 dark:bg-neutral-800'
+                                : 'border-[#e4e1da] dark:border-border bg-white dark:bg-card hover:bg-neutral-50 dark:hover:bg-neutral-800'
                             }`}
                           >
-                            <p className="font-semibold text-[#111111] truncate">{member.displayName}</p>
+                            <p className="font-semibold text-[#111111] dark:text-foreground truncate">{member.displayName}</p>
                             {member.location ? (
                               <p className="text-[#888888] text-xs truncate mt-0.5">{member.location}</p>
                             ) : null}
@@ -186,17 +186,17 @@ export default function Marketplace() {
                   className={`lg:col-span-2 min-w-0 ${showMobileDetail ? 'block' : 'hidden lg:block'}`}
                 >
                   {selectedMember ? (
-                    <Card className="bg-white border-[#e4e1da] p-4 sm:p-6">
+                    <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-4 sm:p-6">
                       <div className="flex items-center gap-2 mb-4 min-h-[44px]">
                         <button
                           type="button"
                           onClick={() => setSelectedMember(null)}
-                          className="lg:hidden inline-flex items-center justify-center min-h-[36px] min-w-[36px] rounded-lg hover:bg-neutral-100"
+                          className="lg:hidden inline-flex items-center justify-center min-h-[36px] min-w-[36px] rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
                           aria-label="Back to members"
                         >
                           <ArrowLeft className="w-4 h-4" />
                         </button>
-                        <h3 className="text-lg sm:text-xl font-semibold text-[#111111] truncate">
+                        <h3 className="text-lg sm:text-xl font-semibold text-[#111111] dark:text-foreground truncate">
                           {selectedMember.displayName}
                         </h3>
                       </div>
@@ -205,7 +205,7 @@ export default function Marketplace() {
                         {selectedMember.location ? (
                           <div>
                             <p className="text-[#888888] text-xs uppercase">Location</p>
-                            <p className="text-[#111111] font-semibold mt-1 break-words">
+                            <p className="text-[#111111] dark:text-foreground font-semibold mt-1 break-words">
                               {selectedMember.location}
                             </p>
                           </div>
@@ -213,7 +213,7 @@ export default function Marketplace() {
                         {selectedMember.bio ? (
                           <div>
                             <p className="text-[#888888] text-xs uppercase">Bio</p>
-                            <p className="text-[#111111] mt-1 whitespace-pre-wrap break-words">
+                            <p className="text-[#111111] dark:text-foreground mt-1 whitespace-pre-wrap break-words">
                               {selectedMember.bio}
                             </p>
                           </div>
@@ -225,7 +225,7 @@ export default function Marketplace() {
                               {selectedMember.skills.map((skill) => (
                                 <span
                                   key={skill}
-                                  className="bg-neutral-100 text-[#111111] px-3 py-1 rounded text-xs"
+                                  className="bg-neutral-100 dark:bg-neutral-800 text-[#111111] dark:text-foreground px-3 py-1 rounded text-xs"
                                 >
                                   {skill}
                                 </span>
@@ -235,14 +235,14 @@ export default function Marketplace() {
                         ) : null}
                       </div>
 
-                      <div className="border-t border-[#e4e1da] pt-4">
+                      <div className="border-t border-[#e4e1da] dark:border-border pt-4">
                         <p className="text-[#888888] text-xs uppercase mb-2">Message</p>
                         <textarea
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           placeholder="Write your message…"
                           rows={4}
-                          className="w-full min-h-[88px] p-3 border border-[#e4e1da] rounded-lg text-[#111111] text-sm mb-3 resize-y"
+                          className="w-full min-h-[88px] p-3 border border-[#e4e1da] dark:border-border rounded-lg text-[#111111] dark:text-foreground text-sm mb-3 resize-y"
                         />
                         <Button
                           onClick={openChatWithMember}
@@ -254,7 +254,7 @@ export default function Marketplace() {
                       </div>
                     </Card>
                   ) : (
-                    <Card className="bg-white border-[#e4e1da] p-8 sm:p-12 text-center hidden lg:block">
+                    <Card className="bg-white dark:bg-card border-[#e4e1da] dark:border-border p-8 sm:p-12 text-center hidden lg:block">
                       <MessageCircle className="w-12 h-12 mx-auto mb-4 text-[#888888] opacity-30" />
                       <p className="text-[#888888]">Select a member to start connecting</p>
                     </Card>

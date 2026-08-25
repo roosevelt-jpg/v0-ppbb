@@ -30,12 +30,12 @@ const STATUS_OPTIONS: JobApplication['status'][] = [
   'rejected',
 ]
 
-const STATUS_STYLES: Record<JobApplication['status'], { bg: string; color: string }> = {
-  pending: { bg: '#fef3c7', color: '#92400e' },
-  reviewing: { bg: '#dbeafe', color: '#1e40af' },
-  shortlisted: { bg: '#e0e7ff', color: '#3730a3' },
-  accepted: { bg: '#dcfce7', color: '#166534' },
-  rejected: { bg: '#fee2e2', color: '#991b1b' },
+const STATUS_STYLES: Record<JobApplication['status'], string> = {
+  pending: 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
+  reviewing: 'bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300',
+  shortlisted: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300',
+  accepted: 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300',
+  rejected: 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300',
 }
 
 type ActivityFilter = 'all' | '1h' | '24h' | '7d' | '14d' | '30d'
@@ -294,26 +294,26 @@ export default function BusinessApplicants() {
 
   if (opportunityIdFilter) {
     return (
-      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center text-neutral-500 text-sm">
+      <div className="min-h-screen bg-[#f5f5f5] dark:bg-neutral-950 flex items-center justify-center text-neutral-500 dark:text-muted-foreground text-sm">
         Opening job applicants…
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="bg-white border-b border-neutral-200 px-4 sm:px-8 py-6">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-neutral-950">
+      <div className="bg-white dark:bg-card border-b border-neutral-200 dark:border-border px-4 sm:px-8 py-6">
         <div className="max-w-7xl mx-auto">
           <button
             type="button"
             onClick={() => router.push('/business/opportunities')}
-            className="flex items-center gap-2 text-sm text-neutral-500 mb-3 hover:text-neutral-800"
+            className="flex items-center gap-2 text-sm text-neutral-500 dark:text-muted-foreground mb-3 hover:text-neutral-800"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Opportunities
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Candidates</h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-foreground">Candidates</h1>
+          <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1">
             Browse applicants, filter by activity, and download CVs
           </p>
         </div>
@@ -322,8 +322,8 @@ export default function BusinessApplicants() {
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
           {/* Sidebar filters */}
-          <aside className="bg-[#eeeeee] rounded-lg p-5 h-fit lg:sticky lg:top-4">
-            <label className="block text-sm font-semibold text-neutral-800 mb-2">
+          <aside className="bg-[#eeeeee] dark:bg-neutral-800 rounded-lg p-5 h-fit lg:sticky lg:top-4">
+            <label className="block text-sm font-semibold text-neutral-800 dark:text-foreground mb-2">
               Search Keywords
             </label>
             <div className="relative mb-5">
@@ -332,28 +332,28 @@ export default function BusinessApplicants() {
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 placeholder="Name, title, skills…"
-                className="w-full h-10 rounded-md border border-neutral-300 bg-white pl-3 pr-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card pl-3 pr-9 text-sm text-neutral-900 dark:text-foreground placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
               />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500" />
             </div>
 
-            <label className="block text-sm font-semibold text-neutral-800 mb-2">Location</label>
+            <label className="block text-sm font-semibold text-neutral-800 dark:text-foreground mb-2">Location</label>
             <div className="relative mb-5">
               <input
                 type="search"
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
                 placeholder="City or emirate"
-                className="w-full h-10 rounded-md border border-neutral-300 bg-white pl-3 pr-9 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card pl-3 pr-9 text-sm text-neutral-900 dark:text-foreground placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
               />
-              <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500" />
             </div>
 
-            <label className="block text-sm font-semibold text-neutral-800 mb-2">Category</label>
+            <label className="block text-sm font-semibold text-neutral-800 dark:text-foreground mb-2">Category</label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 mb-5 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-3 text-sm text-neutral-900 dark:text-foreground mb-5 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
             >
               <option value="all">All Opportunities</option>
               {opportunityOptions.map((opt) => (
@@ -363,11 +363,11 @@ export default function BusinessApplicants() {
               ))}
             </select>
 
-            <label className="block text-sm font-semibold text-neutral-800 mb-2">Status</label>
+            <label className="block text-sm font-semibold text-neutral-800 dark:text-foreground mb-2">Status</label>
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value as typeof filter)}
-              className="w-full h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm text-neutral-900 mb-5 capitalize focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-3 text-sm text-neutral-900 dark:text-foreground mb-5 capitalize focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
             >
               <option value="all">All Statuses</option>
               {STATUS_OPTIONS.map((s) => (
@@ -377,11 +377,11 @@ export default function BusinessApplicants() {
               ))}
             </select>
 
-            <p className="text-sm font-semibold text-neutral-800 mb-3">Last Activity</p>
+            <p className="text-sm font-semibold text-neutral-800 dark:text-foreground mb-3">Last Activity</p>
             <ul className="space-y-2.5">
               {ACTIVITY_OPTIONS.map((opt) => (
                 <li key={opt.id}>
-                  <label className="flex items-center gap-2.5 text-sm text-neutral-700 cursor-pointer">
+                  <label className="flex items-center gap-2.5 text-sm text-neutral-700 dark:text-neutral-200 cursor-pointer">
                     <input
                       type="radio"
                       name="last-activity"
@@ -389,7 +389,7 @@ export default function BusinessApplicants() {
                       onChange={() => setActivity(opt.id)}
                       className="accent-neutral-900"
                     />
-                    <span className={activity === opt.id ? 'font-medium text-neutral-900' : ''}>
+                    <span className={activity === opt.id ? 'font-medium text-neutral-900 dark:text-foreground' : ''}>
                       {opt.label}
                     </span>
                   </label>
@@ -401,15 +401,15 @@ export default function BusinessApplicants() {
           {/* Results */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-neutral-900">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-foreground">
                 {loading ? 'Loading…' : `${filtered.length} Candidate${filtered.length === 1 ? '' : 's'} Found`}
               </h2>
             </div>
 
             {loading ? (
-              <div className="text-center py-16 text-neutral-500">Loading candidates…</div>
+              <div className="text-center py-16 text-neutral-500 dark:text-muted-foreground">Loading candidates…</div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16 rounded-lg bg-white border border-neutral-200 text-neutral-500">
+              <div className="text-center py-16 rounded-lg bg-white dark:bg-card border border-neutral-200 dark:border-border text-neutral-500 dark:text-muted-foreground">
                 No candidates match your filters.
               </div>
             ) : (
@@ -426,10 +426,10 @@ export default function BusinessApplicants() {
                   return (
                     <article
                       key={app.id}
-                      className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5 flex flex-col gap-4"
+                      className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg shadow-sm p-4 sm:p-5 flex flex-col gap-4"
                     >
                       <div className="flex gap-3 sm:gap-4 items-start">
-                        <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden bg-neutral-200 flex items-center justify-center">
+                        <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center">
                           {photo ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -438,7 +438,7 @@ export default function BusinessApplicants() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <span className="text-xl font-semibold text-neutral-700">
+                            <span className="text-xl font-semibold text-neutral-700 dark:text-neutral-200">
                               {app.applicantName?.charAt(0)?.toUpperCase() || '?'}
                             </span>
                           )}
@@ -447,53 +447,52 @@ export default function BusinessApplicants() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <h3 className="font-bold text-base sm:text-lg text-neutral-900 leading-snug truncate">
+                              <h3 className="font-bold text-base sm:text-lg text-neutral-900 dark:text-foreground leading-snug truncate">
                                 {app.applicantName || 'Applicant'}
                               </h3>
-                              <p className="text-sm font-medium text-neutral-600 mt-0.5 truncate">
+                              <p className="text-sm font-medium text-neutral-600 dark:text-muted-foreground mt-0.5 truncate">
                                 {title}
                               </p>
                             </div>
                             <span
-                              className="shrink-0 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
-                              style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
+                              className={`shrink-0 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${statusStyle}`}
                             >
                               {app.status}
                             </span>
                           </div>
 
-                          <ul className="mt-2 space-y-1 text-xs sm:text-sm text-neutral-600">
+                          <ul className="mt-2 space-y-1 text-xs sm:text-sm text-neutral-600 dark:text-muted-foreground">
                             <li className="flex items-center gap-1.5">
-                              <Clock className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <Clock className="w-3.5 h-3.5 shrink-0 text-neutral-400 dark:text-neutral-500" />
                               <span>
                                 Volunteer Hours :{' '}
-                                <span className="font-medium text-neutral-800">{hours}</span>
+                                <span className="font-medium text-neutral-800 dark:text-foreground">{hours}</span>
                               </span>
                             </li>
                             <li className="flex items-center gap-1.5">
-                              <MapPin className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <MapPin className="w-3.5 h-3.5 shrink-0 text-neutral-400 dark:text-neutral-500" />
                               <span className="truncate">
                                 Location :{' '}
-                                <span className="font-medium text-neutral-800">{location}</span>
+                                <span className="font-medium text-neutral-800 dark:text-foreground">{location}</span>
                               </span>
                             </li>
                             <li className="flex items-center gap-1.5">
-                              <GraduationCap className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <GraduationCap className="w-3.5 h-3.5 shrink-0 text-neutral-400 dark:text-neutral-500" />
                               <span className="truncate">
                                 Education :{' '}
-                                <span className="font-medium text-neutral-800">{education}</span>
+                                <span className="font-medium text-neutral-800 dark:text-foreground">{education}</span>
                               </span>
                             </li>
                             <li className="flex items-center gap-1.5">
-                              <Briefcase className="w-3.5 h-3.5 shrink-0 text-neutral-400" />
+                              <Briefcase className="w-3.5 h-3.5 shrink-0 text-neutral-400 dark:text-neutral-500" />
                               <span className="truncate">
                                 Experience :{' '}
-                                <span className="font-medium text-neutral-800">{experience}</span>
+                                <span className="font-medium text-neutral-800 dark:text-foreground">{experience}</span>
                               </span>
                             </li>
                           </ul>
 
-                          <p className="mt-2 text-[11px] text-neutral-400 truncate">
+                          <p className="mt-2 text-[11px] text-neutral-400 dark:text-neutral-500 truncate">
                             Applied for: {app.opportunityTitle}
                           </p>
                         </div>
@@ -511,14 +510,14 @@ export default function BusinessApplicants() {
                             {downloadingId === app.id ? 'Downloading…' : 'View Resume'}
                           </button>
                         ) : (
-                          <span className="inline-flex items-center h-9 px-4 rounded-md bg-neutral-100 text-neutral-400 text-xs font-semibold uppercase tracking-wide">
+                          <span className="inline-flex items-center h-9 px-4 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 text-xs font-semibold uppercase tracking-wide">
                             No CV
                           </span>
                         )}
                         {app.applicantEmail ? (
                           <a
                             href={`mailto:${app.applicantEmail}`}
-                            className="inline-flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-900"
+                            className="inline-flex items-center gap-1 text-xs text-neutral-600 dark:text-muted-foreground hover:text-neutral-900"
                           >
                             <Mail className="w-3.5 h-3.5" />
                             Email
@@ -527,7 +526,7 @@ export default function BusinessApplicants() {
                         {app.applicantPhone ? (
                           <a
                             href={`tel:${app.applicantPhone}`}
-                            className="inline-flex items-center gap-1 text-xs text-neutral-600 hover:text-neutral-900"
+                            className="inline-flex items-center gap-1 text-xs text-neutral-600 dark:text-muted-foreground hover:text-neutral-900"
                           >
                             <Phone className="w-3.5 h-3.5" />
                             Call
@@ -536,12 +535,12 @@ export default function BusinessApplicants() {
                       </div>
 
                       {app.coverLetter ? (
-                        <p className="text-xs text-neutral-600 bg-neutral-50 rounded-md p-3 line-clamp-3">
+                        <p className="text-xs text-neutral-600 dark:text-muted-foreground bg-neutral-50 dark:bg-white/5 rounded-md p-3 line-clamp-3">
                           {app.coverLetter}
                         </p>
                       ) : null}
 
-                      <div className="flex flex-wrap gap-1.5 pt-1 border-t border-neutral-100">
+                      <div className="flex flex-wrap gap-1.5 pt-1 border-t border-neutral-100 dark:border-border">
                         {STATUS_OPTIONS.map((status) => (
                           <button
                             key={status}
@@ -550,8 +549,8 @@ export default function BusinessApplicants() {
                             disabled={app.status === status}
                             className="px-2.5 py-1 rounded text-[10px] font-semibold uppercase tracking-wide transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             style={{
-                              backgroundColor: app.status === status ? '#111111' : '#f3f2ef',
-                              color: app.status === status ? '#ffffff' : '#555555',
+                              backgroundColor: app.status === status ? '#111111' : 'var(--secondary)',
+                              color: app.status === status ? '#ffffff' : 'var(--muted-foreground)',
                             }}
                           >
                             {status}

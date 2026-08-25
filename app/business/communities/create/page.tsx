@@ -109,28 +109,28 @@ export default function CreateCommunityPage() {
 
   if (loadingExisting) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-neutral-500">
+      <div className="flex min-h-[50vh] items-center justify-center text-neutral-500 dark:text-muted-foreground">
         Loading community…
       </div>
     )
   }
 
   return (
-    <div className="min-h-full bg-[#faf9f7]">
-      <div className="border-b border-[#e4e1da] bg-white px-4 py-6 sm:px-8">
+    <div className="min-h-full bg-[#faf9f7] dark:bg-neutral-950">
+      <div className="border-b border-[#e4e1da] dark:border-border bg-white dark:bg-card px-4 py-6 sm:px-8">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button
             type="button"
             onClick={() => router.back()}
-            className="min-h-[44px] min-w-[44px] rounded-md text-neutral-900 hover:bg-neutral-100"
+            className="min-h-[44px] min-w-[44px] rounded-md text-neutral-900 dark:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl sm:text-[28px] font-bold text-neutral-900">
+            <h1 className="text-2xl sm:text-[28px] font-bold text-neutral-900 dark:text-foreground">
               {isEditMode ? 'Edit Community' : 'Create Community'}
             </h1>
-            <p className="text-neutral-500 mt-1 text-sm">
+            <p className="text-neutral-500 dark:text-muted-foreground mt-1 text-sm">
               {isEditMode ? 'Update your community details' : 'Build a community for your business'}
             </p>
           </div>
@@ -139,9 +139,9 @@ export default function CreateCommunityPage() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto p-8">
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg border border-gray-200">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-card p-8 rounded-lg border border-gray-200 dark:border-border">
           <div>
-            <label style={{ display: 'block', color: '#111111', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+            <label style={{ display: 'block', color: 'var(--foreground)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
               Community Name *
             </label>
             <input
@@ -153,17 +153,17 @@ export default function CreateCommunityPage() {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #e4e1da',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#111111',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
                 fontSize: '14px',
               }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', color: '#111111', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+            <label style={{ display: 'block', color: 'var(--foreground)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
               Description
             </label>
             <textarea
@@ -174,10 +174,10 @@ export default function CreateCommunityPage() {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #e4e1da',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#111111',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
                 fontSize: '14px',
                 fontFamily: 'inherit',
               }}
@@ -186,7 +186,7 @@ export default function CreateCommunityPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label style={{ display: 'block', color: '#111111', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+              <label style={{ display: 'block', color: 'var(--foreground)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
                 Category *
               </label>
               <select
@@ -195,10 +195,10 @@ export default function CreateCommunityPage() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #e4e1da',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--foreground)',
                   fontSize: '14px',
                 }}
               >
@@ -211,7 +211,7 @@ export default function CreateCommunityPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', color: '#111111', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+              <label style={{ display: 'block', color: 'var(--foreground)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
                 Visibility *
               </label>
               <select
@@ -220,10 +220,10 @@ export default function CreateCommunityPage() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #e4e1da',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
-                  color: '#111111',
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--foreground)',
                   fontSize: '14px',
                 }}
               >
@@ -235,7 +235,7 @@ export default function CreateCommunityPage() {
           </div>
 
           <div>
-            <label style={{ display: 'block', color: '#111111', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+            <label style={{ display: 'block', color: 'var(--foreground)', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
               Community Rules (one per line)
             </label>
             <textarea
@@ -246,17 +246,17 @@ export default function CreateCommunityPage() {
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #e4e1da',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
-                backgroundColor: '#ffffff',
-                color: '#111111',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
                 fontSize: '14px',
                 fontFamily: 'inherit',
               }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: '1px solid #e4e1da' }}>
+          <div style={{ display: 'flex', gap: '12px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
             <button
               type="submit"
               disabled={loading}
@@ -278,13 +278,13 @@ export default function CreateCommunityPage() {
               onClick={() => router.back()}
               style={{
                 padding: '12px 24px',
-                backgroundColor: '#f0f0f0',
-                color: '#111111',
+                backgroundColor: 'var(--muted)',
+                color: 'var(--foreground)',
                 borderRadius: '8px',
                 fontWeight: 600,
                 fontSize: '14px',
               }}
-              className="hover:bg-gray-200"
+              className="hover:bg-gray-200 dark:hover:bg-neutral-700"
             >
               Cancel
             </button>

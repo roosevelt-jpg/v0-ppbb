@@ -115,24 +115,24 @@ function AdvertiseInner() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] p-4 sm:p-8">
+    <div className="min-h-screen bg-[#faf9f7] dark:bg-neutral-950 p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">Advertise on homepage</h1>
-          <p className="text-sm text-neutral-600 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-foreground">Advertise on homepage</h1>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
             Purchase a horizontal banner placement under the hero. After payment, an admin publishes
             it live.
           </p>
         </div>
 
         {message ? (
-          <Card className="p-4 text-sm border border-neutral-200 bg-white">{message}</Card>
+          <Card className="p-4 text-sm border border-neutral-200 dark:border-border bg-white dark:bg-card">{message}</Card>
         ) : null}
 
-        <Card className="p-5 space-y-4 bg-white border border-neutral-200">
+        <Card className="p-5 space-y-4 bg-white dark:bg-card border border-neutral-200 dark:border-border">
           <div>
             <label className="block text-sm font-medium mb-1">Banner image (GIF or JPG/PNG)</label>
-            <label className="inline-flex items-center gap-2 cursor-pointer border border-dashed border-neutral-300 rounded-lg px-4 py-3 text-sm">
+            <label className="inline-flex items-center gap-2 cursor-pointer border border-dashed border-neutral-300 dark:border-border rounded-lg px-4 py-3 text-sm">
               <Upload size={16} />
               {uploading ? 'Uploading…' : 'Upload banner'}
               <input
@@ -156,7 +156,7 @@ function AdvertiseInner() {
               type="url"
               value={href}
               onChange={(e) => setHref(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-3 py-2"
+              className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2"
               placeholder="https://your-site.com"
             />
           </div>
@@ -166,10 +166,10 @@ function AdvertiseInner() {
               type="text"
               value={alt}
               onChange={(e) => setAlt(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-3 py-2"
+              className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2"
             />
           </div>
-          <p className="text-sm text-neutral-600">Standard placement: AED 500 (one-time).</p>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">Standard placement: AED 500 (one-time).</p>
           <button
             type="button"
             disabled={saving || uploading}
@@ -181,20 +181,20 @@ function AdvertiseInner() {
           </button>
         </Card>
 
-        <Card className="p-5 bg-white border border-neutral-200">
+        <Card className="p-5 bg-white dark:bg-card border border-neutral-200 dark:border-border">
           <h2 className="font-semibold mb-3">Your requests</h2>
           {requests.length === 0 ? (
-            <p className="text-sm text-neutral-500">No advertising requests yet.</p>
+            <p className="text-sm text-neutral-500 dark:text-muted-foreground">No advertising requests yet.</p>
           ) : (
             <ul className="space-y-3 text-sm">
               {requests.map((r) => (
-                <li key={r.id} className="flex gap-3 items-start border-b border-neutral-100 pb-3">
+                <li key={r.id} className="flex gap-3 items-start border-b border-neutral-100 dark:border-border pb-3">
                   {r.imageURL ? (
                     <img src={r.imageURL} alt="" className="w-24 h-12 object-cover rounded" />
                   ) : null}
                   <div>
                     <p className="font-medium capitalize">{String(r.status || 'pending').replace(/_/g, ' ')}</p>
-                    <p className="text-neutral-500">AED {r.priceAed ?? 500}</p>
+                    <p className="text-neutral-500 dark:text-muted-foreground">AED {r.priceAed ?? 500}</p>
                   </div>
                 </li>
               ))}
@@ -208,7 +208,7 @@ function AdvertiseInner() {
 
 export default function BusinessAdvertisePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-neutral-500">Loading…</div>}>
+    <Suspense fallback={<div className="p-8 text-neutral-500 dark:text-muted-foreground">Loading…</div>}>
       <AdvertiseInner />
     </Suspense>
   )

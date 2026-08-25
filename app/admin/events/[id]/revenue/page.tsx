@@ -5,16 +5,18 @@ import React from 'react'
 import { useParams } from 'next/navigation'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 import { Card } from '@/components/ui/card'
+import { auth } from '@/lib/firebase'
 import type { Event, EventRegistration, Payout } from '@/lib/event-types'
 
 export default function EventRevenuePage() {
   const params = useParams()
   const eventId = params.id as string
-  
+
   const [event, setEvent] = React.useState<Event | null>(null)
   const [registrations, setRegistrations] = React.useState<EventRegistration[]>([])
   const [payouts, setPayouts] = React.useState<Payout[]>([])
   const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     loadData()
@@ -22,13 +24,25 @@ export default function EventRevenuePage() {
 
   const loadData = async () => {
     try {
-      const res = await fetch(`/api/events?id=${eventId}`)
-      const json = await res.json()
-      if (json.success) {
-        setEvent(Array.isArray(json.data) ? json.data[0] : json.data)
+      const eventRes = await fetch(`/api/events?id=${eventId}`)
+      const eventJson = await eventRes.json()
+      if (eventJson.success) {
+        setEvent(Array.isArray(eventJson.data) ? eventJson.data[0] : eventJson.data)
       }
+
+      const token = await auth.currentUser?.getIdToken()
+      if (!token) throw new Error('Not signed in')
+      const guestsRes = await fetch(`/api/events/${eventId}/guests`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const guestsJson = await guestsRes.json()
+      if (!guestsJson.success) {
+        throw new Error(guestsJson.error || 'Failed to load registrations')
+      }
+      setRegistrations(guestsJson.data || [])
     } catch (err) {
-      console.error('[v0] Error loading event:', err)
+      console.error('[v0] Error loading event revenue:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load event revenue')
     } finally {
       setLoading(false)
     }
@@ -37,7 +51,7 @@ export default function EventRevenuePage() {
   if (loading || !event) {
     return (
       <AdminPageLayout title="Event Revenue">
-        <div className="text-center py-12">Loading...</div>
+        <div className="text-center py-12">{error || 'Loading...'}</div>
       </AdminPageLayout>
     )
   }
@@ -53,45 +67,45 @@ export default function EventRevenuePage() {
         <h1 className="text-3xl font-bold">{event.title} - Revenue</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
-            <p className="text-xs text-gray-600 font-medium">Total Revenue</p>
+          <Card style={{ padding: '20px' }}>
+            <p className="text-xs text-gray-600 dark:text-muted-foreground font-medium">Total Revenue</p>
             <p className="text-2xl font-bold mt-2">AED {totalRevenue.toFixed(2)}</p>
           </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
-            <p className="text-xs text-gray-600 font-medium">PB Commission</p>
+          <Card style={{ padding: '20px' }}>
+            <p className="text-xs text-gray-600 dark:text-muted-foreground font-medium">PB Commission</p>
             <p className="text-2xl font-bold mt-2">AED {pbCut.toFixed(2)}</p>
-            <p className="text-xs text-gray-500 mt-1">{event.pbCommissionPercent}%</p>
+            <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">{event.pbCommissionPercent}%</p>
           </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
-            <p className="text-xs text-gray-600 font-medium">Business Payout</p>
+          <Card style={{ padding: '20px' }}>
+            <p className="text-xs text-gray-600 dark:text-muted-foreground font-medium">Business Payout</p>
             <p className="text-2xl font-bold mt-2">AED {businessCut.toFixed(2)}</p>
-            <p className="text-xs text-gray-500 mt-1">{event.businessPayoutPercent}%</p>
+            <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">{event.businessPayoutPercent}%</p>
           </Card>
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '20px' }}>
-            <p className="text-xs text-gray-600 font-medium">Registrations</p>
+          <Card style={{ padding: '20px' }}>
+            <p className="text-xs text-gray-600 dark:text-muted-foreground font-medium">Registrations</p>
             <p className="text-2xl font-bold mt-2">{paidRegistrations.length}</p>
           </Card>
         </div>
 
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+        <Card style={{ padding: '24px' }}>
           <h3 className="text-lg font-semibold mb-4">Payout Status</h3>
           <div className="space-y-2">
-            <p><span className="text-gray-600">Status:</span> <strong>{event.payoutStatus}</strong></p>
+            <p><span className="text-gray-600 dark:text-muted-foreground">Status:</span> <strong>{event.payoutStatus}</strong></p>
             {event.payoutDate && (
-              <p><span className="text-gray-600">Payout Date:</span> <strong>{new Date(event.payoutDate).toLocaleDateString()}</strong></p>
+              <p><span className="text-gray-600 dark:text-muted-foreground">Payout Date:</span> <strong>{new Date(event.payoutDate).toLocaleDateString()}</strong></p>
             )}
             {event.payoutReference && (
-              <p><span className="text-gray-600">Reference:</span> <strong>{event.payoutReference}</strong></p>
+              <p><span className="text-gray-600 dark:text-muted-foreground">Reference:</span> <strong>{event.payoutReference}</strong></p>
             )}
           </div>
         </Card>
 
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+        <Card style={{ padding: '24px' }}>
           <h3 className="text-lg font-semibold mb-4">Paid Registrations</h3>
           <div className="admin-table-scroll min-w-0">
             <table className="w-full min-w-[640px]">
               <thead>
-                <tr style={{ borderBottom: '1px solid #e4e1da' }}>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>Name</th>
                   <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>Amount</th>
                   <th style={{ textAlign: 'left', padding: '12px', fontWeight: 600 }}>PB Cut</th>
@@ -101,7 +115,7 @@ export default function EventRevenuePage() {
               </thead>
               <tbody>
                 {paidRegistrations.map((reg) => (
-                  <tr key={reg.id} style={{ borderBottom: '1px solid #e4e1da' }}>
+                  <tr key={reg.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '12px' }}>{reg.userName}</td>
                     <td style={{ padding: '12px' }}>AED {reg.amountPaid?.toFixed(2)}</td>
                     <td style={{ padding: '12px' }}>AED {reg.pbCut?.toFixed(2)}</td>

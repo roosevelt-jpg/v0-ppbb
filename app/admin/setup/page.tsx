@@ -87,19 +87,11 @@ export default function AdminSetup() {
 
     try {
       const code = accessCode.trim().toUpperCase()
-      const ADMIN_ACCESS_CODE = process.env.NEXT_PUBLIC_ADMIN_ACCESS_CODE || 'PB-ADMIN-2025'
-      const hardcodedCodes = [ADMIN_ACCESS_CODE, 'PB-ADMIN-2025', 'ADMIN-SETUP-2025'].map((c) =>
-        String(c).toUpperCase()
-      )
 
-      if (hardcodedCodes.includes(code)) {
-        setIsEmergencyCode(true)
-        setInviteData(null)
-        storeInvite(null)
-        setStep(2)
-        return
-      }
-
+      // Whether this is a real invite code or an emergency bootstrap code is
+      // decided server-side (bootstrap requires ADMIN_BOOTSTRAP_CODE to be
+      // configured AND that no admin account exists yet) — try the invite
+      // lookup first, and only treat it as an emergency code if that fails.
       const res = await fetch('/api/admin/access-codes/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -245,11 +237,10 @@ export default function AdminSetup() {
     setLoading(true)
 
     try {
-      const role = isEmergencyCode
-        ? accountEmail === 'roosevelt@myflynai.com'
-          ? 'super_admin'
-          : 'admin'
-        : inviteData?.adminRole || 'admin'
+      // For the emergency path, the server always grants super_admin for a
+      // genuine first-time bootstrap and ignores whatever role is sent here
+      // — this is just what's shown/used for the invite path's own request.
+      const role = isEmergencyCode ? 'super_admin' : inviteData?.adminRole || 'admin'
 
       const permissions = isEmergencyCode
         ? ['full_access']
@@ -394,7 +385,7 @@ export default function AdminSetup() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
             <SiteLogo background="light" variant="primary" href="/" linked />
           </div>
-          <p style={{ fontSize: '16px', color: '#666' }}>Admin Dashboard Setup</p>
+          <p style={{ fontSize: '16px', color: 'var(--muted-foreground)' }}>Admin Dashboard Setup</p>
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '40px' }}>
@@ -405,7 +396,7 @@ export default function AdminSetup() {
                 flex: 1,
                 height: '6px',
                 borderRadius: '3px',
-                backgroundColor: step >= n ? '#000' : '#e0e0e0',
+                backgroundColor: step >= n ? 'var(--foreground)' : 'var(--border)',
                 transition: 'all 0.3s',
               }}
             />
@@ -414,11 +405,11 @@ export default function AdminSetup() {
 
         <div
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: 'var(--card)',
             borderRadius: '12px',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             padding: 'clamp(20px, 5vw, 40px)',
-            border: '1px solid #e0e0e0',
+            border: '1px solid var(--border)',
             boxSizing: 'border-box',
           }}
         >
@@ -427,7 +418,7 @@ export default function AdminSetup() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
                 Step 1 of 3
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: '16px', color: 'var(--muted-foreground)', marginBottom: '30px', lineHeight: '1.5' }}>
                 Enter the 6-digit access code from your invitation email
               </p>
 
@@ -442,7 +433,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     6-digit Access Code
@@ -458,13 +449,15 @@ export default function AdminSetup() {
                     style={{
                       width: '100%',
                       padding: '14px 16px',
-                      border: '1px solid #ddd',
+                      border: '1px solid var(--border)',
                       borderRadius: '8px',
                       fontSize: '20px',
                       letterSpacing: '0.2em',
                       fontFamily: 'ui-monospace, monospace',
                       boxSizing: 'border-box',
                       textAlign: 'center',
+                      backgroundColor: 'var(--input)',
+                      color: 'var(--foreground)',
                     }}
                     required
                   />
@@ -505,14 +498,44 @@ export default function AdminSetup() {
                   {loading ? 'Verifying...' : 'Continue'}
                 </button>
 
-                <p style={{ textAlign: 'center', fontSize: '14px', color: '#666', marginTop: '4px' }}>
+                <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
                   Already have an admin account?{' '}
                   <Link
                     href={adminLoginHref}
-                    style={{ color: '#000', fontWeight: 600, textDecoration: 'underline' }}
+                    style={{ color: 'var(--foreground)', fontWeight: 600, textDecoration: 'underline' }}
                   >
                     Sign in here
                   </Link>
+                </p>
+
+                <p style={{ textAlign: 'center', fontSize: '13px', color: 'var(--muted-foreground)' }}>
+                  Setting up the very first admin on a fresh deployment?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!accessCode.trim()) {
+                        setError('Enter the emergency bootstrap code above first.')
+                        return
+                      }
+                      setError('')
+                      setIsEmergencyCode(true)
+                      setInviteData(null)
+                      storeInvite(null)
+                      setStep(2)
+                    }}
+                    style={{
+                      color: 'var(--foreground)',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      font: 'inherit',
+                    }}
+                  >
+                    Use an emergency bootstrap code
+                  </button>
                 </p>
               </form>
             </div>
@@ -523,7 +546,7 @@ export default function AdminSetup() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
                 Step 2 of 3
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '30px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: '16px', color: 'var(--muted-foreground)', marginBottom: '30px', lineHeight: '1.5' }}>
                 {inviteData?.recovery
                   ? 'Your login already exists from an earlier attempt. Enter the same password and finish setup — we will create your admin profile.'
                   : 'Create your admin account password. If you already tried once, use the same password and continue.'}
@@ -540,7 +563,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Email Address
@@ -571,7 +594,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Password
@@ -600,7 +623,7 @@ export default function AdminSetup() {
                       fontSize: '14px',
                       fontWeight: '500',
                       marginBottom: '10px',
-                      color: '#000',
+                      color: 'var(--foreground)',
                     }}
                   >
                     Confirm Password
@@ -689,10 +712,10 @@ export default function AdminSetup() {
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#000' }}>
                 Step 3 of 3
               </h2>
-              <p style={{ fontSize: '16px', color: '#666', marginBottom: '20px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: '16px', color: 'var(--muted-foreground)', marginBottom: '20px', lineHeight: '1.5' }}>
                 Your admin account is ready. Redirecting to the dashboard…
               </p>
-              <Link href="/admin" style={{ color: '#000', fontWeight: '600', textDecoration: 'none' }}>
+              <Link href="/admin" style={{ color: 'var(--foreground)', fontWeight: '600', textDecoration: 'none' }}>
                 Go to dashboard now
               </Link>
             </div>

@@ -111,3 +111,26 @@ export function formatPlanPriceDetailed(
     period,
   }
 }
+
+export type ConfiguredGateways = { stripe: boolean; paypal: boolean; ziina: boolean }
+
+/**
+ * Pick the gateway to actually charge through: the plan's stated preference
+ * if it's genuinely configured with credentials, otherwise the first
+ * configured gateway (Stripe first) rather than sending the customer into a
+ * checkout that's guaranteed to fail with "not configured". A plan record
+ * can carry a payment_gateway value left over from a past Integrations
+ * setup that's since been removed — this keeps checkout from breaking for
+ * new signups when that happens instead of surfacing it only at checkout.
+ */
+export function resolveActiveGateway(
+  plan: Pick<PricingPlan, 'paymentGateway'>,
+  gateways: ConfiguredGateways
+): 'stripe' | 'paypal' | 'ziina' | null {
+  const preferred = plan.paymentGateway || 'stripe'
+  if (gateways[preferred as keyof ConfiguredGateways]) return preferred as 'stripe' | 'paypal' | 'ziina'
+  if (gateways.stripe) return 'stripe'
+  if (gateways.paypal) return 'paypal'
+  if (gateways.ziina) return 'ziina'
+  return null
+}

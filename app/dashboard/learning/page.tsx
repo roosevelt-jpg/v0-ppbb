@@ -134,15 +134,15 @@ export default function LearningPage() {
   const getIcon = (type: string) => {
     switch (type) {
       case 'video':
-        return <Video className="w-5 h-5 text-neutral-700" />
+        return <Video className="w-5 h-5 text-neutral-700 dark:text-neutral-200" />
       case 'document':
-        return <FileText className="w-5 h-5 text-neutral-700" />
+        return <FileText className="w-5 h-5 text-neutral-700 dark:text-neutral-200" />
       case 'audio':
-        return <BookOpen className="w-5 h-5 text-neutral-700" />
+        return <BookOpen className="w-5 h-5 text-neutral-700 dark:text-neutral-200" />
       case 'workshop':
-        return <Users className="w-5 h-5 text-neutral-700" />
+        return <Users className="w-5 h-5 text-neutral-700 dark:text-neutral-200" />
       default:
-        return <BookOpen className="w-5 h-5 text-neutral-700" />
+        return <BookOpen className="w-5 h-5 text-neutral-700 dark:text-neutral-200" />
     }
   }
 
@@ -160,19 +160,19 @@ export default function LearningPage() {
         {items.map((resource) => {
           const href = resourceHref(resource as LearningResource)
           return (
-            <Card key={String(resource.id)} className="p-5 border border-neutral-200">
+            <Card key={String(resource.id)} className="p-5 border border-neutral-200 dark:border-border">
               <div className="flex items-start gap-3 mb-3">
-                <div className="p-2 bg-neutral-100 rounded-lg">{getIcon(String(resource.type ?? ''))}</div>
+                <div className="p-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg">{getIcon(String(resource.type ?? ''))}</div>
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-neutral-900 line-clamp-2">{String(resource.title ?? 'Resource')}</h3>
-                  <p className="text-xs text-neutral-500 capitalize">{String(resource.type ?? 'resource')}</p>
+                  <h3 className="font-semibold text-neutral-900 dark:text-foreground line-clamp-2">{String(resource.title ?? 'Resource')}</h3>
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground capitalize">{String(resource.type ?? 'resource')}</p>
                 </div>
               </div>
               {resource.description ? (
-                <p className="text-sm text-neutral-600 mb-4 line-clamp-3">{String(resource.description)}</p>
+                <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-4 line-clamp-3">{String(resource.description)}</p>
               ) : null}
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-neutral-500">{String(resource.duration ?? 'Self-paced')}</span>
+                <span className="text-xs text-neutral-500 dark:text-muted-foreground">{String(resource.duration ?? 'Self-paced')}</span>
                 {href ? (
                   <a
                     href={href}
@@ -184,7 +184,7 @@ export default function LearningPage() {
                     Open
                   </a>
                 ) : (
-                  <span className="text-xs text-neutral-400">No link yet</span>
+                  <span className="text-xs text-neutral-400 dark:text-neutral-500">No link yet</span>
                 )}
               </div>
             </Card>
@@ -208,7 +208,7 @@ export default function LearningPage() {
       </div>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-4 text-neutral-900">Learning Resources</h2>
+        <h2 className="text-2xl font-bold mb-4 text-neutral-900 dark:text-foreground">Learning Resources</h2>
         {displayResources.length === 0 ? (
           <DashboardEmptyState
             title={`No ${filter === 'all' ? '' : filter + ' '}resources`}
@@ -220,7 +220,7 @@ export default function LearningPage() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-4 text-neutral-900">Upcoming Workshops</h2>
+        <h2 className="text-2xl font-bold mb-4 text-neutral-900 dark:text-foreground">Upcoming Workshops</h2>
         {workshops.length === 0 ? (
           <DashboardEmptyState title="No workshops scheduled" description="Check back for upcoming workshops." />
         ) : (
@@ -228,14 +228,14 @@ export default function LearningPage() {
             {workshops.map((workshop) => {
               const sessions = Array.isArray(workshop.sessions) ? workshop.sessions : []
               return (
-                <Card key={String(workshop.id)} className="p-5 border border-neutral-200">
+                <Card key={String(workshop.id)} className="p-5 border border-neutral-200 dark:border-border">
                   <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-semibold text-neutral-900">{String(workshop.title ?? 'Workshop')}</h3>
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-foreground">{String(workshop.title ?? 'Workshop')}</h3>
                       {workshop.description ? (
-                        <p className="text-sm text-neutral-600 mt-1 line-clamp-2">{String(workshop.description)}</p>
+                        <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1 line-clamp-2">{String(workshop.description)}</p>
                       ) : null}
-                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-neutral-600">
+                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-neutral-600 dark:text-muted-foreground">
                         {workshop.instructor ? <span>Instructor: {String(workshop.instructor)}</span> : null}
                         <span>Date: {parseDate(workshop.date ?? workshop.startDate)}</span>
                         <span>Participants: {Number(workshop.participants ?? 0)}</span>
@@ -245,12 +245,12 @@ export default function LearningPage() {
                           {sessions.map((session: Record<string, unknown>, idx: number) => (
                             <div
                               key={String(session.id ?? idx)}
-                              className="rounded-lg border border-neutral-200 bg-neutral-50 p-3"
+                              className="rounded-lg border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5 p-3"
                             >
-                              <p className="font-medium text-sm text-neutral-900 line-clamp-2">
+                              <p className="font-medium text-sm text-neutral-900 dark:text-foreground line-clamp-2">
                                 {String(session.title ?? `Session ${idx + 1}`)}
                               </p>
-                              <p className="text-xs text-neutral-500 mt-1">{parseDate(session.date)}</p>
+                              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">{parseDate(session.date)}</p>
                             </div>
                           ))}
                         </div>
@@ -270,9 +270,9 @@ export default function LearningPage() {
         )}
       </section>
 
-      <Card className="p-6 border border-neutral-200 bg-gradient-to-r from-purple-50 to-blue-50">
-        <h2 className="text-xl font-bold mb-2 text-neutral-900">Spiritual Development</h2>
-        <p className="text-neutral-600 mb-4 text-sm">
+      <Card className="p-6 border border-neutral-200 dark:border-border bg-gradient-to-r from-purple-50 to-blue-50">
+        <h2 className="text-xl font-bold mb-2 text-neutral-900 dark:text-foreground">Spiritual Development</h2>
+        <p className="text-neutral-600 dark:text-muted-foreground mb-4 text-sm">
           Enhance your spiritual growth through guided meditations, reflections, and community wisdom sharing.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -284,7 +284,7 @@ export default function LearningPage() {
               className={`rounded-lg px-4 py-3 text-sm font-semibold text-left min-h-[44px] transition-colors ${
                 spiritualFilter === item.value
                   ? '!bg-black !text-white'
-                  : '!bg-white !text-black border border-gray-300 hover:bg-neutral-50'
+                  : '!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-gray-300 dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800'
               }`}
             >
               {item.label}
@@ -295,7 +295,7 @@ export default function LearningPage() {
 
       {spiritualFilter ? (
         <section ref={spiritualRef} className="mt-8">
-          <h2 className="text-2xl font-bold mb-4 text-neutral-900">
+          <h2 className="text-2xl font-bold mb-4 text-neutral-900 dark:text-foreground">
             {spiritualCategoryLabel(spiritualFilter)}
           </h2>
           {renderResourceCards(spiritualResources)}

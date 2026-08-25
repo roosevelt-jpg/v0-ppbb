@@ -27,7 +27,7 @@ function MissionImage({ imageURL }: { imageURL: string | null }) {
 
   return (
     <div
-      className={`${MISSION_IMAGE_FRAME} bg-neutral-100 border border-neutral-200 flex items-center justify-center`}
+      className={`${MISSION_IMAGE_FRAME} bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center`}
     >
       <p className="text-sm text-muted-foreground font-body px-6 text-center">
         Mission image — upload from Admin → CMS → Homepage
@@ -41,11 +41,11 @@ function MissionSkeleton() {
     <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 animate-pulse">
       <div className="max-w-[72rem] mx-auto w-full min-w-0 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 lg:items-stretch">
         <div className="space-y-4">
-          <div className="h-3 w-32 bg-neutral-200 rounded" />
-          <div className="h-12 w-full bg-neutral-200 rounded" />
-          <div className="h-24 w-full bg-neutral-200 rounded" />
+          <div className="h-3 w-32 bg-neutral-200 dark:bg-neutral-800 rounded" />
+          <div className="h-12 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
+          <div className="h-24 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
         </div>
-        <div className="aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-full bg-neutral-200 rounded-2xl min-h-0" />
+        <div className="aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-full bg-neutral-200 dark:bg-neutral-800 rounded-2xl min-h-0" />
       </div>
     </section>
   )

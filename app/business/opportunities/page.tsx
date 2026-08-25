@@ -5,7 +5,6 @@ import React from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { DashboardModal } from '@/components/dashboard-modal'
 import {
   subscribeToBusinessOpportunities,
   deleteOpportunity,
@@ -106,19 +105,11 @@ export default function BusinessOpportunities() {
   const [metricsByOpp, setMetricsByOpp] = React.useState<Record<string, JobMetrics>>({})
   const [loading, setLoading] = React.useState(true)
   const [loadError, setLoadError] = React.useState<string | null>(null)
-  const [selectedOpp, setSelectedOpp] = React.useState<BusinessOpportunity | null>(null)
-  const [isEditingModal, setIsEditingModal] = React.useState(false)
-  const [saving, setSaving] = React.useState(false)
   const [togglingId, setTogglingId] = React.useState<string | null>(null)
   const [titleQuery, setTitleQuery] = React.useState('')
   const [dateQuery, setDateQuery] = React.useState('')
   const [perPage, setPerPage] = React.useState(5)
   const [page, setPage] = React.useState(1)
-  const [editForm, setEditForm] = React.useState({
-    title: '',
-    description: '',
-    status: 'pending_approval' as BusinessOpportunity['status'],
-  })
 
   React.useEffect(() => {
     if (!user) return
@@ -167,44 +158,6 @@ export default function BusinessOpportunities() {
 
     return () => unsubscribe()
   }, [user, router])
-
-  const openEditModal = (opp: BusinessOpportunity) => {
-    setSelectedOpp(opp)
-    setEditForm({
-      title: opp.title,
-      description: opp.description || '',
-      status: opp.status,
-    })
-    setIsEditingModal(true)
-  }
-
-  const handleSaveEdit = async () => {
-    if (!selectedOpp) return
-    if (!editForm.title.trim()) {
-      alert('Title is required')
-      return
-    }
-    if (editForm.status === 'open') {
-      alert('Jobs go live only after admin approval.')
-      return
-    }
-
-    setSaving(true)
-    try {
-      await updateOpportunity(selectedOpp.id, {
-        title: editForm.title.trim(),
-        description: editForm.description.trim(),
-        status: editForm.status,
-      })
-      setIsEditingModal(false)
-      setSelectedOpp(null)
-    } catch (error) {
-      console.error('[v0] Error updating opportunity:', error)
-      alert('Error updating opportunity')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this opportunity?')) {
@@ -290,7 +243,7 @@ export default function BusinessOpportunities() {
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-neutral-900">Latest Job List:</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-foreground">Latest Job List:</h1>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             type="button"
@@ -313,9 +266,9 @@ export default function BusinessOpportunities() {
       </div>
 
       {/* Search / filter bar */}
-      <div className="bg-white border border-neutral-200 rounded-lg p-4 mb-5 flex flex-col lg:flex-row lg:items-end gap-3 lg:gap-4">
+      <div className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-4 mb-5 flex flex-col lg:flex-row lg:items-end gap-3 lg:gap-4">
         <div className="flex-1 min-w-0">
-          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">
+          <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1.5">
             Search by Job Title
           </label>
           <div className="flex gap-2">
@@ -325,9 +278,9 @@ export default function BusinessOpportunities() {
                 value={titleQuery}
                 onChange={(e) => setTitleQuery(e.target.value)}
                 placeholder="Job title…"
-                className="w-full h-10 rounded-md border border-neutral-300 bg-white pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/15"
+                className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/15"
               />
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500" />
             </div>
             <Button
               type="button"
@@ -340,7 +293,7 @@ export default function BusinessOpportunities() {
         </div>
 
         <div className="w-full lg:w-56">
-          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">
+          <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1.5">
             Search by Date
           </label>
           <div className="relative">
@@ -348,20 +301,20 @@ export default function BusinessOpportunities() {
               type="date"
               value={dateQuery}
               onChange={(e) => setDateQuery(e.target.value)}
-              className="w-full h-10 rounded-md border border-neutral-300 bg-white pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/15"
+              className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/15"
             />
-            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 dark:text-neutral-500 pointer-events-none" />
           </div>
         </div>
 
         <div className="w-full lg:w-40">
-          <label className="block text-xs font-semibold text-neutral-600 mb-1.5">
+          <label className="block text-xs font-semibold text-neutral-600 dark:text-muted-foreground mb-1.5">
             Show per page
           </label>
           <select
             value={perPage}
             onChange={(e) => setPerPage(Number(e.target.value))}
-            className="w-full h-10 rounded-md border border-neutral-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/15"
+            className="w-full h-10 rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card px-3 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/15"
           >
             {[5, 10, 20, 50].map((n) => (
               <option key={n} value={n}>
@@ -373,10 +326,10 @@ export default function BusinessOpportunities() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-neutral-500">Loading job list…</div>
+        <div className="text-center py-12 text-neutral-500 dark:text-muted-foreground">Loading job list…</div>
       ) : loadError ? (
-        <div className="rounded-lg border border-neutral-200 bg-white p-8 text-center">
-          <p className="text-neutral-500 mb-4">{loadError}</p>
+        <div className="rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card p-8 text-center">
+          <p className="text-neutral-500 dark:text-muted-foreground mb-4">{loadError}</p>
           <Button
             type="button"
             onClick={() => window.location.reload()}
@@ -386,8 +339,8 @@ export default function BusinessOpportunities() {
           </Button>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-neutral-200 bg-white p-10 text-center">
-          <p className="text-neutral-500 mb-4">
+        <div className="rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card p-10 text-center">
+          <p className="text-neutral-500 dark:text-muted-foreground mb-4">
             {opportunities.length === 0 ? 'No jobs posted yet' : 'No jobs match your search'}
           </p>
           {opportunities.length === 0 ? (
@@ -402,8 +355,8 @@ export default function BusinessOpportunities() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white shadow-sm">
-            <ul className="lg:hidden divide-y divide-neutral-100">
+          <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card shadow-sm">
+            <ul className="lg:hidden divide-y divide-neutral-100 dark:divide-neutral-800">
               {paged.map((opp) => {
                 const m = metricsFor(opp)
                 const deadline = toDate(opp.deadline) || toDate(opp.hiringBy)
@@ -414,11 +367,11 @@ export default function BusinessOpportunities() {
                       <button
                         type="button"
                         onClick={() => router.push(`/business/opportunities/${opp.id}`)}
-                        className="pb-ghost-btn text-left font-semibold text-neutral-900 break-words"
+                        className="pb-ghost-btn text-left font-semibold text-neutral-900 dark:text-foreground break-words"
                       >
                         {opp.title}
                       </button>
-                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-500">
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-muted-foreground">
                         <Calendar className="w-3.5 h-3.5 shrink-0" />
                         Deadline:{' '}
                         {deadline ? format(deadline, 'dd MMMM, yyyy') : 'Not set'}
@@ -440,12 +393,12 @@ export default function BusinessOpportunities() {
                           maxHeight: 32,
                           minWidth: 56,
                           padding: 0,
-                          backgroundColor: live ? '#10b981' : '#a3a3a3',
+                          backgroundColor: live ? '#10b981' : '#111111',
                         }}
                       >
                         <span
                           aria-hidden
-                          className="pointer-events-none inline-block rounded-full bg-white shadow-md transition-transform duration-200"
+                          className="pointer-events-none inline-block rounded-full bg-white dark:bg-card shadow-md transition-transform duration-200"
                           style={{
                             height: 26,
                             width: 26,
@@ -455,7 +408,7 @@ export default function BusinessOpportunities() {
                       </button>
                       <span
                         className={`text-sm font-semibold capitalize ${
-                          live ? 'text-emerald-700' : 'text-neutral-600'
+                          live ? 'text-emerald-700' : 'text-neutral-600 dark:text-muted-foreground'
                         }`}
                       >
                         {live ? 'Live' : String(opp.status || 'closed').replace(/_/g, ' ')}
@@ -481,10 +434,10 @@ export default function BusinessOpportunities() {
                               status as keyof Omit<JobMetrics, 'applications'> | undefined
                             )
                           }
-                          className="pb-metric-btn pb-metric-btn--center rounded-md bg-neutral-50 text-neutral-900 hover:bg-neutral-100"
+                          className="pb-metric-btn pb-metric-btn--center rounded-md bg-neutral-50 dark:bg-white/5 text-neutral-900 dark:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
                         >
-                          <p className="pb-metric-value text-neutral-900">{m[key]}</p>
-                          <p className="pb-metric-label text-neutral-500 opacity-100">{label}</p>
+                          <p className="pb-metric-value text-neutral-900 dark:text-foreground">{m[key]}</p>
+                          <p className="pb-metric-label text-neutral-500 dark:text-muted-foreground opacity-100">{label}</p>
                         </button>
                       ))}
                     </div>
@@ -500,7 +453,7 @@ export default function BusinessOpportunities() {
                       <button
                         type="button"
                         title="Edit job"
-                        onClick={() => openEditModal(opp)}
+                        onClick={() => router.push(`/business/opportunities/${opp.id}/edit`)}
                         className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md bg-[#111] px-3 text-sm text-white"
                       >
                         <Edit2 className="w-4 h-4" /> Edit
@@ -538,16 +491,16 @@ export default function BusinessOpportunities() {
                   const live = isLiveStatus(opp.status)
 
                   return (
-                    <tr key={opp.id} className="border-t border-neutral-100 align-top hover:bg-neutral-50/80">
+                    <tr key={opp.id} className="border-t border-neutral-100 dark:border-border align-top hover:bg-neutral-50/80 dark:hover:bg-neutral-800">
                       <td className="px-4 py-4">
                         <button
                           type="button"
                           onClick={() => openApplicants(opp.id)}
-                          className="font-semibold text-neutral-900 hover:underline text-left"
+                          className="font-semibold text-neutral-900 dark:text-foreground hover:underline text-left"
                         >
                           {opp.title}
                         </button>
-                        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-500">
+                        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-muted-foreground">
                           <Calendar className="w-3.5 h-3.5 shrink-0" />
                           Deadline:{' '}
                           {deadline ? format(deadline, 'dd MMMM, yyyy') : 'Not set'}
@@ -575,12 +528,12 @@ export default function BusinessOpportunities() {
                               maxHeight: 32,
                               minWidth: 56,
                               padding: 0,
-                              backgroundColor: live ? '#10b981' : '#a3a3a3',
+                              backgroundColor: live ? '#10b981' : '#111111',
                             }}
                           >
                             <span
                               aria-hidden
-                              className="pointer-events-none inline-block rounded-full bg-white shadow-md transition-transform duration-200"
+                              className="pointer-events-none inline-block rounded-full bg-white dark:bg-card shadow-md transition-transform duration-200"
                               style={{
                                 height: 26,
                                 width: 26,
@@ -590,7 +543,7 @@ export default function BusinessOpportunities() {
                           </button>
                           <span
                             className={`text-sm font-semibold capitalize ${
-                              live ? 'text-emerald-700' : 'text-neutral-600'
+                              live ? 'text-emerald-700' : 'text-neutral-600 dark:text-muted-foreground'
                             }`}
                           >
                             {live ? 'Live' : String(opp.status || 'closed').replace(/_/g, ' ')}
@@ -658,7 +611,7 @@ export default function BusinessOpportunities() {
                           <button
                             type="button"
                             title="Edit job"
-                            onClick={() => openEditModal(opp)}
+                            onClick={() => router.push(`/business/opportunities/${opp.id}/edit`)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#111] text-white hover:bg-neutral-800"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -667,7 +620,7 @@ export default function BusinessOpportunities() {
                             type="button"
                             title="Delete job"
                             onClick={() => void handleDelete(opp.id)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-neutral-300 dark:border-border bg-white dark:bg-card text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -681,7 +634,7 @@ export default function BusinessOpportunities() {
           </div>
 
           {totalPages > 1 ? (
-            <div className="mt-4 flex flex-col gap-3 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-4 flex flex-col gap-3 text-sm text-neutral-600 dark:text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
               <span>
                 Showing {(pageSafe - 1) * perPage + 1}–
                 {Math.min(pageSafe * perPage, filtered.length)} of {filtered.length}
@@ -710,80 +663,6 @@ export default function BusinessOpportunities() {
           ) : null}
         </>
       )}
-
-      <DashboardModal
-        open={isEditingModal && !!selectedOpp}
-        title="Edit opportunity"
-        onClose={() => {
-          setIsEditingModal(false)
-          setSelectedOpp(null)
-        }}
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setIsEditingModal(false)
-                setSelectedOpp(null)
-              }}
-              className="min-h-[44px] w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSaveEdit}
-              disabled={saving}
-              className="min-h-[44px] w-full sm:w-auto bg-[#111] text-white"
-            >
-              {saving ? 'Saving…' : 'Save changes'}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Title</label>
-            <input
-              type="text"
-              value={editForm.title}
-              onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 px-3 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
-            <textarea
-              value={editForm.description}
-              onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-              rows={5}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Status</label>
-            <select
-              value={editForm.status}
-              onChange={(e) =>
-                setEditForm((f) => ({
-                  ...f,
-                  status: e.target.value as BusinessOpportunity['status'],
-                }))
-              }
-              className="w-full min-h-[44px] rounded-lg border border-neutral-300 px-3 text-sm"
-            >
-              <option value="pending_approval">Pending approval</option>
-              <option value="closed">Closed</option>
-              <option value="filled">Filled</option>
-              <option value="archived">Archived</option>
-            </select>
-            <p className="text-xs text-neutral-500 mt-1">
-              Open/published status is set by admin after approval.
-            </p>
-          </div>
-        </div>
-      </DashboardModal>
     </div>
   )
 }

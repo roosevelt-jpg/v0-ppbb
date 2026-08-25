@@ -220,7 +220,7 @@ export default function MyEventsPage() {
   return (
     <DashboardPageShell title="My Events" subtitle="Your upcoming and registered events">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-muted-foreground">
           {registeredIds.size} event{registeredIds.size !== 1 ? 's' : ''} registered
         </p>
         <Link
@@ -253,7 +253,7 @@ export default function MyEventsPage() {
               const start = parseEventDate(event.startDate)
               const isRegistered = registeredIds.has(event.id)
               return (
-                <Card key={event.id} className="border border-neutral-200 overflow-hidden p-0">
+                <Card key={event.id} className="border border-neutral-200 dark:border-border overflow-hidden p-0">
                   <EventBannerThumb
                     event={event}
                     title={String(event.title ?? 'Event')}
@@ -261,11 +261,11 @@ export default function MyEventsPage() {
                     rounded="rounded-none"
                   />
                   <div className="p-4 sm:p-5">
-                  <h3 className="text-lg font-semibold text-neutral-900">{String(event.title ?? 'Event')}</h3>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-foreground">{String(event.title ?? 'Event')}</h3>
                   {event.description ? (
-                    <p className="text-sm text-neutral-500 mt-1 line-clamp-2">{String(event.description)}</p>
+                    <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1 line-clamp-2">{String(event.description)}</p>
                   ) : null}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-sm text-neutral-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-sm text-neutral-600 dark:text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} />
                       {start ? format(start, 'MMM dd, yyyy') : 'Date TBA'}
@@ -278,7 +278,7 @@ export default function MyEventsPage() {
                     </div>
                   </div>
                   {event.genderRestriction ? (
-                    <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-neutral-100 text-neutral-700 capitalize">
+                    <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 capitalize">
                       {String(event.genderRestriction).replace(/-/g, ' ')}
                     </span>
                   ) : null}
@@ -326,7 +326,7 @@ export default function MyEventsPage() {
             const attended = Boolean(event.checkedInAt)
             const canCancel = !isPast && !attended
             return (
-              <Card key={event.id} className="border border-neutral-200 overflow-hidden p-0">
+              <Card key={event.id} className="border border-neutral-200 dark:border-border overflow-hidden p-0">
                 <div className="flex flex-col sm:flex-row">
                   <EventBannerThumb
                     event={event as never}
@@ -339,7 +339,7 @@ export default function MyEventsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <Link href={`/events/${event.id}`} className="no-underline">
-                        <h3 className="text-lg font-semibold text-neutral-900 hover:underline">
+                        <h3 className="text-lg font-semibold text-neutral-900 dark:text-foreground hover:underline">
                           {event.title ?? 'Event'}
                         </h3>
                       </Link>
@@ -349,12 +349,12 @@ export default function MyEventsPage() {
                         </span>
                       ) : null}
                       {isPast ? (
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-600">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-muted-foreground">
                           Past
                         </span>
                       ) : null}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm text-neutral-600">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm text-neutral-600 dark:text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} />
                         {start ? format(start, 'MMM dd, yyyy') : 'Date TBA'}

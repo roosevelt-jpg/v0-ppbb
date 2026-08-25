@@ -21,14 +21,14 @@ import { htmlToPlainText } from '@/lib/cms-page-content'
 const fieldStyle: React.CSSProperties = {
   width: '100%',
   padding: '12px 16px',
-  border: '1px solid #e4e1da',
+  border: '1px solid var(--border)',
   borderRadius: '8px',
-  backgroundColor: '#ffffff',
-  color: '#111111',
+  backgroundColor: 'var(--card)',
+  color: 'var(--foreground)',
 }
 
 const labelStyle: React.CSSProperties = {
-  color: '#111111',
+  color: 'var(--foreground)',
   fontWeight: 600,
   display: 'block',
   marginBottom: '8px',
@@ -160,18 +160,18 @@ export default function NewOpportunity() {
   }
 
   return (
-    <div className="min-h-full bg-[#faf9f7]">
-      <div className="border-b border-[#e4e1da] bg-white px-4 py-5 sm:px-8 sm:py-6">
+    <div className="min-h-full bg-[#faf9f7] dark:bg-neutral-950">
+      <div className="border-b border-[#e4e1da] dark:border-border bg-white dark:bg-card px-4 py-5 sm:px-8 sm:py-6">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-2xl font-bold text-[#111] sm:text-3xl">Post a Job / Gig</h1>
-          <p className="mt-2 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-neutral-500 dark:text-muted-foreground">
             Same fields as the platform opportunity form — submitted for admin approval before it goes live
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-8 sm:py-8">
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+        <Card style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', padding: '24px' }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
               <label style={labelStyle}>1. Job Title / Opportunity Name *</label>
@@ -398,7 +398,7 @@ export default function NewOpportunity() {
                   value={formData.applicationURL}
                   onChange={handleChange}
                   placeholder="https://yourcompany.com/careers/apply"
-                  className="mt-3 w-full px-3 py-2 border border-neutral-300 rounded-lg"
+                  className="mt-3 w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg"
                 />
               )}
             </div>
@@ -418,7 +418,7 @@ export default function NewOpportunity() {
                 type="button"
                 disabled={isSaving}
                 onClick={() => void submitOpportunity(true)}
-                className="min-h-[44px] flex-1 border border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-50"
+                className="min-h-[44px] flex-1 border border-neutral-300 dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground hover:bg-neutral-50 dark:hover:bg-neutral-800"
               >
                 Save as Draft
               </Button>

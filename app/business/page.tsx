@@ -24,7 +24,7 @@ export default function BusinessPortal() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-      <p style={{ color: '#888888' }}>Loading business portal...</p>
+      <p style={{ color: 'var(--muted-foreground)' }}>Loading business portal...</p>
     </div>
   )
 }

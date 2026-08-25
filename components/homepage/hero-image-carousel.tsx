@@ -9,7 +9,7 @@ import { HeroImage, HeroSlider, splitImageCaption } from '@/lib/homepage-config'
  * Desktop (lg+): fills the wider right column and stretches to text-column height.
  */
 const FRAME_CLASS =
-  'relative w-full h-full min-h-0 overflow-hidden rounded-2xl bg-neutral-100 aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[min(52vw,28rem)]'
+  'relative w-full h-full min-h-0 overflow-hidden rounded-2xl bg-neutral-100 dark:bg-neutral-800 aspect-[16/10] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[min(52vw,28rem)]'
 
 function HeroCaption({ caption, reserveDots }: { caption: string; reserveDots?: boolean }) {
   if (!caption.trim()) return null
@@ -67,7 +67,7 @@ export function HeroImageCarousel({
 
   if (images.length === 0) {
     return (
-      <div className={`${FRAME_CLASS} flex items-center justify-center border border-neutral-200`}>
+      <div className={`${FRAME_CLASS} flex items-center justify-center border border-neutral-200 dark:border-neutral-700`}>
         <p className="text-sm text-muted-foreground font-body px-6 text-center">
           Hero images — upload from Admin → CMS → Homepage
         </p>

@@ -5,10 +5,9 @@
 
 import nodemailer from 'nodemailer'
 import { SiteSettings } from './types'
-import { getAdminDb } from '@/lib/firebase-admin'
-import { mergeGlobalSettings } from '@/lib/global-settings'
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
+import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
 import {
   emailParagraphs,
   escapeEmailHtml,
@@ -138,25 +137,21 @@ function formatInviteRoleLabel(role: string): string {
   return labels[role] || role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-/** Dark logo for light email backgrounds — reads platformConfig/globalSettings.logoUrlDark */
+/**
+ * Dark logo artwork for light (white) email backgrounds.
+ *
+ * This intentionally always returns the built-in brand asset rather than
+ * reading platformConfig/globalSettings.logoUrlDark from Firestore: that
+ * field has no admin UI of its own — the only thing that ever writes it is
+ * the legacy one-shot "Migrate Global Settings" button, which copies over
+ * whatever was in the old, pre-migration siteSettings/branding.darkLogoUrl.
+ * The site's own header/footer <Logo> component (lib/logo-manager.ts)
+ * already stopped trusting that same legacy value for looking worse than
+ * the original mark — this mirrors that decision so invite/notification
+ * emails don't end up rendering a stale or broken logo URL.
+ */
 export async function getEmailBrandLogoUrl(): Promise<string> {
-  const site = getPublicSiteUrl()
-  try {
-    const db = getAdminDb()
-    const snap = await db.collection('platformConfig').doc('globalSettings').get()
-    const settings = mergeGlobalSettings(snap.data() as Record<string, unknown> | undefined)
-    if (settings.logoUrlDark) {
-      const logo = settings.logoUrlDark.trim()
-      if (/^https?:\/\//i.test(logo)) return logo
-      return `${site}${logo.startsWith('/') ? '' : '/'}${logo}`
-    }
-  } catch (error) {
-    console.warn(
-      '[v0] Failed to load email logo from Firestore:',
-      error instanceof Error ? error.message : String(error)
-    )
-  }
-  return `${site}/images/pb-logo-black.png`
+  return DEFAULT_LOGO_ON_LIGHT_BG
 }
 
 export const sendAdminInviteEmail = async (

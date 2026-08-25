@@ -791,45 +791,47 @@ label:has(> input[type='file'].hidden) {
   overflow: auto;
 }
 
-/* Dashboard page content — cards stay white/grey with black text in dark mode */
-[data-dashboard-surface='light'] {
+/* Dashboard page content — cards stay white/grey with black text in LIGHT mode only.
+   Scoped to :not(.dark) so dark mode falls through to each component's own
+   dark-aware tokens instead of being force-overridden to light. */
+html:not(.dark) [data-dashboard-surface='light'] {
   background-color: #faf9f7;
   color: #111111;
 }
 
-[data-dashboard-surface='light'] [data-slot='card'],
-[data-dashboard-surface='light'] .bg-card {
+html:not(.dark) [data-dashboard-surface='light'] [data-slot='card'],
+html:not(.dark) [data-dashboard-surface='light'] .bg-card {
   background-color: #ffffff !important;
   color: #111111 !important;
   border-color: #e4e1da !important;
 }
 
-[data-dashboard-surface='light'] [data-slot='card'] .text-muted-foreground,
-[data-dashboard-surface='light'] .text-muted-foreground {
+html:not(.dark) [data-dashboard-surface='light'] [data-slot='card'] .text-muted-foreground,
+html:not(.dark) [data-dashboard-surface='light'] .text-muted-foreground {
   color: #737373 !important;
 }
 
-[data-dashboard-surface='light'] h1,
-[data-dashboard-surface='light'] h2,
-[data-dashboard-surface='light'] h3,
-[data-dashboard-surface='light'] .text-foreground,
-[data-dashboard-surface='light'] .text-card-foreground {
+html:not(.dark) [data-dashboard-surface='light'] h1,
+html:not(.dark) [data-dashboard-surface='light'] h2,
+html:not(.dark) [data-dashboard-surface='light'] h3,
+html:not(.dark) [data-dashboard-surface='light'] .text-foreground,
+html:not(.dark) [data-dashboard-surface='light'] .text-card-foreground {
   color: #111111 !important;
 }
 
-[data-dashboard-surface='light'] .text-neutral-900 {
+html:not(.dark) [data-dashboard-surface='light'] .text-neutral-900 {
   color: #111111 !important;
 }
 
-[data-dashboard-surface='light'] .text-neutral-500 {
+html:not(.dark) [data-dashboard-surface='light'] .text-neutral-500 {
   color: #737373 !important;
 }
 
-[data-dashboard-surface='light'] .text-neutral-600 {
+html:not(.dark) [data-dashboard-surface='light'] .text-neutral-600 {
   color: #525252 !important;
 }
 
-[data-dashboard-surface='light'] .border-border {
+html:not(.dark) [data-dashboard-surface='light'] .border-border {
   border-color: #e4e1da !important;
 }
 

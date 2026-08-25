@@ -320,6 +320,26 @@ export function notifyMembershipCancelled(opts: {
   })
 }
 
+export function notifyMembershipExpired(opts: {
+  userId: string
+  planName?: string
+}): void {
+  const plan = opts.planName || 'your membership'
+
+  sendBrandedEmailToUserSafe({
+    userId: opts.userId,
+    subject: `Your membership has expired — ${plan}`,
+    purpose: 'Membership expired',
+    headline: 'Membership expired',
+    bodyHtml: paragraphs(
+      'Assalamu alaikum,',
+      `Your Passive Blessings ${plan} has reached its end date and is no longer active.`,
+      'Subscribe again anytime to restore full access to communities, events, and member benefits.'
+    ),
+    cta: { label: 'Subscribe again', url: membershipDashboardUrl() },
+  })
+}
+
 /** Resolve userId from a Stripe subscription Firestore doc or customer email. */
 export async function resolveUserIdForSubscription(opts: {
   subscriptionId?: string

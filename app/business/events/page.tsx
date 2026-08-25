@@ -58,7 +58,7 @@ export default function BusinessEventsPage() {
   }
 
   return (
-    <div className="min-h-full bg-[#fafafa]">
+    <div className="min-h-full bg-[#fafafa] dark:bg-neutral-950">
       <div className="px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-[#111] sm:text-3xl">Your Events</h1>
@@ -82,7 +82,7 @@ export default function BusinessEventsPage() {
                 className={`shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   activeTab === tab
                     ? 'bg-[#111] text-white'
-                    : 'border border-[#e4e1da] bg-white text-[#111] hover:bg-neutral-50'
+                    : 'border border-[#e4e1da] dark:border-border bg-white dark:bg-card text-[#111] hover:bg-neutral-50 dark:hover:bg-neutral-800'
                 }`}
               >
                 {tab === 'draft'
@@ -100,10 +100,10 @@ export default function BusinessEventsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center text-neutral-500">Loading...</div>
+          <div className="text-center text-neutral-500 dark:text-muted-foreground">Loading...</div>
         ) : events.length === 0 ? (
-          <Card className="border-[#e4e1da] bg-white p-8 text-center sm:p-12">
-            <p className="mb-4 text-neutral-500">No events yet</p>
+          <Card className="border-[#e4e1da] dark:border-border bg-white dark:bg-card p-8 text-center sm:p-12">
+            <p className="mb-4 text-neutral-500 dark:text-muted-foreground">No events yet</p>
             <Link
               href="/business/events/new"
               className="inline-flex min-h-[44px] items-center justify-center rounded-md bg-[#111] px-4 py-2 text-sm font-semibold text-white no-underline"
@@ -116,7 +116,7 @@ export default function BusinessEventsPage() {
             {events.map((event) => (
               <Card
                 key={event.id}
-                className="overflow-hidden border-[#e4e1da] bg-white p-0"
+                className="overflow-hidden border-[#e4e1da] dark:border-border bg-white dark:bg-card p-0"
               >
                 <div className="flex flex-col sm:flex-row">
                   <div className="h-36 w-full shrink-0 sm:h-auto sm:w-36 sm:min-h-[100px]">
@@ -131,13 +131,13 @@ export default function BusinessEventsPage() {
                   <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
                     <div className="min-w-0 flex-1">
                       <h3 className="break-words text-base font-semibold text-[#111]">{event.title}</h3>
-                      <p className="mt-1 text-sm text-neutral-500">
+                      <p className="mt-1 text-sm text-neutral-500 dark:text-muted-foreground">
                         {format(new Date(event.startDate), 'MMM dd, yyyy')} • {event.category}
                       </p>
-                      <p className="mt-1 break-words text-xs text-neutral-600">
+                      <p className="mt-1 break-words text-xs text-neutral-600 dark:text-muted-foreground">
                         {getEventLocationLabel(event as never)}
                       </p>
-                      <p className="mt-2 text-xs uppercase tracking-wide text-neutral-400">
+                      <p className="mt-2 text-xs uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                         {event.status.replace(/_/g, ' ')}
                       </p>
                       {event.status === 'changes_requested' && event.approvalNotes && (

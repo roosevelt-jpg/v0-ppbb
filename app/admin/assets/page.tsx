@@ -69,11 +69,11 @@ export default function AdminAssetsPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-black">Event Asset Library</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-black dark:text-foreground">Event Asset Library</h1>
+            <p className="text-sm text-gray-500 dark:text-muted-foreground mt-1">
               Upload photos & videos from events into tagged folders for members and businesses.
             </p>
-            <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+            <p className="text-xs text-gray-400 dark:text-muted-foreground mt-1 flex items-center gap-1">
               <Settings className="h-3 w-3" />
               Storage: {getStorageProviderLabel(storageProvider)} —{' '}
               <Link href="/admin/integrations" className="underline">
@@ -94,7 +94,7 @@ export default function AdminAssetsPage() {
         {showCreate && (
           <form
             onSubmit={handleCreate}
-            className="bg-white border border-gray-200 rounded-xl p-6 space-y-4 max-w-xl"
+            className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-6 space-y-4 max-w-xl"
           >
             <h2 className="font-semibold text-lg">Create asset folder</h2>
             <input
@@ -102,14 +102,14 @@ export default function AdminAssetsPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Folder name (e.g. Ramadan Iftar 2026)"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
             />
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Description — what is inside this folder?"
               rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
             />
             <EventPickerSelect
               value={form.eventId}
@@ -120,7 +120,7 @@ export default function AdminAssetsPage() {
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
               placeholder="Tags (comma-separated): photos, volunteer, keynote"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
             />
             <div className="grid grid-cols-2 gap-3">
               <label className="text-sm">
@@ -130,7 +130,7 @@ export default function AdminAssetsPage() {
                   onChange={(e) =>
                     setForm({ ...form, visibility: e.target.value as AssetFolder['visibility'] })
                   }
-                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  className="mt-1 w-full border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="both">Members & Businesses</option>
                   <option value="members">Members only</option>
@@ -144,7 +144,7 @@ export default function AdminAssetsPage() {
                   onChange={(e) =>
                     setForm({ ...form, status: e.target.value as AssetFolder['status'] })
                   }
-                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  className="mt-1 w-full border border-gray-200 dark:border-border rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
@@ -162,7 +162,7 @@ export default function AdminAssetsPage() {
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
-                className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
+                className="px-4 py-2 border border-gray-200 dark:border-border rounded-lg text-sm"
               >
                 Cancel
               </button>
@@ -171,11 +171,11 @@ export default function AdminAssetsPage() {
         )}
 
         {loading ? (
-          <p className="text-gray-500">Loading folders…</p>
+          <p className="text-gray-500 dark:text-muted-foreground">Loading folders…</p>
         ) : folders.length === 0 ? (
-          <div className="text-center py-16 bg-gray-50 rounded-xl">
-            <FolderOpen className="h-10 w-10 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500">No folders yet. Create one to start uploading event media.</p>
+          <div className="text-center py-16 bg-gray-50 dark:bg-muted rounded-xl">
+            <FolderOpen className="h-10 w-10 mx-auto text-gray-300 dark:text-muted-foreground mb-3" />
+            <p className="text-gray-500 dark:text-muted-foreground">No folders yet. Create one to start uploading event media.</p>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -183,44 +183,44 @@ export default function AdminAssetsPage() {
               <Link
                 key={folder.id}
                 href={`/admin/assets/${folder.id}`}
-                className="rounded-xl border border-gray-200 bg-white overflow-hidden hover:border-gray-400 transition-colors"
+                className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden hover:border-gray-400 transition-colors"
               >
-                <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                <div className="aspect-video bg-gray-100 dark:bg-muted flex items-center justify-center">
                   {folder.coverImageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={folder.coverImageUrl} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <FolderOpen className="h-10 w-10 text-gray-300" />
+                    <FolderOpen className="h-10 w-10 text-gray-300 dark:text-muted-foreground" />
                   )}
                 </div>
                 <div className="p-4 space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="font-semibold text-black truncate">{folder.name}</h2>
+                    <h2 className="font-semibold text-black dark:text-foreground truncate">{folder.name}</h2>
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
                         folder.status === 'published'
                           ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-600'
+                          : 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground'
                       }`}
                     >
                       {folder.status}
                     </span>
                   </div>
                   {folder.eventTitle && (
-                    <p className="text-xs text-gray-500">Event: {folder.eventTitle}</p>
+                    <p className="text-xs text-gray-500 dark:text-muted-foreground">Event: {folder.eventTitle}</p>
                   )}
                   <div className="flex flex-wrap gap-1">
                     {folder.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                        className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground"
                       >
                         <Tag className="h-3 w-3" />
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-muted-foreground">
                     {folder.fileCount} files · {folder.visibility}
                   </p>
                 </div>

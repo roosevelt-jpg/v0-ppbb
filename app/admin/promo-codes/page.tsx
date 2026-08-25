@@ -21,6 +21,7 @@ type PromoRow = {
   planId: string
   planName: string
   benefitDurationMonths: number
+  trialEnabled: boolean
   maxRedemptions: number | null
   usedCount: number
   codeExpiresAt: string | null
@@ -34,6 +35,7 @@ const EMPTY_FORM = {
   description: '',
   planId: '',
   benefitDurationMonths: 3 as number | 'forever',
+  trialEnabled: false,
   maxRedemptions: '500',
   codeExpiresAt: '',
 }
@@ -79,6 +81,7 @@ export default function AdminPromoCodesPage() {
             planId: String(row.planId || ''),
             planName: String(row.planName || ''),
             benefitDurationMonths: Number(row.benefitDurationMonths) || 0,
+            trialEnabled: Boolean(row.trialEnabled),
             maxRedemptions:
               row.maxRedemptions === null || row.maxRedemptions === undefined
                 ? null
@@ -154,6 +157,7 @@ export default function AdminPromoCodesPage() {
           planId: form.planId,
           benefitDurationMonths:
             form.benefitDurationMonths === 'forever' ? 0 : Number(form.benefitDurationMonths) || 1,
+          trialEnabled: form.benefitDurationMonths !== 'forever' && form.trialEnabled,
           maxRedemptions: form.maxRedemptions.trim() === '' ? null : Number(form.maxRedemptions),
           codeExpiresAt: form.codeExpiresAt || null,
         }),
@@ -193,7 +197,7 @@ export default function AdminPromoCodesPage() {
     >
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             Codes grant 100% free access for forever or any duration from 1–12 months.
           </p>
           <button
@@ -213,11 +217,11 @@ export default function AdminPromoCodesPage() {
         ) : null}
 
         {showForm ? (
-          <div className="bg-white border border-neutral-200 rounded-lg p-4 sm:p-6 space-y-4">
-            <h3 className="font-semibold text-neutral-900">Create promo code</h3>
+          <div className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-4 sm:p-6 space-y-4">
+            <h3 className="font-semibold text-neutral-900 dark:text-foreground">Create promo code</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">Code</label>
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">Code</label>
                 <input
                   className={INPUT_STYLE}
                   value={form.code}
@@ -226,7 +230,7 @@ export default function AdminPromoCodesPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">Label</label>
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">Label</label>
                 <input
                   className={INPUT_STYLE}
                   value={form.label}
@@ -235,7 +239,7 @@ export default function AdminPromoCodesPage() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-neutral-700 mb-1">Description</label>
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">Description</label>
                 <input
                   className={INPUT_STYLE}
                   value={form.description}
@@ -244,7 +248,7 @@ export default function AdminPromoCodesPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">Valid for plan</label>
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">Valid for plan</label>
                 <select
                   className={INPUT_STYLE}
                   value={form.planId}
@@ -259,7 +263,7 @@ export default function AdminPromoCodesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">
                   Benefit duration
                 </label>
                 <select
@@ -284,12 +288,43 @@ export default function AdminPromoCodesPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-neutral-500 mt-1">
+                <p className="text-[11px] text-neutral-500 dark:text-muted-foreground mt-1">
                   Choose forever, or any duration from 1–12 months.
                 </p>
               </div>
+              <div className="sm:col-span-2">
+                <label
+                  className={`flex items-start gap-2 rounded-lg border p-3 ${
+                    form.benefitDurationMonths === 'forever'
+                      ? 'border-neutral-200 dark:border-border bg-neutral-50 dark:bg-muted opacity-60 cursor-not-allowed'
+                      : 'border-neutral-200 dark:border-border cursor-pointer'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 cursor-pointer"
+                    checked={form.trialEnabled && form.benefitDurationMonths !== 'forever'}
+                    disabled={form.benefitDurationMonths === 'forever'}
+                    onChange={(e) => setForm({ ...form, trialEnabled: e.target.checked })}
+                  />
+                  <span className="text-xs">
+                    <span className="block font-medium text-neutral-900 dark:text-foreground">
+                      Enable real trial (card required, auto-bills via Stripe)
+                    </span>
+                    <span className="block text-neutral-500 dark:text-muted-foreground mt-0.5">
+                      On: the member enters a card at checkout and Stripe automatically bills the
+                      plan price the moment the trial ends — a genuine free-trial-then-pay flow.
+                      Off (default): the plan is granted directly for the duration above, no card
+                      collected, no billing — access simply lapses when the duration is up.
+                      {form.benefitDurationMonths === 'forever'
+                        ? ' Not available for a forever/lifetime duration — there is nothing to bill.'
+                        : ''}
+                    </span>
+                  </span>
+                </label>
+              </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">
                   Max redemptions (blank = unlimited)
                 </label>
                 <input
@@ -300,7 +335,7 @@ export default function AdminPromoCodesPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">
                   Code expires (optional)
                 </label>
                 <input
@@ -323,31 +358,31 @@ export default function AdminPromoCodesPage() {
         ) : null}
 
         {loading ? (
-          <p className="text-sm text-neutral-500">Loading…</p>
+          <p className="text-sm text-neutral-500 dark:text-muted-foreground">Loading…</p>
         ) : codes.length === 0 ? (
-          <div className="text-center py-12 bg-neutral-50 rounded-lg border border-neutral-200">
-            <p className="text-neutral-500">No promo codes yet.</p>
+          <div className="text-center py-12 bg-neutral-50 dark:bg-muted rounded-lg border border-neutral-200 dark:border-border">
+            <p className="text-neutral-500 dark:text-muted-foreground">No promo codes yet.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {codes.map((row) => (
               <div
                 key={row.id}
-                className="bg-white border border-neutral-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
+                className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
               >
                 <div className="min-w-0 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <code className="font-mono font-bold text-neutral-900 bg-neutral-50 px-2 py-0.5 rounded">
+                    <code className="font-mono font-bold text-neutral-900 dark:text-foreground bg-neutral-50 dark:bg-muted px-2 py-0.5 rounded">
                       {row.code}
                     </code>
-                    <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 capitalize">
+                    <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 dark:bg-muted text-neutral-700 dark:text-foreground capitalize">
                       {row.status}
                     </span>
                   </div>
-                  <p className="text-sm font-medium text-neutral-900">
+                  <p className="text-sm font-medium text-neutral-900 dark:text-foreground">
                     {row.label || row.code} → {row.planName || row.planId}
                   </p>
-                  <p className="text-xs text-neutral-600">
+                  <p className="text-xs text-neutral-600 dark:text-muted-foreground">
                     {row.type === 'free_access' || row.percentOff >= 100
                       ? '100% free'
                       : `${row.percentOff}% off`}{' '}
@@ -360,13 +395,25 @@ export default function AdminPromoCodesPage() {
                     · Used {row.usedCount}
                     {row.maxRedemptions != null ? ` / ${row.maxRedemptions}` : ' (unlimited)'}
                   </p>
+                  {row.benefitDurationMonths > 0 ? (
+                    <p className="text-xs">
+                      {row.trialEnabled ? (
+                        <span className="text-amber-700">
+                          Real trial — card required, auto-bills via Stripe after {row.benefitDurationMonths}{' '}
+                          month{row.benefitDurationMonths === 1 ? '' : 's'}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-500 dark:text-muted-foreground">Free grant only — no card, no billing</span>
+                      )}
+                    </p>
+                  ) : null}
                   {row.codeExpiresAt ? (
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                       Code expires {format(new Date(row.codeExpiresAt), 'MMM d, yyyy h:mm a')}
                     </p>
                   ) : null}
                   {row.description ? (
-                    <p className="text-xs text-neutral-500">{row.description}</p>
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">{row.description}</p>
                   ) : null}
                 </div>
                 <button

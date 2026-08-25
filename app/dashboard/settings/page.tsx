@@ -324,13 +324,15 @@ function SettingsContent() {
       return
     }
 
-    const uid = authUser?.id ?? firebaseUser?.uid
-    const token = await firebaseUser?.getIdToken()
-    if (!uid || !token) return
-
     setDeleting(true)
     setError(null)
     try {
+      const uid = authUser?.id ?? firebaseUser?.uid
+      const token = await firebaseUser?.getIdToken()
+      if (!uid || !token) {
+        throw new Error('You need to be signed in to delete your account.')
+      }
+
       const res = await fetch('/api/account/delete', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -372,17 +374,25 @@ function SettingsContent() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         {success ? <p className="text-sm text-green-700">{success}</p> : null}
 
-        <Card className="p-6 border border-neutral-200 w-full">
-          <h2 className="text-xl font-bold mb-6 text-neutral-900">Personal Information</h2>
+        <Card className="p-6 border border-neutral-200 dark:border-border w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Personal Information</h2>
+            <Link
+              href="/dashboard/profile"
+              className="text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:underline"
+            >
+              More profile details →
+            </Link>
+          </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 pb-6 border-b border-neutral-200">
+          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 pb-6 border-b border-neutral-200 dark:border-border">
             <UserAvatar user={user} size="lg" imageUrl={pictureURL || null} />
             <div className="flex flex-col items-center sm:items-start gap-2 text-center sm:text-left">
-              <p className="text-sm font-medium text-neutral-900">Profile photo</p>
-              <p className="text-xs text-neutral-500 max-w-xs">
+              <p className="text-sm font-medium text-neutral-900 dark:text-foreground">Profile photo</p>
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground max-w-xs">
                 JPG, PNG, or WebP. Automatically resized to 512px before upload.
               </p>
-              <label className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg border border-neutral-300 bg-white text-black text-sm font-medium cursor-pointer hover:bg-neutral-50">
+              <label className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg border border-neutral-300 dark:border-border bg-white dark:bg-card text-black dark:text-foreground text-sm font-medium cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800">
                 {uploadingPhoto ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 ) : (
@@ -408,68 +418,68 @@ function SettingsContent() {
             <div className="flex flex-col gap-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <label className="text-sm font-medium text-neutral-500">First Name</label>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">First Name</label>
                   <input
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                   />
                 </div>
                 <div className="flex flex-col gap-1 min-w-0">
-                  <label className="text-sm font-medium text-neutral-500">Last Name</label>
+                  <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Last Name</label>
                   <input
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-neutral-500">Email</label>
+                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Email</label>
                 <input
                   type="text"
                   value={user?.email ?? ''}
                   disabled
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-600"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg bg-neutral-50 dark:bg-white/5 text-neutral-600 dark:text-muted-foreground"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-neutral-500">Phone</label>
+                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Phone</label>
                 <input
                   type="text"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-neutral-500">Location</label>
+                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Location</label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="City, emirate, or country"
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-neutral-500">Bio</label>
+                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground">Bio</label>
                 <textarea
                   value={formData.bio}
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-medium text-neutral-500 block mb-2">Skills</label>
+                <label className="text-sm font-medium text-neutral-500 dark:text-muted-foreground block mb-2">Skills</label>
                 <div className="flex flex-wrap gap-2">
                   {SKILL_OPTIONS.map((skill) => (
                     <button
@@ -479,7 +489,7 @@ function SettingsContent() {
                       className={`px-3 py-1 rounded-full text-xs font-medium border ${
                         formData.skills.includes(skill)
                           ? '!bg-black !text-white border-black'
-                          : '!bg-white !text-black border-neutral-300'
+                          : '!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border-neutral-300 dark:border-border'
                       }`}
                     >
                       {skill}
@@ -503,7 +513,7 @@ function SettingsContent() {
                     setFormData(savedProfile)
                     setEditing(false)
                   }}
-                  className="!bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold"
+                  className="!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-gray-300 dark:border-border px-6 py-2 rounded-lg text-sm font-semibold"
                 >
                   Cancel
                 </button>
@@ -513,40 +523,40 @@ function SettingsContent() {
             <div className="flex flex-col gap-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-neutral-500">First Name</p>
-                  <p className="text-base font-medium text-neutral-900">{user?.firstName || '—'}</p>
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground">First Name</p>
+                  <p className="text-base font-medium text-neutral-900 dark:text-foreground">{user?.firstName || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-neutral-500">Last Name</p>
-                  <p className="text-base font-medium text-neutral-900">{user?.lastName || '—'}</p>
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground">Last Name</p>
+                  <p className="text-base font-medium text-neutral-900 dark:text-foreground">{user?.lastName || '—'}</p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Email</p>
-                <p className="text-base font-medium text-neutral-900">{user?.email || '—'}</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">Email</p>
+                <p className="text-base font-medium text-neutral-900 dark:text-foreground">{user?.email || '—'}</p>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Phone</p>
-                <p className="text-base font-medium text-neutral-900">{user?.phone || '—'}</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">Phone</p>
+                <p className="text-base font-medium text-neutral-900 dark:text-foreground">{user?.phone || '—'}</p>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Location</p>
-                <p className="text-base font-medium text-neutral-900">
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">Location</p>
+                <p className="text-base font-medium text-neutral-900 dark:text-foreground">
                   {formatUserLocationDisplay(user?.location, user?.locationLabel) || '—'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-neutral-500">Bio</p>
-                <p className="text-base text-neutral-900 whitespace-pre-wrap">{user?.bio || '—'}</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">Bio</p>
+                <p className="text-base text-neutral-900 dark:text-foreground whitespace-pre-wrap">{user?.bio || '—'}</p>
               </div>
               {user?.skills?.length ? (
                 <div>
-                  <p className="text-sm text-neutral-500 mb-2">Skills</p>
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground mb-2">Skills</p>
                   <div className="flex flex-wrap gap-2">
                     {user.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium text-neutral-800"
+                        className="px-2 py-1 bg-neutral-100 dark:bg-neutral-800 rounded text-xs font-medium text-neutral-800 dark:text-foreground"
                       >
                         {skill}
                       </span>
@@ -565,12 +575,12 @@ function SettingsContent() {
           )}
         </Card>
 
-        <Card className="p-6 border border-neutral-200 w-full">
+        <Card className="p-6 border border-neutral-200 dark:border-border w-full">
           <div className="flex items-center gap-2 mb-4">
             <Bell className="w-5 h-5" />
-            <h2 className="text-xl font-bold text-neutral-900">Notification Preferences</h2>
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Notification Preferences</h2>
           </div>
-          <p className="text-xs text-neutral-500 mb-4">
+          <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-4">
             These preferences control newsletters, push alerts, and in-app notifications across the
             platform.
           </p>
@@ -601,8 +611,8 @@ function SettingsContent() {
                     className="mt-1 w-4 h-4 accent-black"
                   />
                   <div>
-                    <p className="font-medium text-sm text-neutral-900">{title}</p>
-                    <p className="text-xs text-neutral-500">{desc}</p>
+                    <p className="font-medium text-sm text-neutral-900 dark:text-foreground">{title}</p>
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground">{desc}</p>
                   </div>
                 </label>
               ))}
@@ -621,7 +631,7 @@ function SettingsContent() {
                     setNotificationPreferences(savedNotifications)
                     setEditingNotifications(false)
                   }}
-                  className="!bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold"
+                  className="!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-gray-300 dark:border-border px-6 py-2 rounded-lg text-sm font-semibold"
                 >
                   Cancel
                 </button>
@@ -630,11 +640,11 @@ function SettingsContent() {
           ) : (
             <div className="flex flex-col gap-3">
               {Object.entries(notificationPreferences).map(([key, enabled]) => (
-                <div key={key} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
-                  <span className="text-sm font-medium capitalize text-neutral-800">
+                <div key={key} className="flex items-center justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg">
+                  <span className="text-sm font-medium capitalize text-neutral-800 dark:text-foreground">
                     {key.replace(/([A-Z])/g, ' $1').trim()}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-neutral-200 rounded">
+                  <span className="text-xs px-2 py-1 bg-neutral-200 dark:bg-neutral-700 rounded">
                     {enabled ? 'Enabled' : 'Disabled'}
                   </span>
                 </div>
@@ -650,12 +660,12 @@ function SettingsContent() {
           )}
         </Card>
 
-        <Card className="p-6 border border-neutral-200 w-full">
+        <Card className="p-6 border border-neutral-200 dark:border-border w-full">
           <div className="flex items-center gap-2 mb-4">
             <Shield className="w-5 h-5" />
-            <h2 className="text-xl font-bold text-neutral-900">Privacy Settings</h2>
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Privacy Settings</h2>
           </div>
-          <p className="text-xs text-neutral-500 mb-4">
+          <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-4">
             Control how your profile appears in the member directory and community areas.
           </p>
 
@@ -675,7 +685,7 @@ function SettingsContent() {
                 />
                 <div>
                   <p className="font-medium text-sm">Allow others to open my full profile</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                     Members can view your profile card from groups, chat, and the forum
                   </p>
                 </div>
@@ -694,7 +704,7 @@ function SettingsContent() {
                 />
                 <div>
                   <p className="font-medium text-sm">Show in member directory</p>
-                  <p className="text-xs text-neutral-500">Appear in the public member directory</p>
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">Appear in the public member directory</p>
                 </div>
               </label>
               <label className="flex items-start gap-3 cursor-pointer">
@@ -711,7 +721,7 @@ function SettingsContent() {
                 />
                 <div>
                   <p className="font-medium text-sm">Show my real name in groups</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                     If off, others see “Member” instead of your name in chat and forum
                   </p>
                 </div>
@@ -730,7 +740,7 @@ function SettingsContent() {
                 />
                 <div>
                   <p className="font-medium text-sm">Show my photo in groups</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                     Control avatar visibility in chat, forum, and member lists
                   </p>
                 </div>
@@ -749,7 +759,7 @@ function SettingsContent() {
                 />
                 <div>
                   <p className="font-medium text-sm">Show bio on my profile</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                     Include your about text when someone opens your profile
                   </p>
                 </div>
@@ -768,7 +778,7 @@ function SettingsContent() {
                 />
                 <div>
                   <p className="font-medium text-sm">Show location on my profile</p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                     Include your location when someone opens your profile
                   </p>
                 </div>
@@ -788,7 +798,7 @@ function SettingsContent() {
                     setPrivacySettings(savedPrivacy)
                     setEditingPrivacy(false)
                   }}
-                  className="!bg-white !text-black border border-gray-300 px-6 py-2 rounded-lg text-sm font-semibold"
+                  className="!bg-white dark:!bg-neutral-800 !text-black dark:!text-foreground border border-gray-300 dark:border-border px-6 py-2 rounded-lg text-sm font-semibold"
                 >
                   Cancel
                 </button>
@@ -796,27 +806,27 @@ function SettingsContent() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+              <div className="flex justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg text-sm">
                 <span>Full profile visible</span>
                 <span>{privacySettings.showProfileToCommunity ? 'On' : 'Off'}</span>
               </div>
-              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+              <div className="flex justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg text-sm">
                 <span>Show in member directory</span>
                 <span>{privacySettings.showInMemberDirectory ? 'On' : 'Off'}</span>
               </div>
-              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+              <div className="flex justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg text-sm">
                 <span>Real name in groups</span>
                 <span>{privacySettings.showRealNameInGroups ? 'On' : 'Off'}</span>
               </div>
-              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+              <div className="flex justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg text-sm">
                 <span>Photo in groups</span>
                 <span>{privacySettings.showAvatarInGroups ? 'On' : 'Off'}</span>
               </div>
-              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+              <div className="flex justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg text-sm">
                 <span>Bio on profile</span>
                 <span>{privacySettings.showBioOnProfile ? 'On' : 'Off'}</span>
               </div>
-              <div className="flex justify-between p-3 bg-neutral-50 rounded-lg text-sm">
+              <div className="flex justify-between p-3 bg-neutral-50 dark:bg-white/5 rounded-lg text-sm">
                 <span>Location on profile</span>
                 <span>{privacySettings.showLocationOnProfile ? 'On' : 'Off'}</span>
               </div>
@@ -831,10 +841,10 @@ function SettingsContent() {
           )}
         </Card>
 
-        <Card className="p-6 border border-neutral-200 w-full">
+        <Card className="p-6 border border-neutral-200 dark:border-border w-full">
           <div className="flex items-center gap-2 mb-4">
             <UserX className="w-5 h-5" />
-            <h2 className="text-xl font-bold text-neutral-900">Account</h2>
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Account</h2>
           </div>
           <div className="flex flex-col gap-4">
             <div>
@@ -848,7 +858,7 @@ function SettingsContent() {
                   {passwordLoading ? 'Sending...' : 'Change Password'}
                 </button>
               ) : (
-                <p className="text-sm text-neutral-600">
+                <p className="text-sm text-neutral-600 dark:text-muted-foreground">
                   You signed in with a social provider. Use{' '}
                   <Link href="/forgot-password" className="underline font-medium">
                     Forgot Password
@@ -857,7 +867,7 @@ function SettingsContent() {
                 </p>
               )}
               {passwordMessage ? (
-                <p className="text-sm text-neutral-600 mt-2">{passwordMessage}</p>
+                <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-2">{passwordMessage}</p>
               ) : null}
             </div>
             <div>
@@ -869,7 +879,7 @@ function SettingsContent() {
               >
                 {deleting ? 'Deleting...' : 'Delete Account'}
               </button>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
                 Deactivates your profile, opts you out of communications, and disables sign-in.
               </p>
             </div>

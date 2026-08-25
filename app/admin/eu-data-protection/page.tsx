@@ -29,6 +29,9 @@ export default function EUDataProtectionAdmin() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [status, setStatus] = useState<'draft' | 'active' | 'archived'>('draft')
   const [requiresAcceptance, setRequiresAcceptance] = useState(true)
+  const [acceptanceStats, setAcceptanceStats] = useState<{ total: number; currentVersion: number } | null>(
+    null
+  )
 
   const loadPolicy = useCallback(async () => {
     setLoading(true)
@@ -67,6 +70,14 @@ export default function EUDataProtectionAdmin() {
   useEffect(() => {
     void loadPolicy()
   }, [loadPolicy])
+
+  useEffect(() => {
+    adminApiFetch<{ total: number; currentVersion: number }>('/api/admin/eu-policy/acceptances')
+      .then((json) => {
+        if (json.success && json.data) setAcceptanceStats(json.data)
+      })
+      .catch((error) => console.error('[v0] Error loading acceptance stats:', error))
+  }, [policy?.version])
 
   const persistPolicy = async (publish: boolean) => {
     if (!title.trim() || !content.trim()) {
@@ -117,7 +128,7 @@ export default function EUDataProtectionAdmin() {
     return (
       <AdminPageLayout title="EU Data Protection Policy" subtitle="Manage GDPR compliance policy">
         <div className="p-8">
-          <p className="text-neutral-500">Loading policy...</p>
+          <p className="text-neutral-500 dark:text-muted-foreground">Loading policy...</p>
         </div>
       </AdminPageLayout>
     )
@@ -130,42 +141,55 @@ export default function EUDataProtectionAdmin() {
           <Card
             className={`p-4 flex items-center gap-3 border ${
               message.type === 'success'
-                ? 'border-neutral-300 bg-neutral-50'
+                ? 'border-neutral-300 dark:border-border bg-neutral-50 dark:bg-muted'
                 : 'border-red-200 bg-red-50'
             }`}
           >
             {message.type === 'success' ? (
-              <CheckCircle className="h-5 w-5 text-neutral-900 shrink-0" />
+              <CheckCircle className="h-5 w-5 text-neutral-900 dark:text-foreground shrink-0" />
             ) : (
               <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
             )}
-            <p className={message.type === 'success' ? 'text-neutral-900' : 'text-red-800'}>
+            <p className={message.type === 'success' ? 'text-neutral-900 dark:text-foreground' : 'text-red-800'}>
               {message.text}
             </p>
           </Card>
         )}
 
-        <Card className="p-6 sm:p-8 border border-neutral-200">
+        {acceptanceStats && (
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="p-4 border border-neutral-200 dark:border-border">
+              <p className="text-sm text-neutral-500 dark:text-muted-foreground">Total acceptances recorded</p>
+              <p className="text-2xl font-semibold text-neutral-900 dark:text-foreground">{acceptanceStats.total}</p>
+            </Card>
+            <Card className="p-4 border border-neutral-200 dark:border-border">
+              <p className="text-sm text-neutral-500 dark:text-muted-foreground">Accepted current version (v{policy?.version ?? '—'})</p>
+              <p className="text-2xl font-semibold text-neutral-900 dark:text-foreground">{acceptanceStats.currentVersion}</p>
+            </Card>
+          </div>
+        )}
+
+        <Card className="p-6 sm:p-8 border border-neutral-200 dark:border-border">
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-2 text-neutral-900">Policy Title</label>
+              <label className="block text-sm font-medium mb-2 text-neutral-900 dark:text-foreground">Policy Title</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={DEFAULT_TITLE}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-md bg-neutral-50 text-neutral-900"
+                className="w-full px-3 py-2 border border-neutral-200 dark:border-border rounded-md bg-neutral-50 dark:bg-muted text-neutral-900 dark:text-foreground"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-neutral-900">Policy Content</label>
+              <label className="block text-sm font-medium mb-2 text-neutral-900 dark:text-foreground">Policy Content</label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Enter the full EU Data Protection Policy text..."
                 rows={12}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-md bg-neutral-50 text-neutral-900 font-mono text-sm leading-relaxed"
+                className="w-full px-3 py-2 border border-neutral-200 dark:border-border rounded-md bg-neutral-50 dark:bg-muted text-neutral-900 dark:text-foreground font-mono text-sm leading-relaxed"
               />
             </div>
 
@@ -177,17 +201,17 @@ export default function EUDataProtectionAdmin() {
                 id="requires-acceptance"
                 className="cursor-pointer"
               />
-              <label htmlFor="requires-acceptance" className="text-neutral-900 font-medium cursor-pointer">
+              <label htmlFor="requires-acceptance" className="text-neutral-900 dark:text-foreground font-medium cursor-pointer">
                 Require users to accept this policy before accessing the website
               </label>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-neutral-900">Policy Status</label>
+              <label className="block text-sm font-medium mb-2 text-neutral-900 dark:text-foreground">Policy Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as 'draft' | 'active' | 'archived')}
-                className="w-full px-3 py-2 border border-neutral-200 rounded-md bg-neutral-50 text-neutral-900"
+                className="w-full px-3 py-2 border border-neutral-200 dark:border-border rounded-md bg-neutral-50 dark:bg-muted text-neutral-900 dark:text-foreground"
               >
                 <option value="draft">Draft (Not visible to users)</option>
                 <option value="active">Active (Visible & Required)</option>
@@ -196,7 +220,7 @@ export default function EUDataProtectionAdmin() {
             </div>
 
             {policy && (
-              <div className="bg-neutral-50 p-3 rounded-md border-l-4 border-neutral-900 text-sm text-neutral-600 space-y-1">
+              <div className="bg-neutral-50 dark:bg-muted p-3 rounded-md border-l-4 border-neutral-900 text-sm text-neutral-600 dark:text-muted-foreground space-y-1">
                 <p>
                   <strong>Version:</strong> {policy.version}
                 </p>

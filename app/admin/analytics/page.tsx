@@ -10,7 +10,7 @@ import { collection, onSnapshot, query } from 'firebase/firestore'
 import { BarChart as BarIcon, TrendingUp, LineChart as LineIcon, PieChart as PieIcon } from 'lucide-react'
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
-const CHART_BLACK = '#111111'
+const CHART_BLACK = 'var(--foreground)'
 const CHART_PALETTE = [CHART_BLACK, '#374151', '#6b7280', '#9ca3af']
 
 interface Analytics {
@@ -134,19 +134,19 @@ export default function AnalyticsPage() {
   const KPICard = ({ label, value, icon: Icon }: { label: string; value: string | number; icon: any }) => (
     <Card
       style={{
-        backgroundColor: '#ffffff',
-        borderColor: '#e4e1da',
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
         padding: '24px',
       }}
       className="flex items-start justify-between"
     >
       <div>
-        <p style={{ color: '#888888', fontSize: '12px' }} className="mb-2">
+        <p style={{ color: 'var(--muted-foreground)', fontSize: '12px' }} className="mb-2">
           {label}
         </p>
-        <p style={{ color: '#111111', fontSize: '28px', fontWeight: 700 }}>{value}</p>
+        <p style={{ color: 'var(--foreground)', fontSize: '28px', fontWeight: 700 }}>{value}</p>
       </div>
-      <Icon style={{ color: '#888888', opacity: 0.3 }} className="h-8 w-8" />
+      <Icon style={{ color: 'var(--muted-foreground)', opacity: 0.3 }} className="h-8 w-8" />
     </Card>
   )
 
@@ -166,18 +166,18 @@ export default function AnalyticsPage() {
         {/* Member Growth Chart */}
         <Card
           style={{
-            backgroundColor: '#ffffff',
-            borderColor: '#e4e1da',
+            backgroundColor: 'var(--card)',
+            borderColor: 'var(--border)',
             padding: '32px',
           }}
         >
-          <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Member Growth Trend</h3>
+          <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Member Growth Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={analytics.memberGrowth}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e4e1da" />
-              <XAxis dataKey="month" stroke="#888888" />
-              <YAxis stroke="#888888" />
-              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="month" stroke="var(--muted-foreground)" />
+              <YAxis stroke="var(--muted-foreground)" />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }} />
               <Legend />
               <Line type="monotone" dataKey="value" stroke={CHART_BLACK} strokeWidth={2} dot={{ fill: CHART_BLACK }} name="Members" />
             </LineChart>
@@ -187,18 +187,18 @@ export default function AnalyticsPage() {
         {/* Donation Trend Chart */}
         <Card
           style={{
-            backgroundColor: '#ffffff',
-            borderColor: '#e4e1da',
+            backgroundColor: 'var(--card)',
+            borderColor: 'var(--border)',
             padding: '32px',
           }}
         >
-          <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Monthly Donation Trend</h3>
+          <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Monthly Donation Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={analytics.donationTrend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e4e1da" />
-              <XAxis dataKey="month" stroke="#888888" />
-              <YAxis stroke="#888888" />
-              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="month" stroke="var(--muted-foreground)" />
+              <YAxis stroke="var(--muted-foreground)" />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }} />
               <Legend />
               <Bar dataKey="amount" fill={CHART_BLACK} name="Donations (AED)" />
             </BarChart>
@@ -209,12 +209,12 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card
             style={{
-              backgroundColor: '#ffffff',
-              borderColor: '#e4e1da',
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)',
               padding: '32px',
             }}
           >
-            <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Community Engagement</h3>
+            <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Community Engagement</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -239,32 +239,32 @@ export default function AnalyticsPage() {
           {/* Key Metrics Summary */}
           <Card
             style={{
-              backgroundColor: '#ffffff',
-              borderColor: '#e4e1da',
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)',
               padding: '32px',
             }}
             className="flex flex-col justify-between"
           >
             <div>
-              <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Key Performance Indicators</h3>
+              <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Key Performance Indicators</h3>
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-4 border-b border-neutral-200">
-                  <span style={{ color: '#888888' }}>Conversion Rate</span>
-                  <span style={{ color: '#111111', fontWeight: 600 }}>
+                <div className="flex justify-between items-center pb-4 border-b border-neutral-200 dark:border-border">
+                  <span style={{ color: 'var(--muted-foreground)' }}>Conversion Rate</span>
+                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>
                     {analytics.conversionRate || analytics.totalVolunteers > 0 ? Math.round((analytics.totalVolunteers / Math.max(analytics.totalMembers, 1)) * 100) : 0}%
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-neutral-200">
-                  <span style={{ color: '#888888' }}>Monthly Growth</span>
-                  <span style={{ color: '#111111', fontWeight: 600 }}>{analytics.monthlyGrowth || 12}%</span>
+                <div className="flex justify-between items-center pb-4 border-b border-neutral-200 dark:border-border">
+                  <span style={{ color: 'var(--muted-foreground)' }}>Monthly Growth</span>
+                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>{analytics.monthlyGrowth || 12}%</span>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-neutral-200">
-                  <span style={{ color: '#888888' }}>Donation Average</span>
-                  <span style={{ color: '#111111', fontWeight: 600 }}>AED {analytics.totalDonations > 0 ? Math.round(analytics.totalDonations / Math.max(analytics.totalVolunteers, 1)) : 0}</span>
+                <div className="flex justify-between items-center pb-4 border-b border-neutral-200 dark:border-border">
+                  <span style={{ color: 'var(--muted-foreground)' }}>Donation Average</span>
+                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>AED {analytics.totalDonations > 0 ? Math.round(analytics.totalDonations / Math.max(analytics.totalVolunteers, 1)) : 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span style={{ color: '#888888' }}>Active Rate</span>
-                  <span style={{ color: '#111111', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--muted-foreground)' }}>Active Rate</span>
+                  <span style={{ color: 'var(--foreground)', fontWeight: 600 }}>
                     {analytics.totalEvents > 0 ? Math.round((analytics.totalEvents / Math.max(analytics.totalMembers, 1)) * 100) : 0}%
                   </span>
                 </div>

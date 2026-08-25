@@ -40,7 +40,7 @@ function statusMeta(status?: string) {
         Icon: Clock,
       }
     default:
-      return { label: status || 'Unknown', className: 'bg-neutral-100 text-neutral-700', Icon: FileText }
+      return { label: status || 'Unknown', className: 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200', Icon: FileText }
   }
 }
 
@@ -121,26 +121,26 @@ function CharityRequestsContent() {
   const btnPrimary =
     'min-h-[44px] inline-flex items-center justify-center gap-2 bg-black hover:bg-neutral-900 text-white px-4 py-2.5 rounded text-sm font-semibold'
   const btnSecondary =
-    'min-h-[44px] inline-flex items-center justify-center gap-2 bg-white text-black border border-neutral-300 hover:bg-neutral-50 px-4 py-2.5 rounded text-sm font-semibold'
+    'min-h-[44px] inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800 px-4 py-2.5 rounded text-sm font-semibold'
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-4xl mx-auto w-full">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div>
           <p
-            className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-2"
+            className="text-xs uppercase tracking-[0.2em] text-neutral-500 dark:text-muted-foreground mb-2"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Member support
           </p>
           <h1
-            className="text-3xl sm:text-4xl text-neutral-900"
+            className="text-3xl sm:text-4xl text-neutral-900 dark:text-foreground"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
             Charity Support Requests
           </h1>
           <p
-            className="text-sm text-neutral-600 mt-2 max-w-xl"
+            className="text-sm text-neutral-600 dark:text-muted-foreground mt-2 max-w-xl"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Apply confidentially for welfare support. Your documents are stored on a restricted path
@@ -175,9 +175,9 @@ function CharityRequestsContent() {
         </div>
       ) : null}
 
-      <div className="bg-white border border-neutral-200 rounded-lg p-4 sm:p-6">
+      <div className="bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg p-4 sm:p-6">
         <h2
-          className="text-xl mb-4 text-neutral-900"
+          className="text-xl mb-4 text-neutral-900 dark:text-foreground"
           style={{ fontFamily: 'Cormorant Garamond, serif' }}
         >
           Your requests
@@ -186,14 +186,14 @@ function CharityRequestsContent() {
         {loading ? (
           <div className="space-y-3 animate-pulse">
             {[1, 2].map((i) => (
-              <div key={i} className="h-16 bg-neutral-100 rounded" />
+              <div key={i} className="h-16 bg-neutral-100 dark:bg-neutral-800 rounded" />
             ))}
           </div>
         ) : requests.length === 0 ? (
           <div className="text-center py-12" style={{ fontFamily: 'Inter, sans-serif' }}>
             <FileText className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-            <p className="text-neutral-600 mb-1">No support requests yet</p>
-            <p className="text-sm text-neutral-500 mb-6">
+            <p className="text-neutral-600 dark:text-muted-foreground mb-1">No support requests yet</p>
+            <p className="text-sm text-neutral-500 dark:text-muted-foreground mb-6">
               Start an application when you need confidential charity support.
             </p>
             <button type="button" className={btnPrimary} onClick={() => setShowForm(true)}>
@@ -209,12 +209,12 @@ function CharityRequestsContent() {
               return (
                 <li
                   key={r.id}
-                  className="border border-neutral-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                  className="border border-neutral-200 dark:border-border rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <meta.Icon className="w-4 h-4 text-neutral-500 shrink-0" />
-                      <span className="font-medium text-neutral-900 truncate">
+                      <meta.Icon className="w-4 h-4 text-neutral-500 dark:text-muted-foreground shrink-0" />
+                      <span className="font-medium text-neutral-900 dark:text-foreground truncate">
                         {r.fullName || 'Support request'}
                       </span>
                       <span
@@ -223,15 +223,15 @@ function CharityRequestsContent() {
                         {meta.label}
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-1 capitalize">
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1 capitalize">
                       {r.emergencyLevel || '—'} priority
                       {when ? ` · ${when.toLocaleDateString()}` : ''}
                     </p>
                     {r.reason ? (
-                      <p className="text-sm text-neutral-600 mt-1 line-clamp-2">{r.reason}</p>
+                      <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1 line-clamp-2">{r.reason}</p>
                     ) : null}
                   </div>
-                  <p className="text-[10px] font-mono text-neutral-400 break-all sm:text-right">
+                  <p className="text-[10px] font-mono text-neutral-400 dark:text-neutral-500 break-all sm:text-right">
                     {r.id}
                   </p>
                 </li>
@@ -249,8 +249,8 @@ export default function CharityRequestsPage() {
     <Suspense
       fallback={
         <div className="px-4 py-8 max-w-4xl mx-auto animate-pulse space-y-4">
-          <div className="h-8 bg-neutral-200 rounded w-1/2" />
-          <div className="h-40 bg-neutral-200 rounded" />
+          <div className="h-8 bg-neutral-200 dark:bg-neutral-700 rounded w-1/2" />
+          <div className="h-40 bg-neutral-200 dark:bg-neutral-700 rounded" />
         </div>
       }
     >

@@ -12,7 +12,7 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore'
-import { Users, AlertCircle, CheckCircle, Download, Trash2 } from 'lucide-react'
+import { Users, AlertCircle, CheckCircle, Download, Trash2, Check } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { AdminUserCell } from '@/components/admin-user-cell'
 import { AdminSelect } from '@/components/admin-select'
@@ -153,6 +153,10 @@ export default function MembershipPage() {
     setIsProcessing(true)
     try {
       const plan = plans.find((p) => p.id === bulkTierTarget)
+      const isBusiness = /business|partner|corporate|company/i.test(String(plan?.name || ''))
+      const renewDate = new Date(
+        new Date().setMonth(new Date().getMonth() + (plan?.billingPeriod === 'yearly' ? 12 : 1))
+      ).toISOString()
       const batch = writeBatch(db)
       selectedMembers.forEach((memberId) => {
         const userRef = doc(db, 'users', memberId)
@@ -160,8 +164,22 @@ export default function MembershipPage() {
           membershipTier: bulkTierTarget,
           membershipPlanId: bulkTierTarget,
           membershipPlanName: plan?.name ?? bulkTierTarget,
+          membershipStatus: 'active',
+          membershipRenewDate: renewDate,
           lastTierChange: new Date(),
           bulkUpdateApplied: true,
+          ...(isBusiness
+            ? {
+                role: 'business',
+                userType: 'business',
+                hasBusinessProfile: true,
+                roles: ['member', 'business'],
+              }
+            : {
+                role: 'member',
+                userType: 'member',
+                roles: ['member'],
+              }),
         })
       })
       await batch.commit()
@@ -339,28 +357,28 @@ export default function MembershipPage() {
   )
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-neutral-50 space-y-6 lg:space-y-8 min-w-0">
+    <div className="p-4 sm:p-6 lg:p-8 bg-neutral-50 dark:bg-muted space-y-6 lg:space-y-8 min-w-0">
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Card className="p-4 sm:p-6 border border-neutral-200">
+        <Card className="p-4 sm:p-6 border border-neutral-200 dark:border-border">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Total Members</p>
-              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{activeMembers.length}</p>
-              <p className="text-xs text-neutral-500 mt-1 font-body">{activeMemberCount} active</p>
+              <p className="text-xs sm:text-sm text-neutral-600 dark:text-muted-foreground uppercase tracking-wide font-body">Total Members</p>
+              <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 dark:text-foreground mt-2">{activeMembers.length}</p>
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1 font-body">{activeMemberCount} active</p>
             </div>
-            <Users className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
+            <Users className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 dark:text-muted-foreground shrink-0" />
           </div>
         </Card>
 
         {unassignedCount > 0 && (
-          <Card className="p-4 sm:p-6 border border-neutral-200 bg-neutral-50">
+          <Card className="p-4 sm:p-6 border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-muted">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-neutral-600 uppercase tracking-wide font-body">Unassigned</p>
-                <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 mt-2">{unassignedCount}</p>
+                <p className="text-xs sm:text-sm text-neutral-600 dark:text-muted-foreground uppercase tracking-wide font-body">Unassigned</p>
+                <p className="text-2xl sm:text-3xl font-headline font-bold text-neutral-900 dark:text-foreground mt-2">{unassignedCount}</p>
               </div>
-              <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 shrink-0" />
+              <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8 text-neutral-400 dark:text-muted-foreground shrink-0" />
             </div>
           </Card>
         )}
@@ -377,35 +395,47 @@ export default function MembershipPage() {
             return (
               <Card
                 key={`detail-${plan.id}`}
-                className="p-4 sm:p-6 border-2"
-                style={{ borderColor: accent, backgroundColor: `${accent}08` }}
+                className="flex flex-col p-4 sm:p-6 rounded-2xl border border-neutral-200 dark:border-border shadow-sm transition hover:shadow-lg"
+                style={{ borderTop: `4px solid ${accent}`, backgroundColor: `${accent}06` }}
               >
                 <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-headline font-bold truncate" style={{ color: accent }}>
-                      {plan.name}
-                    </h3>
-                    <p className="text-sm font-medium mt-1" style={{ color: accent }}>
-                      {count} member{count === 1 ? '' : 's'} · {formatPlanPrice(plan)}
-                    </p>
-                    {plan.active === false ? (
-                      <p className="text-xs text-neutral-500 mt-1 font-body">Inactive plan</p>
-                    ) : null}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="flex items-center justify-center w-11 h-11 rounded-full text-xl shrink-0"
+                      style={{ backgroundColor: `${accent}1a` }}
+                    >
+                      {plan.icon || '🎯'}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-headline font-bold leading-tight truncate" style={{ color: accent }}>
+                        {plan.name}
+                      </h3>
+                      <p className="text-xs font-semibold font-body mt-0.5" style={{ color: accent }}>
+                        {count} member{count === 1 ? '' : 's'} · {formatPlanPrice(plan)}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-2xl shrink-0">{plan.icon || '🎯'}</span>
+                  {plan.active === false ? (
+                    <span className="px-2 py-1 bg-neutral-200 dark:bg-muted text-neutral-600 dark:text-muted-foreground text-xs font-medium rounded-full shrink-0">
+                      Inactive
+                    </span>
+                  ) : null}
                 </div>
                 {plan.description ? (
-                  <p className="text-sm text-neutral-600 font-body mb-3">{plan.description}</p>
+                  <p className="text-sm text-neutral-600 dark:text-muted-foreground font-body mb-4 pb-4 border-b border-neutral-100 dark:border-border">
+                    {plan.description}
+                  </p>
                 ) : null}
-                <div className="space-y-2">
+                <div className="flex-1 space-y-2">
                   {items.length > 0 ? (
                     items.map((item, i) => (
-                      <p key={i} className="text-sm text-neutral-700 font-body">
-                        • {item}
-                      </p>
+                      <div key={i} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: accent }} strokeWidth={2.5} />
+                        <p className="text-sm text-neutral-700 dark:text-foreground font-body leading-snug">{item}</p>
+                      </div>
                     ))
                   ) : (
-                    <p className="text-sm text-neutral-500 font-body">
+                    <p className="text-sm text-neutral-500 dark:text-muted-foreground font-body">
                       No features listed. Edit this plan under Pricing Plans.
                     </p>
                   )}
@@ -415,10 +445,10 @@ export default function MembershipPage() {
           })}
         </div>
       ) : (
-        <Card className="p-6 border border-dashed border-neutral-300 bg-white">
-          <p className="text-sm text-neutral-600 font-body">
+        <Card className="p-6 border border-dashed border-neutral-300 dark:border-border bg-white dark:bg-card">
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground font-body">
             No pricing plans configured yet. Create plans in{' '}
-            <a href="/admin/pricing" className="underline text-neutral-900">
+            <a href="/admin/pricing" className="underline text-neutral-900 dark:text-foreground">
               Pricing Plans
             </a>{' '}
             to manage membership tiers.
@@ -428,13 +458,13 @@ export default function MembershipPage() {
 
       {/* Bulk actions */}
       {selectedMembers.size > 0 && (
-        <Card className="p-4 sm:p-6 border-2 border-black bg-white sticky top-2 z-20 shadow-md">
+        <Card className="p-4 sm:p-6 border-2 border-black bg-white dark:bg-card sticky top-2 z-20 shadow-md">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-neutral-900 font-body">
+              <h3 className="font-semibold text-neutral-900 dark:text-foreground font-body">
                 {selectedMembers.size} member{selectedMembers.size === 1 ? '' : 's'} selected
               </h3>
-              <p className="text-sm text-neutral-600 mt-1 font-body">
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1 font-body">
                 Change tier or delete selected members
               </p>
             </div>
@@ -442,7 +472,7 @@ export default function MembershipPage() {
               <select
                 value={bulkTierTarget}
                 onChange={(e) => setBulkTierTarget(e.target.value)}
-                className="h-8 min-h-0 px-2.5 border border-neutral-300 rounded-md text-xs bg-white font-body"
+                className="h-8 min-h-0 px-2.5 border border-neutral-300 dark:border-border rounded-md text-xs bg-white dark:bg-card font-body"
               >
                 <option value="">Select target tier...</option>
                 {plans.map((plan) => (
@@ -492,7 +522,7 @@ export default function MembershipPage() {
               className={`px-4 py-2 rounded-lg font-medium transition whitespace-nowrap shrink-0 font-body ${
                 filter === tab.key
                   ? 'bg-black text-white'
-                  : 'bg-white text-neutral-700 border border-neutral-200 hover:border-neutral-400'
+                  : 'bg-white dark:bg-card text-neutral-700 dark:text-foreground border border-neutral-200 dark:border-border hover:border-neutral-400'
               }`}
             >
               {tab.label}
@@ -507,13 +537,13 @@ export default function MembershipPage() {
               placeholder="Search by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm font-body"
+              className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm font-body"
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'name' | 'joined' | 'tier')}
-            className="w-full sm:w-auto px-4 py-2 border border-neutral-300 rounded-lg text-sm bg-white font-body"
+            className="w-full sm:w-auto px-4 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm bg-white dark:bg-card font-body"
           >
             <option value="joined">Sort by: Joined Date</option>
             <option value="name">Sort by: Name</option>
@@ -530,10 +560,10 @@ export default function MembershipPage() {
       </div>
 
       {/* Members table */}
-      <Card className="border border-neutral-200 min-w-0">
+      <Card className="border border-neutral-200 dark:border-border min-w-0">
         <div className="admin-table-scroll">
           <table className="w-full min-w-[900px]">
-            <thead className="bg-neutral-100 border-b border-neutral-200">
+            <thead className="bg-neutral-100 dark:bg-muted border-b border-neutral-200 dark:border-border">
               <tr>
                 <th className="px-4 py-3 text-left w-12">
                   <input
@@ -546,25 +576,25 @@ export default function MembershipPage() {
                     className="cursor-pointer"
                   />
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Member
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Email
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Phone
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Tier
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Status
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Joined
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 whitespace-nowrap">
+                <th className="px-4 sm:px-6 py-3 text-left text-sm font-semibold text-neutral-700 dark:text-foreground whitespace-nowrap">
                   Action
                 </th>
               </tr>
@@ -572,13 +602,13 @@ export default function MembershipPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-neutral-600 font-body">
+                  <td colSpan={8} className="px-6 py-8 text-center text-neutral-600 dark:text-muted-foreground font-body">
                     Loading members...
                   </td>
                 </tr>
               ) : filteredAndSearchedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-neutral-600 font-body">
+                  <td colSpan={8} className="px-6 py-8 text-center text-neutral-600 dark:text-muted-foreground font-body">
                     No members found
                   </td>
                 </tr>
@@ -590,8 +620,8 @@ export default function MembershipPage() {
                   return (
                     <tr
                       key={String(member.id)}
-                      className={`border-b border-neutral-200 hover:bg-neutral-50 ${
-                        selectedMembers.has(String(member.id)) ? 'bg-neutral-100' : ''
+                      className={`border-b border-neutral-200 dark:border-border hover:bg-neutral-50 ${
+                        selectedMembers.has(String(member.id)) ? 'bg-neutral-100 dark:bg-muted' : ''
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -605,10 +635,10 @@ export default function MembershipPage() {
                       <td className="px-4 sm:px-6 py-4 text-sm">
                         <AdminUserCell user={member} />
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 max-w-[200px] truncate">
+                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 dark:text-muted-foreground max-w-[200px] truncate">
                         {String(member.email || '')}
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 dark:text-muted-foreground whitespace-nowrap">
                         {formatUserPhoneDisplay(member)}
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
@@ -626,18 +656,18 @@ export default function MembershipPage() {
                         <div className="flex items-center gap-2">
                           {member.active ? (
                             <>
-                              <CheckCircle className="w-4 h-4 text-neutral-700" />
-                              <span className="text-xs text-neutral-700 font-medium">Active</span>
+                              <CheckCircle className="w-4 h-4 text-neutral-700 dark:text-foreground" />
+                              <span className="text-xs text-neutral-700 dark:text-foreground font-medium">Active</span>
                             </>
                           ) : (
                             <>
-                              <AlertCircle className="w-4 h-4 text-neutral-500" />
-                              <span className="text-xs text-neutral-500 font-medium">Inactive</span>
+                              <AlertCircle className="w-4 h-4 text-neutral-500 dark:text-muted-foreground" />
+                              <span className="text-xs text-neutral-500 dark:text-muted-foreground font-medium">Inactive</span>
                             </>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-4 text-sm text-neutral-600 dark:text-muted-foreground whitespace-nowrap">
                         {member.memberSince
                           ? formatDistanceToNow(
                               (member.memberSince as { toDate?: () => Date }).toDate?.() ||
@@ -668,7 +698,7 @@ export default function MembershipPage() {
             </tbody>
           </table>
         </div>
-        <div className="px-4 sm:px-6 py-4 bg-neutral-50 border-t border-neutral-200 text-sm text-neutral-600 font-body">
+        <div className="px-4 sm:px-6 py-4 bg-neutral-50 dark:bg-muted border-t border-neutral-200 dark:border-border text-sm text-neutral-600 dark:text-muted-foreground font-body">
           Showing {filteredAndSearchedMembers.length} of {activeMembers.length} members
         </div>
       </Card>

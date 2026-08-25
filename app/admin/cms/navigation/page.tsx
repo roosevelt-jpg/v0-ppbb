@@ -112,8 +112,8 @@ export default function AdminCmsNavigationPage() {
     <AdminPageLayout title="Navigation">
       <div className="space-y-6">
         <div>
-          <h1 className="font-headline text-3xl font-bold text-neutral-900">Navigation</h1>
-          <p className="text-sm text-neutral-600 mt-1">
+          <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">Navigation</h1>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
             Manage navbar links, labels, and CTA button. Changes sync instantly via Firestore.
           </p>
         </div>
@@ -192,7 +192,7 @@ export default function AdminCmsNavigationPage() {
             {config.links.map((link, index) => (
               <div
                 key={`${link.href}-${index}`}
-                className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end p-4 border border-neutral-200 rounded-lg"
+                className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end p-4 border border-neutral-200 dark:border-border rounded-lg"
               >
                 <div className="md:col-span-3">
                   <label className="block text-sm font-medium mb-1">Label</label>

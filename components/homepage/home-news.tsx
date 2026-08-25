@@ -23,13 +23,13 @@ export function HomeNews() {
 
   if (!ready) {
     return (
-      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-white animate-pulse">
+      <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-white dark:bg-neutral-900 animate-pulse">
         <div className="max-w-[72rem] mx-auto">
-          <div className="h-10 w-48 bg-neutral-200 rounded mx-auto mb-3" />
-          <div className="h-4 w-64 bg-neutral-100 rounded mx-auto mb-10" />
+          <div className="h-10 w-48 bg-neutral-200 dark:bg-neutral-800 rounded mx-auto mb-3" />
+          <div className="h-4 w-64 bg-neutral-100 dark:bg-neutral-800 rounded mx-auto mb-10" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-72 bg-neutral-100 rounded" />
+              <div key={i} className="h-72 bg-neutral-100 dark:bg-neutral-800 rounded" />
             ))}
           </div>
         </div>
@@ -38,23 +38,23 @@ export function HomeNews() {
   }
 
   return (
-    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-white">
+    <section className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 bg-white dark:bg-neutral-900">
       <div className="max-w-[72rem] mx-auto w-full min-w-0">
         <div className="text-center mb-8 sm:mb-10">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-headline text-[#111111]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold font-headline text-[#111111] dark:text-neutral-50">
             Press Room
           </h2>
-          <p className="mt-2 text-sm sm:text-base text-[#666666]">
+          <p className="mt-2 text-sm sm:text-base text-[#666666] dark:text-neutral-400">
             Stories, updates, and community news from Passive Blessings
           </p>
         </div>
 
         {articles.length === 0 ? (
-          <div className="text-center py-10 border border-[#e4e1da] rounded-lg bg-[#f7f6f2]">
-            <p className="text-sm text-[#666666] mb-4">No stories published yet.</p>
+          <div className="text-center py-10 border border-[#e4e1da] dark:border-neutral-800 rounded-lg bg-[#f7f6f2] dark:bg-neutral-950">
+            <p className="text-sm text-[#666666] dark:text-neutral-400 mb-4">No stories published yet.</p>
             <Link
               href="/news"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-[#111111] underline"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#111111] dark:text-neutral-50 underline"
             >
               Visit the news page
               <ArrowRight className="h-4 w-4" />
@@ -69,7 +69,7 @@ export function HomeNews() {
                   href={newsArticleHref(article)}
                   className="group flex flex-col text-center"
                 >
-                  <div className="relative overflow-hidden bg-neutral-100 mb-5">
+                  <div className="relative overflow-hidden bg-neutral-100 dark:bg-neutral-800 mb-5">
                     {article.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -83,7 +83,7 @@ export function HomeNews() {
                       />
                     ) : (
                       <div
-                        className="w-full aspect-[4/3] bg-neutral-200 flex items-center justify-center text-neutral-400 text-sm"
+                        className="w-full aspect-[4/3] bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-neutral-400 dark:text-neutral-500 text-sm"
                         style={{
                           clipPath:
                             'polygon(0 0, 100% 0, 100% 88%, 50% 100%, 0 88%)',
@@ -94,19 +94,19 @@ export function HomeNews() {
                     )}
                   </div>
 
-                  <h3 className="font-headline font-bold text-base sm:text-lg text-[#222222] leading-snug px-2 mb-4 line-clamp-3 group-hover:underline">
+                  <h3 className="font-headline font-bold text-base sm:text-lg text-[#222222] dark:text-neutral-100 leading-snug px-2 mb-4 line-clamp-3 group-hover:underline">
                     {article.title}
                   </h3>
 
-                  <div className="mt-auto border-t border-[#e4e1da] pt-3 px-1 flex items-center justify-between gap-2 text-xs text-[#888888]">
+                  <div className="mt-auto border-t border-[#e4e1da] dark:border-neutral-800 pt-3 px-1 flex items-center justify-between gap-2 text-xs text-[#888888] dark:text-neutral-400">
                     <span className="inline-flex items-center gap-1.5 min-w-0">
-                      <Calendar className="h-3.5 w-3.5 shrink-0 text-[#111111]" />
+                      <Calendar className="h-3.5 w-3.5 shrink-0 text-[#111111] dark:text-neutral-300" />
                       <span className="truncate">
                         {formatNewsDate(article.publishedAt) || 'Recent'}
                       </span>
                     </span>
                     <span className="inline-flex items-center gap-1.5 min-w-0">
-                      <User className="h-3.5 w-3.5 shrink-0 text-[#111111]" />
+                      <User className="h-3.5 w-3.5 shrink-0 text-[#111111] dark:text-neutral-300" />
                       <span className="truncate">By {article.author}</span>
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export function HomeNews() {
             <div className="text-center mt-8 sm:mt-10">
               <Link
                 href="/news"
-                className="inline-flex items-center gap-2 bg-[#111111] hover:bg-[#333333] text-white text-sm font-semibold px-5 py-2.5 rounded-md"
+                className="inline-flex items-center gap-2 bg-[#111111] hover:bg-[#333333] text-white dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-200 text-sm font-semibold px-5 py-2.5 rounded-md"
               >
                 View all news
                 <ArrowRight className="h-4 w-4" />

@@ -18,6 +18,17 @@ export type MembershipPromoCode = {
   planId: string
   planName: string
   benefitDurationMonths: number
+  /**
+   * When true, redemption goes through a real Stripe Checkout session with
+   * subscription_data.trial_period_days set to benefitDurationMonths — the
+   * member enters a real card up front and Stripe auto-bills the plan price
+   * the moment the trial ends. When false (the default), redemption grants
+   * the plan directly for benefitDurationMonths with no billing behind it
+   * at all — access lapses via the membership-expire cron instead.
+   * Meaningless (and ignored) when benefitDurationMonths is 0 (lifetime) —
+   * a grant that never ends has nothing to bill.
+   */
+  trialEnabled: boolean
   maxRedemptions: number | null
   usedCount: number
   codeExpiresAt: Date | null
@@ -72,6 +83,7 @@ export function mapPromoDoc(id: string, data: Record<string, unknown>): Membersh
     maxRaw === null || maxRaw === undefined || maxRaw === ''
       ? null
       : Math.max(0, Math.floor(Number(maxRaw)))
+  const benefitDurationMonths = normalizeBenefitDurationMonths(data.benefitDurationMonths)
 
   return {
     id,
@@ -83,7 +95,10 @@ export function mapPromoDoc(id: string, data: Record<string, unknown>): Membersh
     percentOff,
     planId: String(data.planId || ''),
     planName: String(data.planName || ''),
-    benefitDurationMonths: normalizeBenefitDurationMonths(data.benefitDurationMonths),
+    benefitDurationMonths,
+    // Lifetime grants never bill, so a trial flag on one is meaningless —
+    // normalize it away here rather than trusting whatever was last saved.
+    trialEnabled: benefitDurationMonths > 0 && data.trialEnabled === true,
     maxRedemptions: Number.isFinite(maxRedemptions as number) ? maxRedemptions : null,
     usedCount: Math.max(0, Math.floor(Number(data.usedCount) || 0)),
     codeExpiresAt: parseDate(data.codeExpiresAt),
@@ -134,6 +149,7 @@ export type CreateMembershipPromoInput = {
   percentOff?: number
   planId: string
   benefitDurationMonths: number
+  trialEnabled?: boolean
   maxRedemptions?: number | null
   codeExpiresAt?: Date | null
   createdBy: string
@@ -163,6 +179,7 @@ export async function createMembershipPromoCode(
   }
 
   const benefitDurationMonths = normalizeBenefitDurationMonths(input.benefitDurationMonths)
+  const trialEnabled = benefitDurationMonths > 0 && input.trialEnabled === true
   const maxRedemptions =
     input.maxRedemptions === null || input.maxRedemptions === undefined
       ? null
@@ -178,6 +195,7 @@ export async function createMembershipPromoCode(
     planId: input.planId,
     planName: String(plan.name || input.planId),
     benefitDurationMonths,
+    trialEnabled,
     maxRedemptions,
     usedCount: 0,
     codeExpiresAt: input.codeExpiresAt || null,
@@ -201,6 +219,7 @@ export async function updateMembershipPromoCode(
     codeExpiresAt: Date | null
     maxRedemptions: number | null
     benefitDurationMonths: number
+    trialEnabled: boolean
   }>
 ): Promise<MembershipPromoCode> {
   const db = getAdminDb()
@@ -219,6 +238,7 @@ export async function updateMembershipPromoCode(
   if (patch.benefitDurationMonths !== undefined) {
     updates.benefitDurationMonths = normalizeBenefitDurationMonths(patch.benefitDurationMonths)
   }
+  if (patch.trialEnabled !== undefined) updates.trialEnabled = Boolean(patch.trialEnabled)
 
   await ref.update(sanitizeForFirestore(updates))
   const next = await ref.get()
@@ -229,13 +249,70 @@ export type RedeemMembershipPromoResult = {
   promo: MembershipPromoCode
   planId: string
   planName: string
-  membershipUrl: string
+  /** Set when the code granted the plan directly (trialEnabled: false). */
+  membershipUrl: string | null
+  /**
+   * Set when the code is trial-enabled: the plan isn't active yet — the
+   * caller must render an embedded Stripe card form with this client
+   * secret and confirm it (stripe.confirmPayment or confirmSetup depending
+   * on `intentMode`, never a redirect to a Stripe-hosted page). Membership
+   * activates once Stripe confirms the card, via the webhook's
+   * customer.subscription.updated handler.
+   */
+  clientSecret: string | null
+  intentMode: 'payment' | 'setup' | null
   renewDate: string | null
 }
 
+/** Undo a reservation made by redeemMembershipPromo's transaction below — used both by
+ * its own failure path and by the checkout.session.expired webhook handler, for a
+ * trial checkout that was reserved but never actually completed by the member. */
+export async function rollbackMembershipPromoReservation(promoId: string, userId: string): Promise<void> {
+  const db = getAdminDb()
+  const promoRef = db.collection(MEMBERSHIP_PROMO_COLLECTION).doc(promoId)
+  const userRef = db.collection('users').doc(userId)
+
+  await db.runTransaction(async (tx) => {
+    const [promoSnap, userSnap] = await Promise.all([tx.get(promoRef), tx.get(userRef)])
+    if (!promoSnap.exists) return
+    const userData = userSnap.data() || {}
+    // Only roll back if this reservation is still the one on file — avoids
+    // clobbering a redemption that already succeeded (or a different one)
+    // in the rare case this fires more than once.
+    if (userData.membershipPromoCodeId !== promoId) return
+
+    const promo = promoSnap.data() || {}
+    const currentUsed = Math.max(0, Math.floor(Number(promo.usedCount) || 0))
+    tx.set(
+      promoRef,
+      {
+        usedCount: Math.max(0, currentUsed - 1),
+        status: 'active',
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    )
+    tx.set(
+      userRef,
+      {
+        membershipPromoCodeId: FieldValue.delete(),
+        membershipPromoCode: FieldValue.delete(),
+        updatedAt: Timestamp.now(),
+      },
+      { merge: true }
+    )
+  })
+}
+
 /**
- * Atomically redeem a free / 100% membership promo for a signed-in user.
- * MVP: only free_access (or percentOff >= 100) grants immediately.
+ * Atomically redeem a membership promo for a signed-in user.
+ *
+ * Non-trial codes (the default): grant the plan directly, no billing behind
+ * it — access lapses via the membership-expire cron when benefitDurationMonths
+ * is up. Trial-enabled codes: reserve the code the same way, then hand back
+ * a Stripe Checkout URL with a real trial period instead of activating
+ * immediately — the member enters a card, and Stripe auto-bills the plan
+ * price the moment the trial ends.
  */
 export async function redeemMembershipPromo(input: {
   userId: string
@@ -266,10 +343,7 @@ export async function redeemMembershipPromo(input: {
   let grantedPlanId = ''
   let grantedPlanName = ''
   let benefitMonths = 3
-  const reserved: { promo: MembershipPromoCode | null; previousUsed: number } = {
-    promo: null,
-    previousUsed: 0,
-  }
+  const reserved: { promo: MembershipPromoCode | null } = { promo: null }
 
   await db.runTransaction(async (tx) => {
     const promoSnap = await tx.get(promoRef)
@@ -277,7 +351,6 @@ export async function redeemMembershipPromo(input: {
     if (!promoSnap.exists) throw new Error('Invalid promo code')
     const promo = mapPromoDoc(promoSnap.id, promoSnap.data() as Record<string, unknown>)
     reserved.promo = promo
-    reserved.previousUsed = promo.usedCount
 
     const freshUser = freshUserSnap.data() || {}
     if (freshUser.membershipPromoCodeId || freshUser.promoCodeId) {
@@ -323,9 +396,37 @@ export async function redeemMembershipPromo(input: {
     throw new Error('Failed to redeem promo code')
   }
 
-  const paymentReference = `promo_${redeemedPromo.id}_${input.userId}_${Date.now()}`
   try {
+    if (redeemedPromo.trialEnabled) {
+      const { createStripeMembershipIntent } = await import('@/lib/payment-completion')
+      const now = new Date()
+      const trialEnd = new Date(now)
+      trialEnd.setMonth(trialEnd.getMonth() + benefitMonths)
+      const trialDays = Math.max(1, Math.round((trialEnd.getTime() - now.getTime()) / 86400000))
+
+      const { clientSecret, mode } = await createStripeMembershipIntent({
+        planId: grantedPlanId,
+        userId: input.userId,
+        trialDays,
+        extraMetadata: {
+          promoCodeId: redeemedPromo.id,
+          promoCode: redeemedPromo.code,
+        },
+      })
+
+      return {
+        promo: redeemedPromo,
+        planId: grantedPlanId,
+        planName: grantedPlanName,
+        membershipUrl: null,
+        clientSecret,
+        intentMode: mode,
+        renewDate: null,
+      }
+    }
+
     const { completeMembershipPayment } = await import('@/lib/payment-completion')
+    const paymentReference = `promo_${redeemedPromo.id}_${input.userId}_${Date.now()}`
     const result = await completeMembershipPayment({
       userId: input.userId,
       planId: grantedPlanId,
@@ -351,28 +452,18 @@ export async function redeemMembershipPromo(input: {
       planId: grantedPlanId,
       planName: grantedPlanName,
       membershipUrl: result.membershipUrl,
+      clientSecret: null,
+      intentMode: null,
       renewDate: renewDate ? renewDate.toISOString() : null,
     }
   } catch (err) {
     // Roll back reservation so the user can retry and the code stays usable.
-    await Promise.all([
-      promoRef.set(
-        {
-          usedCount: reserved.previousUsed,
-          status: 'active',
-          updatedAt: FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      ),
-      userRef.set(
-        {
-          membershipPromoCodeId: FieldValue.delete(),
-          membershipPromoCode: FieldValue.delete(),
-          updatedAt: Timestamp.now(),
-        },
-        { merge: true }
-      ),
-    ]).catch((rollbackErr) => {
+    // For the trial branch, this only fires when creating the Stripe
+    // subscription/intent itself fails (e.g. Stripe not configured) — a
+    // member who reserves the code but abandons the embedded card form is
+    // rolled back separately, when their subscription hits
+    // incomplete_expired, in the customer.subscription.updated handler.
+    await rollbackMembershipPromoReservation(redeemedPromo.id, input.userId).catch((rollbackErr) => {
       console.error('[redeemMembershipPromo] rollback failed', rollbackErr)
     })
     throw err

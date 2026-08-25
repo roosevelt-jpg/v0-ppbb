@@ -231,21 +231,21 @@ export default function BusinessDashboard() {
       onClick={onClick}
       className={`pb-stat-card p-3 cursor-pointer hover:border-neutral-400 transition-colors ${onClick ? '' : ''}`}
       style={{
-        backgroundColor: '#ffffff',
-        borderColor: '#e4e1da',
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
       }}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">{label}</p>
-          <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 mt-1 truncate">
+          <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">{label}</p>
+          <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 dark:text-foreground mt-1 truncate">
             {value}
           </p>
           {subtext && (
-            <p className="text-[11px] text-neutral-500 mt-0.5 truncate">{subtext}</p>
+            <p className="text-[11px] text-neutral-500 dark:text-muted-foreground mt-0.5 truncate">{subtext}</p>
           )}
         </div>
-        <Icon className="w-4 h-4 text-neutral-900 opacity-30 shrink-0" />
+        <Icon className="w-4 h-4 text-neutral-900 dark:text-foreground opacity-30 shrink-0" />
       </div>
     </Card>
   )
@@ -255,10 +255,10 @@ export default function BusinessDashboard() {
         {listingReady && listingStatus && !listingStatus.isApproved && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 sm:p-5">
             <p className="eyebrow text-amber-800 mb-1">LISTING STATUS</p>
-            <h2 className="font-headline text-xl font-bold text-neutral-900 mb-1">
+            <h2 className="font-headline text-xl font-bold text-neutral-900 dark:text-foreground mb-1">
               Pending admin approval
             </h2>
-            <p className="font-body text-sm text-neutral-700">
+            <p className="font-body text-sm text-neutral-700 dark:text-neutral-200">
               Your marketplace directory listing is under review. You can still draft jobs and offers
               now — they go live on your public profile once admin approves your business.
             </p>
@@ -268,8 +268,8 @@ export default function BusinessDashboard() {
         {listingReady && listingStatus && listingStatus.isApproved && !listingStatus.isActive && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 sm:p-5">
             <p className="eyebrow text-red-800 mb-1">LISTING STATUS</p>
-            <h2 className="font-headline text-xl font-bold text-neutral-900 mb-1">Suspended</h2>
-            <p className="font-body text-sm text-neutral-700">
+            <h2 className="font-headline text-xl font-bold text-neutral-900 dark:text-foreground mb-1">Suspended</h2>
+            <p className="font-body text-sm text-neutral-700 dark:text-neutral-200">
               Your listing is hidden from the public directory. Contact Passive Blessings support
               for help.
             </p>
@@ -298,7 +298,7 @@ export default function BusinessDashboard() {
           <Button
             type="button"
             onClick={() => router.push('/business/offers/new')}
-            className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px] font-body"
+            className="bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800 min-h-[44px] font-body"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Post an Offer
@@ -307,7 +307,7 @@ export default function BusinessDashboard() {
             <Button
               type="button"
               onClick={() => router.push(`/directory/${user.id}`)}
-              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px] font-body"
+              className="bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800 min-h-[44px] font-body"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               View public profile
@@ -318,30 +318,30 @@ export default function BusinessDashboard() {
         {/* Pending Members — groups this business owns */}
         <Card
           className="p-4 sm:p-6"
-          style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}
+          style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <p
-                className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
+                className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Groups you created
               </p>
               <h2
-                className="text-xl sm:text-2xl text-neutral-900"
+                className="text-xl sm:text-2xl text-neutral-900 dark:text-foreground"
                 style={{ fontFamily: 'Cormorant Garamond, serif' }}
               >
                 Pending Members
               </h2>
             </div>
-            <div className="flex items-center gap-2 text-sm text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
               <UserCheck className="w-4 h-4" />
               {pendingLoading ? 'Loading…' : `${pendingMembers.length} awaiting review`}
             </div>
           </div>
           {pendingMembers.length === 0 && !pendingLoading ? (
-            <p className="text-sm text-neutral-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-sm text-neutral-500 dark:text-muted-foreground" style={{ fontFamily: 'Inter, sans-serif' }}>
               No pending join requests for groups you own.
             </p>
           ) : (
@@ -352,16 +352,16 @@ export default function BusinessDashboard() {
                 return (
                   <li
                     key={key}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between border border-[#e4e1da] rounded-lg p-3 sm:p-4"
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between border border-[#e4e1da] dark:border-border rounded-lg p-3 sm:p-4"
                   >
                     <div className="min-w-0">
                       <p
-                        className="font-semibold text-neutral-900 truncate"
+                        className="font-semibold text-neutral-900 dark:text-foreground truncate"
                         style={{ fontFamily: 'Inter, sans-serif' }}
                       >
                         {row.displayName || row.email || row.userId || 'Member'}
                       </p>
-                      <p className="text-xs sm:text-sm text-neutral-500 mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
+                      <p className="text-xs sm:text-sm text-neutral-500 dark:text-muted-foreground mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
                         {row.groupName} · {row.communityName}
                       </p>
                     </div>
@@ -465,10 +465,10 @@ export default function BusinessDashboard() {
         <BusinessDashboardHomeSections businessId={user.id} />
 
         {/* Quick Actions */}
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+        <Card style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', padding: '24px' }}>
           <h3
             style={{
-              color: '#111111',
+              color: 'var(--foreground)',
               fontSize: '18px',
               fontWeight: 600,
               marginBottom: '16px',
@@ -501,14 +501,14 @@ export default function BusinessDashboard() {
             </Button>
             <Button
               onClick={() => router.push('/business/communities/create')}
-              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+              className="bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800 min-h-[44px]"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Create Community
             </Button>
             <Button
               onClick={() => router.push('/business/profile')}
-              className="bg-white text-black border border-[#e4e1da] hover:bg-neutral-50 min-h-[44px]"
+              className="bg-white dark:bg-card text-black dark:text-foreground border border-[#e4e1da] dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800 min-h-[44px]"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Edit Profile
@@ -519,9 +519,9 @@ export default function BusinessDashboard() {
         {/* Community & Events Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Events Card */}
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+          <Card style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', padding: '24px' }}>
             <div className="flex items-center justify-between mb-4">
-              <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600 }}>
+              <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600 }}>
                 Events
               </h3>
               <Button
@@ -538,7 +538,7 @@ export default function BusinessDashboard() {
                 Create Event
               </Button>
             </div>
-            <p style={{ color: '#888888', fontSize: '14px', marginBottom: '16px' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '14px', marginBottom: '16px' }}>
               Host events and connect with community members
             </p>
             <button
@@ -559,9 +559,9 @@ export default function BusinessDashboard() {
           </Card>
 
           {/* Communities Card */}
-          <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
+          <Card style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', padding: '24px' }}>
             <div className="flex items-center justify-between mb-4">
-              <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600 }}>
+              <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600 }}>
                 Communities
               </h3>
               <Button
@@ -578,7 +578,7 @@ export default function BusinessDashboard() {
                 Create Community
               </Button>
             </div>
-            <p style={{ color: '#888888', fontSize: '14px', marginBottom: '16px', fontFamily: 'Inter, sans-serif' }}>
+            <p style={{ color: 'var(--muted-foreground)', fontSize: '14px', marginBottom: '16px', fontFamily: 'Inter, sans-serif' }}>
               Build communities and groups. Pending joins for groups you created appear in
               Pending Members above — you can only approve members for groups you own.
             </p>
@@ -605,8 +605,8 @@ export default function BusinessDashboard() {
         </div>
 
         {/* Navigation Grid */}
-        <Card style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da', padding: '24px' }}>
-          <h3 style={{ color: '#111111', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
+        <Card style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', padding: '24px' }}>
+          <h3 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>
             Business Management
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -677,15 +677,15 @@ export default function BusinessDashboard() {
                 onClick={() => router.push(item.href)}
                 className="p-6 cursor-pointer hover:shadow-lg transition-all"
                 style={{
-                  backgroundColor: '#ffffff',
-                  borderColor: '#e4e1da',
+                  backgroundColor: 'var(--card)',
+                  borderColor: 'var(--border)',
                 }}
               >
-                <item.icon style={{ color: '#111111' }} className="w-6 h-6 mb-4" />
-                <h4 style={{ color: '#111111', fontWeight: 600, marginBottom: '4px' }}>
+                <item.icon style={{ color: 'var(--foreground)' }} className="w-6 h-6 mb-4" />
+                <h4 style={{ color: 'var(--foreground)', fontWeight: 600, marginBottom: '4px' }}>
                   {item.label}
                 </h4>
-                <p style={{ color: '#888888', fontSize: '14px' }}>{item.description}</p>
+                <p style={{ color: 'var(--muted-foreground)', fontSize: '14px' }}>{item.description}</p>
               </Card>
             ))}
           </div>

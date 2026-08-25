@@ -152,14 +152,14 @@ export default function ReferralsPage() {
       title="Referrals & Commission"
       subtitle="Share your referral link to start earning commissions"
     >
-      <div className="bg-white border border-[#e4e1da] rounded-xl p-5 mb-8">
-        <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2">Your Referral Link</p>
+      <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5 mb-8">
+        <p className="text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-2">Your Referral Link</p>
         {referralLink ? (
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               readOnly
               value={referralLink}
-              className="flex-1 border rounded-lg px-3 py-2 text-sm bg-neutral-50"
+              className="flex-1 border rounded-lg px-3 py-2 text-sm bg-neutral-50 dark:bg-white/5"
             />
             <button
               type="button"
@@ -171,13 +171,13 @@ export default function ReferralsPage() {
             </button>
           </div>
         ) : (
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-muted-foreground">
             Your referral link will appear after your business listing is approved.
           </p>
         )}
       </div>
 
-      <div className="bg-white border border-[#e4e1da] rounded-xl p-5 mb-8">
+      <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5 mb-8">
         <p className="text-sm font-medium mb-2">
           Your referral contribution % to Passive Blessings
         </p>
@@ -190,7 +190,7 @@ export default function ReferralsPage() {
             onChange={(e) => setReferralPercent(Number(e.target.value))}
             className="w-24 border rounded-lg px-3 py-2 text-sm"
           />
-          <span className="text-sm text-neutral-500">%</span>
+          <span className="text-sm text-neutral-500 dark:text-muted-foreground">%</span>
           <button
             type="button"
             onClick={savePercent}
@@ -209,15 +209,15 @@ export default function ReferralsPage() {
           { label: 'Pending', value: pending },
           { label: 'Total Commission', value: `AED ${totalCommission}` },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-[#e4e1da] rounded-xl p-5">
-            <p className="text-sm text-neutral-500">{s.label}</p>
+          <div key={s.label} className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5">
+            <p className="text-sm text-neutral-500 dark:text-muted-foreground">{s.label}</p>
             <p className="text-2xl font-semibold mt-1">{s.value}</p>
           </div>
         ))}
       </div>
 
       {records.length > 0 ? (
-        <div className="bg-white border border-[#e4e1da] rounded-xl p-5 mb-8">
+        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5 mb-8">
           <h3 className="font-semibold mb-4">Monthly conversions (6 months)</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthlyChart}>
@@ -225,7 +225,7 @@ export default function ReferralsPage() {
               <XAxis dataKey="label" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="#111" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="var(--foreground)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -238,10 +238,10 @@ export default function ReferralsPage() {
           description="Share your referral link to start earning commissions."
         />
       ) : (
-        <div className="bg-white border border-[#e4e1da] rounded-xl overflow-x-auto table-scroll">
+        <div className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl overflow-x-auto table-scroll">
           <table className="w-full text-sm min-w-[720px]">
             <thead>
-              <tr className="border-b text-left text-xs uppercase text-neutral-500">
+              <tr className="border-b text-left text-xs uppercase text-neutral-500 dark:text-muted-foreground">
                 <th className="py-3 px-4">Referred User</th>
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Status</th>
@@ -260,10 +260,10 @@ export default function ReferralsPage() {
                       ? 'bg-red-100 text-red-800'
                       : 'bg-amber-100 text-amber-800'
                 return (
-                  <tr key={r.id} className="border-b border-neutral-100">
+                  <tr key={r.id} className="border-b border-neutral-100 dark:border-border">
                     <td className="py-3 px-4">
                       <p className="font-medium">{r.referredUserName || '—'}</p>
-                      <p className="text-xs text-neutral-500">{r.referredUserEmail}</p>
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">{r.referredUserEmail}</p>
                     </td>
                     <td className="py-3 px-4">{date ? date.toLocaleDateString() : '—'}</td>
                     <td className="py-3 px-4">

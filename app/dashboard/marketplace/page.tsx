@@ -17,6 +17,7 @@ import {
   type OfferMarketplaceTabId,
 } from '@/lib/offer-categories'
 import { BusinessDirectorySection } from '@/components/marketplace/business-directory-section'
+import { MarketplaceCheckoutPanel } from '@/components/marketplace/marketplace-checkout-panel'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 
@@ -44,13 +45,15 @@ function unitPrice(product: BusinessOffer): number {
 }
 
 export default function MarketplacePage() {
-  const { user } = useAuth()
+  const { user, firebaseUser } = useAuth()
   const [products, setProducts] = useState<BusinessOffer[]>([])
   const [filter, setFilter] = useState<OfferMarketplaceTabId | 'all'>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [orderMessage, setOrderMessage] = useState<string | null>(null)
 
   const isBusinessMember = hasBusinessAccess(user)
 
@@ -136,7 +139,7 @@ export default function MarketplacePage() {
           {/* Already on member marketplace — never send business members back to join packages */}
           <Link
             href={isBusinessMember ? '/business/dashboard' : '/business/signup'}
-            className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-white text-black border border-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50"
+            className="min-h-[44px] inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded-lg text-sm font-semibold hover:bg-neutral-50 dark:hover:bg-neutral-800"
           >
             {isBusinessMember ? 'Business portal' : 'List your business'}
           </Link>
@@ -145,9 +148,9 @@ export default function MarketplacePage() {
         {/* Same filters as public /marketplace offers */}
         <section className="space-y-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Products & services</p>
-            <h2 className="text-xl font-bold text-neutral-900">Community marketplace</h2>
-            <p className="text-sm text-neutral-600 mt-1">
+            <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-1">Products & services</p>
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Community marketplace</h2>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
               Filter by type (Product / Service) or industry — discounts are not a category.
             </p>
           </div>
@@ -162,7 +165,7 @@ export default function MarketplacePage() {
                   className={`min-h-[44px] px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap ${
                     filter === item.id
                       ? 'bg-black text-white'
-                      : 'bg-white text-neutral-900 border border-neutral-300 hover:bg-neutral-50'
+                      : 'bg-white dark:bg-card text-neutral-900 dark:text-foreground border border-neutral-300 dark:border-border hover:bg-neutral-50 dark:hover:bg-neutral-800'
                   }`}
                 >
                   {item.label}
@@ -186,7 +189,7 @@ export default function MarketplacePage() {
                 return (
                   <Card
                     key={product.id || cartKeyFor(product)}
-                    className="overflow-hidden border border-neutral-200 flex flex-col"
+                    className="overflow-hidden border border-neutral-200 dark:border-border flex flex-col"
                   >
                     {imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -196,29 +199,29 @@ export default function MarketplacePage() {
                         className="w-full aspect-[4/3] object-cover"
                       />
                     ) : (
-                      <div className="w-full aspect-[4/3] bg-neutral-100 flex items-center justify-center">
+                      <div className="w-full aspect-[4/3] bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
                         <Tag className="w-10 h-10 text-neutral-300" />
                       </div>
                     )}
                     <div className="p-4 flex flex-col flex-1">
-                      <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-100 text-neutral-700 w-fit capitalize mb-2">
+                      <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 w-fit capitalize mb-2">
                         {product.type || 'Product'}
                       </span>
-                      <h3 className="font-bold text-neutral-900 line-clamp-2">{product.title}</h3>
-                      <p className="text-sm text-neutral-500 mt-1">{product.businessName}</p>
+                      <h3 className="font-bold text-neutral-900 dark:text-foreground line-clamp-2">{product.title}</h3>
+                      <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1">{product.businessName}</p>
                       {product.description ? (
-                        <p className="text-sm text-neutral-600 mt-2 line-clamp-2 flex-1">
+                        <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-2 line-clamp-2 flex-1">
                           {product.description}
                         </p>
                       ) : (
                         <div className="flex-1" />
                       )}
                       <div className="mt-3 flex items-center gap-2">
-                        <span className="font-bold text-lg text-neutral-900">
+                        <span className="font-bold text-lg text-neutral-900 dark:text-foreground">
                           AED {discounted.toLocaleString()}
                         </span>
                         {product.discountPercentage ? (
-                          <span className="text-xs line-through text-neutral-400">
+                          <span className="text-xs line-through text-neutral-400 dark:text-neutral-500">
                             AED {price.toLocaleString()}
                           </span>
                         ) : null}
@@ -226,7 +229,7 @@ export default function MarketplacePage() {
                       <div className="flex flex-wrap gap-2 mt-4">
                         <Link
                           href={product.id ? `/marketplace/${product.id}` : '#'}
-                          className="flex-1 min-h-[44px] inline-flex items-center justify-center bg-white text-black border border-neutral-300 px-3 py-2 rounded-lg text-sm font-semibold"
+                          className="flex-1 min-h-[44px] inline-flex items-center justify-center bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border px-3 py-2 rounded-lg text-sm font-semibold"
                         >
                           View Details
                         </Link>
@@ -252,14 +255,14 @@ export default function MarketplacePage() {
       </div>
 
       {cart.length > 0 ? (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-neutral-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-neutral-200 dark:border-border bg-white dark:bg-card shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
           <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <button type="button" onClick={() => setCartOpen((o) => !o)} className="text-left">
-              <p className="text-sm text-neutral-500">
+              <p className="text-sm text-neutral-500 dark:text-muted-foreground">
                 {itemCount} item{itemCount === 1 ? '' : 's'} in cart
                 {cartOpen ? ' · hide' : ' · tap to manage'}
               </p>
-              <p className="text-2xl font-bold text-neutral-900">
+              <p className="text-2xl font-bold text-neutral-900 dark:text-foreground">
                 AED {totalPrice.toLocaleString()}
               </p>
             </button>
@@ -267,12 +270,16 @@ export default function MarketplacePage() {
               <button
                 type="button"
                 onClick={() => setCartOpen(true)}
-                className="min-h-[44px] px-4 py-2 border border-neutral-300 rounded-lg text-sm font-semibold"
+                className="min-h-[44px] px-4 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm font-semibold"
               >
                 Manage cart
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  setCartOpen(true)
+                  setCheckoutOpen(true)
+                }}
                 className="min-h-[44px] bg-black text-white px-6 py-2 rounded-lg text-sm font-semibold"
               >
                 Proceed to Checkout
@@ -281,9 +288,9 @@ export default function MarketplacePage() {
           </div>
 
           {cartOpen ? (
-            <div className="max-w-7xl mx-auto px-4 pb-4 border-t border-neutral-100">
+            <div className="max-w-7xl mx-auto px-4 pb-4 border-t border-neutral-100 dark:border-border">
               <div className="flex items-center justify-between py-3">
-                <h3 className="font-semibold text-neutral-900">Your cart</h3>
+                <h3 className="font-semibold text-neutral-900 dark:text-foreground">Your cart</h3>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -295,14 +302,14 @@ export default function MarketplacePage() {
                   <button
                     type="button"
                     onClick={() => setCartOpen(false)}
-                    className="p-2 rounded-lg hover:bg-neutral-100"
+                    className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
                     aria-label="Close cart"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <ul className="divide-y divide-neutral-200 max-h-64 overflow-y-auto">
+              <ul className="divide-y divide-neutral-200 dark:divide-neutral-800 max-h-64 overflow-y-auto">
                 {cart.map((item) => (
                   <li key={item.key} className="py-3 flex items-center gap-3">
                     {item.imageUrl ? (
@@ -310,14 +317,14 @@ export default function MarketplacePage() {
                       <img
                         src={item.imageUrl}
                         alt=""
-                        className="w-14 h-14 rounded-lg object-cover border border-neutral-200 shrink-0"
+                        className="w-14 h-14 rounded-lg object-cover border border-neutral-200 dark:border-border shrink-0"
                       />
                     ) : (
-                      <div className="w-14 h-14 rounded-lg bg-neutral-100 shrink-0" />
+                      <div className="w-14 h-14 rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0" />
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-neutral-900 truncate">{item.title}</p>
-                      <p className="text-xs text-neutral-500 truncate">{item.businessName}</p>
+                      <p className="font-medium text-neutral-900 dark:text-foreground truncate">{item.title}</p>
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground truncate">{item.businessName}</p>
                       <p className="text-sm font-semibold mt-0.5">
                         AED {(item.price * item.qty).toLocaleString()}
                       </p>
@@ -326,7 +333,7 @@ export default function MarketplacePage() {
                       <button
                         type="button"
                         onClick={() => updateQty(item.key, -1)}
-                        className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center border border-neutral-300 rounded-lg"
+                        className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center border border-neutral-300 dark:border-border rounded-lg"
                         aria-label="Decrease quantity"
                       >
                         <Minus className="w-4 h-4" />
@@ -335,7 +342,7 @@ export default function MarketplacePage() {
                       <button
                         type="button"
                         onClick={() => updateQty(item.key, 1)}
-                        className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center border border-neutral-300 rounded-lg"
+                        className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center border border-neutral-300 dark:border-border rounded-lg"
                         aria-label="Increase quantity"
                       >
                         <Plus className="w-4 h-4" />
@@ -352,8 +359,45 @@ export default function MarketplacePage() {
                   </li>
                 ))}
               </ul>
+
+              {checkoutOpen && cart.length > 0 ? (
+                <>
+                  {cart.length > 1 ? (
+                    <p className="text-xs text-neutral-500 dark:text-muted-foreground pt-3">
+                      Items are checked out one at a time — starting with {cart[0].title}. It will
+                      be removed from your cart once the order is placed.
+                    </p>
+                  ) : null}
+                  <MarketplaceCheckoutPanel
+                    offerId={cart[0].productId}
+                    price={cart[0].price}
+                    currency="AED"
+                    onCancel={() => setCheckoutOpen(false)}
+                    onSuccessMessage={(msg) => {
+                      setOrderMessage(msg)
+                      setCheckoutOpen(false)
+                      handleRemoveFromCart(cart[0].key)
+                    }}
+                    getToken={async () => firebaseUser?.getIdToken()}
+                  />
+                </>
+              ) : null}
             </div>
           ) : null}
+        </div>
+      ) : null}
+
+      {orderMessage ? (
+        <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto rounded-lg border border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-900 px-4 py-3 text-sm text-green-800 dark:text-green-300 shadow-lg flex items-start justify-between gap-3">
+          <span>{orderMessage}</span>
+          <button
+            type="button"
+            onClick={() => setOrderMessage(null)}
+            aria-label="Dismiss"
+            className="shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       ) : null}
     </DashboardPageShell>

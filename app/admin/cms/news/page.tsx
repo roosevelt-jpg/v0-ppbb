@@ -156,7 +156,7 @@ export default function AdminCmsNewsPage() {
           <div
             className={`rounded-lg border px-4 py-3 text-sm ${
               message.type === 'success'
-                ? 'border-neutral-300 bg-neutral-50 text-neutral-900'
+                ? 'border-neutral-300 dark:border-border bg-neutral-50 dark:bg-muted text-neutral-900 dark:text-foreground'
                 : 'border-red-200 bg-red-50 text-red-800'
             }`}
           >
@@ -173,7 +173,7 @@ export default function AdminCmsNewsPage() {
                 required
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                className="mt-1 w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                className="mt-1 w-full border border-neutral-300 dark:border-border rounded-md px-3 py-2 text-sm"
                 placeholder="Community workshop draws 200 guests"
               />
             </label>
@@ -182,7 +182,7 @@ export default function AdminCmsNewsPage() {
               <textarea
                 value={form.summary}
                 onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
-                className="mt-1 w-full border border-neutral-300 rounded-md px-3 py-2 text-sm min-h-[72px]"
+                className="mt-1 w-full border border-neutral-300 dark:border-border rounded-md px-3 py-2 text-sm min-h-[72px]"
                 placeholder="Short teaser for cards…"
               />
             </label>
@@ -191,7 +191,7 @@ export default function AdminCmsNewsPage() {
               <textarea
                 value={form.body}
                 onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-                className="mt-1 w-full border border-neutral-300 rounded-md px-3 py-2 text-sm min-h-[140px]"
+                className="mt-1 w-full border border-neutral-300 dark:border-border rounded-md px-3 py-2 text-sm min-h-[140px]"
                 placeholder="Full article text (plain text or simple HTML)…"
               />
             </label>
@@ -201,7 +201,7 @@ export default function AdminCmsNewsPage() {
                 <input
                   value={form.category}
                   onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  className="mt-1 w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="mt-1 w-full border border-neutral-300 dark:border-border rounded-md px-3 py-2 text-sm"
                 />
               </label>
               <label className="block text-sm">
@@ -209,7 +209,7 @@ export default function AdminCmsNewsPage() {
                 <input
                   value={form.author}
                   onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
-                  className="mt-1 w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                  className="mt-1 w-full border border-neutral-300 dark:border-border rounded-md px-3 py-2 text-sm"
                 />
               </label>
             </div>
@@ -218,7 +218,7 @@ export default function AdminCmsNewsPage() {
               <input
                 value={form.slug}
                 onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                className="mt-1 w-full border border-neutral-300 rounded-md px-3 py-2 text-sm"
+                className="mt-1 w-full border border-neutral-300 dark:border-border rounded-md px-3 py-2 text-sm"
                 placeholder="auto-generated from title if empty"
               />
             </label>
@@ -229,7 +229,7 @@ export default function AdminCmsNewsPage() {
                 <img
                   src={form.image}
                   alt=""
-                  className="w-full max-w-sm aspect-[4/3] object-cover rounded border border-neutral-200"
+                  className="w-full max-w-sm aspect-[4/3] object-cover rounded border border-neutral-200 dark:border-border"
                 />
               ) : null}
               <label className={`${BUTTON_OUTLINE} inline-flex gap-1 cursor-pointer`}>
@@ -266,7 +266,7 @@ export default function AdminCmsNewsPage() {
         <div className="space-y-3">
           <h2 className="font-semibold text-lg">All articles ({articles.length})</h2>
           {articles.length === 0 ? (
-            <p className="text-sm text-neutral-600">No articles yet.</p>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground">No articles yet.</p>
           ) : (
             articles.map((article) => (
               <Card key={article.id} className="p-4">
@@ -277,12 +277,12 @@ export default function AdminCmsNewsPage() {
                       <img
                         src={article.image}
                         alt=""
-                        className="w-20 h-16 object-cover rounded border border-neutral-200 shrink-0"
+                        className="w-20 h-16 object-cover rounded border border-neutral-200 dark:border-border shrink-0"
                       />
                     ) : null}
                     <div className="min-w-0">
                       <p className="font-semibold break-words">{article.title}</p>
-                      <p className="text-xs text-neutral-500 mt-1">
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
                         {article.isPublished ? 'Published' : 'Draft'} ·{' '}
                         {formatNewsDate(article.publishedAt) || '—'} · By {article.author}
                       </p>

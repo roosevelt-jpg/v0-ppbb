@@ -14,7 +14,7 @@ export default function AdminPartnershipsRedirectPage() {
   }, [router])
 
   return (
-    <div className="p-8 text-center text-sm text-neutral-500">
+    <div className="p-8 text-center text-sm text-neutral-500 dark:text-muted-foreground">
       Redirecting to Contact Submissions → Sponsorship / Partnership Inquiries…
     </div>
   )

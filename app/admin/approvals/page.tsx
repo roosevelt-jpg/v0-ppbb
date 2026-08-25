@@ -124,7 +124,7 @@ export default function ApprovalsPage() {
       label: 'Category',
       width: '140px',
       render: (value: string) => (
-        <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-neutral-100 text-neutral-900 border border-neutral-200">
+        <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-neutral-100 dark:bg-muted text-neutral-900 dark:text-foreground border border-neutral-200 dark:border-border">
           {TYPE_LABELS[value] || value}
         </span>
       ),
@@ -134,7 +134,7 @@ export default function ApprovalsPage() {
       label: 'Submitted By',
       width: '180px',
       render: (value: string) => (
-        <span className="text-neutral-600 text-sm break-all">{shortenSubmitter(value)}</span>
+        <span className="text-neutral-600 dark:text-muted-foreground text-sm break-all">{shortenSubmitter(value)}</span>
       ),
     },
     {
@@ -145,7 +145,7 @@ export default function ApprovalsPage() {
         if (!value) return '—'
         const date = new Date(value)
         return (
-          <span className="text-neutral-600 text-sm">
+          <span className="text-neutral-600 dark:text-muted-foreground text-sm">
             {formatDistanceToNow(date, { addSuffix: true })}
           </span>
         )
@@ -162,7 +162,7 @@ export default function ApprovalsPage() {
             e.stopPropagation()
             openReview(row)
           }}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-black underline"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-black dark:text-foreground underline"
         >
           <Eye className="w-3.5 h-3.5" /> View
         </button>
@@ -194,7 +194,7 @@ export default function ApprovalsPage() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             {loading
               ? 'Loading…'
               : tab === 'forms'
@@ -279,20 +279,20 @@ export default function ApprovalsPage() {
             <div className="space-y-4 text-sm">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-neutral-500">Category</p>
-                  <p className="font-semibold text-neutral-900">
+                  <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Category</p>
+                  <p className="font-semibold text-neutral-900 dark:text-foreground">
                     {TYPE_LABELS[selectedItem.type] || selectedItem.type}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-neutral-500">Submitted by</p>
-                  <p className="font-semibold text-neutral-900 break-all">
+                  <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Submitted by</p>
+                  <p className="font-semibold text-neutral-900 dark:text-foreground break-all">
                     {selectedItem.submittedBy || '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-neutral-500">Submitted</p>
-                  <p className="font-semibold text-neutral-900">
+                  <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Submitted</p>
+                  <p className="font-semibold text-neutral-900 dark:text-foreground">
                     {selectedItem.createdAt
                       ? new Date(selectedItem.createdAt).toLocaleString()
                       : '—'}
@@ -300,8 +300,8 @@ export default function ApprovalsPage() {
                 </div>
                 {selectedItem.amount != null ? (
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">Amount</p>
-                    <p className="font-semibold text-neutral-900">
+                    <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">Amount</p>
+                    <p className="font-semibold text-neutral-900 dark:text-foreground">
                       AED {selectedItem.amount.toLocaleString()}
                     </p>
                   </div>
@@ -309,17 +309,17 @@ export default function ApprovalsPage() {
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">Summary</p>
-                <p className="text-neutral-700 whitespace-pre-wrap">
+                <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-1">Summary</p>
+                <p className="text-neutral-700 dark:text-foreground whitespace-pre-wrap">
                   {selectedItem.description || 'No summary'}
                 </p>
               </div>
 
-              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-                <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">
+              <div className="rounded-lg border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-muted p-3">
+                <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-1">
                   Full inquiry / details
                 </p>
-                <p className="text-neutral-800 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                <p className="text-neutral-800 dark:text-foreground whitespace-pre-wrap max-h-64 overflow-y-auto">
                   {selectedItem.message ||
                     selectedItem.description ||
                     'No additional details were provided with this request.'}

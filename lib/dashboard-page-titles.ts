@@ -47,6 +47,10 @@ const memberRoutes: TitleEntry[] = [
   { href: '/dashboard/assets', title: 'Event Assets' },
   { href: '/dashboard/membership', title: 'Membership' },
   { href: '/dashboard/communities', title: 'My Communities' },
+  { href: '/dashboard/wallet', title: 'Wallet' },
+  { href: '/dashboard/ai-matches', title: 'AI Matches' },
+  { href: '/dashboard/recurring-donations', title: 'Recurring Donations' },
+  { href: '/dashboard/community-reputation', title: 'Community Reputation' },
   { href: '/dashboard/settings', title: 'Settings' },
 ]
 

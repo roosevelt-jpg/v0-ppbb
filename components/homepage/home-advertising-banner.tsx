@@ -30,7 +30,7 @@ export function HomeAdvertisingBanner() {
   )
 
   return (
-    <section className="w-full border-y border-neutral-200 bg-white" aria-label="Advertisement">
+    <section className="w-full border-y border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950" aria-label="Advertisement">
       <div className="max-w-[72rem] mx-auto">
         {banner.href ? (
           <Link

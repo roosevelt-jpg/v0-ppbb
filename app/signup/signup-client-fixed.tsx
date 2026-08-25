@@ -23,8 +23,12 @@ import {
   formatPlanPriceDetailed,
   getPlanIncludedItems,
   inferSignupTypeFromPlan,
+  resolveActiveGateway,
+  type ConfiguredGateways,
 } from '@/lib/pricing-utils'
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
+import { Dialog } from '@/components/dialog'
+import { StripeCardCheckout } from '@/components/stripe-card-checkout'
 
 const STEPS = [
   { id: 1, label: 'Choose membership' },
@@ -95,6 +99,16 @@ export default function SignupClient() {
   const [plansLoading, setPlansLoading] = useState(true)
   const [createdUserId, setCreatedUserId] = useState<string | null>(null)
   const [checkingOut, setCheckingOut] = useState(false)
+  const [gateways, setGateways] = useState<ConfiguredGateways>({
+    stripe: true,
+    paypal: false,
+    ziina: false,
+  })
+  const [stripePublishableKey, setStripePublishableKey] = useState<string | null>(null)
+  const [activeIntent, setActiveIntent] = useState<{
+    clientSecret: string
+    mode: 'payment' | 'setup'
+  } | null>(null)
   const [businessAddress, setBusinessAddress] = useState<AddressLocationValue>({
     country: 'United Arab Emirates',
     countryCode: 'AE',
@@ -107,6 +121,16 @@ export default function SignupClient() {
     lat: 0,
     lng: 0,
   })
+
+  useEffect(() => {
+    fetch('/api/checkout/gateways')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.data) setGateways(json.data)
+        if (json?.data?.stripePublishableKey) setStripePublishableKey(json.data.stripePublishableKey)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const q = query(collection(db, 'pricingPlans'), where('active', '==', true))
@@ -342,7 +366,12 @@ export default function SignupClient() {
     }
   }
 
-  const tryRedeemPromo = async (userId: string): Promise<{ ok: true; url: string } | { ok: false; error: string }> => {
+  type PromoRedeemOutcome =
+    | { ok: true; kind: 'redirect'; url: string }
+    | { ok: true; kind: 'card'; clientSecret: string; mode: 'payment' | 'setup' }
+    | { ok: false; error: string }
+
+  const tryRedeemPromo = async (userId: string): Promise<PromoRedeemOutcome> => {
     const code = formData.promoCode.trim()
     if (!code) return { ok: false, error: '' }
     const firebaseUser = auth.currentUser
@@ -367,10 +396,26 @@ export default function SignupClient() {
       setFormData((prev) => ({ ...prev, planId: data.data.planId }))
       if (data.data.planName) setPlanName(String(data.data.planName))
     }
+    // A trial-enabled code isn't active yet — show the embedded card form.
+    // Otherwise the code granted the plan directly.
+    if (data.data?.clientSecret) {
+      return { ok: true, kind: 'card', clientSecret: data.data.clientSecret, mode: data.data.intentMode || 'setup' }
+    }
     return {
       ok: true,
+      kind: 'redirect',
       url: data.data?.membershipUrl || '/dashboard/membership?status=success',
     }
+  }
+
+  /** Shared handling for a successful tryRedeemPromo() result — shows the
+   * embedded card form for a trial code, or redirects for a direct grant. */
+  const applyPromoOutcome = (redeemed: Extract<PromoRedeemOutcome, { ok: true }>) => {
+    if (redeemed.kind === 'card') {
+      setActiveIntent({ clientSecret: redeemed.clientSecret, mode: redeemed.mode })
+      return
+    }
+    window.location.href = redeemed.url
   }
 
   const handleSubscribe = async () => {
@@ -386,7 +431,8 @@ export default function SignupClient() {
       if (formData.promoCode.trim()) {
         const redeemed = await tryRedeemPromo(userId)
         if (redeemed.ok) {
-          window.location.href = redeemed.url
+          applyPromoOutcome(redeemed)
+          setCheckingOut(false)
           return
         }
         // Promo failed — show message, still allow paid checkout
@@ -396,7 +442,10 @@ export default function SignupClient() {
       }
 
       const plan = selectedPlan || plans.find((p) => p.id === formData.planId)
-      const gateway = (plan?.paymentGateway as 'stripe' | 'paypal' | 'ziina') || 'stripe'
+      const gateway = plan ? resolveActiveGateway(plan, gateways) : 'stripe'
+      if (!gateway) {
+        throw new Error('No payment method is configured yet. Please contact support.')
+      }
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -408,7 +457,18 @@ export default function SignupClient() {
         }),
       })
       const data = await response.json()
-      if (!response.ok || !data.checkoutUrl) {
+      if (!response.ok) {
+        throw new Error(data.error || 'Checkout failed')
+      }
+
+      if (gateway === 'stripe') {
+        if (!data.clientSecret) throw new Error('Stripe did not return a client secret')
+        setActiveIntent({ clientSecret: data.clientSecret, mode: data.mode || 'payment' })
+        setCheckingOut(false)
+        return
+      }
+
+      if (!data.checkoutUrl) {
         throw new Error(data.error || 'Checkout failed')
       }
       window.location.href = data.checkoutUrl
@@ -569,7 +629,7 @@ export default function SignupClient() {
         if (formData.promoCode.trim()) {
           const redeemed = await tryRedeemPromo(existingUid)
           if (redeemed.ok) {
-            window.location.href = redeemed.url
+            applyPromoOutcome(redeemed)
             return
           }
           if (redeemed.error) {
@@ -624,7 +684,7 @@ export default function SignupClient() {
       if (formData.promoCode.trim()) {
         const redeemed = await tryRedeemPromo(firebaseUser.uid)
         if (redeemed.ok) {
-          window.location.href = redeemed.url
+          applyPromoOutcome(redeemed)
           return
         }
         if (redeemed.error) {
@@ -653,6 +713,34 @@ export default function SignupClient() {
 
   return (
     <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+      <Dialog
+        open={Boolean(activeIntent)}
+        onOpenChange={(open) => {
+          if (!open) setActiveIntent(null)
+        }}
+        title="Enter card details"
+        description="Your card is processed securely by Stripe — it's never seen by our servers."
+        maxWidth="26rem"
+        compact={false}
+      >
+        {activeIntent && stripePublishableKey ? (
+          <StripeCardCheckout
+            publishableKey={stripePublishableKey}
+            clientSecret={activeIntent.clientSecret}
+            mode={activeIntent.mode}
+            onSuccess={() => {
+              window.location.href = '/dashboard/membership?status=success'
+            }}
+            onCancel={() => setActiveIntent(null)}
+          />
+        ) : activeIntent ? (
+          <p style={{ fontSize: '0.875rem', color: '#c62828' }}>
+            Card payments aren't fully configured right now. Please try again shortly or contact
+            support.
+          </p>
+        ) : null}
+      </Dialog>
+
       {/* Header */}
       <div style={{ width: '100%', padding: '0.5rem 0.75rem', borderBottom: '1px solid #e4e1da' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.75rem', paddingRight: '0.75rem' }}>

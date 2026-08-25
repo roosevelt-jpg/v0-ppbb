@@ -135,6 +135,10 @@ export const MEMBER_DASHBOARD_ALLOWED_PREFIXES = [
   '/dashboard/profile',
   '/dashboard/community',
   '/dashboard/communities',
+  '/dashboard/wallet',
+  '/dashboard/ai-matches',
+  '/dashboard/recurring-donations',
+  '/dashboard/community-reputation',
 ] as const
 
 /** Business-portal paths that require hasBusinessAccess (excluding signup). */

@@ -88,7 +88,7 @@ export function AdminTable({
   return (
     <div className="space-y-4 min-w-0">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h2 className="text-xl font-semibold" style={{ color: '#111111' }}>
+        <h2 className="text-xl font-semibold text-foreground">
           {title}
         </h2>
         <div className="flex gap-2 flex-shrink-0">
@@ -109,58 +109,47 @@ export function AdminTable({
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4" style={{ color: '#888888' }} />
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <input
           placeholder={searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="bg-secondary border-border text-foreground"
           style={{
             width: '100%',
             paddingLeft: '40px',
             paddingRight: '12px',
             paddingTop: '8px',
             paddingBottom: '8px',
-            backgroundColor: '#f7f6f2',
-            borderColor: '#e4e1da',
-            color: '#111111',
-            border: '1px solid #e4e1da',
+            border: '1px solid',
             borderRadius: '6px',
           }}
         />
       </div>
 
       {/* Table */}
-      <Card
-        className="min-w-0"
-        style={{
-          backgroundColor: '#ffffff',
-          borderColor: '#e4e1da',
-        }}
-      >
+      <Card className="min-w-0 bg-card border-border">
         <AdminTableScroll>
           <table className="w-full" style={{ minWidth: `${minWidth}px` }}>
             <thead>
               <tr
+                className="bg-secondary"
                 style={{
-                  borderBottomColor: '#e4e1da',
+                  borderBottomColor: 'var(--border)',
                   borderBottomWidth: 1,
-                  backgroundColor: '#f7f6f2',
                 }}
               >
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 sm:px-6 py-3 text-left text-xs font-medium whitespace-nowrap"
-                    style={{ color: '#888888', width: col.width }}
+                    className="px-4 sm:px-6 py-3 text-left text-xs font-medium whitespace-nowrap text-muted-foreground"
+                    style={{ width: col.width }}
                   >
                     {col.label}
                   </th>
                 ))}
                 {hasActions && (
-                  <th
-                    className="px-3 py-3 text-left text-xs font-medium whitespace-nowrap w-[1%] "
-                    style={{ color: '#888888' }}
-                  >
+                  <th className="px-3 py-3 text-left text-xs font-medium whitespace-nowrap w-[1%] text-muted-foreground">
                     Actions
                   </th>
                 )}
@@ -170,13 +159,13 @@ export function AdminTable({
               {loading ? (
                 <tr>
                   <td colSpan={columns.length + (hasActions ? 1 : 0)} className="px-6 py-8 text-center">
-                    <div style={{ color: '#888888' }}>Loading...</div>
+                    <div className="text-muted-foreground">Loading...</div>
                   </td>
                 </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length + (hasActions ? 1 : 0)} className="px-6 py-8 text-center">
-                    <div style={{ color: '#888888' }}>No data found</div>
+                    <div className="text-muted-foreground">No data found</div>
                   </td>
                 </tr>
               ) : (
@@ -184,15 +173,14 @@ export function AdminTable({
                   <tr
                     key={item.id || idx}
                     style={{
-                      borderBottomColor: '#e4e1da',
+                      borderBottomColor: 'var(--border)',
                       borderBottomWidth: 1,
                     }}
                   >
                     {columns.map((col) => (
                       <td
                         key={`${item.id}-${col.key}`}
-                        className="px-4 sm:px-6 py-4 text-sm whitespace-nowrap"
-                        style={{ color: '#333333' }}
+                        className="px-4 sm:px-6 py-4 text-sm whitespace-nowrap text-foreground/80"
                       >
                         {col.render ? col.render(item[col.key], item) : String(item[col.key] || '-')}
                       </td>
@@ -246,7 +234,7 @@ export function AdminTable({
 
       {/* Pagination Info */}
       {filteredData.length > 0 && (
-        <div className="text-xs" style={{ color: '#888888' }}>
+        <div className="text-xs text-muted-foreground">
           Showing {filteredData.length} of {data.length} records
         </div>
       )}

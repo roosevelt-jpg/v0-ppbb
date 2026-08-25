@@ -74,17 +74,17 @@ export default function Analytics() {
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
       {loading ? (
-        <p className="text-neutral-500">Loading analytics…</p>
+        <p className="text-neutral-500 dark:text-muted-foreground">Loading analytics…</p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Jobs posted</p><p className="text-2xl font-bold">{stats?.opportunitiesPosted || 0}</p></Card>
-            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Offers posted</p><p className="text-2xl font-bold">{stats?.offersPosted || 0}</p></Card>
-            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Total leads</p><p className="text-2xl font-bold">{stats?.leadsGenerated || 0}</p></Card>
-            <Card className="p-4 border-[#e4e1da]"><p className="text-xs text-neutral-500">Referral earnings</p><p className="text-2xl font-bold">AED {stats?.referralEarnings || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da] dark:border-border"><p className="text-xs text-neutral-500 dark:text-muted-foreground">Jobs posted</p><p className="text-2xl font-bold">{stats?.opportunitiesPosted || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da] dark:border-border"><p className="text-xs text-neutral-500 dark:text-muted-foreground">Offers posted</p><p className="text-2xl font-bold">{stats?.offersPosted || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da] dark:border-border"><p className="text-xs text-neutral-500 dark:text-muted-foreground">Total leads</p><p className="text-2xl font-bold">{stats?.leadsGenerated || 0}</p></Card>
+            <Card className="p-4 border-[#e4e1da] dark:border-border"><p className="text-xs text-neutral-500 dark:text-muted-foreground">Referral earnings</p><p className="text-2xl font-bold">AED {stats?.referralEarnings || 0}</p></Card>
           </div>
 
-          <Card className="p-6 border-[#e4e1da]">
+          <Card className="p-6 border-[#e4e1da] dark:border-border">
             <h3 className="font-semibold mb-4">Profile views (from leads)</h3>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
@@ -93,20 +93,20 @@ export default function Analytics() {
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="views" stroke="#111" strokeWidth={2} />
+                  <Line type="monotone" dataKey="views" stroke="var(--foreground)" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Card>
 
-          <Card className="p-6 border-[#e4e1da]">
+          <Card className="p-6 border-[#e4e1da] dark:border-border">
             <h3 className="font-semibold mb-4">Job board performance</h3>
             <div className="overflow-x-auto table-scroll">
               <table className="w-full min-w-[480px] text-sm">
                 <thead><tr className="border-b"><th className="text-left py-2">Job</th><th className="text-left py-2">Applications</th><th className="text-left py-2">Status</th></tr></thead>
                 <tbody>
                   {jobs.slice(0, 10).map((j) => (
-                    <tr key={j.id} className="border-b border-neutral-100">
+                    <tr key={j.id} className="border-b border-neutral-100 dark:border-border">
                       <td className="py-2">{j.title}</td>
                       <td className="py-2">{j.applications || 0}</td>
                       <td className="py-2 capitalize">{j.status}</td>
@@ -117,14 +117,14 @@ export default function Analytics() {
             </div>
           </Card>
 
-          <Card className="p-6 border-[#e4e1da]">
+          <Card className="p-6 border-[#e4e1da] dark:border-border">
             <h3 className="font-semibold mb-4">Marketplace performance</h3>
             <div className="overflow-x-auto table-scroll">
               <table className="w-full min-w-[480px] text-sm">
                 <thead><tr className="border-b"><th className="text-left py-2">Offer</th><th className="text-left py-2">Views</th><th className="text-left py-2">Purchases</th></tr></thead>
                 <tbody>
                   {offers.slice(0, 10).map((o) => (
-                    <tr key={o.id} className="border-b border-neutral-100">
+                    <tr key={o.id} className="border-b border-neutral-100 dark:border-border">
                       <td className="py-2">{o.title}</td>
                       <td className="py-2">{o.views || 0}</td>
                       <td className="py-2">{o.conversions || 0}</td>
@@ -135,7 +135,7 @@ export default function Analytics() {
             </div>
           </Card>
 
-          <Card className="p-6 border-[#e4e1da]">
+          <Card className="p-6 border-[#e4e1da] dark:border-border">
             <h3 className="font-semibold mb-4">Leads by source</h3>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
@@ -144,7 +144,7 @@ export default function Analytics() {
                   <XAxis dataKey="source" tick={{ fontSize: 10 }} />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#111" />
+                  <Bar dataKey="count" fill="var(--foreground)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

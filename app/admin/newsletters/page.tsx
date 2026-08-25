@@ -33,21 +33,21 @@ const TEMPLATE_CARD_BASE = `${BUTTON_BASE} flex flex-col items-stretch justify-s
 function templateCardClass(selected: boolean): string {
   return selected
     ? `${TEMPLATE_CARD_BASE} bg-black text-white border-black hover:bg-neutral-800 active:bg-neutral-900`
-    : `${TEMPLATE_CARD_BASE} bg-white text-black border-black hover:bg-neutral-50 active:bg-neutral-100`
+    : `${TEMPLATE_CARD_BASE} bg-white dark:bg-card text-black dark:text-foreground border-black hover:bg-neutral-50 active:bg-neutral-100`
 }
 
 function NewslettersSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
-      <div className="h-10 bg-neutral-200 rounded-lg w-48" />
+      <div className="h-10 bg-neutral-200 dark:bg-muted rounded-lg w-48" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-[5.5rem] bg-neutral-200 rounded-lg" />
+          <div key={i} className="h-[5.5rem] bg-neutral-200 dark:bg-muted rounded-lg" />
         ))}
       </div>
-      <div className="h-64 bg-neutral-200 rounded-lg" />
+      <div className="h-64 bg-neutral-200 dark:bg-muted rounded-lg" />
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-16 bg-neutral-200 rounded-lg" />
+        <div key={i} className="h-16 bg-neutral-200 dark:bg-muted rounded-lg" />
       ))}
     </div>
   )
@@ -362,7 +362,7 @@ export default function AdminNewslettersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
           <div>
             <h1 className={TEXT_HEADING}>Newsletters</h1>
-            <p className="text-neutral-600 mt-2 text-sm md:text-base break-words">
+            <p className="text-neutral-600 dark:text-muted-foreground mt-2 text-sm md:text-base break-words">
               Create and send email campaigns to registered members, volunteers, businesses, and sponsors
             </p>
           </div>
@@ -394,14 +394,14 @@ export default function AdminNewslettersPage() {
             {/* Create Form */}
             {showForm && (
               <Card className={`${CARD_BASE} mb-8 min-w-0 overflow-hidden`}>
-                <h2 className="font-headline text-xl md:text-2xl font-bold text-neutral-900 mb-6">
+                <h2 className="font-headline text-xl md:text-2xl font-bold text-neutral-900 dark:text-foreground mb-6">
                   Create New Newsletter
                 </h2>
 
                 {/* Template Selection */}
                 <div className="mb-6 min-w-0">
                   <label className={`${TEXT_LABEL} block mb-3`}>
-                    <span className="font-eyebrow text-xs uppercase tracking-wider text-neutral-500">
+                    <span className="font-eyebrow text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">
                       Template
                     </span>
                   </label>
@@ -572,11 +572,11 @@ export default function AdminNewslettersPage() {
                   </div>
 
                   {/* Recipient Info */}
-                  <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+                  <div className="bg-neutral-50 dark:bg-muted border border-neutral-200 dark:border-border rounded-lg p-4">
                     {recipientLoading ? (
-                      <div className="h-4 bg-neutral-200 rounded w-2/3 animate-pulse" />
+                      <div className="h-4 bg-neutral-200 dark:bg-muted rounded w-2/3 animate-pulse" />
                     ) : (
-                      <p className="text-sm text-neutral-800 break-words">
+                      <p className="text-sm text-neutral-800 dark:text-foreground break-words">
                         This newsletter will be sent to{' '}
                         <strong>{recipientCount.toLocaleString()}</strong> registered users (excluding
                         unsubscribed).
@@ -624,41 +624,41 @@ export default function AdminNewslettersPage() {
 
             {/* Send History */}
             <div className="mb-8">
-              <h2 className="font-headline text-lg md:text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="font-headline text-lg md:text-xl font-bold text-neutral-900 dark:text-foreground mb-4">
                 Send History
               </h2>
               {listLoading ? (
                 <div className="space-y-2 animate-pulse">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-14 bg-neutral-200 rounded-lg" />
+                    <div key={i} className="h-14 bg-neutral-200 dark:bg-muted rounded-lg" />
                   ))}
                 </div>
               ) : sentHistory.length === 0 ? (
-                <div className="text-center py-8 bg-neutral-50 rounded-lg border border-neutral-200">
-                  <p className="text-neutral-600 text-sm">No newsletters sent yet.</p>
+                <div className="text-center py-8 bg-neutral-50 dark:bg-muted rounded-lg border border-neutral-200 dark:border-border">
+                  <p className="text-neutral-600 dark:text-muted-foreground text-sm">No newsletters sent yet.</p>
                 </div>
               ) : (
-                <AdminTableScroll className="rounded-lg border border-neutral-200">
+                <AdminTableScroll className="rounded-lg border border-neutral-200 dark:border-border">
                   <table className="w-full text-sm min-w-[600px]">
-                    <thead className="bg-neutral-50 border-b border-neutral-200">
+                    <thead className="bg-neutral-50 dark:bg-muted border-b border-neutral-200 dark:border-border">
                       <tr>
-                        <th className="text-left px-4 py-3 font-medium text-neutral-700">Subject</th>
-                        <th className="text-left px-4 py-3 font-medium text-neutral-700">Date Sent</th>
-                        <th className="text-left px-4 py-3 font-medium text-neutral-700">Recipients</th>
-                        <th className="text-left px-4 py-3 font-medium text-neutral-700">Status</th>
-                        <th className="text-right px-4 py-3 font-medium text-neutral-700">Actions</th>
+                        <th className="text-left px-4 py-3 font-medium text-neutral-700 dark:text-foreground">Subject</th>
+                        <th className="text-left px-4 py-3 font-medium text-neutral-700 dark:text-foreground">Date Sent</th>
+                        <th className="text-left px-4 py-3 font-medium text-neutral-700 dark:text-foreground">Recipients</th>
+                        <th className="text-left px-4 py-3 font-medium text-neutral-700 dark:text-foreground">Status</th>
+                        <th className="text-right px-4 py-3 font-medium text-neutral-700 dark:text-foreground">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sentHistory.map((nl) => (
-                        <tr key={nl.id} className="border-b border-neutral-100 hover:bg-neutral-50">
-                          <td className="px-4 py-3 font-medium text-neutral-900 max-w-[200px] sm:max-w-none break-words">
+                        <tr key={nl.id} className="border-b border-neutral-100 dark:border-border hover:bg-neutral-50">
+                          <td className="px-4 py-3 font-medium text-neutral-900 dark:text-foreground max-w-[200px] sm:max-w-none break-words">
                             {nl.subject || nl.title}
                           </td>
-                          <td className="px-4 py-3 text-neutral-600 whitespace-nowrap">
+                          <td className="px-4 py-3 text-neutral-600 dark:text-muted-foreground whitespace-nowrap">
                             {nl.sentAt ? format(nl.sentAt, 'MMM d, yyyy h:mm a') : '—'}
                           </td>
-                          <td className="px-4 py-3 text-neutral-600">{nl.recipientCount ?? 0}</td>
+                          <td className="px-4 py-3 text-neutral-600 dark:text-muted-foreground">{nl.recipientCount ?? 0}</td>
                           <td className="px-4 py-3">
                             <span
                               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
@@ -695,22 +695,22 @@ export default function AdminNewslettersPage() {
 
             {/* All newsletters (drafts / scheduled) */}
             <div>
-              <h2 className="font-headline text-lg md:text-xl font-bold text-neutral-900 mb-4">
+              <h2 className="font-headline text-lg md:text-xl font-bold text-neutral-900 dark:text-foreground mb-4">
                 Drafts &amp; Scheduled
               </h2>
               {newsletters.filter((n) => n.status !== 'sent').length === 0 ? (
-                <div className="text-center py-8 bg-neutral-50 rounded-lg border border-neutral-200">
-                  <p className="text-neutral-600 text-sm">No drafts or scheduled newsletters.</p>
+                <div className="text-center py-8 bg-neutral-50 dark:bg-muted rounded-lg border border-neutral-200 dark:border-border">
+                  <p className="text-neutral-600 dark:text-muted-foreground text-sm">No drafts or scheduled newsletters.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {newsletters
                     .filter((n) => n.status !== 'sent')
                     .map((nl) => (
-                      <Card key={nl.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border border-neutral-200">
+                      <Card key={nl.id} className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border border-neutral-200 dark:border-border">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-neutral-900 truncate">{nl.title}</h3>
-                          <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-neutral-600">
+                          <h3 className="font-semibold text-neutral-900 dark:text-foreground truncate">{nl.title}</h3>
+                          <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-neutral-600 dark:text-muted-foreground">
                             <span className="capitalize">{nl.status}</span>
                             {nl.scheduledFor && (
                               <>
@@ -740,8 +740,8 @@ export default function AdminNewslettersPage() {
       {/* Preview Modal */}
       {previewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
+          <div className="bg-white dark:bg-card rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-xl min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-border">
               <h3 className="font-headline text-lg font-bold">Email Preview</h3>
               <button
                 type="button"
@@ -752,19 +752,19 @@ export default function AdminNewslettersPage() {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-4 bg-neutral-100">
+            <div className="flex-1 overflow-auto p-4 bg-neutral-100 dark:bg-muted">
               {previewLoading ? (
-                <div className="animate-pulse h-96 bg-neutral-200 rounded" />
+                <div className="animate-pulse h-96 bg-neutral-200 dark:bg-muted rounded" />
               ) : (
                 <iframe
                   title="Newsletter preview"
                   srcDoc={previewHtml}
-                  className="w-full min-h-[400px] bg-white rounded border border-neutral-200"
+                  className="w-full min-h-[400px] bg-white dark:bg-card rounded border border-neutral-200 dark:border-border"
                   sandbox="allow-same-origin"
                 />
               )}
             </div>
-            <div className="px-4 py-3 border-t border-neutral-200 flex justify-end">
+            <div className="px-4 py-3 border-t border-neutral-200 dark:border-border flex justify-end">
               <button type="button" onClick={() => setPreviewOpen(false)} className={BUTTON_PRIMARY}>
                 Close
               </button>
@@ -776,8 +776,8 @@ export default function AdminNewslettersPage() {
       {/* AI Assist Modal */}
       {aiModalOpen && aiField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col shadow-xl min-w-0 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200">
+          <div className="bg-white dark:bg-card rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col shadow-xl min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-border">
               <h3 className="font-headline text-lg font-bold flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
                 Generate with AI
@@ -802,13 +802,13 @@ export default function AdminNewslettersPage() {
                 />
               </div>
               {aiSuggestion && (
-                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 min-w-0 overflow-hidden">
-                  <p className="text-xs uppercase tracking-wider text-neutral-500 mb-2 font-eyebrow">Suggestion</p>
-                  <p className="text-sm text-neutral-800 whitespace-pre-wrap break-words">{aiSuggestion}</p>
+                <div className="bg-neutral-50 dark:bg-muted border border-neutral-200 dark:border-border rounded-lg p-3 min-w-0 overflow-hidden">
+                  <p className="text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground mb-2 font-eyebrow">Suggestion</p>
+                  <p className="text-sm text-neutral-800 dark:text-foreground whitespace-pre-wrap break-words">{aiSuggestion}</p>
                 </div>
               )}
             </div>
-            <div className="px-4 py-3 border-t border-neutral-200 flex flex-col-reverse sm:flex-row gap-2 justify-end">
+            <div className="px-4 py-3 border-t border-neutral-200 dark:border-border flex flex-col-reverse sm:flex-row gap-2 justify-end">
               <button type="button" onClick={() => setAiModalOpen(false)} className={BUTTON_SECONDARY}>
                 Cancel
               </button>

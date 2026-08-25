@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { FieldValue, Timestamp } from 'firebase-admin/firestore'
+import { Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { persistUserReferralAttribution } from '@/lib/referral-attribution-server'
 import { getReferralCodeFromRequest } from '@/lib/referral-cookie'
-import { getStripeClient } from '@/lib/get-stripe-client'
 import { resolvePayPalConfig } from '@/lib/resolve-paypal-config'
 import { resolveZiinaConfig } from '@/lib/resolve-ziina-config'
 import {
@@ -11,7 +10,7 @@ import {
   ensurePayPalBillingPlan,
 } from '@/lib/paypal-client'
 import { createZiinaPaymentIntent } from '@/lib/ziina-client'
-import { getPublicAppUrl } from '@/lib/payment-completion'
+import { createStripeMembershipIntent, getPublicAppUrl } from '@/lib/payment-completion'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -76,66 +75,8 @@ async function handleStripeCheckout(
   planId: string
 ) {
   try {
-    const stripe = await getStripeClient()
-    const db = getAdminDb()
-    const site = getPublicAppUrl()
-
-    let productId = plan.stripeProductId as string | undefined
-    if (!productId) {
-      const product = await stripe.products.create({
-        name: String(plan.name || 'Membership'),
-        description: String(plan.description || ''),
-        metadata: { planId },
-      })
-      productId = product.id
-      await db.collection('pricingPlans').doc(planId).update({ stripeProductId: productId })
-    }
-
-    let priceId = plan.stripePriceId as string | undefined
-    if (!priceId) {
-      const price = await stripe.prices.create({
-        unit_amount: Number(plan.price) || 0,
-        currency: String(plan.currency || 'aed').toLowerCase(),
-        recurring: {
-          interval: plan.billingPeriod === 'yearly' ? 'year' : 'month',
-        },
-        product: productId,
-      })
-      priceId = price.id
-      await db.collection('pricingPlans').doc(planId).update({ stripePriceId: priceId })
-    }
-
-    const userSnap = await db.collection('users').doc(userId).get()
-    const email = (userSnap.data()?.email as string) || undefined
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${site}/dashboard/membership?status=success`,
-      cancel_url: `${site}/dashboard/membership?status=canceled`,
-      customer_email: email,
-      metadata: {
-        type: 'membership',
-        userId,
-        planId,
-      },
-    })
-
-    await db.collection('checkoutSessions').add({
-      userId,
-      planId,
-      sessionId: session.id,
-      gateway: 'stripe',
-      status: 'pending',
-      createdAt: FieldValue.serverTimestamp(),
-    })
-
-    return NextResponse.json({
-      sessionId: session.id,
-      checkoutUrl: session.url,
-      gateway: 'stripe',
-    })
+    const { clientSecret, mode, subscriptionId } = await createStripeMembershipIntent({ planId, userId })
+    return NextResponse.json({ clientSecret, mode, subscriptionId, gateway: 'stripe' })
   } catch (error) {
     console.error('[checkout] Stripe:', error)
     return NextResponse.json(

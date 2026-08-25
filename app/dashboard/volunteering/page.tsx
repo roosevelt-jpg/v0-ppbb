@@ -332,11 +332,11 @@ export default function VolunteeringPage() {
 
   return (
     <DashboardPageShell title="Volunteering" subtitle="Give your time and skills to causes that matter">
-      <Card className="p-4 mb-6 border border-neutral-200 bg-neutral-50">
-        <p className="text-sm text-neutral-700">
+      <Card className="p-4 mb-6 border border-neutral-200 dark:border-border bg-neutral-50 dark:bg-white/5">
+        <p className="text-sm text-neutral-700 dark:text-neutral-200">
           Confirm attendance at charity events to add hours equal to each event’s start–end time
           toward your certificates, then{' '}
-          <Link href="/dashboard/certificates" className="underline font-medium text-neutral-900">
+          <Link href="/dashboard/certificates" className="underline font-medium text-neutral-900 dark:text-foreground">
             issue your certificate
           </Link>
           .
@@ -351,12 +351,12 @@ export default function VolunteeringPage() {
         ].map((stat) => {
           const Icon = stat.icon
           return (
-            <Card key={stat.label} className="pb-stat-card p-3 border border-neutral-200">
+            <Card key={stat.label} className="pb-stat-card p-3 border border-neutral-200 dark:border-border">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500">{stat.label}</p>
-                  <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 mt-1">{stat.value}</p>
-                  <p className="text-[11px] text-neutral-400 mt-0.5">{stat.sub}</p>
+                  <p className="pb-stat-label text-[10px] uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">{stat.label}</p>
+                  <p className="pb-stat-value font-headline text-xl font-bold text-neutral-900 dark:text-foreground mt-1">{stat.value}</p>
+                  <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-0.5">{stat.sub}</p>
                 </div>
                 <Icon className="w-5 h-5 text-neutral-300 shrink-0" />
               </div>
@@ -378,7 +378,7 @@ export default function VolunteeringPage() {
       </div>
 
       {attendanceMessage ? (
-        <p className="mb-4 text-sm text-neutral-700 bg-white border border-neutral-200 rounded-lg px-3 py-2">
+        <p className="mb-4 text-sm text-neutral-700 dark:text-neutral-200 bg-white dark:bg-card border border-neutral-200 dark:border-border rounded-lg px-3 py-2">
           {attendanceMessage}
         </p>
       ) : null}
@@ -394,7 +394,7 @@ export default function VolunteeringPage() {
                 <Link href="/events" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold text-center">
                   Browse events
                 </Link>
-                <Link href="/opportunities?type=volunteer" className="border border-neutral-300 px-4 py-2 rounded-lg text-sm font-semibold text-center">
+                <Link href="/opportunities?type=volunteer" className="border border-neutral-300 dark:border-border px-4 py-2 rounded-lg text-sm font-semibold text-center">
                   Browse opportunities
                 </Link>
               </div>
@@ -403,15 +403,15 @@ export default function VolunteeringPage() {
         ) : (
           <div className="space-y-8">
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 mb-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-3">
                 Charity events ({charityEvents.length})
               </h2>
               {charityEvents.length === 0 ? (
-                <p className="text-sm text-neutral-500">No upcoming charity events right now.</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">No upcoming charity events right now.</p>
               ) : (
                 <div className="space-y-3">
                   {charityEvents.map((evt) => (
-                    <Card key={`evt-${String(evt.id)}`} className="border border-neutral-200 overflow-hidden p-0">
+                    <Card key={`evt-${String(evt.id)}`} className="border border-neutral-200 dark:border-border overflow-hidden p-0">
                       <div className="flex flex-col sm:flex-row">
                         <EventBannerThumb
                           event={evt}
@@ -425,8 +425,8 @@ export default function VolunteeringPage() {
                           <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-900 text-white">
                             Charity event
                           </span>
-                          <h3 className="font-semibold text-neutral-900 mt-2">{String(evt.title ?? 'Event')}</h3>
-                          <p className="text-sm text-neutral-500 flex items-center gap-1.5 mt-1">
+                          <h3 className="font-semibold text-neutral-900 dark:text-foreground mt-2">{String(evt.title ?? 'Event')}</h3>
+                          <p className="text-sm text-neutral-500 dark:text-muted-foreground flex items-center gap-1.5 mt-1">
                             <Calendar className="w-3.5 h-3.5 shrink-0" />
                             {evt.startDate
                               ? parseFirestoreDate(evt.startDate)?.toLocaleDateString('en-US', {
@@ -437,10 +437,10 @@ export default function VolunteeringPage() {
                               : String(evt.businessName ?? '')}
                           </p>
                           {evt.businessName ? (
-                            <p className="text-sm text-neutral-500">{String(evt.businessName)}</p>
+                            <p className="text-sm text-neutral-500 dark:text-muted-foreground">{String(evt.businessName)}</p>
                           ) : null}
                           {evt.description ? (
-                            <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(evt.description)}</p>
+                            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-2 line-clamp-2">{String(evt.description)}</p>
                           ) : null}
                         </div>
                         <Link
@@ -458,31 +458,31 @@ export default function VolunteeringPage() {
             </section>
 
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 mb-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-muted-foreground mb-3">
                 Volunteer roles ({opportunities.length})
               </h2>
               {opportunities.length === 0 ? (
-                <p className="text-sm text-neutral-500">No open volunteer jobs right now.</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">No open volunteer jobs right now.</p>
               ) : (
                 <div className="space-y-3">
                   {opportunities.map((opp) => (
-                    <Card key={String(opp.id)} className="p-4 border border-neutral-200">
+                    <Card key={String(opp.id)} className="p-4 border border-neutral-200 dark:border-border">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div>
-                          <span className="text-xs font-semibold px-2 py-1 rounded border border-neutral-300 text-neutral-800">
+                          <span className="text-xs font-semibold px-2 py-1 rounded border border-neutral-300 dark:border-border text-neutral-800 dark:text-foreground">
                             Volunteer role
                           </span>
-                          <h3 className="font-semibold text-neutral-900 mt-2">{String(opp.title ?? 'Role')}</h3>
-                          <p className="text-sm text-neutral-500">{String(opp.businessName ?? '')}</p>
+                          <h3 className="font-semibold text-neutral-900 dark:text-foreground mt-2">{String(opp.title ?? 'Role')}</h3>
+                          <p className="text-sm text-neutral-500 dark:text-muted-foreground">{String(opp.businessName ?? '')}</p>
                           {opp.location ? (
-                            <p className="text-xs text-neutral-400 mt-1 break-words min-w-0">
+                            <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 break-words min-w-0">
                               {/^https?:\/\//i.test(String(opp.location).trim())
                                 ? 'View map / location on listing'
                                 : String(opp.location)}
                             </p>
                           ) : null}
                           {opp.description ? (
-                            <p className="text-sm text-neutral-600 mt-2 line-clamp-2">{String(opp.description)}</p>
+                            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-2 line-clamp-2">{String(opp.description)}</p>
                           ) : null}
                         </div>
                         <Link
@@ -520,7 +520,7 @@ export default function VolunteeringPage() {
             {registeredCharity.map((evt) => {
               const attended = Boolean(evt.checkedInAt)
               return (
-                <Card key={evt.id} className="border border-neutral-200 overflow-hidden p-0">
+                <Card key={evt.id} className="border border-neutral-200 dark:border-border overflow-hidden p-0">
                   <div className="flex flex-col sm:flex-row">
                     <EventBannerThumb
                       event={evt as never}
@@ -534,11 +534,11 @@ export default function VolunteeringPage() {
                       <span className="text-xs font-semibold px-2 py-1 rounded bg-rose-100 text-rose-800">
                         Charity event
                       </span>
-                      <h3 className="font-semibold text-neutral-900 mt-2">{evt.title || 'Event'}</h3>
-                      <p className="text-sm text-neutral-500 break-words">
+                      <h3 className="font-semibold text-neutral-900 dark:text-foreground mt-2">{evt.title || 'Event'}</h3>
+                      <p className="text-sm text-neutral-500 dark:text-muted-foreground break-words">
                         {getEventLocationLabel(evt as never)}
                       </p>
-                      <p className="text-xs text-neutral-400 mt-1">
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">
                         {formatDate(evt.startDate as string | Date | undefined)}
                       </p>
                     </div>
@@ -565,9 +565,9 @@ export default function VolunteeringPage() {
                 </Card>
               )
             })}
-            <p className="text-xs text-neutral-500 pt-2">
+            <p className="text-xs text-neutral-500 dark:text-muted-foreground pt-2">
               After hours are credited, go to{' '}
-              <Link href="/dashboard/certificates" className="underline font-medium text-neutral-800">
+              <Link href="/dashboard/certificates" className="underline font-medium text-neutral-800 dark:text-foreground">
                 Certificates
               </Link>{' '}
               and tap Issue my certificates.
@@ -592,30 +592,30 @@ export default function VolunteeringPage() {
       ) : (
         <div className="space-y-3">
           {applications.map((app) => (
-            <Card key={`app-${app.id}`} className="p-4 border border-neutral-200">
+            <Card key={`app-${app.id}`} className="p-4 border border-neutral-200 dark:border-border">
               <div className="flex justify-between gap-3">
                 <div>
                   <h3 className="font-semibold">{String(app.title ?? 'Volunteer role')}</h3>
-                  <p className="text-sm text-neutral-500">{String(app.company ?? '')}</p>
-                  <p className="text-xs text-neutral-400 mt-1">Applied {formatDate(app.date as Timestamp)}</p>
+                  <p className="text-sm text-neutral-500 dark:text-muted-foreground">{String(app.company ?? '')}</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1">Applied {formatDate(app.date as Timestamp)}</p>
                 </div>
-                <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-100 capitalize h-fit">
+                <span className="text-xs font-semibold px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 capitalize h-fit">
                   {String(app.status ?? 'submitted')}
                 </span>
               </div>
             </Card>
           ))}
           {volunteerData.records.map((record) => (
-            <Card key={record.id} className="p-4 border border-neutral-200">
+            <Card key={record.id} className="p-4 border border-neutral-200 dark:border-border">
               <div className="flex justify-between gap-3">
                 <div>
                   <h3 className="font-semibold">{record.eventTitle || 'Volunteer Activity'}</h3>
-                  {record.description ? <p className="text-sm text-neutral-600 mt-1">{record.description}</p> : null}
-                  <p className="text-xs text-neutral-400 mt-2">{formatDate(record.date)}</p>
+                  {record.description ? <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">{record.description}</p> : null}
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-2">{formatDate(record.date)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-neutral-900">{record.hours}</p>
-                  <p className="text-xs text-neutral-500">hours</p>
+                  <p className="text-2xl font-bold text-neutral-900 dark:text-foreground">{record.hours}</p>
+                  <p className="text-xs text-neutral-500 dark:text-muted-foreground">hours</p>
                   <span
                     className={`inline-block mt-2 px-2 py-1 text-xs rounded font-semibold ${
                       record.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'

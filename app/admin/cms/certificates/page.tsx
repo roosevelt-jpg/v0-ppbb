@@ -234,22 +234,22 @@ export default function AdminCmsCertificatesPage() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <h2 className="font-bold text-black">Templates ({templates.length})</h2>
+            <h2 className="font-bold text-black dark:text-foreground">Templates ({templates.length})</h2>
             {templates.length === 0 ? (
-              <p className="text-sm text-gray-500">No templates yet. Create one for each hour milestone (e.g. 10, 50, 100 hours).</p>
+              <p className="text-sm text-gray-500 dark:text-muted-foreground">No templates yet. Create one for each hour milestone (e.g. 10, 50, 100 hours).</p>
             ) : (
               templates.map((t) => (
                 <Card
                   key={t.id}
                   className={`p-4 border cursor-pointer transition ${
-                    selectedId === t.id ? 'border-black ring-1 ring-black' : 'border-gray-200'
+                    selectedId === t.id ? 'border-black ring-1 ring-black' : 'border-gray-200 dark:border-border'
                   }`}
                   onClick={() => setSelectedId(t.id)}
                 >
                   <div className="flex justify-between gap-2">
                     <div>
                       <p className="font-semibold">{t.title}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">
                         {t.hoursRequired} hours · {t.status} · {t.signatories.length} signatory(ies)
                       </p>
                     </div>
@@ -268,7 +268,7 @@ export default function AdminCmsCertificatesPage() {
               ))
             )}
 
-            <Card className="p-6 border border-gray-200 space-y-4">
+            <Card className="p-6 border border-gray-200 dark:border-border space-y-4">
               <h3 className="font-bold">{selectedId ? 'Edit template' : 'New template'}</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -372,19 +372,19 @@ export default function AdminCmsCertificatesPage() {
                   </button>
                 </div>
                 {form.signatories.map((sig, idx) => (
-                  <div key={idx} className="border rounded-lg p-3 space-y-2 bg-gray-50">
+                  <div key={idx} className="border rounded-lg p-3 space-y-2 bg-gray-50 dark:bg-muted">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         placeholder="Name"
                         value={sig.name}
                         onChange={(e) => updateSignatory(idx, { name: e.target.value })}
-                        className="px-3 py-2 border rounded-lg bg-white"
+                        className="px-3 py-2 border rounded-lg bg-white dark:bg-card"
                       />
                       <input
                         placeholder="Title (e.g. Founder)"
                         value={sig.title}
                         onChange={(e) => updateSignatory(idx, { title: e.target.value })}
-                        className="px-3 py-2 border rounded-lg bg-white"
+                        className="px-3 py-2 border rounded-lg bg-white dark:bg-card"
                       />
                     </div>
                     <label className="inline-flex items-center gap-2 text-sm cursor-pointer">
@@ -453,12 +453,12 @@ export default function AdminCmsCertificatesPage() {
           </div>
 
           <div className="space-y-4 xl:sticky xl:top-4 self-start">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
               <Eye size={16} />
               Live preview (sample member)
             </div>
             <CertificateDesignPreview data={previewData} />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-muted-foreground">
               When a member reaches the hour threshold, this design is saved to their dashboard and a congratulatory email is sent (if Gmail SMTP is configured).
             </p>
           </div>

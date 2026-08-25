@@ -214,8 +214,8 @@ export default function AdminCmsAboutPage() {
       <div className="space-y-6 w-full min-w-0">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-neutral-900">About Page</h1>
-            <p className="text-sm text-neutral-600 mt-1">
+            <h1 className="font-headline text-3xl font-bold text-neutral-900 dark:text-foreground">About Page</h1>
+            <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
               Edit hero, story, mission/vision, and values. Team members are managed at{' '}
               <a href="/admin/team" className="underline font-medium">
                 /admin/team
@@ -321,15 +321,15 @@ export default function AdminCmsAboutPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Founder image</label>
-              <p className="text-xs text-neutral-500 mb-3">
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-3">
                 Portrait orientation (3:4). Shown in the Story section on the public About page.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
                 <div className="w-full max-w-[14rem] sm:max-w-[16rem] shrink-0">
-                  <p className="text-[0.65rem] text-neutral-400 mb-1 text-center sm:text-left">
+                  <p className="text-[0.65rem] text-neutral-400 dark:text-muted-foreground mb-1 text-center sm:text-left">
                     Portrait preview (3:4)
                   </p>
-                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 aspect-[3/4] bg-neutral-50">
+                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 dark:border-border aspect-[3/4] bg-neutral-50 dark:bg-muted">
                     {config.story.founderImageURL ? (
                       <img
                         src={config.story.founderImageURL}
@@ -337,7 +337,7 @@ export default function AdminCmsAboutPage() {
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500">
+                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500 dark:text-muted-foreground">
                         No image yet
                       </div>
                     )}
@@ -416,7 +416,7 @@ export default function AdminCmsAboutPage() {
         {/* Mission / Vision (About-only; separate from homepage Mission) */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Mission / Vision</h2>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             About-page Mission &amp; Vision block — separate from the homepage Mission section.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -476,12 +476,12 @@ export default function AdminCmsAboutPage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Section image</label>
-              <p className="text-xs text-neutral-500 mb-3">
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-3">
                 Landscape orientation (4:3). Shown beside Mission &amp; Vision copy on the public About page.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 items-start">
                 <div className="w-full max-w-[24rem] shrink-0">
-                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 aspect-[4/3] bg-neutral-50">
+                  <div className="relative w-full overflow-hidden rounded-lg border border-neutral-200 dark:border-border aspect-[4/3] bg-neutral-50 dark:bg-muted">
                     {config.missionVision.imageURL ? (
                       <img
                         src={config.missionVision.imageURL}
@@ -489,7 +489,7 @@ export default function AdminCmsAboutPage() {
                         className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500">
+                      <div className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-neutral-500 dark:text-muted-foreground">
                         No image yet
                       </div>
                     )}
@@ -672,7 +672,7 @@ export default function AdminCmsAboutPage() {
         {/* Team heading (3D copy only) */}
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="font-headline text-xl font-bold">Team section labels (3D)</h2>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             Member profiles are managed at{' '}
             <a href="/admin/team" className="underline font-medium">
               /admin/team

@@ -50,20 +50,20 @@ export default function AdminCmsTransparencyPage() {
 
   const field = (key: keyof TransparencyConfig, label: string, multiline = false) => (
     <div className="space-y-1">
-      <label className="block text-xs uppercase tracking-wider text-neutral-500">{label}</label>
+      <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">{label}</label>
       {multiline ? (
         <textarea
           value={typeof config[key] === 'string' ? (config[key] as string) : ''}
           onChange={(e) => setConfig({ ...config, [key]: e.target.value })}
           rows={4}
-          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
         />
       ) : (
         <input
           type="text"
           value={typeof config[key] === 'string' ? (config[key] as string) : ''}
           onChange={(e) => setConfig({ ...config, [key]: e.target.value })}
-          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
         />
       )}
     </div>
@@ -121,8 +121,8 @@ export default function AdminCmsTransparencyPage() {
           >
             Open live page <ExternalLink className="w-3.5 h-3.5" />
           </Link>
-          <span className="text-neutral-400">·</span>
-          <span className="text-neutral-600">
+          <span className="text-neutral-400 dark:text-muted-foreground">·</span>
+          <span className="text-neutral-600 dark:text-muted-foreground">
             Contact email must use <strong>passive-blessings.com</strong>
           </span>
         </div>
@@ -145,7 +145,7 @@ export default function AdminCmsTransparencyPage() {
         )}
 
         <Card className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Hero section</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Hero section</h2>
           {field('heroHeadline', 'Page headline')}
           {field('heroSubheadline', 'Subheadline', true)}
           {field('heroTagline', 'Tagline')}
@@ -154,7 +154,7 @@ export default function AdminCmsTransparencyPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Impact metrics labels</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Impact metrics labels</h2>
           {field('metricsHeading', 'Metrics section heading')}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {field('metricDonationsLabel', 'Donations label')}
@@ -169,7 +169,7 @@ export default function AdminCmsTransparencyPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Causes & timeline</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Causes & timeline</h2>
           {field('causesHeading', 'Causes section heading')}
           {field('causesChartTitle', 'Causes chart title')}
           {field('totalFundraisedLabel', 'Total fundraised card label')}
@@ -184,12 +184,12 @@ export default function AdminCmsTransparencyPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Privacy & contact</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Privacy & contact</h2>
           {field('privacyHeading', 'Privacy heading')}
           {field('privacyBody', 'Privacy body', true)}
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <label className="block text-xs uppercase tracking-wider text-neutral-500">
+              <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">
                 Privacy bullets
               </label>
               <button type="button" onClick={addBullet} className={btnPrimary}>
@@ -202,7 +202,7 @@ export default function AdminCmsTransparencyPage() {
                   type="text"
                   value={bullet}
                   onChange={(e) => updateBullet(index, e.target.value)}
-                  className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+                  className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
                 />
                 <button
                   type="button"
@@ -220,7 +220,7 @@ export default function AdminCmsTransparencyPage() {
         </Card>
 
         <Card className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Call to action</h2>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-foreground">Call to action</h2>
           {field('ctaHeading', 'CTA heading')}
           {field('ctaBody', 'CTA body', true)}
           {field('donateLabel', 'Donate button label')}
@@ -229,7 +229,7 @@ export default function AdminCmsTransparencyPage() {
           {field('joinHref', 'Join button link')}
           {field('getInvolvedTitle', 'Get involved box title')}
           <div className="flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wider text-neutral-500">Get involved items</p>
+            <p className="text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">Get involved items</p>
             <button type="button" onClick={addGetInvolved} className={btnPrimary}>
               <Plus className="w-3.5 h-3.5" /> Add item
             </button>
@@ -243,14 +243,14 @@ export default function AdminCmsTransparencyPage() {
                     value={item.title}
                     onChange={(e) => updateGetInvolved(index, 'title', e.target.value)}
                     placeholder={`Item ${index + 1} title`}
-                    className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+                    className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
                   />
                   <input
                     type="text"
                     value={item.description}
                     onChange={(e) => updateGetInvolved(index, 'description', e.target.value)}
                     placeholder={`Item ${index + 1} description`}
-                    className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+                    className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm"
                   />
                 </div>
                 <button

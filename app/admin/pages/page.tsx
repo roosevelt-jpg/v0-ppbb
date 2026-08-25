@@ -241,7 +241,7 @@ export default function AdminPages() {
                 {page.status === 'published' ? (
                   <Eye className="h-3.5 w-3.5 text-green-600" aria-hidden />
                 ) : (
-                  <EyeOff className="h-3.5 w-3.5 text-neutral-500" aria-hidden />
+                  <EyeOff className="h-3.5 w-3.5 text-neutral-500 dark:text-muted-foreground" aria-hidden />
                 )}
                 <button
                   type="button"
@@ -275,8 +275,8 @@ export default function AdminPages() {
 
       {editingPage && (
         <div className="admin-modal-overlay p-4">
-          <div className="admin-modal-content bg-white rounded-lg w-full max-w-2xl flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-neutral-200 flex-shrink-0">
+          <div className="admin-modal-content bg-white dark:bg-card rounded-lg w-full max-w-2xl flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-neutral-200 dark:border-border flex-shrink-0">
               <h2 className="text-2xl font-bold">{isCreating ? 'Create New Page' : 'Edit Page'}</h2>
             </div>
 
@@ -287,7 +287,7 @@ export default function AdminPages() {
                   type="text"
                   value={editingPage.title}
                   onChange={(e) => setEditingPage({ ...editingPage, title: e.target.value })}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                 />
               </div>
 
@@ -297,10 +297,10 @@ export default function AdminPages() {
                   type="text"
                   value={editingPage.slug}
                   onChange={(e) => setEditingPage({ ...editingPage, slug: e.target.value })}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                   placeholder="my-page"
                 />
-                <p className="text-xs text-neutral-500 mt-1">Public URL: /pages/{editingPage.slug || '…'}</p>
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">Public URL: /pages/{editingPage.slug || '…'}</p>
               </div>
 
               <div>
@@ -308,13 +308,13 @@ export default function AdminPages() {
                 <textarea
                   value={editingPage.description}
                   onChange={(e) => setEditingPage({ ...editingPage, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900 h-20"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground h-20"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Page content</label>
-                <p className="text-xs text-neutral-500 mb-2">
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground mb-2">
                   Use the toolbar for bold, italics, subtitles, bullets, numbering, and hyperlinks.
                   Applies to this page and all future pages.
                 </p>
@@ -333,7 +333,7 @@ export default function AdminPages() {
                     type="text"
                     value={editingPage.seoTitle}
                     onChange={(e) => setEditingPage({ ...editingPage, seoTitle: e.target.value })}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                    className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                   />
                 </div>
 
@@ -342,7 +342,7 @@ export default function AdminPages() {
                   <select
                     value={editingPage.status}
                     onChange={(e) => setEditingPage({ ...editingPage, status: e.target.value as Page['status'] })}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                    className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
@@ -357,14 +357,14 @@ export default function AdminPages() {
                   value={editingPage.externalHref || ''}
                   onChange={(e) => setEditingPage({ ...editingPage, externalHref: e.target.value })}
                   placeholder="/about or https://…"
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                  className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                 />
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
                   When set, menu links go here instead of /pages/slug (useful for app routes).
                 </p>
               </div>
 
-              <div className="border-t border-neutral-200 pt-4 mt-4">
+              <div className="border-t border-neutral-200 dark:border-border pt-4 mt-4">
                 <h3 className="text-sm font-semibold mb-4">Menu Configuration</h3>
 
                 <label className="flex items-center gap-2 mb-4">
@@ -395,7 +395,7 @@ export default function AdminPages() {
                         })
                       }
                     }}
-                    className="w-4 h-4 border border-neutral-300 rounded"
+                    className="w-4 h-4 border border-neutral-300 dark:border-border rounded"
                   />
                   <span className="text-sm font-medium">Show in Menu</span>
                 </label>
@@ -407,7 +407,7 @@ export default function AdminPages() {
                       <select
                         value={menuPlacement}
                         onChange={(e) => handlePlacementChange(e.target.value as MenuPlacement)}
-                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                        className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                       >
                         <option value="header">Header (navbar dropdown)</option>
                         <option value="footer">Footer column</option>
@@ -426,7 +426,7 @@ export default function AdminPages() {
                               headerSection: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                          className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                         >
                           <option value="">Top-level header link</option>
                           {navLinks.map((link) => (
@@ -450,7 +450,7 @@ export default function AdminPages() {
                               headerSection: '',
                             })
                           }
-                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                          className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                         >
                           <option value="footer-quicklinks">Quick Links</option>
                           <option value="footer-getinvolved">Get Involved</option>
@@ -466,7 +466,7 @@ export default function AdminPages() {
                         value={editingPage.menuLabel || ''}
                         onChange={(e) => setEditingPage({ ...editingPage, menuLabel: e.target.value })}
                         placeholder="Leave blank to use page title"
-                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                        className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                       />
                     </div>
 
@@ -478,7 +478,7 @@ export default function AdminPages() {
                         onChange={(e) =>
                           setEditingPage({ ...editingPage, menuOrder: parseInt(e.target.value, 10) || 0 })
                         }
-                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg bg-white text-neutral-900"
+                        className="w-full px-4 py-2 border border-neutral-300 dark:border-border rounded-lg bg-white dark:bg-card text-neutral-900 dark:text-foreground"
                       />
                     </div>
                   </div>
@@ -486,7 +486,7 @@ export default function AdminPages() {
               </div>
             </div>
 
-            <div className="p-6 border-t border-neutral-200 flex flex-col-reverse sm:flex-row gap-3 flex-shrink-0">
+            <div className="p-6 border-t border-neutral-200 dark:border-border flex flex-col-reverse sm:flex-row gap-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => {

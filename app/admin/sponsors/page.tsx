@@ -17,7 +17,7 @@ export default function AdminSponsorsRedirectPage() {
   }, [router])
 
   return (
-    <div className="p-8 text-center text-sm text-neutral-500">
+    <div className="p-8 text-center text-sm text-neutral-500 dark:text-muted-foreground">
       Redirecting to Sponsor Inquiries… Sponsors are business members; requests are handled in
       inquiries, not a separate user tab.
     </div>

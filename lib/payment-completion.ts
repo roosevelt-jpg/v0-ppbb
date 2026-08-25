@@ -1,3 +1,4 @@
+import type Stripe from 'stripe'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { recordReferralConversion } from '@/lib/referral-conversion-server'
@@ -14,6 +15,142 @@ export function getPublicAppUrl(): string {
     process.env.NEXT_PUBLIC_SITE_URL ||
     'https://test.myflynai.com'
   ).replace(/\/$/, '')
+}
+
+/**
+ * Get or create the Stripe Customer for this user, reusing it across every
+ * future subscription instead of creating a new one each time.
+ */
+async function getOrCreateStripeCustomer(
+  stripe: Stripe,
+  db: FirebaseFirestore.Firestore,
+  userId: string
+): Promise<string> {
+  const userSnap = await db.collection('users').doc(userId).get()
+  const userData = userSnap.data() || {}
+  const existingId = userData.stripeCustomerId as string | undefined
+
+  if (existingId) {
+    const exists = await stripe.customers.retrieve(existingId).then(
+      (c) => !c.deleted,
+      () => false
+    )
+    if (exists) return existingId
+  }
+
+  const customer = await stripe.customers.create({
+    email: (userData.email as string) || undefined,
+    name: [userData.firstName, userData.lastName].filter(Boolean).join(' ') || undefined,
+    metadata: { userId },
+  })
+  await db.collection('users').doc(userId).set({ stripeCustomerId: customer.id }, { merge: true })
+  return customer.id
+}
+
+/**
+ * Create a Stripe Subscription in `default_incomplete` mode and return the
+ * client secret for whichever intent it produced — a card is collected via
+ * an embedded Stripe Elements form on our own page (never a redirect to a
+ * Stripe-hosted page). Shared by the plain signup/dashboard checkout path
+ * and the trial-promo redemption path, so both get the same self-healing
+ * product/price resolution.
+ *
+ * With a trial (trialDays set), the subscription has nothing to charge
+ * immediately — Stripe produces a `pending_setup_intent` instead, just to
+ * save the card for later. Without a trial, it produces a real
+ * `latest_invoice.payment_intent` for the first charge. Either way the
+ * frontend confirms the same way: stripe.confirmPayment / confirmSetup
+ * with `redirect: 'if_required'`, which only pops an in-page 3DS modal
+ * when the card's bank actually requires one, and otherwise never
+ * navigates away from our own page at all.
+ */
+export async function createStripeMembershipIntent(params: {
+  planId: string
+  userId: string
+  trialDays?: number
+  extraMetadata?: Record<string, string>
+}): Promise<{ clientSecret: string; mode: 'payment' | 'setup'; subscriptionId: string }> {
+  const { getStripeClient } = await import('@/lib/get-stripe-client')
+  const stripe = await getStripeClient()
+  const db = getAdminDb()
+
+  const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
+  if (!planSnap.exists) throw new Error('Plan not found')
+  const plan = planSnap.data() as Record<string, unknown>
+
+  let productId = plan.stripeProductId as string | undefined
+  if (productId) {
+    const exists = await stripe.products.retrieve(productId).then(
+      () => true,
+      () => false
+    )
+    if (!exists) productId = undefined
+  }
+  if (!productId) {
+    const product = await stripe.products.create({
+      name: String(plan.name || 'Membership'),
+      description: String(plan.description || ''),
+      metadata: { planId: params.planId },
+    })
+    productId = product.id
+    await db.collection('pricingPlans').doc(params.planId).update({ stripeProductId: productId })
+  }
+
+  let priceId = productId === plan.stripeProductId ? (plan.stripePriceId as string | undefined) : undefined
+  if (priceId) {
+    const exists = await stripe.prices.retrieve(priceId).then(
+      () => true,
+      () => false
+    )
+    if (!exists) priceId = undefined
+  }
+  if (!priceId) {
+    const price = await stripe.prices.create({
+      unit_amount: Number(plan.price) || 0,
+      currency: String(plan.currency || 'aed').toLowerCase(),
+      recurring: {
+        interval: plan.billingPeriod === 'yearly' ? 'year' : 'month',
+      },
+      product: productId,
+    })
+    priceId = price.id
+    await db.collection('pricingPlans').doc(params.planId).update({ stripePriceId: priceId })
+  }
+
+  const customerId = await getOrCreateStripeCustomer(stripe, db, params.userId)
+
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: priceId }],
+    payment_behavior: 'default_incomplete',
+    payment_settings: {
+      save_default_payment_method: 'on_subscription',
+      payment_method_types: ['card'],
+    },
+    trial_period_days: params.trialDays && params.trialDays > 0 ? params.trialDays : undefined,
+    expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+    metadata: {
+      type: 'membership',
+      userId: params.userId,
+      planId: params.planId,
+      ...(params.extraMetadata || {}),
+    },
+  })
+
+  const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent | null
+  const paymentIntent = (subscription.latest_invoice as Stripe.Invoice | null)
+    ?.payment_intent as Stripe.PaymentIntent | null | undefined
+
+  const clientSecret = setupIntent?.client_secret || paymentIntent?.client_secret
+  if (!clientSecret) {
+    throw new Error('Stripe did not return a client secret for this subscription')
+  }
+
+  return {
+    clientSecret,
+    mode: setupIntent ? 'setup' : 'payment',
+    subscriptionId: subscription.id,
+  }
 }
 
 /** Mark an event registration paid and update event counters (idempotent). */
@@ -167,6 +304,56 @@ function portalFieldsFromPlan(
   }
 }
 
+/**
+ * Look up the `checkoutSessions` doc created server-side when a PayPal/Ziina
+ * membership checkout was initiated, and atomically mark it consumed.
+ *
+ * The return-URL handlers for PayPal and Ziina only get an untrusted query
+ * string back from the browser — a visitor can freely rewrite `userId` or
+ * `planId` in that URL while keeping their own genuinely-completed payment
+ * reference, which would otherwise let a real (but cheap) payment activate
+ * an arbitrary, more expensive plan. It would also let the same return URL
+ * be replayed indefinitely to keep pushing the renewal date forward with no
+ * new payment. This resolves the real userId/planId from the record created
+ * at checkout time (not client-suppliable) and fails once that record has
+ * already been consumed once, closing both gaps.
+ */
+export async function consumeMembershipCheckoutSession(
+  gateway: 'paypal' | 'ziina',
+  matchField: 'subscriptionId' | 'transactionId',
+  matchValue: string
+): Promise<{ userId: string; planId: string }> {
+  const db = getAdminDb()
+  const snap = await db
+    .collection('checkoutSessions')
+    .where('gateway', '==', gateway)
+    .where(matchField, '==', matchValue)
+    .limit(1)
+    .get()
+
+  if (snap.empty) {
+    throw new Error('Checkout session not found')
+  }
+
+  const sessionRef = snap.docs[0].ref
+  return db.runTransaction(async (tx) => {
+    const fresh = await tx.get(sessionRef)
+    const session = fresh.data() || {}
+    if (session.status !== 'pending') {
+      throw new Error('This payment has already been processed')
+    }
+
+    const userId = String(session.userId || '')
+    const planId = String(session.planId || '')
+    if (!userId || !planId) {
+      throw new Error('Checkout session is missing userId/planId')
+    }
+
+    tx.update(sessionRef, { status: 'completed', completedAt: Timestamp.now() })
+    return { userId, planId }
+  })
+}
+
 /** Activate membership on the user after a successful PayPal/Ziina (or manual/promo) payment. */
 export async function completeMembershipPayment(params: {
   userId: string
@@ -179,6 +366,16 @@ export async function completeMembershipPayment(params: {
   benefitDurationMonths?: number
   promoCodeId?: string
   promoCode?: string
+  /**
+   * Stripe's own current_period_end (or trial_end) for this subscription,
+   * when available — takes priority over benefitDurationMonths/billing-
+   * period math below. This matters most for a trial checkout: without it,
+   * renewDate would be set to "one plan billing period from now" at the
+   * moment checkout completes (day 0 of the trial), not the actual trial
+   * end Stripe is tracking — membership-expire would then downgrade the
+   * member mid-trial, before Stripe has attempted to charge them at all.
+   */
+  renewDateOverride?: Date
 }): Promise<{ membershipUrl: string }> {
   const db = getAdminDb()
   const planSnap = await db.collection('pricingPlans').doc(params.planId).get()
@@ -193,9 +390,11 @@ export async function completeMembershipPayment(params: {
     params.benefitDurationMonths === 0
   const renewDate = isLifetimePromo
     ? new Date('9999-12-31T23:59:59.000Z')
-    : typeof params.benefitDurationMonths === 'number' && params.benefitDurationMonths > 0
-      ? addMonths(now, params.benefitDurationMonths)
-      : addBillingPeriod(now, String(plan.billingPeriod || 'monthly'))
+    : params.renewDateOverride
+      ? params.renewDateOverride
+      : typeof params.benefitDurationMonths === 'number' && params.benefitDurationMonths > 0
+        ? addMonths(now, params.benefitDurationMonths)
+        : addBillingPeriod(now, String(plan.billingPeriod || 'monthly'))
   const amountCents =
     typeof params.amountCents === 'number' ? params.amountCents : Number(plan.price) || 0
   const currency = (params.currency || plan.currency || 'AED').toString().toUpperCase()
@@ -208,6 +407,7 @@ export async function completeMembershipPayment(params: {
       membershipStatus: 'active',
       membershipRenewDate: isLifetimePromo ? null : renewDate.toISOString(),
       membershipLifetimeForever: isLifetimePromo ? true : FieldValue.delete(),
+      membershipExpiredAt: FieldValue.delete(),
       // Portal access follows the pricing plan (not a hardcoded role alone)
       ...portalFieldsFromPlan(plan, existingUser),
       ...(params.promoCodeId

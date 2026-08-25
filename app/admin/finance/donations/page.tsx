@@ -209,15 +209,15 @@ export default function FinanceDonationsPage() {
   }
 
   const StatCard = ({ label, value }: { label: string; value: string | number }) => (
-    <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-5 min-w-0">
+    <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-5 min-w-0">
       <p
-        className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
+        className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         {label}
       </p>
       <p
-        className="text-2xl sm:text-3xl text-neutral-900"
+        className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground"
         style={{ fontFamily: 'Cormorant Garamond, serif' }}
       >
         {loading ? '—' : value}
@@ -251,7 +251,7 @@ export default function FinanceDonationsPage() {
           type="button"
           disabled={busy || VERIFIED.has(st)}
           onClick={() => runAction(s.id, 'request_resubmission')}
-          className="h-7 min-h-0 px-3 bg-white text-black border border-neutral-300 rounded text-xs font-semibold disabled:opacity-40 inline-flex items-center gap-1"
+          className="h-7 min-h-0 px-3 bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border rounded text-xs font-semibold disabled:opacity-40 inline-flex items-center gap-1"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Request Resubmission
@@ -265,24 +265,24 @@ export default function FinanceDonationsPage() {
       <div className="space-y-6 w-full min-w-0">
         <div>
           <p
-            className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
+            className="text-xs uppercase tracking-[0.15em] text-neutral-500 dark:text-muted-foreground mb-1"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Finance
           </p>
           <h1
-            className="text-2xl sm:text-3xl text-neutral-900"
+            className="text-2xl sm:text-3xl text-neutral-900 dark:text-foreground"
             style={{ fontFamily: 'Cormorant Garamond, serif' }}
           >
             Donation Tracking
           </h1>
-          <p className="text-sm text-neutral-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
             Finance view of donationSubmissions — same data and verification flow as Donation
             Verification. Total AED Raised counts verified donations only.
           </p>
           <Link
             href="/admin/donation-verification"
-            className="inline-flex items-center gap-1 text-sm text-neutral-700 underline mt-2"
+            className="inline-flex items-center gap-1 text-sm text-neutral-700 dark:text-foreground underline mt-2"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             Open Charity Verification queue
@@ -322,26 +322,26 @@ export default function FinanceDonationsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search donor, cause, reference, campaign…"
-          className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm bg-white"
+          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 min-h-[44px] text-sm bg-white dark:bg-card"
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
 
         {loading ? (
           <div className="space-y-3 animate-pulse">
-            <div className="h-24 bg-neutral-100 rounded" />
-            <div className="h-24 bg-neutral-100 rounded" />
-            <div className="h-24 bg-neutral-100 rounded" />
+            <div className="h-24 bg-neutral-100 dark:bg-muted rounded" />
+            <div className="h-24 bg-neutral-100 dark:bg-muted rounded" />
+            <div className="h-24 bg-neutral-100 dark:bg-muted rounded" />
           </div>
         ) : submissions.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[#e4e1da] bg-white p-8 sm:p-12 text-center">
-            <ClipboardList className="w-10 h-10 mx-auto text-neutral-400 mb-3" />
+          <div className="rounded-lg border border-dashed border-[#e4e1da] dark:border-border bg-white dark:bg-card p-8 sm:p-12 text-center">
+            <ClipboardList className="w-10 h-10 mx-auto text-neutral-400 dark:text-muted-foreground mb-3" />
             <h2
-              className="text-xl text-neutral-900 mb-1"
+              className="text-xl text-neutral-900 dark:text-foreground mb-1"
               style={{ fontFamily: 'Cormorant Garamond, serif' }}
             >
               No donation submissions yet
             </h2>
-            <p className="text-sm text-neutral-500 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-sm text-neutral-500 dark:text-muted-foreground mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
               Proofs submitted from /donate-confirm will appear here in real time.
             </p>
             <Link
@@ -358,21 +358,21 @@ export default function FinanceDonationsPage() {
               {filtered.map((s) => (
                 <li
                   key={s.id}
-                  className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3"
+                  className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3"
                 >
                   <div className="flex gap-3 min-w-0">
-                    <div className="h-12 w-12 shrink-0 rounded border bg-neutral-50 flex items-center justify-center overflow-hidden">
+                    <div className="h-12 w-12 shrink-0 rounded border bg-neutral-50 dark:bg-muted flex items-center justify-center overflow-hidden">
                       {s.proofImage ? (
                         <a href={s.proofImage} target="_blank" rel="noopener noreferrer">
                           <img src={s.proofImage} alt="" className="h-12 w-12 object-cover" />
                         </a>
                       ) : (
-                        <ImageIcon className="w-5 h-5 text-neutral-400" />
+                        <ImageIcon className="w-5 h-5 text-neutral-400 dark:text-muted-foreground" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p
-                        className="font-semibold text-neutral-900 truncate"
+                        className="font-semibold text-neutral-900 dark:text-foreground truncate"
                         style={{ fontFamily: 'Inter, sans-serif' }}
                       >
                         {s.donorName || 'Donor'}
@@ -382,17 +382,17 @@ export default function FinanceDonationsPage() {
                           </span>
                         ) : null}
                       </p>
-                      <p className="text-xs text-neutral-500 mt-0.5">
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-0.5">
                         {s.causeName || '—'} · AED {(s.amount || 0).toLocaleString()}
                       </p>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                         {s.donorEmail || '—'} · {s.donorPhone || s.phone || '—'}
                       </p>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                         Ref {s.referenceNumber || '—'} · {formatDate(toDate(s))} · {statusLabel(s.status)}
                       </p>
                       {(s.campaign || s.campaignName) && (
-                        <p className="text-xs text-neutral-500">
+                        <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                           Campaign: {s.campaign || s.campaignName}
                         </p>
                       )}
@@ -403,13 +403,13 @@ export default function FinanceDonationsPage() {
               ))}
             </ul>
 
-            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] rounded-lg bg-white min-w-0">
+            <div className="hidden lg:block admin-table-scroll border border-[#e4e1da] dark:border-border rounded-lg bg-white dark:bg-card min-w-0">
               <table
                 className="w-full text-sm min-w-[1000px]"
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 <thead>
-                  <tr className="border-b text-left text-neutral-500 text-xs uppercase tracking-wider">
+                  <tr className="border-b text-left text-neutral-500 dark:text-muted-foreground text-xs uppercase tracking-wider">
                     <th className="py-3 px-3">Donor</th>
                     <th className="py-3 px-3">Cause</th>
                     <th className="py-3 px-3">Amount</th>
@@ -422,9 +422,9 @@ export default function FinanceDonationsPage() {
                 </thead>
                 <tbody>
                   {filtered.map((s) => (
-                    <tr key={s.id} className="border-b border-neutral-100 align-top">
+                    <tr key={s.id} className="border-b border-neutral-100 dark:border-border align-top">
                       <td className="py-3 px-3">
-                        <div className="font-medium text-neutral-900">
+                        <div className="font-medium text-neutral-900 dark:text-foreground">
                           {s.donorName || 'Donor'}
                           {isRepeatDonor(s) ? (
                             <span className="ml-2 text-[10px] uppercase text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">
@@ -432,13 +432,13 @@ export default function FinanceDonationsPage() {
                             </span>
                           ) : null}
                         </div>
-                        <div className="text-xs text-neutral-500">{s.donorEmail || '—'}</div>
-                        <div className="text-xs text-neutral-500">{s.donorPhone || s.phone || '—'}</div>
+                        <div className="text-xs text-neutral-500 dark:text-muted-foreground">{s.donorEmail || '—'}</div>
+                        <div className="text-xs text-neutral-500 dark:text-muted-foreground">{s.donorPhone || s.phone || '—'}</div>
                       </td>
                       <td className="py-3 px-3">
                         <div>{s.causeName || '—'}</div>
                         {(s.campaign || s.campaignName) && (
-                          <div className="text-xs text-neutral-500">
+                          <div className="text-xs text-neutral-500 dark:text-muted-foreground">
                             {s.campaign || s.campaignName}
                           </div>
                         )}
@@ -462,7 +462,7 @@ export default function FinanceDonationsPage() {
                             />
                           </a>
                         ) : (
-                          <DollarSign className="w-5 h-5 text-neutral-300" />
+                          <DollarSign className="w-5 h-5 text-neutral-300 dark:text-muted-foreground" />
                         )}
                       </td>
                       <td className="py-3 px-3 whitespace-nowrap">{formatDate(toDate(s))}</td>

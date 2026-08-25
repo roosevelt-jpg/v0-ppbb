@@ -260,20 +260,20 @@ export default function AdminCmsVolunteerPage() {
     multiline = false
   ) => (
     <div className="space-y-1">
-      <label className="block text-xs uppercase tracking-wider text-neutral-500">{label}</label>
+      <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">{label}</label>
       {multiline ? (
         <textarea
           value={pc[key]}
           onChange={(e) => updatePage(key, e.target.value)}
           rows={4}
-          className="w-full border border-neutral-300 rounded px-3 py-2.5 text-sm"
+          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
         />
       ) : (
         <input
           type="text"
           value={pc[key]}
           onChange={(e) => updatePage(key, e.target.value)}
-          className="w-full border border-neutral-300 rounded px-3 py-2.5 text-sm"
+          className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
         />
       )}
     </div>
@@ -289,8 +289,8 @@ export default function AdminCmsVolunteerPage() {
     return (
       <AdminPageLayout title="Volunteer & Ads" subtitle="Loading…">
         <div className="w-full max-w-3xl space-y-4 animate-pulse">
-          <div className="h-8 w-48 bg-neutral-200 rounded" />
-          <div className="h-24 w-full bg-neutral-100 rounded" />
+          <div className="h-8 w-48 bg-neutral-200 dark:bg-muted rounded" />
+          <div className="h-24 w-full bg-neutral-100 dark:bg-muted rounded" />
         </div>
       </AdminPageLayout>
     )
@@ -302,7 +302,7 @@ export default function AdminCmsVolunteerPage() {
       subtitle="Volunteer form config, /events gallery & volunteer banner, homepage advertising"
     >
       <div className="max-w-3xl w-full min-w-0 space-y-6">
-        <div className="flex flex-wrap gap-2 border-b border-neutral-200 pb-3">
+        <div className="flex flex-wrap gap-2 border-b border-neutral-200 dark:border-border pb-3">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -311,7 +311,7 @@ export default function AdminCmsVolunteerPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-semibold ${
                 tab === t.id
                   ? 'bg-black text-white'
-                  : 'bg-white text-black border border-neutral-300'
+                  : 'bg-white dark:bg-card text-black dark:text-foreground border border-neutral-300 dark:border-border'
               }`}
             >
               {t.label}
@@ -337,7 +337,7 @@ export default function AdminCmsVolunteerPage() {
         )}
 
         {tab === 'page' ? (
-          <div className="space-y-4 rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6">
+          <div className="space-y-4 rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6">
             {field('eyebrow', 'Eyebrow')}
             {field('headline', 'Headline')}
             {field('body', 'Body', true)}
@@ -353,16 +353,16 @@ export default function AdminCmsVolunteerPage() {
             />
 
             <div className="space-y-3">
-              <label className="block text-xs uppercase tracking-wider text-neutral-500">
+              <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">
                 Pillar options
               </label>
               <ul className="space-y-2">
                 {pc.pillarOptions.map((pillar, index) => (
                   <li
                     key={`${pillar}-${index}`}
-                    className="flex items-center gap-2 border border-neutral-200 rounded px-3 py-2"
+                    className="flex items-center gap-2 border border-neutral-200 dark:border-border rounded px-3 py-2"
                   >
-                    <span className="flex-1 text-sm text-neutral-800 min-w-0 break-words">
+                    <span className="flex-1 text-sm text-neutral-800 dark:text-foreground min-w-0 break-words">
                       {pillar}
                     </span>
                     <button
@@ -382,7 +382,7 @@ export default function AdminCmsVolunteerPage() {
                   value={newPillar}
                   onChange={(e) => setNewPillar(e.target.value)}
                   placeholder="Add a pillar"
-                  className="flex-1 border border-neutral-300 rounded px-3 py-2.5 text-sm"
+                  className="flex-1 border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault()
@@ -404,10 +404,10 @@ export default function AdminCmsVolunteerPage() {
         ) : null}
 
         {tab === 'events' ? (
-          <div className="space-y-6 rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6">
+          <div className="space-y-6 rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6">
             <div>
-              <h2 className="font-semibold text-lg text-neutral-900">Events volunteer banner</h2>
-              <p className="text-sm text-neutral-600 mt-1">
+              <h2 className="font-semibold text-lg text-neutral-900 dark:text-foreground">Events volunteer banner</h2>
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
                 Vertical advertising banner beside the /events calendar. Image or GIF. Button links
                 to the volunteer form.
               </p>
@@ -421,21 +421,21 @@ export default function AdminCmsVolunteerPage() {
               onChange={(url) => updateEventsPage('volunteerBannerImageURL', url)}
             />
             <div className="space-y-1">
-              <label className="block text-xs uppercase tracking-wider text-neutral-500">
+              <label className="block text-xs uppercase tracking-wider text-neutral-500 dark:text-muted-foreground">
                 Banner link (volunteer form)
               </label>
               <input
                 type="text"
                 value={epc.volunteerBannerHref || ''}
                 onChange={(e) => updateEventsPage('volunteerBannerHref', e.target.value)}
-                className="w-full border border-neutral-300 rounded px-3 py-2.5 text-sm"
+                className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
                 placeholder="/forms/volunteer-unpaid-service"
               />
             </div>
 
-            <div className="border-t border-neutral-200 pt-5 space-y-3">
-              <h2 className="font-semibold text-lg text-neutral-900">Hero photo gallery</h2>
-              <p className="text-sm text-neutral-600">
+            <div className="border-t border-neutral-200 dark:border-border pt-5 space-y-3">
+              <h2 className="font-semibold text-lg text-neutral-900 dark:text-foreground">Hero photo gallery</h2>
+              <p className="text-sm text-neutral-600 dark:text-muted-foreground">
                 Previous event images as slides beside the Events hero text (max 12). Also falls
                 back to photos attached to published events.
               </p>
@@ -489,8 +489,8 @@ export default function AdminCmsVolunteerPage() {
               />
             </div>
 
-            <div className="border-t border-neutral-200 pt-5 space-y-3">
-              <h2 className="font-semibold text-lg text-neutral-900">Optional events side ad</h2>
+            <div className="border-t border-neutral-200 dark:border-border pt-5 space-y-3">
+              <h2 className="font-semibold text-lg text-neutral-900 dark:text-foreground">Optional events side ad</h2>
               <CmsImageUpload
                 label="Side ad image / GIF"
                 value={epc.adBannerImageURL || ''}
@@ -503,7 +503,7 @@ export default function AdminCmsVolunteerPage() {
                 type="text"
                 value={epc.adBannerHref || ''}
                 onChange={(e) => updateEventsPage('adBannerHref', e.target.value)}
-                className="w-full border border-neutral-300 rounded px-3 py-2.5 text-sm"
+                className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
                 placeholder="Ad link (optional)"
               />
             </div>
@@ -517,7 +517,7 @@ export default function AdminCmsVolunteerPage() {
               <Save className="w-3.5 h-3.5" />
               {saving ? 'Saving…' : 'Save events banners & gallery'}
             </button>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-neutral-500 dark:text-muted-foreground">
               Full Events page copy still lives under{' '}
               <Link href="/admin/cms/events" className="underline">
                 CMS → Events Config
@@ -529,12 +529,12 @@ export default function AdminCmsVolunteerPage() {
 
         {tab === 'ads' ? (
           <div className="space-y-6">
-            <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6 space-y-4">
+            <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6 space-y-4">
               <div>
-                <h2 className="font-semibold text-lg text-neutral-900">
+                <h2 className="font-semibold text-lg text-neutral-900 dark:text-foreground">
                   Admin free homepage banner
                 </h2>
-                <p className="text-sm text-neutral-600 mt-1">
+                <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
                   Upload an image or GIF for the horizontal homepage strip. Free for admin. Businesses
                   pay via Business Portal → Advertise (Stripe).
                 </p>
@@ -551,14 +551,14 @@ export default function AdminCmsVolunteerPage() {
                 type="text"
                 value={freeAd.href}
                 onChange={(e) => setFreeAd((p) => ({ ...p, href: e.target.value }))}
-                className="w-full border border-neutral-300 rounded px-3 py-2.5 text-sm"
+                className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
                 placeholder="Click-through URL (optional)"
               />
               <input
                 type="text"
                 value={freeAd.alt}
                 onChange={(e) => setFreeAd((p) => ({ ...p, alt: e.target.value }))}
-                className="w-full border border-neutral-300 rounded px-3 py-2.5 text-sm"
+                className="w-full border border-neutral-300 dark:border-border rounded px-3 py-2.5 text-sm"
                 placeholder="Alt text"
               />
               <div className="flex flex-wrap gap-2">
@@ -584,8 +584,8 @@ export default function AdminCmsVolunteerPage() {
                 ) : null}
               </div>
               {homeBanner.enabled && homeBanner.imageURL ? (
-                <div className="rounded border border-neutral-200 overflow-hidden">
-                  <p className="text-xs uppercase tracking-wide text-neutral-500 px-3 py-2 bg-neutral-50">
+                <div className="rounded border border-neutral-200 dark:border-border overflow-hidden">
+                  <p className="text-xs uppercase tracking-wide text-neutral-500 dark:text-muted-foreground px-3 py-2 bg-neutral-50 dark:bg-muted">
                     Currently live
                   </p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -598,24 +598,24 @@ export default function AdminCmsVolunteerPage() {
               ) : null}
             </div>
 
-            <div className="rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-6 space-y-4">
+            <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 sm:p-6 space-y-4">
               <div>
-                <h2 className="font-semibold text-lg text-neutral-900">
+                <h2 className="font-semibold text-lg text-neutral-900 dark:text-foreground">
                   Business paid requests
                 </h2>
-                <p className="text-sm text-neutral-600 mt-1">
+                <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1">
                   After Stripe payment, publish to the homepage strip. Same queue as CMS →
                   Advertising.
                 </p>
               </div>
               {adRows.length === 0 ? (
-                <p className="text-sm text-neutral-500">No advertising requests yet.</p>
+                <p className="text-sm text-neutral-500 dark:text-muted-foreground">No advertising requests yet.</p>
               ) : (
                 <div className="space-y-3">
                   {adRows.map((r) => (
                     <div
                       key={r.id}
-                      className="flex flex-col sm:flex-row gap-3 items-start border border-neutral-200 rounded-lg p-3"
+                      className="flex flex-col sm:flex-row gap-3 items-start border border-neutral-200 dark:border-border rounded-lg p-3"
                     >
                       {r.imageURL ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -627,7 +627,7 @@ export default function AdminCmsVolunteerPage() {
                       ) : null}
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm">{r.businessName || 'Business'}</p>
-                        <p className="text-xs text-neutral-500 capitalize">
+                        <p className="text-xs text-neutral-500 dark:text-muted-foreground capitalize">
                           {String(r.status || '').replace(/_/g, ' ')}
                           {r.adminFree ? ' · free admin' : ` · AED ${r.priceAed ?? 500}`}
                         </p>

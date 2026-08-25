@@ -22,13 +22,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="w-full min-w-0">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-neutral-900">Admin Dashboard</h1>
-      <p className="text-sm text-neutral-600 mb-6 sm:mb-10">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-neutral-900 dark:text-foreground">Admin Dashboard</h1>
+      <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-6 sm:mb-10">
         Welcome to the Passive Blessings admin panel
       </p>
 
       {cards.length === 0 ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-muted-foreground">
           No dashboard shortcuts for your current permissions. Use the sidebar to open areas you can
           access.
         </p>
@@ -37,10 +37,10 @@ export default function AdminDashboard() {
           {cards.map((card) => (
             <div
               key={card.href}
-              className="bg-white p-4 sm:p-6 rounded-lg border border-neutral-200 min-w-0"
+              className="bg-white dark:bg-card p-4 sm:p-6 rounded-lg border border-neutral-200 dark:border-border min-w-0"
             >
-              <h3 className="text-sm font-medium text-neutral-600 mb-2">{card.title}</h3>
-              <p className="text-xl sm:text-2xl font-bold text-neutral-900 break-words">{card.label}</p>
+              <h3 className="text-sm font-medium text-neutral-600 dark:text-muted-foreground mb-2">{card.title}</h3>
+              <p className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-foreground break-words">{card.label}</p>
               <Link
                 href={card.href}
                 className="inline-flex items-center mt-4 text-sm font-medium text-blue-600 hover:underline"

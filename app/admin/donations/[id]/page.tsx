@@ -95,7 +95,7 @@ export default function DonationDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
         <div className="text-center">Loading donation details...</div>
       </div>
     )
@@ -103,14 +103,14 @@ export default function DonationDetailPage() {
 
   if (error && !donation) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
         <div className="text-center text-red-600">{error}</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
+    <div className="min-h-screen bg-neutral-50 dark:bg-muted p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -121,8 +121,8 @@ export default function DonationDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Donation Details</h1>
-            <p className="text-neutral-600">View and manage donation information</p>
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-foreground">Donation Details</h1>
+            <p className="text-neutral-600 dark:text-muted-foreground">View and manage donation information</p>
           </div>
         </div>
 
@@ -141,66 +141,66 @@ export default function DonationDetailPage() {
         )}
 
         {/* Donation Info */}
-        <Card className="p-6 border border-neutral-200">
-          <h2 className="text-xl font-bold text-neutral-900 mb-4">Donation Information</h2>
+        <Card className="p-6 border border-neutral-200 dark:border-border">
+          <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground mb-4">Donation Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Donor Name</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Donor Name</label>
               <input
                 type="text"
                 name="donorName"
                 value={formData.donorName || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Amount (AED)</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Amount (AED)</label>
               <input
                 type="number"
                 name="amount"
                 value={formData.amount || 0}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Currency</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Currency</label>
               <input
                 type="text"
                 name="currency"
                 value={formData.currency || 'AED'}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Date</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Date</label>
               <input
                 type="date"
                 name="date"
                 value={formData.date || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Status</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Status</label>
               <select
                 name="status"
                 value={formData.status || ''}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               >
                 <option value="pending">Pending</option>
                 <option value="verified">Verified</option>
@@ -210,41 +210,41 @@ export default function DonationDetailPage() {
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Purpose/Notes</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-foreground mb-1">Purpose/Notes</label>
             <textarea
               name="purpose"
               value={formData.purpose || ''}
               onChange={handleInputChange}
               rows={3}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
             />
           </div>
         </Card>
 
         {/* Donation Stats */}
         <div className="grid grid-cols-3 gap-4">
-          <Card className="p-4 border border-neutral-200">
+          <Card className="p-4 border border-neutral-200 dark:border-border">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="w-4 h-4 text-green-600" />
-              <span className="text-sm text-neutral-600">Amount</span>
+              <span className="text-sm text-neutral-600 dark:text-muted-foreground">Amount</span>
             </div>
-            <p className="text-2xl font-bold text-neutral-900">
+            <p className="text-2xl font-bold text-neutral-900 dark:text-foreground">
               {formData.currency || 'AED'} {formData.amount || 0}
             </p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
+          <Card className="p-4 border border-neutral-200 dark:border-border">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-neutral-600">Date</span>
+              <span className="text-sm text-neutral-600 dark:text-muted-foreground">Date</span>
             </div>
-            <p className="text-sm font-semibold text-neutral-900">
+            <p className="text-sm font-semibold text-neutral-900 dark:text-foreground">
               {formData.date ? new Date(formData.date).toLocaleDateString() : 'N/A'}
             </p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
+          <Card className="p-4 border border-neutral-200 dark:border-border">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="w-4 h-4 text-orange-600" />
-              <span className="text-sm text-neutral-600">Status</span>
+              <span className="text-sm text-neutral-600 dark:text-muted-foreground">Status</span>
             </div>
             <p className="text-lg font-semibold text-orange-600 capitalize">{formData.status || 'Pending'}</p>
           </Card>
@@ -252,8 +252,8 @@ export default function DonationDetailPage() {
 
         {/* Receipt Info */}
         {donation?.receiptUrl && (
-          <Card className="p-6 border border-neutral-200">
-            <h3 className="font-semibold text-neutral-900 mb-2">Receipt Generated</h3>
+          <Card className="p-6 border border-neutral-200 dark:border-border">
+            <h3 className="font-semibold text-neutral-900 dark:text-foreground mb-2">Receipt Generated</h3>
             <a
               href={donation.receiptUrl}
               target="_blank"

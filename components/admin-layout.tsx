@@ -62,6 +62,7 @@ import {
   Megaphone,
   Newspaper,
   Ticket,
+  Gauge,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -78,6 +79,7 @@ import { clearAdminMfaSession } from '@/lib/admin-mfa-session'
 export const adminMenuItems = [
   // Dashboard & System
   { label: 'Overview', href: '/admin', icon: BarChart3, group: 'Dashboard' },
+  { label: 'Dashboard Plus', href: '/admin/dashboard-enhanced', icon: Gauge, group: 'Dashboard' },
   { label: 'System Health', href: '/admin/health', icon: Activity, group: 'Dashboard' },
   { label: 'Analytics', href: '/admin/analytics', icon: TrendingUp, group: 'Dashboard' },
   { label: 'Reporting', href: '/admin/reporting', icon: FileChartColumn, group: 'Dashboard' },
@@ -218,9 +220,9 @@ export function AdminSidebar({
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-52 min-h-screen flex-col border-r" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+      <aside className="hidden lg:flex w-52 min-h-screen flex-col border-r bg-card border-border">
         {/* Logo */}
-        <div className="px-4 py-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da' }}>
+        <div className="px-4 py-4 border-b border-border flex flex-col items-center justify-center">
           <SiteLogo background="light" variant="sidebar" href="/admin" />
         </div>
 
@@ -230,9 +232,9 @@ export function AdminSidebar({
             <div key={group}>
               {/* Group Header */}
               <div className="px-3 py-2 mb-2">
-                <h3 
-                  className="text-xs font-semibold tracking-wider"
-                  style={{ color: '#888888', textTransform: 'uppercase' }}
+                <h3
+                  className="text-xs font-semibold tracking-wider text-muted-foreground"
+                  style={{ textTransform: 'uppercase' }}
                 >
                   {group}
                 </h3>
@@ -249,8 +251,8 @@ export function AdminSidebar({
                       href={item.href}
                       className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-medium truncate transition-all duration-200 ${
                         isActive
-                          ? 'bg-[#111111] text-[#f7f6f2] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]'
-                          : 'text-[#333333] hover:bg-[#f0efeb] hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
+                          ? 'bg-foreground text-background hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]'
+                          : 'text-foreground/80 hover:bg-muted hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
                       }`}
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
@@ -287,9 +289,9 @@ export function AdminSidebar({
             onClick={() => setMobileMenuOpen(false)}
           />
           {/* Drawer */}
-          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-64 flex flex-col border-r overflow-y-auto z-30" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-64 flex flex-col border-r overflow-y-auto z-30 bg-card border-border">
             {/* Logo */}
-            <div className="px-4 py-4 border-b flex flex-col items-center justify-center" style={{ borderColor: '#e4e1da' }}>
+            <div className="px-4 py-4 border-b border-border flex flex-col items-center justify-center">
               <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
                 <SiteLogo background="light" variant="sidebar" linked={false} />
               </Link>
@@ -301,9 +303,9 @@ export function AdminSidebar({
                 <div key={group}>
                   {/* Group Header */}
                   <div className="px-3 py-2 mb-2">
-                    <h3 
-                      className="text-xs font-semibold tracking-wider"
-                      style={{ color: '#888888', textTransform: 'uppercase' }}
+                    <h3
+                      className="text-xs font-semibold tracking-wider text-muted-foreground"
+                      style={{ textTransform: 'uppercase' }}
                     >
                       {group}
                     </h3>
@@ -321,8 +323,8 @@ export function AdminSidebar({
                           onClick={() => setMobileMenuOpen(false)}
                           className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-medium transition-all duration-200 ${
                             isActive
-                              ? 'bg-[#111111] text-[#f7f6f2] hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]'
-                              : 'text-[#333333] hover:bg-[#f0efeb] hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
+                              ? 'bg-foreground text-background hover:shadow-[0_2px_10px_rgba(0,0,0,0.25)]'
+                              : 'text-foreground/80 hover:bg-muted hover:shadow-[0_2px_10px_rgba(0,0,0,0.12)]'
                           }`}
                         >
                           <Icon className="h-4 w-4 flex-shrink-0" />

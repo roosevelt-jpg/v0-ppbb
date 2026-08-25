@@ -22,16 +22,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const {
-      codeId,
-      code,
-      email,
-      userId,
-      firstName,
-      lastName,
-      role: bodyRole,
-      permissions: bodyPermissions,
-    } = body
+    const { codeId, code, email, userId, firstName, lastName } = body
 
     const authHeader = request.headers.get('authorization') || ''
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
@@ -99,11 +90,12 @@ export async function POST(request: NextRequest) {
       // Recovery: continue to upsert admin profile
     }
 
-    const role =
-      (typeof bodyRole === 'string' && bodyRole) || invite.adminRole || 'admin'
-    const permissions = Array.isArray(bodyPermissions)
-      ? bodyPermissions
-      : invite.permissions
+    // Role/permissions always come from the invite itself, never the
+    // request body — otherwise redeeming any invite with an elevated role
+    // in the POST body would grant that role regardless of what the invite
+    // actually specified.
+    const role = invite.adminRole || 'admin'
+    const permissions = invite.permissions
 
     // Profile FIRST — never burn the invite before users/{uid} exists
     await upsertAdminUserProfile({

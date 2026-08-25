@@ -362,28 +362,28 @@ export default function ModerationPage() {
       <div className="space-y-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          <Card className="p-4 border border-neutral-200">
-            <p className="text-xs text-neutral-600 uppercase tracking-wide">Total Reports</p>
-            <p className="text-2xl font-bold text-neutral-900 mt-1">{stats.totalReports}</p>
+          <Card className="p-4 border border-neutral-200 dark:border-border">
+            <p className="text-xs text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">Total Reports</p>
+            <p className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-1">{stats.totalReports}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
-            <p className="text-xs text-neutral-600 uppercase tracking-wide">Pending</p>
+          <Card className="p-4 border border-neutral-200 dark:border-border">
+            <p className="text-xs text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">Pending</p>
             <p className="text-2xl font-bold text-amber-600 mt-1">{stats.pendingReports}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
-            <p className="text-xs text-neutral-600 uppercase tracking-wide">Approved</p>
+          <Card className="p-4 border border-neutral-200 dark:border-border">
+            <p className="text-xs text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">Approved</p>
             <p className="text-2xl font-bold text-green-600 mt-1">{stats.approvedReports}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
-            <p className="text-xs text-neutral-600 uppercase tracking-wide">Rejected</p>
+          <Card className="p-4 border border-neutral-200 dark:border-border">
+            <p className="text-xs text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">Rejected</p>
             <p className="text-2xl font-bold text-red-600 mt-1">{stats.rejectedReports}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
-            <p className="text-xs text-neutral-600 uppercase tracking-wide">Flagged Users</p>
+          <Card className="p-4 border border-neutral-200 dark:border-border">
+            <p className="text-xs text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">Flagged Users</p>
             <p className="text-2xl font-bold text-orange-600 mt-1">{stats.flaggedUsers}</p>
           </Card>
-          <Card className="p-4 border border-neutral-200">
-            <p className="text-xs text-neutral-600 uppercase tracking-wide">Flagged Content</p>
+          <Card className="p-4 border border-neutral-200 dark:border-border">
+            <p className="text-xs text-neutral-600 dark:text-muted-foreground uppercase tracking-wide">Flagged Content</p>
             <p className="text-2xl font-bold text-purple-600 mt-1">{stats.flaggedContent}</p>
           </Card>
         </div>
@@ -425,7 +425,7 @@ export default function ModerationPage() {
                 placeholder="Search reports..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="flex-1 min-w-[200px] px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                className="flex-1 min-w-[200px] px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
               />
             </div>
 
@@ -433,12 +433,12 @@ export default function ModerationPage() {
             {selectedReports.size > 0 && (
               <Card className="p-4 border-2 border-blue-200 bg-blue-50">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="font-medium text-neutral-900">{selectedReports.size} reports selected</span>
+                  <span className="font-medium text-neutral-900 dark:text-foreground">{selectedReports.size} reports selected</span>
                   <div className="flex gap-2">
                     <select
                       value={bulkAction || ''}
                       onChange={(e) => setBulkAction(e.target.value as any)}
-                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                      className="px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
                     >
                       <option value="">Choose action...</option>
                       <option value="approve">Approve All</option>
@@ -465,12 +465,12 @@ export default function ModerationPage() {
             {/* Reports List */}
             <div className="space-y-3">
               {loading ? (
-                <Card className="p-8 border border-neutral-200 text-center text-neutral-600">Loading...</Card>
+                <Card className="p-8 border border-neutral-200 dark:border-border text-center text-neutral-600 dark:text-muted-foreground">Loading...</Card>
               ) : filteredReports.length === 0 ? (
-                <Card className="p-8 border border-neutral-200 text-center text-neutral-600">No reports found</Card>
+                <Card className="p-8 border border-neutral-200 dark:border-border text-center text-neutral-600 dark:text-muted-foreground">No reports found</Card>
               ) : (
                 filteredReports.map(report => (
-                  <Card key={report.id} className="p-4 border border-neutral-200">
+                  <Card key={report.id} className="p-4 border border-neutral-200 dark:border-border">
                     <div className="flex items-start gap-4">
                       <input
                         type="checkbox"
@@ -481,7 +481,7 @@ export default function ModerationPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Flag className="w-4 h-4 text-red-600" />
-                          <span className="font-semibold text-neutral-900">{report.reason}</span>
+                          <span className="font-semibold text-neutral-900 dark:text-foreground">{report.reason}</span>
                           <span className={`text-xs px-2 py-1 rounded font-medium ${
                             report.status === 'pending' ? 'bg-amber-100 text-amber-800' :
                             report.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -490,8 +490,8 @@ export default function ModerationPage() {
                             {report.status}
                           </span>
                         </div>
-                        <p className="text-sm text-neutral-600 mb-1">{report.description}</p>
-                        <div className="flex gap-4 text-xs text-neutral-500">
+                        <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-1">{report.description}</p>
+                        <div className="flex gap-4 text-xs text-neutral-500 dark:text-muted-foreground">
                           <span>Reported by: {report.reportedBy}</span>
                           <span>{formatDistanceToNow(report.createdAt?.toDate?.() || new Date(), { addSuffix: true })}</span>
                         </div>
@@ -526,18 +526,18 @@ export default function ModerationPage() {
         {activeTab === 'users' && (
           <div className="space-y-3">
             {flaggedUsers.length === 0 ? (
-              <Card className="p-8 border border-neutral-200 text-center text-neutral-600">No flagged users</Card>
+              <Card className="p-8 border border-neutral-200 dark:border-border text-center text-neutral-600 dark:text-muted-foreground">No flagged users</Card>
             ) : (
               flaggedUsers.map(user => (
-                <Card key={user.id} className="p-4 border border-neutral-200">
+                <Card key={user.id} className="p-4 border border-neutral-200 dark:border-border">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <AdminUserCell user={user} />
-                      <p className="text-sm text-neutral-600 mt-1 break-all">{user.email || 'Not provided'}</p>
-                      <p className="text-sm text-neutral-600">
+                      <p className="text-sm text-neutral-600 dark:text-muted-foreground mt-1 break-all">{user.email || 'Not provided'}</p>
+                      <p className="text-sm text-neutral-600 dark:text-muted-foreground">
                         Phone: {formatUserPhoneDisplay(user)}
                       </p>
-                      <p className="text-xs text-neutral-500 mt-2">Flags: {user.flags || 0}</p>
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-2">Flags: {user.flags || 0}</p>
                     </div>
                     <button
                       onClick={() => handleBanUser(user.id)}
@@ -557,17 +557,17 @@ export default function ModerationPage() {
         {activeTab === 'content' && (
           <div className="space-y-3">
             {flaggedContent.length === 0 ? (
-              <Card className="p-8 border border-neutral-200 text-center text-neutral-600">No flagged content</Card>
+              <Card className="p-8 border border-neutral-200 dark:border-border text-center text-neutral-600 dark:text-muted-foreground">No flagged content</Card>
             ) : (
               flaggedContent.map(content => (
-                <Card key={content.id} className="p-4 border border-neutral-200">
+                <Card key={content.id} className="p-4 border border-neutral-200 dark:border-border">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <MessageSquare className="w-4 h-4 text-neutral-600" />
-                        <h4 className="font-semibold text-neutral-900 line-clamp-2">{content.text}</h4>
+                        <MessageSquare className="w-4 h-4 text-neutral-600 dark:text-muted-foreground" />
+                        <h4 className="font-semibold text-neutral-900 dark:text-foreground line-clamp-2">{content.text}</h4>
                       </div>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-neutral-500 dark:text-muted-foreground">
                         By: {content.authorName} • {formatDistanceToNow(content.createdAt?.toDate?.() || new Date(), { addSuffix: true })}
                       </p>
                     </div>
@@ -601,16 +601,16 @@ export default function ModerationPage() {
             </div>
 
             {communityMessages.length === 0 ? (
-              <Card className="p-8 border border-neutral-200 text-center text-neutral-600">No flagged community messages</Card>
+              <Card className="p-8 border border-neutral-200 dark:border-border text-center text-neutral-600 dark:text-muted-foreground">No flagged community messages</Card>
             ) : (
               <div className="space-y-3">
                 {(communityFilter === 'all' ? communityMessages : communityMessages.filter(m => m.moderationStatus === 'pending')).map(message => (
-                  <Card key={message.id} className="p-4 border border-neutral-200">
+                  <Card key={message.id} className="p-4 border border-neutral-200 dark:border-border">
                     <div className="flex items-start gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Flag className="w-4 h-4 text-red-600" />
-                          <span className="font-semibold text-neutral-900">{message.content.slice(0, 100)}</span>
+                          <span className="font-semibold text-neutral-900 dark:text-foreground">{message.content.slice(0, 100)}</span>
                           <span className={`text-xs px-2 py-1 rounded font-medium ${
                             message.moderationStatus === 'pending' ? 'bg-amber-100 text-amber-800' :
                             message.moderationStatus === 'approved' ? 'bg-green-100 text-green-800' :
@@ -619,8 +619,8 @@ export default function ModerationPage() {
                             {message.moderationStatus}
                           </span>
                         </div>
-                        <p className="text-sm text-neutral-600 mb-2">{message.content}</p>
-                        <div className="flex gap-4 text-xs text-neutral-500">
+                        <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-2">{message.content}</p>
+                        <div className="flex gap-4 text-xs text-neutral-500 dark:text-muted-foreground">
                           <span>By: {message.authorName}</span>
                           <span>Community: {message.communityId}</span>
                           <span>{formatDistanceToNow(message.createdAt?.toDate?.() || new Date(), { addSuffix: true })}</span>
@@ -655,7 +655,7 @@ export default function ModerationPage() {
         {/* Banned Words Tab */}
         {activeTab === 'banned-words' && (
           <div className="space-y-4">
-            <Card className="p-6 border border-neutral-200">
+            <Card className="p-6 border border-neutral-200 dark:border-border">
               <h3 className="text-lg font-semibold mb-4">Add Banned Word</h3>
               <div className="flex gap-2">
                 <input
@@ -664,7 +664,7 @@ export default function ModerationPage() {
                   value={newBannedWord}
                   onChange={(e) => setNewBannedWord(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddBannedWord()}
-                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                  className="flex-1 px-3 py-2 border border-neutral-300 dark:border-border rounded-lg text-sm"
                 />
                 <button
                   onClick={handleAddBannedWord}
@@ -676,9 +676,9 @@ export default function ModerationPage() {
             </Card>
 
             <div className="space-y-2">
-              <h3 className="font-semibold text-neutral-900">Current Banned Words ({bannedWords.length})</h3>
+              <h3 className="font-semibold text-neutral-900 dark:text-foreground">Current Banned Words ({bannedWords.length})</h3>
               {bannedWords.length === 0 ? (
-                <Card className="p-4 border border-neutral-200 text-center text-neutral-600">No banned words configured</Card>
+                <Card className="p-4 border border-neutral-200 dark:border-border text-center text-neutral-600 dark:text-muted-foreground">No banned words configured</Card>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {bannedWords.map(word => (

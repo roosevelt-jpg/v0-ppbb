@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
 import {
@@ -11,6 +11,8 @@ import {
 } from '@/lib/partners-page-config'
 import { PartnershipInquiryForm } from '@/components/partners/partnership-inquiry-form'
 import { DashboardPageShell, DashboardSkeleton } from '@/components/dashboard-states'
+import { getPartnershipRequestById } from '@/lib/business-queries'
+import type { PartnershipRequest } from '@/lib/types'
 
 function isCharityCategory(id: string, label: string) {
   const i = id.toLowerCase()
@@ -37,11 +39,14 @@ function partnershipTypeFromCategory(id: string, label: string): string {
  */
 export default function BusinessPartnershipNewPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const resubmitId = searchParams.get('resubmit')
   const { user, loading: authLoading } = useAuth()
   const [config, setConfig] = useState(DEFAULT_PARTNERS_CONFIG)
   const [ready, setReady] = useState(false)
   const [inquiryCategoryId, setInquiryCategoryId] = useState('')
   const [formKey, setFormKey] = useState(0)
+  const [resubmitSource, setResubmitSource] = useState<PartnershipRequest | null>(null)
 
   useEffect(() => {
     if (authLoading) return
@@ -49,6 +54,13 @@ export default function BusinessPartnershipNewPage() {
       router.replace('/login')
     }
   }, [user, authLoading, router])
+
+  useEffect(() => {
+    if (!resubmitId) return
+    getPartnershipRequestById(resubmitId)
+      .then((req) => setResubmitSource(req))
+      .catch(() => setResubmitSource(null))
+  }, [resubmitId])
 
   useEffect(
     () =>
@@ -62,10 +74,16 @@ export default function BusinessPartnershipNewPage() {
   const categories = config.pageConfig.inquiryCategories
 
   useEffect(() => {
-    if (categories.length > 0 && !inquiryCategoryId) {
-      setInquiryCategoryId(categories[0].id)
-    }
-  }, [categories, inquiryCategoryId])
+    if (categories.length === 0 || inquiryCategoryId) return
+    // Resuming a declined request: restore the category it was originally
+    // submitted under, when one still matches.
+    const matching = resubmitSource
+      ? categories.find(
+          (c) => partnershipTypeFromCategory(c.id, c.label) === resubmitSource.type
+        )
+      : null
+    setInquiryCategoryId((matching || categories[0]).id)
+  }, [categories, inquiryCategoryId, resubmitSource])
 
   const selected = useMemo(
     () => categories.find((c) => c.id === inquiryCategoryId) || categories[0],
@@ -104,13 +122,17 @@ export default function BusinessPartnershipNewPage() {
     <DashboardPageShell title="New partnership request">
       <div className="max-w-xl space-y-4">
         <div>
-          <h1 className="font-headline text-2xl font-bold text-foreground">New partnership request</h1>
+          <h1 className="font-headline text-2xl font-bold text-foreground">
+            {resubmitId ? 'Edit & resubmit request' : 'New partnership request'}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Same fields as the public Partners inquiry — submissions stay consistent.
+            {resubmitId
+              ? 'Your previous submission has been loaded below — make changes and resubmit.'
+              : 'Same fields as the public Partners inquiry — submissions stay consistent.'}
           </p>
         </div>
         {!ready ? (
-          <div className="h-64 animate-pulse bg-neutral-100 rounded-lg" />
+          <div className="h-64 animate-pulse bg-neutral-100 dark:bg-neutral-800 rounded-lg" />
         ) : (
           <>
             <div>
@@ -124,7 +146,7 @@ export default function BusinessPartnershipNewPage() {
                   setInquiryCategoryId(e.target.value)
                   setFormKey((k) => k + 1)
                 }}
-                className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg font-body text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] dark:border-border rounded-lg font-body text-sm bg-white dark:bg-card focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -135,7 +157,7 @@ export default function BusinessPartnershipNewPage() {
             </div>
 
             {charitySelected ? (
-              <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+              <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Charity support uses our beneficiary request form.
                 </p>
@@ -148,7 +170,7 @@ export default function BusinessPartnershipNewPage() {
                 </button>
               </div>
             ) : linkedFormHref ? (
-              <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+              <div className="rounded-lg border border-[#e4e1da] dark:border-border bg-white dark:bg-card p-4 space-y-3">
                 <p className="text-sm text-muted-foreground">
                   This category opens the form linked in Admin → CMS → Partners.
                 </p>
@@ -162,11 +184,16 @@ export default function BusinessPartnershipNewPage() {
               </div>
             ) : (
               <PartnershipInquiryForm
-                key={`${inquiryCategoryId}-${formKey}`}
+                key={`${inquiryCategoryId}-${formKey}-${resubmitSource?.id || ''}`}
                 type={inquiryType}
                 submitLabel={pc.inquiryCTA}
                 showContactLink={false}
                 cancelHref="/business/partnerships"
+                initialValues={
+                  resubmitSource
+                    ? { title: resubmitSource.title, description: resubmitSource.description }
+                    : undefined
+                }
                 onSuccess={() => {
                   setTimeout(() => router.push('/business/partnerships'), 1500)
                 }}
