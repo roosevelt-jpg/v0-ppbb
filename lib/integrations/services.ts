@@ -213,6 +213,33 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     ],
     help: 'Emails are sent with display name "Passive Blessings". Verify your from address in SendGrid.',
   },
+  anthropic: {
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    category: 'messaging',
+    description: 'AI chatbot & newsletter generation (Claude)',
+    icon: '🤖',
+    fields: [
+      {
+        name: 'apiKey',
+        label: 'API Key',
+        type: 'password',
+        required: true,
+        encrypt: true,
+        placeholder: 'sk-ant-...',
+        help: 'Used by the PB Assistant chatbot and admin AI tools. Keys from console.anthropic.com',
+      },
+      {
+        name: 'model',
+        label: 'Chat model (optional)',
+        type: 'text',
+        required: false,
+        placeholder: 'claude-3-5-haiku-20241022',
+        help: 'Leave blank for the default Haiku model used by the support chatbot.',
+      },
+    ],
+    docs: 'https://docs.anthropic.com/en/api/getting-started',
+  },
   gmailSmtp: {
     id: 'gmailSmtp',
     name: 'Gmail SMTP',

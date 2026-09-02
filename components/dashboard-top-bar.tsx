@@ -53,23 +53,23 @@ export function DashboardTopBar({
 
   return (
     <header
-      className={`shrink-0 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 sm:px-6 py-3 ${className}`}
+      className={`shrink-0 border-b border-neutral-200 bg-white px-4 sm:px-6 py-3 ${className}`}
     >
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-4 gap-y-1 min-h-[40px]">
         {/* Page title — far left */}
-        <h1 className="font-headline text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate sm:justify-self-start">
+        <h1 className="font-headline text-base sm:text-lg font-bold text-neutral-900 truncate sm:justify-self-start">
           {title}
         </h1>
 
         {/* Date/time — centered */}
-        <p className="hidden sm:block text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 text-center whitespace-nowrap px-2">
+        <p className="hidden sm:block text-xs sm:text-sm text-neutral-500 text-center whitespace-nowrap px-2">
           {dateTime || '…'}
         </p>
 
         {/* Welcome + toolbar — right */}
         <div className="flex items-center gap-2 sm:gap-3 justify-end sm:justify-self-end col-span-1 sm:col-span-1">
           {welcome ? (
-            <p className="hidden md:block text-sm text-neutral-600 dark:text-neutral-300 whitespace-nowrap truncate max-w-[200px]">
+            <p className="hidden md:block text-sm text-neutral-600 whitespace-nowrap truncate max-w-[200px]">
               {welcome}
             </p>
           ) : null}

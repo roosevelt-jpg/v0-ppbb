@@ -473,7 +473,7 @@ export default function BusinessOpportunities() {
             </ul>
             <table className="hidden lg:table w-full min-w-[960px] text-left text-sm">
               <thead>
-                <tr className="bg-neutral-900 text-white">
+                <tr className="bg-[#f7f6f2] text-neutral-600 border-b border-neutral-200">
                   <th className="px-4 py-3 font-semibold">Job Title</th>
                   <th className="px-2 py-3 font-semibold text-center">All</th>
                   <th className="px-2 py-3 font-semibold text-center">Pending</th>

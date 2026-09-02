@@ -105,8 +105,8 @@ export function MemberSidebar({
                 onClick={() => setOpen(false)}
                 className={`flex items-center gap-3 px-4 py-2.5 min-h-[44px] rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-secondary'
+                    ? 'bg-[#f0efeb] text-[#111111] font-semibold border border-[#e4e1da]'
+                    : 'text-neutral-700 hover:bg-neutral-100'
                 }`}
               >
                 <Icon className="h-4 w-4" />

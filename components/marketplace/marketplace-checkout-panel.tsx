@@ -9,6 +9,7 @@ import {
   type MarketplacePaymentMethod,
 } from '@/lib/marketplace-shipping'
 import { BUTTON_PRIMARY, BUTTON_OUTLINE } from '@/lib/admin-design-system'
+import { StripeCardForm } from '@/components/payments/stripe-card-form'
 
 type Props = {
   offerId: string
@@ -101,10 +102,17 @@ export function MarketplaceCheckoutPanel({
   const [sameAsInvoice, setSameAsInvoice] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [stripeCheckout, setStripeCheckout] = useState<{
+    clientSecret: string
+    publishableKey: string
+    paymentIntentId: string
+    orderId: string
+  } | null>(null)
 
   const submit = async () => {
     setBusy(true)
     setError('')
+    setStripeCheckout(null)
     try {
       const token = await getToken()
       if (!token) throw new Error('Sign in required')
@@ -123,6 +131,17 @@ export function MarketplaceCheckoutPanel({
       })
       const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Checkout failed')
+
+      if (json.embedded && json.clientSecret && json.publishableKey) {
+        setStripeCheckout({
+          clientSecret: json.clientSecret,
+          publishableKey: json.publishableKey,
+          paymentIntentId: json.paymentIntentId,
+          orderId: json.orderId,
+        })
+        setBusy(false)
+        return
+      }
 
       if (json.checkoutUrl) {
         window.location.href = json.checkoutUrl
@@ -235,6 +254,44 @@ export function MarketplaceCheckoutPanel({
         partner. You receive an auto-generated invoice (and receipt when paid by card).
       </p>
 
+      {stripeCheckout ? (
+        <StripeCardForm
+          publishableKey={stripeCheckout.publishableKey}
+          clientSecret={stripeCheckout.clientSecret}
+          submitLabel={`Pay ${currency} ${price.toFixed(2)}`}
+          onSuccess={async (paymentIntentId) => {
+            setBusy(true)
+            try {
+              const confirmRes = await fetch('/api/payments/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'marketplace',
+                  paymentIntentId,
+                  orderId: stripeCheckout.orderId,
+                }),
+              })
+              const confirmJson = await confirmRes.json()
+              if (!confirmRes.ok || !confirmJson.success) {
+                throw new Error(confirmJson.error || 'Payment confirmation failed')
+              }
+              const docs =
+                confirmJson.invoiceUrl || confirmJson.receiptUrl
+                  ? ' Invoice/receipt generated — see My Orders.'
+                  : ''
+              onSuccessMessage(`Order placed.${docs}`)
+              setStripeCheckout(null)
+              onCancel()
+            } catch (e: unknown) {
+              setError(e instanceof Error ? e.message : 'Payment failed')
+            } finally {
+              setBusy(false)
+            }
+          }}
+          onError={(msg) => setError(msg)}
+        />
+      ) : null}
+
       {error ? (
         <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
           {error}
@@ -242,13 +299,15 @@ export function MarketplaceCheckoutPanel({
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => void submit()} className={BUTTON_PRIMARY}>
-          {busy
-            ? 'Working…'
-            : paymentMethod === 'card'
-              ? 'Continue to card payment'
-              : 'Place order'}
-        </button>
+        {!stripeCheckout ? (
+          <button type="button" disabled={busy} onClick={() => void submit()} className={BUTTON_PRIMARY}>
+            {busy
+              ? 'Working…'
+              : paymentMethod === 'card'
+                ? 'Continue to card payment'
+                : 'Place order'}
+          </button>
+        ) : null}
         <button type="button" disabled={busy} onClick={onCancel} className={BUTTON_OUTLINE}>
           Cancel
         </button>

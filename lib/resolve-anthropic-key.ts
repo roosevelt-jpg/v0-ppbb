@@ -21,3 +21,17 @@ export async function resolveAnthropicApiKey(): Promise<string | null> {
 
   return null
 }
+
+/** Optional chat model from integrations (defaults to Haiku). */
+export async function resolveAnthropicModel(): Promise<string | null> {
+  try {
+    const integration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'anthropic')
+    const model = integration?.credentials?.model
+    if (typeof model === 'string' && model.trim()) {
+      return model.trim()
+    }
+  } catch (error) {
+    console.warn('[v0] Could not load Anthropic model setting:', error)
+  }
+  return null
+}

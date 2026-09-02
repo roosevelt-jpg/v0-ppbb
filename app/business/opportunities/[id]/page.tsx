@@ -701,7 +701,7 @@ export default function BusinessOpportunityDetailPage() {
                   <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-border bg-white dark:bg-card">
                     <table className="w-full min-w-[720px] text-left text-sm">
                       <thead>
-                        <tr className="bg-neutral-900 text-white">
+                        <tr className="bg-[#f7f6f2] text-neutral-600 border-b border-neutral-200">
                           <th className="px-4 py-3 font-semibold">Candidate Name</th>
                           <th className="px-4 py-3 font-semibold">Career Summary</th>
                           <th className="px-4 py-3 font-semibold text-center">Actions</th>

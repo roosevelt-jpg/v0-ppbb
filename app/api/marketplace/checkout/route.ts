@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/admin-access-server'
+import { getAdminDb } from '@/lib/firebase-admin'
 import { getStripeClient } from '@/lib/get-stripe-client'
+import { createEmbeddedPaymentIntent } from '@/lib/stripe-embedded'
 import {
   createPendingMarketplaceOrder,
   loadMarketplaceOffer,
@@ -90,53 +92,54 @@ export async function POST(request: NextRequest) {
     const currency = String(offer.currency || 'AED').toLowerCase()
     const title = String(offer.title || 'Marketplace listing')
     const businessId = String(offer.businessId || '')
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin
-
-    const stripe = await getStripeClient()
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency,
-            unit_amount: Math.round(amount * 100),
-            product_data: {
-              name: title,
-              metadata: { offerId, businessId },
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${appUrl}/marketplace/${offerId}?status=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/marketplace/${offerId}?status=canceled`,
-      metadata: {
-        type: 'marketplace',
-        offerId,
-        userId: uid,
-        businessId,
-        paymentMethod: 'card',
-      },
-    })
-
-    if (!session.url) {
-      return NextResponse.json({ success: false, error: 'Failed to create checkout session' }, { status: 500 })
-    }
 
     const orderId = await createPendingMarketplaceOrder({
       offerId,
       buyerId: uid,
-      stripeSessionId: session.id,
+      stripePaymentIntentId: 'pending',
       invoiceAddress,
       deliveryAddress,
       paymentMethod: 'card',
     })
 
+    const embedded = await createEmbeddedPaymentIntent({
+      amountMinor: Math.round(amount * 100),
+      currency,
+      description: title,
+      metadata: {
+        type: 'marketplace',
+        offerId,
+        userId: uid,
+        businessId,
+        orderId,
+        paymentMethod: 'card',
+      },
+    })
+
+    const stripe = await getStripeClient()
+    await stripe.paymentIntents.update(embedded.paymentIntentId, {
+      metadata: {
+        type: 'marketplace',
+        offerId,
+        userId: uid,
+        businessId,
+        orderId,
+        paymentMethod: 'card',
+      },
+    })
+
+    const db = getAdminDb()
+    await db.collection('orders').doc(orderId).update({
+      stripePaymentIntentId: embedded.paymentIntentId,
+      updatedAt: new Date(),
+    })
+
     return NextResponse.json({
       success: true,
-      checkoutUrl: session.url,
-      sessionId: session.id,
+      embedded: true,
+      clientSecret: embedded.clientSecret,
+      publishableKey: embedded.publishableKey,
+      paymentIntentId: embedded.paymentIntentId,
       orderId,
       paymentMethod: 'card',
     })

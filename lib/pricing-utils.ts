@@ -20,6 +20,17 @@ export function getPlanIncludedItems(
   return merged
 }
 
+/** Short list for cards — max items, prefers shorter feature lines. */
+export function getPlanHighlightItems(
+  plan: Pick<PricingPlan, 'features' | 'benefits'>,
+  max = 4
+): string[] {
+  const items = getPlanIncludedItems(plan)
+  return items
+    .sort((a, b) => a.length - b.length)
+    .slice(0, Math.max(1, max))
+}
+
 function normalizeTierKey(value: string): string {
   return value.trim().toLowerCase()
 }

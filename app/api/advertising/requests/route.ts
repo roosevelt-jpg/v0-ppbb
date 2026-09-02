@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { verifyIdToken } from '@/lib/admin-access-server'
-import { getStripeClient } from '@/lib/get-stripe-client'
-import { getPublicAppUrl } from '@/lib/payment-completion'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 
 export const runtime = 'nodejs'
@@ -262,25 +260,11 @@ export async function PUT(request: NextRequest) {
     }
 
     const priceAed = Number(data.priceAed) || DEFAULT_PRICE_AED
-    const stripe = await getStripeClient()
-    const base = getPublicAppUrl()
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      line_items: [
-        {
-          price_data: {
-            currency: 'aed',
-            unit_amount: Math.round(priceAed * 100),
-            product_data: {
-              name: 'Homepage advertising banner',
-              description: 'Horizontal promo placement on Passive Blessings homepage',
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${base}/business/advertise?status=success&id=${id}`,
-      cancel_url: `${base}/business/advertise?status=canceled&id=${id}`,
+    const { createEmbeddedPaymentIntent } = await import('@/lib/stripe-embedded')
+    const embedded = await createEmbeddedPaymentIntent({
+      amountMinor: Math.round(priceAed * 100),
+      currency: 'aed',
+      description: 'Homepage advertising banner',
       metadata: {
         type: 'advertising',
         advertisingRequestId: id,
@@ -289,12 +273,19 @@ export async function PUT(request: NextRequest) {
     })
 
     await snap.ref.update({
-      stripeSessionId: session.id,
+      stripePaymentIntentId: embedded.paymentIntentId,
       status: 'pending_payment',
       updatedAt: Timestamp.now(),
     })
 
-    return NextResponse.json({ success: true, checkoutUrl: session.url })
+    return NextResponse.json({
+      success: true,
+      embedded: true,
+      clientSecret: embedded.clientSecret,
+      publishableKey: embedded.publishableKey,
+      paymentIntentId: embedded.paymentIntentId,
+      advertisingRequestId: id,
+    })
   } catch (error) {
     console.error('[advertising/checkout]', error)
     return NextResponse.json(
