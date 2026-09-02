@@ -94,7 +94,7 @@ const req = https.request(options, (res) => {
         console.log('[v0] Role: super_admin');
         console.log('[v0] Permissions: All admin permissions granted');
         console.log('[v0]');
-        console.log('[v0] Login at: https://test.myflynai.com/admin/setup');
+        console.log('[v0] Login at: https://www.passive-blessings.com/admin/setup');
         console.log('[v0] Access Code: PB-ADMIN-2025');
         console.log('[v0]');
       } else {

@@ -9,12 +9,10 @@ import {
   incrementTicketSold,
 } from '@/lib/event-luma-server'
 
+import { getSiteUrl } from '@/lib/site-metadata'
+
 export function getPublicAppUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://www.passive-blessings.com'
-  ).replace(/\/$/, '')
+  return getSiteUrl()
 }
 
 /**

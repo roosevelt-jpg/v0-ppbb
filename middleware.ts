@@ -7,7 +7,18 @@ import {
   ROBOTS_NOINDEX_HEADER,
 } from '@/lib/bot-protection'
 
+const DEPRECATED_HOSTS = new Set(['test.myflynai.com'])
+
 export function middleware(request: NextRequest) {
+  const host = request.headers.get('host')?.split(':')[0]?.toLowerCase() ?? ''
+
+  if (DEPRECATED_HOSTS.has(host)) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.protocol = 'https:'
+    redirectUrl.host = 'www.passive-blessings.com'
+    return NextResponse.redirect(redirectUrl, 308)
+  }
+
   const { pathname } = request.nextUrl
   const userAgent = getUserAgent(request)
 

@@ -127,7 +127,7 @@ function testLogin(email, password, apiKey) {
           console.log('[v0] Password: ' + password);
           console.log('[v0] Access Code: PB-ADMIN-2025');
           console.log('[v0]');
-          console.log('[v0] Go to: https://test.myflynai.com/admin/setup');
+          console.log('[v0] Go to: https://www.passive-blessings.com/admin/setup');
           console.log('[v0]');
         } else {
           console.log('[v0] ❌ Login failed:', response.error?.message);

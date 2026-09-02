@@ -85,7 +85,7 @@ async function setupTestAdmin() {
     console.log('═'.repeat(60))
 
     console.log('\n=== HOW TO LOGIN ===')
-    console.log('1. Go to: https://test.myflynai.com/admin/setup')
+    console.log('1. Go to: https://www.passive-blessings.com/admin/setup')
     console.log(`2. Enter Access Code: ${accessCode}`)
     console.log('3. Click Continue')
     console.log('4. Click Next (Step 2 - Verification confirmed)')

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { getSiteUrl } from '@/lib/site-metadata'
 
 const AI_BOT_AGENTS = [
   'GPTBot',
@@ -21,8 +22,7 @@ const AI_BOT_AGENTS = [
 const PRIVATE_PATHS = ['/admin/', '/dashboard/', '/business/', '/sponsor/', '/api/']
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://www.passive-blessings.com'
+  const baseUrl = getSiteUrl()
 
   return {
     rules: [
