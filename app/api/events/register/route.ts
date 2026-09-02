@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       const origin =
         request.headers.get('origin') ||
         process.env.NEXT_PUBLIC_SITE_URL ||
-        'https://test.myflynai.com'
+        'https://www.passive-blessings.com'
       if (userEmail) {
         const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
         void sendEventRegistrationEmail({
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
         request.headers.get('origin') ||
         process.env.NEXT_PUBLIC_SITE_URL ||
         process.env.NEXT_PUBLIC_APP_URL ||
-        'https://test.myflynai.com'
+        'https://www.passive-blessings.com'
       const currency = (ticket.currency || (event.currency as string) || 'AED').toString()
       const description = `${String(event.title || 'Event')} — ${ticket.name}`
 
@@ -371,7 +371,7 @@ export async function POST(request: NextRequest) {
     const origin =
       request.headers.get('origin') ||
       process.env.NEXT_PUBLIC_SITE_URL ||
-      'https://test.myflynai.com'
+      'https://www.passive-blessings.com'
     if (userEmail) {
       const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
       void sendEventRegistrationEmail({

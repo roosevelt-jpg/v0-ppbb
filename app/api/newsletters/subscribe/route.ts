@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, collection, addDoc } from 'firebase-admin/firestore'
-import { getAdminApp } from '@/lib/firebase-admin'
+import { collection, addDoc } from 'firebase-admin/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const db = getAdminDb()
     const body = await request.json()
     const { email } = body
 

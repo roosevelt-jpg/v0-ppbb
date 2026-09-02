@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, doc, getDoc, updateDoc, deleteDoc, getDocs, collection } from 'firebase-admin/firestore'
-import { getAdminApp } from '@/lib/firebase-admin'
+import { doc, getDoc, updateDoc, deleteDoc } from 'firebase-admin/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
 
-const db = getFirestore(getAdminApp())
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const db = getAdminDb()
     const docRef = doc(db, 'newsletters', params.id)
     const docSnap = await getDoc(docRef)
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
       return NextResponse.json(
         { error: 'Newsletter not found' },
         { status: 404 }
@@ -45,11 +47,12 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const db = getAdminDb()
     const body = await request.json()
     const { title, subject, content, template, status, scheduledFor } = body
 
     const docRef = doc(db, 'newsletters', params.id)
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updatedAt: new Date(),
     }
 
@@ -80,6 +83,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const db = getAdminDb()
     const docRef = doc(db, 'newsletters', params.id)
     await deleteDoc(docRef)
 

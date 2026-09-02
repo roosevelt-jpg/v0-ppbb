@@ -22,7 +22,7 @@ const PRIVATE_PATHS = ['/admin/', '/dashboard/', '/business/', '/sponsor/', '/ap
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://test.myflynai.com'
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://www.passive-blessings.com'
 
   return {
     rules: [

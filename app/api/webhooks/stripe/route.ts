@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
             if (email) {
               const eventSnap = await db.collection('events').doc(session.metadata.eventId).get()
               const title = (eventSnap.data()?.title as string) || 'Event'
-              const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+              const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.passive-blessings.com'
               const updated = (await regRef.get()).data()
               const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
               void sendEventRegistrationEmail({

@@ -27,7 +27,7 @@ export function verifyUnsubscribeToken(email: string, token: string): boolean {
 }
 
 export function buildUnsubscribeUrl(email: string): string {
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.passive-blessings.com'
   const normalized = encodeURIComponent(email.trim().toLowerCase())
   const token = buildUnsubscribeToken(email)
   return `${site}/newsletters/unsubscribe?email=${normalized}&token=${token}`
