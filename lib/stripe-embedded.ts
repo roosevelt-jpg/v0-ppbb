@@ -77,7 +77,9 @@ export async function createEmbeddedMembershipCheckout(opts: {
   const { clientSecretForIncompleteSubscription, membershipRecurringInterval } = await import(
     '@/lib/stripe-membership-billing'
   )
+  const { planTrialDays } = await import('@/lib/pricing-utils')
   const interval = membershipRecurringInterval(opts.plan.billingPeriod)
+  const trialDays = planTrialDays(opts.plan)
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: priceId }],
@@ -87,6 +89,7 @@ export async function createEmbeddedMembershipCheckout(opts: {
       save_default_payment_method: 'on_subscription',
       payment_method_types: ['card'],
     },
+    trial_period_days: trialDays,
     expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
     metadata: {
       type: 'membership',

@@ -23,6 +23,7 @@ import {
   formatPlanPriceDetailed,
   getPlanIncludedItems,
   inferSignupTypeFromPlan,
+  planTrialCopy,
   resolveActiveGateway,
   type ConfiguredGateways,
 } from '@/lib/pricing-utils'
@@ -718,8 +719,12 @@ export default function SignupClient() {
         onOpenChange={(open) => {
           if (!open) setActiveIntent(null)
         }}
-        title="Enter card details"
-        description="Your card is processed securely by Stripe — it's never seen by our servers."
+        title={activeIntent?.mode === 'setup' ? 'Save your card' : 'Enter card details'}
+        description={
+          activeIntent?.mode === 'setup'
+            ? 'Your card is saved securely. You will not be charged until the free period ends, then billing starts automatically.'
+            : "Your card is processed securely by Stripe — it's never seen by our servers."
+        }
         maxWidth="26rem"
         compact={false}
       >
@@ -783,7 +788,7 @@ export default function SignupClient() {
                       Choose your membership
                     </h2>
                     <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>
-                      Membership is paid — pick a package first. You&apos;ll create your account next, then subscribe at the end.
+                      Pick a package first. If the plan has a free trial, you add a card at the end — you won&apos;t be charged until the trial is over.
                     </p>
                     {plansLoading ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', padding: '1.5rem 0' }}>
@@ -832,6 +837,11 @@ export default function SignupClient() {
                                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                   <p style={{ fontWeight: 700, fontSize: '1rem', color: '#111', margin: 0 }}>{amount}</p>
                                   <p style={{ fontSize: '0.7rem', color: '#888', margin: 0 }}>/{period}</p>
+                                  {planTrialCopy(plan) ? (
+                                    <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#111', marginTop: '0.25rem', marginBottom: 0, maxWidth: '9rem' }}>
+                                      {planTrialCopy(plan)}
+                                    </p>
+                                  ) : null}
                                 </div>
                               </div>
                               {items.length > 0 && (
@@ -1293,7 +1303,7 @@ export default function SignupClient() {
                       Select your tier & subscribe
                     </h2>
                     <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>
-                      Your account is ready. Confirm a membership tier and complete payment to activate access.
+                      Confirm your plan. If it includes a free trial, you only save a card now — the first charge is after the trial.
                     </p>
                     {plans.map((plan) => {
                       const { amount, period } = formatPlanPriceDetailed(plan)
@@ -1326,6 +1336,11 @@ export default function SignupClient() {
                             <div style={{ textAlign: 'right', flexShrink: 0 }}>
                               <p style={{ fontWeight: 700, margin: 0 }}>{amount}</p>
                               <p style={{ fontSize: '0.7rem', color: '#888', margin: 0 }}>/{period}</p>
+                              {planTrialCopy(plan) ? (
+                                <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#111', marginTop: '0.25rem', marginBottom: 0, maxWidth: '8rem' }}>
+                                  {planTrialCopy(plan)}
+                                </p>
+                              ) : null}
                             </div>
                           </div>
                         </div>
@@ -1439,8 +1454,10 @@ export default function SignupClient() {
                     {checkingOut ? (
                       <>
                         <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-                        Redirecting to payment…
+                        Redirecting…
                       </>
+                    ) : planTrialCopy(selectedPlan || {}) ? (
+                      'Add card — start free period'
                     ) : (
                       'Subscribe & pay'
                     )}

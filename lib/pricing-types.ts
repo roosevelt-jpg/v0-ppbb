@@ -12,6 +12,12 @@ export interface PricingPlan {
   icon?: string // emoji or icon name
   color?: string // hex color for UI
   paymentGateway?: 'stripe' | 'paypal' | 'ziina' // which gateway collects payment for this plan
+  /**
+   * Signup / subscribe free period. 0 = charge immediately.
+   * 1–3 = save card, grant access now, first charge after that many months.
+   * Stripe only.
+   */
+  trialMonths?: 0 | 1 | 2 | 3
   stripeProductId?: string
   stripePriceId?: string
   paypalPlanId?: string

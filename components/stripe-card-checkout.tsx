@@ -37,7 +37,7 @@ export function StripeCardCheckout({
   mode,
   onSuccess,
   onCancel,
-  submitLabel = 'Subscribe',
+  submitLabel = mode === 'setup' ? 'Save card — start free period' : 'Subscribe',
 }: StripeCardCheckoutProps) {
   const stripePromise = React.useMemo(() => getStripePromise(publishableKey), [publishableKey])
 

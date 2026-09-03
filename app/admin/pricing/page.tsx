@@ -9,7 +9,7 @@ import { AdminSelect } from '@/components/admin-select'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
 import { PricingPlan } from '@/lib/pricing-types'
-import { getPlanIncludedItems, formatPlanPriceDetailed } from '@/lib/pricing-utils'
+import { getPlanIncludedItems, formatPlanPriceDetailed, planTrialCopy } from '@/lib/pricing-utils'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { Plus, Edit2, Trash2, Save, X, Check } from 'lucide-react'
 import { BUTTON_PRIMARY, INPUT_STYLE, TEXTAREA_STYLE } from '@/lib/admin-design-system'
@@ -23,6 +23,7 @@ const EMPTY_FORM: Partial<PricingPlan> = {
   price: 0,
   currency: 'USD',
   billingPeriod: 'monthly',
+  trialMonths: 0,
   features: [],
   benefits: [],
   icon: '🎯',
@@ -101,6 +102,10 @@ export default function PricingManagementPage() {
         price: formData.price,
         currency: formData.currency || 'USD',
         billingPeriod: formData.billingPeriod || 'monthly',
+        trialMonths:
+          formData.trialMonths === 1 || formData.trialMonths === 2 || formData.trialMonths === 3
+            ? formData.trialMonths
+            : 0,
         features: consolidatedFeatures,
         benefits: [],
         icon: formData.icon || '🎯',
@@ -281,6 +286,29 @@ export default function PricingManagementPage() {
             </div>
 
             <div>
+              <label className="block text-sm font-medium mb-1">Free trial before first charge</label>
+              <AdminSelect
+                value={String(formData.trialMonths === 1 || formData.trialMonths === 2 || formData.trialMonths === 3 ? formData.trialMonths : 0)}
+                onChange={(v) =>
+                  setFormData({
+                    ...formData,
+                    trialMonths: (Number(v) === 1 || Number(v) === 2 || Number(v) === 3 ? Number(v) : 0) as PricingPlan['trialMonths'],
+                  })
+                }
+                aria-label="Free trial months"
+                options={[
+                  { value: '0', label: 'None — charge immediately' },
+                  { value: '1', label: '1 month free, then auto-bill' },
+                  { value: '2', label: '2 months free, then auto-bill' },
+                  { value: '3', label: '3 months free, then auto-bill' },
+                ]}
+              />
+              <p className="text-xs text-neutral-500 dark:text-muted-foreground mt-1">
+                Signup: pick this plan, add a card, no charge until the trial ends. Requires Stripe.
+              </p>
+            </div>
+
+            <div>
               <label className="block text-sm font-medium mb-1">Payment Gateway</label>
               <AdminSelect
                 value={(formData as PricingPlan).paymentGateway || 'stripe'}
@@ -442,6 +470,11 @@ export default function PricingManagementPage() {
                   <span className="text-3xl font-headline font-extrabold text-neutral-900 dark:text-foreground">{amount}</span>
                   <span className="text-sm text-neutral-500 dark:text-muted-foreground font-body">/{period}</span>
                 </p>
+                {planTrialCopy(plan) ? (
+                  <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 mt-2">
+                    {planTrialCopy(plan)}
+                  </p>
+                ) : null}
               </div>
 
               <div className="flex-1 space-y-2.5 mb-6">

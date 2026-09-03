@@ -123,6 +123,30 @@ export function formatPlanPriceDetailed(
   }
 }
 
+/** Admin-configured free months before the first auto-debit (0–3). */
+export function normalizePlanTrialMonths(value: unknown): 0 | 1 | 2 | 3 {
+  const n = Math.floor(Number(value))
+  if (n === 1 || n === 2 || n === 3) return n
+  return 0
+}
+
+/** Calendar days Stripe should trial before charging the saved card. */
+export function planTrialDays(plan: Pick<PricingPlan, 'trialMonths'>): number | undefined {
+  const months = normalizePlanTrialMonths(plan.trialMonths)
+  if (!months) return undefined
+  const now = new Date()
+  const end = new Date(now)
+  end.setMonth(end.getMonth() + months)
+  return Math.max(1, Math.round((end.getTime() - now.getTime()) / 86400000))
+}
+
+export function planTrialCopy(plan: Pick<PricingPlan, 'trialMonths'>): string | null {
+  const months = normalizePlanTrialMonths(plan.trialMonths)
+  if (!months) return null
+  const period = months === 1 ? 'month' : 'months'
+  return `First ${months} ${period} free — add a card now, billed after the trial`
+}
+
 export type ConfiguredGateways = { stripe: boolean; paypal: boolean; ziina: boolean }
 
 /**
