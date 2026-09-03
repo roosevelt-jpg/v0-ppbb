@@ -374,6 +374,7 @@ export async function completeMarketplacePurchase(
       userId: pushTarget,
       subject: mode === 'enquire' ? 'New marketplace enquiry' : 'New marketplace order',
       purpose: mode === 'enquire' ? 'Marketplace enquiry notification' : 'Marketplace order notification',
+      department: 'marketplace',
       headline: mode === 'enquire' ? 'New enquiry' : 'New order',
       bodyHtml: paragraphs(
         'Assalamu alaikum,',
@@ -393,6 +394,7 @@ export async function completeMarketplacePurchase(
         userId: params.buyerId,
         subject: `Order confirmed: ${title}`,
         purpose: 'Marketplace order confirmation',
+        department: 'marketplace',
         headline: 'Order confirmed',
         bodyHtml: paragraphs(
           'Assalamu alaikum,',

@@ -116,13 +116,16 @@ export async function POST(req: NextRequest) {
               const title = (eventSnap.data()?.title as string) || 'Event'
               const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.passive-blessings.com'
               const updated = (await regRef.get()).data()
-              const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
-              void sendEventRegistrationEmail({
+              const currency = String(eventSnap.data()?.currency || 'AED')
+              const { sendEventPaymentConfirmationEmail } = await import('@/lib/event-confirmation-email')
+              void sendEventPaymentConfirmationEmail({
                 to: email,
                 eventTitle: title,
                 eventUrl: `${site}/events/${session.metadata.eventId}/confirmation?registrationId=${session.metadata.registrationId}`,
-                status: String(updated?.status || 'confirmed'),
+                amount,
+                currency,
                 checkInCode: (updated?.checkInCode as string) || null,
+                paymentReference: session.id,
               })
             }
           }
@@ -130,18 +133,38 @@ export async function POST(req: NextRequest) {
           session.metadata?.type === 'advertising' &&
           session.metadata.advertisingRequestId
         ) {
-          await db
-            .collection('advertisingRequests')
-            .doc(session.metadata.advertisingRequestId)
-            .set(
-              {
-                status: 'paid',
-                paidAt: Timestamp.now(),
-                stripeSessionId: session.id,
-                updatedAt: Timestamp.now(),
-              },
-              { merge: true }
-            )
+          const adRef = db.collection('advertisingRequests').doc(session.metadata.advertisingRequestId)
+          const adSnap = await adRef.get()
+          const ad = adSnap.data() || {}
+          const amount =
+            typeof session.amount_total === 'number'
+              ? session.amount_total / 100
+              : typeof ad.priceAed === 'number'
+                ? ad.priceAed
+                : 0
+
+          await adRef.set(
+            {
+              status: 'paid',
+              paidAt: Timestamp.now(),
+              stripeSessionId: session.id,
+              updatedAt: Timestamp.now(),
+            },
+            { merge: true }
+          )
+
+          const businessId = String(ad.businessId || session.metadata.businessId || '').trim()
+          if (businessId) {
+            const { notifyAdvertisingPaymentConfirmed } = await import('@/lib/advertising-payment-email')
+            notifyAdvertisingPaymentConfirmed({
+              businessId,
+              businessName: String(ad.businessName || ''),
+              amount,
+              currency: String(ad.currency || 'AED'),
+              paymentReference: session.id,
+              requestId: session.metadata.advertisingRequestId,
+            })
+          }
         }
         // Membership no longer goes through Checkout Sessions at all — an
         // embedded card form on our own page creates the Subscription

@@ -124,18 +124,33 @@ export async function POST(request: NextRequest) {
       }
 
       const db = getAdminDb()
-      await db
-        .collection('advertisingRequests')
-        .doc(advertisingRequestId)
-        .set(
-          {
-            status: 'paid',
-            paidAt: Timestamp.now(),
-            stripePaymentIntentId: paymentIntentId,
-            updatedAt: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        )
+      const adRef = db.collection('advertisingRequests').doc(advertisingRequestId)
+      const adSnap = await adRef.get()
+      const ad = adSnap.data() || {}
+      const amountMajor = (pi.amount_received || pi.amount) / 100
+
+      await adRef.set(
+        {
+          status: 'paid',
+          paidAt: Timestamp.now(),
+          stripePaymentIntentId: paymentIntentId,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      )
+
+      const businessId = String(ad.businessId || meta.businessId || '').trim()
+      if (businessId) {
+        const { notifyAdvertisingPaymentConfirmed } = await import('@/lib/advertising-payment-email')
+        notifyAdvertisingPaymentConfirmed({
+          businessId,
+          businessName: String(ad.businessName || ''),
+          amount: amountMajor,
+          currency: String(ad.currency || pi.currency || 'AED').toUpperCase(),
+          paymentReference: paymentIntentId,
+          requestId: advertisingRequestId,
+        })
+      }
 
       return NextResponse.json({ success: true })
     }

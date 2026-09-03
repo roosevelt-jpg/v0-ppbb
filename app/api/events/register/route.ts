@@ -235,6 +235,16 @@ export async function POST(request: NextRequest) {
         }).catch((err) => console.error('[referral] event conversion:', err))
       }
 
+      if (userEmail) {
+        const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+        void sendEventRegistrationEmail({
+          to: userEmail,
+          eventTitle: String(event.title || 'Event'),
+          eventUrl: `${origin}/events/${eventId}`,
+          status: 'pending_payment',
+        })
+      }
+
       if (gateway === 'paypal') {
         const { resolvePayPalConfig } = await import('@/lib/resolve-paypal-config')
         const { createPayPalOrder } = await import('@/lib/paypal-client')

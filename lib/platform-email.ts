@@ -1,12 +1,17 @@
 /**
  * Branded transactional email via Gmail SMTP.
- * Layout: Logo → Greeting → Body → purpose + "PB Admin"
+ * Layout: Logo → Greeting → Body → department signature
  */
 
 import nodemailer from 'nodemailer'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getGmailSmtpConfig, getEmailBrandLogoUrl } from '@/lib/gmail-service'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
+import {
+  type EmailDepartmentKey,
+  type EmailSignature,
+  signatureFor,
+} from '@/lib/email-departments'
 import {
   emailParagraph,
   emailParagraphs,
@@ -22,6 +27,10 @@ export type SendBrandedEmailInput = {
   subject: string
   /** Short purpose line used in the signature (e.g. "New job application") */
   purpose: string
+  /** Department key for the signature block */
+  department?: EmailDepartmentKey
+  /** Full signature override (e.g. founder welcome from DB) */
+  signature?: EmailSignature
   /** Optional greeting line, e.g. "Hi Jordan," */
   greeting?: string
   /** @deprecated Prefer greeting + bodyHtml; still rendered as the first body line if set */
@@ -31,9 +40,27 @@ export type SendBrandedEmailInput = {
   cta?: BrandedEmailCta
 }
 
+function resolveSignature(input: Pick<SendBrandedEmailInput, 'purpose' | 'department' | 'signature'>): EmailSignature {
+  if (input.signature) return input.signature
+  if (input.department) return signatureFor(input.department, input.purpose)
+  return signatureFor('admin', input.purpose)
+}
+
+function signatureText(sig: EmailSignature): string[] {
+  return [
+    sig.department,
+    sig.purpose,
+    sig.signerName || '',
+    sig.signerTitle || '',
+    'Passive Blessings',
+  ].filter(Boolean)
+}
+
 export function renderBrandedEmailHtml(opts: {
   logoUrl: string
   purpose: string
+  department?: EmailDepartmentKey
+  signature?: EmailSignature
   greeting?: string
   headline?: string
   bodyHtml: string
@@ -47,11 +74,14 @@ export function renderBrandedEmailHtml(opts: {
   }
   bodyParts.push(opts.bodyHtml)
 
+  const signature = resolveSignature(opts)
+
   return renderSimpleEmailHtml({
     logoUrl: opts.logoUrl,
     greeting: opts.greeting,
     bodyHtml: bodyParts.join(''),
     purpose: opts.purpose,
+    signature,
     cta: opts.cta,
   })
 }
@@ -95,9 +125,12 @@ export async function sendBrandedEmail(
 
   try {
     const logoUrl = await resolveLogoUrl()
+    const signature = resolveSignature(input)
     const html = renderBrandedEmailHtml({
       logoUrl,
       purpose: input.purpose,
+      department: input.department,
+      signature: input.signature,
       greeting: input.greeting,
       headline: input.headline,
       bodyHtml: input.bodyHtml,
@@ -108,8 +141,7 @@ export async function sendBrandedEmail(
       input.headline || '',
       input.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
       '',
-      input.purpose,
-      'PB Admin',
+      ...signatureText(signature),
     ]
       .filter(Boolean)
       .join('\n')
@@ -189,6 +221,8 @@ export async function sendBrandedEmailToUser(opts: {
   userId: string
   subject: string
   purpose: string
+  department?: EmailDepartmentKey
+  signature?: EmailSignature
   greeting?: string
   headline?: string
   bodyHtml: string
@@ -212,6 +246,8 @@ export async function sendBrandedEmailToUser(opts: {
       to: email,
       subject: opts.subject,
       purpose: opts.purpose,
+      department: opts.department,
+      signature: opts.signature,
       greeting: opts.greeting,
       headline: opts.headline,
       bodyHtml: opts.bodyHtml,
@@ -227,6 +263,8 @@ export function sendBrandedEmailToUserSafe(opts: {
   userId: string
   subject: string
   purpose: string
+  department?: EmailDepartmentKey
+  signature?: EmailSignature
   greeting?: string
   headline?: string
   bodyHtml: string

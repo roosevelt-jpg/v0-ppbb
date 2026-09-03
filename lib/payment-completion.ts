@@ -193,13 +193,16 @@ export async function completeEventTicketPayment(params: {
     const eventSnap = await db.collection('events').doc(params.eventId).get()
     const title = (eventSnap.data()?.title as string) || 'Event'
     const updated = (await regRef.get()).data()
-    const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
-    void sendEventRegistrationEmail({
+    const currency = String(eventSnap.data()?.currency || 'AED')
+    const { sendEventPaymentConfirmationEmail } = await import('@/lib/event-confirmation-email')
+    void sendEventPaymentConfirmationEmail({
       to: email,
       eventTitle: title,
       eventUrl: confirmationUrl,
-      status: String(updated?.status || 'confirmed'),
+      amount,
+      currency,
       checkInCode: (updated?.checkInCode as string) || null,
+      paymentReference: params.paymentReference,
     })
   }
 

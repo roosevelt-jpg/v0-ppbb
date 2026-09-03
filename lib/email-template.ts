@@ -1,6 +1,8 @@
 /**
- * Shared short email layout: Logo → Greeting → Body → Signature
+ * Shared short email layout: Logo → Greeting → Body → Department signature
  */
+
+import type { EmailSignature } from '@/lib/email-departments'
 
 export function escapeEmailHtml(value: string): string {
   return String(value || '')
@@ -17,15 +19,23 @@ export type SimpleEmailCta = { label: string; url: string }
  * 1. Header (logo)
  * 2. Greeting
  * 3. Body
- * 4. Signature (purpose + PB Admin)
+ * 4. Signature (department + optional named signer)
  */
 export function renderSimpleEmailHtml(opts: {
   logoUrl: string
   greeting?: string
   bodyHtml: string
   purpose: string
+  signature?: EmailSignature
   cta?: SimpleEmailCta
 }): string {
+  const sig: EmailSignature = opts.signature || {
+    purpose: opts.purpose,
+    department: 'PB Admin',
+    signerName: 'Passive Blessings Admin',
+    signerTitle: 'Platform Administration',
+  }
+
   const greeting = opts.greeting?.trim()
     ? `<p style="margin:0 0 12px 0;font-size:15px;line-height:1.5;color:#111;">${escapeEmailHtml(opts.greeting.trim())}</p>`
     : ''
@@ -52,9 +62,12 @@ export function renderSimpleEmailHtml(opts: {
       </td>
     </tr>
     <tr>
-      <td style="padding:24px 0 0 0;font-size:14px;line-height:1.5;color:#555;">
-        <p style="margin:0 0 2px 0;">${escapeEmailHtml(opts.purpose)}</p>
-        <p style="margin:0;font-weight:700;color:#111;">PB Admin</p>
+      <td style="padding:24px 0 0 0;font-size:14px;line-height:1.5;color:#555;border-top:1px solid #e8e8e8;">
+        <p style="margin:0 0 4px 0;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.04em;">${escapeEmailHtml(sig.department)}</p>
+        <p style="margin:0 0 2px 0;">${escapeEmailHtml(sig.purpose)}</p>
+        ${sig.signerName ? `<p style="margin:8px 0 0 0;font-weight:700;color:#111;">${escapeEmailHtml(sig.signerName)}</p>` : ''}
+        ${sig.signerTitle ? `<p style="margin:2px 0 0 0;font-size:13px;color:#666;">${escapeEmailHtml(sig.signerTitle)}</p>` : ''}
+        <p style="margin:12px 0 0 0;font-size:12px;color:#888;">Passive Blessings</p>
       </td>
     </tr>
   </table>
