@@ -35,7 +35,14 @@ export async function POST(request: NextRequest) {
     if (type === 'membership' || meta.type === 'membership') {
       const userId = String(body.userId || meta.userId || '')
       const planId = String(body.planId || meta.planId || '')
-      const subscriptionId = String(body.subscriptionId || meta.subscriptionId || paymentIntentId)
+      let subscriptionId = String(body.subscriptionId || meta.subscriptionId || '')
+
+      if (!subscriptionId.startsWith('sub_') && pi.invoice) {
+        const invoiceId = typeof pi.invoice === 'string' ? pi.invoice : pi.invoice.id
+        const invoice = await stripe.invoices.retrieve(invoiceId)
+        const { invoiceSubscriptionId } = await import('@/lib/stripe-membership-billing')
+        subscriptionId = invoiceSubscriptionId(invoice)
+      }
 
       if (!userId || !planId) {
         return NextResponse.json({ success: false, error: 'Missing membership context' }, { status: 400 })
@@ -45,7 +52,7 @@ export async function POST(request: NextRequest) {
         userId,
         planId,
         gateway: 'stripe',
-        paymentReference: subscriptionId,
+        paymentReference: subscriptionId.startsWith('sub_') ? subscriptionId : paymentIntentId,
         amountCents: pi.amount_received || pi.amount,
         currency: pi.currency,
       })

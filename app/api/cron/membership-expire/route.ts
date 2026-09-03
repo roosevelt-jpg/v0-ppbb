@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { notifyMembershipExpired } from '@/lib/member-notifications'
+import { getStripeClient } from '@/lib/get-stripe-client'
+import { subscriptionPeriodEndUnix } from '@/lib/stripe-membership-billing'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -36,19 +39,13 @@ function isAuthorized(request: NextRequest): boolean {
 }
 
 /**
- * Daily: downgrade any 'active' membership whose renewDate has passed.
+ * Daily: downgrade any 'active' membership whose renewDate has passed and
+ * that Stripe is no longer auto-debiting.
  *
- * membershipStatus never flips on its own — completeMembershipPayment only
- * ever sets it to 'active' (real payment or promo grant alike) and nothing
- * else touches it afterward. hasActiveMembership() in lib/membership-access
- * returns true the moment it sees status === 'active', before it even looks
- * at membershipRenewDate, so a promo-granted "free for 3 months" membership
- * was actually free forever in practice — access never lapsed on its own.
- * This is what actually enforces the renew date: no auto-charge, just a
- * clean downgrade to 'expired' (excluded by hasActiveMembership) plus a
- * "subscribe again" email. lib/pricing-utils.ts's dashboard "current plan"
- * check was updated alongside this to also require active status, so the
- * Subscribe button re-enables the moment this runs.
+ * Stripe memberships are charge_automatically subscriptions. Each successful
+ * cycle (invoice.paid) pushes membershipRenewDate forward. This job is the
+ * safety net for promo grants, PayPal/Ziina one-shots, and cancelled cards —
+ * not a substitute for Stripe's monthly charge.
  */
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
@@ -75,6 +72,55 @@ export async function GET(request: NextRequest) {
       if (!renewDate || renewDate >= now) {
         skipped++
         continue
+      }
+
+      let stripeSubId =
+        typeof data.stripeSubscriptionId === 'string' ? data.stripeSubscriptionId.trim() : ''
+      if (!stripeSubId.startsWith('sub_')) {
+        const subSnap = await db
+          .collection('subscriptions')
+          .where('userId', '==', doc.id)
+          .limit(8)
+          .get()
+        const live = subSnap.docs.find((d) => {
+          const s = d.data() || {}
+          const id = String(s.stripeSubscriptionId || d.id)
+          return id.startsWith('sub_') && ['active', 'trialing', 'past_due'].includes(String(s.status || ''))
+        })
+        if (live) {
+          stripeSubId = String(live.data()?.stripeSubscriptionId || live.id)
+        }
+      }
+      if (stripeSubId.startsWith('sub_') && data.membershipAutoRenew !== false) {
+        try {
+          const stripe = await getStripeClient()
+          const sub = await stripe.subscriptions.retrieve(stripeSubId)
+          if (['active', 'trialing', 'past_due'].includes(sub.status)) {
+            const periodEndUnix = subscriptionPeriodEndUnix(sub)
+            const periodEnd = periodEndUnix ? new Date(periodEndUnix * 1000) : null
+            if (periodEnd && periodEnd >= now) {
+              await doc.ref.set(
+                {
+                  membershipStatus: 'active',
+                  membershipRenewDate: periodEnd.toISOString(),
+                  membershipExpiredAt: FieldValue.delete(),
+                  updatedAt: Timestamp.now(),
+                },
+                { merge: true }
+              )
+              skipped++
+              continue
+            }
+            if (sub.status === 'past_due') {
+              skipped++
+              continue
+            }
+          }
+        } catch (err) {
+          console.error('[cron/membership-expire] Stripe lookup failed, keeping access:', stripeSubId, err)
+          skipped++
+          continue
+        }
       }
 
       await doc.ref.set(

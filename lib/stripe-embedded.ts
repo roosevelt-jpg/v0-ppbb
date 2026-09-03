@@ -19,34 +19,11 @@ async function ensureStripeProductAndPrice(
   plan: Record<string, unknown>,
   planId: string
 ): Promise<{ productId: string; priceId: string }> {
+  const { ensureRecurringMembershipPrice } = await import('@/lib/stripe-membership-billing')
   const db = getAdminDb()
-
-  let productId = plan.stripeProductId as string | undefined
-  if (!productId) {
-    const product = await stripe.products.create({
-      name: String(plan.name || 'Membership'),
-      description: String(plan.description || ''),
-      metadata: { planId },
-    })
-    productId = product.id
-    await db.collection('pricingPlans').doc(planId).update({ stripeProductId: productId })
-  }
-
-  let priceId = plan.stripePriceId as string | undefined
-  if (!priceId) {
-    const price = await stripe.prices.create({
-      unit_amount: Number(plan.price) || 0,
-      currency: String(plan.currency || 'aed').toLowerCase(),
-      recurring: {
-        interval: plan.billingPeriod === 'yearly' ? 'year' : 'month',
-      },
-      product: productId,
-    })
-    priceId = price.id
-    await db.collection('pricingPlans').doc(planId).update({ stripePriceId: priceId })
-  }
-
-  return { productId, priceId }
+  return ensureRecurringMembershipPrice(stripe, plan, planId, async (patch) => {
+    await db.collection('pricingPlans').doc(planId).update(patch)
+  })
 }
 
 async function ensureStripeCustomer(
@@ -97,30 +74,36 @@ export async function createEmbeddedMembershipCheckout(opts: {
   const email = (userSnap.data()?.email as string) || undefined
   const customerId = await ensureStripeCustomer(stripe, opts.userId, email)
 
+  const { clientSecretForIncompleteSubscription, membershipRecurringInterval } = await import(
+    '@/lib/stripe-membership-billing'
+  )
+  const interval = membershipRecurringInterval(opts.plan.billingPeriod)
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: priceId }],
+    collection_method: 'charge_automatically',
     payment_behavior: 'default_incomplete',
-    payment_settings: { save_default_payment_method: 'on_subscription' },
-    expand: ['latest_invoice.payment_intent'],
+    payment_settings: {
+      save_default_payment_method: 'on_subscription',
+      payment_method_types: ['card'],
+    },
+    expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
     metadata: {
       type: 'membership',
       userId: opts.userId,
       planId: opts.planId,
+      autoDebit: 'true',
+      billingInterval: interval,
     },
   })
 
-  const invoice = subscription.latest_invoice as Stripe.Invoice
-  const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent
-  if (!paymentIntent?.client_secret) {
-    throw new Error('Could not initialize card payment for subscription.')
-  }
+  const secret = await clientSecretForIncompleteSubscription(stripe, subscription)
 
   await db.collection('checkoutSessions').add({
     userId: opts.userId,
     planId: opts.planId,
     subscriptionId: subscription.id,
-    paymentIntentId: paymentIntent.id,
+    paymentIntentId: secret.paymentIntentId || '',
     gateway: 'stripe',
     status: 'pending',
     createdAt: FieldValue.serverTimestamp(),
@@ -129,9 +112,9 @@ export async function createEmbeddedMembershipCheckout(opts: {
   return {
     embedded: true,
     gateway: 'stripe',
-    clientSecret: paymentIntent.client_secret,
+    clientSecret: secret.clientSecret,
     publishableKey: config.publishableKey,
-    paymentIntentId: paymentIntent.id,
+    paymentIntentId: secret.paymentIntentId || '',
     subscriptionId: subscription.id,
   }
 }
