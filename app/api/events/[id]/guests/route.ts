@@ -129,16 +129,32 @@ export async function POST(request: NextRequest, context: Ctx) {
     }
 
     if (action === 'approve') {
+      const data = doc.data()!
+      const unpaid =
+        data.paymentStatus === 'pending' &&
+        (Number(data.ticketPrice) > 0 || Number(data.amountPaid) > 0 || Number(data.pbCut) > 0)
+
+      if (unpaid) {
+        // Approve host gate but do not issue QR until payment succeeds.
+        await ref.update({
+          status: 'pending_payment',
+          paymentStatus: 'pending',
+          checkInCode: null,
+          qrToken: null,
+        })
+        return NextResponse.json({
+          success: true,
+          message: 'Approved — guest must complete payment before check-in codes are issued',
+        })
+      }
+
       const code = generateCheckInCode()
       const token = generateQrToken()
-      const data = doc.data()!
       await ref.update({
         status: 'confirmed',
         checkInCode: code,
         qrToken: token,
-        paymentStatus: data.paymentStatus === 'pending' && (data.amountPaid || 0) > 0
-          ? 'pending'
-          : data.paymentStatus || 'free',
+        paymentStatus: data.paymentStatus || 'free',
       })
       await getAdminDb()
         .collection('events')

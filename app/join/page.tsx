@@ -2,10 +2,11 @@
 
 import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { auth } from '@/lib/firebase'
 
 /**
  * /join is the public "Join the community" entry.
- * Membership packages are step 1 of the signup flow.
+ * Logged-in members changing plan go to membership checkout instead of signup.
  */
 function JoinRedirect() {
   const router = useRouter()
@@ -17,8 +18,25 @@ function JoinRedirect() {
     const params = new URLSearchParams()
     if (type) params.set('type', type)
     if (plan) params.set('plan', plan)
-    const qs = params.toString()
-    router.replace(qs ? `/signup?${qs}` : '/signup')
+
+    const go = () => {
+      if (auth.currentUser) {
+        if (type === 'business') {
+          router.replace('/dashboard/membership?upgrade=business')
+        } else {
+          router.replace('/dashboard/membership')
+        }
+        return
+      }
+      const qs = params.toString()
+      router.replace(qs ? `/signup?${qs}` : '/signup')
+    }
+
+    const unsub = auth.onAuthStateChanged(() => {
+      unsub()
+      go()
+    })
+    return () => unsub()
   }, [router, searchParams])
 
   return (

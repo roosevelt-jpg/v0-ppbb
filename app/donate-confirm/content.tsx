@@ -25,7 +25,7 @@ export default function DonateConfirmContent() {
   const donationType = parseDonationPaymentType(searchParams.get('donationType')) || 'sadaqah'
   const donationTypeLabel = donationType === 'zakat' ? 'Zakat' : 'Sadaqah'
 
-  const [step, setStep] = useState<'info' | 'payment' | 'submit'>('info')
+  const [step, setStep] = useState<'donate' | 'submit'>('donate')
   const [formData, setFormData] = useState({
     amount: '',
     referenceNumber: '',
@@ -44,10 +44,10 @@ export default function DonateConfirmContent() {
       return
     }
     setError('')
-    setStep('payment')
     if (paymentLink) {
       window.open(paymentLink, '_blank', 'noopener,noreferrer')
     }
+    setStep('submit')
   }
 
   const handleProofSelect = (file: File | null) => {
@@ -158,14 +158,14 @@ export default function DonateConfirmContent() {
             className="flex flex-col sm:flex-row bg-neutral-100 text-[11px]"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
-            {(['info', 'payment', 'submit'] as const).map((s, i) => (
+            {(['donate', 'submit'] as const).map((s, i) => (
               <div
                 key={s}
                 className={`flex-1 py-2 px-2 text-center font-semibold ${
                   step === s ? 'bg-black text-white' : 'text-neutral-600'
                 }`}
               >
-                {i + 1}. {s === 'info' ? 'Amount' : s === 'payment' ? 'Payment' : 'Proof'}
+                {i + 1}. {s === 'donate' ? 'Give' : 'Confirm'}
               </div>
             ))}
           </div>
@@ -182,7 +182,7 @@ export default function DonateConfirmContent() {
                 </p>
                 <p className="text-xs text-neutral-500">Redirecting to your dashboard…</p>
               </div>
-            ) : step === 'info' ? (
+            ) : step === 'donate' ? (
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
@@ -259,35 +259,9 @@ export default function DonateConfirmContent() {
                 </div>
 
                 <button type="submit" className={btnPrimary} disabled={!paymentLink}>
-                  Proceed to Payment
+                  Pay with {partner} — then confirm
                 </button>
               </form>
-            ) : step === 'payment' ? (
-              <div className="text-center py-4 space-y-2.5">
-                <h2 className="text-xl" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                  Completing Payment
-                </h2>
-                <p className="text-neutral-600 text-sm">
-                  A window should have opened for {partner}. Complete payment there, then continue
-                  to upload your proof.
-                </p>
-                {paymentLink ? (
-                  <a
-                    href={paymentLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`${btnSecondary} inline-flex items-center justify-center`}
-                  >
-                    Re-open payment page
-                  </a>
-                ) : null}
-                <button type="button" onClick={() => setStep('submit')} className={btnPrimary}>
-                  Payment Complete — Continue
-                </button>
-                <button type="button" onClick={() => setStep('info')} className={btnSecondary}>
-                  Go Back
-                </button>
-              </div>
             ) : (
               <form onSubmit={handleSubmitProof} className="space-y-2.5">
                 <h2 className="text-xl mb-1" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
@@ -355,7 +329,7 @@ export default function DonateConfirmContent() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <button type="button" onClick={() => setStep('payment')} className={btnSecondary}>
+                  <button type="button" onClick={() => setStep('donate')} className={btnSecondary}>
                     Back
                   </button>
                   <button

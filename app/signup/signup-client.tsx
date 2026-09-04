@@ -359,7 +359,6 @@ function SignupPageContent() {
                   <option value="">Select gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="other">Other</option>
                 </select>
                 <select name="nationality" value={formData.nationality} onChange={handleInputChange} style={{ padding: '0.75rem 1rem', border: '1px solid #e4e1da', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }}>
                   <option value="Emirati">Emirati</option>

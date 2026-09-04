@@ -6,6 +6,7 @@ import {
   User as FirebaseUser,
   setPersistence,
   browserLocalPersistence,
+  browserSessionPersistence,
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
@@ -117,11 +118,19 @@ export async function registerUser(
 
 export async function loginUser(
   email: string,
-  password: string
+  password: string,
+  options?: { rememberMe?: boolean }
 ): Promise<{ user: User | null; error: string | null }> {
   try {
-    // Set persistence to local
-    await setPersistence(auth, browserLocalPersistence)
+    const remember = options?.rememberMe !== false
+    await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence)
+    if (typeof window !== 'undefined') {
+      if (remember) {
+        localStorage.setItem('pb_remember_until', String(Date.now() + 30 * 24 * 60 * 60 * 1000))
+      } else {
+        localStorage.removeItem('pb_remember_until')
+      }
+    }
 
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const firebaseUser = userCredential.user

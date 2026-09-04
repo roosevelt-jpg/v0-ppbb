@@ -174,20 +174,31 @@ export function MembershipSubscriptionOverview({
     Boolean(subscription?.cancelAtPeriodEnd) ||
     String(subscription?.status || '') === 'cancel_at_period_end'
 
+  const hasBillableSub =
+    Boolean(subscription) || Boolean(String(profile?.stripeSubscriptionId || '').trim())
+
   const handleCancelRenewal = async () => {
-    if (!subscription?.id) {
+    const stripeSubId =
+      String(subscription?.stripeSubscriptionId || '') ||
+      String(profile?.stripeSubscriptionId || '')
+    const subDocId = String(subscription?.id || '') || stripeSubId
+    if (!subDocId && !stripeSubId) {
       alert('No active subscription found to stop renewal.')
       return
     }
     if (!confirm('Stop automatic renewal? You keep access until the current period ends.')) return
     setCancelling(true)
     try {
+      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken()
       const res = await fetch('/api/subscriptions/cancel', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
-          subscriptionId: subscription.id,
-          stripeSubscriptionId: subscription.stripeSubscriptionId || null,
+          subscriptionId: subDocId || null,
+          stripeSubscriptionId: stripeSubId || null,
           stopRenewalOnly: true,
         }),
       })
@@ -283,7 +294,7 @@ export function MembershipSubscriptionOverview({
             </Link>
             <button
               type="button"
-              disabled={cancelling || !subscription || renewalStopped || isLifetime || isPromoSub}
+              disabled={cancelling || !hasBillableSub || renewalStopped || isLifetime || isPromoSub}
               onClick={() => void handleCancelRenewal()}
               className="min-h-[44px] px-4 border border-red-300 text-red-700 rounded-lg text-sm font-semibold hover:bg-red-50 disabled:opacity-50"
             >

@@ -143,6 +143,7 @@ export function buildRegistrationRecord(input: {
   status: RegistrationStatus
   ticket: TicketType
   amountPaid: number
+  ticketPrice?: number
   paymentStatus: 'free' | 'paid' | 'pending' | 'refunded' | null
   pbCut: number
   businessCut: number
@@ -178,6 +179,7 @@ export function buildRegistrationRecord(input: {
     referralCode: input.referralCode ?? null,
     paymentStatus: input.paymentStatus,
     amountPaid: input.amountPaid,
+    ticketPrice: input.ticketPrice ?? input.amountPaid,
     currency: input.currency,
     pbCut: input.pbCut,
     businessCut: input.businessCut,

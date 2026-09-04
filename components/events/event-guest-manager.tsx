@@ -240,7 +240,7 @@ export function EventGuestManager({
       </div>
 
       <div className={`${ACTION_ROW} gap-1.5 flex-wrap`}>
-        {['all', 'confirmed', 'pending', 'waitlisted', 'cancelled'].map((s) => (
+        {['all', 'confirmed', 'pending', 'pending_payment', 'waitlisted', 'cancelled'].map((s) => (
           <button
             key={s}
             type="button"
@@ -286,12 +286,16 @@ export function EventGuestManager({
                   </td>
                   <td className="p-3">
                     {g.ticketTypeName || '—'}
-                    {g.amountPaid != null && g.amountPaid > 0 && (
+                    {g.paymentStatus === 'paid' && g.amountPaid != null && g.amountPaid > 0 ? (
                       <div className="text-xs text-neutral-500">{g.amountPaid} paid</div>
-                    )}
+                    ) : g.paymentStatus === 'pending' ? (
+                      <div className="text-xs text-amber-600">Awaiting payment</div>
+                    ) : null}
                   </td>
                   <td className="p-3">
-                    <span className="capitalize">{g.status}</span>
+                    <span className="capitalize">
+                      {g.status === 'pending_payment' ? 'Awaiting payment' : g.status}
+                    </span>
                     {g.checkedInAt && (
                       <span className="ml-2 inline-flex items-center gap-1 text-green-700 text-xs">
                         <CheckCircle2 className="h-3 w-3" /> in

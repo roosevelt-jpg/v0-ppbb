@@ -34,6 +34,8 @@ const EMPTY_FORM = {
   label: '',
   description: '',
   planId: '',
+  type: 'free_access' as 'free_access' | 'percent_off',
+  percentOff: 50,
   benefitDurationMonths: 3 as number | 'forever',
   trialEnabled: false,
   maxRedemptions: '500',
@@ -152,12 +154,15 @@ export default function AdminPromoCodesPage() {
           code: form.code,
           label: form.label || form.code,
           description: form.description,
-          type: 'free_access',
-          percentOff: 100,
+          type: form.type,
+          percentOff: form.type === 'percent_off' ? Number(form.percentOff) || 50 : 100,
           planId: form.planId,
           benefitDurationMonths:
             form.benefitDurationMonths === 'forever' ? 0 : Number(form.benefitDurationMonths) || 1,
-          trialEnabled: form.benefitDurationMonths !== 'forever' && form.trialEnabled,
+          trialEnabled:
+            form.type === 'free_access' &&
+            form.benefitDurationMonths !== 'forever' &&
+            form.trialEnabled,
           maxRedemptions: form.maxRedemptions.trim() === '' ? null : Number(form.maxRedemptions),
           codeExpiresAt: form.codeExpiresAt || null,
         }),
@@ -193,12 +198,12 @@ export default function AdminPromoCodesPage() {
   return (
     <AdminPageLayout
       title="Membership Promo Codes"
-      subtitle="Create free-access membership codes (plan, duration 1–12 months or forever, expiry, redemption caps)."
+      subtitle="Create free-access codes or percent-off discounts for 1–12 months, then full price resumes."
     >
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-neutral-600 dark:text-muted-foreground">
-            Codes grant 100% free access for forever or any duration from 1–12 months.
+            Free access (100%) or percent off (e.g. 30% / 50% for 3 months via Stripe).
           </p>
           <button
             type="button"
@@ -248,6 +253,48 @@ export default function AdminPromoCodesPage() {
                 />
               </div>
               <div>
+                <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">
+                  Discount type
+                </label>
+                <select
+                  className={INPUT_STYLE}
+                  value={form.type}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      type: e.target.value === 'percent_off' ? 'percent_off' : 'free_access',
+                      benefitDurationMonths:
+                        e.target.value === 'percent_off' && form.benefitDurationMonths === 'forever'
+                          ? 3
+                          : form.benefitDurationMonths,
+                    })
+                  }
+                >
+                  <option value="free_access">100% free access</option>
+                  <option value="percent_off">Percent off (then full price)</option>
+                </select>
+              </div>
+              {form.type === 'percent_off' ? (
+                <div>
+                  <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">
+                    Percent off (1–99)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={99}
+                    className={INPUT_STYLE}
+                    value={form.percentOff}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        percentOff: Math.min(99, Math.max(1, Number(e.target.value) || 1)),
+                      })
+                    }
+                  />
+                </div>
+              ) : null}
+              <div>
                 <label className="block text-xs font-medium text-neutral-700 dark:text-foreground mb-1">Valid for plan</label>
                 <select
                   className={INPUT_STYLE}
@@ -281,7 +328,9 @@ export default function AdminPromoCodesPage() {
                     })
                   }}
                 >
-                  <option value="forever">Forever (lifetime free)</option>
+                  <option value="forever" disabled={form.type === 'percent_off'}>
+                    Forever (lifetime free)
+                  </option>
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((months) => (
                     <option key={months} value={String(months)}>
                       {months} month{months === 1 ? '' : 's'}

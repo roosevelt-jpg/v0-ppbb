@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth-context'
 import { clearAdminMfaSession } from '@/lib/admin-mfa-session'
 
 /** Log out any signed-in user after this much inactivity. */
-export const SESSION_IDLE_MS = 10 * 60 * 1000
+export const SESSION_IDLE_MS = 60 * 60 * 1000
 
 function idleLogoutPath(pathname: string | null): string {
   if (pathname?.startsWith('/admin')) {
@@ -20,7 +20,8 @@ function idleLogoutPath(pathname: string | null): string {
 
 /**
  * Global idle session guard for admin, member, and business accounts.
- * Resets on pointer/keyboard/scroll activity; signs out after 10 minutes silent.
+ * Resets on pointer/keyboard/scroll activity; signs out after 1 hour silent.
+ * Also enforces 30-day Remember me expiry.
  */
 export function SessionIdleTimeout() {
   const { firebaseUser, logout } = useAuth()
@@ -39,6 +40,19 @@ export function SessionIdleTimeout() {
       lastActivityRef.current = Date.now()
       loggingOutRef.current = false
       return
+    }
+
+    // Expire Remember-me sessions after 30 days.
+    try {
+      const until = Number(localStorage.getItem('pb_remember_until') || 0)
+      if (until > 0 && Date.now() > until) {
+        localStorage.removeItem('pb_remember_until')
+        localStorage.removeItem('pb_remember_email')
+        void logout().then(() => router.replace('/login?reason=session_expired'))
+        return
+      }
+    } catch {
+      /* ignore */
     }
 
     lastActivityRef.current = Date.now()

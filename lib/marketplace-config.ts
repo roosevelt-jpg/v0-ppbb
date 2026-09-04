@@ -43,7 +43,7 @@ export const DEFAULT_MARKETPLACE_PAGE_CONFIG: MarketplacePageConfig = {
   membershipBody:
     'Our membership unlocks the full enterprise pillar — directory listing, booth priority, networking events, discounts and direct support from our team.',
   membershipCTA: 'Become a member',
-  membershipCTAHref: '/join?type=business',
+  membershipCTAHref: '/dashboard/membership?upgrade=business',
   benefitsEyebrow: 'BENEFITS',
   benefitsHeadline: 'Built for builders.',
   benefits: [

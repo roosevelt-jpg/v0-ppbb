@@ -73,10 +73,15 @@ function ConfirmationInner() {
     }
   }, [registrationId])
 
-  const status = String(reg?.status || 'confirmed')
+  const status = String(reg?.status || '')
+  const paymentStatus = String(reg?.paymentStatus || '')
   const isPendingApproval = status === 'pending'
   const isWaitlisted = status === 'waitlisted'
-  const isConfirmed = status === 'confirmed'
+  const isPendingPayment =
+    status === 'pending_payment' ||
+    (paymentStatus === 'pending' && status !== 'confirmed' && status !== 'waitlisted')
+  const isConfirmed =
+    status === 'confirmed' && (paymentStatus === 'paid' || paymentStatus === 'free' || !paymentStatus)
 
   const qrValue = reg?.qrToken || reg?.checkInCode || ''
   const qrUrl =
@@ -91,7 +96,7 @@ function ConfirmationInner() {
           <p className="text-neutral-500 text-sm">Loading registration…</p>
         ) : (
           <>
-            {isPendingApproval ? (
+            {isPendingApproval || isPendingPayment ? (
               <Clock size={64} className="mx-auto text-amber-600" />
             ) : (
               <CheckCircle size={64} className="mx-auto text-green-600" />
@@ -101,14 +106,22 @@ function ConfirmationInner() {
                 ? "You're on the waitlist"
                 : isPendingApproval
                   ? 'Registration pending approval'
-                  : 'Registration confirmed'}
+                  : isPendingPayment
+                    ? 'Complete payment'
+                    : isConfirmed
+                      ? 'Registration confirmed'
+                      : 'Registration received'}
             </h1>
             <p className="text-gray-600">
               {isWaitlisted
                 ? `Position #${reg?.waitlistPosition || '—'}. We'll notify you if a spot opens.`
                 : isPendingApproval
-                  ? 'The host will review your registration shortly. You will get a QR code after approval.'
-                  : 'Show this QR code at the door for check-in.'}
+                  ? 'The host will review your registration shortly. You will get a QR code after approval and payment (if required).'
+                  : isPendingPayment
+                    ? 'Your spot is reserved until payment is completed. You will receive a check-in QR code after payment succeeds.'
+                    : isConfirmed
+                      ? 'Show this QR code at the door for check-in.'
+                      : 'We received your registration.'}
             </p>
 
             {qrUrl ? (
@@ -122,6 +135,7 @@ function ConfirmationInner() {
             ) : null}
 
             <div className="space-y-3 pt-2">
+              {!isPendingPayment && (
               <a
                 href={`/api/events/${eventId}/google-calendar`}
                 target="_blank"
@@ -130,17 +144,20 @@ function ConfirmationInner() {
               >
                 <CalendarPlus size={18} /> Add to Google Calendar
               </a>
+              )}
+              {!isPendingPayment && (
               <a
                 href={`/api/events/${eventId}/ics`}
                 className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-100 text-black rounded-lg font-semibold hover:bg-neutral-200"
               >
                 <Download size={18} /> Download .ics
               </a>
+              )}
               <Link
                 href={`/events/${eventId}`}
                 className="block w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-900"
               >
-                Back to Event
+                {isPendingPayment ? 'Return to event to pay' : 'Back to Event'}
               </Link>
               <Link
                 href="/dashboard/events"

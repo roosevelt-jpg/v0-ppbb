@@ -16,6 +16,7 @@ export type PayoutStatus = 'not_applicable' | 'pending' | 'processing' | 'paid_o
 export type RegistrationStatus =
   | 'confirmed'
   | 'pending'
+  | 'pending_payment'
   | 'waitlisted'
   | 'cancelled'
   | 'rejected'
@@ -186,6 +187,8 @@ export interface EventRegistration {
 
   paymentStatus: 'free' | 'paid' | 'pending' | 'refunded' | null
   amountPaid: number | null
+  /** Expected ticket price before payment (distinct from amountPaid). */
+  ticketPrice?: number | null
   currency: string | null
   pbCut: number | null
   businessCut: number | null

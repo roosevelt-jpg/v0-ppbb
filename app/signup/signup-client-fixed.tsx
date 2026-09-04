@@ -272,27 +272,35 @@ export default function SignupClient() {
       }
       
       try {
-        const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(formData.email.toLowerCase())}`)
-        const json = await res.json()
-        if (res.ok && json.success && !json.available) {
-          setError('This email is already registered. Please log in or use a different email.')
-          return false
+        // Logged-in members changing/upgrading plan may reuse their email.
+        const currentEmail = (auth.currentUser?.email || '').toLowerCase()
+        const sameAsSignedIn =
+          Boolean(currentEmail) && currentEmail === formData.email.toLowerCase()
+        if (!sameAsSignedIn) {
+          const res = await fetch(`/api/auth/check-email?email=${encodeURIComponent(formData.email.toLowerCase())}`)
+          const json = await res.json()
+          if (res.ok && json.success && !json.available) {
+            setError('This email is already registered. Please log in or use a different email.')
+            return false
+          }
         }
       } catch (err) {
         console.error('[v0] Error checking email uniqueness:', err)
       }
-      
-      if (!formData.password) {
-        setError('Password is required')
-        return false
-      }
-      if (formData.password.length < 8) {
-        setError('Password must be at least 8 characters')
-        return false
-      }
-      if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match')
-        return false
+
+      if (!auth.currentUser) {
+        if (!formData.password) {
+          setError('Password is required')
+          return false
+        }
+        if (formData.password.length < 8) {
+          setError('Password must be at least 8 characters')
+          return false
+        }
+        if (formData.password !== formData.confirmPassword) {
+          setError('Passwords do not match')
+          return false
+        }
       }
       if (!formData.consentTerms) {
         setError('You must accept the Terms of Service')
@@ -985,7 +993,7 @@ export default function SignupClient() {
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.5rem', textTransform: 'uppercase', color: '#666' }}>Gender *</label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                        {['Male', 'Female', 'Other', 'Prefer not to say'].map(g => (
+                        {['Male', 'Female'].map(g => (
                           <label key={g} style={{ display: 'flex', alignItems: 'center', padding: '0.5rem', border: `1px solid ${formData.gender === g ? '#111111' : '#e4e1da'}`, borderRadius: '0.375rem', cursor: 'pointer', backgroundColor: formData.gender === g ? '#f7f6f2' : '#fff', transition: 'all 0.2s' }}>
                             <input type="radio" name="gender" value={g} checked={formData.gender === g} onChange={handleInputChange} style={{ width: '14px', height: '14px', cursor: 'pointer', flexShrink: 0 }} />
                             <span style={{ fontSize: '0.7rem', marginLeft: '0.375rem', color: '#111111', fontWeight: 500 }}>{g}</span>

@@ -13,7 +13,7 @@ export type UpgradeToBusinessModalProps = {
 
 /**
  * Part 10C — shown when a basic member hits a business-only action.
- * Does not perform the upgrade itself; CTA goes to /join?type=business.
+ * Does not perform the upgrade itself; CTA goes to membership checkout.
  */
 export function UpgradeToBusinessModal({
   open,
@@ -76,7 +76,7 @@ export function UpgradeToBusinessModal({
 
         <div className="flex flex-col gap-2" style={{ fontFamily: 'Inter, sans-serif' }}>
           <Link
-            href="/join?type=business"
+            href="/dashboard/membership?upgrade=business"
             className="min-h-[32px] inline-flex items-center justify-center bg-black hover:bg-neutral-900 text-white px-3 py-1.5 rounded text-xs font-semibold"
             onClick={onClose}
           >

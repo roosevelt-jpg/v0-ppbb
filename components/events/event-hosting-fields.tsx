@@ -133,6 +133,9 @@ export function EventHostingFields({
         <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
           Ticket types
         </p>
+        <p className="text-xs text-neutral-500 -mt-1">
+          Add separate types with different prices (e.g. Regular and VIP).
+        </p>
         {types.map((t, i) => (
           <div key={t.id || i} className="grid sm:grid-cols-5 gap-2 items-end bg-white p-3 rounded-lg border">
             <label className="text-xs sm:col-span-2">

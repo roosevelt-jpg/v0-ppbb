@@ -33,6 +33,7 @@ export type MembershipPromoCode = {
   usedCount: number
   codeExpiresAt: Date | null
   status: MembershipPromoStatus
+  stripeCouponId: string | null
   createdBy: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -105,6 +106,7 @@ export function mapPromoDoc(id: string, data: Record<string, unknown>): Membersh
     status: (['active', 'paused', 'exhausted', 'expired'].includes(String(data.status))
       ? String(data.status)
       : 'active') as MembershipPromoStatus,
+    stripeCouponId: typeof data.stripeCouponId === 'string' ? data.stripeCouponId : null,
     createdBy: typeof data.createdBy === 'string' ? data.createdBy : null,
     createdAt: parseDate(data.createdAt),
     updatedAt: parseDate(data.updatedAt),
@@ -120,6 +122,41 @@ export function resolvePromoStatus(promo: MembershipPromoCode, now = new Date())
 
 export function promoGrantsFreeAccess(promo: MembershipPromoCode): boolean {
   return promo.type === 'free_access' || promo.percentOff >= 100
+}
+
+export async function ensurePromoStripeCoupon(
+  promo: MembershipPromoCode
+): Promise<string | null> {
+  if (promoGrantsFreeAccess(promo)) return null
+  if (promo.percentOff <= 0 || promo.percentOff >= 100) return null
+  const months = promo.benefitDurationMonths
+  if (months <= 0) {
+    throw new Error('Percent-off promos need a duration of 1–12 months')
+  }
+
+  if (promo.stripeCouponId) return promo.stripeCouponId
+
+  const { getStripeClient } = await import('@/lib/get-stripe-client')
+  const stripe = await getStripeClient()
+  const coupon = await stripe.coupons.create({
+    percent_off: promo.percentOff,
+    duration: 'repeating',
+    duration_in_months: months,
+    name: `${promo.code} (${promo.percentOff}% × ${months}mo)`,
+    metadata: {
+      promoCodeId: promo.id,
+      promoCode: promo.code,
+    },
+  })
+
+  await getAdminDb().collection(MEMBERSHIP_PROMO_COLLECTION).doc(promo.id).set(
+    {
+      stripeCouponId: coupon.id,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  )
+  return coupon.id
 }
 
 export async function listMembershipPromoCodes(): Promise<MembershipPromoCode[]> {
@@ -363,10 +400,19 @@ export async function redeemMembershipPromo(input: {
     if (status === 'exhausted') throw new Error('This promo code has reached its redemption limit')
     if (status !== 'active') throw new Error('This promo code is not available')
 
-    if (!promoGrantsFreeAccess(promo)) {
-      throw new Error('This promo requires checkout and is not supported yet. Use a 100% free code.')
-    }
     if (!promo.planId) throw new Error('Promo code is missing a pricing plan')
+
+    // percent_off (1–99) goes through Stripe checkout with a repeating coupon.
+    // 100% free / free_access continues below.
+    if (!promoGrantsFreeAccess(promo) && promo.type !== 'percent_off') {
+      throw new Error('Unsupported promo type')
+    }
+    if (!promoGrantsFreeAccess(promo) && (promo.percentOff <= 0 || promo.percentOff >= 100)) {
+      throw new Error('Percent-off promos must be between 1% and 99%')
+    }
+    if (!promoGrantsFreeAccess(promo) && promo.benefitDurationMonths <= 0) {
+      throw new Error('Percent-off promos need a duration of 1–12 months')
+    }
 
     grantedPlanId = promo.planId
     grantedPlanName = promo.planName || promo.planId
@@ -397,6 +443,35 @@ export async function redeemMembershipPromo(input: {
   }
 
   try {
+    if (!promoGrantsFreeAccess(redeemedPromo)) {
+      const couponId = await ensurePromoStripeCoupon(redeemedPromo)
+      if (!couponId) throw new Error('Could not create Stripe discount coupon')
+
+      const { createStripeMembershipIntent } = await import('@/lib/payment-completion')
+      const { clientSecret, mode, alreadyComplete } = await createStripeMembershipIntent({
+        planId: grantedPlanId,
+        userId: input.userId,
+        couponId,
+        extraMetadata: {
+          promoCodeId: redeemedPromo.id,
+          promoCode: redeemedPromo.code,
+          percentOff: String(redeemedPromo.percentOff),
+          discountMonths: String(redeemedPromo.benefitDurationMonths),
+        },
+      })
+
+      return {
+        promo: redeemedPromo,
+        planId: grantedPlanId,
+        planName: grantedPlanName,
+        membershipUrl: null,
+        clientSecret: alreadyComplete ? null : clientSecret,
+        intentMode: mode,
+        renewDate: null,
+        alreadyComplete: Boolean(alreadyComplete),
+      }
+    }
+
     if (redeemedPromo.trialEnabled) {
       const { createStripeMembershipIntent } = await import('@/lib/payment-completion')
       const now = new Date()
