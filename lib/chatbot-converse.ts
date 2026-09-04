@@ -34,26 +34,22 @@ function buildContextPack(input: {
 
   for (const row of faqRows) {
     if (!row.faq.answer?.trim()) continue
-    // Prefer scored matches; still include a couple high-value always answers when score is 0
-    if (row.score <= 0 && parts.length >= 3) continue
+    if (row.score <= 0) continue
     parts.push(`Q: ${row.faq.question}\nA: ${row.faq.answer.trim()}`)
   }
 
   for (const row of knowledgeRows) {
     if (!row.item.content.trim()) continue
-    if (row.score <= 0 && !row.item.alwaysInclude && parts.length >= 5) continue
+    if (row.score <= 0 && !row.item.alwaysInclude) continue
     const passage = extractBestPassage(row.item.content, input.userMessage)
     if (passage) parts.push(passage)
   }
 
-  // If nothing scored, still give the model a sample of active knowledge so it can converse
+  // Prefer always-include knowledge when nothing matched the question
   if (parts.length === 0) {
-    for (const item of input.knowledge.slice(0, 4)) {
+    for (const item of input.knowledge.filter((k) => k.alwaysInclude).slice(0, 3)) {
       const passage = extractBestPassage(item.content, input.userMessage || item.title)
       if (passage) parts.push(passage)
-    }
-    for (const faq of input.faqs.slice(0, 4)) {
-      if (faq.answer?.trim()) parts.push(`Q: ${faq.question}\nA: ${faq.answer.trim()}`)
     }
   }
 
@@ -90,6 +86,7 @@ export async function generateConversationalSupportReply(input: {
 Voice: warm, polite, concise, and human — like a helpful community host. Keep replies to 1–3 short paragraphs unless the visitor asks for detail.
 
 You may use the INTERNAL REFERENCE NOTES below when they help answer. Rules:
+- Answer the visitor's latest question directly. Do not answer a different FAQ.
 - Never mention FAQs, training documents, knowledge bases, notes, or that you were given reference material.
 - Do not invent policies, prices, or promises that are not supported by the notes or general Passive Blessings positioning.
 - If the notes do not cover the question, say so briefly in your own words and offer another way to help${whatsapp ? ` (WhatsApp: ${whatsapp})` : ' (the Contact page)'}.

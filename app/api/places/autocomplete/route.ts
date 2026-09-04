@@ -37,18 +37,25 @@ export async function GET(request: NextRequest) {
     let lastError = 'Places autocomplete failed'
 
     for (const apiKey of apiKeys) {
-      const params = new URLSearchParams({
-        input,
-        key: apiKey,
-      })
-      if (components) {
-        params.set('components', components)
+      const attempt = async (withCountry: boolean) => {
+        const params = new URLSearchParams({
+          input,
+          key: apiKey,
+        })
+        if (withCountry && components) {
+          params.set('components', components)
+        }
+        const googleRes = await fetch(
+          `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`
+        )
+        return googleRes.json()
       }
 
-      const googleRes = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params.toString()}`
-      )
-      const data = await googleRes.json()
+      let data = await attempt(true)
+      // If country filter yields nothing, retry globally so typing still shows suggestions
+      if (components && data.status === 'ZERO_RESULTS') {
+        data = await attempt(false)
+      }
 
       if (data.status === 'OK' || data.status === 'ZERO_RESULTS') {
         const predictions = (data.predictions || []).map((prediction: any) => ({

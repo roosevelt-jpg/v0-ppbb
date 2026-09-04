@@ -401,19 +401,19 @@ function EventsPageContent() {
                 </li>
               ))}
             </ul>
-            <div className="hidden lg:block admin-table-scroll">
+            <div className="hidden lg:block min-w-0 admin-table-scroll">
             <table className="w-full min-w-[1200px]">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-neutral-100 border-b border-neutral-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Event</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created By</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Submitted</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Revenue</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Event</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Category</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Created By</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Location</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Date</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Submitted</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Revenue</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-neutral-800">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">

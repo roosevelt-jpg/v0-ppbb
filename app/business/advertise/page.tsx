@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { auth } from '@/lib/firebase'
 import { Card } from '@/components/ui/card'
+import { StripeCardForm } from '@/components/payments/stripe-card-form'
 import { Loader2, Upload } from 'lucide-react'
 
 type AdRequest = {
@@ -28,6 +29,11 @@ function AdvertiseInner() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [requests, setRequests] = useState<AdRequest[]>([])
+  const [stripeCheckout, setStripeCheckout] = useState<{
+    clientSecret: string
+    publishableKey: string
+    advertisingRequestId: string
+  } | null>(null)
 
   const load = async () => {
     const token = await auth.currentUser?.getIdToken()
@@ -104,10 +110,19 @@ function AdvertiseInner() {
         body: JSON.stringify({ id: createJson.id }),
       })
       const payJson = await payRes.json()
-      if (!payJson.success || !payJson.checkoutUrl) {
+      if (!payJson.success) {
         throw new Error(payJson.error || 'Checkout failed')
       }
-      window.location.href = payJson.checkoutUrl
+      if (payJson.embedded && payJson.clientSecret && payJson.publishableKey) {
+        setStripeCheckout({
+          clientSecret: payJson.clientSecret,
+          publishableKey: payJson.publishableKey,
+          advertisingRequestId: createJson.id,
+        })
+        setSaving(false)
+        return
+      }
+      throw new Error('Card checkout is not available. Check Stripe in Admin → Integrations.')
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Request failed')
       setSaving(false)
@@ -116,6 +131,49 @@ function AdvertiseInner() {
 
   return (
     <div className="min-h-screen bg-[#faf9f7] dark:bg-neutral-950 p-4 sm:p-8">
+      {stripeCheckout ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <Card className="w-full max-w-md p-6 bg-white space-y-3">
+            <h2 className="text-lg font-semibold">Pay for advertising</h2>
+            <p className="text-sm text-neutral-600">Enter card details — you stay on Passive Blessings.</p>
+            <StripeCardForm
+              publishableKey={stripeCheckout.publishableKey}
+              clientSecret={stripeCheckout.clientSecret}
+              submitLabel="Pay & submit"
+              onSuccess={async (paymentIntentId) => {
+                const res = await fetch('/api/payments/confirm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    type: 'advertising',
+                    paymentIntentId,
+                    advertisingRequestId: stripeCheckout.advertisingRequestId,
+                  }),
+                })
+                const confirmJson = await res.json()
+                if (!res.ok || !confirmJson.success) {
+                  setMessage(confirmJson.error || 'Payment confirmation failed')
+                  return
+                }
+                setStripeCheckout(null)
+                setImageURL('')
+                setHref('')
+                setMessage('Payment received. Admin will publish your banner after review.')
+                void load()
+              }}
+              onError={(msg) => setMessage(msg)}
+            />
+            <button
+              type="button"
+              className="text-xs underline text-neutral-600"
+              onClick={() => setStripeCheckout(null)}
+            >
+              Cancel
+            </button>
+          </Card>
+        </div>
+      ) : null}
+
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-foreground">Advertise on homepage</h1>
@@ -157,7 +215,7 @@ function AdvertiseInner() {
               value={href}
               onChange={(e) => setHref(e.target.value)}
               className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2"
-              placeholder="https://your-site.com"
+              placeholder="https://"
             />
           </div>
           <div>
@@ -169,46 +227,38 @@ function AdvertiseInner() {
               className="w-full border border-neutral-300 dark:border-border rounded-lg px-3 py-2"
             />
           </div>
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">Standard placement: AED 500 (one-time).</p>
           <button
             type="button"
-            disabled={saving || uploading}
             onClick={() => void submitAndPay()}
-            className="!bg-black !text-white px-4 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 inline-flex items-center gap-2"
+            disabled={saving || uploading}
+            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-lg bg-black text-white font-semibold disabled:opacity-50"
           >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            Submit &amp; pay
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {saving ? 'Preparing checkout…' : 'Pay with card'}
           </button>
         </Card>
 
-        <Card className="p-5 bg-white dark:bg-card border border-neutral-200 dark:border-border">
-          <h2 className="font-semibold mb-3">Your requests</h2>
-          {requests.length === 0 ? (
-            <p className="text-sm text-neutral-500 dark:text-muted-foreground">No advertising requests yet.</p>
-          ) : (
-            <ul className="space-y-3 text-sm">
+        {requests.length > 0 ? (
+          <Card className="p-5 bg-white dark:bg-card border border-neutral-200 dark:border-border">
+            <h2 className="font-semibold mb-3">Your requests</h2>
+            <ul className="space-y-2 text-sm">
               {requests.map((r) => (
-                <li key={r.id} className="flex gap-3 items-start border-b border-neutral-100 dark:border-border pb-3">
-                  {r.imageURL ? (
-                    <img src={r.imageURL} alt="" className="w-24 h-12 object-cover rounded" />
-                  ) : null}
-                  <div>
-                    <p className="font-medium capitalize">{String(r.status || 'pending').replace(/_/g, ' ')}</p>
-                    <p className="text-neutral-500 dark:text-muted-foreground">AED {r.priceAed ?? 500}</p>
-                  </div>
+                <li key={r.id} className="flex justify-between gap-2 border-b border-neutral-100 pb-2">
+                  <span className="truncate">{r.alt || r.href || r.id}</span>
+                  <span className="shrink-0 text-neutral-500">{r.status}</span>
                 </li>
               ))}
             </ul>
-          )}
-        </Card>
+          </Card>
+        ) : null}
       </div>
     </div>
   )
 }
 
-export default function BusinessAdvertisePage() {
+export default function AdvertisePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-neutral-500 dark:text-muted-foreground">Loading…</div>}>
+    <Suspense fallback={<div className="p-8">Loading…</div>}>
       <AdvertiseInner />
     </Suspense>
   )

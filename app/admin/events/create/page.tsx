@@ -265,8 +265,15 @@ function CreateEventForm() {
       if (!formData.date?.trim()) throw new Error('Event date is required')
       if (!formData.category?.trim()) throw new Error('Event category is required')
       if (!formData.locationName?.trim()) throw new Error('Event location is required')
-      if (formData.isPaid && (!formData.price || formData.price <= 0)) {
-        throw new Error('Paid events require a ticket price greater than 0')
+      const ticketPrices = (formData.ticketTypes || [])
+        .filter((t) => t.isActive !== false)
+        .map((t) => Number(t.price) || 0)
+      const hasPricedTickets = ticketPrices.some((p) => p > 0)
+      const effectivePrice = hasPricedTickets
+        ? Math.max(...ticketPrices)
+        : Number(formData.price) || 0
+      if (formData.isPaid && effectivePrice <= 0) {
+        throw new Error('Paid events require at least one ticket type with a price greater than 0')
       }
 
       const dateObj = new Date(formData.date)
@@ -523,10 +530,10 @@ function CreateEventForm() {
                   </button>
                 </div>
               ) : (
-                <label className="cursor-pointer block">
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <Upload className="text-gray-400 mb-2" size={28} />
-                    <p className="text-gray-600 font-medium">Click to upload</p>
+                <label className="pb-dropzone-label cursor-pointer block w-full">
+                  <div className="pb-dropzone-cta">
+                    <Upload size={28} aria-hidden />
+                    <span>Click to upload</span>
                   </div>
                   <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                 </label>
@@ -714,24 +721,38 @@ function CreateEventForm() {
             </div>
 
             {formData.isPaid && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Ticket Price</label>
-                  <input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => handleChange('price', Number(e.target.value) || 0)}
-                    placeholder="0.00"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                {(formData.ticketTypes || []).filter((t) => t.isActive !== false).length === 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ticket Price
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => handleChange('price', Number(e.target.value) || 0)}
+                      placeholder="0.00"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
+                    />
+                    <p className="text-xs text-neutral-500 mt-1">
+                      Or add ticket types above (General, VIP, etc.) with their own prices.
+                    </p>
+                  </div>
+                )}
+
+                {(formData.ticketTypes || []).filter((t) => t.isActive !== false).length > 0 && (
+                  <div className="sm:col-span-2 text-sm text-neutral-600">
+                    Ticket prices come from the ticket types above. Choose currency and payment gateway for
+                    checkout.
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
                   <select
                     value={formData.currency}
                     onChange={(e) => handleChange('currency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   >
                     <option value="AED">AED</option>
                     <option value="USD">USD</option>
@@ -747,7 +768,7 @@ function CreateEventForm() {
                   <select
                     value={formData.paymentGateway || 'stripe'}
                     onChange={(e) => handleChange('paymentGateway', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
                   >
                     <option value="stripe">Stripe</option>
                     <option value="paypal">PayPal</option>

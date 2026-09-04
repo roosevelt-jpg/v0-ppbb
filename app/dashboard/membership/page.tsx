@@ -242,7 +242,7 @@ export default function MembershipPage() {
         description={
           activeIntent?.mode === 'setup'
             ? 'Your card is saved securely. You will not be charged until the free period ends, then billing starts automatically.'
-            : "Your card is processed securely by Stripe — it's never seen by our servers."
+            : 'Enter your card details below. Payment stays on this page — card fields only.'
         }
         maxWidth="26rem"
         compact={false}

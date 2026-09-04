@@ -54,11 +54,11 @@ export const BUTTON_ROW_COMPACT = `${BUTTON_BASE} pb-compact-btn inline-flex ite
 export const ACTION_ROW = 'flex flex-wrap items-center gap-0.5'
 /** Compact back / navigation control */
 export const BUTTON_BACK = `${BUTTON_BASE} pb-compact-btn inline-flex items-center gap-1.5 h-7 min-h-0 px-2.5 text-xs font-semibold rounded-md bg-black !text-white hover:bg-neutral-800 active:bg-neutral-900 border-0 shadow-none [&_svg]:text-white [&_svg]:h-4 [&_svg]:w-4`
-/** Filter / tab pills — light active state (not black-on-black) */
+/** Filter / tab pills — light surfaces; must use pb-filter-pill-* so globals don't force black CTAs */
 export const FILTER_PILL_ACTIVE =
-  `${BUTTON_BASE} h-7 min-h-0 px-2.5 text-xs rounded-md bg-[#f0efeb] !text-[#111111] border border-[#e4e1da] font-semibold shadow-none`
+  `${BUTTON_BASE} pb-filter-pill-active h-7 min-h-0 px-2.5 text-xs rounded-md bg-[#111111] !text-white border border-[#111111] font-semibold shadow-none`
 export const FILTER_PILL_INACTIVE =
-  `${BUTTON_BASE} h-7 min-h-0 px-2.5 text-xs rounded-md bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50 shadow-none`
+  `${BUTTON_BASE} pb-filter-pill-inactive h-7 min-h-0 px-2.5 text-xs rounded-md bg-white !text-neutral-800 border border-neutral-200 hover:bg-neutral-50 shadow-none`
 /** Up/down reorder controls — black square with white icon */
 export const BUTTON_REORDER = `${BUTTON_BASE} pb-compact-btn min-h-0 min-w-0 h-7 w-7 p-0 rounded bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 disabled:opacity-40 shadow-none border-0 [&_svg]:h-4 [&_svg]:w-4`
 /** @deprecated Use BUTTON_PRIMARY — success actions use black per design system */

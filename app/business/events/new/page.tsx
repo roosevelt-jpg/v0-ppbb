@@ -959,7 +959,8 @@ function BusinessEventForm() {
                   <option value="paid_by_business">Paid</option>
                 </select>
               </div>
-              {formData.pricingType !== 'free' && (
+              {formData.pricingType !== 'free' &&
+                (formData.ticketTypes || []).filter((t) => t.isActive !== false).length === 0 && (
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--foreground)' }}>
                     Price (AED)
@@ -978,6 +979,12 @@ function BusinessEventForm() {
                       fontSize: '14px',
                     }}
                   />
+                </div>
+              )}
+              {formData.pricingType !== 'free' &&
+                (formData.ticketTypes || []).filter((t) => t.isActive !== false).length > 0 && (
+                <div className="sm:col-span-2 text-sm text-neutral-600">
+                  Ticket prices are set on each ticket type below. Use those prices at checkout.
                 </div>
               )}
             </div>

@@ -10,6 +10,7 @@ import type { NormalizedEvent } from '@/lib/event-utils'
 import {
   getEventStartDate,
   getEventTimeRangeLabel,
+  getEventLocationLabel,
   getGenderBadgeLabel,
 } from '@/lib/event-utils'
 import { getEventPriceCornerLabel, hostFromEventDoc } from '@/lib/event-host'
@@ -33,12 +34,7 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
   const logoUrl = host?.businessLogoUrl || ''
   const timeLabel = getEventTimeRangeLabel(event)
   const whenLabel = `${format(startDate, 'MMM d')}${timeLabel ? ` · ${timeLabel}` : ''}`
-  const location =
-    !event.locationName || /^https?:\/\//i.test(event.locationName)
-      ? event.locationName
-        ? 'View map'
-        : 'Location TBA'
-      : event.locationName
+  const location = getEventLocationLabel(event)
 
   return (
     <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full w-full shadow-sm hover:shadow-md transition">
@@ -91,6 +87,10 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
         <h3 className="font-headline text-sm font-bold text-foreground leading-tight line-clamp-2">
           {event.title}
         </h3>
+
+        {event.description ? (
+          <p className="text-[11px] text-muted-foreground line-clamp-2">{event.description}</p>
+        ) : null}
 
         <div className="space-y-0.5 text-[11px] text-muted-foreground">
           <div className="flex items-center gap-1 min-w-0">

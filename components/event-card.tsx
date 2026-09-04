@@ -217,6 +217,10 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
 
         <h3 className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{title}</h3>
 
+        {description ? (
+          <p className="text-[11px] text-neutral-600 line-clamp-2">{description}</p>
+        ) : null}
+
         <div className="space-y-0.5 text-[11px] text-neutral-600">
           <div className="flex items-center gap-1 min-w-0">
             <Calendar size={11} className="shrink-0" />
@@ -224,8 +228,8 @@ export default function EventCard({ event, showActions = true }: EventCardProps)
           </div>
           <div className="flex items-center gap-1 min-w-0">
             <MapPin size={11} className="shrink-0" />
-            <span className="truncate">{locationLabel}</span>
-            <span className="text-neutral-300 mx-0.5">·</span>
+            <span className="truncate min-w-0 flex-1">{locationLabel}</span>
+            <span className="text-neutral-300 mx-0.5 shrink-0">·</span>
             <Users size={11} className="shrink-0" />
             <span className="truncate shrink-0">{attendeesLabel}</span>
           </div>

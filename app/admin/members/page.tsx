@@ -262,8 +262,8 @@ export default function AdminMembersPage() {
             ))}
           </div>
 
-          <div className="flex-1 flex items-center gap-2 bg-white rounded-md border border-gray-200 px-2.5 min-w-0 h-8">
-            <Search size={14} className="text-gray-400 shrink-0" />
+          <div className="flex-1 flex items-center gap-2 bg-white rounded-md border border-neutral-300 px-2.5 min-w-0 h-8">
+            <Search size={14} className="text-neutral-400 shrink-0" />
             <input
               type="text"
               placeholder="Search by name, email, or location..."
@@ -272,7 +272,7 @@ export default function AdminMembersPage() {
                 setSearch(e.target.value)
                 setLoading(true)
               }}
-              className="flex-1 py-1 outline-none bg-transparent text-xs text-gray-700"
+              className="flex-1 py-1 outline-none bg-white text-xs text-neutral-800 placeholder:text-neutral-400"
             />
           </div>
         </div>

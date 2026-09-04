@@ -371,40 +371,40 @@ input[type='checkbox'] {
  * proper touch targets (44px+). Opt-outs: theme/nav chrome, calendar days, rating stars,
  * ghost/outline, floating FABs, selectable cards, form nav rows, metric cards.
  */
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn),
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn),
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label),
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active),
 label.pb-compact-btn,
 a.pb-compact-btn,
-label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn),
-label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) {
+label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label),
+label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label) {
   background-color: #111111 !important;
   color: #ffffff !important;
   border-color: #111111 !important;
   font-family: var(--pb-font-button, var(--font-body));
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):hover,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):hover,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label):hover,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):hover,
 label.pb-compact-btn:hover,
 a.pb-compact-btn:hover,
-label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):hover,
-label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):hover {
+label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label):hover,
+label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label):hover {
   background-color: #262626 !important;
   color: #ffffff !important;
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn) svg,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn) svg,
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label) svg,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active) svg,
 label.pb-compact-btn svg,
 a.pb-compact-btn svg,
-label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) svg,
-label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn) svg {
+label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label) svg,
+label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label) svg {
   color: #ffffff !important;
   stroke: currentColor !important;
 }
 
-button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):active,
-[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):active {
+button:not([data-dashboard-control]):not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label):active,
+[data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):active {
   opacity: 0.9;
 }
 
@@ -831,22 +831,26 @@ html:not(.dark) [data-dashboard-surface='light'] .text-neutral-600 {
   color: #525252 !important;
 }
 
-html:not(.dark) [data-dashboard-surface='light'] .border-border {
-  border-color: #e4e1da !important;
+html:not(.dark) [data-dashboard-surface='light'] input[type='search'],
+html:not(.dark) [data-dashboard-surface='light'] input[placeholder*='Search' i],
+html:not(.dark) [data-dashboard-surface='light'] input[placeholder*='search' i] {
+  background-color: #ffffff !important;
+  color: #111111 !important;
+  border-color: #d4d4d4 !important;
 }
 
 /*
  * Compact controls across Admin / Member / Business dashboards.
  * Keeps brand black buttons but shrinks oversized pills, CTAs, and cards.
  */
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn),
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label),
 [data-dashboard-surface] a.pb-compact-btn,
 [data-dashboard-surface] a.bg-black:not(.pb-float-btn),
 [data-dashboard-surface] [data-dashboard-control],
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn),
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active),
 [data-dashboard-surface] label.pb-compact-btn,
-[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
-[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
+[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label),
+[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label) {
   height: 28px !important;
   min-height: 28px !important;
   max-height: 28px !important;
@@ -863,25 +867,25 @@ html:not(.dark) [data-dashboard-surface='light'] .border-border {
   color: #ffffff !important;
 }
 
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn),
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label),
 [data-dashboard-surface] a.pb-compact-btn,
 [data-dashboard-surface] a.bg-black:not(.pb-float-btn),
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn),
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active),
 [data-dashboard-surface] label.pb-compact-btn,
-[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn),
-[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn) {
+[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label),
+[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-ghost-btn):not(.pb-dropzone-label) {
   background-color: #111111 !important;
   border-color: #111111 !important;
 }
 
-[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn) svg,
+[data-dashboard-surface] button:not([data-menu-item]):not([data-calendar-day]):not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active):not(.pb-dropzone-label) svg,
 [data-dashboard-surface] [data-dashboard-control] svg,
-[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn) svg,
+[data-dashboard-surface] [data-slot='button']:not(.pb-rating-btn):not(.pb-ghost-btn):not(.pb-outline-btn):not(.pb-float-btn):not(.pb-selectable-card):not(.pb-form-nav-btn):not(.pb-metric-btn):not(.pb-filter-pill-inactive):not(.pb-filter-pill-active) svg,
 [data-dashboard-surface] a.pb-compact-btn svg,
 [data-dashboard-surface] a.bg-black:not(.pb-float-btn) svg,
 [data-dashboard-surface] label.pb-compact-btn svg,
-[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn) svg,
-[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn) svg {
+[data-dashboard-surface] label:has(> input[type='file'].hidden):not(.pb-outline-btn):not(.pb-dropzone-label) svg,
+[data-dashboard-surface] label:has(> input[type='file'].sr-only):not(.pb-outline-btn):not(.pb-dropzone-label) svg {
   width: 1rem !important;
   height: 1rem !important;
   min-width: 1rem !important;
@@ -1031,7 +1035,26 @@ html:not(.dark) [data-dashboard-surface='light'] .border-border {
   margin-top: 0.25rem !important;
 }
 
-/* Outline filter pills must stay white (global button rule forces black) */
+/* Filter pills: active = black + white text; inactive = white + dark text */
+[data-dashboard-surface] button.pb-filter-pill-active,
+button.pb-filter-pill-active {
+  background-color: #111111 !important;
+  color: #ffffff !important;
+  border-color: #111111 !important;
+}
+
+[data-dashboard-surface] button.pb-filter-pill-active:hover,
+button.pb-filter-pill-active:hover {
+  background-color: #262626 !important;
+  color: #ffffff !important;
+}
+
+[data-dashboard-surface] button.pb-filter-pill-active svg,
+button.pb-filter-pill-active svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
 [data-dashboard-surface] button.pb-filter-pill-inactive,
 button.pb-filter-pill-inactive {
   background-color: #ffffff !important;
@@ -1049,6 +1072,53 @@ button.pb-filter-pill-inactive:hover {
 button.pb-filter-pill-inactive svg {
   color: #111111 !important;
   stroke: currentColor !important;
+}
+
+/* Dashed file dropzones (banner upload) — full-size area, not compact black CTAs */
+[data-dashboard-surface] label.pb-dropzone-label,
+label.pb-dropzone-label {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: 0 !important;
+  line-height: 1.4 !important;
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+[data-dashboard-surface] label.pb-dropzone-label .pb-dropzone-cta,
+label.pb-dropzone-label .pb-dropzone-cta {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  min-height: 7rem !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 1.5rem 1rem !important;
+  width: 100% !important;
+  border-radius: 0.5rem !important;
+  background-color: #111111 !important;
+  color: #ffffff !important;
+  border: none !important;
+  line-height: 1.35 !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+}
+
+[data-dashboard-surface] label.pb-dropzone-label .pb-dropzone-cta svg,
+label.pb-dropzone-label .pb-dropzone-cta svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  min-width: 1.75rem !important;
+  min-height: 1.75rem !important;
 }
 
 /* ── Modal styles ── */

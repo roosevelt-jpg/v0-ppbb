@@ -40,16 +40,16 @@ const VARIANT_CLASSES: Record<
   },
   navbar: {
     wrapper:
-      'inline-flex items-center self-stretch shrink-0 leading-none h-full max-w-[min(42vw,150px)] sm:max-w-[min(50vw,220px)] lg:max-w-[min(40vw,280px)]',
-    img: 'block h-full max-h-full w-auto object-contain object-left',
+      'inline-flex items-center self-stretch shrink-0 leading-none h-full max-w-[min(52vw,200px)] sm:max-w-[min(55vw,260px)] lg:max-w-[min(45vw,320px)]',
+    img: 'block h-[85%] max-h-12 w-auto object-contain object-left',
   },
   sidebar: {
-    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[260px]',
-    img: 'block w-full max-w-[260px] max-h-24 h-auto object-contain',
+    wrapper: 'inline-flex items-center justify-center shrink-0 leading-none w-full max-w-[280px] px-1',
+    img: 'block w-full max-w-[280px] max-h-28 h-auto object-contain',
   },
   footer: {
     wrapper: 'inline-flex items-center shrink-0 leading-none',
-    img: 'block w-auto max-w-[260px] max-h-20 h-auto object-contain',
+    img: 'block w-auto max-w-[280px] max-h-24 h-auto object-contain',
   },
 }
 

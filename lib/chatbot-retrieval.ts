@@ -22,16 +22,60 @@ export interface RetrievalResult {
   matchScore: number
 }
 
-const FAQ_DIRECT_THRESHOLD = 8
-const KNOWLEDGE_DIRECT_THRESHOLD = 6
+const FAQ_DIRECT_THRESHOLD = 18
+const FAQ_SOFT_THRESHOLD = 25
+const KNOWLEDGE_DIRECT_THRESHOLD = 10
 const MAX_ANSWER_CHARS = 1200
+
+const STOP_WORDS = new Set([
+  'a',
+  'an',
+  'the',
+  'is',
+  'are',
+  'am',
+  'be',
+  'to',
+  'of',
+  'and',
+  'or',
+  'for',
+  'in',
+  'on',
+  'at',
+  'by',
+  'with',
+  'from',
+  'how',
+  'can',
+  'i',
+  'you',
+  'we',
+  'do',
+  'does',
+  'what',
+  'when',
+  'where',
+  'why',
+  'who',
+  'my',
+  'me',
+  'your',
+  'our',
+  'it',
+  'this',
+  'that',
+  'please',
+  'help',
+  'about',
+])
 
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s']/gu, ' ')
     .split(/\s+/)
-    .filter((w) => w.length > 1)
+    .filter((w) => w.length > 1 && !STOP_WORDS.has(w))
 }
 
 function smallTalkReply(userMessage: string): string | null {
@@ -236,8 +280,8 @@ export function retrieveChatAnswer(input: {
     }
   }
 
-  // Soft FAQ — still better than a dead end
-  if (bestFaq && bestFaq.score > 0) {
+  // Soft FAQ — only when the match is strong enough to avoid unrelated answers
+  if (bestFaq && bestFaq.score >= FAQ_SOFT_THRESHOLD) {
     return {
       message: toNaturalSupportReply(bestFaq.faq.answer),
       source: 'faq',
@@ -248,40 +292,6 @@ export function retrieveChatAnswer(input: {
       },
       knowledgeSource: null,
       matchScore: bestFaq.score,
-    }
-  }
-
-  // Soft knowledge / always-include docs
-  if (bestKnowledge && bestKnowledge.item.content.trim()) {
-    const passage = extractBestPassage(bestKnowledge.item.content, userMessage)
-    const alwaysBits = input.knowledge
-      .filter((k) => k.alwaysInclude && k.id !== bestKnowledge.item.id && k.content.trim())
-      .slice(0, 2)
-      .map((k) => extractBestPassage(k.content, userMessage))
-
-    const message = toNaturalSupportReply([passage, ...alwaysBits].filter(Boolean).join('\n\n'))
-    return {
-      message,
-      source: 'knowledge',
-      faqSource: null,
-      knowledgeSource: { id: bestKnowledge.item.id, title: bestKnowledge.item.title },
-      matchScore: bestKnowledge.score,
-    }
-  }
-
-  // Always-include only (e.g. WhatsApp facts) when nothing else matched
-  const alwaysInclude = input.knowledge.filter((k) => k.alwaysInclude && k.content.trim())
-  if (alwaysInclude.length > 0) {
-    const message = alwaysInclude
-      .slice(0, 3)
-      .map((k) => extractBestPassage(k.content, userMessage))
-      .join('\n\n')
-    return {
-      message: toNaturalSupportReply(`${message}\n\n${buildFallback(whatsappLink)}`),
-      source: 'knowledge',
-      faqSource: null,
-      knowledgeSource: { id: alwaysInclude[0]!.id, title: alwaysInclude[0]!.title },
-      matchScore: 0,
     }
   }
 

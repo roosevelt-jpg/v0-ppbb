@@ -218,7 +218,7 @@ export function ChatbotKnowledgePanel() {
         <div>
           <h2 className="text-lg font-semibold text-neutral-900">AI training docs & knowledge</h2>
           <p className="text-sm text-neutral-600 mt-1 max-w-2xl">
-            The chatbot answers from published FAQs plus everything you add here — no Anthropic API.
+            The chatbot prefers Anthropic (from Admin → Integrations) with these notes as context, and falls back to FAQ/knowledge matching when the API is unavailable.
             Upload training documents (.txt, .md, .csv, .json) or paste facts, WhatsApp links, and
             contact lines. Add trigger keywords so the bot matches the right doc to each question.
           </p>

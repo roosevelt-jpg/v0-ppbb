@@ -109,47 +109,32 @@ export function AdminTable({
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
         <input
           placeholder={searchPlaceholder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-secondary border-border text-foreground"
-          style={{
-            width: '100%',
-            paddingLeft: '40px',
-            paddingRight: '12px',
-            paddingTop: '8px',
-            paddingBottom: '8px',
-            border: '1px solid',
-            borderRadius: '6px',
-          }}
+          className="w-full bg-white text-neutral-900 border border-neutral-300 rounded-md pl-10 pr-3 py-2 text-sm placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-400"
         />
       </div>
 
       {/* Table */}
-      <Card className="min-w-0 bg-card border-border">
+      <Card className="min-w-0 bg-white border-neutral-200">
         <AdminTableScroll>
           <table className="w-full" style={{ minWidth: `${minWidth}px` }}>
             <thead>
-              <tr
-                className="bg-secondary"
-                style={{
-                  borderBottomColor: 'var(--border)',
-                  borderBottomWidth: 1,
-                }}
-              >
+              <tr className="bg-neutral-100 border-b border-neutral-200">
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 sm:px-6 py-3 text-left text-xs font-medium whitespace-nowrap text-muted-foreground"
+                    className="px-4 sm:px-6 py-3 text-left text-xs font-semibold whitespace-nowrap text-neutral-800"
                     style={{ width: col.width }}
                   >
                     {col.label}
                   </th>
                 ))}
                 {hasActions && (
-                  <th className="px-3 py-3 text-left text-xs font-medium whitespace-nowrap w-[1%] text-muted-foreground">
+                  <th className="px-3 py-3 text-left text-xs font-semibold whitespace-nowrap w-[1%] text-neutral-800">
                     Actions
                   </th>
                 )}

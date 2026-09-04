@@ -2,13 +2,8 @@ import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 
-/** Resolve Anthropic API key: env override, then encrypted integrations store. */
+/** Resolve Anthropic API key: Integrations vault first, then env override. */
 export async function resolveAnthropicApiKey(): Promise<string | null> {
-  const envKey = process.env.ANTHROPIC_API_KEY
-  if (typeof envKey === 'string' && envKey.trim()) {
-    return envKey.trim()
-  }
-
   try {
     const integration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'anthropic')
     const apiKey = integration?.credentials?.apiKey
@@ -17,6 +12,11 @@ export async function resolveAnthropicApiKey(): Promise<string | null> {
     }
   } catch (error) {
     console.warn('[v0] Could not load Anthropic integration:', error)
+  }
+
+  const envKey = process.env.ANTHROPIC_API_KEY
+  if (typeof envKey === 'string' && envKey.trim()) {
+    return envKey.trim()
   }
 
   return null

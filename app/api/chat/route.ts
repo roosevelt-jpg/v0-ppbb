@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         message: conversational,
         conversationId,
-        engine: 'support',
+        engine: 'anthropic',
       })
     }
 
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: result.message,
       conversationId,
-      engine: 'support',
+      engine: 'retrieval',
     })
   } catch (error) {
     console.error('[v0] Chat API error:', error)

@@ -107,8 +107,11 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
   }
 
   const ticketTypes = normalizeTicketTypes(form)
+  const ticketMax = Math.max(0, ...ticketTypes.map((t) => Number(t.price) || 0))
   const primaryPrice = form.isPaid
-    ? ticketTypes[0]?.price ?? form.price
+    ? ticketMax > 0
+      ? ticketMax
+      : Number(form.price) || 0
     : 0
 
   const resolveMaxAttendees = (): number | null => {
