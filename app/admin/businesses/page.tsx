@@ -83,7 +83,8 @@ function BusinessesPageInner() {
   const fetchBusinesses = React.useCallback(async () => {
     if (!firebaseUser) {
       setLoading(false)
-      return
+      return 
+      
     }
     setLoading(true)
     setMessage(null)
