@@ -12,6 +12,8 @@ import { StripeCardForm } from '@/components/payments/stripe-card-form'
 import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import type { Event } from '@/lib/event-types'
+import { hasActiveMembership } from '@/lib/membership-access'
+import { hasAdminAccess } from '@/lib/roles'
 
 function EventDetailInner() {
   const params = useParams()
@@ -64,6 +66,16 @@ function EventDetailInner() {
   const handleRegister = async () => {
     if (!user) {
       router.push('/login')
+      return
+    }
+
+    const membersOnly = event?.allowNonMemberGuests !== true
+    if (
+      membersOnly &&
+      !hasActiveMembership(user as unknown as Record<string, unknown>) &&
+      !hasAdminAccess(user)
+    ) {
+      setError('This event is for members only. Join or renew your membership to register.')
       return
     }
 
@@ -147,6 +159,13 @@ function EventDetailInner() {
     )
   }
 
+  const membersOnly = event.allowNonMemberGuests !== true
+  const canRegister =
+    !user ||
+    !membersOnly ||
+    hasActiveMembership(user as unknown as Record<string, unknown>) ||
+    hasAdminAccess(user)
+
   return (
     <>
       {stripeCheckout ? (
@@ -193,6 +212,9 @@ function EventDetailInner() {
       onTicketChange={setTicketTypeId}
       onCouponChange={setCouponCode}
       onRegister={handleRegister}
+      membersOnly={membersOnly}
+      canRegister={canRegister}
+      membershipHref={user ? '/dashboard/membership' : '/signup'}
     />
     </>
   )

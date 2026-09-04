@@ -123,6 +123,11 @@ export interface Event {
   recurrence?: EventRecurrence | null
   seriesId?: string | null
   showGuestList: boolean
+  /**
+   * When false (default), only users with an active membership (or admins) may register.
+   * When true, any signed-in account can book — including non-member guests.
+   */
+  allowNonMemberGuests: boolean
 
   bannerURL: string
   /** Optional photo gallery for past / event images (slideshow beside content) */

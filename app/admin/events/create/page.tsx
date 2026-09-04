@@ -54,6 +54,7 @@ interface EventFormData {
   coupons: EventCoupon[]
   requireApproval: boolean
   enableWaitlist: boolean
+  allowNonMemberGuests: boolean
   showGuestList: boolean
   isFeatured: boolean
   cohostEmails: string
@@ -88,6 +89,7 @@ const EMPTY_FORM: EventFormData = {
   coupons: [],
   requireApproval: false,
   enableWaitlist: true,
+  allowNonMemberGuests: false,
   showGuestList: true,
   isFeatured: false,
   cohostEmails: '',
@@ -172,6 +174,7 @@ function CreateEventForm() {
           coupons: mapped.coupons || [],
           requireApproval: mapped.requireApproval === true,
           enableWaitlist: mapped.enableWaitlist !== false,
+          allowNonMemberGuests: mapped.allowNonMemberGuests === true,
           showGuestList: mapped.showGuestList !== false,
           isFeatured: Boolean(mapped.isFeatured),
           cohostEmails: (mapped.cohostEmails || []).join(', '),
@@ -683,6 +686,7 @@ function CreateEventForm() {
             coupons={formData.coupons}
             requireApproval={formData.requireApproval}
             enableWaitlist={formData.enableWaitlist}
+            allowNonMemberGuests={formData.allowNonMemberGuests}
             showGuestList={formData.showGuestList}
             isFeatured={formData.isFeatured}
             cohostEmails={formData.cohostEmails}

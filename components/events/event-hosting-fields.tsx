@@ -11,6 +11,7 @@ type EventHostingFieldsProps = {
   coupons: EventCoupon[]
   requireApproval: boolean
   enableWaitlist: boolean
+  allowNonMemberGuests: boolean
   showGuestList: boolean
   isFeatured: boolean
   cohostEmails: string
@@ -25,6 +26,7 @@ type EventHostingFieldsProps = {
     coupons?: EventCoupon[]
     requireApproval?: boolean
     enableWaitlist?: boolean
+    allowNonMemberGuests?: boolean
     showGuestList?: boolean
     isFeatured?: boolean
     cohostEmails?: string
@@ -40,6 +42,7 @@ export function EventHostingFields({
   coupons,
   requireApproval,
   enableWaitlist,
+  allowNonMemberGuests,
   showGuestList,
   isFeatured,
   cohostEmails,
@@ -212,6 +215,20 @@ export function EventHostingFields({
             onChange={(e) => onChange({ enableWaitlist: e.target.checked })}
           />
           Enable waitlist when full
+        </label>
+        <label className="text-sm flex items-start gap-2">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={allowNonMemberGuests}
+            onChange={(e) => onChange({ allowNonMemberGuests: e.target.checked })}
+          />
+          <span>
+            Allow non-member guests to book
+            <span className="block text-xs text-neutral-500 mt-0.5">
+              Off by default — only paying members can register. Turn on for public / charity events.
+            </span>
+          </span>
         </label>
         <label className="text-sm flex items-center gap-2">
           <input

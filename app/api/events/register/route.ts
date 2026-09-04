@@ -99,6 +99,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Event is not open for registration' }, { status: 400 })
     }
 
+    // Members-only by default; hosts opt in with allowNonMemberGuests.
+    if (!isExplicitTrue(event.allowNonMemberGuests)) {
+      const userSnap = await db.collection('users').doc(userId).get()
+      const userData = (userSnap.exists ? userSnap.data() : {}) as Record<string, unknown>
+      const { hasActiveMembership } = await import('@/lib/membership-access')
+      const { hasAdminAccessServer } = await import('@/lib/roles-server')
+      if (!hasActiveMembership(userData) && !hasAdminAccessServer(userData)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'This event is for Passive Blessings members only. Join or renew your membership to register.',
+            code: 'members_only',
+          },
+          { status: 403 }
+        )
+      }
+    }
+
     const existing = await findExistingRegistration(eventId, userId)
     if (existing) {
       const existingData = existing.data() || {}
