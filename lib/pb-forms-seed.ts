@@ -226,7 +226,7 @@ export const PB_FORM_TEMPLATES: Omit<
           'Fujairah',
           'Other',
         ]),
-        field('gender', 'radio', 'Gender', 6, true, ['Male', 'Female', 'Prefer not to say']),
+        field('gender', 'radio', 'Gender', 6, true, ['Male', 'Female']),
         field('ageRange', 'select', 'Age range', 7, true, [
           'Under 18',
           '18–24',

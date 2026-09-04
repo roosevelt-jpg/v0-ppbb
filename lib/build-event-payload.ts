@@ -51,6 +51,7 @@ export interface AdminEventFormInput {
   coupons?: EventCoupon[]
   requireApproval?: boolean
   enableWaitlist?: boolean
+  allowNonMemberGuests?: boolean
   cohostIds?: string[]
   cohostEmails?: string[]
   showGuestList?: boolean
@@ -158,6 +159,7 @@ export function buildEventApiPayload(form: AdminEventFormInput) {
     coupons: Array.isArray(form.coupons) ? form.coupons : [],
     requireApproval: form.requireApproval === true,
     enableWaitlist: Boolean(form.enableWaitlist),
+    allowNonMemberGuests: form.allowNonMemberGuests === true,
     waitlistCount: 0,
     cohostIds: form.cohostIds || [],
     cohostEmails: form.cohostEmails || [],
@@ -261,6 +263,7 @@ export function mapEventDocToAdminForm(
     coupons: Array.isArray(data.coupons) ? (data.coupons as EventCoupon[]) : [],
     requireApproval: data.requireApproval === true,
     enableWaitlist: Boolean(data.enableWaitlist),
+    allowNonMemberGuests: data.allowNonMemberGuests === true,
     cohostIds: Array.isArray(data.cohostIds) ? (data.cohostIds as string[]) : [],
     cohostEmails: Array.isArray(data.cohostEmails) ? (data.cohostEmails as string[]) : [],
     showGuestList: data.showGuestList !== false,

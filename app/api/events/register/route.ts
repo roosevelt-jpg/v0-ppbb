@@ -99,8 +99,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Event is not open for registration' }, { status: 400 })
     }
 
+    // Members-only by default; hosts opt in with allowNonMemberGuests.
+    if (!isExplicitTrue(event.allowNonMemberGuests)) {
+      const userSnap = await db.collection('users').doc(userId).get()
+      const userData = (userSnap.exists ? userSnap.data() : {}) as Record<string, unknown>
+      const { hasActiveMembership } = await import('@/lib/membership-access')
+      const { hasAdminAccessServer } = await import('@/lib/roles-server')
+      if (!hasActiveMembership(userData) && !hasAdminAccessServer(userData)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'This event is for Passive Blessings members only. Join or renew your membership to register.',
+            code: 'members_only',
+          },
+          { status: 403 }
+        )
+      }
+    }
+
     const existing = await findExistingRegistration(eventId, userId)
     if (existing) {
+      const existingData = existing.data() || {}
+      const existingStatus = String(existingData.status || '')
+      const existingPay = String(existingData.paymentStatus || '')
+      // Allow resuming unpaid checkout instead of hard-blocking the user.
+      if (existingStatus === 'pending_payment' || existingPay === 'pending') {
+        return NextResponse.json({
+          success: true,
+          registrationId: existing.id,
+          status: existingStatus || 'pending_payment',
+          resumePayment: true,
+          registration: { id: existing.id, ...existingData },
+        })
+      }
       return NextResponse.json(
         { success: false, error: 'You are already registered for this event', registrationId: existing.id },
         { status: 409 }
@@ -123,13 +154,14 @@ export async function POST(request: NextRequest) {
     }
 
     const price = couponResult.price
-    const isPaid = price > 0 && registrationType !== 'free'
+    // Never trust client "free" when the resolved ticket still has a price.
+    const isPaid = price > 0
     const full = isEventFull(event, ticket)
     const enableWaitlist = Boolean(event.enableWaitlist)
     // Event-level only. Strict check — Boolean("false") must not become pending.
     const requireApproval = isExplicitTrue(event.requireApproval)
 
-    let status: 'confirmed' | 'pending' | 'waitlisted' = 'confirmed'
+    let status: 'confirmed' | 'pending' | 'pending_payment' | 'waitlisted' = 'confirmed'
     let waitlistPosition: number | null = null
 
     if (full) {
@@ -147,12 +179,14 @@ export async function POST(request: NextRequest) {
     const businessCut = isPaid ? price - pbCut : 0
 
     const needsPayment = isPaid && status !== 'waitlisted'
-    // Never mark as pending approval unless the host explicitly requires approval
-    const registrationStatus: 'confirmed' | 'pending' | 'waitlisted' = needsPayment
-      ? requireApproval
-        ? 'pending'
-        : 'confirmed'
-      : status
+    // Paid tickets stay pending_payment until Stripe/PayPal/Ziina succeeds.
+    // Host-approval events stay pending until approve, then still need payment if priced.
+    const registrationStatus: 'confirmed' | 'pending' | 'pending_payment' | 'waitlisted' =
+      needsPayment
+        ? requireApproval
+          ? 'pending'
+          : 'pending_payment'
+        : status
 
     const registration = buildRegistrationRecord({
       eventId,
@@ -162,8 +196,9 @@ export async function POST(request: NextRequest) {
       userGender,
       status: registrationStatus,
       ticket,
-      amountPaid: price,
-      paymentStatus: needsPayment ? 'pending' : price > 0 ? 'pending' : 'free',
+      amountPaid: 0,
+      ticketPrice: price,
+      paymentStatus: needsPayment ? 'pending' : 'free',
       pbCut,
       businessCut,
       currency: ticket.currency || (event.currency as string) || 'AED',
@@ -176,6 +211,11 @@ export async function POST(request: NextRequest) {
         needsPayment || registrationStatus !== 'confirmed' ? null : generateCheckInCode(),
       qrToken: needsPayment || registrationStatus !== 'confirmed' ? null : generateQrToken(),
     })
+
+    // Free confirmed path: amountPaid stays 0 with paymentStatus free
+    if (!needsPayment && registrationStatus === 'confirmed') {
+      registration.paymentStatus = 'free'
+    }
 
     if (status === 'waitlisted') {
       registration.status = 'waitlisted'

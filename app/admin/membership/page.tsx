@@ -101,32 +101,27 @@ export default function MembershipPage() {
         member?.membershipPlanName || member?.membershipTier || ''
       ).trim()
       const plan = plans.find((p) => p.id === planId)
-      const isBusiness = /business|partner|corporate|company/i.test(String(plan?.name || ''))
-      await updateDoc(doc(db, 'users', memberId), {
-        membershipTier: planId,
-        membershipPlanId: planId,
-        membershipPlanName: plan?.name ?? planId,
-        membershipStatus: 'active',
-        membershipRenewDate: new Date(
-          new Date().setMonth(new Date().getMonth() + (plan?.billingPeriod === 'yearly' ? 12 : 1))
-        ).toISOString(),
-        upgradedAt: new Date(),
-        ...(isBusiness
-          ? {
-              role: 'business',
-              userType: 'business',
-              hasBusinessProfile: true,
-              roles: ['member', 'business'],
-            }
-          : {
-              role: 'member',
-              userType: 'member',
-              roles: ['member'],
-            }),
+
+      const mode = window.confirm(
+        `Change billing plan to "${plan?.name || planId}"?\n\nOK = Schedule Stripe change from next renewal (no immediate charge)\nCancel = Grant portal access only (no Stripe change)`
+      )
+        ? 'schedule'
+        : 'grant'
+
+      const json = await adminApiFetch('/api/admin/membership/change-plan', {
+        method: 'POST',
+        body: JSON.stringify({ memberId, planId, mode }),
       })
+      if (!json?.success) {
+        throw new Error(json?.error || 'Plan change failed')
+      }
+      if (json.message) {
+        window.alert(String(json.message))
+      }
+
       audit({
         actionType: 'update',
-        action: `Updated membership tier for member ${memberId}`,
+        action: `Updated membership tier for member ${memberId} (${mode})`,
         entityType: 'member',
         entityId: memberId,
         entityName: plan?.name,
@@ -144,6 +139,7 @@ export default function MembershipPage() {
       })
     } catch (error) {
       console.error('[v0] Error upgrading tier:', error)
+      alert(error instanceof Error ? error.message : 'Plan change failed')
     }
   }
 
@@ -678,7 +674,7 @@ export default function MembershipPage() {
                       </td>
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap min-w-[10rem]">
                         <div
-                          className="relative z-20"
+                          className="relative z-50"
                           onClick={(e) => e.stopPropagation()}
                           onMouseDown={(e) => e.stopPropagation()}
                         >

@@ -71,8 +71,15 @@ export async function createStripeMembershipIntent(params: {
   planId: string
   userId: string
   trialDays?: number
+  /** Stripe coupon id for percent-off repeating discounts */
+  couponId?: string
   extraMetadata?: Record<string, string>
-}): Promise<{ clientSecret: string; mode: 'payment' | 'setup'; subscriptionId: string }> {
+}): Promise<{
+  clientSecret: string | null
+  mode: 'payment' | 'setup'
+  subscriptionId: string
+  alreadyComplete?: boolean
+}> {
   const { getStripeClient } = await import('@/lib/get-stripe-client')
   const stripe = await getStripeClient()
   const db = getAdminDb()
@@ -87,8 +94,42 @@ export async function createStripeMembershipIntent(params: {
 
   const customerId = await getOrCreateStripeCustomer(stripe, db, params.userId)
   const interval = membershipRecurringInterval(plan.billingPeriod)
+  const metadata = {
+    type: 'membership',
+    userId: params.userId,
+    planId: params.planId,
+    autoDebit: 'true',
+    billingInterval: interval,
+    ...(params.extraMetadata || {}),
+  }
+  const discountOpts = params.couponId
+    ? { discounts: [{ coupon: params.couponId }] }
+    : {}
 
-  const subscription = await stripe.subscriptions.create({
+  // Prefer upgrading an existing active/trialing membership (prorated) instead
+  // of creating a second full-price subscription.
+  const userSnap = await db.collection('users').doc(params.userId).get()
+  const userData = userSnap.data() || {}
+  let existingSubId = String(userData.stripeSubscriptionId || '').trim()
+
+  if (!existingSubId) {
+    const subQ = await db
+      .collection('subscriptions')
+      .where('userId', '==', params.userId)
+      .limit(10)
+      .get()
+    const live = subQ.docs.find((d) => {
+      const s = d.data()
+      const st = String(s.status || '')
+      return (
+        Boolean(s.stripeSubscriptionId) &&
+        (st === 'active' || st === 'trialing' || s.cancelAtPeriodEnd === true)
+      )
+    })
+    existingSubId = String(live?.data()?.stripeSubscriptionId || '').trim()
+  }
+
+  const buildCreateParams = (): Stripe.SubscriptionCreateParams => ({
     customer: customerId,
     items: [{ price: priceId }],
     collection_method: 'charge_automatically',
@@ -99,15 +140,95 @@ export async function createStripeMembershipIntent(params: {
     },
     trial_period_days: params.trialDays && params.trialDays > 0 ? params.trialDays : undefined,
     expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
-    metadata: {
-      type: 'membership',
+    metadata,
+    ...discountOpts,
+  })
+
+  let subscription: Stripe.Subscription
+
+  if (existingSubId) {
+    try {
+      const current = await stripe.subscriptions.retrieve(existingSubId)
+      const status = String(current.status || '')
+      if (['active', 'trialing', 'past_due'].includes(status) && !current.cancel_at_period_end) {
+        const itemId = current.items.data[0]?.id
+        if (itemId) {
+          subscription = await stripe.subscriptions.update(existingSubId, {
+            items: [{ id: itemId, price: priceId }],
+            proration_behavior: 'create_prorations',
+            metadata,
+            expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
+            cancel_at_period_end: false,
+            ...(params.couponId ? { discounts: [{ coupon: params.couponId }] } : {}),
+          })
+        } else {
+          throw new Error('missing subscription item')
+        }
+      } else if (['incomplete', 'incomplete_expired'].includes(status)) {
+        try {
+          await stripe.subscriptions.cancel(existingSubId)
+        } catch {
+          /* ignore */
+        }
+        subscription = await stripe.subscriptions.create(buildCreateParams())
+      } else {
+        subscription = await stripe.subscriptions.create(buildCreateParams())
+      }
+    } catch {
+      subscription = await stripe.subscriptions.create(buildCreateParams())
+    }
+  } else {
+    subscription = await stripe.subscriptions.create(buildCreateParams())
+  }
+
+  await db.collection('users').doc(params.userId).set(
+    {
+      stripeSubscriptionId: subscription.id,
+      stripeCustomerId: customerId,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  )
+
+  await db.collection('subscriptions').doc(subscription.id).set(
+    {
       userId: params.userId,
       planId: params.planId,
-      autoDebit: 'true',
-      billingInterval: interval,
-      ...(params.extraMetadata || {}),
+      planName: String(plan.name || ''),
+      stripeSubscriptionId: subscription.id,
+      stripeCustomerId: customerId,
+      gateway: 'stripe',
+      status: subscription.status === 'active' ? 'active' : 'incomplete',
+      interval,
+      cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
+      updatedAt: FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     },
-  })
+    { merge: true }
+  )
+
+  // Upgrades that are already active (proration charged on file) need no card form.
+  if (['active', 'trialing'].includes(String(subscription.status))) {
+    try {
+      const secret = await clientSecretForIncompleteSubscription(stripe, subscription)
+      return {
+        clientSecret: secret.clientSecret,
+        mode: secret.mode,
+        subscriptionId: subscription.id,
+      }
+    } catch {
+      await db.collection('subscriptions').doc(subscription.id).set(
+        { status: 'active', updatedAt: FieldValue.serverTimestamp() },
+        { merge: true }
+      )
+      return {
+        clientSecret: null,
+        mode: 'payment',
+        subscriptionId: subscription.id,
+        alreadyComplete: true,
+      }
+    }
+  }
 
   const secret = await clientSecretForIncompleteSubscription(stripe, subscription)
   return {

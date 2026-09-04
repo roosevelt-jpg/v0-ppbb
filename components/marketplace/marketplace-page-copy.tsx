@@ -54,7 +54,7 @@ export function MarketplacePageCopy() {
           </p>
           <BusinessFeatureLink
             featureLabel="Join as Business Member"
-            href="/join?type=business"
+            href="/dashboard/membership?upgrade=business"
             className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-neutral-800 transition-colors"
           >
             Join as Business Member

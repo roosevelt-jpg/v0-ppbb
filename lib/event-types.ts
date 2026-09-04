@@ -16,6 +16,7 @@ export type PayoutStatus = 'not_applicable' | 'pending' | 'processing' | 'paid_o
 export type RegistrationStatus =
   | 'confirmed'
   | 'pending'
+  | 'pending_payment'
   | 'waitlisted'
   | 'cancelled'
   | 'rejected'
@@ -122,6 +123,11 @@ export interface Event {
   recurrence?: EventRecurrence | null
   seriesId?: string | null
   showGuestList: boolean
+  /**
+   * When false (default), only users with an active membership (or admins) may register.
+   * When true, any signed-in account can book — including non-member guests.
+   */
+  allowNonMemberGuests: boolean
 
   bannerURL: string
   /** Optional photo gallery for past / event images (slideshow beside content) */
@@ -186,6 +192,8 @@ export interface EventRegistration {
 
   paymentStatus: 'free' | 'paid' | 'pending' | 'refunded' | null
   amountPaid: number | null
+  /** Expected ticket price before payment (distinct from amountPaid). */
+  ticketPrice?: number | null
   currency: string | null
   pbCut: number | null
   businessCut: number | null

@@ -1,7 +1,7 @@
 /** Client-side admin MFA session after email OTP (step 3). */
 
 export const ADMIN_MFA_STORAGE_KEY = 'pb_admin_mfa_v1'
-export const ADMIN_MFA_TTL_MS = 12 * 60 * 60 * 1000
+export const ADMIN_MFA_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
 export function setAdminMfaSession(uid: string): void {
   if (typeof window === 'undefined') return

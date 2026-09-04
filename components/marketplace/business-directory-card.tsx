@@ -184,7 +184,7 @@ export function BusinessDirectoryEmptyState() {
       </p>
       <BusinessFeatureLink
         featureLabel="List your business"
-        href="/join?type=business"
+        href="/dashboard/membership?upgrade=business"
         className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-[#111] text-white rounded-lg font-body text-sm font-semibold hover:bg-neutral-800 transition-colors"
       >
         List your business

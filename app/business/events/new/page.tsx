@@ -75,6 +75,7 @@ function BusinessEventForm() {
     coupons: [] as EventCoupon[],
     requireApproval: false,
     enableWaitlist: true,
+    allowNonMemberGuests: false,
     showGuestList: true,
     isFeatured: false,
     cohostEmails: '',
@@ -157,6 +158,7 @@ function BusinessEventForm() {
           coupons: Array.isArray(event.coupons) ? event.coupons : [],
           requireApproval: event.requireApproval === true,
           enableWaitlist: event.enableWaitlist !== false,
+          allowNonMemberGuests: event.allowNonMemberGuests === true,
           showGuestList: event.showGuestList !== false,
           isFeatured: Boolean(event.isFeatured),
           cohostEmails: Array.isArray(event.cohostEmails) ? event.cohostEmails.join(', ') : '',
@@ -229,6 +231,7 @@ function BusinessEventForm() {
         coupons: formData.coupons,
         requireApproval: formData.requireApproval,
         enableWaitlist: formData.enableWaitlist,
+        allowNonMemberGuests: formData.allowNonMemberGuests,
         showGuestList: formData.showGuestList,
         isFeatured: formData.isFeatured,
         cohostEmails: formData.cohostEmails
@@ -986,6 +989,7 @@ function BusinessEventForm() {
             coupons={formData.coupons}
             requireApproval={formData.requireApproval}
             enableWaitlist={formData.enableWaitlist}
+            allowNonMemberGuests={formData.allowNonMemberGuests}
             showGuestList={formData.showGuestList}
             isFeatured={formData.isFeatured}
             cohostEmails={formData.cohostEmails}

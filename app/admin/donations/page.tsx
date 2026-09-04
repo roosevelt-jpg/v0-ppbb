@@ -18,27 +18,76 @@ export default function DonationsPage() {
   const [actingId, setActingId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(db, 'donations'),
+    const mapSubmission = (docSnap: { id: string; data: () => Record<string, unknown> }) => {
+      const d = docSnap.data()
+      const statusRaw = String(d.status || 'pending')
+      const status =
+        statusRaw === 'pending_verification'
+          ? 'pending'
+          : statusRaw === 'verified'
+            ? 'completed'
+            : statusRaw
+      return {
+        id: docSnap.id,
+        ...d,
+        donorName: d.donorName || d.userName || d.anonymousName || 'Anonymous',
+        amount: Number(d.amount) || 0,
+        type: d.donationType || d.type || 'monetary',
+        targetCase: d.causeName || d.targetCase || 'General',
+        status,
+        createdAt: d.createdAt || d.submittedAt,
+      }
+    }
+
+    const unsubSubs = onSnapshot(
+      collection(db, 'donationSubmissions'),
       (snapshot) => {
-        const donationData = snapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
-        })) as any[]
-        setDonations(
-          donationData.sort(
-            (a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+        const fromSubs = snapshot.docs.map((docSnap) => mapSubmission(docSnap))
+        setDonations((prev) => {
+          const legacy = prev.filter((p) => p._source === 'donations')
+          const merged = [
+            ...fromSubs.map((r) => ({ ...r, _source: 'donationSubmissions' })),
+            ...legacy,
+          ].sort(
+            (a, b) =>
+              (b.createdAt?.toMillis?.() || new Date(b.createdAt || 0).getTime() || 0) -
+              (a.createdAt?.toMillis?.() || new Date(a.createdAt || 0).getTime() || 0)
           )
-        )
+          return merged
+        })
         setLoading(false)
       },
       (error) => {
-        console.error('[admin/donations] Error fetching donations:', error)
+        console.error('[admin/donations] donationSubmissions:', error)
         setLoading(false)
       }
     )
 
-    return () => unsubscribe()
+    const unsubLegacy = onSnapshot(
+      collection(db, 'donations'),
+      (snapshot) => {
+        const legacy = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+          _source: 'donations',
+        })) as any[]
+        setDonations((prev) => {
+          const fromSubs = prev.filter((p) => p._source === 'donationSubmissions')
+          return [...fromSubs, ...legacy].sort(
+            (a, b) =>
+              (b.createdAt?.toMillis?.() || new Date(b.createdAt || 0).getTime() || 0) -
+              (a.createdAt?.toMillis?.() || new Date(a.createdAt || 0).getTime() || 0)
+          )
+        })
+        setLoading(false)
+      },
+      () => setLoading(false)
+    )
+
+    return () => {
+      unsubSubs()
+      unsubLegacy()
+    }
   }, [])
 
   const columns = [

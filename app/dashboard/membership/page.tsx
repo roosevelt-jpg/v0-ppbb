@@ -51,6 +51,12 @@ export default function MembershipPage() {
     else if (status === 'canceled') setStatusBanner('Checkout was canceled.')
     else if (status === 'error')
       setStatusBanner('Payment could not be completed. Please try again or contact support.')
+    const upgrade = new URLSearchParams(window.location.search).get('upgrade')
+    if (upgrade === 'business') {
+      setStatusBanner(
+        'Choose a Business membership plan below. If you already subscribe, you only pay the prorated difference.'
+      )
+    }
   }, [])
 
   useEffect(() => {
@@ -181,6 +187,11 @@ export default function MembershipPage() {
       }
 
       if (gateway === 'stripe') {
+        if (data.alreadyComplete) {
+          setStatusBanner('Plan upgraded. The prorated difference was charged to your card on file.')
+          await refreshProfile()
+          return
+        }
         if (!data.clientSecret) throw new Error('Stripe did not return a client secret')
         setActiveIntent({ clientSecret: data.clientSecret, mode: data.mode || 'payment' })
         return

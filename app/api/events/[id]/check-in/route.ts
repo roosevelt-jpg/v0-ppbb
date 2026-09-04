@@ -64,6 +64,13 @@ export async function POST(request: NextRequest, context: Ctx) {
       { status: 400 }
     )
   }
+  const pay = String(data.paymentStatus || '')
+  if (pay === 'pending' || (pay && pay !== 'paid' && pay !== 'free')) {
+    return NextResponse.json(
+      { success: false, error: 'Cannot check in until payment is complete' },
+      { status: 400 }
+    )
+  }
   if (data.checkedInAt) {
     return NextResponse.json({
       success: true,

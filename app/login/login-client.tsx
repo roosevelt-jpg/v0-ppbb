@@ -116,7 +116,7 @@ function LoginPageContent() {
       timestamp: new Date().toISOString()
     })
 
-    const { user, error: loginError } = await loginUser(email, password)
+    const { user, error: loginError } = await loginUser(email, password, { rememberMe })
 
     if (loginError) {
       let displayError = loginError

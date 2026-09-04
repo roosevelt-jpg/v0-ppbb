@@ -2,21 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe-utils'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { FieldValue } from 'firebase-admin/firestore'
+import { verifyIdToken } from '@/lib/admin-access-server'
+import { notifyMembershipCancelled } from '@/lib/member-notifications'
 
 /**
  * Stop subscription renewal (cancel at period end) or cancel immediately.
- * Body: { subscriptionId, stripeSubscriptionId?, stopRenewalOnly? }
+ * Body: { subscriptionId?, stripeSubscriptionId?, stopRenewalOnly? }
+ * Auth required — only the owning member may cancel.
  */
 export async function POST(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    const uid = token ? await verifyIdToken(token) : null
+    if (!uid) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await req.json()
     const subscriptionId = String(body.subscriptionId || '').trim()
     const stripeSubscriptionId = String(body.stripeSubscriptionId || '').trim()
     const stopRenewalOnly = body.stopRenewalOnly !== false
-
-    if (!subscriptionId && !stripeSubscriptionId) {
-      return NextResponse.json({ error: 'Subscription ID required' }, { status: 400 })
-    }
 
     const db = getAdminDb()
     let docRef = subscriptionId ? db.collection('subscriptions').doc(subscriptionId) : null
@@ -34,11 +40,39 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (!snap?.exists) {
+      const byUser = await db
+        .collection('subscriptions')
+        .where('userId', '==', uid)
+        .limit(10)
+        .get()
+      const live = byUser.docs.find((d) => {
+        const st = String(d.data().status || '')
+        return st === 'active' || st === 'trialing' || d.data().cancelAtPeriodEnd === true
+      })
+      if (live) {
+        docRef = live.ref
+        snap = live
+      }
+    }
+
     const data = snap?.exists ? snap.data() : null
+    if (data && String(data.userId || '') && String(data.userId) !== uid) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const userSnap = await db.collection('users').doc(uid).get()
+    const userStripeSub = String(userSnap.data()?.stripeSubscriptionId || '').trim()
+
     const stripeId =
       stripeSubscriptionId ||
       String(data?.stripeSubscriptionId || '') ||
+      userStripeSub ||
       (subscriptionId.startsWith('sub_') ? subscriptionId : '')
+
+    if (!stripeId && !docRef) {
+      return NextResponse.json({ error: 'No active subscription found' }, { status: 404 })
+    }
 
     if (stripe && stripeId) {
       if (stopRenewalOnly) {
@@ -63,6 +97,26 @@ export async function POST(req: NextRequest) {
               updatedAt: FieldValue.serverTimestamp(),
             }
       )
+    } else if (stripeId) {
+      await db.collection('subscriptions').doc(stripeId).set(
+        {
+          userId: uid,
+          stripeSubscriptionId: stripeId,
+          gateway: 'stripe',
+          cancelAtPeriodEnd: stopRenewalOnly,
+          status: stopRenewalOnly ? 'active' : 'cancelled',
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      )
+    }
+
+    if (stopRenewalOnly) {
+      notifyMembershipCancelled({
+        userId: uid,
+        planName: String(data?.planName || userSnap.data()?.membershipPlanName || ''),
+        endsAt: null,
+      })
     }
 
     return NextResponse.json({ success: true, stopRenewalOnly })

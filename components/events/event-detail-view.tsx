@@ -36,6 +36,11 @@ interface EventDetailViewProps {
   onTicketChange?: (id: string) => void
   onCouponChange?: (code: string) => void
   onRegister?: () => void
+  /** When true, only members may register (unless guests are allowed on the event). */
+  membersOnly?: boolean
+  /** Signed-in user may register (member, admin, or guests allowed). */
+  canRegister?: boolean
+  membershipHref?: string
 }
 
 function formatEventDate(value: unknown, pattern: string) {
@@ -110,6 +115,9 @@ export function EventDetailView({
   onTicketChange,
   onCouponChange,
   onRegister,
+  membersOnly = false,
+  canRegister = true,
+  membershipHref = '/dashboard/membership',
 }: EventDetailViewProps) {
   const ticketTypes: TicketType[] = Array.isArray(event.ticketTypes)
     ? event.ticketTypes.filter((t) => t.isActive !== false)
@@ -333,6 +341,15 @@ export function EventDetailView({
                   </div>
                 )}
 
+                {membersOnly && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-900 font-medium">Members only</p>
+                    <p className="text-xs text-amber-800 mt-1">
+                      Active Passive Blessings membership is required to register for this event.
+                    </p>
+                  </div>
+                )}
+
                 {ticketTypes.length > 0 && onTicketChange && (
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Ticket type</p>
@@ -377,7 +394,7 @@ export function EventDetailView({
                   </div>
                 )}
 
-                {!previewMode && onRegister && (
+                {!previewMode && onRegister && canRegister && (
                   <button
                     type="button"
                     onClick={onRegister}
@@ -393,6 +410,15 @@ export function EventDetailView({
                           ? 'Get Tickets'
                           : 'Register Now'}
                   </button>
+                )}
+
+                {!previewMode && !canRegister && membersOnly && (
+                  <a
+                    href={membershipHref}
+                    className="w-full py-3 bg-black !text-white rounded-lg font-semibold hover:bg-gray-900 flex items-center justify-center gap-2 min-h-[44px] text-center"
+                  >
+                    Become a member to register
+                  </a>
                 )}
 
                 {previewMode && (

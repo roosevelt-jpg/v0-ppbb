@@ -195,9 +195,16 @@ export default function DonationPage() {
   }
 
   const openDonateModal = (cause: CharityCase) => {
-    setSelectedCause(cause)
-    setSelectedPartner(null)
-    setModalStep('partner')
+    const assigned = cause.partnerId
+      ? partners.find((p) => p.id === cause.partnerId)
+      : null
+    const beit =
+      partners.find((p) => /beit|khair/i.test(String(p.name || ''))) ||
+      partners[0] ||
+      null
+    const partner = assigned || beit
+    // Skip partner picker — go straight to amount/confirm with default partner.
+    window.location.href = buildConfirmHref(cause, partner, 'sadaqah')
   }
 
   const closeDonateModal = () => {

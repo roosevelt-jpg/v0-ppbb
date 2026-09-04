@@ -88,13 +88,19 @@ async function handleStripeCheckout(
   try {
     const trialDays = planTrialDays(plan)
     const trialMonths = normalizePlanTrialMonths(plan.trialMonths)
-    const { clientSecret, mode, subscriptionId } = await createStripeMembershipIntent({
+    const { clientSecret, mode, subscriptionId, alreadyComplete } = await createStripeMembershipIntent({
       planId,
       userId,
       trialDays,
       extraMetadata: trialMonths ? { trialMonths: String(trialMonths) } : undefined,
     })
-    return NextResponse.json({ clientSecret, mode, subscriptionId, gateway: 'stripe' })
+    return NextResponse.json({
+      clientSecret,
+      mode,
+      subscriptionId,
+      alreadyComplete: Boolean(alreadyComplete),
+      gateway: 'stripe',
+    })
   } catch (error) {
     console.error('[checkout] Stripe:', error)
     return NextResponse.json(
