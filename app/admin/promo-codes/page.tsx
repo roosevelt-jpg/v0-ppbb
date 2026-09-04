@@ -204,6 +204,7 @@ export default function AdminPromoCodesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-neutral-600 dark:text-muted-foreground">
             Free access (100%) or percent off (e.g. 30% / 50% for 3 months via Stripe).
+            </p>
           <p className="text-sm text-neutral-600">
             Codes grant 100% free access for forever or any duration from 1–12 months.
           </p>
