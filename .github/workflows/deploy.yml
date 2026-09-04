@@ -23,9 +23,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        # No `version:` here on purpose — this action auto-detects the pnpm
-        # version from package.json's "packageManager" field (11.22.0), and
-        # errors out if both are specified and could drift out of sync.
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -39,7 +36,6 @@ jobs:
       - name: Write production env file
         run: |
           echo "${{ secrets.PROD_ENV_FILE_B64 }}" | base64 -d > .env.production.local
-          # Fail loudly if the secret was empty/missing rather than shipping an empty build
           test -s .env.production.local
 
       - name: Build
@@ -69,80 +65,82 @@ jobs:
 
       - name: Extract, restart, and health-check on EC2
         run: |
-          ssh -i ~/.ssh/deploy_key "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" '
-            set -e
+          ssh -i ~/.ssh/deploy_key "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" bash -s <<'REMOTE_SCRIPT'
+          set -e
 
-            # Stage the new build alongside the current one so we can roll back
-            # if it fails to come up, instead of deploying blind over the old copy.
-            rm -rf ~/app_new
-            mkdir -p ~/app_new
-            tar -xzf ~/passive-blessings-standalone.tgz -C ~/app_new
-            rm -f ~/passive-blessings-standalone.tgz
+          # Stage the new build alongside the current one so we can roll back
+          # if it fails to come up, instead of deploying blind over the old copy.
+          rm -rf ~/app_new
+          mkdir -p ~/app_new
+          tar -xzf ~/passive-blessings-standalone.tgz -C ~/app_new
+          rm -f ~/passive-blessings-standalone.tgz
 
-            rm -rf ~/app_prev
-            [ -d ~/app ] && cp -al ~/app ~/app_prev || true
+          rm -rf ~/app_prev
+          [ -d ~/app ] && cp -al ~/app ~/app_prev || true
 
-            rm -rf ~/app
-            mv ~/app_new ~/app
+          rm -rf ~/app
+          mv ~/app_new ~/app
 
-            cd ~/app
-            export NODE_ENV=production
-            export PORT=3000
-            pm2 delete passive-blessings || true
-            pm2 start server.js --name passive-blessings
-            pm2 save
+          cd ~/app
+          export NODE_ENV=production
+          export PORT=3000
+          export HOSTNAME=0.0.0.0
+          pm2 delete passive-blessings || true
+          pm2 start server.js --name passive-blessings
+          pm2 save
 
-            # Health-check /api/health (not /) — homepage middleware used to
-            # 403 curl's default User-Agent and roll back healthy deploys.
-            ok=""
-            for i in 1 2 3 4 5 6 7 8 9 10; do
-              sleep 2
-              if curl -fsS -o /dev/null -A 'PassiveBlessings-HealthCheck/1.0' \
-                http://127.0.0.1:3000/api/health; then
-                ok=1
-                break
-              fi
-            done
-
-            if [ -z "$ok" ]; then
-              echo "New build failed health check, rolling back..." >&2
-              pm2 logs passive-blessings --lines 80 --nostream || true
-              if [ -d ~/app_prev ]; then
-                rm -rf ~/app
-                mv ~/app_prev ~/app
-                cd ~/app
-                pm2 delete passive-blessings || true
-                pm2 start server.js --name passive-blessings
-                pm2 save
-              fi
-              exit 1
+          # Health-check /api/health (not /) - homepage middleware used to
+          # 403 curl default User-Agent and roll back healthy deploys.
+          ok=""
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            sleep 2
+            if curl -fsS -o /dev/null -A "PassiveBlessings-HealthCheck/1.0" \
+              http://127.0.0.1:3000/api/health; then
+              ok=1
+              break
             fi
+          done
 
-            echo "Deploy healthy."
+          if [ -z "$ok" ]; then
+            echo "New build failed health check, rolling back..." >&2
+            pm2 logs passive-blessings --lines 80 --nostream || true
+            if [ -d ~/app_prev ]; then
+              rm -rf ~/app
+              mv ~/app_prev ~/app
+              cd ~/app
+              export NODE_ENV=production
+              export PORT=3000
+              export HOSTNAME=0.0.0.0
+              pm2 delete passive-blessings || true
+              pm2 start server.js --name passive-blessings
+              pm2 save
+            fi
+            exit 1
+          fi
 
-            # Schedule the membership cron routes (idempotent — replaces its
-            # own marked block each deploy, so a CRON_SECRET rotation is
-            # picked up automatically and reruns never duplicate entries).
-            # These call the app on localhost:3000 rather than the public
-            # domain, matching the health check above.
+          echo "Deploy healthy."
+
+          # Schedule the membership cron routes (idempotent - replaces its
+          # own marked block each deploy, so a CRON_SECRET rotation is
+          # picked up automatically and reruns never duplicate entries).
+          {
+            CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
+            if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi
+            BEGIN_MARK="# BEGIN passive-blessings-membership-crons"
+            END_MARK="# END passive-blessings-membership-crons"
+            crontab -l 2>/dev/null | sed "/$BEGIN_MARK/,/$END_MARK/d" > /tmp/crontab.new
             {
-              CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
-              if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi
-              BEGIN_MARK="# BEGIN passive-blessings-membership-crons"
-              END_MARK="# END passive-blessings-membership-crons"
-              crontab -l 2>/dev/null | sed "/$BEGIN_MARK/,/$END_MARK/d" > /tmp/crontab.new
-              {
-                echo "$BEGIN_MARK"
-                echo "CRON_TZ=UTC"
-                echo "0 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-reminders >/dev/null 2>&1"
-                echo "5 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-expire >/dev/null 2>&1"
-                echo "$END_MARK"
-              } >> /tmp/crontab.new
-              crontab /tmp/crontab.new
-              rm -f /tmp/crontab.new
-              echo "Membership crons scheduled."
-            } || echo "Warning: could not schedule membership crons (continuing deploy)." >&2
-          '
+              echo "$BEGIN_MARK"
+              echo "CRON_TZ=UTC"
+              echo "0 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-reminders >/dev/null 2>&1"
+              echo "5 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-expire >/dev/null 2>&1"
+              echo "$END_MARK"
+            } >> /tmp/crontab.new
+            crontab /tmp/crontab.new
+            rm -f /tmp/crontab.new
+            echo "Membership crons scheduled."
+          } || echo "Warning: could not schedule membership crons (continuing deploy)." >&2
+          REMOTE_SCRIPT
 
       - name: Cleanup local SSH key
         if: always()
