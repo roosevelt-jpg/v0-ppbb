@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
             </p>
             
             <ol style="color: #555555; font-size: 14px; margin-bottom: 20px;">
-              <li>Go to <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://test.myflynai.com'}/admin/setup" style="color: #111111;">Admin Login</a></li>
+              <li>Go to <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.passive-blessings.com'}/admin/setup" style="color: #111111;">Admin Login</a></li>
               <li>Enter the access code above</li>
               <li>Sign in with your email and password</li>
             </ol>

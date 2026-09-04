@@ -9,12 +9,15 @@ import {
   incrementTicketSold,
 } from '@/lib/event-luma-server'
 
+import { getSiteUrl } from '@/lib/site-metadata'
+import {
+  clientSecretForIncompleteSubscription,
+  ensureRecurringMembershipPrice,
+  membershipRecurringInterval,
+} from '@/lib/stripe-membership-billing'
+
 export function getPublicAppUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://test.myflynai.com'
-  ).replace(/\/$/, '')
+  return getSiteUrl()
 }
 
 /**
@@ -78,50 +81,17 @@ export async function createStripeMembershipIntent(params: {
   if (!planSnap.exists) throw new Error('Plan not found')
   const plan = planSnap.data() as Record<string, unknown>
 
-  let productId = plan.stripeProductId as string | undefined
-  if (productId) {
-    const exists = await stripe.products.retrieve(productId).then(
-      () => true,
-      () => false
-    )
-    if (!exists) productId = undefined
-  }
-  if (!productId) {
-    const product = await stripe.products.create({
-      name: String(plan.name || 'Membership'),
-      description: String(plan.description || ''),
-      metadata: { planId: params.planId },
-    })
-    productId = product.id
-    await db.collection('pricingPlans').doc(params.planId).update({ stripeProductId: productId })
-  }
-
-  let priceId = productId === plan.stripeProductId ? (plan.stripePriceId as string | undefined) : undefined
-  if (priceId) {
-    const exists = await stripe.prices.retrieve(priceId).then(
-      () => true,
-      () => false
-    )
-    if (!exists) priceId = undefined
-  }
-  if (!priceId) {
-    const price = await stripe.prices.create({
-      unit_amount: Number(plan.price) || 0,
-      currency: String(plan.currency || 'aed').toLowerCase(),
-      recurring: {
-        interval: plan.billingPeriod === 'yearly' ? 'year' : 'month',
-      },
-      product: productId,
-    })
-    priceId = price.id
-    await db.collection('pricingPlans').doc(params.planId).update({ stripePriceId: priceId })
-  }
+  const { priceId } = await ensureRecurringMembershipPrice(stripe, plan, params.planId, async (patch) => {
+    await db.collection('pricingPlans').doc(params.planId).update(patch)
+  })
 
   const customerId = await getOrCreateStripeCustomer(stripe, db, params.userId)
+  const interval = membershipRecurringInterval(plan.billingPeriod)
 
   const subscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: priceId }],
+    collection_method: 'charge_automatically',
     payment_behavior: 'default_incomplete',
     payment_settings: {
       save_default_payment_method: 'on_subscription',
@@ -133,22 +103,16 @@ export async function createStripeMembershipIntent(params: {
       type: 'membership',
       userId: params.userId,
       planId: params.planId,
+      autoDebit: 'true',
+      billingInterval: interval,
       ...(params.extraMetadata || {}),
     },
   })
 
-  const setupIntent = subscription.pending_setup_intent as Stripe.SetupIntent | null
-  const paymentIntent = (subscription.latest_invoice as Stripe.Invoice | null)
-    ?.payment_intent as Stripe.PaymentIntent | null | undefined
-
-  const clientSecret = setupIntent?.client_secret || paymentIntent?.client_secret
-  if (!clientSecret) {
-    throw new Error('Stripe did not return a client secret for this subscription')
-  }
-
+  const secret = await clientSecretForIncompleteSubscription(stripe, subscription)
   return {
-    clientSecret,
-    mode: setupIntent ? 'setup' : 'payment',
+    clientSecret: secret.clientSecret,
+    mode: secret.mode,
     subscriptionId: subscription.id,
   }
 }
@@ -229,13 +193,16 @@ export async function completeEventTicketPayment(params: {
     const eventSnap = await db.collection('events').doc(params.eventId).get()
     const title = (eventSnap.data()?.title as string) || 'Event'
     const updated = (await regRef.get()).data()
-    const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
-    void sendEventRegistrationEmail({
+    const currency = String(eventSnap.data()?.currency || 'AED')
+    const { sendEventPaymentConfirmationEmail } = await import('@/lib/event-confirmation-email')
+    void sendEventPaymentConfirmationEmail({
       to: email,
       eventTitle: title,
       eventUrl: confirmationUrl,
-      status: String(updated?.status || 'confirmed'),
+      amount,
+      currency,
       checkInCode: (updated?.checkInCode as string) || null,
+      paymentReference: params.paymentReference,
     })
   }
 
@@ -408,6 +375,12 @@ export async function completeMembershipPayment(params: {
       membershipRenewDate: isLifetimePromo ? null : renewDate.toISOString(),
       membershipLifetimeForever: isLifetimePromo ? true : FieldValue.delete(),
       membershipExpiredAt: FieldValue.delete(),
+      ...(params.gateway === 'stripe' && params.paymentReference.startsWith('sub_')
+        ? {
+            stripeSubscriptionId: params.paymentReference,
+            membershipAutoRenew: true,
+          }
+        : {}),
       // Portal access follows the pricing plan (not a hardcoded role alone)
       ...portalFieldsFromPlan(plan, existingUser),
       ...(params.promoCodeId

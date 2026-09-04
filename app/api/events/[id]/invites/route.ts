@@ -64,7 +64,7 @@ export async function POST(request: NextRequest, context: Ctx) {
   const origin =
     request.headers.get('origin') ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://test.myflynai.com'
+    'https://www.passive-blessings.com'
   const eventUrl = `${origin}/events/${eventId}`
 
   const results: Array<{ email: string; ok: boolean; registrationId?: string }> = []

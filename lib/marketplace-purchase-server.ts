@@ -374,6 +374,7 @@ export async function completeMarketplacePurchase(
       userId: pushTarget,
       subject: mode === 'enquire' ? 'New marketplace enquiry' : 'New marketplace order',
       purpose: mode === 'enquire' ? 'Marketplace enquiry notification' : 'Marketplace order notification',
+      department: 'marketplace',
       headline: mode === 'enquire' ? 'New enquiry' : 'New order',
       bodyHtml: paragraphs(
         'Assalamu alaikum,',
@@ -393,6 +394,7 @@ export async function completeMarketplacePurchase(
         userId: params.buyerId,
         subject: `Order confirmed: ${title}`,
         purpose: 'Marketplace order confirmation',
+        department: 'marketplace',
         headline: 'Order confirmed',
         bodyHtml: paragraphs(
           'Assalamu alaikum,',
@@ -449,7 +451,8 @@ export async function completeMarketplacePurchase(
 export async function createPendingMarketplaceOrder(params: {
   offerId: string
   buyerId: string
-  stripeSessionId: string
+  stripeSessionId?: string
+  stripePaymentIntentId?: string
   invoiceAddress?: MarketplaceAddress
   deliveryAddress?: MarketplaceAddress
   paymentMethod?: MarketplacePaymentMethod
@@ -475,7 +478,10 @@ export async function createPendingMarketplaceOrder(params: {
       type: 'marketplace',
       paymentGateway: 'stripe',
       paymentMethod: params.paymentMethod || 'card',
-      stripeSessionId: params.stripeSessionId,
+      ...(params.stripeSessionId ? { stripeSessionId: params.stripeSessionId } : {}),
+      ...(params.stripePaymentIntentId
+        ? { stripePaymentIntentId: params.stripePaymentIntentId }
+        : {}),
       invoiceAddress: params.invoiceAddress || null,
       deliveryAddress: params.deliveryAddress || null,
       createdAt: now,

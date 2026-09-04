@@ -61,7 +61,7 @@ const req = https.request(options, (res) => {
         console.log('[v0] Email:', email);
         console.log('[v0] Password:', password);
         console.log('[v0]');
-        console.log('[v0] Go to https://test.myflynai.com/admin/setup and login');
+        console.log('[v0] Go to https://www.passive-blessings.com/admin/setup and login');
         console.log('[v0] Access Code: PB-ADMIN-2025');
       } else if (response.error?.message === 'EMAIL_EXISTS') {
         console.log('[v0]');
@@ -69,7 +69,7 @@ const req = https.request(options, (res) => {
         console.log('[v0] Email:', email);
         console.log('[v0] Password:', password);
         console.log('[v0]');
-        console.log('[v0] Go to https://test.myflynai.com/admin/setup to login');
+        console.log('[v0] Go to https://www.passive-blessings.com/admin/setup to login');
         console.log('[v0] Access Code: PB-ADMIN-2025');
       } else {
         console.log('[v0] Error:', response.error?.message || data);

@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, doc, updateDoc } from 'firebase-admin/firestore'
-import { getAdminApp } from '@/lib/firebase-admin'
+import { doc, updateDoc } from 'firebase-admin/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = getFirestore(getAdminApp())
   try {
+    const db = getAdminDb()
     const body = await request.json()
     const { scheduledFor } = body
 

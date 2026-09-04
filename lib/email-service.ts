@@ -29,7 +29,7 @@ export const sendAccessCodeEmail = async (email: string, code: string, expiresAt
             
             <p><strong>How to use:</strong></p>
             <ol>
-              <li>Go to <a href="https://test.myflynai.com/admin/setup">Admin Setup Page</a></li>
+              <li>Go to <a href="https://www.passive-blessings.com/admin/setup">Admin Setup Page</a></li>
               <li>Enter this access code on Step 1</li>
               <li>Follow the 3-step setup process</li>
               <li>Sign in with your credentials on Step 3</li>

@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/auth-context'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { EventDetailView } from '@/components/events/event-detail-view'
+import { StripeCardForm } from '@/components/payments/stripe-card-form'
+import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import type { Event } from '@/lib/event-types'
 
@@ -24,6 +26,12 @@ function EventDetailInner() {
   const [error, setError] = React.useState<string | null>(null)
   const [ticketTypeId, setTicketTypeId] = React.useState('')
   const [couponCode, setCouponCode] = React.useState('')
+  const [stripeCheckout, setStripeCheckout] = React.useState<{
+    clientSecret: string
+    publishableKey: string
+    registrationId: string
+    eventId: string
+  } | null>(null)
 
   React.useEffect(() => {
     loadEvent()
@@ -100,7 +108,14 @@ function EventDetailInner() {
             })
           )
         }
-        if (json.checkoutUrl) {
+        if (json.embedded && json.clientSecret && json.publishableKey) {
+          setStripeCheckout({
+            clientSecret: json.clientSecret,
+            publishableKey: json.publishableKey,
+            registrationId: json.registrationId,
+            eventId,
+          })
+        } else if (json.checkoutUrl) {
           window.location.href = json.checkoutUrl
         } else {
           router.push(`/events/${eventId}/confirmation?registrationId=${json.registrationId}`)
@@ -133,7 +148,43 @@ function EventDetailInner() {
   }
 
   return (
-    <EventDetailView
+    <>
+      {stripeCheckout ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <Card className="w-full max-w-md p-6 bg-white">
+            <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
+            <p className="text-sm text-neutral-600 mb-4">Enter card details — you stay on Passive Blessings.</p>
+            <StripeCardForm
+              publishableKey={stripeCheckout.publishableKey}
+              clientSecret={stripeCheckout.clientSecret}
+              submitLabel="Pay & register"
+              onSuccess={async (paymentIntentId) => {
+                const res = await fetch('/api/payments/confirm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    type: 'event_ticket',
+                    paymentIntentId,
+                    registrationId: stripeCheckout.registrationId,
+                  }),
+                })
+                const confirmJson = await res.json()
+                if (!res.ok || !confirmJson.success) {
+                  setError(confirmJson.error || 'Payment confirmation failed')
+                  return
+                }
+                setStripeCheckout(null)
+                router.push(confirmJson.confirmationUrl || `/events/${eventId}/confirmation?registrationId=${stripeCheckout.registrationId}`)
+              }}
+              onError={(msg) => setError(msg)}
+            />
+            <button type="button" className="mt-3 text-xs underline text-neutral-600" onClick={() => setStripeCheckout(null)}>
+              Cancel
+            </button>
+          </Card>
+        </div>
+      ) : null}
+      <EventDetailView
       event={{ ...event, id: eventId }}
       registering={registering}
       error={error}
@@ -143,6 +194,7 @@ function EventDetailInner() {
       onCouponChange={setCouponCode}
       onRegister={handleRegister}
     />
+    </>
   )
 }
 

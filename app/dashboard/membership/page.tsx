@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Dialog } from '@/components/dialog'
 import { Check, Loader2 } from 'lucide-react'
 import { PricingPlan } from '@/lib/pricing-types'
-import { getPlanIncludedItems, memberMatchesPlan, resolveActiveGateway } from '@/lib/pricing-utils'
+import { getPlanIncludedItems, memberMatchesPlan, planTrialCopy, resolveActiveGateway } from '@/lib/pricing-utils'
 import { hasActiveMembership } from '@/lib/membership-access'
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import {
@@ -213,7 +213,11 @@ export default function MembershipPage() {
   const handleCardSuccess = () => {
     setActiveIntent(null)
     setPromoCode('')
-    setStatusBanner('Payment confirmed. Your membership is updating.')
+    setStatusBanner(
+      activeIntent?.mode === 'setup'
+        ? 'Card saved. Your membership is active for the free period — billing starts when it ends.'
+        : 'Payment confirmed. Your membership is updating.'
+    )
   }
 
   return (
@@ -223,8 +227,12 @@ export default function MembershipPage() {
         onOpenChange={(open) => {
           if (!open) setActiveIntent(null)
         }}
-        title="Enter card details"
-        description="Your card is processed securely by Stripe — it's never seen by our servers."
+        title={activeIntent?.mode === 'setup' ? 'Save your card' : 'Enter card details'}
+        description={
+          activeIntent?.mode === 'setup'
+            ? 'Your card is saved securely. You will not be charged until the free period ends, then billing starts automatically.'
+            : "Your card is processed securely by Stripe — it's never seen by our servers."
+        }
         maxWidth="26rem"
         compact={false}
       >
@@ -328,6 +336,11 @@ export default function MembershipPage() {
                   </span>
                   <span className="text-neutral-600 dark:text-muted-foreground">/{plan.billingPeriod}</span>
                 </div>
+                {planTrialCopy(plan) ? (
+                  <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-200 mb-4">
+                    {planTrialCopy(plan)}
+                  </p>
+                ) : null}
                 <ul className="space-y-2 mb-6 flex-1">
                   {getPlanIncludedItems(plan).map((item, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
@@ -352,6 +365,8 @@ export default function MembershipPage() {
                     </span>
                   ) : isCurrentPlan ? (
                     'Current Plan'
+                  ) : planTrialCopy(plan) ? (
+                    'Add card — start free period'
                   ) : (
                     `Subscribe with ${(resolveActiveGateway(plan, gateways) || 'stripe').replace(/^./, (c) => c.toUpperCase())}`
                   )}

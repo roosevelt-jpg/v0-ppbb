@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
                   <p style="color: #888888; font-size: 12px; margin: 0;">
                     <strong>Passive Blessings</strong><br/>
                     Building community through compassion and collective action<br/>
-                    <a href="https://test.myflynai.com" style="color: #111111; text-decoration: none;">Visit our website</a>
+                    <a href="https://www.passive-blessings.com" style="color: #111111; text-decoration: none;">Visit our website</a>
                   </p>
                 </div>
               </div>

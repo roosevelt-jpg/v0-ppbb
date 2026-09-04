@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminLoginHistory, getAllAdminLoginHistory } from '@/lib/admin-login-tracking'
-import { getFirestore } from 'firebase-admin/firestore'
-import { getAdminApp } from '@/lib/firebase-admin'
+import { doc, getDoc } from 'firebase-admin/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams // dynamic signal first
+    const db = getAdminDb()
+    const searchParams = request.nextUrl.searchParams
     const adminId = searchParams.get('adminId')
     const isSuperAdmin = searchParams.get('isSuperAdmin') === 'true'
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -19,12 +21,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const db = getFirestore(getAdminApp()) // init after dynamic signal
-
     // Verify user is either viewing their own logs or is super admin
     if (!isSuperAdmin) {
-      const userDoc = await db.collection('users').doc(adminId).get()
-      if (!userDoc.exists) {
+      const requestingAdmin = await getDoc(doc(db, 'users', adminId))
+
+      if (!requestingAdmin.exists) {
         return NextResponse.json(
           { error: 'Unauthorized' },
           { status: 403 }

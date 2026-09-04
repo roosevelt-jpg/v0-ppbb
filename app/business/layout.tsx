@@ -64,7 +64,7 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-white dark:bg-neutral-900">
+    <div className="flex h-full min-h-screen flex-col bg-white">
       {/* Header with Logo */}
       <div className="border-b border-neutral-200 dark:border-neutral-700 px-4 py-4 flex items-center justify-center">
         <SiteLogo background="light" variant="sidebar" href="/business/dashboard" />
@@ -84,8 +84,8 @@ function BusinessSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   onClick={onNavigate}
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
-                      : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                      ? 'bg-[#f0efeb] text-[#111111] font-semibold border border-[#e4e1da]'
+                      : 'text-neutral-700 hover:bg-neutral-100'
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />

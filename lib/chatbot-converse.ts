@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { resolveAnthropicApiKey } from '@/lib/resolve-anthropic-key'
+import { resolveAnthropicApiKey, resolveAnthropicModel } from '@/lib/resolve-anthropic-key'
 import {
   scoreKnowledgeMatch,
   type ChatbotKnowledgeItem,
@@ -72,6 +72,7 @@ export async function generateConversationalSupportReply(input: {
 }): Promise<string | null> {
   const apiKey = await resolveAnthropicApiKey()
   if (!apiKey) return null
+  const model = (await resolveAnthropicModel()) || 'claude-3-5-haiku-20241022'
 
   const lastUser = [...input.messages].reverse().find((m) => m.role === 'user')
   const userMessage = String(lastUser?.content || '').trim()
@@ -110,7 +111,7 @@ ${context || '(No notes loaded yet — be honest that you may need to connect th
   try {
     const client = new Anthropic({ apiKey })
     const result = await client.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model,
       max_tokens: 500,
       system,
       messages: history,

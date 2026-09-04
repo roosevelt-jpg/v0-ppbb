@@ -11,6 +11,7 @@ import {
 } from '@/lib/paypal-client'
 import { createZiinaPaymentIntent } from '@/lib/ziina-client'
 import { createStripeMembershipIntent, getPublicAppUrl } from '@/lib/payment-completion'
+import { planTrialDays, normalizePlanTrialMonths } from '@/lib/pricing-utils'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,16 @@ export async function POST(req: NextRequest) {
           ? planGateway
           : 'stripe'
 
+    if (planTrialDays(plan) && selected !== 'stripe') {
+      return NextResponse.json(
+        {
+          error:
+            'This plan includes a free trial. Stripe must collect a card now so billing can start after the trial. Switch the plan to Stripe in Admin → Pricing, or turn the trial off.',
+        },
+        { status: 400 }
+      )
+    }
+
     switch (selected) {
       case 'stripe':
         return handleStripeCheckout(plan, userId, planId)
@@ -75,7 +86,14 @@ async function handleStripeCheckout(
   planId: string
 ) {
   try {
-    const { clientSecret, mode, subscriptionId } = await createStripeMembershipIntent({ planId, userId })
+    const trialDays = planTrialDays(plan)
+    const trialMonths = normalizePlanTrialMonths(plan.trialMonths)
+    const { clientSecret, mode, subscriptionId } = await createStripeMembershipIntent({
+      planId,
+      userId,
+      trialDays,
+      extraMetadata: trialMonths ? { trialMonths: String(trialMonths) } : undefined,
+    })
     return NextResponse.json({ clientSecret, mode, subscriptionId, gateway: 'stripe' })
   } catch (error) {
     console.error('[checkout] Stripe:', error)

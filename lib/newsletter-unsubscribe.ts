@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { getAdminDb } from '@/lib/firebase-admin'
+import { getSiteUrl } from '@/lib/site-metadata'
 
 const COLLECTION = 'newsletterUnsubscribes'
 
@@ -27,7 +28,7 @@ export function verifyUnsubscribeToken(email: string, token: string): boolean {
 }
 
 export function buildUnsubscribeUrl(email: string): string {
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+  const site = getSiteUrl()
   const normalized = encodeURIComponent(email.trim().toLowerCase())
   const token = buildUnsubscribeToken(email)
   return `${site}/newsletters/unsubscribe?email=${normalized}&token=${token}`

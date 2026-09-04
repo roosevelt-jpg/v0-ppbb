@@ -54,6 +54,7 @@ export async function sendLoginAlertEmail(opts: {
     userId: opts.userId,
     subject: 'New sign-in to your Passive Blessings account',
     purpose: 'Sign-in security notification',
+    department: 'security',
     headline: 'New sign-in detected',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
@@ -90,6 +91,7 @@ export async function sendEmailVerificationBranded(opts: {
       to: email,
       subject: 'Verify your Passive Blessings email',
       purpose: 'Email verification',
+      department: 'security',
       headline: 'Verify your email',
       bodyHtml: paragraphs(
         greeting,
@@ -133,6 +135,7 @@ export async function sendPasswordResetBranded(opts: {
       to: email,
       subject: 'Reset your Passive Blessings password',
       purpose: 'Password reset',
+      department: 'security',
       headline: 'Reset your password',
       bodyHtml: paragraphs(
         'Assalamu alaikum,',
@@ -165,6 +168,7 @@ export function notifyMembershipActivated(opts: {
       userId: opts.userId,
       subject: `Your membership was upgraded to ${planName}`,
       purpose: 'Membership upgrade confirmation',
+      department: 'membership',
       headline: 'Membership upgraded',
       bodyHtml: paragraphs(
         'Assalamu alaikum,',
@@ -190,6 +194,7 @@ export function notifyMembershipActivated(opts: {
       ? `Welcome — ${planName} (promo) activated`
       : `Welcome — ${planName} membership activated`,
     purpose: 'Membership activation confirmation',
+    department: 'membership',
     headline: 'Membership activated',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
@@ -224,6 +229,7 @@ export function notifyMembershipRenewed(opts: {
     userId: opts.userId,
     subject: `Membership renewed — ${plan}`,
     purpose: 'Subscription renewal confirmation',
+    department: 'membership',
     headline: 'Membership renewed',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
@@ -252,6 +258,7 @@ export function notifyMembershipExpiring(opts: {
     userId: opts.userId,
     subject: `Your membership expires ${days}`,
     purpose: 'Membership expiry reminder',
+    department: 'membership',
     headline: 'Membership expiring soon',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
@@ -283,6 +290,7 @@ export function notifyMembershipPaymentFailed(opts: {
     userId: opts.userId,
     subject: 'Action needed — membership payment failed',
     purpose: 'Failed subscription payment',
+    department: 'membership',
     headline: 'Payment failed',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
@@ -309,6 +317,7 @@ export function notifyMembershipCancelled(opts: {
     userId: opts.userId,
     subject: `Subscription cancelled — ${plan}`,
     purpose: 'Subscription cancellation notice',
+    department: 'membership',
     headline: 'Subscription cancelled',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',
@@ -330,6 +339,7 @@ export function notifyMembershipExpired(opts: {
     userId: opts.userId,
     subject: `Your membership has expired — ${plan}`,
     purpose: 'Membership expired',
+    department: 'membership',
     headline: 'Membership expired',
     bodyHtml: paragraphs(
       'Assalamu alaikum,',

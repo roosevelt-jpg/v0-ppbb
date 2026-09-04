@@ -1,25 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getFirestore, doc, getDoc } from 'firebase-admin/firestore'
-import { getAdminApp } from '@/lib/firebase-admin'
+import { doc, getDoc } from 'firebase-admin/firestore'
+import { getAdminDb } from '@/lib/firebase-admin'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const db = getFirestore(getAdminApp())
   try {
+    const db = getAdminDb()
     const docRef = doc(db, 'newsletters', params.id)
     const docSnap = await getDoc(docRef)
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
       return NextResponse.json(
         { error: 'Newsletter not found' },
         { status: 404 }
       )
     }
 
-    const data = docSnap.data()
+    const data = docSnap.data()!
     const analytics = {
       recipientCount: data.recipientCount || 0,
       openedCount: data.openedCount || 0,

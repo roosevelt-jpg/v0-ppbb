@@ -9,6 +9,11 @@ import {
   markCheckoutSessionProcessed,
 } from '@/lib/stripe-webhook-marketplace'
 import { recordReferralConversion } from '@/lib/referral-conversion-server'
+import {
+  attachInvoiceCardForAutoDebit,
+  invoiceSubscriptionId,
+  subscriptionPeriodEndUnix,
+} from '@/lib/stripe-membership-billing'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -109,15 +114,18 @@ export async function POST(req: NextRequest) {
             if (email) {
               const eventSnap = await db.collection('events').doc(session.metadata.eventId).get()
               const title = (eventSnap.data()?.title as string) || 'Event'
-              const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.myflynai.com'
+              const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.passive-blessings.com'
               const updated = (await regRef.get()).data()
-              const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
-              void sendEventRegistrationEmail({
+              const currency = String(eventSnap.data()?.currency || 'AED')
+              const { sendEventPaymentConfirmationEmail } = await import('@/lib/event-confirmation-email')
+              void sendEventPaymentConfirmationEmail({
                 to: email,
                 eventTitle: title,
                 eventUrl: `${site}/events/${session.metadata.eventId}/confirmation?registrationId=${session.metadata.registrationId}`,
-                status: String(updated?.status || 'confirmed'),
+                amount,
+                currency,
                 checkInCode: (updated?.checkInCode as string) || null,
+                paymentReference: session.id,
               })
             }
           }
@@ -125,18 +133,38 @@ export async function POST(req: NextRequest) {
           session.metadata?.type === 'advertising' &&
           session.metadata.advertisingRequestId
         ) {
-          await db
-            .collection('advertisingRequests')
-            .doc(session.metadata.advertisingRequestId)
-            .set(
-              {
-                status: 'paid',
-                paidAt: Timestamp.now(),
-                stripeSessionId: session.id,
-                updatedAt: Timestamp.now(),
-              },
-              { merge: true }
-            )
+          const adRef = db.collection('advertisingRequests').doc(session.metadata.advertisingRequestId)
+          const adSnap = await adRef.get()
+          const ad = adSnap.data() || {}
+          const amount =
+            typeof session.amount_total === 'number'
+              ? session.amount_total / 100
+              : typeof ad.priceAed === 'number'
+                ? ad.priceAed
+                : 0
+
+          await adRef.set(
+            {
+              status: 'paid',
+              paidAt: Timestamp.now(),
+              stripeSessionId: session.id,
+              updatedAt: Timestamp.now(),
+            },
+            { merge: true }
+          )
+
+          const businessId = String(ad.businessId || session.metadata.businessId || '').trim()
+          if (businessId) {
+            const { notifyAdvertisingPaymentConfirmed } = await import('@/lib/advertising-payment-email')
+            notifyAdvertisingPaymentConfirmed({
+              businessId,
+              businessName: String(ad.businessName || ''),
+              amount,
+              currency: String(ad.currency || 'AED'),
+              paymentReference: session.id,
+              requestId: session.metadata.advertisingRequestId,
+            })
+          }
         }
         // Membership no longer goes through Checkout Sessions at all — an
         // embedded card form on our own page creates the Subscription
@@ -173,7 +201,13 @@ export async function POST(req: NextRequest) {
         const prevSnap = await subRef.get()
         const prevStatus = prevSnap.exists ? (prevSnap.data()?.status as string | undefined) : undefined
 
-        const subscriptionData = {
+        const periodEndUnix = subscriptionPeriodEndUnix(subscription)
+        const periodStartUnix =
+          typeof subscription.current_period_start === 'number'
+            ? subscription.current_period_start
+            : subscription.items?.data?.[0]?.current_period_start
+
+        const subscriptionData: Record<string, unknown> = {
           userId,
           stripeSubscriptionId: subscriptionId,
           stripeCustomerId: customerId,
@@ -181,12 +215,17 @@ export async function POST(req: NextRequest) {
           currency: subscription.items.data[0]?.price.currency,
           interval: subscription.items.data[0]?.price.recurring?.interval,
           status: subscription.status,
-          currentPeriodStart: Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
-          currentPeriodEnd: Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
-          nextBillingDate: Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
+          collectionMethod: subscription.collection_method || 'charge_automatically',
           metadata: subscription.metadata,
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
+        }
+        if (typeof periodStartUnix === 'number') {
+          subscriptionData.currentPeriodStart = Timestamp.fromDate(new Date(periodStartUnix * 1000))
+        }
+        if (periodEndUnix) {
+          subscriptionData.currentPeriodEnd = Timestamp.fromDate(new Date(periodEndUnix * 1000))
+          subscriptionData.nextBillingDate = Timestamp.fromDate(new Date(periodEndUnix * 1000))
         }
 
         await db.collection('subscriptions').doc(subscriptionId).set(subscriptionData, { merge: true })
@@ -216,9 +255,7 @@ export async function POST(req: NextRequest) {
             paymentReference: subscriptionId,
             promoCodeId: subscription.metadata.promoCodeId || undefined,
             promoCode: subscription.metadata.promoCode || undefined,
-            renewDateOverride: subscription.current_period_end
-              ? new Date(subscription.current_period_end * 1000)
-              : undefined,
+            renewDateOverride: periodEndUnix ? new Date(periodEndUnix * 1000) : undefined,
           })
         } else if (
           subscription.status === 'incomplete_expired' &&
@@ -283,11 +320,20 @@ export async function POST(req: NextRequest) {
         break
       }
 
+      case 'invoice.paid':
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as any
-        const subscriptionId = invoice.subscription
+        const subscriptionId = invoiceSubscriptionId(invoice)
 
         if (subscriptionId) {
+          try {
+            const { getStripeClient } = await import('@/lib/get-stripe-client')
+            const stripe = await getStripeClient()
+            await attachInvoiceCardForAutoDebit(stripe, invoice, subscriptionId)
+          } catch (pmErr) {
+            console.error('[v0] Could not save card for auto-debit:', pmErr)
+          }
+
           const periodEndSec = invoice.lines?.data?.[0]?.period?.end
           const paidAtSec = invoice.status_transitions?.paid_at || invoice.created
           const chargeData = {
@@ -336,6 +382,8 @@ export async function POST(req: NextRequest) {
                   membershipStatus: 'active',
                   membershipRenewDate: new Date(periodEndSec * 1000).toISOString(),
                   membershipExpiredAt: FieldValue.delete(),
+                  stripeSubscriptionId: subscriptionId,
+                  membershipAutoRenew: true,
                   updatedAt: Timestamp.now(),
                 },
                 { merge: true }
@@ -365,7 +413,7 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as any
-        const subscriptionId = invoice.subscription
+        const subscriptionId = invoiceSubscriptionId(invoice)
 
         if (subscriptionId) {
           const chargeData = {

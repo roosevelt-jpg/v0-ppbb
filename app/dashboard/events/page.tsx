@@ -11,6 +11,7 @@ import { Calendar, MapPin, Users, Trash2, ArrowRight, CheckCircle2 } from 'lucid
 import type { Event } from '@/lib/event-types'
 import type { User } from '@/lib/types'
 import { isCharityVolunteerEvent } from '@/lib/charity-event'
+import { StripeCardForm } from '@/components/payments/stripe-card-form'
 import {
   DashboardPageShell,
   DashboardSkeleton,
@@ -49,6 +50,12 @@ export default function MyEventsPage() {
   const [registeringId, setRegisteringId] = React.useState<string | null>(null)
   const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState<'browse' | 'registered'>('browse')
+  const [stripeCheckout, setStripeCheckout] = React.useState<{
+    clientSecret: string
+    publishableKey: string
+    registrationId: string
+    eventId: string
+  } | null>(null)
 
   const loadRegistered = React.useCallback(async () => {
     if (!user?.id) return
@@ -142,6 +149,15 @@ export default function MyEventsPage() {
         alert(json.error || 'Registration failed')
         return
       }
+      if (json.embedded && json.clientSecret && json.publishableKey) {
+        setStripeCheckout({
+          clientSecret: json.clientSecret,
+          publishableKey: json.publishableKey,
+          registrationId: json.registrationId,
+          eventId: event.id,
+        })
+        return
+      }
       if (json.checkoutUrl) {
         window.location.href = json.checkoutUrl
         return
@@ -219,6 +235,45 @@ export default function MyEventsPage() {
 
   return (
     <DashboardPageShell title="My Events" subtitle="Your upcoming and registered events">
+      {stripeCheckout ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <Card className="w-full max-w-md p-6 bg-white">
+            <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
+            <p className="text-sm text-neutral-600 mb-4">Enter card details to complete registration.</p>
+            <StripeCardForm
+              publishableKey={stripeCheckout.publishableKey}
+              clientSecret={stripeCheckout.clientSecret}
+              submitLabel="Pay & register"
+              onSuccess={async (paymentIntentId) => {
+                const res = await fetch('/api/payments/confirm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    type: 'event_ticket',
+                    paymentIntentId,
+                    registrationId: stripeCheckout.registrationId,
+                  }),
+                })
+                const confirmJson = await res.json()
+                if (!res.ok || !confirmJson.success) {
+                  alert(confirmJson.error || 'Payment confirmation failed')
+                  return
+                }
+                setStripeCheckout(null)
+                await loadRegistered()
+                setActiveTab('registered')
+              }}
+            />
+            <button
+              type="button"
+              className="mt-3 text-xs underline text-neutral-600"
+              onClick={() => setStripeCheckout(null)}
+            >
+              Cancel
+            </button>
+          </Card>
+        </div>
+      ) : null}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <p className="text-sm text-neutral-500 dark:text-muted-foreground">
           {registeredIds.size} event{registeredIds.size !== 1 ? 's' : ''} registered

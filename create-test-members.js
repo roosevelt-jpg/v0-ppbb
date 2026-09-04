@@ -107,7 +107,7 @@ async function main() {
   console.log('  Email: member1@passiveblessings.ae');
   console.log('  Password: Member@123456\n');
   console.log('  (or member2, member3, member4, member5 with same password)\n');
-  console.log('[v0] Login URL: https://test.myflynai.com/login\n');
+  console.log('[v0] Login URL: https://www.passive-blessings.com/login\n');
 
   process.exit(0);
 }

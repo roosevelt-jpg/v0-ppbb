@@ -92,12 +92,13 @@ jobs:
             pm2 start server.js --name passive-blessings
             pm2 save
 
-            # Give it a few seconds to boot, then confirm it answers before
-            # calling the deploy a success.
+            # Health-check /api/health (not /) — homepage middleware used to
+            # 403 curl's default User-Agent and roll back healthy deploys.
             ok=""
             for i in 1 2 3 4 5 6 7 8 9 10; do
               sleep 2
-              if curl -fsS -o /dev/null http://127.0.0.1:3000; then
+              if curl -fsS -o /dev/null -A 'PassiveBlessings-HealthCheck/1.0' \
+                http://127.0.0.1:3000/api/health; then
                 ok=1
                 break
               fi

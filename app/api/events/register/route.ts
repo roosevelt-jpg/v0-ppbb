@@ -5,7 +5,7 @@ import { persistUserReferralAttribution } from '@/lib/referral-attribution-serve
 import { recordReferralConversion } from '@/lib/referral-conversion-server'
 import { getReferralCodeFromRequest } from '@/lib/referral-cookie'
 import { resolveStripeConfig } from '@/lib/resolve-stripe-key'
-import Stripe from 'stripe'
+import { createEmbeddedPaymentIntent } from '@/lib/stripe-embedded'
 import {
   applyCoupon,
   buildRegistrationRecord,
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       const origin =
         request.headers.get('origin') ||
         process.env.NEXT_PUBLIC_SITE_URL ||
-        'https://test.myflynai.com'
+        'https://www.passive-blessings.com'
       if (userEmail) {
         const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
         void sendEventRegistrationEmail({
@@ -220,7 +220,7 @@ export async function POST(request: NextRequest) {
         request.headers.get('origin') ||
         process.env.NEXT_PUBLIC_SITE_URL ||
         process.env.NEXT_PUBLIC_APP_URL ||
-        'https://test.myflynai.com'
+        'https://www.passive-blessings.com'
       const currency = (ticket.currency || (event.currency as string) || 'AED').toString()
       const description = `${String(event.title || 'Event')} — ${ticket.name}`
 
@@ -233,6 +233,16 @@ export async function POST(request: NextRequest) {
           status: 'pending',
           idempotencyKey: `event:${regRef.id}`,
         }).catch((err) => console.error('[referral] event conversion:', err))
+      }
+
+      if (userEmail) {
+        const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+        void sendEventRegistrationEmail({
+          to: userEmail,
+          eventTitle: String(event.title || 'Event'),
+          eventUrl: `${origin}/events/${eventId}`,
+          status: 'pending_payment',
+        })
       }
 
       if (gateway === 'paypal') {
@@ -313,31 +323,15 @@ export async function POST(request: NextRequest) {
 
       // Default: Stripe
       const stripeConfig = await resolveStripeConfig()
-      if (!stripeConfig?.secretKey) {
+      if (!stripeConfig?.secretKey || !stripeConfig.publishableKey) {
         await regRef.delete()
         return NextResponse.json({ success: false, error: 'Stripe is not configured' }, { status: 500 })
       }
 
-      const stripe = new Stripe(stripeConfig.secretKey, { apiVersion: '2024-04-10' })
-      const session = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        payment_method_types: ['card'],
-        customer_email: userEmail || undefined,
-        line_items: [
-          {
-            quantity: 1,
-            price_data: {
-              currency: currency.toLowerCase(),
-              unit_amount: Math.round(price * 100),
-              product_data: {
-                name: description,
-                description: `Event ticket via Passive Blessings`,
-              },
-            },
-          },
-        ],
-        success_url: `${origin}/events/${eventId}/confirmation?registrationId=${regRef.id}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/events/${eventId}?cancelled=1`,
+      const embedded = await createEmbeddedPaymentIntent({
+        amountMinor: Math.round(price * 100),
+        currency,
+        description,
         metadata: {
           type: 'event_ticket',
           eventId,
@@ -348,15 +342,25 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      await regRef.update({ stripeSessionId: session.id, paymentGateway: 'stripe' })
+      await regRef.update({
+        stripePaymentIntentId: embedded.paymentIntentId,
+        paymentGateway: 'stripe',
+      })
 
       return NextResponse.json({
         success: true,
         registrationId: regRef.id,
-        checkoutUrl: session.url,
+        embedded: true,
+        clientSecret: embedded.clientSecret,
+        publishableKey: embedded.publishableKey,
+        paymentIntentId: embedded.paymentIntentId,
         gateway: 'stripe',
         status: registration.status,
-        registration: { id: regRef.id, ...registration, stripeSessionId: session.id },
+        registration: {
+          id: regRef.id,
+          ...registration,
+          stripePaymentIntentId: embedded.paymentIntentId,
+        },
       })
     }
 
@@ -377,7 +381,7 @@ export async function POST(request: NextRequest) {
     const origin =
       request.headers.get('origin') ||
       process.env.NEXT_PUBLIC_SITE_URL ||
-      'https://test.myflynai.com'
+      'https://www.passive-blessings.com'
     if (userEmail) {
       const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
       void sendEventRegistrationEmail({

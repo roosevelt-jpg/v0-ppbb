@@ -75,7 +75,7 @@ async function createAdminUser() {
     console.log('[v0] Admin user setup complete!');
     console.log(`[v0] Email: ${email}`);
     console.log(`[v0] Password: ${password}`);
-    console.log('[v0] You can now login to the admin panel at: https://test.myflynai.com/admin/setup');
+    console.log('[v0] You can now login to the admin panel at: https://www.passive-blessings.com/admin/setup');
 
     process.exit(0);
   } catch (error) {

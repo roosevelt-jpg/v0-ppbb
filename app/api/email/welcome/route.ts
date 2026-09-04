@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/admin-access-server'
+import { resolveFounderSignature } from '@/lib/email-departments'
 import { paragraphs, sendBrandedEmailToUser } from '@/lib/platform-email'
 
 /**
  * Send branded welcome email after signup (member or business).
  * Auth required — only the signed-in user can trigger their own welcome mail.
+ * Member welcome is signed by the Founder (name loaded from teamMembers in DB).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -31,12 +33,19 @@ export async function POST(request: NextRequest) {
     ).replace(/\/$/, '')
 
     const greeting = firstName ? `Assalamu alaikum, ${firstName}.` : 'Assalamu alaikum,'
+
+    const founderSignature = isBusiness
+      ? undefined
+      : await resolveFounderSignature('Member welcome')
+
     const result = await sendBrandedEmailToUser({
       userId: uid,
       subject: isBusiness
         ? 'Welcome to Passive Blessings Business'
         : 'Welcome to Passive Blessings',
-      purpose: isBusiness ? 'Business account welcome' : 'Member account welcome',
+      purpose: isBusiness ? 'Business account welcome' : 'Member welcome',
+      department: isBusiness ? 'admin' : undefined,
+      signature: founderSignature,
       headline: 'Welcome to Passive Blessings',
       bodyHtml: paragraphs(
         greeting,
@@ -44,7 +53,9 @@ export async function POST(request: NextRequest) {
           ? 'Your business account has been created. Complete membership payment and wait for approval to unlock the full business portal.'
           : 'Your member account has been created. Choose a membership plan to activate your access and start exploring communities, events, and volunteering.',
         'We also sent a separate email to verify your address — please confirm it to keep your account secure.',
-        'If you have any questions, reply to this email or contact PB Admin through the platform.'
+        isBusiness
+          ? 'If you have any questions, reply to this email or contact us through the platform.'
+          : 'We are glad you joined our community. If you have any questions, reply to this email — I am happy to help.'
       ),
       cta: {
         label: isBusiness ? 'Open business dashboard' : 'Complete membership',

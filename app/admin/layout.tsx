@@ -94,10 +94,10 @@ export default function AdminLayout({
   // Wait for Firebase Auth + Firestore profile before any admin route guard runs
   if (loading && !isPublicAdminPage) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex items-center justify-center min-h-screen bg-[#faf9f7]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Verifying admin access...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Verifying admin access...</p>
         </div>
       </div>
     )
@@ -105,10 +105,10 @@ export default function AdminLayout({
 
   if (loading && isSetupPage) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex items-center justify-center min-h-screen bg-[#faf9f7]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Verifying admin access...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Verifying admin access...</p>
         </div>
       </div>
     )
@@ -117,10 +117,10 @@ export default function AdminLayout({
   // Signed in but profile doc unavailable
   if (!loading && !isPublicAdminPage && firebaseUser && !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="flex items-center justify-center min-h-screen bg-[#faf9f7]">
         <div className="text-center max-w-md px-4 space-y-4">
-          <p className="text-red-500 font-semibold text-lg">Profile not found</p>
-          <p className="text-muted-foreground">
+          <p className="text-red-600 font-semibold text-lg">Profile not found</p>
+          <p className="text-neutral-600">
             Your account is signed in but no user profile was found. If you were invited as an admin,
             finish setup with your access code (same password) so your profile can be created.
           </p>

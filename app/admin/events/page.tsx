@@ -1,6 +1,14 @@
 'use client'
 
 export const dynamic = 'force-dynamic'
+
+import {
+  FILTER_PILL_ACTIVE,
+  FILTER_PILL_INACTIVE,
+  ACTION_ROW,
+  BUTTON_ICON_COMPACT,
+  BUTTON_ROW_COMPACT,
+} from '@/lib/admin-design-system'
 import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -11,11 +19,6 @@ import type { Event, EventStatus } from '@/lib/event-types'
 import { subscribeToAllEvents, deleteEvent } from '@/lib/event-queries'
 import { toEventDate, getEventLocationLabel } from '@/lib/event-utils'
 import { EventBannerThumb } from '@/components/events/event-banner-thumb'
-import {
-  ACTION_ROW,
-  BUTTON_ICON_COMPACT,
-  BUTTON_ROW_COMPACT,
-} from '@/lib/admin-design-system'
 
 type TabType = 'all' | 'pending_approval' | 'draft' | 'published' | 'changes_requested' | 'rejected' | 'cancelled' | 'completed'
 
@@ -265,9 +268,7 @@ function EventsPageContent() {
                 type="button"
                 onClick={() => handleTabChange(tab)}
                 className={`px-4 py-2 font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2 rounded-lg ${
-                  activeTab === tab
-                    ? 'bg-black text-white'
-                    : 'bg-black text-white opacity-70 hover:opacity-100'
+                  activeTab === tab ? FILTER_PILL_ACTIVE : FILTER_PILL_INACTIVE
                 }`}
               >
                 {tab === 'pending_approval' && pendingCount > 0 && (

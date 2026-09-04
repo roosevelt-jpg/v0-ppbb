@@ -87,7 +87,7 @@ export default function OrdersPage() {
           description="Start shopping in the marketplace to see your orders here."
           action={
             <Link
-              href="/marketplace"
+              href="/dashboard/marketplace"
               className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
             >
               Browse Marketplace
