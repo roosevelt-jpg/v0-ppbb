@@ -22,8 +22,15 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const userAgent = getUserAgent(request)
 
-  // Block AI trainers & automated scrapers site-wide
-  if (isBlockedBot(userAgent)) {
+  // Local health checks / crons use curl; do not block loopback or readiness.
+  const isLoopback =
+    request.headers.get('x-forwarded-for') == null &&
+    (host === '127.0.0.1' || host === 'localhost' || host === '::1')
+  const isInternalProbe =
+    pathname === '/api/health' || pathname.startsWith('/api/cron/')
+
+  // Block AI trainers & automated scrapers site-wide (except local probes)
+  if (!isLoopback && !isInternalProbe && isBlockedBot(userAgent)) {
     return new NextResponse('Access denied — automated crawling is not permitted.', {
       status: 403,
       headers: {
