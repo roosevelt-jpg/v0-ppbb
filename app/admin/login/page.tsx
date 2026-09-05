@@ -309,45 +309,39 @@ function AdminLoginForm() {
   return (
     <div
       style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
+        width: '100%',
+        maxWidth: '420px',
+        margin: '0 auto',
+        padding: '24px 20px',
+        boxSizing: 'border-box',
       }}
     >
-      <div style={{ width: '100%', maxWidth: '480px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div
+      <div style={{ width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <Link
+            href="/"
             style={{
-              display: 'flex',
+              display: 'inline-flex',
               justifyContent: 'center',
               alignItems: 'center',
-              width: '100%',
-              minHeight: 140,
-              marginBottom: 8,
+              marginBottom: 12,
             }}
           >
-            <Link
-              href="/"
-              style={{ display: 'inline-flex', width: '100%', maxWidth: 440, justifyContent: 'center' }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={DEFAULT_LOGO_ON_LIGHT_BG}
-                alt="Passive Blessings"
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  height: 'auto',
-                  maxHeight: 160,
-                  objectFit: 'contain',
-                  backgroundColor: 'transparent',
-                }}
-                decoding="async"
-              />
-            </Link>
-          </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={DEFAULT_LOGO_ON_LIGHT_BG}
+              alt="Passive Blessings"
+              style={{
+                display: 'block',
+                height: 56,
+                width: 'auto',
+                maxWidth: 'min(260px, 75vw)',
+                objectFit: 'contain',
+                backgroundColor: 'transparent',
+              }}
+              decoding="async"
+            />
+          </Link>
           <p style={{ fontSize: '15px', color: 'var(--muted-foreground)', margin: 0 }}>
             Admin sign-in · Step {step} of 3
           </p>

@@ -197,7 +197,7 @@ export default function AdminLayout({
 
   if (isPublicAdminPage) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted">
+      <div className="min-h-dvh w-full flex items-center justify-center bg-gradient-to-br from-background to-muted">
         {children}
       </div>
     )
