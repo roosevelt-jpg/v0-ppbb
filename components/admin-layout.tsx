@@ -124,6 +124,7 @@ export const adminMenuItems = [
 
   // Communication — one inbox for all website contact / partnership inquiries
   { label: 'Contact Submissions', href: '/admin/contact-submissions', icon: Inbox, group: 'Communication' },
+  { label: 'Email Activity', href: '/admin/email-logs', icon: Mail, group: 'Communication' },
   { label: 'Newsletters', href: '/admin/newsletters', icon: Mail, group: 'Communication' },
   { label: 'Moderation', href: '/admin/moderation', icon: ShieldCheck, group: 'Communication' },
   { label: 'Chatbot', href: '/admin/chatbot', icon: Zap, group: 'Communication' },

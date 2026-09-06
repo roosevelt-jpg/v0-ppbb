@@ -38,6 +38,10 @@ export type SendBrandedEmailInput = {
   /** HTML body (paragraphs). Plain text is also fine — wrap in <p> if needed. */
   bodyHtml: string
   cta?: BrandedEmailCta
+  /** Optional CRM linkage */
+  userId?: string | null
+  relatedType?: string | null
+  relatedId?: string | null
 }
 
 function resolveSignature(input: Pick<SendBrandedEmailInput, 'purpose' | 'department' | 'signature'>): EmailSignature {
@@ -108,18 +112,38 @@ async function resolveLogoUrl(): Promise<string> {
 /**
  * Send a branded platform email via Gmail SMTP.
  * Returns ok:false (does not throw) when SMTP is not configured.
+ * Always writes an emailSendLogs CRM activity row (success or failure).
  */
 export async function sendBrandedEmail(
   input: SendBrandedEmailInput
 ): Promise<{ ok: boolean; error?: string }> {
+  const { previewFromBodyHtml, recordEmailSendLog } = await import('@/lib/email-send-log')
   const to = String(input.to || '').trim().toLowerCase()
+  const logBase = {
+    to: to || String(input.to || ''),
+    subject: input.subject,
+    purpose: input.purpose,
+    department: input.department || null,
+    userId: input.userId || null,
+    relatedType: input.relatedType || null,
+    relatedId: input.relatedId || null,
+    ctaUrl: input.cta?.url || null,
+    preview: previewFromBodyHtml(input.bodyHtml, input.headline),
+  }
+
   if (!to || !to.includes('@')) {
+    await recordEmailSendLog({ ...logBase, status: 'failed', error: 'Invalid recipient' })
     return { ok: false, error: 'Invalid recipient' }
   }
 
   const config = await getGmailSmtpConfig()
   if (!config) {
     console.warn('[platform-email] Gmail SMTP not configured — skipped:', input.subject)
+    await recordEmailSendLog({
+      ...logBase,
+      status: 'skipped',
+      error: 'Gmail SMTP not configured',
+    })
     return { ok: false, error: 'Gmail SMTP not configured' }
   }
 
@@ -162,10 +186,12 @@ export async function sendBrandedEmail(
       text,
     })
 
+    await recordEmailSendLog({ ...logBase, status: 'sent' })
     return { ok: true }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[platform-email] send failed:', message)
+    await recordEmailSendLog({ ...logBase, status: 'failed', error: message })
     return { ok: false, error: message }
   }
 }
@@ -229,18 +255,52 @@ export async function sendBrandedEmailToUser(opts: {
   cta?: BrandedEmailCta
   /** When true (default), skip if user disabled email notifications */
   respectPreference?: boolean
+  relatedType?: string | null
+  relatedId?: string | null
 }): Promise<{ ok: boolean; error?: string }> {
   const userId = String(opts.userId || '').trim()
   if (!userId) return { ok: false, error: 'Missing userId' }
 
   if (opts.respectPreference !== false) {
     const allowed = await userAllowsEmail(userId)
-    if (!allowed) return { ok: false, error: 'User opted out of email notifications' }
+    if (!allowed) {
+      const { recordEmailSendLog, previewFromBodyHtml } = await import('@/lib/email-send-log')
+      await recordEmailSendLog({
+        to: '',
+        subject: opts.subject,
+        purpose: opts.purpose,
+        department: opts.department || null,
+        status: 'skipped',
+        error: 'User opted out of email notifications',
+        userId,
+        relatedType: opts.relatedType || null,
+        relatedId: opts.relatedId || null,
+        ctaUrl: opts.cta?.url || null,
+        preview: previewFromBodyHtml(opts.bodyHtml, opts.headline),
+      })
+      return { ok: false, error: 'User opted out of email notifications' }
+    }
   }
 
   try {
     const email = await resolveRecipientEmail(userId)
-    if (!email) return { ok: false, error: 'User has no email' }
+    if (!email) {
+      const { recordEmailSendLog, previewFromBodyHtml } = await import('@/lib/email-send-log')
+      await recordEmailSendLog({
+        to: '',
+        subject: opts.subject,
+        purpose: opts.purpose,
+        department: opts.department || null,
+        status: 'failed',
+        error: 'User has no email',
+        userId,
+        relatedType: opts.relatedType || null,
+        relatedId: opts.relatedId || null,
+        ctaUrl: opts.cta?.url || null,
+        preview: previewFromBodyHtml(opts.bodyHtml, opts.headline),
+      })
+      return { ok: false, error: 'User has no email' }
+    }
 
     return sendBrandedEmail({
       to: email,
@@ -252,6 +312,9 @@ export async function sendBrandedEmailToUser(opts: {
       headline: opts.headline,
       bodyHtml: opts.bodyHtml,
       cta: opts.cta,
+      userId,
+      relatedType: opts.relatedType,
+      relatedId: opts.relatedId,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -270,6 +333,8 @@ export function sendBrandedEmailToUserSafe(opts: {
   bodyHtml: string
   cta?: BrandedEmailCta
   respectPreference?: boolean
+  relatedType?: string | null
+  relatedId?: string | null
 }): void {
   void sendBrandedEmailToUser(opts).catch((err) => {
     console.error('[platform-email] to-user safe send error:', err)
