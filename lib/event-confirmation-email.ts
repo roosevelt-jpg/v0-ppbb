@@ -113,3 +113,57 @@ export async function sendEventPaymentConfirmationEmail(opts: {
     return false
   }
 }
+
+export type EventReminderKind = 'day_before' | 'hours_before'
+
+/** Reminder before an event starts (day before or a few hours before). */
+export async function sendEventReminderEmail(opts: {
+  to: string
+  eventTitle: string
+  eventUrl: string
+  startDate: Date
+  locationLabel?: string | null
+  kind: EventReminderKind
+  checkInCode?: string | null
+}): Promise<boolean> {
+  if (!opts.to) return false
+
+  const when = opts.startDate.toLocaleString(undefined, {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  })
+  const location = opts.locationLabel?.trim()
+  const isHours = opts.kind === 'hours_before'
+
+  const subject = isHours
+    ? `Starting soon: ${opts.eventTitle}`
+    : `Tomorrow: ${opts.eventTitle}`
+  const headline = isHours ? 'Your event starts soon' : 'Event reminder'
+  const lead = isHours
+    ? `Just a heads-up — "${opts.eventTitle}" starts in a few hours.`
+    : `Friendly reminder — "${opts.eventTitle}" is coming up tomorrow.`
+
+  const lines = [
+    lead,
+    `When: ${when}.`,
+    location ? `Where: ${location}.` : '',
+    opts.checkInCode ? `Your check-in code: ${opts.checkInCode}` : '',
+    'We look forward to seeing you.',
+  ].filter(Boolean)
+
+  try {
+    const result = await sendBrandedEmail({
+      to: opts.to,
+      subject,
+      purpose: isHours ? 'Event starting soon reminder' : 'Event day-before reminder',
+      department: 'events',
+      headline,
+      bodyHtml: paragraphs(...lines),
+      cta: { label: 'View event', url: opts.eventUrl },
+    })
+    return result.ok
+  } catch (e) {
+    console.warn('[events] reminder email failed:', e)
+    return false
+  }
+}

@@ -120,26 +120,35 @@ jobs:
 
           echo "Deploy healthy."
 
-          # Schedule the membership cron routes (idempotent - replaces its
-          # own marked block each deploy, so a CRON_SECRET rotation is
-          # picked up automatically and reruns never duplicate entries).
+          # Schedule platform cron routes (idempotent — replaces its own
+          # marked block each deploy, so a CRON_SECRET rotation is picked up
+          # automatically and reruns never duplicate entries).
+          #
+          # Values (CRON_TZ=UTC):
+          #   0 9 * * *     membership-reminders  — expiry emails at 7/3/1 days left
+          #   5 9 * * *     membership-expire     — downgrade + expired email
+          #   15 * * * *    event-reminders       — ~1 day before + ~3 hours before
           {
             CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
             if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi
-            BEGIN_MARK="# BEGIN passive-blessings-membership-crons"
-            END_MARK="# END passive-blessings-membership-crons"
-            crontab -l 2>/dev/null | sed "/$BEGIN_MARK/,/$END_MARK/d" > /tmp/crontab.new
+            BEGIN_MARK="# BEGIN passive-blessings-platform-crons"
+            END_MARK="# END passive-blessings-platform-crons"
+            # Drop legacy membership-only block name if present
+            crontab -l 2>/dev/null \
+              | sed "/# BEGIN passive-blessings-membership-crons/,/# END passive-blessings-membership-crons/d" \
+              | sed "/$BEGIN_MARK/,/$END_MARK/d" > /tmp/crontab.new
             {
               echo "$BEGIN_MARK"
               echo "CRON_TZ=UTC"
               echo "0 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-reminders >/dev/null 2>&1"
               echo "5 9 * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/membership-expire >/dev/null 2>&1"
+              echo "15 * * * * curl -fsS -H \"Authorization: Bearer $CRON_TOKEN\" http://127.0.0.1:3000/api/cron/event-reminders >/dev/null 2>&1"
               echo "$END_MARK"
             } >> /tmp/crontab.new
             crontab /tmp/crontab.new
             rm -f /tmp/crontab.new
-            echo "Membership crons scheduled."
-          } || echo "Warning: could not schedule membership crons (continuing deploy)." >&2
+            echo "Platform crons scheduled."
+          } || echo "Warning: could not schedule platform crons (continuing deploy)." >&2
           REMOTE_SCRIPT
 
       - name: Cleanup local SSH key
