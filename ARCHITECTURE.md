@@ -1,0 +1,353 @@
+﻿# VerbaLab AI ? Architecture (MVP-realistic)
+
+This is the **starting** architecture for a small team. It is allowed to disagree with the libraries. When a later phase changes the shape of the system, update this file in the same session.
+
+**North star:** one language-intelligence **API company** with a console, not a hyperscaler replica.
+
+**Phase −1 enterprise blueprint (docs only):** [`docs/ENTERPRISE_PRODUCT_BLUEPRINT.md`](docs/ENTERPRISE_PRODUCT_BLUEPRINT.md) — system/C4 context, DDD, contracts, deploy, security, testing. This file remains the MVP-shaped runtime architecture.
+
+**Cloud Platform Foundation (VL-125):** [`docs/CLOUD_PLATFORM_FOUNDATION.md`](docs/CLOUD_PLATFORM_FOUNDATION.md) — library term → module map (Projects = workspaces; no AZs / discovery).
+
+**Identity Cloud (VL-126):** [`docs/IDENTITY_CLOUD.md`](docs/IDENTITY_CLOUD.md) — Clerk + RBAC + API keys; SAML/SCIM/ABAC/Teams not rebuilt.
+
+**Developer Cloud (VL-127):** [`docs/DEVELOPER_CLOUD.md`](docs/DEVELOPER_CLOUD.md) — portal hub + soft sandbox keys + thin CLI; no OAuth AS.
+
+**Enterprise Cloud (VL-128):** [`docs/ENTERPRISE_CLOUD.md`](docs/ENTERPRISE_CLOUD.md) — compose governance/admin/residency; no policy engine.
+
+**AI Gateway Cloud (VL-129):** [`docs/AI_GATEWAY_CLOUD.md`](docs/AI_GATEWAY_CLOUD.md) — thin gateway + OpenRouter optional fallback; Volume 1A closeout.
+
+**Language Cloud (VL-130):** [`docs/LANGUAGE_CLOUD.md`](docs/LANGUAGE_CLOUD.md) — hub over translate/glossary/TM/locales; no linguistics OS.
+
+**Speech Cloud (VL-150):** [`docs/SPEECH_CLOUD.md`](docs/SPEECH_CLOUD.md) — hub over batch STT/TTS/interpreter/voice; streaming and speech-intelligence products deferred.
+
+---
+
+## What we are actually building (now)
+
+A **modular monolith** in one monorepo:
+
+- **Web console** (`apps/web`) ? Next.js App Router
+- **Public/API + workers later** (`apps/api`) ? NestJS
+- **Postgres** ? the system of record
+- **Vendor AI** behind a single gateway module
+- **Clerk** (or Better Auth) for identity
+- **Stripe** when we reach VL-031
+
+First customer-visible slice: **authenticated org + API key + text translation + usage**. Specified in `PHASE_0_1.md`.
+
+---
+
+## Pushback on the library stacks
+
+v1 Phase 0 asks for, on day one: Turborepo, pnpm, Next.js 16, NestJS, Tailwind, ShadCN, Framer Motion, Docker, **Kubernetes**, **Terraform**, GitHub Actions, **OpenTelemetry + Prometheus + Grafana**, Redis, Postgres, **Elasticsearch**, BullMQ, Clerk, Cloudflare, AWS, Husky, Commitlint, Vitest, Playwright, Storybook ? plus GraphQL *and* REST *and* SDKs on every later phase.
+
+v2 then adds hexagonal/CQRS/event-driven **for every cloud**, plus Control Plane, Data Plane, AI Kernel, AI Fabric, GPU platform, and a six-repository split.
+
+### Keep
+
+| Choice | Why |
+| --- | --- |
+| **pnpm + Turborepo** | Cheap modularity; matches the library; fine for one team |
+| **TypeScript everywhere** | One language across web, API, SDK |
+| **Next.js (current stable)** | Console + docs + marketing. Use current stable (library says 16; do not pin to a number that does not exist at install time) |
+| **NestJS for `apps/api`** | Clear modules for gateway, billing, translation; can split out later without rewriting HTTP |
+| **Postgres** | Tenancy, keys, usage, TM, jobs. One database until it hurts |
+| **Tailwind + shadcn/ui** | Fast console; skip Framer Motion until a screen needs it |
+| **Vitest** | API and unit tests from Phase 0 |
+| **Playwright** | Add in Phase 1 for the translate happy path, not in the empty skeleton |
+| **Docker Compose** | Local Postgres + Redis (VL-044; ADR-0005) |
+| **GitHub Actions** | `lint`, `typecheck`, `test` |
+| **Clerk** | v1 already chose it; Organizations + OAuth in days, not months |
+| **Prisma** | Fast schema + migrations for NestJS. Revisit Drizzle only if we hate the client |
+
+### Cut from Phase 0?2 (overkill)
+
+| Library item | Why cut | When to revisit |
+| --- | --- | --- |
+| Kubernetes | You have one API and no SRE | Sustained load or many services |
+| Terraform / AWS account sprawl | PaaS + managed Postgres is enough | Multi-env compliance |
+| Elasticsearch | Postgres FTS / `pg_trgm` first | Search product, not logs |
+| Redis + BullMQ on day one | Deferred until jobs | Done in VL-044 (ADR-0005) |
+| Prometheus + Grafana + self-hosted OTel | Operate nothing extra | K8s era |
+| GraphQL | One extra surface to test | A client that needs it |
+| Storybook | Console is small | Design-system scale |
+| Framer Motion | Polish, not product | Marketing site |
+| Cloudflare (full) | Optional later for DNS/CDN | After a real domain |
+| Hexagonal + CQRS + event bus per module | Slows a 2-person team | A bounded context that is actually complex |
+| REST **and** GraphQL **and** gRPC | Pick REST/JSON | Partner demand |
+| Six git repos | Cross-repo PRs will stall you | Org boundaries exist |
+| ?AI Kernel / Fabric / VAIOS? | Duplicate of functions + a queue | Never for MVP |
+
+### Clerk vs ?build Identity Cloud?
+
+v1 and v2 specify OAuth2, OIDC, JWT, SAML, SCIM, passkeys, MFA, ABAC, audit ? **and** Clerk. Building that yourself **and** integrating Clerk is two identity companies.
+
+**Decision:** Clerk is the identity system. Our DB stores `clerkUserId` / `clerkOrgId` mappings, roles we must enforce in the API, workspaces, keys, and audit copies we need for product queries. We do **not** implement SAML/SCIM until a contract requires Clerk Enterprise or WorkOS (call that a new phase, not a silent expansion of VL-010).
+
+---
+
+## Logical shape
+
+```text
+                    ???????????????
+                    ?  Clerk       ?
+                    ?  (IdP)       ?
+                    ????????????????
+                           ? session / JWT
+              ???????????????????????????
+              ?                         ?
+       ???????????????           ???????????????
+       ? apps/web    ?  cookie   ? apps/api    ?
+       ? Next.js     ????????????? NestJS      ?
+       ? console     ?  /v1/*    ?             ?
+       ???????????????           ?  Identity   ?
+                                 ?  Workspaces ?
+                                 ?  ApiKeys    ?
+                                 ?  Gateway    ?
+                                 ?  Translate  ?
+                                 ?  Usage      ?
+                                 ???????????????
+                                        ?
+                          ???????????????????????????????????????????
+                          ?             ?             ?             ?
+                   ????????????  ????????????  ????????????? ????????????
+                   ? Postgres ?  ? Stripe   ?  ? AI vendors? ? Redis    ?
+                   ? + jobs   ?  ? (M3)     ?  ? Translate ? ? BullMQ   ?
+                   ????????????  ????????????  ? STT/TTS   ? ????????????
+                                               ? LLM/OCR   ?
+                                               ?????????????
+```
+
+**No microservice per cloud.** Translation, speech, and billing are NestJS modules (and later worker processes) sharing one Postgres, one deployment, one OpenAPI.
+
+---
+
+## Target repo layout (Phase 0 ? shipped)
+
+```text
+verbalab/
+  apps/
+    web/                 # Next.js 15 console (health page)
+    api/                 # NestJS HTTP API + Prisma
+  packages/
+    typescript-config/
+    eslint-config/
+    sdk/                 # placeholder until VL-033
+  docs/
+    ENGINEERING.md       # VL-001
+    adr/
+  infra/
+    docker-compose.yml   # Postgres :5433 + Redis :6379
+  .github/workflows/ci.yml
+  pnpm-workspace.yaml
+  turbo.json
+  package.json
+```
+
+**Local Postgres:** Compose publishes **5433?5432** because this machine already had something on 5432. CI still uses the Actions service on 5432. **Redis** is on host **6379** (ADR-0005). Document bytes land in local `DOCUMENT_STORAGE_DIR` (ADR-0006).
+
+---
+
+## API conventions (lock this in VL-001)
+
+- Base path: `/v1`
+- Auth: `Authorization: Bearer vl_live_...` for public API; session/Clerk for console BFF routes
+- Errors: `{ "error": { "code": "unsupported_language", "message": "...", "request_id": "..." } }`
+- Idempotency: `Idempotency-Key` on paid mutations once billing exists
+- Versioning: URL version; no header soup
+- OpenAPI generated from NestJS, not hand-written forever
+
+---
+
+## Data (Phase 1)
+
+Minimum tables (names indicative):
+
+| Table | Purpose |
+| --- | --- |
+| `organizations` | Tenant; Clerk org id |
+| `users` | Clerk user id |
+| `memberships` | user?org?role |
+| `workspaces` | belongs to org |
+| `api_keys` | hashed secret, prefix, workspace_id |
+| `languages` | registry |
+| `translation_requests` | metadata (+ optional body per retention policy) |
+| `usage_events` | append-only meter |
+| `audit_events` | VL-032; a thin version can start in Phase 1 for key create |
+
+**Isolation:** every query that returns customer data is scoped by `org_id` (and tests prove it).
+
+**pgvector:** enabled (VL-062) via `pgvector/pgvector:pg16` ? see ADR-0018.
+
+---
+
+## AI Gateway (VL-021)
+
+One NestJS module, not a sidecar service.
+
+```text
+Gateway
+  ??? ProviderRegistry
+  ??? adapters/googleTranslate.ts    # first
+  ??? adapters/openai-chat.ts        # VL-060 chat completions
+  ??? retry/timeout
+  ??? UsageWriter ? usage_events
+```
+
+Rules:
+
+- Controllers never import vendor SDKs directly
+- A provider failure is a mapped error, not a 500 stack trace
+- Cost estimate is logged even if billing is later
+- Adding DeepL is a **new adapter**, not a rewrite
+
+**First translation provider:** Google Cloud Translation **or** Azure Translator (African-language coverage). DeepL is a quality route for languages it actually supports ? second, not first.
+
+---
+
+## AuthN / AuthZ
+
+| Layer | Mechanism |
+| --- | --- |
+| Human on console | Clerk session |
+| Machine on `/v1` | API key (hashed at rest, prefix displayed) |
+| Authorization | `owner` / `admin` / `member` on org; keys inherit workspace |
+| Audit | Clerk events + our `audit_events` for keys and translations |
+
+Passkeys, MFA enrollment UX, and SAML stay in Clerk?s product. We do not reimplement them.
+
+---
+
+## Frontend
+
+- App Router, server components where they help, client for the translator box
+- shadcn/ui + Tailwind
+- No global state library until there is real client state (React Query if the console grows)
+- Marketing site can wait; a logged-in console is enough for M1?M2
+
+---
+
+## Testing
+
+| Layer | Tool | When |
+| --- | --- | --- |
+| Unit / API | Vitest + Nest testing module | Phase 0 (`/health`); Phase 1 (translate, keys, tenant isolation) |
+| Provider contract | Adapter tests with recorded fixtures **plus** one optional live test gated on env | Phase 1 |
+| E2E | Playwright: public `/setup` `/docs` `/coverage` `/health`; signed-in translate when `E2E_CLERK_*` set | Phase 1+ |
+| Types | `tsc --noEmit` in CI | Phase 0 |
+
+**Done does not mean:** a `TODO` adapter that returns `"hello"` in French.
+
+If `GOOGLE_TRANSLATE_API_KEY` (or Azure equivalent) is missing, **stop** and ask ? do not ship a fake translator.
+
+---
+
+## Environments
+
+| Env | What |
+| --- | --- |
+| Local | Compose Postgres, `.env.local`, Clerk dev keys, vendor key |
+| CI | Postgres service container, no vendor calls except optional nightly |
+| Production (VL-074/075) | Fly.io residency islands (`infra/fly/*.toml` + `*.eu.toml`); each island has its own Postgres+Redis; `VERBALAB_REGION` + org `data_region` pin (ADR-0043) |
+
+No ?dev / staging / prod / gov / sovereign? matrix until there is staff to operate it.
+
+---
+
+## Observability (until VL-070)
+
+Phase 0?1: JSON logs with `request_id`, Nest logger. VL-070: Sentry. Metrics dashboards only when we have traffic.
+
+---
+
+## Security defaults
+
+- API keys: `sha256` of the secret; store prefix only for UI
+- TLS at the PaaS edge
+- Helmet / security headers on API + web
+- Org data settings: retention, `persistSourceText`, `allowVendorTraining` (VL-073); DPA map in `docs/data-map.md`
+- No source text in logs by default
+- Vendor data-processing: check ?do not train? on Google/Azure/OpenAI before production
+
+---
+
+## What success looks like after Phase 1
+
+A developer can:
+
+1. Sign in
+2. Create an API key
+3. `curl` `POST /v1/translate` with real Swahili?English (or another seeded pair)
+4. See the same result and a character count in the console
+
+That is a company. It is not Translation Cloud + Speech Cloud + Voice Cloud + OCR Cloud + Marketplace + Foundation Models.
+
+---
+
+## Evolution (do not do early)
+
+| Pressure | Possible change |
+| --- | --- |
+| Document/audio jobs block HTTP | Extract `apps/worker`, add Redis + BullMQ |
+| Chat + translate need different scale | Still one API; scale replicas |
+| Fine-tunes | Gateway adapter to a rented vLLM / vendor fine-tune endpoint |
+| Second region | Done (VL-075): EU island (`*.eu.toml`) + org `data_region` pin; not a fabric |
+| Team boundaries | Split `packages/translate` then maybe a repo ? after pain is real |
+
+---
+
+## Mapping to v2 ?clouds?
+
+| v2 cloud | MVP home |
+| --- | --- |
+| Identity Cloud | Clerk + `apps/api` identity module |
+| Developer Cloud | Console pages + OpenAPI + later `packages/sdk` |
+| Enterprise Cloud | `organizations` + `workspaces` |
+| AI Gateway Cloud | `gateway` module |
+| Language Cloud | `languages` + `translate` module |
+| Speech Cloud | `speech-cloud` hub + existing `audio` / `interpret` / `voice*` |
+| Speech / Voice / Vision | Later modules + vendor adapters |
+| Everything else | See ROADMAP vision backlog |
+
+---
+
+## Open decisions (resolve before or during Phase 1, not in Phase 0)
+
+1. **IdP:** Clerk ? chosen. Live sign-in blocked until keys are in `.env`.
+2. **MT vendor:** Google Cloud Translation (ADR-0002). Live MT blocked until `GOOGLE_TRANSLATE_API_KEY` is set.
+3. **PaaS:** Fly.io (ADR-0023) — two apps + Docker; managed Postgres with pgvector; Redis required.
+
+## Frontend (ElevenLabs-inspired)
+
+Light monochrome product UI (not dark): white canvas, black primary CTAs, soft gray panels, generous space.
+Typography: **Syne** (display) + **DM Sans** (body). Brand accent green `#1a6b52` sparingly.
+Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`, `/language`, `/developers`, `/enterprise`, `/gateway`, `/identity`, `/translate`, `/keys`, `/usage`.
+
+## Phase 1 runtime shape (shipped)
+
+- Session routes (`/v1/api-keys`, `/v1/usage/summary`, console translate): Clerk Bearer JWT → identity sync → org/workspace.
+- Product route (`POST /v1/translate`): API key **or** Clerk session.
+- Without Clerk/Google keys: `/setup` page; API returns `auth_not_configured` / `provider_not_configured` — not fake data.
+- Tests: API + SDK suites green with DB + fixture provider; live Google test gated on `TRANSLATE_LIVE=1`.
+- Audit (`audit_events`): `api_key.created` / `api_key.revoked` / `translate.completed` / daily `session.sign_in`. Console `/audit` for owners/admins.
+- SDK: workspace package `@verbalab/sdk` (`VerbaLab` client).
+- Billing: org entitlements (`free` 50k chars / `pro` 1M). Stripe Checkout + Customer Portal + webhook. Translate returns `402 quota_exceeded` when over quota. Console `/billing`.
+- Marketplace (VL-090–092): Pro orgs publish frozen `glossary` / `prompt` / `dataset` (TM) listings; optional `priceCents` with Stripe Connect destination charges + platform fee (`/marketplace`, ADR-0031–0033).
+- Coverage (VL-100): golden EN→sw/yo/am eval harness + public `GET /v1/coverage` and `/coverage` (ADR-0034); reference metrics only — no leadership claims.
+- Dataset program (VL-101): licensed corpus intake with consent/license/PII metadata + versioned local blobs (`/datasets`, ADR-0035); Label Studio stays external.
+- Locale packs (VL-102): curated date/number/currency/honorifics/do-not-translate notes on `locale_packs`; public `/v1/locales` + `/locales` (ADR-0036).
+- Vertical glossaries (VL-103): platform EN→sw starter packs (public-sector/healthcare/banking); Pro install copies into workspace glossary (`/glossary`, ADR-0037).
+- Fine-tunes (VL-104): coverage candidates → Pro jobs + thin `model_registry`; gateway prefers ready `finetune` artifacts (`phrase_map` / `http_endpoint`) with vendor fallback (`/finetunes`, ADR-0038). GPU launch stays manual/Modal-gated.
+- Model registry (VL-110): extended `model_registry` seeds bought providers per feature; public `/v1/models/live` + `/models`; optional W&B `externalUrl` (ADR-0039). Not MLflow.
+- Training jobs (VL-111): `/v1/training-jobs` launchers (manual/Modal/Vertex/fixture); callback token for rented GPUs; optional dataset link; no fake GPU success (ADR-0040).
+- Foundation models (VL-112): **deferred** — no named FM program without research org/capital; keep vendors + narrow fine-tunes (ADR-0041).
+- Voice cloning (VL-064): ElevenLabs Instant Voice Cloning with consent attestation, abuse review, required watermark header; speak via `clone:{id}` (ADR-0042).
+- Voice Studio (VL-120): `/audio` African studio UX — language presets, clone lifecycle UI, Clerk-first TTS; vendors only (ADR-0044).
+- Own TTS (VL-121): `own:*` voices via `OWN_TTS_URL` rented endpoint (or fixture); OpenAI remains stock default (ADR-0045).
+- Cloud Platform Foundation (VL-125): library Phase 1 mapped onto org/workspace/Clerk/Stripe/residency — not a control plane. Workspaces API + `X-VerbaLab-Workspace-Id`, thin feature flags, `/dashboard` + `GET /v1/cloud/overview`. See [`docs/CLOUD_PLATFORM_FOUNDATION.md`](docs/CLOUD_PLATFORM_FOUNDATION.md) + ADR-0046. No AZs / service discovery.
+- Identity Cloud (VL-126): library Phase 2 mapped — Clerk human IdP; VerbaLab RBAC membership writes + Clerk role sync; API keys as machine identity (`lastUsedAt`); `/identity` + `GET /v1/identity/overview`. See [`docs/IDENTITY_CLOUD.md`](docs/IDENTITY_CLOUD.md) + ADR-0047. No first-party SAML/SCIM/ABAC/Teams.
+- Developer Cloud (VL-127): library Phase 3 mapped — `/developers` hub, soft `vl_test_` keys (same cluster), `@verbalab/cli`, playground detect/languages, `GET /v1/developer/*`. See [`docs/DEVELOPER_CLOUD.md`](docs/DEVELOPER_CLOUD.md) + ADR-0048. No OAuth AS / sandbox island.
+- Enterprise Cloud (VL-128): library Phase 4 mapped — `/enterprise` + derived policies from governance/admin/residency/billing/RBAC. See [`docs/ENTERPRISE_CLOUD.md`](docs/ENTERPRISE_CLOUD.md) + ADR-0049. No policy engine / Trust Center product.
+- AI Gateway Cloud (VL-129): library Phase 5 mapped — thin gateway hub + optional OpenRouter chat fallback. See [`docs/AI_GATEWAY_CLOUD.md`](docs/AI_GATEWAY_CLOUD.md) + ADR-0050. **Closes Volume 1 Part A.**
+- Language Cloud volume complete through Production Audit (VL-130–147). See LANGUAGE_CLOUD + `docs/language-cloud-audit/` and ADR-0051–0068. Fly remains default PaaS. Competitor-parity claims rejected.
+- Speech Cloud Foundation shipped (VL-150 / Phase 16). See SPEECH_CLOUD + ADR-0069. Extends audio modules; does not regenerate Language Cloud.

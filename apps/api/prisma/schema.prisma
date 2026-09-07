@@ -1,0 +1,902 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  owner
+  admin
+  member
+}
+
+enum ApiKeyEnvironment {
+  live
+  test
+}
+
+enum LanguageTier {
+  vendor
+  strategic_african
+}
+
+model Organization {
+  id                   String   @id @default(cuid())
+  clerkOrgId           String?  @unique @map("clerk_org_id")
+  name                 String
+  plan                 String   @default("free")
+  characterQuota       Int      @default(50000) @map("character_quota")
+  dataRegion           String?  @map("data_region")
+  stripeCustomerId     String?  @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?  @unique @map("stripe_subscription_id")
+  stripeConnectAccountId String? @unique @map("stripe_connect_account_id")
+  stripeConnectChargesEnabled Boolean @default(false) @map("stripe_connect_charges_enabled")
+  billingStatus        String   @default("active") @map("billing_status")
+  webhookSigningSecret String?  @map("webhook_signing_secret")
+  retentionDays        Int?     @map("retention_days")
+  persistSourceText    Boolean  @default(true) @map("persist_source_text")
+  allowVendorTraining  Boolean  @default(false) @map("allow_vendor_training")
+  disabledAt           DateTime? @map("disabled_at")
+  disabledReason       String?  @map("disabled_reason")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  memberships         Membership[]
+  workspaces          Workspace[]
+  apiKeys             ApiKey[]
+  translationRequests TranslationRequest[]
+  usageEvents         UsageEvent[]
+  auditEvents         AuditEvent[]
+  jobs                Job[]
+  documents           Document[]
+  glossaryTerms       GlossaryTerm[]
+  tmEntries           TranslationMemoryEntry[]
+  translationReviews  TranslationReview[]
+  knowledgeDocuments KnowledgeDocument[]
+  knowledgeChunks     KnowledgeChunk[]
+  slackInstallations  SlackInstallation[]
+  workflows           Workflow[]
+  prompts             Prompt[]
+  marketplaceListings MarketplaceListing[] @relation("MarketplacePublisher")
+  marketplaceInstalls MarketplaceInstall[] @relation("MarketplaceInstaller")
+  marketplaceSalesAsPublisher MarketplaceSale[] @relation("MarketplaceSalePublisher")
+  marketplaceSalesAsBuyer     MarketplaceSale[] @relation("MarketplaceSaleBuyer")
+  datasetAssets               DatasetAsset[]
+  verticalGlossaryInstalls    VerticalGlossaryInstall[]
+  fineTuneJobs                FineTuneJob[]
+  voiceClones                 VoiceClone[]
+
+  @@map("organizations")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique @map("clerk_user_id")
+  email       String?
+  name        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  memberships Membership[]
+  apiKeys     ApiKey[]
+  auditEvents AuditEvent[]
+  reviews     TranslationReview[]
+
+  @@map("users")
+}
+
+model Membership {
+  id             String         @id @default(cuid())
+  organizationId String         @map("organization_id")
+  userId         String         @map("user_id")
+  role           MembershipRole @default(member)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("memberships")
+}
+
+model Workspace {
+  id                 String   @id @default(cuid())
+  organizationId     String   @map("organization_id")
+  name               String
+  defaultSourceLang  String   @default("en") @map("default_source_lang")
+  defaultTargetLang  String   @default("sw") @map("default_target_lang")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  organization        Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  apiKeys             ApiKey[]
+  translationRequests TranslationRequest[]
+  usageEvents         UsageEvent[]
+  jobs                Job[]
+  documents           Document[]
+  glossaryTerms       GlossaryTerm[]
+  tmEntries           TranslationMemoryEntry[]
+  translationReviews  TranslationReview[]
+  knowledgeDocuments  KnowledgeDocument[]
+  knowledgeChunks     KnowledgeChunk[]
+  slackInstallations  SlackInstallation[]
+  workflows           Workflow[]
+  prompts             Prompt[]
+  marketplaceListings MarketplaceListing[] @relation("MarketplacePublisherWorkspace")
+  marketplaceInstalls MarketplaceInstall[] @relation("MarketplaceInstallerWorkspace")
+  datasetAssets       DatasetAsset[]
+  verticalGlossaryInstalls VerticalGlossaryInstall[]
+  voiceClones         VoiceClone[]
+
+  @@index([organizationId])
+  @@map("workspaces")
+}
+
+model Job {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  workspaceId    String    @map("workspace_id")
+  apiKeyId       String?   @map("api_key_id")
+  type           String
+  status         String    @default("queued")
+  input          Json
+  result         Json?
+  error          String?
+  webhookUrl     String?   @map("webhook_url")
+  webhookStatus  String?   @map("webhook_status")
+  attempts       Int       @default(0)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  startedAt      DateTime? @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  apiKey       ApiKey?      @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([status])
+  @@map("jobs")
+}
+
+model Document {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  apiKeyId       String?  @map("api_key_id")
+  kind           String   @default("source") // source | output
+  filename       String
+  mimeType       String   @map("mime_type")
+  sizeBytes      Int      @map("size_bytes")
+  storageKey     String   @map("storage_key")
+  sourceLang     String?  @map("source_lang")
+  targetLang     String?  @map("target_lang")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  apiKey       ApiKey?      @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("documents")
+}
+
+model GlossaryTerm {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  sourceLang     String   @map("source_lang")
+  targetLang     String   @map("target_lang")
+  sourceTerm     String   @map("source_term")
+  targetTerm     String   @map("target_term")
+  caseSensitive  Boolean  @default(false) @map("case_sensitive")
+  wholeWord      Boolean  @default(true) @map("whole_word")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceLang, targetLang, sourceTerm])
+  @@index([workspaceId, sourceLang, targetLang])
+  @@map("glossary_terms")
+}
+
+model TranslationMemoryEntry {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  /// workspace | enterprise | shared | project
+  scope          String   @default("workspace")
+  /// Project key when scope=project; empty string otherwise.
+  projectKey     String   @default("") @map("project_key")
+  sourceLang     String   @map("source_lang")
+  targetLang     String   @map("target_lang")
+  sourceText     String   @map("source_text")
+  targetText     String   @map("target_text")
+  sourceHash     String   @map("source_hash")
+  approved       Boolean  @default(true)
+  hitCount       Int      @default(0) @map("hit_count")
+  version        Int      @default(1)
+  /// OpenAI text-embedding-3-small (1536-d). Written/read via raw SQL when present.
+  embedding      Unsupported("vector(1536)")?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  versions     TranslationMemoryVersion[]
+
+  @@unique([workspaceId, sourceLang, targetLang, sourceHash], map: "tm_entries_ws_langs_hash_key")
+  @@index([workspaceId, sourceLang, targetLang], map: "tm_entries_ws_langs_idx")
+  @@index([organizationId, scope, sourceLang, targetLang], map: "tm_entries_org_scope_langs_idx")
+  @@index([organizationId, projectKey, sourceLang, targetLang], map: "tm_entries_org_project_langs_idx")
+  @@map("translation_memory_entries")
+}
+
+model TranslationMemoryVersion {
+  id        String   @id @default(cuid())
+  entryId   String   @map("entry_id")
+  version   Int
+  sourceText String  @map("source_text")
+  targetText String  @map("target_text")
+  scope     String
+  projectKey String  @default("") @map("project_key")
+  createdById String? @map("created_by_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  entry TranslationMemoryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, version], map: "tm_versions_entry_version_key")
+  @@index([entryId], map: "tm_versions_entry_idx")
+  @@map("translation_memory_versions")
+}
+
+model TranslationReview {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  workspaceId    String    @map("workspace_id")
+  sourceLang     String    @map("source_lang")
+  targetLang     String    @map("target_lang")
+  sourceText     String    @map("source_text")
+  targetText     String    @map("target_text")
+  provider       String
+  qualityScore   Int       @map("quality_score")
+  needsReview    Boolean   @default(false) @map("needs_review")
+  status         String    @default("pending") // pending | accepted | rejected
+  reviewNote     String?   @map("review_note")
+  reviewedById   String?   @map("reviewed_by_id")
+  reviewedAt     DateTime? @map("reviewed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  reviewedBy   User?        @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, createdAt], map: "tr_reviews_org_status_idx")
+  @@map("translation_reviews")
+}
+
+model ApiKey {
+  id             String             @id @default(cuid())
+  organizationId String             @map("organization_id")
+  workspaceId    String             @map("workspace_id")
+  createdById    String?            @map("created_by_id")
+  name           String
+  prefix         String
+  secretHash     String             @map("secret_hash")
+  environment    ApiKeyEnvironment  @default(live)
+  revokedAt      DateTime?          @map("revoked_at")
+  lastUsedAt     DateTime?          @map("last_used_at")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  organization        Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace           Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy           User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  translationRequests TranslationRequest[]
+  usageEvents         UsageEvent[]
+  jobs                Job[]
+  documents           Document[]
+  knowledgeDocuments  KnowledgeDocument[]
+
+  @@index([prefix])
+  @@index([organizationId])
+  @@map("api_keys")
+}
+
+enum LinguisticRuleKind {
+  pronunciation
+  grammar
+  phonetic
+  morphology
+}
+
+enum WritingSystemKind {
+  alphabet
+  abjad
+  abugida
+  syllabary
+  logographic
+  other
+}
+
+/** Language family node (VL-139). Curated — not Ethnologue parity. */
+model LanguageFamily {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  nameEn    String   @map("name_en")
+  parentCode String? @map("parent_code")
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  languages Language[]
+
+  @@map("language_families")
+}
+
+/**
+ * Writing system / script / alphabet registry (ISO 15924) — VL-139.
+ * "Alphabet" rows use kind=alphabet; all kinds are writing systems.
+ */
+model WritingSystem {
+  id          String            @id @default(cuid())
+  /// ISO 15924 four-letter code
+  code        String            @unique
+  nameEn      String            @map("name_en")
+  kind        WritingSystemKind @default(alphabet)
+  rtl         Boolean           @default(false)
+  sampleChars String?           @map("sample_chars")
+  notes       String?
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@index([kind])
+  @@map("writing_systems")
+}
+
+/**
+ * Curated linguistic rule catalog (VL-139). Metadata for validation/docs —
+ * not a runtime morphology/phonetics engine.
+ */
+model LinguisticRule {
+  id           String             @id @default(cuid())
+  code         String             @unique
+  kind         LinguisticRuleKind
+  languageCode String?            @map("language_code")
+  nameEn       String             @map("name_en")
+  description  String
+  /// optional pattern / cue string for clients
+  pattern      String?
+  /// string[] examples
+  examples     Json               @default("[]")
+  notes        String?
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  language Language? @relation(fields: [languageCode], references: [code], onDelete: SetNull)
+
+  @@index([kind])
+  @@index([languageCode])
+  @@map("linguistic_rules")
+}
+
+model Language {
+  id         String        @id @default(cuid())
+  code       String        @unique
+  nameEn     String        @map("name_en")
+  nameNative String?       @map("name_native")
+  script     String?
+  familyCode String?       @map("family_code")
+  rtl        Boolean       @default(false)
+  tier       LanguageTier  @default(vendor)
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  family     LanguageFamily? @relation(fields: [familyCode], references: [code], onDelete: SetNull)
+  localePack LocalePack?
+  dialects   Dialect[]
+  accents    Accent[]
+  linguisticRules LinguisticRule[]
+
+  @@index([familyCode])
+  @@map("languages")
+}
+
+/** Curated dialect labels for a registry language (VL-131). Not unlimited coverage. */
+model Dialect {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  languageCode String   @map("language_code")
+  nameEn       String   @map("name_en")
+  nameNative   String?  @map("name_native")
+  region       String?
+  /// string[] orthographic / lexical cues used for heuristic scoring
+  cueTerms     Json     @default("[]") @map("cue_terms")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  language Language @relation(fields: [languageCode], references: [code], onDelete: Cascade)
+
+  @@index([languageCode])
+  @@map("dialects")
+}
+
+/** Spoken accent profiles (VL-132). Transcript-assisted — not acoustic phonetics ID. */
+model Accent {
+  id                 String   @id @default(cuid())
+  code               String   @unique
+  languageCode       String   @map("language_code")
+  nameEn             String   @map("name_en")
+  nameNative         String?  @map("name_native")
+  region             String?
+  relatedDialectCode String?  @map("related_dialect_code")
+  /// string[] lexical / orthographic proxies used after STT or on text
+  cueTerms           Json     @default("[]") @map("cue_terms")
+  notes              String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  language Language @relation(fields: [languageCode], references: [code], onDelete: Cascade)
+
+  @@index([languageCode])
+  @@map("accents")
+}
+
+/** Cultural / locale notes for a registry language (VL-102). Not a culture platform. */
+model LocalePack {
+  id             String   @id @default(cuid())
+  languageCode   String   @unique @map("language_code")
+  /// BCP-47 tag for Intl, e.g. sw-TZ
+  bcp47          String?
+  dateNotes      String?  @map("date_notes")
+  numberNotes    String?  @map("number_notes")
+  currencyCode   String?  @map("currency_code")
+  currencyNotes  String?  @map("currency_notes")
+  /// [{ form, usage, notes }]
+  honorifics     Json?
+  /// string[] entities that should not be MT-mutated
+  doNotTranslate Json?    @map("do_not_translate")
+  culturalNotes  String?  @map("cultural_notes")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  language Language @relation(fields: [languageCode], references: [code], onDelete: Cascade)
+
+  @@map("locale_packs")
+}
+
+/** Country / regional localization guidance (VL-135). Composes language locale packs. */
+model CountryPack {
+  id                   String   @id @default(cuid())
+  /// ISO 3166-1 alpha-2
+  code                 String   @unique
+  nameEn               String   @map("name_en")
+  region               String?
+  currencyCode         String?  @map("currency_code")
+  /// string[] language registry codes
+  primaryLanguages     Json     @default("[]") @map("primary_languages")
+  /// string[] BCP-47 tags e.g. sw-KE
+  bcp47Tags            Json     @default("[]") @map("bcp47_tags")
+  relatedDialectCodes  Json     @default("[]") @map("related_dialect_codes")
+  relatedAccentCodes   Json     @default("[]") @map("related_accent_codes")
+  dateNotes            String?  @map("date_notes")
+  numberNotes          String?  @map("number_notes")
+  currencyNotes        String?  @map("currency_notes")
+  culturalNotes        String?  @map("cultural_notes")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  @@index([region])
+  @@map("country_packs")
+}
+
+model TranslationRequest {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  apiKeyId       String?  @map("api_key_id")
+  sourceLang     String   @map("source_lang")
+  targetLang     String   @map("target_lang")
+  characters     Int
+  provider       String
+  latencyMs      Int?     @map("latency_ms")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  apiKey       ApiKey?      @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("translation_requests")
+}
+
+model UsageEvent {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  apiKeyId       String?  @map("api_key_id")
+  feature        String
+  unitType       String   @map("unit_type")
+  units          Int
+  provider       String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  apiKey       ApiKey?      @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("usage_events")
+}
+
+model AuditEvent {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  userId         String?  @map("user_id")
+  action         String
+  route          String?
+  ip             String?
+  apiKeyPrefix   String?  @map("api_key_prefix")
+  metadata       Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("audit_events")
+}
+
+/// Workspace knowledge corpus document (RAG). Separate from translation Document (VL-040).
+model KnowledgeDocument {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  apiKeyId       String?  @map("api_key_id")
+  filename       String
+  mimeType       String   @map("mime_type")
+  sizeBytes      Int      @map("size_bytes")
+  storageKey     String   @map("storage_key")
+  status         String   @default("processing") // processing | ready | failed
+  error          String?
+  chunkCount     Int      @default(0) @map("chunk_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  apiKey       ApiKey?          @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  chunks       KnowledgeChunk[]
+
+  @@index([workspaceId, createdAt])
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id             String                       @id @default(cuid())
+  organizationId String                       @map("organization_id")
+  workspaceId    String                       @map("workspace_id")
+  documentId     String                       @map("document_id")
+  ordinal        Int
+  content        String
+  /// OpenAI text-embedding-3-small (1536-d). Written/read via raw SQL.
+  embedding      Unsupported("vector(1536)")?
+  createdAt      DateTime                     @default(now()) @map("created_at")
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  document     KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([documentId, ordinal])
+  @@map("knowledge_chunks")
+}
+
+model SlackInstallation {
+  id                String   @id @default(cuid())
+  teamId            String   @unique @map("team_id")
+  teamName          String?  @map("team_name")
+  organizationId    String   @map("organization_id")
+  workspaceId       String   @map("workspace_id")
+  defaultTargetLang String   @default("en") @map("default_target_lang")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("slack_installations")
+}
+
+/** Saved directed step list; runs snapshot steps onto a `workflow` job. */
+model Workflow {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  name           String
+  steps          Json
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@map("workflows")
+}
+
+/** Org/workspace managed system prompts (chat, rag, voice_faq). */
+model Prompt {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  key            String
+  /// Active PromptVersion.version; null = use code fallback.
+  activeVersion  Int?     @map("active_version")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  versions     PromptVersion[]
+
+  @@unique([workspaceId, key])
+  @@index([organizationId])
+  @@map("prompts")
+}
+
+model PromptVersion {
+  id        String   @id @default(cuid())
+  promptId  String   @map("prompt_id")
+  version   Int
+  body      String
+  note      String?
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+
+  @@unique([promptId, version])
+  @@index([promptId, version])
+  @@map("prompt_versions")
+}
+
+/** Published AI asset listing. Snapshot frozen at publish. Optional price for VL-092. */
+model MarketplaceListing {
+  id                    String   @id @default(cuid())
+  publisherOrgId        String   @map("publisher_org_id")
+  publisherWorkspaceId  String   @map("publisher_workspace_id")
+  kind                  String   @default("glossary")
+  title                 String
+  description           String?
+  status                String   @default("published")
+  /// Frozen glossary terms / prompts / dataset pairs at publish time.
+  snapshot              Json
+  termCount             Int      @default(0) @map("term_count")
+  priceCents            Int      @default(0) @map("price_cents")
+  currency              String   @default("usd")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  publisherOrg       Organization         @relation("MarketplacePublisher", fields: [publisherOrgId], references: [id], onDelete: Cascade)
+  publisherWorkspace Workspace            @relation("MarketplacePublisherWorkspace", fields: [publisherWorkspaceId], references: [id], onDelete: Cascade)
+  installs           MarketplaceInstall[]
+  sales              MarketplaceSale[]
+
+  @@index([status, createdAt])
+  @@index([publisherOrgId])
+  @@map("marketplace_listings")
+}
+
+/** Entitlement / receipt that a workspace installed a listing (copy-on-install). */
+model MarketplaceInstall {
+  id                   String   @id @default(cuid())
+  listingId            String   @map("listing_id")
+  installerOrgId       String   @map("installer_org_id")
+  installerWorkspaceId String   @map("installer_workspace_id")
+  termsInstalled       Int      @default(0) @map("terms_installed")
+  installedAt          DateTime @default(now()) @map("installed_at")
+
+  listing            MarketplaceListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  installerOrg       Organization       @relation("MarketplaceInstaller", fields: [installerOrgId], references: [id], onDelete: Cascade)
+  installerWorkspace Workspace          @relation("MarketplaceInstallerWorkspace", fields: [installerWorkspaceId], references: [id], onDelete: Cascade)
+  sale               MarketplaceSale?
+
+  @@unique([listingId, installerWorkspaceId])
+  @@index([installerOrgId])
+  @@map("marketplace_installs")
+}
+
+/** Revenue-share sale for a paid marketplace install (Stripe Connect or recorded fixture). */
+model MarketplaceSale {
+  id                      String   @id @default(cuid())
+  listingId               String   @map("listing_id")
+  buyerOrgId              String   @map("buyer_org_id")
+  publisherOrgId          String   @map("publisher_org_id")
+  installId               String?  @unique @map("install_id")
+  amountCents             Int      @map("amount_cents")
+  applicationFeeCents     Int      @map("application_fee_cents")
+  currency                String   @default("usd")
+  stripeCheckoutSessionId String?  @unique @map("stripe_checkout_session_id")
+  status                  String   @default("recorded")
+  createdAt               DateTime @default(now()) @map("created_at")
+
+  listing      MarketplaceListing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerOrg     Organization        @relation("MarketplaceSaleBuyer", fields: [buyerOrgId], references: [id], onDelete: Cascade)
+  publisherOrg Organization        @relation("MarketplaceSalePublisher", fields: [publisherOrgId], references: [id], onDelete: Cascade)
+  install      MarketplaceInstall? @relation(fields: [installId], references: [id], onDelete: SetNull)
+
+  @@index([publisherOrgId, createdAt])
+  @@index([buyerOrgId])
+  @@map("marketplace_sales")
+}
+
+/** Licensed corpus intake for future fine-tunes (VL-101). Not a Dataset Cloud product. */
+model DatasetAsset {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  title          String
+  licenseTag     String   @map("license_tag")
+  consentNotes   String   @map("consent_notes")
+  containsPii    Boolean  @default(false) @map("contains_pii")
+  sourceLang     String?  @map("source_lang")
+  targetLang     String?  @map("target_lang")
+  partnerOrgName String?  @map("partner_org_name")
+  status         String   @default("active")
+  createdBy      String?  @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  versions     DatasetVersion[]
+  fineTuneJobs FineTuneJob[]
+
+  @@index([organizationId, createdAt])
+  @@index([workspaceId, status])
+  @@map("dataset_assets")
+}
+
+model DatasetVersion {
+  id             String   @id @default(cuid())
+  assetId        String   @map("asset_id")
+  version        Int
+  storageKey     String   @map("storage_key")
+  filename       String
+  mimeType       String   @map("mime_type")
+  sizeBytes      Int      @map("size_bytes")
+  checksumSha256 String?  @map("checksum_sha256")
+  note           String?
+  status         String   @default("ready")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  asset DatasetAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, version])
+  @@index([assetId, version])
+  @@map("dataset_versions")
+}
+
+/** Receipt that a workspace installed a platform vertical glossary pack (VL-103). */
+model VerticalGlossaryInstall {
+  id             String   @id @default(cuid())
+  packId         String   @map("pack_id")
+  organizationId String   @map("organization_id")
+  workspaceId    String   @map("workspace_id")
+  termsInstalled Int      @default(0) @map("terms_installed")
+  installedAt    DateTime @default(now()) @map("installed_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([packId, workspaceId])
+  @@index([organizationId])
+  @@map("vertical_glossary_installs")
+}
+
+/** Model registry: vendor defaults + fine-tunes (VL-104 / VL-110). Not MLflow. */
+model ModelRegistryEntry {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  displayName   String   @map("display_name")
+  feature       String   @default("translate")
+  kind          String   @default("finetune")
+  provider      String?
+  sourceLang    String?  @map("source_lang")
+  targetLang    String?  @map("target_lang")
+  baseModel     String   @map("base_model")
+  status        String   @default("draft")
+  artifactKind  String?  @map("artifact_kind")
+  artifactUri   String?  @map("artifact_uri")
+  externalUrl   String?  @map("external_url")
+  notes         String?
+  metricsJson   Json?    @map("metrics_json")
+  fineTuneJobId String?  @unique @map("fine_tune_job_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  fineTuneJob FineTuneJob? @relation(fields: [fineTuneJobId], references: [id], onDelete: SetNull)
+
+  @@index([feature, status])
+  @@index([feature, sourceLang, targetLang, status])
+  @@map("model_registry")
+}
+
+/** Training job record for rented-GPU / manual fine-tunes (VL-104 / VL-111). */
+model FineTuneJob {
+  id               String    @id @default(cuid())
+  organizationId   String    @map("organization_id")
+  sourceLang       String    @map("source_lang")
+  targetLang       String    @map("target_lang")
+  baseModel        String    @default("nllb-200-distilled-600M") @map("base_model")
+  launcher         String    @default("manual")
+  status           String    @default("queued")
+  trainingPackPath String?   @map("training_pack_path")
+  datasetAssetId   String?   @map("dataset_asset_id")
+  externalJobId    String?   @map("external_job_id")
+  callbackToken    String?   @map("callback_token")
+  errorMessage     String?   @map("error_message")
+  artifactKind     String?   @map("artifact_kind")
+  artifactUri      String?   @map("artifact_uri")
+  metricsJson      Json?     @map("metrics_json")
+  providerMeta     Json?     @map("provider_meta")
+  createdByUserId  String?   @map("created_by_user_id")
+  startedAt        DateTime? @map("started_at")
+  finishedAt       DateTime? @map("finished_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  datasetAsset DatasetAsset?       @relation(fields: [datasetAssetId], references: [id], onDelete: SetNull)
+  modelEntry   ModelRegistryEntry?
+
+  @@index([organizationId, status])
+  @@index([sourceLang, targetLang])
+  @@index([callbackToken])
+  @@map("fine_tune_jobs")
+}
+
+/**
+ * Vendor voice clone (ElevenLabs) with consent + abuse review (VL-064).
+ * Do not train cloning models in-house.
+ */
+model VoiceClone {
+  id                 String    @id @default(cuid())
+  organizationId     String    @map("organization_id")
+  workspaceId        String    @map("workspace_id")
+  name               String
+  status             String    @default("pending_review")
+  consentAttested    Boolean   @map("consent_attested")
+  consentNotes       String    @map("consent_notes")
+  consentAttestedAt  DateTime  @map("consent_attested_at")
+  consentAttestedBy  String?   @map("consent_attested_by")
+  watermarkRequired  Boolean   @default(true) @map("watermark_required")
+  sampleStorageKeys  Json      @map("sample_storage_keys")
+  sampleCount        Int       @default(0) @map("sample_count")
+  provider           String    @default("elevenlabs")
+  providerVoiceId    String?   @map("provider_voice_id")
+  reviewNotes        String?   @map("review_notes")
+  reviewedBy         String?   @map("reviewed_by")
+  reviewedAt         DateTime? @map("reviewed_at")
+  disabledReason     String?   @map("disabled_reason")
+  createdByUserId    String?   @map("created_by_user_id")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@map("voice_clones")
+}
