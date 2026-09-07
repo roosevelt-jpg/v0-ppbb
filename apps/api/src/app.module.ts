@@ -50,6 +50,14 @@ import { EnterpriseCloudModule } from './enterprise-cloud/enterprise-cloud.modul
 import { GatewayCloudModule } from './gateway-cloud/gateway-cloud.module';
 import { LanguageCloudModule } from './language-cloud/language-cloud.module';
 import { SpeechCloudModule } from './speech-cloud/speech-cloud.module';
+import { SpeechRecognitionModule } from './speech-recognition/speech-recognition.module';
+import { SpeakerIntelligenceModule } from './speaker-intelligence/speaker-intelligence.module';
+import { EmotionIntelligenceModule } from './emotion-intelligence/emotion-intelligence.module';
+import { AudioIntelligenceModule } from './audio-intelligence/audio-intelligence.module';
+import { PronunciationIntelligenceModule } from './pronunciation-intelligence/pronunciation-intelligence.module';
+import { WakeWordModule } from './wake-word/wake-word.module';
+import { CallIntelligenceModule } from './call-intelligence/call-intelligence.module';
+import { SpeechAnalyticsModule } from './speech-analytics/speech-analytics.module';
 import { DialectsModule } from './dialects/dialects.module';
 import { AccentsModule } from './accents/accents.module';
 import { GrammarModule } from './grammar/grammar.module';
@@ -74,6 +82,14 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     GatewayCloudModule,
     LanguageCloudModule,
     SpeechCloudModule,
+    SpeechRecognitionModule,
+    SpeakerIntelligenceModule,
+    EmotionIntelligenceModule,
+    AudioIntelligenceModule,
+    PronunciationIntelligenceModule,
+    WakeWordModule,
+    CallIntelligenceModule,
+    SpeechAnalyticsModule,
     ApiKeysModule,
     RegistryModule,
     LanguagesModule,

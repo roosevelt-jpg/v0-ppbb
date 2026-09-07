@@ -318,6 +318,459 @@ export class GqlSpeechProduct {
   notes!: string;
 }
 
+@ObjectType()
+export class GqlSpeechCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlSpeechEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlSpeechCapability])
+  capabilities!: GqlSpeechCapability[];
+}
+
+@ObjectType()
+export class GqlSpeechVocabPack {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  description!: string;
+
+  @Field(() => [String])
+  phrases!: string[];
+}
+
+@ObjectType()
+export class GqlSpeakerCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlSpeakerEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlSpeakerCapability])
+  capabilities!: GqlSpeakerCapability[];
+}
+
+@ObjectType()
+export class GqlSpeakerProfile {
+  @Field()
+  id!: string;
+
+  @Field()
+  displayName!: string;
+
+  @Field()
+  status!: string;
+
+  @Field()
+  enrolled!: boolean;
+
+  @Field()
+  enrollmentCount!: number;
+}
+
+@ObjectType()
+export class GqlAccentCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAccentEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAccentCapability])
+  capabilities!: GqlAccentCapability[];
+}
+
+@InputType()
+export class DetectAccentInput {
+  @Field()
+  text!: string;
+
+  @Field(() => String, { nullable: true })
+  language?: string;
+}
+
+@ObjectType()
+export class GqlAccentDetectResult {
+  @Field()
+  language!: string;
+
+  @Field(() => String, { nullable: true })
+  accent!: string | null;
+
+  @Field(() => String, { nullable: true })
+  accentName!: string | null;
+
+  @Field()
+  confidence!: number;
+
+  @Field()
+  provider!: string;
+
+  @Field()
+  note!: string;
+}
+
+@ObjectType()
+export class GqlEmotionCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlEmotionEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [String])
+  labels!: string[];
+
+  @Field(() => [GqlEmotionCapability])
+  capabilities!: GqlEmotionCapability[];
+}
+
+@InputType()
+export class DetectEmotionInput {
+  @Field()
+  text!: string;
+}
+
+@ObjectType()
+export class GqlEmotionDetectResult {
+  @Field()
+  label!: string;
+
+  @Field()
+  confidence!: number;
+
+  @Field()
+  audioAdjusted!: boolean;
+
+  @Field()
+  note!: string;
+}
+
+@ObjectType()
+export class GqlAudioCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlAudioEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlAudioCapability])
+  capabilities!: GqlAudioCapability[];
+}
+
+@ObjectType()
+export class GqlPronunciationCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlPronunciationEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlPronunciationCapability])
+  capabilities!: GqlPronunciationCapability[];
+}
+
+@ObjectType()
+export class GqlPronunciationScores {
+  @Field()
+  overall!: number;
+
+  @Field()
+  accuracy!: number;
+
+  @Field()
+  fluency!: number;
+
+  @Field()
+  stress!: number;
+}
+
+@InputType()
+export class AssessPronunciationInput {
+  @Field()
+  reference!: string;
+
+  @Field({ nullable: true })
+  hypothesis?: string;
+
+  @Field({ nullable: true })
+  language?: string;
+}
+
+@ObjectType()
+export class GqlPronunciationAssessResult {
+  @Field()
+  language!: string;
+
+  @Field()
+  hypothesis!: string;
+
+  @Field(() => GqlPronunciationScores)
+  scores!: GqlPronunciationScores;
+
+  @Field()
+  note!: string;
+}
+
+@ObjectType()
+export class GqlWakeCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlWakeWordEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [String])
+  defaultWakePhrases!: string[];
+
+  @Field(() => [GqlWakeCapability])
+  capabilities!: GqlWakeCapability[];
+}
+
+@InputType()
+export class DetectWakeWordInput {
+  @Field()
+  text!: string;
+}
+
+@ObjectType()
+export class GqlWakeDetectResult {
+  @Field()
+  wakeDetected!: boolean;
+
+  @Field()
+  transcript!: string;
+
+  @Field()
+  note!: string;
+}
+
+@ObjectType()
+export class GqlCallCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlCallIntelligenceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlCallCapability])
+  capabilities!: GqlCallCapability[];
+}
+
+@InputType()
+export class IngestCallInput {
+  @Field()
+  transcript!: string;
+
+  @Field(() => String, { nullable: true })
+  language?: string;
+
+  @Field(() => String, { nullable: true })
+  direction?: string;
+
+  @Field(() => String, { nullable: true })
+  externalRef?: string;
+}
+
+@ObjectType()
+export class GqlCallRecord {
+  @Field()
+  id!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  summary?: string | null;
+
+  @Field(() => String, { nullable: true })
+  transcript?: string | null;
+}
+
+@ObjectType()
+export class GqlSpeechAnalyticsEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field()
+  capabilityCount!: number;
+
+  @Field()
+  shippedCount!: number;
+}
+
+@ObjectType()
+export class GqlSpeechAnalyticsOverview {
+  @Field()
+  periodStart!: string;
+
+  @Field()
+  periodEnd!: string;
+
+  @Field()
+  estimatedCostUsd!: number;
+
+  @Field()
+  sttRequests!: number;
+
+  @Field()
+  ttsRequests!: number;
+}
+
 @InputType()
 export class TranslateInput {
   @Field()

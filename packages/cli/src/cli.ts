@@ -14,6 +14,15 @@ function usage(): never {
   verbalab icu-validate --message <icu>
   verbalab languages
   verbalab speech-products
+  verbalab speech-engine
+  verbalab speaker-engine
+  verbalab accent-engine
+  verbalab emotion-engine
+  verbalab audio-engine
+  verbalab pronunciation-engine
+  verbalab wake-word-engine
+  verbalab call-engine
+  verbalab speech-analytics
   verbalab whoami
 
 Env:
@@ -54,6 +63,51 @@ async function main() {
 
   if (command === 'speech-products') {
     console.log(JSON.stringify(await vl.speechProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'speech-engine') {
+    console.log(JSON.stringify(await vl.speechEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'speaker-engine') {
+    console.log(JSON.stringify(await vl.speakerEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'accent-engine') {
+    console.log(JSON.stringify(await vl.accentEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'emotion-engine') {
+    console.log(JSON.stringify(await vl.emotionEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'audio-engine') {
+    console.log(JSON.stringify(await vl.audioEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'pronunciation-engine') {
+    console.log(JSON.stringify(await vl.pronunciationEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'wake-word-engine') {
+    console.log(JSON.stringify(await vl.wakeWordEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'call-engine') {
+    console.log(JSON.stringify(await vl.callIntelligenceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'speech-analytics') {
+    console.log(JSON.stringify(await vl.speechAnalyticsEngine(), null, 2));
     return;
   }
 

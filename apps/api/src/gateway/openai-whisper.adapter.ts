@@ -1,8 +1,16 @@
 import { HttpStatus } from '@nestjs/common';
 import { ApiException } from '../common/errors/api-exception';
-import { SttInput, SttOutput, SttProvider } from './stt-provider';
+import { SttInput, SttOutput, SttProvider, SttSegment } from './stt-provider';
 
 const OPENAI_URL = 'https://api.openai.com/v1/audio/transcriptions';
+
+type WhisperSegment = {
+  id?: number;
+  start?: number;
+  end?: number;
+  text?: string;
+  avg_logprob?: number;
+};
 
 export class OpenAiWhisperAdapter implements SttProvider {
   readonly name = 'openai_whisper';
@@ -28,6 +36,10 @@ export class OpenAiWhisperAdapter implements SttProvider {
     form.append('response_format', 'verbose_json');
     if (input.language) {
       form.append('language', input.language);
+    }
+    if (input.prompt?.trim()) {
+      // Whisper uses prompt for style/vocabulary priming (not a hard lexicon).
+      form.append('prompt', input.prompt.trim().slice(0, 800));
     }
 
     let response: Response;
@@ -61,6 +73,7 @@ export class OpenAiWhisperAdapter implements SttProvider {
       text?: string;
       language?: string;
       duration?: number;
+      segments?: WhisperSegment[];
     };
 
     const text = typeof body.text === 'string' ? body.text : '';
@@ -69,14 +82,51 @@ export class OpenAiWhisperAdapter implements SttProvider {
         ? Math.max(0, body.duration)
         : estimateDurationFromBytes(input.buffer.length);
 
+    const segments = mapSegments(body.segments);
+    const confidence = aggregateConfidence(segments);
+
     return {
       text,
       language: body.language ?? input.language,
       durationSeconds,
       provider: this.name,
       latencyMs: Date.now() - started,
+      segments: segments.length ? segments : undefined,
+      confidence,
     };
   }
+}
+
+function mapSegments(raw: WhisperSegment[] | undefined): SttSegment[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((seg, index) => {
+    const confidence =
+      typeof seg.avg_logprob === 'number' && Number.isFinite(seg.avg_logprob)
+        ? logprobToConfidence(seg.avg_logprob)
+        : undefined;
+    return {
+      id: typeof seg.id === 'number' ? seg.id : index,
+      start: typeof seg.start === 'number' ? seg.start : 0,
+      end: typeof seg.end === 'number' ? seg.end : 0,
+      text: typeof seg.text === 'string' ? seg.text.trim() : '',
+      confidence,
+    };
+  });
+}
+
+/** Map Whisper avg_logprob (typically -1..0) to a bounded 0–1 confidence. */
+export function logprobToConfidence(avgLogprob: number): number {
+  const raw = Math.exp(avgLogprob);
+  return Math.round(Math.min(1, Math.max(0, raw)) * 1000) / 1000;
+}
+
+function aggregateConfidence(segments: SttSegment[]): number | undefined {
+  const scores = segments
+    .map((s) => s.confidence)
+    .filter((c): c is number => typeof c === 'number');
+  if (!scores.length) return undefined;
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  return Math.round(avg * 1000) / 1000;
 }
 
 /** Last-resort estimate (~16 kbps speech) when vendor omits duration. */

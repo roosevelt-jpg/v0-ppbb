@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-09-07 (VL-150 Done)
+Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-151 Speech Recognition Engine (Phase 17) / VL-122 Speech depth |
+| Next up | Schedule next cloud volume via ROADMAP (Blueprint ADR-0080); do not invent empty clouds |
 
 ---
 
@@ -189,6 +189,16 @@ Last updated: 2026-09-07 (VL-150 Done)
 | VL-146 | Language Analytics (Phase 14) | Done | Translation/language/dialect/quality/latency/costs + enterprise report; ADR-0067. Not BI cloud. |
 | VL-147 | Language Cloud Production Audit (Phase 15) | Done | Audit gate + reports under `docs/language-cloud-audit/`; ADR-0068. Rejects competitor-parity + Speech kickoff. |
 | VL-150 | Speech Cloud Foundation (Phase 16) | Done | `/speech` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0069. Maps onto VL-041/042 audio; streaming/speaker OS deferred. |
+| VL-151 | Speech Recognition Engine (Phase 17) | Done | `/speech/recognize` + SSE stream + vocab/subtitles; ADR-0070. Whisper segments; live-mic WS deferred. |
+| VL-152 | Speaker Intelligence (Phase 18) | Done | Profiles + local fingerprints + verify/identify + gap diarization; ADR-0071. Not NIST/neural diarization. |
+| VL-153 | Accent Intelligence (Phase 19) | Done | Engine + classify + analytics façade over VL-132; ADR-0072. Acoustic regional models deferred. |
+| VL-154 | Emotion Intelligence (Phase 20) | Done | `/v1/emotion` detect/stream + 9 labels; ADR-0073. Soft audio proxies — not trained SER. |
+| VL-155 | Audio Intelligence (Phase 21) | Done | `/v1/audio-intelligence` analyze/silence/enhance/upscale/isolate + SSE; ADR-0074. Echo AEC deferred. |
+| VL-156 | Pronunciation Intelligence (Phase 22) | Done | `/v1/pronunciation` assess/score/coach/phonemes/fluency; ADR-0075. Forced alignment deferred. |
+| VL-157 | Wake Word Engine (Phase 23) | Done | `/v1/wake-word` detect/spot/triggers/keywords + SSE; ADR-0076. On-device DNN deferred. |
+| VL-158 | Call Intelligence (Phase 24) | Done | `/v1/call-intelligence` calls/analyze/report; ADR-0077. Heuristic QA/compliance. Voice FAQ separate. |
+| VL-159 | Speech Analytics (Phase 25) | Done | `/v1/speech-analytics` usage/overview/report; ADR-0078. Accuracy proxies; WER lab deferred. |
+| VL-160 | Speech Cloud Production Audit (Phase 26) | Done | Audit gate + reports under `docs/speech-cloud-audit/`; ADR-0079. Blueprint ADR-0080. Rejects commercial speech-OS parity. |
 
 ---
 
@@ -262,3 +272,13 @@ Last updated: 2026-09-07 (VL-150 Done)
 | 2026-09-07 | VL-146 Done: Language Analytics (Phase 14) — usage/quality/latency/costs/dialects + enterprise report; ADR-0067. |
 | 2026-09-07 | VL-147 Done: Language Cloud Production Audit (Phase 15) — checklist/tests/reports; rejects Google+DeepL+Grammarly+Crowdin parity claim; no Speech Cloud. ADR-0068. |
 | 2026-09-07 | VL-150 Done: Speech Cloud Foundation (Phase 16) — `/speech` hub + catalog/overview + CQRS/GraphQL slice; ADR-0069. Extends VL-041/042; streaming/speaker OS deferred. |
+| 2026-09-07 | VL-151 Done: Speech Recognition Engine (Phase 17) — recognize/stream/subtitles/vocab + dashboard; ADR-0070. Segment SSE partial streaming. |
+| 2026-09-07 | VL-152 Done: Speaker Intelligence (Phase 18) — profiles/enroll/verify/identify/diarize + history; ADR-0071. Local fingerprints + gap diarization. |
+| 2026-09-07 | VL-153 Done: Accent Intelligence (Phase 19) — engine/classify/analytics façade over VL-132; ADR-0072. Acoustic models deferred. |
+| 2026-09-07 | VL-154 Done: Emotion Intelligence (Phase 20) — detect/stream + 9 labels; ADR-0073. Soft audio proxies; SER deferred. |
+| 2026-09-07 | VL-155 Done: Audio Intelligence (Phase 21) — analyze/silence/enhance/upscale/isolate + SSE; ADR-0074. Echo AEC deferred. |
+| 2026-09-07 | VL-156 Done: Pronunciation Intelligence (Phase 22) — assess/score/coach/phonemes/fluency; ADR-0075. Forced alignment deferred. |
+| 2026-09-07 | VL-157 Done: Wake Word Engine (Phase 23) — detect/spot/triggers/keywords + SSE; ADR-0076. On-device DNN deferred. |
+| 2026-09-07 | VL-158 Done: Call Intelligence (Phase 24) — ingest/analyze/report; ADR-0077. Heuristic coaching/QA; Voice FAQ separate. |
+| 2026-09-07 | VL-159 Done: Speech Analytics (Phase 25) — usage/languages/costs/accuracy proxies/report; ADR-0078. WER lab deferred. |
+| 2026-09-07 | VL-160 Done: Speech Cloud Production Audit — checklist/tests/reports; ADR-0079. Cloud Blueprint ADR-0080. Volume closed. |

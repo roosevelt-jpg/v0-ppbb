@@ -2096,6 +2096,460 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/speech/engine': {
+      get: {
+        summary: 'Speech Recognition Engine catalog',
+        operationId: 'getSpeechEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, engines, and deployment honesty notes',
+          },
+        },
+      },
+    },
+    '/v1/speakers/engine': {
+      get: {
+        summary: 'Speaker Intelligence engine catalog',
+        operationId: 'getSpeakerEngine',
+        responses: {
+          '200': {
+            description: 'Speaker capabilities and honesty notes',
+          },
+        },
+      },
+    },
+    '/v1/accents/engine': {
+      get: {
+        summary: 'Accent Intelligence engine catalog',
+        operationId: 'getAccentEngine',
+        responses: {
+          '200': { description: 'Accent capabilities and honesty notes' },
+        },
+      },
+    },
+    '/v1/accents/classify': {
+      post: {
+        summary: 'Classify spoken accent (ranked candidates)',
+        operationId: 'classifyAccent',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Classification with confidence band' } },
+      },
+    },
+    '/v1/accents/analytics': {
+      get: {
+        summary: 'Accent Intelligence analytics',
+        operationId: 'getAccentAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org accent detect/classify usage' } },
+      },
+    },
+    '/v1/emotion/engine': {
+      get: {
+        summary: 'Emotion Intelligence engine catalog',
+        operationId: 'getEmotionEngine',
+        responses: { '200': { description: 'Emotion labels and capabilities' } },
+      },
+    },
+    '/v1/emotion/detect': {
+      post: {
+        summary: 'Detect speech emotion from text or audio',
+        operationId: 'detectEmotion',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Emotion label, confidence, ranked scores' } },
+      },
+    },
+    '/v1/audio-intelligence/engine': {
+      get: {
+        summary: 'Audio Intelligence engine catalog',
+        operationId: 'getAudioEngine',
+        responses: { '200': { description: 'Noise/silence/enhance capabilities' } },
+      },
+    },
+    '/v1/audio-intelligence/echo': {
+      get: {
+        summary: 'Echo cancellation status (deferred)',
+        operationId: 'getAudioEchoStatus',
+        responses: { '200': { description: 'AEC deferred status' } },
+      },
+    },
+    '/v1/audio-intelligence/analyze': {
+      post: {
+        summary: 'Analyze audio for noise and silence',
+        operationId: 'analyzeAudioIntelligence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Noise/silence metrics' } },
+      },
+    },
+    '/v1/audio-intelligence/silence': {
+      post: {
+        summary: 'Detect silence regions',
+        operationId: 'detectAudioSilence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Silence regions' } },
+      },
+    },
+    '/v1/audio-intelligence/enhance': {
+      post: {
+        summary: 'Enhance audio (noise gate)',
+        operationId: 'enhanceAudioIntelligence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Enhanced WAV base64' } },
+      },
+    },
+    '/v1/audio-intelligence/upscale': {
+      post: {
+        summary: 'Upscale audio sample rate (linear)',
+        operationId: 'upscaleAudioIntelligence',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Upsampled WAV base64' } },
+      },
+    },
+    '/v1/audio-intelligence/isolate': {
+      post: {
+        summary: 'Isolate voice via energy VAD',
+        operationId: 'isolateAudioVoice',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Isolated WAV base64' } },
+      },
+    },
+    '/v1/audio-intelligence/analyze/stream': {
+      post: {
+        summary: 'Stream audio analysis progress (SSE)',
+        operationId: 'streamAudioAnalyze',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'SSE analysis events' } },
+      },
+    },
+    '/v1/audio-intelligence/analytics': {
+      get: {
+        summary: 'Audio Intelligence analytics',
+        operationId: 'getAudioIntelligenceAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org audit-derived usage' } },
+      },
+    },
+    '/v1/pronunciation/engine': {
+      get: {
+        summary: 'Pronunciation Intelligence engine catalog',
+        operationId: 'getPronunciationEngine',
+        responses: { '200': { description: 'Assessment capabilities' } },
+      },
+    },
+    '/v1/pronunciation/assess': {
+      post: {
+        summary: 'Assess pronunciation vs reference',
+        operationId: 'assessPronunciation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Scores, alignment, coaching' } },
+      },
+    },
+    '/v1/pronunciation/score': {
+      post: {
+        summary: 'Pronunciation scores only',
+        operationId: 'scorePronunciation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Overall/accuracy/fluency/stress' } },
+      },
+    },
+    '/v1/pronunciation/coach': {
+      post: {
+        summary: 'Accent/pronunciation coaching tips',
+        operationId: 'coachPronunciation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Coaching tips + scores' } },
+      },
+    },
+    '/v1/pronunciation/phonemes': {
+      post: {
+        summary: 'Approximate phonemes and word stress',
+        operationId: 'pronunciationPhonemes',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Grapheme/dictionary phonemes' } },
+      },
+    },
+    '/v1/pronunciation/fluency': {
+      post: {
+        summary: 'Sentence fluency from audio',
+        operationId: 'pronunciationFluency',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Speaking rate + silence proxies' } },
+      },
+    },
+    '/v1/pronunciation/assess/stream': {
+      post: {
+        summary: 'Stream pronunciation assessment (SSE)',
+        operationId: 'streamPronunciationAssess',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'SSE assessment events' } },
+      },
+    },
+    '/v1/pronunciation/analytics': {
+      get: {
+        summary: 'Pronunciation Intelligence analytics',
+        operationId: 'getPronunciationAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org audit-derived usage' } },
+      },
+    },
+    '/v1/wake-word/engine': {
+      get: {
+        summary: 'Wake Word engine catalog',
+        operationId: 'getWakeWordEngine',
+        responses: { '200': { description: 'Wake/keyword capabilities' } },
+      },
+    },
+    '/v1/wake-word/keywords': {
+      get: {
+        summary: 'List custom wake/keyword/trigger phrases',
+        operationId: 'listWakeKeywords',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace phrases' } },
+      },
+      post: {
+        summary: 'Add custom wake/keyword/trigger phrase',
+        operationId: 'addWakeKeyword',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created phrase' } },
+      },
+    },
+    '/v1/wake-word/detect': {
+      post: {
+        summary: 'Detect wake words in text or audio',
+        operationId: 'detectWakeWord',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Wake detection hits' } },
+      },
+    },
+    '/v1/wake-word/spot': {
+      post: {
+        summary: 'Spot keywords in text or audio',
+        operationId: 'spotWakeKeywords',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Keyword hits' } },
+      },
+    },
+    '/v1/wake-word/triggers': {
+      post: {
+        summary: 'Evaluate enterprise trigger phrases',
+        operationId: 'evaluateWakeTriggers',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Fired triggers' } },
+      },
+    },
+    '/v1/wake-word/detect/stream': {
+      post: {
+        summary: 'Stream wake detection (SSE)',
+        operationId: 'streamWakeDetect',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'SSE wake events' } },
+      },
+    },
+    '/v1/wake-word/analytics': {
+      get: {
+        summary: 'Wake Word analytics',
+        operationId: 'getWakeWordAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org audit-derived usage' } },
+      },
+    },
+    '/v1/call-intelligence/engine': {
+      get: {
+        summary: 'Call Intelligence engine catalog',
+        operationId: 'getCallIntelligenceEngine',
+        responses: { '200': { description: 'Call analytics capabilities' } },
+      },
+    },
+    '/v1/call-intelligence/calls': {
+      get: {
+        summary: 'List call records',
+        operationId: 'listCallRecords',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace calls' } },
+      },
+      post: {
+        summary: 'Ingest call (transcript and/or recording)',
+        operationId: 'createCallRecord',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created call with optional analysis' } },
+      },
+    },
+    '/v1/call-intelligence/calls/{id}/analyze': {
+      post: {
+        summary: 'Analyze an existing call',
+        operationId: 'analyzeCallRecord',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Updated call analysis' } },
+      },
+    },
+    '/v1/call-intelligence/report': {
+      get: {
+        summary: 'Call Intelligence workspace report',
+        operationId: 'getCallIntelligenceReport',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Aggregated call metrics' } },
+      },
+    },
+    '/v1/call-intelligence/analytics': {
+      get: {
+        summary: 'Call Intelligence analytics',
+        operationId: 'getCallIntelligenceAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org audit-derived usage' } },
+      },
+    },
+    '/v1/call-intelligence/analyze/stream': {
+      post: {
+        summary: 'Stream call ingest/analyze (SSE)',
+        operationId: 'streamCallAnalyze',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'SSE call events' } },
+      },
+    },
+    '/v1/speech-analytics/engine': {
+      get: {
+        summary: 'Speech Analytics engine catalog',
+        operationId: 'getSpeechAnalyticsEngine',
+        responses: { '200': { description: 'Speech analytics capabilities' } },
+      },
+    },
+    '/v1/speech-analytics/overview': {
+      get: {
+        summary: 'Speech Analytics overview',
+        operationId: 'getSpeechAnalyticsOverview',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Usage + cost snapshot' } },
+      },
+    },
+    '/v1/speech-analytics/usage': {
+      get: {
+        summary: 'Speech STT/TTS usage',
+        operationId: 'getSpeechAnalyticsUsage',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'STT/TTS usage aggregates' } },
+      },
+    },
+    '/v1/speech-analytics/report': {
+      get: {
+        summary: 'Bundled Speech Analytics report',
+        operationId: 'getSpeechAnalyticsReport',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Enterprise speech report JSON' } },
+      },
+    },
+    '/v1/speech-analytics/monitoring': {
+      get: {
+        summary: 'Speech Analytics monitoring snapshot',
+        operationId: 'getSpeechAnalyticsMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
+    '/v1/speakers/profiles': {
+      get: {
+        summary: 'List speaker profiles',
+        operationId: 'listSpeakerProfiles',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Workspace speaker profiles' } },
+      },
+      post: {
+        summary: 'Create speaker profile',
+        operationId: 'createSpeakerProfile',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '201': { description: 'Created profile' } },
+      },
+    },
+    '/v1/speakers/verify': {
+      post: {
+        summary: 'Verify speaker (1:1)',
+        operationId: 'verifySpeaker',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Match score and decision' } },
+      },
+    },
+    '/v1/speakers/identify': {
+      post: {
+        summary: 'Identify speaker (1:N)',
+        operationId: 'identifySpeaker',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Top candidates and decision' } },
+      },
+    },
+    '/v1/speakers/diarize': {
+      post: {
+        summary: 'Diarize speakers (gap-based over Whisper segments)',
+        operationId: 'diarizeSpeech',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Speaker turns and labels' } },
+      },
+    },
+    '/v1/speech/recognize': {
+      post: {
+        summary: 'Recognize speech (batch STT with segments)',
+        operationId: 'recognizeSpeech',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file'],
+                properties: {
+                  file: { type: 'string', format: 'binary' },
+                  language: { type: 'string', description: 'Optional ISO-639-1; omit to auto-detect' },
+                  industryPacks: {
+                    type: 'string',
+                    description: 'Comma-separated: medical,legal,financial,government',
+                  },
+                  vocabulary: { type: 'string', description: 'Comma-separated custom phrases' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Transcript with segments, timestamps, confidence' },
+        },
+      },
+    },
+    '/v1/speech/stream': {
+      post: {
+        summary: 'Stream speech recognition events (SSE segment stream)',
+        operationId: 'streamSpeechRecognition',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file'],
+                properties: {
+                  file: { type: 'string', format: 'binary' },
+                  language: { type: 'string' },
+                  industryPacks: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'text/event-stream with start, segment, done events',
+          },
+        },
+      },
+    },
+    '/v1/speech/subtitles': {
+      post: {
+        summary: 'Generate SRT or WebVTT subtitles from audio',
+        operationId: 'createSpeechSubtitles',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Subtitle file content + metadata' },
+        },
+      },
+    },
     '/v1/speech/overview': {
       get: {
         summary: 'Speech Cloud org overview',

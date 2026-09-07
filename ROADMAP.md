@@ -41,7 +41,7 @@ This roadmap is a **backlog and vision**, not a one-shot build script. v1 and v2
 | 3 AI Gateway | 5 AI Gateway (+ 74 AI Router, 71–80 Inference) | **VL-021** |
 | 4 Language registry | 7 Language Registry (+ 128 African registry) | **VL-020** |
 | 5 Translation Cloud | 6–15 Language Cloud | **VL-022–VL-024, VL-040, VL-050–VL-054** |
-| 6 Speech Cloud | 16–26 Speech Cloud | **VL-150+** (foundation); **VL-041/042** vendor STT/TTS |
+| 6 Speech Cloud | 16–26 Speech Cloud | **VL-150+**; **VL-151** recognition; **VL-041/042** vendor STT/TTS |
 | 7 Voice Cloud | 27–36 Voice Cloud | **VL-042, VL-064** (vendor) |
 | 8 OCR Cloud | 37–46 Vision Cloud | **VL-043** (vendor) |
 | 9 Live Interpreter | (no dedicated volume; compose STT+MT+TTS) | **VL-061** |
@@ -923,6 +923,96 @@ User override (2026-09-07): build tracks 1–5 from the library ambition as **bo
 - **Buy vs build:** Extend Nest/Next; docs in `SPEECH_CLOUD.md` + ADR-0069
 - **Sources:** Library Phase 16 “Speech Cloud Foundation”
 - **Out of scope:** Streaming STT, Speaker/Emotion/Audio/Pronunciation/Wake-Word/Call Intelligence engines, Audio Enhancement, Speech Analytics product (Phases 17–25), greenfield DDD rewrite of `AudioModule`
+
+#### VL-151 — Speech Recognition Engine (Phase 17)
+
+- **Goal:** VerbaLab Speech Recognition — batch recognize with timestamps/confidence, segment SSE stream, multilingual/auto-detect, custom + industry vocabulary, subtitles, punctuation/capitalization, engine catalog, GraphQL/SDK/dashboard/analytics hooks. Extend Whisper; do not claim live-mic WebSocket ASR OS.
+- **Complexity:** L
+- **Depends on:** VL-041, VL-150
+- **Buy vs build:** Buy Whisper; build engine façade + vocab/subtitles/SSE
+- **Sources:** Library Phase 17; ADR-0070
+- **Out of scope:** Bidirectional live-mic WebSocket, Deepgram/AssemblyAI parity, Speech Analytics product (Phase 25)
+
+#### VL-152 — Speaker Intelligence (Phase 18)
+
+- **Goal:** Speaker profiles, local voice fingerprints, 1:1 verification, 1:N identification, gap-based diarization over Whisper segments, history, engine catalog, GraphQL/SDK/console. Honest partial — not NIST biometrics or neural diarization.
+- **Complexity:** L
+- **Depends on:** VL-150, VL-151
+- **Buy vs build:** Build local fingerprint + gap diarization; buy neural diarization later if needed
+- **Sources:** Library Phase 18; ADR-0071
+- **Out of scope:** NIST-grade biometrics, anti-spoof, pyannote/Deepgram diarization parity, regenerating voice clones as verification
+
+#### VL-153 — Accent Intelligence (Phase 19)
+
+- **Goal:** Accent Intelligence façade over VL-132 — engine catalog, classify (ranked + confidence band), analytics, GraphQL/SDK/console. Cross-link dialect detect (Language Cloud). Defer acoustic regional models.
+- **Complexity:** M
+- **Depends on:** VL-132, VL-150
+- **Buy vs build:** Extend cue engine; buy acoustic models later if needed
+- **Sources:** Library Phase 19; ADR-0072
+- **Out of scope:** Acoustic phonetics ID, regenerating dialects module, unlimited accent catalogs
+
+#### VL-154 — Emotion Intelligence (Phase 20)
+
+- **Goal:** Speech Cloud emotion detect for happy/sad/angry/fear/neutral/stress/confidence/excitement/urgency — text cues, optional audio→STT + soft energy proxies, SSE stream, engine/analytics, GraphQL/SDK/console. Do not regenerate Language Intelligence emotion.
+- **Complexity:** M
+- **Depends on:** VL-150, VL-151
+- **Buy vs build:** Build cue engine; buy trained SER later if needed
+- **Sources:** Library Phase 20; ADR-0073
+- **Out of scope:** Trained acoustic SER, Affectiva/Hume parity, regenerating VL-144 emotion endpoints
+
+#### VL-155 — Audio Intelligence (Phase 21)
+
+- **Goal:** Noise/silence analysis, noise-gate enhancement, linear upscaling, energy VAD isolation — REST/SSE/SDK/console/monitoring on shared deploy. Echo cancellation deferred (needs AEC reference/vendor).
+- **Complexity:** M
+- **Depends on:** VL-150
+- **Buy vs build:** Build PCM DSP; buy neural denoise/AEC later if needed
+- **Sources:** Library Phase 21; ADR-0074
+- **Out of scope:** Krisp/Demucs/Adobe Enhance parity, live AEC WebSocket, generative audio upscaling
+
+#### VL-156 — Pronunciation Intelligence (Phase 22)
+
+- **Goal:** Pronunciation assess/score/coach for language learning — word alignment vs reference, fluency proxies, grapheme phoneme/stress heuristics, analytics/dashboard/SDK. Forced-alignment phonemes deferred.
+- **Complexity:** M
+- **Depends on:** VL-150, VL-151
+- **Buy vs build:** Build alignment heuristics; buy specialty pronunciation ASR later if needed
+- **Sources:** Library Phase 22; ADR-0075
+- **Out of scope:** ELSA/SpeechAce parity, CEFR certification, acoustic accent coaching models
+
+#### VL-157 — Wake Word Engine (Phase 23)
+
+- **Goal:** Wake word detection, keyword spotting, custom phrases, enterprise trigger hits, SSE streaming — via text/STT spotting. On-device always-on DNN deferred.
+- **Complexity:** M
+- **Depends on:** VL-150, VL-151
+- **Buy vs build:** Build transcript spotting; buy Porcupine-class models later if needed
+- **Sources:** Library Phase 23; ADR-0076
+- **Out of scope:** Picovoice/Snowboy parity, continuous mic DNN, workflow orchestration OS
+
+#### VL-158 — Call Intelligence (Phase 24)
+
+- **Goal:** Contact-center call ingest (recording upload + transcript), STT, heuristic summary/topics/intent/sentiment/emotion/compliance/coaching/QA, reports, GraphQL/SDK/dashboard. Do not regenerate Voice FAQ.
+- **Complexity:** M
+- **Depends on:** VL-150, VL-151
+- **Buy vs build:** Build heuristic analytics; buy CCaaS/Gong-class vendors later if needed
+- **Sources:** Library Phase 24; ADR-0077
+- **Out of scope:** Gong/Chorus parity, realtime dialer agent-assist, legal compliance certification
+
+#### VL-159 — Speech Analytics (Phase 25)
+
+- **Goal:** Speech usage, languages, dialects, cost estimates, accuracy proxies, latency/error snapshots, customers/industries aggregates, dashboard/report — over usage_events + speech audits. Do not regenerate Language Analytics.
+- **Complexity:** M
+- **Depends on:** VL-150, VL-151
+- **Buy vs build:** Build aggregates; buy BI/WER vendors later if needed
+- **Sources:** Library Phase 25; ADR-0078
+- **Out of scope:** BI cloud, NIST WER lab, regenerating `/v1/analytics`
+
+#### VL-160 — Speech Cloud Production Audit (Phase 26)
+
+- **Goal:** Checklist + evidence pack over VL-150–159 (TODO scan, catalog/auth/SSE/load smokes, reports). Accept 12-layer Cloud Blueprint (ADR-0080). Reject competitor-parity marketing and invented k6/axe platforms.
+- **Complexity:** S
+- **Depends on:** VL-150–159
+- **Buy vs build:** N/A (audit gate)
+- **Sources:** Library Phase 26; ADR-0079, ADR-0080
+- **Out of scope:** New speech features, empty Voice/Vision clouds, commercial speech-OS parity claims
 
 ---
 

@@ -6,12 +6,30 @@ import { IdentityModule } from '../identity/identity.module';
 import { RateLimitModule } from '../rate-limit/rate-limit.module';
 import { LanguageCloudApplicationModule } from '../language-cloud/application/language-cloud-application.module';
 import { SpeechCloudApplicationModule } from '../speech-cloud/application/speech-cloud-application.module';
+import { SpeechRecognitionModule } from '../speech-recognition/speech-recognition.module';
+import { SpeakerIntelligenceModule } from '../speaker-intelligence/speaker-intelligence.module';
+import { AccentsModule } from '../accents/accents.module';
+import { EmotionIntelligenceModule } from '../emotion-intelligence/emotion-intelligence.module';
+import { AudioIntelligenceModule } from '../audio-intelligence/audio-intelligence.module';
+import { PronunciationIntelligenceModule } from '../pronunciation-intelligence/pronunciation-intelligence.module';
+import { WakeWordModule } from '../wake-word/wake-word.module';
+import { CallIntelligenceModule } from '../call-intelligence/call-intelligence.module';
+import { SpeechAnalyticsModule } from '../speech-analytics/speech-analytics.module';
 import { TranslateModule } from '../translate/translate.module';
 import { GrammarModule } from '../grammar/grammar.module';
 import { LocalizeModule } from '../localize/localize.module';
 import { TranslateAuthGuard } from '../common/guards/translate-auth.guard';
 import { LanguageCloudGraphqlResolver } from './language-cloud.resolver';
 import { SpeechCloudGraphqlResolver } from './speech-cloud.resolver';
+import { SpeechRecognitionGraphqlResolver } from './speech-recognition.resolver';
+import { SpeakerIntelligenceGraphqlResolver } from './speaker-intelligence.resolver';
+import { AccentIntelligenceGraphqlResolver } from './accent-intelligence.resolver';
+import { EmotionIntelligenceGraphqlResolver } from './emotion-intelligence.resolver';
+import { AudioIntelligenceGraphqlResolver } from './audio-intelligence.resolver';
+import { PronunciationIntelligenceGraphqlResolver } from './pronunciation-intelligence.resolver';
+import { WakeWordGraphqlResolver } from './wake-word.resolver';
+import { CallIntelligenceGraphqlResolver } from './call-intelligence.resolver';
+import { SpeechAnalyticsGraphqlResolver } from './speech-analytics.resolver';
 import { TranslateGraphqlResolver } from './translate.resolver';
 import { LocalizationGraphqlResolver } from './localization.resolver';
 import { GrammarIntelligenceGraphqlResolver } from './grammar-intelligence.resolver';
@@ -38,6 +56,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     }),
     LanguageCloudApplicationModule,
     SpeechCloudApplicationModule,
+    SpeechRecognitionModule,
+    SpeakerIntelligenceModule,
+    AccentsModule,
+    EmotionIntelligenceModule,
+    AudioIntelligenceModule,
+    PronunciationIntelligenceModule,
+    WakeWordModule,
+    CallIntelligenceModule,
+    SpeechAnalyticsModule,
     TranslateModule,
     LocalizeModule,
     GrammarModule,
@@ -52,6 +79,15 @@ import { AnalyticsModule } from '../analytics/analytics.module';
   providers: [
     LanguageCloudGraphqlResolver,
     SpeechCloudGraphqlResolver,
+    SpeechRecognitionGraphqlResolver,
+    SpeakerIntelligenceGraphqlResolver,
+    AccentIntelligenceGraphqlResolver,
+    EmotionIntelligenceGraphqlResolver,
+    AudioIntelligenceGraphqlResolver,
+    PronunciationIntelligenceGraphqlResolver,
+    WakeWordGraphqlResolver,
+    CallIntelligenceGraphqlResolver,
+    SpeechAnalyticsGraphqlResolver,
     TranslateGraphqlResolver,
     LocalizationGraphqlResolver,
     GrammarIntelligenceGraphqlResolver,

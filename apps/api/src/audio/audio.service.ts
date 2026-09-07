@@ -96,6 +96,8 @@ export class AudioService {
       durationSeconds,
       durationMinutes: Math.round((durationSeconds / 60) * 1000) / 1000,
       provider: result.provider,
+      confidence: result.confidence ?? null,
+      segments: result.segments ?? [],
     };
   }
 

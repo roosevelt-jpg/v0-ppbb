@@ -7,7 +7,7 @@ Two supported paths:
 
 PaaS choice for day-to-day: **Fly.io**. EKS is optional when AWS/K8s is required.
 
-Enterprise Language Registry (VL-139), Localization Platform (VL-141), and Language Analytics (VL-146) ship with the API database/migrations + boot seed / Intl helpers. Language Cloud production audit evidence: [`docs/language-cloud-audit/`](../docs/language-cloud-audit/) (VL-147). See [`docs/LANGUAGE_REGISTRY.md`](../docs/LANGUAGE_REGISTRY.md), [`docs/LOCALIZATION.md`](../docs/LOCALIZATION.md), and [`docs/ANALYTICS.md`](../docs/ANALYTICS.md).
+Enterprise Language Registry (VL-139), Localization Platform (VL-141), and Language Analytics (VL-146) ship with the API database/migrations + boot seed / Intl helpers. Language Cloud production audit evidence: [`docs/language-cloud-audit/`](../docs/language-cloud-audit/) (VL-147). Speech Cloud production audit evidence: [`docs/speech-cloud-audit/`](../docs/speech-cloud-audit/) (VL-160). Cloud blueprint: [`docs/CLOUD_BLUEPRINT.md`](../docs/CLOUD_BLUEPRINT.md) (ADR-0080).
 
 ## Architecture (Fly)
 

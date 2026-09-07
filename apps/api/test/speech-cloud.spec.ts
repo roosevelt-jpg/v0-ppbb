@@ -79,7 +79,8 @@ describe('Speech Cloud Foundation (VL-150)', () => {
     expect(res.body.architecture.terraform).toBe(true);
     expect(res.body.architecture.kubernetes).toBe(true);
     expect(res.body.architecture.batch).toBe(true);
-    expect(res.body.architecture.streaming).toBe(false);
+    expect(res.body.architecture.streaming).toBe(true);
+    expect(res.body.architecture.realtime).toBe(true);
     expect(res.body.architecture.billing).toBe(true);
     expect(res.body.architecture.monitoring).toBe(true);
     expect(res.body.architecture.primaryRegion).toBe('af-south-1');
@@ -100,16 +101,36 @@ describe('Speech Cloud Foundation (VL-150)', () => {
 
     const batch = res.body.products.find((p: { id: string }) => p.id === 'batch-stt');
     expect(batch.status).toBe('shipped');
-    expect(batch.api).toContain('/v1/audio/transcriptions');
+    expect(batch.api).toContain('/v1/speech/recognize');
 
     const streaming = res.body.products.find((p: { id: string }) => p.id === 'streaming-stt');
-    expect(streaming.status).toBe('deferred');
+    expect(streaming.status).toBe('partial');
 
     const speaker = res.body.products.find((p: { id: string }) => p.id === 'speaker-intelligence');
-    expect(speaker.status).toBe('deferred');
+    expect(speaker.status).toBe('partial');
 
     const biometrics = res.body.products.find((p: { id: string }) => p.id === 'voice-biometrics');
     expect(biometrics.status).toBe('partial');
+
+    const audioIntel = res.body.products.find((p: { id: string }) => p.id === 'audio-intelligence');
+    expect(audioIntel.status).toBe('partial');
+    expect(audioIntel.api).toContain('/v1/audio-intelligence');
+
+    const pronunciation = res.body.products.find((p: { id: string }) => p.id === 'pronunciation-ai');
+    expect(pronunciation.status).toBe('partial');
+    expect(pronunciation.api).toContain('/v1/pronunciation');
+
+    const wake = res.body.products.find((p: { id: string }) => p.id === 'wake-word');
+    expect(wake.status).toBe('partial');
+    expect(wake.api).toContain('/v1/wake-word');
+
+    const callIntel = res.body.products.find((p: { id: string }) => p.id === 'call-intelligence');
+    expect(callIntel.status).toBe('partial');
+    expect(callIntel.api).toContain('/v1/call-intelligence');
+
+    const speechAnalytics = res.body.products.find((p: { id: string }) => p.id === 'speech-analytics');
+    expect(speechAnalytics.status).toBe('partial');
+    expect(speechAnalytics.api).toContain('/v1/speech-analytics');
   });
 
   it('returns org speech overview with usage + deferred flags', async () => {
@@ -126,10 +147,29 @@ describe('Speech Cloud Foundation (VL-150)', () => {
     expect(overview.usage.stt).toBeDefined();
     expect(overview.usage.tts).toBeDefined();
     expect(overview.workspace.voiceClones).toBeGreaterThanOrEqual(0);
-    expect(overview.deferred.streamingStt).toBe(true);
-    expect(overview.deferred.speakerIntelligence).toBe(true);
-    expect(overview.deferred.callIntelligence).toBe(true);
-    expect(overview.deferred.speechAnalytics).toBe(true);
+    expect(overview.deferred.streamingStt).toBe(false);
+    expect(overview.deferred.speakerIntelligence).toBe(false);
+    expect(overview.deferred.emotionAi).toBe(false);
+    expect(overview.deferred.acousticSer).toBe(true);
+    expect(overview.links.emotion).toBe('/emotion-intelligence');
+    expect(overview.deferred.audioIntelligence).toBe(false);
+    expect(overview.deferred.echoCancellation).toBe(true);
+    expect(overview.deferred.audioEnhancement).toBe(false);
+    expect(overview.links.audioIntelligence).toBe('/audio-intelligence');
+    expect(overview.deferred.pronunciationAi).toBe(false);
+    expect(overview.deferred.forcedAlignmentPhonemes).toBe(true);
+    expect(overview.links.pronunciation).toBe('/pronunciation-intelligence');
+    expect(overview.deferred.wakeWord).toBe(false);
+    expect(overview.deferred.onDeviceWakeDnn).toBe(true);
+    expect(overview.links.wakeWord).toBe('/wake-word');
+    expect(overview.deferred.callIntelligence).toBe(false);
+    expect(overview.deferred.realtimeCcaas).toBe(true);
+    expect(overview.links.callIntelligence).toBe('/call-intelligence');
+    expect(overview.deferred.speechAnalytics).toBe(false);
+    expect(overview.deferred.werEvalLab).toBe(true);
+    expect(overview.links.speechAnalytics).toBe('/speech-analytics');
+    expect(overview.deferred.liveMicWebSocket).toBe(true);
+    expect(overview.links.speakers).toBe('/speaker-intelligence');
     expect(overview.links.audio).toBe('/audio');
     expect(overview.links.interpret).toBe('/interpret');
     expect(overview.links.graphql).toBe('/graphql');
@@ -148,6 +188,6 @@ describe('Speech Cloud Foundation (VL-150)', () => {
     const products = res.body.data.speechProducts as Array<{ id: string; status: string }>;
     expect(products.length).toBeGreaterThan(5);
     expect(products.some((p) => p.id === 'batch-stt' && p.status === 'shipped')).toBe(true);
-    expect(products.some((p) => p.id === 'streaming-stt' && p.status === 'deferred')).toBe(true);
+    expect(products.some((p) => p.id === 'streaming-stt' && p.status === 'partial')).toBe(true);
   });
 });

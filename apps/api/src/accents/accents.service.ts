@@ -7,6 +7,7 @@ import { LanguagesService } from '../languages/languages.service';
 import { UsageService } from '../usage/usage.service';
 import { AudioService } from '../audio/audio.service';
 import { ACCENT_SEEDS } from './accent-seeds';
+import { accentEngineCatalog, confidenceBand } from './accent-engine.catalog';
 
 export type AccentScore = {
   code: string;
@@ -81,6 +82,110 @@ export class AccentsService implements OnModuleInit {
     return this.toDto(row);
   }
 
+  engine() {
+    return accentEngineCatalog();
+  }
+
+  async analytics(organizationId: string) {
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const events = await this.prisma.auditEvent.findMany({
+      where: {
+        organizationId,
+        action: { in: ['accent.detect', 'accent.classify'] },
+        createdAt: { gte: since },
+      },
+      select: { action: true, metadata: true },
+      take: 5000,
+    });
+
+    const detects = events.filter((e) => e.action === 'accent.detect').length;
+    const classifies = events.filter((e) => e.action === 'accent.classify').length;
+    const byAccent: Record<string, number> = {};
+    const byInputMode: Record<string, number> = {};
+    for (const e of events) {
+      const meta = (e.metadata ?? {}) as Record<string, unknown>;
+      const accent = typeof meta.accent === 'string' && meta.accent ? meta.accent : 'unknown';
+      byAccent[accent] = (byAccent[accent] ?? 0) + 1;
+      const mode = typeof meta.inputMode === 'string' ? meta.inputMode : 'unknown';
+      byInputMode[mode] = (byInputMode[mode] ?? 0) + 1;
+    }
+
+    const profileCount = await this.prisma.accent.count();
+
+    return {
+      windowDays: 30,
+      detects,
+      classifies,
+      total: detects + classifies,
+      byAccent,
+      byInputMode,
+      registryProfiles: profileCount,
+      note: 'Org audit-derived Accent Intelligence usage — not acoustic model quality metrics.',
+    };
+  }
+
+  async classify(input: {
+    text?: string;
+    language?: string;
+    file?: Express.Multer.File;
+    organizationId: string;
+    workspaceId: string;
+    userId?: string;
+    apiKeyId?: string;
+    ip?: string;
+  }) {
+    const detected = await this.detect({ ...input, skipAudit: true });
+    const band = confidenceBand(detected.confidence);
+    const classification = {
+      ...detected,
+      classification: {
+        label: detected.accent,
+        name: detected.accentName,
+        confidence: detected.confidence,
+        confidenceBand: band,
+        ranked: (detected.candidates ?? []).map(
+          (
+            c: {
+              code: string;
+              nameEn: string;
+              languageCode: string;
+              score: number;
+              matchedCues: string[];
+            },
+            index: number,
+          ) => ({
+            rank: index + 1,
+            code: c.code,
+            nameEn: c.nameEn,
+            languageCode: c.languageCode,
+            score: c.score,
+            matchedCues: c.matchedCues,
+          }),
+        ),
+      },
+      product: 'Accent Intelligence',
+      note:
+        band === 'none'
+          ? 'No accent classified above threshold — cue scoring only (VL-153). Not acoustic classification.'
+          : `Accent classified with ${band} confidence via cue scoring (VL-153). Not acoustic regional models.`,
+    };
+
+    await this.recordAudit(
+      input,
+      {
+        language: detected.language,
+        accent: detected.accent,
+        provider: detected.provider,
+        confidence: detected.confidence,
+        inputMode: detected.inputMode,
+      },
+      'accent.classify',
+      'POST /v1/accents/classify',
+    );
+
+    return classification;
+  }
+
   async detect(input: {
     text?: string;
     language?: string;
@@ -90,6 +195,7 @@ export class AccentsService implements OnModuleInit {
     userId?: string;
     apiKeyId?: string;
     ip?: string;
+    skipAudit?: boolean;
   }) {
     let text = input.text?.trim() ?? '';
     let stt:
@@ -165,7 +271,9 @@ export class AccentsService implements OnModuleInit {
         candidates: [] as AccentScore[],
         note: `No curated accent profiles for language "${language}" yet. Not acoustic phonetics ID.`,
       };
-      await this.recordAudit(input, result);
+      if (!input.skipAudit) {
+        await this.recordAudit(input, result);
+      }
       return result;
     }
 
@@ -215,7 +323,9 @@ export class AccentsService implements OnModuleInit {
           : 'Spoken accent profile from transcript/text cues — not a dedicated acoustic accent classifier.',
     };
 
-    await this.recordAudit(input, result);
+    if (!input.skipAudit) {
+      await this.recordAudit(input, result);
+    }
     return result;
   }
 
@@ -323,6 +433,8 @@ export class AccentsService implements OnModuleInit {
       confidence: number;
       inputMode: string;
     },
+    action = 'accent.detect',
+    route = 'POST /v1/accents/detect',
   ) {
     let apiKeyPrefix: string | undefined;
     if (input.apiKeyId) {
@@ -332,8 +444,8 @@ export class AccentsService implements OnModuleInit {
     await this.audit.record({
       organizationId: input.organizationId,
       userId: input.userId,
-      action: 'accent.detect',
-      route: 'POST /v1/accents/detect',
+      action,
+      route,
       ip: input.ip,
       apiKeyPrefix,
       metadata: {

@@ -242,6 +242,371 @@ export class VerbaLab {
     });
   }
 
+  async accentEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/accents/engine', { method: 'GET' });
+  }
+
+  async accentAnalytics(): Promise<{
+    windowDays: number;
+    detects: number;
+    classifies: number;
+    total: number;
+    byAccent: Record<string, number>;
+    registryProfiles: number;
+    note: string;
+  }> {
+    return this.requestJson('/v1/accents/analytics', { method: 'GET' });
+  }
+
+  async classifyAccent(input: AccentDetectRequest): Promise<AccentDetectResponse & {
+    classification: {
+      label: string | null;
+      name: string | null;
+      confidence: number;
+      confidenceBand: string;
+      ranked: Array<{
+        rank: number;
+        code: string;
+        nameEn: string;
+        score: number;
+      }>;
+    };
+  }> {
+    if (input.file) {
+      const form = new FormData();
+      form.append('file', toBlob(input.file), input.file.filename);
+      if (input.text) form.append('text', input.text);
+      if (input.language) form.append('language', input.language);
+      return this.requestForm('/v1/accents/classify', form);
+    }
+    return this.requestJson('/v1/accents/classify', {
+      method: 'POST',
+      body: JSON.stringify({ text: input.text, language: input.language }),
+    });
+  }
+
+  async emotionEngine(): Promise<{
+    product: string;
+    note: string;
+    labels: string[];
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/emotion/engine', { method: 'GET' });
+  }
+
+  async detectEmotion(input: {
+    text?: string;
+    language?: string;
+    file?: UploadFile;
+  }): Promise<{
+    label: string;
+    confidence: number;
+    scores: Array<{ label: string; score: number }>;
+    audioAdjusted: boolean;
+    note: string;
+  }> {
+    if (input.file) {
+      const form = new FormData();
+      form.append('file', toBlob(input.file), input.file.filename);
+      if (input.text) form.append('text', input.text);
+      if (input.language) form.append('language', input.language);
+      return this.requestForm('/v1/emotion/detect', form);
+    }
+    return this.requestJson('/v1/emotion/detect', {
+      method: 'POST',
+      body: JSON.stringify({ text: input.text, language: input.language }),
+    });
+  }
+
+  async audioEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/audio-intelligence/engine', { method: 'GET' });
+  }
+
+  async analyzeAudio(input: { file: UploadFile }): Promise<{
+    product: string;
+    noise: { detected: boolean; noiseFloor: number; estimatedSnrDb: number };
+    silence: { ratio: number; regions: Array<{ start: number; end: number; durationSeconds: number }> };
+    metrics: Record<string, number>;
+    note: string;
+  }> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    return this.requestForm('/v1/audio-intelligence/analyze', form);
+  }
+
+  async enhanceAudio(input: { file: UploadFile }): Promise<{
+    format: string;
+    mimeType: string;
+    audioBase64: string;
+    bytes: number;
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    note: string;
+  }> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    return this.requestForm('/v1/audio-intelligence/enhance', form);
+  }
+
+  async isolateAudio(input: { file: UploadFile }): Promise<{
+    format: string;
+    mimeType: string;
+    audioBase64: string;
+    bytes: number;
+    speechRatio: number;
+    note: string;
+  }> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    return this.requestForm('/v1/audio-intelligence/isolate', form);
+  }
+
+  async pronunciationEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/pronunciation/engine', { method: 'GET' });
+  }
+
+  async assessPronunciation(input: {
+    reference: string;
+    hypothesis?: string;
+    language?: string;
+    file?: UploadFile;
+  }): Promise<{
+    language: string;
+    hypothesis: string;
+    scores: {
+      overall: number;
+      accuracy: number;
+      fluency: number;
+      stress: number;
+      wordErrorRate: number;
+    };
+    coaching: Array<{ id: string; severity: string; message: string }>;
+    note: string;
+  }> {
+    if (input.file) {
+      const form = new FormData();
+      form.append('file', toBlob(input.file), input.file.filename);
+      form.append('reference', input.reference);
+      if (input.hypothesis) form.append('hypothesis', input.hypothesis);
+      if (input.language) form.append('language', input.language);
+      return this.requestForm('/v1/pronunciation/assess', form);
+    }
+    return this.requestJson('/v1/pronunciation/assess', {
+      method: 'POST',
+      body: JSON.stringify({
+        reference: input.reference,
+        hypothesis: input.hypothesis,
+        language: input.language,
+      }),
+    });
+  }
+
+  async wakeWordEngine(): Promise<{
+    product: string;
+    note: string;
+    defaultWakePhrases: string[];
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/wake-word/engine', { method: 'GET' });
+  }
+
+  async detectWakeWord(input: {
+    text?: string;
+    language?: string;
+    file?: UploadFile;
+  }): Promise<{
+    wakeDetected: boolean;
+    transcript: string;
+    hits: Array<{ phrase: string; kind: string; start: number; end: number }>;
+    note: string;
+  }> {
+    if (input.file) {
+      const form = new FormData();
+      form.append('file', toBlob(input.file), input.file.filename);
+      if (input.text) form.append('text', input.text);
+      if (input.language) form.append('language', input.language);
+      return this.requestForm('/v1/wake-word/detect', form);
+    }
+    return this.requestJson('/v1/wake-word/detect', {
+      method: 'POST',
+      body: JSON.stringify({ text: input.text, language: input.language }),
+    });
+  }
+
+  async spotKeywords(input: {
+    text?: string;
+    keywords?: string[];
+    language?: string;
+    file?: UploadFile;
+  }): Promise<{
+    transcript: string;
+    hits: Array<{ phrase: string; kind: string; start: number; end: number }>;
+    hitCount: number;
+    note: string;
+  }> {
+    if (input.file) {
+      const form = new FormData();
+      form.append('file', toBlob(input.file), input.file.filename);
+      if (input.text) form.append('text', input.text);
+      if (input.language) form.append('language', input.language);
+      if (input.keywords?.length) form.append('keywords', input.keywords.join(','));
+      return this.requestForm('/v1/wake-word/spot', form);
+    }
+    return this.requestJson('/v1/wake-word/spot', {
+      method: 'POST',
+      body: JSON.stringify({
+        text: input.text,
+        language: input.language,
+        keywords: input.keywords,
+      }),
+    });
+  }
+
+  async callIntelligenceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/call-intelligence/engine', { method: 'GET' });
+  }
+
+  async ingestCall(input: {
+    transcript?: string;
+    language?: string;
+    direction?: string;
+    externalRef?: string;
+    file?: UploadFile;
+    analyze?: boolean;
+  }): Promise<{
+    id: string;
+    status: string;
+    summary: string | null;
+    transcript: string | null;
+    analysis: unknown;
+  }> {
+    if (input.file) {
+      const form = new FormData();
+      form.append('file', toBlob(input.file), input.file.filename);
+      if (input.transcript) form.append('transcript', input.transcript);
+      if (input.language) form.append('language', input.language);
+      if (input.direction) form.append('direction', input.direction);
+      if (input.externalRef) form.append('externalRef', input.externalRef);
+      if (input.analyze === false) form.append('analyze', 'false');
+      return this.requestForm('/v1/call-intelligence/calls', form);
+    }
+    return this.requestJson('/v1/call-intelligence/calls', {
+      method: 'POST',
+      body: JSON.stringify({
+        transcript: input.transcript,
+        language: input.language,
+        direction: input.direction,
+        externalRef: input.externalRef,
+        analyze: input.analyze,
+      }),
+    });
+  }
+
+  async callIntelligenceReport(): Promise<{
+    totalCalls: number;
+    bySentiment: Record<string, number>;
+    averageQaScore: number | null;
+    note: string;
+  }> {
+    return this.requestJson('/v1/call-intelligence/report', { method: 'GET' });
+  }
+
+  async speechAnalyticsEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/speech-analytics/engine', { method: 'GET' });
+  }
+
+  async speechAnalyticsOverview(params?: { from?: string; to?: string }): Promise<{
+    periodStart: string;
+    periodEnd: string;
+    estimatedCostUsd: number;
+    usage: { stt: { requests: number; seconds: number }; tts: { requests: number; characters: number } };
+    note: string;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    const qs = q.toString();
+    return this.requestJson(`/v1/speech-analytics/overview${qs ? `?${qs}` : ''}`, {
+      method: 'GET',
+    });
+  }
+
+  async speechAnalyticsReport(params?: { from?: string; to?: string }): Promise<{
+    product: string;
+    generatedAt: string;
+    note: string;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.from) q.set('from', params.from);
+    if (params?.to) q.set('to', params.to);
+    const qs = q.toString();
+    return this.requestJson(`/v1/speech-analytics/report${qs ? `?${qs}` : ''}`, {
+      method: 'GET',
+    });
+  }
+
   async checkGrammar(input: GrammarCheckRequest): Promise<GrammarCheckResponse> {
     return this.requestJson<GrammarCheckResponse>('/v1/grammar/check', {
       method: 'POST',
@@ -666,6 +1031,149 @@ export class VerbaLab {
     docs: string;
   }> {
     return this.requestJson('/v1/speech/products', { method: 'GET' });
+  }
+
+  async speechEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/speech/engine', { method: 'GET' });
+  }
+
+  async speechVocabularyPacks(): Promise<{
+    packs: Array<{
+      id: string;
+      name: string;
+      description: string;
+      phraseCount: number;
+      phrases: string[];
+    }>;
+  }> {
+    return this.requestJson('/v1/speech/vocabulary/packs', { method: 'GET' });
+  }
+
+  async speakerEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/speakers/engine', { method: 'GET' });
+  }
+
+  async speakerProfiles(): Promise<{
+    data: Array<{
+      id: string;
+      displayName: string;
+      status: string;
+      enrolled: boolean;
+      enrollmentCount: number;
+    }>;
+    note: string;
+  }> {
+    return this.requestJson('/v1/speakers/profiles', { method: 'GET' });
+  }
+
+  async createSpeakerProfile(input: {
+    displayName: string;
+    externalRef?: string;
+  }): Promise<{
+    id: string;
+    displayName: string;
+    status: string;
+    enrolled: boolean;
+  }> {
+    return this.requestJson('/v1/speakers/profiles', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async enrollSpeaker(input: {
+    profileId: string;
+    file: UploadFile;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    return this.requestForm(`/v1/speakers/profiles/${encodeURIComponent(input.profileId)}/enroll`, form);
+  }
+
+  async verifySpeaker(input: {
+    profileId: string;
+    file: UploadFile;
+    threshold?: number;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    form.append('profileId', input.profileId);
+    if (input.threshold != null) form.append('threshold', String(input.threshold));
+    return this.requestForm('/v1/speakers/verify', form);
+  }
+
+  async identifySpeaker(input: {
+    file: UploadFile;
+    threshold?: number;
+    topK?: number;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.threshold != null) form.append('threshold', String(input.threshold));
+    if (input.topK != null) form.append('topK', String(input.topK));
+    return this.requestForm('/v1/speakers/identify', form);
+  }
+
+  async diarizeSpeech(input: {
+    file: UploadFile;
+    language?: string;
+    gapSeconds?: number;
+  }): Promise<Record<string, unknown>> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.language) form.append('language', input.language);
+    if (input.gapSeconds != null) form.append('gapSeconds', String(input.gapSeconds));
+    return this.requestForm('/v1/speakers/diarize', form);
+  }
+
+  async recognizeSpeech(input: {
+    file: UploadFile;
+    language?: string;
+    industryPacks?: string[];
+    vocabulary?: string[];
+  }): Promise<{
+    text: string;
+    language: string | null;
+    durationSeconds: number;
+    durationMinutes: number;
+    provider: string;
+    confidence: number | null;
+    segments: Array<{
+      id: number;
+      start: number;
+      end: number;
+      text: string;
+      confidence?: number;
+    }>;
+    vocabularyApplied: boolean;
+    industryPacks: string[];
+  }> {
+    const form = new FormData();
+    form.append('file', toBlob(input.file), input.file.filename);
+    if (input.language) form.append('language', input.language);
+    if (input.industryPacks?.length) form.append('industryPacks', input.industryPacks.join(','));
+    if (input.vocabulary?.length) form.append('vocabulary', input.vocabulary.join(','));
+    return this.requestForm('/v1/speech/recognize', form);
   }
 
   async transcribe(input: TranscribeRequest): Promise<TranscribeResponse> {

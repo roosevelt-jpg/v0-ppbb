@@ -67,7 +67,7 @@ export function SpeechClient() {
         Speech Cloud
       </h1>
       <p style={{ color: 'var(--muted)', margin: '0 0 1.75rem', maxWidth: '42rem' }}>
-        Parent hub for batch STT, TTS, interpreter, voice studio, and deferred speech intelligence
+        Parent hub for batch STT, segment SSE streaming, TTS, interpreter, voice studio, and deferred speech intelligence
         products. Extends existing audio APIs — does not regenerate Language Cloud or Identity.
       </p>
 
@@ -116,14 +116,41 @@ export function SpeechClient() {
           </section>
 
           <section style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <Link href={data.links.audio} style={primary}>
+            <Link href={data.links.recognition ?? '/speech-recognition'} style={primary}>
+              STT Engine
+            </Link>
+            <Link href={data.links.audio} style={secondary}>
               Voice Studio
+            </Link>
+            <Link href={data.links.speakers ?? '/speaker-intelligence'} style={secondary}>
+              Speakers
             </Link>
             <Link href={data.links.interpret} style={secondary}>
               Interpreter
             </Link>
             <Link href={data.links.voice} style={secondary}>
               Voice FAQ
+            </Link>
+            <Link href={data.links.emotion ?? '/emotion-intelligence'} style={secondary}>
+              Emotion AI
+            </Link>
+            <Link href={data.links.audioIntelligence ?? '/audio-intelligence'} style={secondary}>
+              Audio AI
+            </Link>
+            <Link href={data.links.pronunciation ?? '/pronunciation-intelligence'} style={secondary}>
+              Pronunciation
+            </Link>
+            <Link href={data.links.wakeWord ?? '/wake-word'} style={secondary}>
+              Wake Word
+            </Link>
+            <Link href={data.links.callIntelligence ?? '/call-intelligence'} style={secondary}>
+              Calls
+            </Link>
+            <Link href={data.links.speechAnalytics ?? '/speech-analytics'} style={secondary}>
+              Speech Analytics
+            </Link>
+            <Link href={data.links.accentIntelligence ?? '/accent-intelligence'} style={secondary}>
+              Accent AI
             </Link>
             <Link href={data.links.accents} style={secondary}>
               Accents
@@ -143,7 +170,7 @@ export function SpeechClient() {
             <h2 style={label}>Architecture honesty</h2>
             <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.55 }}>
               Batch {data.architecture.batch ? 'yes' : 'no'} · Streaming{' '}
-              {data.architecture.streaming ? 'yes' : 'deferred'} · GraphQL{' '}
+              {data.architecture.streaming ? 'yes (segment SSE)' : 'deferred'} · GraphQL{' '}
               {data.architecture.graphql ? 'yes' : 'no'} · CQRS{' '}
               {data.architecture.cqrs ? 'yes (Speech Cloud hub)' : 'no'} · Billing{' '}
               {data.architecture.billing ? 'yes (STT/TTS metering)' : 'no'} · Monitoring{' '}
@@ -152,8 +179,8 @@ export function SpeechClient() {
               {data.architecture.kubernetes ? 'yes (EKS af-south-1)' : 'no'}
             </p>
             <p style={{ margin: '0.5rem 0 0', color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-              Deferred: streaming STT, speaker/emotion/audio/pronunciation/wake-word/call intelligence,
-              enhancement, speech analytics product.
+              Deferred: live-mic WebSocket, forced-alignment phonemes, echo AEC, trained SER,
+              on-device wake DNN, realtime CCaaS streaming, WER evaluation lab.
             </p>
           </section>
         </div>

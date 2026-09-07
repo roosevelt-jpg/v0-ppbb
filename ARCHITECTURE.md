@@ -306,6 +306,7 @@ That is a company. It is not Translation Cloud + Speech Cloud + Voice Cloud + OC
 | AI Gateway Cloud | `gateway` module |
 | Language Cloud | `languages` + `translate` module |
 | Speech Cloud | `speech-cloud` hub + existing `audio` / `interpret` / `voice*` |
+| Speaker Intelligence | `speaker-intelligence` + local fingerprints / gap diarization |
 | Speech / Voice / Vision | Later modules + vendor adapters |
 | Everything else | See ROADMAP vision backlog |
 
@@ -351,3 +352,14 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - AI Gateway Cloud (VL-129): library Phase 5 mapped — thin gateway hub + optional OpenRouter chat fallback. See [`docs/AI_GATEWAY_CLOUD.md`](docs/AI_GATEWAY_CLOUD.md) + ADR-0050. **Closes Volume 1 Part A.**
 - Language Cloud volume complete through Production Audit (VL-130–147). See LANGUAGE_CLOUD + `docs/language-cloud-audit/` and ADR-0051–0068. Fly remains default PaaS. Competitor-parity claims rejected.
 - Speech Cloud Foundation shipped (VL-150 / Phase 16). See SPEECH_CLOUD + ADR-0069. Extends audio modules; does not regenerate Language Cloud.
+- Speech Recognition Engine shipped (VL-151 / Phase 17). See SPEECH_RECOGNITION + ADR-0070. Segment SSE; live-mic WS deferred.
+- Speaker Intelligence partial (VL-152 / Phase 18). See SPEAKER_INTELLIGENCE + ADR-0071. Local fingerprints + gap diarization.
+- Accent Intelligence partial (VL-153 / Phase 19). See ACCENT_INTELLIGENCE + ADR-0072. Cue façade; acoustic models deferred.
+- Emotion Intelligence partial (VL-154 / Phase 20). See EMOTION_INTELLIGENCE + ADR-0073. Cue + soft audio proxies; SER deferred.
+- Audio Intelligence partial (VL-155 / Phase 21). See AUDIO_INTELLIGENCE + ADR-0074. PCM heuristics; echo AEC deferred.
+- Pronunciation Intelligence partial (VL-156 / Phase 22). See PRONUNCIATION_INTELLIGENCE + ADR-0075. Alignment + heuristics; forced alignment deferred.
+- Wake Word Engine partial (VL-157 / Phase 23). See WAKE_WORD + ADR-0076. Transcript spotting; on-device DNN deferred.
+- Call Intelligence partial (VL-158 / Phase 24). See CALL_INTELLIGENCE + ADR-0077. Heuristic analytics; Voice FAQ remains separate.
+- Speech Analytics partial (VL-159 / Phase 25). See SPEECH_ANALYTICS + ADR-0078. Usage/audit aggregates; WER lab deferred. Language Analytics separate.
+- Speech Cloud volume complete through Production Audit (VL-150–160). See SPEECH_CLOUD + `docs/speech-cloud-audit/` and ADR-0069–0079. Competitor-parity claims rejected.
+- **VerbaLab Cloud Blueprint (12 layers)** accepted (ADR-0080 / `docs/CLOUD_BLUEPRINT.md`). Future clouds map Foundation → Production Audit without regenerating Identity/Gateway/Billing.
