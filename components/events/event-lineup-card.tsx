@@ -36,16 +36,18 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
   const whenLabel = `${format(startDate, 'MMM d')}${timeLabel ? ` · ${timeLabel}` : ''}`
   const location = getEventLocationLabel(event)
 
+  const detailsHref = `/events/${event.id}`
+
   return (
     <article className="bg-white rounded-lg border border-[#e4e1da] overflow-hidden min-w-0 flex flex-col h-full w-full shadow-sm hover:shadow-md transition">
-      <div className="relative w-full shrink-0">
+      <Link href={detailsHref} className="relative w-full shrink-0 block no-underline">
         <EventBannerThumb
           event={event as never}
           title={event.title}
           size="md"
           rounded="rounded-none"
         />
-        <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1 max-w-[70%]">
+        <div className="absolute top-1.5 left-1.5 flex flex-wrap gap-1 max-w-[70%] pointer-events-none">
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-semibold text-white"
             style={{ backgroundColor: categoryColor }}
@@ -58,10 +60,10 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
             </span>
           ) : null}
         </div>
-        <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black text-white">
+        <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black text-white pointer-events-none">
           {priceCorner}
         </div>
-      </div>
+      </Link>
 
       <div className="p-2.5 flex flex-col gap-1 flex-1 min-w-0">
         {(logoUrl || businessName || ownerName) && (
@@ -84,9 +86,11 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           </div>
         )}
 
-        <h3 className="font-headline text-sm font-bold text-foreground leading-tight line-clamp-2">
-          {event.title}
-        </h3>
+        <Link href={detailsHref} className="no-underline">
+          <h3 className="font-headline text-sm font-bold text-foreground leading-tight line-clamp-2 hover:underline">
+            {event.title}
+          </h3>
+        </Link>
 
         {event.description ? (
           <p className="text-[11px] text-muted-foreground line-clamp-2">{event.description}</p>
@@ -118,13 +122,13 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
 
         <div className="mt-auto flex flex-col gap-2 pt-1.5 sm:flex-row sm:gap-1">
           <Link
-            href={`/events/${event.id}`}
+            href={detailsHref}
             className="inline-flex min-h-[40px] sm:min-h-0 sm:h-7 items-center justify-center flex-1 px-2 bg-black !text-white rounded-md text-xs sm:text-[11px] font-semibold hover:bg-neutral-800"
           >
             {pageConfig.registerButtonLabel}
           </Link>
           <Link
-            href={`/events/${event.id}`}
+            href={detailsHref}
             className="inline-flex min-h-[40px] sm:min-h-0 sm:h-7 items-center justify-center flex-1 px-2 border border-[#e4e1da] bg-white !text-neutral-900 rounded-md text-xs sm:text-[11px] font-semibold hover:bg-neutral-50"
           >
             {pageConfig.detailsButtonLabel}

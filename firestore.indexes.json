@@ -29,6 +29,20 @@
       ]
     },
     {
+      "collectionGroup": "news",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "slug",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isPublished",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "emailSendLogs",
       "queryScope": "COLLECTION",
       "fields": [

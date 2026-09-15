@@ -68,7 +68,9 @@ export function mapNewsDoc(id: string, data: Record<string, unknown>): NewsArtic
 }
 
 export function newsArticleHref(article: Pick<NewsArticle, 'id' | 'slug'>): string {
-  return `/news/${article.slug || article.id}`
+  // Prefer Firestore doc id — slug lookups need a composite rule-safe query.
+  const key = String(article.id || article.slug || '').trim()
+  return `/news/${encodeURIComponent(key)}`
 }
 
 export function formatNewsDate(date: Date | null): string {
@@ -87,6 +89,7 @@ export function slugifyNewsTitle(title: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80)
+    .replace(/-+$/g, '')
 }
 
 /** Latest published articles for homepage / listing. */

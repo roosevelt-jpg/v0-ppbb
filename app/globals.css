@@ -4,12 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Hide scrollbars on the public marketing site only (content-guard pages).
-   Dashboard/admin/business keep usable scrollbars for tables and overflow. */
-html[data-public-content-guard='1'] ::-webkit-scrollbar { display: none; }
-html[data-public-content-guard='1'] * { scrollbar-width: none; }
-html[data-public-content-guard='1'] body { -ms-overflow-style: none; }
-
 /* Shared horizontal scroll for tables/cards across all dashboards */
 .table-scroll,
 .admin-table-scroll {
@@ -48,36 +42,6 @@ html[data-public-content-guard='1'] body { -ms-overflow-style: none; }
 [data-dashboard-surface] .rounded-2xl {
   max-width: 100%;
   min-width: 0;
-}
-
-/* Public site content deterrence — inactive on /dashboard, /business, /admin, /sponsor */
-html[data-public-content-guard='1'] body {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
-html[data-public-content-guard='1'] input,
-html[data-public-content-guard='1'] textarea,
-html[data-public-content-guard='1'] select,
-html[data-public-content-guard='1'] [contenteditable='true'] {
-  -webkit-user-select: text;
-  user-select: text;
-  -webkit-touch-callout: default;
-}
-
-html[data-public-content-guard='1'] img,
-html[data-public-content-guard='1'] video,
-html[data-public-content-guard='1'] picture,
-html[data-public-content-guard='1'] canvas {
-  -webkit-user-drag: none;
-  user-drag: none;
-  pointer-events: auto;
-}
-
-html[data-public-content-guard='1'] img::selection,
-html[data-public-content-guard='1'] video::selection {
-  background: transparent;
 }
 
 /* RTL layout when Arabic / Urdu selected */
