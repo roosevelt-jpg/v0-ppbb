@@ -6,6 +6,7 @@ import {
   isPrivateStoragePath,
   parseStorageObject,
 } from '@/lib/media-url'
+import { rewriteLegacyStorageUrl } from '@/lib/storage-bucket'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -28,7 +29,7 @@ function allowedBucket(bucket: string): boolean {
  * tokenless Firebase download URLs are blocked by Storage rules.
  */
 export async function GET(req: NextRequest) {
-  const raw = req.nextUrl.searchParams.get('u') || ''
+  const raw = rewriteLegacyStorageUrl(req.nextUrl.searchParams.get('u') || '')
   const parsed = parseStorageObject(raw)
   if (!parsed) {
     return NextResponse.json({ error: 'Invalid media URL' }, { status: 400 })

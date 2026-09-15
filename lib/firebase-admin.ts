@@ -1,13 +1,14 @@
 import { initializeApp, getApps, cert, type App } from 'firebase-admin/app'
 import { getFirestore } from 'firebase-admin/firestore'
 import { getStorage } from 'firebase-admin/storage'
+import { resolveConfiguredStorageBucket } from '@/lib/storage-bucket'
 
 /**
  * The GCS bucket that holds all binary files (images, PDFs, videos).
  * Firestore only ever stores the resulting public download URL — never the
  * file bytes themselves.
  */
-export const STORAGE_BUCKET = process.env.FIREBASE_STORAGE_BUCKET || 'pasiveblessings-media'
+export const STORAGE_BUCKET = resolveConfiguredStorageBucket()
 
 interface AdminCredentials {
   projectId: string

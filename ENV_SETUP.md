@@ -82,8 +82,8 @@ In your hosting environment, add at minimum:
 ```
 NEXT_PUBLIC_FIREBASE_API_KEY=
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=pasiveblessings
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=passiveblessings-cc0ef
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=passiveblessings-cc0ef.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
@@ -96,10 +96,10 @@ GCP_SERVICE_ACCOUNT={"type":"service_account","project_id":"...",...}
 
 Or use separate fields:
 ```
-FIREBASE_ADMIN_PROJECT_ID=pasiveblessings
-FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-...@pasiveblessings.iam.gserviceaccount.com
+FIREBASE_ADMIN_PROJECT_ID=passiveblessings-cc0ef
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-...@passiveblessings-cc0ef.iam.gserviceaccount.com
 FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-FIREBASE_STORAGE_BUCKET=pasiveblessings-media
+FIREBASE_STORAGE_BUCKET=passiveblessings-cc0ef.firebasestorage.app
 ```
 
 Optional but recommended:

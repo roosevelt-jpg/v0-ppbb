@@ -8,6 +8,13 @@
  * and `/api/media` streams the same object via the Admin SDK as a fallback.
  */
 
+import {
+  isLegacyStorageBucket,
+  resolveConfiguredStorageBucket,
+  rewriteLegacyStorageUrl,
+  rewriteStorageBucket,
+} from '@/lib/storage-bucket'
+
 export const PRIVATE_STORAGE_FOLDERS = [
   'beneficiary-docs',
   'beneficiaryRequests',
@@ -29,13 +36,14 @@ export function isPrivateStoragePath(objectPath: string): boolean {
 }
 
 export function firebaseDownloadUrl(bucket: string, objectPath: string): string {
+  const liveBucket = rewriteStorageBucket(bucket)
   const encoded = encodeURIComponent(objectPath.replace(/^\/+/, ''))
-  return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encoded}?alt=media`
+  return `https://firebasestorage.googleapis.com/v0/b/${liveBucket}/o/${encoded}?alt=media`
 }
 
 export function parseStorageObject(url: string | null | undefined): ParsedStorageObject | null {
   if (!url) return null
-  const trimmed = url.trim()
+  const trimmed = rewriteLegacyStorageUrl(url.trim())
   if (!trimmed) return null
 
   if (trimmed.startsWith('gs://')) {
@@ -43,7 +51,7 @@ export function parseStorageObject(url: string | null | undefined): ParsedStorag
     const slash = rest.indexOf('/')
     if (slash <= 0) return null
     return {
-      bucket: decodeURIComponent(rest.slice(0, slash)),
+      bucket: rewriteStorageBucket(decodeURIComponent(rest.slice(0, slash))),
       objectPath: decodeURIComponent(rest.slice(slash + 1).replace(/^\/+/, '')),
       hasToken: false,
     }
@@ -58,7 +66,7 @@ export function parseStorageObject(url: string | null | undefined): ParsedStorag
       const parts = u.pathname.replace(/^\//, '').split('/').filter(Boolean)
       if (parts.length < 2) return null
       return {
-        bucket: decodeURIComponent(parts[0]),
+        bucket: rewriteStorageBucket(decodeURIComponent(parts[0])),
         objectPath: parts.slice(1).map(decodeURIComponent).join('/'),
         hasToken,
       }
@@ -68,14 +76,14 @@ export function parseStorageObject(url: string | null | undefined): ParsedStorag
       const bucket = host.slice(0, -'.storage.googleapis.com'.length)
       const objectPath = decodeURIComponent(u.pathname.replace(/^\//, ''))
       if (!bucket || !objectPath) return null
-      return { bucket, objectPath, hasToken }
+      return { bucket: rewriteStorageBucket(bucket), objectPath, hasToken }
     }
 
     if (host === 'firebasestorage.googleapis.com') {
       const match = u.pathname.match(/^\/v0\/b\/([^/]+)\/o\/(.+)$/)
       if (!match) return null
       return {
-        bucket: decodeURIComponent(match[1]),
+        bucket: rewriteStorageBucket(decodeURIComponent(match[1])),
         objectPath: decodeURIComponent(match[2]),
         hasToken,
       }
@@ -88,10 +96,15 @@ export function parseStorageObject(url: string | null | undefined): ParsedStorag
 }
 
 export function isAllowedMediaBucket(bucket: string): boolean {
-  const name = bucket.trim().toLowerCase()
+  const name = rewriteStorageBucket(bucket).trim().toLowerCase()
   if (!name) return false
-  if (name.endsWith('.appspot.com') || name.endsWith('.firebasestorage.app')) return true
-  if (name.includes('pasiveblessings') || name.includes('passiveblessings') || name.includes('passive-blessings')) {
+  if (isLegacyStorageBucket(name)) return false
+  if (name === resolveConfiguredStorageBucket().toLowerCase()) return true
+  if (name.endsWith('.appspot.com') || name.endsWith('.firebasestorage.app')) {
+    // Only the live Passive Blessings project — block retired typo-project buckets.
+    return name.includes('passiveblessings-cc0ef') || name.includes('passive-blessings')
+  }
+  if (name.includes('passiveblessings-cc0ef') || name.includes('passive-blessings')) {
     return true
   }
   return false
@@ -99,18 +112,19 @@ export function isAllowedMediaBucket(bucket: string): boolean {
 
 /** Same-origin Admin SDK stream. Use when direct GCS / tokenless Firebase URLs 403. */
 export function toMediaProxyUrl(url: string): string {
-  const parsed = parseStorageObject(url)
+  const rewritten = rewriteLegacyStorageUrl(url)
+  const parsed = parseStorageObject(rewritten)
   if (!parsed || isPrivateStoragePath(parsed.objectPath) || !isAllowedMediaBucket(parsed.bucket)) {
     return ''
   }
-  if (url.startsWith('/api/media')) return url
-  return `/api/media?u=${encodeURIComponent(url.trim())}`
+  if (rewritten.startsWith('/api/media')) return rewritten
+  return `/api/media?u=${encodeURIComponent(rewritten.trim())}`
 }
 
 /** Rewrite a stored URL so the browser can load it. Pass through data/blob/local/http(s) others. */
 export function resolvePublicMediaUrl(url: string | null | undefined): string {
   if (!url) return ''
-  const trimmed = url.trim()
+  const trimmed = rewriteLegacyStorageUrl(url.trim())
   if (!trimmed) return ''
   if (
     trimmed.startsWith('data:') ||

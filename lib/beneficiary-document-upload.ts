@@ -76,6 +76,8 @@ export async function deleteBeneficiaryDocument(storagePath: string): Promise<vo
   }
 }
 
+import { resolveConfiguredStorageBucket } from '@/lib/storage-bucket'
+
 /**
  * Get the public download URL for a stored document. Files are uploaded as
  * public objects, so the URL is derived directly from the storage path.
@@ -83,7 +85,7 @@ export async function deleteBeneficiaryDocument(storagePath: string): Promise<vo
  * @returns Download URL
  */
 export async function getBeneficiaryDocumentUrl(storagePath: string): Promise<string> {
-  const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_NAME || 'pasiveblessings-media'
+  const bucket = resolveConfiguredStorageBucket()
   return `https://storage.googleapis.com/${bucket}/${storagePath.replace(/^\/+/, '')}`
 }
 
