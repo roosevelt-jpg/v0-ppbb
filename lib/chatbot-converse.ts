@@ -56,23 +56,29 @@ function buildContextPack(input: {
   return parts.join('\n\n---\n\n').slice(0, 12000)
 }
 
+export type ConverseFailureReason = 'no_api_key' | 'empty_message' | 'api_error' | 'empty_reply'
+
+export type ConverseResult =
+  | { ok: true; message: string }
+  | { ok: false; reason: ConverseFailureReason }
+
 /**
  * Conversational reply using Anthropic + private FAQ/training context.
- * Returns null if no API key or the model call fails (caller should fall back).
+ * Returns a structured result so callers can fall back and surface AI status.
  */
 export async function generateConversationalSupportReply(input: {
   messages: ChatTurn[]
   faqs: ChatFaq[]
   knowledge: ChatbotKnowledgeItem[]
   whatsappLink?: string
-}): Promise<string | null> {
+}): Promise<ConverseResult> {
   const apiKey = await resolveAnthropicApiKey()
-  if (!apiKey) return null
+  if (!apiKey) return { ok: false, reason: 'no_api_key' }
   const model = (await resolveAnthropicModel()) || 'claude-3-5-haiku-20241022'
 
   const lastUser = [...input.messages].reverse().find((m) => m.role === 'user')
   const userMessage = String(lastUser?.content || '').trim()
-  if (!userMessage) return null
+  if (!userMessage) return { ok: false, reason: 'empty_message' }
 
   const context = buildContextPack({
     userMessage,
@@ -115,9 +121,10 @@ ${context || '(No notes loaded yet — be honest that you may need to connect th
     })
     const textBlock = result.content.find((b) => b.type === 'text')
     const text = textBlock && textBlock.type === 'text' ? textBlock.text.trim() : ''
-    return text || null
+    if (!text) return { ok: false, reason: 'empty_reply' }
+    return { ok: true, message: text }
   } catch (error) {
     console.error('[v0] conversational support reply failed:', error)
-    return null
+    return { ok: false, reason: 'api_error' }
   }
 }

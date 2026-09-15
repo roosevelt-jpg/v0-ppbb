@@ -23,6 +23,7 @@ export default function ChatBotPage() {
   ])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [aiOnline, setAiOnline] = useState<boolean | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -54,6 +55,14 @@ export default function ChatBotPage() {
       })
       const data = await chatResponse.json().catch(() => ({}))
       if (!chatResponse.ok) throw new Error(data.error || 'Failed to get a reply')
+
+      if (typeof data.aiOnline === 'boolean') {
+        setAiOnline(data.aiOnline)
+      } else if (data.engine === 'retrieval') {
+        setAiOnline(false)
+      } else if (data.engine === 'anthropic') {
+        setAiOnline(true)
+      }
 
       const botResponse: Message = {
         type: 'bot',
@@ -100,6 +109,22 @@ export default function ChatBotPage() {
 
       {/* Chat Area */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+        {aiOnline === false ? (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              backgroundColor: '#fff8e6',
+              border: '1px solid #f0d48a',
+              color: '#7a5b00',
+              fontSize: '13px',
+              lineHeight: 1.4,
+            }}
+          >
+            Answering from our FAQ library right now (AI assistant offline). For complex questions, use Contact or WhatsApp.
+          </div>
+        ) : null}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {messages.map((message, idx) => (
             <div key={idx} style={{ display: 'flex', justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start' }}>

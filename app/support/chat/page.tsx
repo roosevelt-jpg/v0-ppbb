@@ -29,6 +29,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [conversationLoading, setConversationLoading] = useState(false)
+  const [aiOnline, setAiOnline] = useState<boolean | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -130,6 +131,14 @@ export default function ChatPage() {
 
       const data = await response.json()
 
+      if (typeof data.aiOnline === 'boolean') {
+        setAiOnline(data.aiOnline)
+      } else if (data.engine === 'retrieval') {
+        setAiOnline(false)
+      } else if (data.engine === 'anthropic') {
+        setAiOnline(true)
+      }
+
       if (data.message) {
         const assistantMessage: Message = {
           role: 'assistant',
@@ -214,6 +223,11 @@ export default function ChatPage() {
           <>
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {aiOnline === false ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-900">
+                  Answering from our FAQ library right now (AI assistant offline). For complex questions, use Contact or WhatsApp.
+                </div>
+              ) : null}
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">

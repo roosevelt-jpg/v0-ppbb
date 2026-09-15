@@ -91,14 +91,15 @@ export async function POST(request: NextRequest) {
       whatsappLink,
     })
 
-    if (conversational) {
+    if (conversational.ok) {
       console.log(
         `[v0] Chat converse: faqs=${faqs.length} knowledge=${knowledgeItems.length} msgLen=${lastUserMessage.length}`
       )
       return NextResponse.json({
-        message: conversational,
+        message: conversational.message,
         conversationId,
         engine: 'anthropic',
+        aiOnline: true,
       })
     }
 
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
     })
 
     console.log(
-      `[v0] Chat retrieval: source=${result.source} score=${result.matchScore}` +
+      `[v0] Chat retrieval: reason=${conversational.reason} source=${result.source} score=${result.matchScore}` +
         (result.faqSource ? ` faq="${result.faqSource.question}"` : '') +
         (result.knowledgeSource ? ` knowledge="${result.knowledgeSource.title}"` : '')
     )
@@ -119,6 +120,10 @@ export async function POST(request: NextRequest) {
       message: result.message,
       conversationId,
       engine: 'retrieval',
+      aiOnline: false,
+      // Safe public hint — no secrets / raw API errors
+      fallbackReason:
+        conversational.reason === 'no_api_key' ? 'not_configured' : 'unavailable',
     })
   } catch (error) {
     console.error('[v0] Chat API error:', error)

@@ -25,6 +25,7 @@ export function ChatWidget() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [aiOnline, setAiOnline] = useState<boolean | null>(null)
   const [conversationId, setConversationId] = useState<string>('')
   const [ready, setReady] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -148,6 +149,14 @@ export function ChatWidget() {
 
       const data = await sendToApi(convId, payload)
 
+      if (typeof data.aiOnline === 'boolean') {
+        setAiOnline(data.aiOnline)
+      } else if (data.engine === 'retrieval') {
+        setAiOnline(false)
+      } else if (data.engine === 'anthropic') {
+        setAiOnline(true)
+      }
+
       if (data.message) {
         setMessages((prev) => [
           ...prev,
@@ -232,6 +241,12 @@ export function ChatWidget() {
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 bg-neutral-50">
+            {aiOnline === false ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 text-[11px] sm:text-xs text-amber-900 leading-snug">
+                Answering from our FAQ library right now (AI assistant offline). For complex questions,
+                use Contact or WhatsApp.
+              </div>
+            ) : null}
             {messages.map((message, idx) => (
               <div
                 key={`${message.role}-${idx}-${message.timestamp?.getTime?.() || idx}`}

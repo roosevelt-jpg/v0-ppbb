@@ -5,6 +5,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { ChatbotAvatar } from '@/components/chatbot-avatar'
 import { LinkifiedText } from '@/components/chat/linkified-text'
 import { ChatbotKnowledgePanel } from '@/components/admin/chatbot-knowledge-panel'
+import { ChatbotDiagnosticsPanel } from '@/components/admin/chatbot-diagnostics-panel'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
@@ -221,6 +222,8 @@ export default function AdminChatbotPage() {
             </p>
           </div>
         </div>
+
+        <ChatbotDiagnosticsPanel />
 
         <div className="flex flex-wrap gap-2 mb-6">
           {tabBtn('conversations', 'Conversations')}
