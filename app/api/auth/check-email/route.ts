@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb, getAdminApp } from '@/lib/firebase-admin'
+import { firestoreEmailIsReleased } from '@/lib/account-delete'
 
 export const runtime = 'nodejs'
 
@@ -12,17 +13,36 @@ export async function GET(request: NextRequest) {
     }
 
     const db = getAdminDb()
-    const snap = await db.collection('users').where('email', '==', email).limit(1).get()
-    const firestoreUser = snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() }
+    const snap = await db.collection('users').where('email', '==', email).limit(5).get()
+    const blockingDoc = snap.docs.find(
+      (d) => !firestoreEmailIsReleased(d.data() as Record<string, unknown>)
+    )
+    const firestoreUser = blockingDoc
+      ? { id: blockingDoc.id, ...blockingDoc.data() }
+      : null
 
     let authUser: { providers: string[]; uid: string } | null = null
     try {
       // Dynamic import: top-level firebase-admin/auth can crash the serverless module.
       const { getAuth } = await import('firebase-admin/auth')
-      const record = await getAuth(getAdminApp()).getUserByEmail(email)
-      authUser = {
-        uid: record.uid,
-        providers: record.providerData.map((p) => p.providerId).filter(Boolean),
+      const auth = getAuth(getAdminApp())
+      const record = await auth.getUserByEmail(email)
+      if (record.disabled) {
+        // Previous soft-delete left a disabled Auth user — remove so signup can reuse the email.
+        try {
+          await auth.deleteUser(record.uid)
+        } catch (delErr) {
+          console.warn('[auth/check-email] Could not delete disabled Auth user:', delErr)
+          authUser = {
+            uid: record.uid,
+            providers: record.providerData.map((p) => p.providerId).filter(Boolean),
+          }
+        }
+      } else {
+        authUser = {
+          uid: record.uid,
+          providers: record.providerData.map((p) => p.providerId).filter(Boolean),
+        }
       }
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code
@@ -36,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      available: snap.empty && !authUser,
+      available: !firestoreUser && !authUser,
       authExists: Boolean(authUser),
       firestoreExists: Boolean(firestoreUser),
       hasPassword,

@@ -46,32 +46,11 @@ async function applyBulkUpdate(ids: string[], patch: Record<string, unknown>) {
 }
 
 async function applyBulkDelete(ids: string[]) {
-  const db = getAdminDb()
-  const now = FieldValue.serverTimestamp()
-  const patch = {
-    status: 'deleted',
-    accountDeleted: true,
-    active: false,
-    deletedAt: now,
-    updatedAt: now,
-  }
-  const chunks: string[][] = []
-  for (let i = 0; i < ids.length; i += 400) chunks.push(ids.slice(i, i + 400))
-
+  const { releaseAccountForReregistration } = await import('@/lib/account-delete')
   let deleted = 0
-  for (const chunk of chunks) {
-    const batch = db.batch()
-    for (const id of chunk) {
-      batch.set(db.collection('users').doc(id), patch, { merge: true })
-      // Keep admin mirror in sync if present
-      batch.set(
-        db.collection('admin-users').doc(id),
-        { status: 'deleted', active: false, updatedAt: now },
-        { merge: true }
-      )
-      deleted += 1
-    }
-    await batch.commit()
+  for (const id of ids) {
+    const result = await releaseAccountForReregistration(id)
+    if (result.ok) deleted += 1
   }
   return deleted
 }

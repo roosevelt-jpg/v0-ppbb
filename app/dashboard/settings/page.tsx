@@ -318,7 +318,7 @@ function SettingsContent() {
   const handleDeleteAccount = async () => {
     if (
       !confirm(
-        'Delete your account? You will be signed out and your profile will be deactivated. Contact support to restore access.'
+        'Delete your account? You will be signed out. You can register again later with the same email.'
       )
     ) {
       return
