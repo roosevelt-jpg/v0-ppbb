@@ -35,21 +35,38 @@ type BrowseEvent = Record<string, unknown> & { id: string }
 type RegisteredEvent = Event & {
   registrationId?: string
   registrationStatus?: string
+  paymentStatus?: string | null
   checkedInAt?: Date | string | null
   attendanceConfirmedByMember?: boolean
+}
+
+function isAwaitingPayment(event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus'>) {
+  return (
+    event.registrationStatus === 'pending_payment' ||
+    event.paymentStatus === 'pending'
+  )
+}
+
+function isFullyRegistered(event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus'>) {
+  if (isAwaitingPayment(event)) return false
+  const status = String(event.registrationStatus || '')
+  return status === 'confirmed' || status === 'pending' || status === 'waitlisted'
 }
 
 export default function MyEventsPage() {
   const { user, loading: authLoading } = useAuth()
   const [browseEvents, setBrowseEvents] = React.useState<BrowseEvent[]>([])
   const [registeredEvents, setRegisteredEvents] = React.useState<RegisteredEvent[]>([])
-  const [registeredIds, setRegisteredIds] = React.useState<Set<string>>(new Set())
+  const [registrationByEventId, setRegistrationByEventId] = React.useState<
+    Record<string, Pick<RegisteredEvent, 'registrationId' | 'registrationStatus' | 'paymentStatus'>>
+  >({})
   const [loadingBrowse, setLoadingBrowse] = React.useState(true)
   const [loadingRegistered, setLoadingRegistered] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [registeringId, setRegisteringId] = React.useState<string | null>(null)
   const [confirmingId, setConfirmingId] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState<'browse' | 'registered'>('browse')
+  const [payCoupon, setPayCoupon] = React.useState('')
   const [stripeCheckout, setStripeCheckout] = React.useState<{
     clientSecret: string
     publishableKey: string
@@ -65,14 +82,26 @@ export default function MyEventsPage() {
       const json = await res.json()
       if (!json.success) {
         setRegisteredEvents([])
-        setRegisteredIds(new Set())
+        setRegistrationByEventId({})
         return
       }
       const raw = json.data
       const eventList = Array.isArray(raw) ? raw : raw ? [raw] : []
       const events = eventList.filter(Boolean) as RegisteredEvent[]
       setRegisteredEvents(events)
-      setRegisteredIds(new Set(events.map((e) => e.id!).filter(Boolean)))
+      const map: Record<
+        string,
+        Pick<RegisteredEvent, 'registrationId' | 'registrationStatus' | 'paymentStatus'>
+      > = {}
+      for (const e of events) {
+        if (!e.id) continue
+        map[e.id] = {
+          registrationId: e.registrationId,
+          registrationStatus: e.registrationStatus,
+          paymentStatus: e.paymentStatus,
+        }
+      }
+      setRegistrationByEventId(map)
     } catch (err) {
       console.error('[v0] Error loading registered events:', err)
     } finally {
@@ -123,7 +152,7 @@ export default function MyEventsPage() {
     return () => unsub()
   }, [authLoading, user?.id, user, loadRegistered])
 
-  const handleRegister = async (event: BrowseEvent) => {
+  const handleRegister = async (event: BrowseEvent, couponOverride?: string) => {
     if (!user?.id) return
     setRegisteringId(event.id)
     try {
@@ -142,6 +171,7 @@ export default function MyEventsPage() {
           userEmail: (user as User).email,
           userGender: (user as User).gender,
           registrationType: event.pricingType === 'free' || !event.price ? 'free' : 'paid',
+          couponCode: (couponOverride ?? payCoupon).trim() || undefined,
         }),
       })
       const json = await res.json()
@@ -240,7 +270,35 @@ export default function MyEventsPage() {
           <Card className="w-full max-w-md p-6 bg-white">
             <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
             <p className="text-sm text-neutral-600 mb-4">Enter card details to complete registration.</p>
+            <div className="mb-3">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                Coupon / unlock code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={payCoupon}
+                  onChange={(e) => setPayCoupon(e.target.value)}
+                  placeholder="Optional"
+                  className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded-lg"
+                />
+                <button
+                  type="button"
+                  disabled={registeringId === stripeCheckout.eventId}
+                  onClick={() => {
+                    const ev =
+                      browseEvents.find((e) => e.id === stripeCheckout.eventId) ||
+                      (registeredEvents.find((e) => e.id === stripeCheckout.eventId) as BrowseEvent | undefined)
+                    if (ev) void handleRegister(ev, payCoupon)
+                  }}
+                  className="px-3 py-2 text-xs font-semibold border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
             <StripeCardForm
+              key={stripeCheckout.clientSecret}
               publishableKey={stripeCheckout.publishableKey}
               clientSecret={stripeCheckout.clientSecret}
               submitLabel="Pay & register"
@@ -260,6 +318,7 @@ export default function MyEventsPage() {
                   return
                 }
                 setStripeCheckout(null)
+                setPayCoupon('')
                 await loadRegistered()
                 setActiveTab('registered')
               }}
@@ -276,7 +335,7 @@ export default function MyEventsPage() {
       ) : null}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <p className="text-sm text-neutral-500 dark:text-muted-foreground">
-          {registeredIds.size} event{registeredIds.size !== 1 ? 's' : ''} registered
+          {registeredEvents.length} event{registeredEvents.length !== 1 ? 's' : ''} registered
         </p>
         <Link
           href="/events"
@@ -306,17 +365,25 @@ export default function MyEventsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {browseEvents.map((event) => {
               const start = parseEventDate(event.startDate)
-              const isRegistered = registeredIds.has(event.id)
+              const reg = registrationByEventId[event.id]
+              const awaiting = reg ? isAwaitingPayment(reg) : false
+              const fullyRegistered = reg ? isFullyRegistered(reg) : false
               return (
                 <Card key={event.id} className="border border-neutral-200 dark:border-border overflow-hidden p-0">
-                  <EventBannerThumb
-                    event={event}
-                    title={String(event.title ?? 'Event')}
-                    size="md"
-                    rounded="rounded-none"
-                  />
+                  <Link href={`/events/${event.id}`} className="block no-underline">
+                    <EventBannerThumb
+                      event={event}
+                      title={String(event.title ?? 'Event')}
+                      size="md"
+                      rounded="rounded-none"
+                    />
+                  </Link>
                   <div className="p-4 sm:p-5">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-foreground">{String(event.title ?? 'Event')}</h3>
+                  <Link href={`/events/${event.id}`} className="no-underline">
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-foreground hover:underline">
+                      {String(event.title ?? 'Event')}
+                    </h3>
+                  </Link>
                   {event.description ? (
                     <p className="text-sm text-neutral-500 dark:text-muted-foreground mt-1 line-clamp-2">{String(event.description)}</p>
                   ) : null}
@@ -337,19 +404,40 @@ export default function MyEventsPage() {
                       {String(event.genderRestriction).replace(/-/g, ' ')}
                     </span>
                   ) : null}
-                  <div className="mt-4">
-                    {isRegistered ? (
-                      <span className="text-sm font-semibold text-green-700">Registered ✓</span>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    {awaiting ? (
+                      <button
+                        type="button"
+                        disabled={registeringId === event.id}
+                        onClick={() => void handleRegister(event)}
+                        className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                      >
+                        {registeringId === event.id ? 'Opening payment…' : 'Complete payment'}
+                      </button>
+                    ) : fullyRegistered ? (
+                      <span className="text-sm font-semibold text-green-700">
+                        {reg?.registrationStatus === 'waitlisted'
+                          ? 'Waitlisted'
+                          : reg?.registrationStatus === 'pending'
+                            ? 'Pending approval'
+                            : 'Registered ✓'}
+                      </span>
                     ) : (
                       <button
                         type="button"
                         disabled={registeringId === event.id}
-                        onClick={() => handleRegister(event)}
+                        onClick={() => void handleRegister(event)}
                         className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
                       >
                         {registeringId === event.id ? 'Registering...' : 'Register / RSVP'}
                       </button>
                     )}
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="text-sm font-medium text-neutral-700 underline underline-offset-2"
+                    >
+                      View details
+                    </Link>
                   </div>
                   </div>
                 </Card>
@@ -408,6 +496,23 @@ export default function MyEventsPage() {
                           Past
                         </span>
                       ) : null}
+                      {isAwaitingPayment(event) ? (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900">
+                          Awaiting payment
+                        </span>
+                      ) : event.registrationStatus === 'waitlisted' ? (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-700">
+                          Waitlisted
+                        </span>
+                      ) : event.registrationStatus === 'pending' ? (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                          Pending approval
+                        </span>
+                      ) : (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-green-100 text-green-800">
+                          Registered
+                        </span>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm text-neutral-600 dark:text-muted-foreground">
                       <div className="flex items-center gap-2">
@@ -427,6 +532,16 @@ export default function MyEventsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2 self-start">
+                    {isAwaitingPayment(event) && event.id ? (
+                      <button
+                        type="button"
+                        disabled={registeringId === event.id}
+                        onClick={() => void handleRegister(event as unknown as BrowseEvent)}
+                        className="!bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                      >
+                        {registeringId === event.id ? 'Opening…' : 'Complete payment'}
+                      </button>
+                    ) : null}
                     {isCharity ? (
                       attended ? (
                         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 px-3 py-2">

@@ -76,7 +76,10 @@ export async function POST(req: NextRequest) {
 
     if (stripe && stripeId) {
       if (stopRenewalOnly) {
-        await stripe.subscriptions.update(stripeId, { cancel_at_period_end: true })
+        const current = await stripe.subscriptions.retrieve(stripeId)
+        if (!current.cancel_at_period_end) {
+          await stripe.subscriptions.update(stripeId, { cancel_at_period_end: true })
+        }
       } else {
         await stripe.subscriptions.cancel(stripeId)
       }
@@ -110,6 +113,15 @@ export async function POST(req: NextRequest) {
         { merge: true }
       )
     }
+
+    await db.collection('users').doc(uid).set(
+      {
+        membershipAutoRenew: false,
+        ...(stopRenewalOnly ? {} : { membershipStatus: 'cancelled' }),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    )
 
     if (stopRenewalOnly) {
       notifyMembershipCancelled({

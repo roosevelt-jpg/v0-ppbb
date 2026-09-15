@@ -122,14 +122,206 @@ export async function POST(request: NextRequest) {
       const existingData = existing.data() || {}
       const existingStatus = String(existingData.status || '')
       const existingPay = String(existingData.paymentStatus || '')
-      // Allow resuming unpaid checkout instead of hard-blocking the user.
+      // Allow resuming unpaid checkout — return a live payment payload.
       if (existingStatus === 'pending_payment' || existingPay === 'pending') {
+        const ticket = resolveTicketType(
+          event,
+          ticketTypeId || String(existingData.ticketTypeId || '')
+        )
+        if (!ticket) {
+          return NextResponse.json({ success: false, error: 'Invalid ticket type' }, { status: 400 })
+        }
+        const couponResult = applyCoupon(
+          ticket.price || 0,
+          couponCode || existingData.couponCode,
+          event.coupons as any,
+          ticket.id
+        )
+        if (couponResult.error) {
+          return NextResponse.json({ success: false, error: couponResult.error }, { status: 400 })
+        }
+        const price = couponResult.price
+        if (!(price > 0)) {
+          return NextResponse.json({
+            success: true,
+            registrationId: existing.id,
+            status: existingStatus || 'pending_payment',
+            resumePayment: true,
+            registration: { id: existing.id, ...existingData },
+          })
+        }
+
+        const gateway = (
+          String(existingData.paymentGateway || event.paymentGateway || 'stripe')
+        ).toLowerCase()
+        const origin =
+          request.headers.get('origin') ||
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          process.env.NEXT_PUBLIC_APP_URL ||
+          'https://www.passive-blessings.com'
+        const currency = (ticket.currency || (event.currency as string) || 'AED').toString()
+        const description = `${String(event.title || 'Event')} — ${ticket.name}`
+
+        if (gateway === 'paypal') {
+          const { resolvePayPalConfig } = await import('@/lib/resolve-paypal-config')
+          const { createPayPalOrder } = await import('@/lib/paypal-client')
+          const paypalConfig = await resolvePayPalConfig()
+          if (!paypalConfig) {
+            return NextResponse.json(
+              { success: false, error: 'PayPal is not configured' },
+              { status: 500 }
+            )
+          }
+          const order = await createPayPalOrder({
+            amountMajor: price,
+            currency,
+            description,
+            returnUrl: `${origin}/api/paypal/return?type=event&eventId=${encodeURIComponent(eventId)}&registrationId=${encodeURIComponent(existing.id)}`,
+            cancelUrl: `${origin}/events/${eventId}?cancelled=1`,
+            customId: existing.id,
+          })
+          await existing.ref.update({
+            paypalOrderId: order.id,
+            paymentGateway: 'paypal',
+            ticketPrice: price,
+            couponCode: couponResult.coupon?.code || null,
+            updatedAt: Timestamp.now(),
+          })
+          return NextResponse.json({
+            success: true,
+            registrationId: existing.id,
+            checkoutUrl: order.approveUrl,
+            gateway: 'paypal',
+            status: existingStatus || 'pending_payment',
+            resumePayment: true,
+            registration: { id: existing.id, ...existingData, paypalOrderId: order.id },
+          })
+        }
+
+        if (gateway === 'ziina') {
+          const { resolveZiinaConfig } = await import('@/lib/resolve-ziina-config')
+          const { createZiinaPaymentIntent } = await import('@/lib/ziina-client')
+          const ziinaConfig = await resolveZiinaConfig()
+          if (!ziinaConfig) {
+            return NextResponse.json(
+              { success: false, error: 'Ziina is not configured' },
+              { status: 500 }
+            )
+          }
+          const intent = await createZiinaPaymentIntent({
+            amountMinor: Math.round(price * 100),
+            currency,
+            message: description,
+            successUrl:
+              `${origin}/api/ziina/return?type=event` +
+              `&eventId=${encodeURIComponent(eventId)}` +
+              `&registrationId=${encodeURIComponent(existing.id)}` +
+              `&payment_intent_id={PAYMENT_INTENT_ID}`,
+            cancelUrl: `${origin}/events/${eventId}?cancelled=1`,
+          })
+          if (!intent.redirect_url) {
+            return NextResponse.json(
+              { success: false, error: 'Ziina did not return a checkout URL' },
+              { status: 500 }
+            )
+          }
+          await existing.ref.update({
+            ziinaPaymentIntentId: intent.id,
+            paymentGateway: 'ziina',
+            ticketPrice: price,
+            couponCode: couponResult.coupon?.code || null,
+            updatedAt: Timestamp.now(),
+          })
+          return NextResponse.json({
+            success: true,
+            registrationId: existing.id,
+            checkoutUrl: intent.redirect_url,
+            gateway: 'ziina',
+            status: existingStatus || 'pending_payment',
+            resumePayment: true,
+            registration: { id: existing.id, ...existingData, ziinaPaymentIntentId: intent.id },
+          })
+        }
+
+        // Stripe — reuse open PI when possible, otherwise create a fresh one
+        const stripeConfig = await resolveStripeConfig()
+        if (!stripeConfig?.secretKey || !stripeConfig.publishableKey) {
+          return NextResponse.json({ success: false, error: 'Stripe is not configured' }, { status: 500 })
+        }
+
+        const existingPiId = String(existingData.stripePaymentIntentId || '').trim()
+        const couponChanged =
+          Boolean(couponCode) &&
+          String(couponCode).trim().toLowerCase() !==
+            String(existingData.couponCode || '')
+              .trim()
+              .toLowerCase()
+        const amountMinor = Math.round(price * 100)
+
+        if (existingPiId && !couponChanged) {
+          try {
+            const { getStripeClient } = await import('@/lib/get-stripe-client')
+            const stripe = await getStripeClient()
+            const pi = await stripe.paymentIntents.retrieve(existingPiId)
+            const reusable = ['requires_payment_method', 'requires_confirmation', 'requires_action'].includes(
+              String(pi.status)
+            )
+            if (reusable && pi.client_secret && Number(pi.amount) === amountMinor) {
+              return NextResponse.json({
+                success: true,
+                registrationId: existing.id,
+                embedded: true,
+                clientSecret: pi.client_secret,
+                publishableKey: stripeConfig.publishableKey,
+                paymentIntentId: pi.id,
+                gateway: 'stripe',
+                status: existingStatus || 'pending_payment',
+                resumePayment: true,
+                registration: { id: existing.id, ...existingData },
+              })
+            }
+          } catch (err) {
+            console.warn('[events/register] resume PI retrieve failed:', err)
+          }
+        }
+
+        const embedded = await createEmbeddedPaymentIntent({
+          amountMinor,
+          currency,
+          description,
+          metadata: {
+            type: 'event_ticket',
+            eventId,
+            registrationId: existing.id,
+            userId,
+            ticketTypeId: ticket.id,
+            couponCode: couponResult.coupon?.code || '',
+          },
+        })
+
+        await existing.ref.update({
+          stripePaymentIntentId: embedded.paymentIntentId,
+          paymentGateway: 'stripe',
+          ticketPrice: price,
+          couponCode: couponResult.coupon?.code || null,
+          updatedAt: Timestamp.now(),
+        })
+
         return NextResponse.json({
           success: true,
           registrationId: existing.id,
+          embedded: true,
+          clientSecret: embedded.clientSecret,
+          publishableKey: embedded.publishableKey,
+          paymentIntentId: embedded.paymentIntentId,
+          gateway: 'stripe',
           status: existingStatus || 'pending_payment',
           resumePayment: true,
-          registration: { id: existing.id, ...existingData },
+          registration: {
+            id: existing.id,
+            ...existingData,
+            stripePaymentIntentId: embedded.paymentIntentId,
+          },
         })
       }
       return NextResponse.json(

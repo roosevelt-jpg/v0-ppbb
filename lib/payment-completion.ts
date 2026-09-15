@@ -150,7 +150,8 @@ export async function createStripeMembershipIntent(params: {
     try {
       const current = await stripe.subscriptions.retrieve(existingSubId)
       const status = String(current.status || '')
-      if (['active', 'trialing', 'past_due'].includes(status) && !current.cancel_at_period_end) {
+      // Allow in-place plan change even when renewal was stopped — clear cancel_at_period_end.
+      if (['active', 'trialing', 'past_due'].includes(status)) {
         const itemId = current.items.data[0]?.id
         if (itemId) {
           subscription = await stripe.subscriptions.update(existingSubId, {
@@ -174,7 +175,8 @@ export async function createStripeMembershipIntent(params: {
       } else {
         subscription = await stripe.subscriptions.create(buildCreateParams())
       }
-    } catch {
+    } catch (err) {
+      console.error('[payment-completion] subscription update failed, creating new:', err)
       subscription = await stripe.subscriptions.create(buildCreateParams())
     }
   } else {
@@ -185,6 +187,7 @@ export async function createStripeMembershipIntent(params: {
     {
       stripeSubscriptionId: subscription.id,
       stripeCustomerId: customerId,
+      membershipAutoRenew: true,
       updatedAt: FieldValue.serverTimestamp(),
     },
     { merge: true }
@@ -209,6 +212,13 @@ export async function createStripeMembershipIntent(params: {
 
   // Upgrades that are already active (proration charged on file) need no card form.
   if (['active', 'trialing'].includes(String(subscription.status))) {
+    const renewOverride = (() => {
+      const end =
+        typeof (subscription as { current_period_end?: number }).current_period_end === 'number'
+          ? (subscription as { current_period_end: number }).current_period_end
+          : null
+      return end ? new Date(end * 1000) : undefined
+    })()
     try {
       const secret = await clientSecretForIncompleteSubscription(stripe, subscription)
       return {
@@ -217,6 +227,14 @@ export async function createStripeMembershipIntent(params: {
         subscriptionId: subscription.id,
       }
     } catch {
+      // No further card confirmation needed — apply the new plan immediately.
+      await completeMembershipPayment({
+        userId: params.userId,
+        planId: params.planId,
+        gateway: 'stripe',
+        paymentReference: subscription.id,
+        renewDateOverride: renewOverride,
+      })
       await db.collection('subscriptions').doc(subscription.id).set(
         { status: 'active', updatedAt: FieldValue.serverTimestamp() },
         { merge: true }

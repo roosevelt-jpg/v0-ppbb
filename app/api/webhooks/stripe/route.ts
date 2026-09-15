@@ -216,9 +216,13 @@ export async function POST(req: NextRequest) {
           interval: subscription.items.data[0]?.price.recurring?.interval,
           status: subscription.status,
           collectionMethod: subscription.collection_method || 'charge_automatically',
+          cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
           metadata: subscription.metadata,
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
+        }
+        if (subscription.metadata?.planId) {
+          subscriptionData.planId = subscription.metadata.planId
         }
         if (typeof periodStartUnix === 'number') {
           subscriptionData.currentPeriodStart = Timestamp.fromDate(new Date(periodStartUnix * 1000))
@@ -231,32 +235,43 @@ export async function POST(req: NextRequest) {
         await db.collection('subscriptions').doc(subscriptionId).set(subscriptionData, { merge: true })
         console.log('[v0] Subscription saved:', subscriptionId)
 
+        if (Boolean(subscription.cancel_at_period_end)) {
+          await db.collection('users').doc(userId).set(
+            { membershipAutoRenew: false, updatedAt: Timestamp.now() },
+            { merge: true }
+          )
+        }
+
         const isActiveNow = ['active', 'trialing'].includes(subscription.status)
         const wasActiveBefore = ['active', 'trialing'].includes(prevStatus || '')
+        const planId = String(subscription.metadata?.planId || '').trim()
+        const prevPlanId = String(prevSnap.exists ? prevSnap.data()?.planId || '' : '').trim()
+        let userPlanId = ''
+        if (planId && isActiveNow && wasActiveBefore) {
+          try {
+            const u = await db.collection('users').doc(userId).get()
+            userPlanId = String(u.data()?.membershipPlanId || '').trim()
+          } catch {
+            /* ignore */
+          }
+        }
 
-        if (
-          subscription.metadata?.type === 'membership' &&
-          subscription.metadata.planId &&
-          isActiveNow &&
-          !wasActiveBefore
-        ) {
-          // The subscription just transitioned into active/trialing for the
-          // first time — the member confirmed their card on the embedded
-          // form and Stripe accepted it. Fires here rather than at
-          // subscription creation because `customer.subscription.created`
-          // arrives immediately with status 'incomplete', before the
-          // member has entered anything — activating there would grant
-          // access before payment is actually confirmed.
-          const { completeMembershipPayment } = await import('@/lib/payment-completion')
-          await completeMembershipPayment({
-            userId,
-            planId: subscription.metadata.planId,
-            gateway: 'stripe',
-            paymentReference: subscriptionId,
-            promoCodeId: subscription.metadata.promoCodeId || undefined,
-            promoCode: subscription.metadata.promoCode || undefined,
-            renewDateOverride: periodEndUnix ? new Date(periodEndUnix * 1000) : undefined,
-          })
+        if (subscription.metadata?.type === 'membership' && planId && isActiveNow) {
+          // First activation OR plan change while already active (upgrade/downgrade).
+          const planChanged =
+            (planId && planId !== prevPlanId) || (planId && userPlanId && planId !== userPlanId)
+          if (!wasActiveBefore || planChanged) {
+            const { completeMembershipPayment } = await import('@/lib/payment-completion')
+            await completeMembershipPayment({
+              userId,
+              planId,
+              gateway: 'stripe',
+              paymentReference: subscriptionId,
+              promoCodeId: subscription.metadata.promoCodeId || undefined,
+              promoCode: subscription.metadata.promoCode || undefined,
+              renewDateOverride: periodEndUnix ? new Date(periodEndUnix * 1000) : undefined,
+            })
+          }
         } else if (
           subscription.status === 'incomplete_expired' &&
           subscription.metadata?.promoCodeId &&

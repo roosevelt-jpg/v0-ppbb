@@ -160,13 +160,19 @@ export function MembershipSubscriptionOverview({
     : renewDateObj
       ? renewDateObj.toLocaleDateString(undefined, { dateStyle: 'medium' })
       : '—'
-  const monthsRemaining =
+  const daysRemaining =
     isLifetime || renewDateObj == null
       ? null
-      : Math.max(
-          0,
-          Math.round((renewDateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44))
-        )
+      : Math.max(0, Math.ceil((renewDateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const remainingLabel =
+    daysRemaining == null
+      ? null
+      : daysRemaining < 45
+        ? `~${daysRemaining} day${daysRemaining === 1 ? '' : 's'} remaining`
+        : (() => {
+            const months = Math.floor(daysRemaining / 30.44)
+            return `~${months} month${months === 1 ? '' : 's'} remaining`
+          })()
 
   const isPromoSub = String(subscription?.gateway || '') === 'promo'
   const renewalStopped =
@@ -189,12 +195,14 @@ export function MembershipSubscriptionOverview({
     if (!confirm('Stop automatic renewal? You keep access until the current period ends.')) return
     setCancelling(true)
     try {
-      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken()
+      const { auth } = await import('@/lib/firebase')
+      const token = await auth.currentUser?.getIdToken(true)
+      if (!token) throw new Error('Please sign in again to stop renewal.')
       const res = await fetch('/api/subscriptions/cancel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           subscriptionId: subDocId || null,
@@ -202,10 +210,11 @@ export function MembershipSubscriptionOverview({
           stopRenewalOnly: true,
         }),
       })
-      const json = await res.json()
+      const json = await res.json().catch(() => ({}))
       if (!res.ok || json.error) throw new Error(json.error || 'Cancel failed')
       setCancelDone(true)
       alert('Renewal cancelled. You retain access until the end of the paid period.')
+      if (typeof window !== 'undefined') window.location.reload()
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Could not stop renewal')
     } finally {
@@ -261,10 +270,8 @@ export function MembershipSubscriptionOverview({
                   </>
                 )}
               </p>
-              {monthsRemaining != null ? (
-                <p className="text-sm text-neutral-500 mt-0.5">
-                  ~{monthsRemaining} month{monthsRemaining === 1 ? '' : 's'} remaining
-                </p>
+              {remainingLabel ? (
+                <p className="text-sm text-neutral-500 mt-0.5">{remainingLabel}</p>
               ) : null}
               {assignedPlan ? (
                 <ul className="mt-3 space-y-1 text-sm text-neutral-600">

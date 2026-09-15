@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useSearchParams, useParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
+import { StripeCardForm } from '@/components/payments/stripe-card-form'
+import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
 import { CalendarPlus, CheckCircle, Clock, Download } from 'lucide-react'
 
@@ -15,6 +17,8 @@ type RegView = {
   checkInCode?: string | null
   qrToken?: string | null
   paymentStatus?: string | null
+  eventId?: string
+  userId?: string
 }
 
 function ConfirmationInner() {
@@ -24,6 +28,14 @@ function ConfirmationInner() {
   const eventId = params.id as string
   const [reg, setReg] = React.useState<RegView | null>(null)
   const [loading, setLoading] = React.useState(true)
+  const [paying, setPaying] = React.useState(false)
+  const [payError, setPayError] = React.useState<string | null>(null)
+  const [couponCode, setCouponCode] = React.useState('')
+  const [stripeCheckout, setStripeCheckout] = React.useState<{
+    clientSecret: string
+    publishableKey: string
+    registrationId: string
+  } | null>(null)
 
   React.useEffect(() => {
     if (!registrationId) {
@@ -33,7 +45,6 @@ function ConfirmationInner() {
 
     let cancelled = false
     ;(async () => {
-      // Prefer live registration so we never show a stale "pending approval" from cache
       try {
         const token = await auth.currentUser?.getIdToken().catch(() => null)
         const res = await fetch(
@@ -89,8 +100,118 @@ function ConfirmationInner() {
       ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`
       : ''
 
+  const handlePayNow = async () => {
+    if (!registrationId) return
+    setPaying(true)
+    setPayError(null)
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      const user = auth.currentUser
+      const res = await fetch('/api/events/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          eventId,
+          userId: user?.uid,
+          userEmail: user?.email || '',
+          userName: user?.displayName || '',
+          couponCode: couponCode.trim() || undefined,
+          registrationType: 'paid',
+        }),
+      })
+      const json = await res.json()
+      if (!json.success) {
+        setPayError(json.error || 'Could not start payment')
+        return
+      }
+      if (json.embedded && json.clientSecret && json.publishableKey) {
+        setStripeCheckout({
+          clientSecret: json.clientSecret,
+          publishableKey: json.publishableKey,
+          registrationId: json.registrationId || registrationId,
+        })
+        return
+      }
+      if (json.checkoutUrl) {
+        window.location.href = json.checkoutUrl
+        return
+      }
+      setPayError('Payment could not be started. Return to the event and try again.')
+    } catch (err) {
+      console.error('[confirmation] pay now', err)
+      setPayError('Payment failed to start')
+    } finally {
+      setPaying(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+      {stripeCheckout ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <Card className="w-full max-w-md p-6 bg-white">
+            <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
+            <div className="mb-3">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                Coupon / unlock code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Optional"
+                  className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded-lg"
+                />
+                <button
+                  type="button"
+                  disabled={paying}
+                  onClick={() => void handlePayNow()}
+                  className="px-3 py-2 text-xs font-semibold border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+            <StripeCardForm
+              key={stripeCheckout.clientSecret}
+              publishableKey={stripeCheckout.publishableKey}
+              clientSecret={stripeCheckout.clientSecret}
+              submitLabel="Pay & register"
+              onSuccess={async (paymentIntentId) => {
+                const res = await fetch('/api/payments/confirm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    type: 'event_ticket',
+                    paymentIntentId,
+                    registrationId: stripeCheckout.registrationId,
+                  }),
+                })
+                const confirmJson = await res.json()
+                if (!res.ok || !confirmJson.success) {
+                  setPayError(confirmJson.error || 'Payment confirmation failed')
+                  return
+                }
+                window.location.href =
+                  confirmJson.confirmationUrl ||
+                  `/events/${eventId}/confirmation?registrationId=${stripeCheckout.registrationId}`
+              }}
+              onError={(msg) => setPayError(msg)}
+            />
+            <button
+              type="button"
+              className="mt-3 text-xs underline text-neutral-600"
+              onClick={() => setStripeCheckout(null)}
+            >
+              Cancel
+            </button>
+          </Card>
+        </div>
+      ) : null}
       <div className="bg-white rounded-lg border border-gray-200 p-8 sm:p-12 max-w-md w-full text-center space-y-4">
         {loading ? (
           <p className="text-neutral-500 text-sm">Loading registration…</p>
@@ -134,7 +255,19 @@ function ConfirmationInner() {
               </div>
             ) : null}
 
+            {payError ? <p className="text-sm text-red-600">{payError}</p> : null}
+
             <div className="space-y-3 pt-2">
+              {isPendingPayment ? (
+                <button
+                  type="button"
+                  disabled={paying}
+                  onClick={() => void handlePayNow()}
+                  className="w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-neutral-800 disabled:opacity-50"
+                >
+                  {paying ? 'Opening payment…' : 'Pay now'}
+                </button>
+              ) : null}
               {!isPendingPayment && (
               <a
                 href={`/api/events/${eventId}/google-calendar`}
@@ -155,9 +288,9 @@ function ConfirmationInner() {
               )}
               <Link
                 href={`/events/${eventId}`}
-                className="block w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-900"
+                className="block w-full py-3 border border-gray-200 text-black rounded-lg font-semibold hover:bg-gray-50"
               >
-                {isPendingPayment ? 'Return to event to pay' : 'Back to Event'}
+                Back to Event
               </Link>
               <Link
                 href="/dashboard/events"

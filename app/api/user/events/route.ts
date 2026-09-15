@@ -26,6 +26,9 @@ export async function GET(request: NextRequest) {
         id: string
         eventId: string
         status?: string
+        paymentStatus?: string
+        ticketTypeId?: string
+        ticketName?: string
         checkedInAt?: Date | string | null
         attendanceConfirmedByMember?: boolean
       }) => {
@@ -39,6 +42,9 @@ export async function GET(request: NextRequest) {
             endDate: eventDoc.data()?.endDate?.toDate?.() || eventDoc.data()?.endDate,
             registrationId: reg.id,
             registrationStatus: reg.status || 'confirmed',
+            paymentStatus: reg.paymentStatus || null,
+            ticketTypeId: reg.ticketTypeId || null,
+            ticketName: reg.ticketName || null,
             checkedInAt: reg.checkedInAt,
             attendanceConfirmedByMember: Boolean(reg.attendanceConfirmedByMember),
           }

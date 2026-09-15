@@ -186,7 +186,7 @@ export function EventDetailView({
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 break-words">
                 {event.title}
@@ -323,7 +323,7 @@ export function EventDetailView({
             )}
           </div>
 
-          <div>
+          <div className="order-1 lg:order-2">
             <Card className="bg-white border border-gray-200 p-6 sm:p-8 lg:sticky lg:top-20">
               <div className="space-y-6">
                 <div>

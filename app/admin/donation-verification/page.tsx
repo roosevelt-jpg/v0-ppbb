@@ -36,6 +36,52 @@ async function getIdToken(): Promise<string | null> {
   return user.getIdToken()
 }
 
+function ProofLink({ submissionId, hasProof }: { submissionId: string; hasProof: boolean }) {
+  const [url, setUrl] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    if (!hasProof) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const token = await getIdToken()
+        if (!token) return
+        const res = await fetch(
+          `/api/admin/donation-proof?submissionId=${encodeURIComponent(submissionId)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        const json = await res.json()
+        if (!cancelled && json.success && json.url) setUrl(String(json.url))
+      } catch {
+        /* ignore */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [submissionId, hasProof])
+
+  if (!hasProof) {
+    return <p className="text-xs text-neutral-400 mt-1">No proof image</p>
+  }
+
+  if (!url) {
+    return <p className="text-xs text-neutral-400 mt-1">Loading proof…</p>
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 text-sm underline mt-1"
+    >
+      <ImageIcon className="w-4 h-4" />
+      View proof
+    </a>
+  )
+}
+
 export default function DonationVerificationPage() {
   const [submissions, setSubmissions] = React.useState<Submission[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -144,15 +190,7 @@ export default function DonationVerificationPage() {
               {formatDistanceToNow(when, { addSuffix: true })}
             </p>
             {submission.proofImage ? (
-              <a
-                href={submission.proofImage}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm underline mt-1"
-              >
-                <ImageIcon className="w-4 h-4" />
-                View proof
-              </a>
+              <ProofLink submissionId={submission.id} hasProof />
             ) : (
               <p className="text-xs text-neutral-400 mt-1">No proof image</p>
             )}

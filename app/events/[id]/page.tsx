@@ -52,12 +52,17 @@ function EventDetailInner() {
       if (json.success && json.data) {
         const data = json.data as Event
         setEvent(data)
+        setError(null)
         const first = Array.isArray(data.ticketTypes) && data.ticketTypes[0]
         if (first) setTicketTypeId(first.id)
+      } else {
+        setEvent(null)
+        setError(json.error || 'Event not found or not published yet.')
       }
     } catch (err) {
       console.error('[v0] Error loading event:', err)
       setError('Failed to load event')
+      setEvent(null)
     } finally {
       setLoading(false)
     }
@@ -153,8 +158,8 @@ function EventDetailInner() {
 
   if (!event) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Event not found</p>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <p className="text-gray-500 text-center">{error || 'Event not found'}</p>
       </div>
     )
   }
@@ -173,7 +178,30 @@ function EventDetailInner() {
           <Card className="w-full max-w-md p-6 bg-white">
             <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
             <p className="text-sm text-neutral-600 mb-4">Enter card details — you stay on Passive Blessings.</p>
+            <div className="mb-3">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
+                Coupon / unlock code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Optional"
+                  className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded-lg"
+                />
+                <button
+                  type="button"
+                  disabled={registering}
+                  onClick={() => void handleRegister()}
+                  className="px-3 py-2 text-xs font-semibold border border-neutral-300 rounded-lg hover:bg-neutral-50 disabled:opacity-50"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
             <StripeCardForm
+              key={stripeCheckout.clientSecret}
               publishableKey={stripeCheckout.publishableKey}
               clientSecret={stripeCheckout.clientSecret}
               submitLabel="Pay & register"

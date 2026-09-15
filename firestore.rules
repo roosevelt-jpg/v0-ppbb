@@ -739,6 +739,13 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (isAuth() && resource.data.userId == request.auth.uid);
       allow delete: if isAdmin();
+
+      // Stripe invoice.paid charge rows — member/admin read only
+      match /charges/{chargeId} {
+        allow read: if isAdmin()
+          || (isAuth() && get(/databases/$(database)/documents/subscriptions/$(subscriptionId)).data.userId == request.auth.uid);
+        allow create, update, delete: if false;
+      }
     }
 
     // Learning hub (/dashboard/learning)

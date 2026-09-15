@@ -67,6 +67,60 @@ async function getIdToken(): Promise<string | null> {
   return auth.currentUser?.getIdToken() || null
 }
 
+async function resolveProofUrl(submissionId: string, fallback?: string): Promise<string | null> {
+  try {
+    const token = await getIdToken()
+    if (!token) return fallback || null
+    const res = await fetch(
+      `/api/admin/donation-proof?submissionId=${encodeURIComponent(submissionId)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const json = await res.json()
+    if (json.success && json.url) return String(json.url)
+  } catch (err) {
+    console.warn('[finance/donations] proof URL', err)
+  }
+  return fallback || null
+}
+
+function ProofThumb({
+  submissionId,
+  hasProof,
+}: {
+  submissionId: string
+  hasProof: boolean
+}) {
+  const [url, setUrl] = React.useState<string | null>(null)
+  const [broken, setBroken] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!hasProof) return
+    let cancelled = false
+    void resolveProofUrl(submissionId).then((u) => {
+      if (!cancelled) setUrl(u)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [submissionId, hasProof])
+
+  if (!hasProof || broken || !url) {
+    return <ImageIcon className="w-5 h-5 text-neutral-400" />
+  }
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt="Proof"
+        className="h-12 w-12 object-cover"
+        onError={() => setBroken(true)}
+      />
+    </a>
+  )
+}
+
 /**
  * Part 13A — finance tracking view over the SAME donationSubmissions collection
  * as Part 7B. Actions call /api/admin/donation-verification (shared increment logic).
@@ -362,13 +416,7 @@ export default function FinanceDonationsPage() {
                 >
                   <div className="flex gap-3 min-w-0">
                     <div className="h-12 w-12 shrink-0 rounded border bg-neutral-50 flex items-center justify-center overflow-hidden">
-                      {s.proofImage ? (
-                        <a href={s.proofImage} target="_blank" rel="noopener noreferrer">
-                          <img src={s.proofImage} alt="" className="h-12 w-12 object-cover" />
-                        </a>
-                      ) : (
-                        <ImageIcon className="w-5 h-5 text-neutral-400" />
-                      )}
+                      <ProofThumb submissionId={s.id} hasProof={Boolean(s.proofImage)} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p
@@ -448,22 +496,13 @@ export default function FinanceDonationsPage() {
                       </td>
                       <td className="py-3 px-3 text-xs">{s.referenceNumber || '—'}</td>
                       <td className="py-3 px-3">
-                        {s.proofImage ? (
-                          <a
-                            href={s.proofImage}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block"
-                          >
-                            <img
-                              src={s.proofImage}
-                              alt="Proof"
-                              className="h-12 w-12 object-cover rounded border"
-                            />
-                          </a>
-                        ) : (
-                          <DollarSign className="w-5 h-5 text-neutral-300" />
-                        )}
+                        <div className="h-12 w-12 rounded border bg-neutral-50 flex items-center justify-center overflow-hidden">
+                          {s.proofImage ? (
+                            <ProofThumb submissionId={s.id} hasProof />
+                          ) : (
+                            <DollarSign className="w-5 h-5 text-neutral-300" />
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-3 whitespace-nowrap">{formatDate(toDate(s))}</td>
                       <td className="py-3 px-3 capitalize whitespace-nowrap">{statusLabel(s.status)}</td>
