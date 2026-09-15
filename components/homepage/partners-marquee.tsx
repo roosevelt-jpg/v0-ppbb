@@ -10,7 +10,7 @@ function PartnerLogo({ partner }: { partner: Partner }) {
       <img
         src={partner.logoURL}
         alt={partner.name}
-        className="h-10 sm:h-12 w-auto max-w-[140px] object-contain grayscale hover:grayscale-0 transition-all opacity-80 hover:opacity-100"
+        className="h-10 sm:h-12 w-auto max-w-[140px] object-contain opacity-100"
       />
     </div>
   ) : (
