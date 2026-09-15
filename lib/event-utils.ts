@@ -100,22 +100,33 @@ export function isMapsOrWebUrl(value: string): boolean {
 }
 
 /**
- * Prefer a human-readable address over pasted Google Maps links.
- * Order: non-URL address → non-URL name → non-URL location → TBA.
+ * Prefer a human-readable place label as admin selected it.
+ * Shows "Venue — full address" when both differ; otherwise the best single line.
  */
 export function getEventLocationLabel(event: Partial<Event> & { location?: string }): string {
-  const candidates = [
-    typeof event.locationName === 'string' ? event.locationName.trim() : '',
-    typeof event.locationAddress === 'string' ? event.locationAddress.trim() : '',
-    typeof event.location === 'string' ? event.location.trim() : '',
-  ].filter(Boolean)
+  const nameRaw = typeof event.locationName === 'string' ? event.locationName.trim() : ''
+  const addressRaw = typeof event.locationAddress === 'string' ? event.locationAddress.trim() : ''
+  const legacyRaw = typeof event.location === 'string' ? event.location.trim() : ''
 
-  const human = candidates.find((c) => !isMapsOrWebUrl(c))
-  if (human) return human
+  const name = nameRaw && !isMapsOrWebUrl(nameRaw) ? nameRaw : ''
+  const address = addressRaw && !isMapsOrWebUrl(addressRaw) ? addressRaw : ''
+  const legacy = legacyRaw && !isMapsOrWebUrl(legacyRaw) ? legacyRaw : ''
+
+  if (name && address) {
+    const nameLower = name.toLowerCase()
+    const addressLower = address.toLowerCase()
+    if (nameLower === addressLower || addressLower.startsWith(nameLower)) {
+      return address
+    }
+    return `${name} — ${address}`
+  }
+  if (name) return name
+  if (address) return address
+  if (legacy) return legacy
   return 'Location TBA'
 }
 
-/** First Maps / web URL found on the event (for “Open map” links). */
+/** Maps link from stored URL, Google placeId, or lat/lng. */
 export function getEventMapsUrl(event: Partial<Event> & { location?: string }): string | null {
   const candidates = [
     typeof event.locationAddress === 'string' ? event.locationAddress.trim() : '',
@@ -123,7 +134,26 @@ export function getEventMapsUrl(event: Partial<Event> & { location?: string }): 
     typeof event.location === 'string' ? event.location.trim() : '',
   ].filter(Boolean)
   const url = candidates.find((c) => isMapsOrWebUrl(c))
-  return url || null
+  if (url) return url
+
+  const placeId =
+    typeof event.locationPlaceId === 'string' ? event.locationPlaceId.trim() : ''
+  if (placeId) {
+    return `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}`
+  }
+
+  const lat = typeof event.locationLat === 'number' ? event.locationLat : null
+  const lng = typeof event.locationLng === 'number' ? event.locationLng : null
+  if (lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng) && !(lat === 0 && lng === 0)) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lat},${lng}`)}`
+  }
+
+  const label = getEventLocationLabel(event)
+  if (label && label !== 'Location TBA') {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(label)}`
+  }
+
+  return null
 }
 
 export function mapEventDoc(id: string, data: Record<string, unknown>): NormalizedEvent {
@@ -147,11 +177,15 @@ export function mapEventDoc(id: string, data: Record<string, unknown>): Normaliz
     isFeatured: data.isFeatured === true,
     speakers: Array.isArray(data.speakers) ? (data.speakers as Event['speakers']) : [],
     agenda: Array.isArray(data.agenda) ? (data.agenda as Event['agenda']) : [],
-    locationName: getEventLocationLabel(data as Partial<Event>),
+    locationName: (() => {
+      const raw = typeof data.locationName === 'string' ? data.locationName.trim() : ''
+      return raw && !isMapsOrWebUrl(raw) ? raw : ''
+    })(),
     locationAddress: (() => {
       const raw = typeof data.locationAddress === 'string' ? data.locationAddress.trim() : ''
       if (raw && !isMapsOrWebUrl(raw)) return raw
-      return getEventLocationLabel(data as Partial<Event>)
+      const legacy = typeof data.location === 'string' ? data.location.trim() : ''
+      return legacy && !isMapsOrWebUrl(legacy) ? legacy : ''
     })(),
     locationPlaceId: typeof data.locationPlaceId === 'string' ? data.locationPlaceId : '',
     locationLat: typeof data.locationLat === 'number' ? data.locationLat : 0,

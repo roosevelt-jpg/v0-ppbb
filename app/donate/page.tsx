@@ -22,6 +22,7 @@ import {
 import {
   DONATION_PAYMENT_TYPES,
   type DonationPaymentType,
+  availableDonationTypes,
   resolvePartnerPaymentLink,
 } from '@/lib/donation-payment-links'
 
@@ -153,8 +154,18 @@ export default function DonationPage() {
   useEffect(() => {
     if (!causeFromQuery || causes.length === 0 || selectedCause) return
     const match = causes.find((c) => c.id === causeFromQuery)
-    if (match) setSelectedCause(match)
-  }, [causeFromQuery, causes, selectedCause])
+    if (!match) return
+    const assigned = match.partnerId
+      ? partners.find((p) => p.id === match.partnerId)
+      : null
+    const beit =
+      partners.find((p) => /beit|khair/i.test(String(p.name || ''))) ||
+      partners[0] ||
+      null
+    setSelectedCause(match)
+    setSelectedPartner(assigned || beit)
+    setModalStep('type')
+  }, [causeFromQuery, causes, partners, selectedCause])
 
   const resolvePaymentLink = (
     cause: CharityCase,
@@ -203,8 +214,19 @@ export default function DonationPage() {
       partners[0] ||
       null
     const partner = assigned || beit
-    // Skip partner picker — go straight to amount/confirm with default partner.
-    window.location.href = buildConfirmHref(cause, partner, 'sadaqah')
+    const fallback = donationsConfig.beitAlKhairURL || ''
+    const types = availableDonationTypes(partner, fallback)
+
+    // One payment type available — skip straight to the short confirm form.
+    if (types.length === 1) {
+      window.location.href = buildConfirmHref(cause, partner, types[0])
+      return
+    }
+
+    // Show one quick screen: Zakat or Sadaqah (partner already chosen).
+    setSelectedCause(cause)
+    setSelectedPartner(partner)
+    setModalStep('type')
   }
 
   const closeDonateModal = () => {
@@ -554,18 +576,22 @@ export default function DonationPage() {
                     </div>
                   ) : (
                     <div>
-                      <button
-                        type="button"
-                        onClick={() => setModalStep('partner')}
-                        className="pb-ghost-btn text-xs font-semibold text-neutral-700 underline mb-3 h-auto min-h-0 p-0"
-                      >
-                        ← Change partner
-                      </button>
-                      <h3 className="text-sm font-semibold mb-1 text-neutral-900">2. Zakat or Sadaqah?</h3>
+                      {partners.length > 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => setModalStep('partner')}
+                          className="pb-ghost-btn text-xs font-semibold text-neutral-700 underline mb-3 h-auto min-h-0 p-0"
+                        >
+                          ← Change partner
+                        </button>
+                      ) : null}
+                      <h3 className="text-sm font-semibold mb-1 text-neutral-900">
+                        Zakat or Sadaqah?
+                      </h3>
                       <p className="text-neutral-600 text-xs mb-3 leading-relaxed">
                         {selectedPartner
-                          ? `Paying via ${selectedPartner.name}. Each type opens a different payment link.`
-                          : 'Choose the donation type to open the matching payment link.'}
+                          ? `Paying via ${selectedPartner.name}. Pick one — then enter your amount.`
+                          : 'Choose the donation type, then enter your amount.'}
                       </p>
                       <div className="space-y-2.5">
                         {DONATION_PAYMENT_TYPES.map((t) => {

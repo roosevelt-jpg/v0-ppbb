@@ -188,40 +188,23 @@ export default function DonateConfirmContent() {
                   e.preventDefault()
                   handleProceedToPayment()
                 }}
-                className="space-y-2.5"
+                className="space-y-3"
               >
                 <h2 className="text-xl mb-1" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                  Donation Details
+                  Give in a few taps
                 </h2>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  <span className="font-semibold text-neutral-900">{donationTypeLabel}</span>
+                  {' · '}
+                  {cause}
+                  {' · '}
+                  via {partner}
+                </p>
                 {error && <p className="text-xs text-red-600">{error}</p>}
 
                 <div>
-                  <label className="block font-semibold mb-0.5 text-xs">Cause</label>
-                  <p className="text-neutral-800 bg-neutral-50 px-2.5 py-2 rounded-md border border-neutral-100 text-sm">
-                    {cause}
-                  </p>
-                  {causeDescription ? (
-                    <p className="text-xs text-neutral-600 mt-1 line-clamp-2">{causeDescription}</p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-0.5 text-xs">Donation type</label>
-                  <p className="text-neutral-800 bg-neutral-50 px-2.5 py-2 rounded-md border border-neutral-100 text-sm">
-                    {donationTypeLabel}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-0.5 text-xs">Payment partner</label>
-                  <p className="text-neutral-800 bg-neutral-50 px-2.5 py-2 rounded-md border border-neutral-100 text-sm">
-                    {partner}
-                  </p>
-                </div>
-
-                <div>
                   <label htmlFor="amount" className="block font-semibold mb-0.5 text-xs">
-                    Donation Amount (AED) *
+                    Amount (AED) *
                   </label>
                   <input
                     id="amount"
@@ -229,63 +212,52 @@ export default function DonateConfirmContent() {
                     min="1"
                     step="0.01"
                     inputMode="decimal"
-                    placeholder="Enter amount"
+                    placeholder="e.g. 50"
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full border border-neutral-300 rounded-md px-2.5 py-2 h-9 text-sm focus:outline-none focus:border-neutral-900"
+                    className="w-full border border-neutral-300 rounded-md px-2.5 py-2 h-10 text-base focus:outline-none focus:border-neutral-900"
                     required
+                    autoFocus
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="notes" className="block font-semibold mb-0.5 text-xs">
-                    Message (Optional)
-                  </label>
+                <details className="text-xs">
+                  <summary className="cursor-pointer text-neutral-600 font-medium">
+                    Add a note (optional)
+                  </summary>
                   <textarea
                     id="notes"
-                    placeholder="Add a personal note"
+                    placeholder="Optional message"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full border border-neutral-300 rounded-md px-2.5 py-2 text-sm focus:outline-none focus:border-neutral-900"
+                    className="mt-1.5 w-full border border-neutral-300 rounded-md px-2.5 py-2 text-sm focus:outline-none focus:border-neutral-900"
                     rows={2}
                   />
-                </div>
+                </details>
 
-                <div className="bg-neutral-50 border border-neutral-200 rounded-md p-2.5 text-xs text-neutral-700">
-                  <strong>Next:</strong>{' '}
+                <p className="text-xs text-neutral-600 leading-relaxed">
                   {paymentLink
-                    ? `You will be redirected to ${partner} to complete payment securely.`
-                    : 'No payment link is configured yet — contact Passive Blessings for alternative methods.'}
-                </div>
+                    ? `Next: pay securely on ${partner}'s site, then upload your receipt here.`
+                    : 'No payment link is configured yet — contact Passive Blessings for help.'}
+                </p>
 
                 <button type="submit" className={btnPrimary} disabled={!paymentLink}>
-                  Pay with {partner} — then confirm
+                  Continue to pay
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleSubmitProof} className="space-y-2.5">
+              <form onSubmit={handleSubmitProof} className="space-y-3">
                 <h2 className="text-xl mb-1" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
-                  Upload Payment Proof
+                  Confirm your gift
                 </h2>
+                <p className="text-xs text-neutral-600">
+                  AED {formData.amount} · {donationTypeLabel} · {cause}
+                </p>
                 {error && <p className="text-xs text-red-600">{error}</p>}
 
                 <div>
-                  <label className="block font-semibold mb-0.5 text-xs">Cause (read-only)</label>
-                  <p className="text-neutral-800 bg-neutral-50 px-2.5 py-2 rounded-md border text-sm">
-                    {cause}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-0.5 text-xs">Amount donated (AED)</label>
-                  <p className="text-neutral-800 bg-neutral-50 px-2.5 py-2 rounded-md border text-sm">
-                    AED {formData.amount}
-                  </p>
-                </div>
-
-                <div>
                   <label htmlFor="referenceNumber" className="block font-semibold mb-0.5 text-xs">
-                    Payment Reference Number *
+                    Payment reference *
                   </label>
                   <input
                     id="referenceNumber"
@@ -302,30 +274,25 @@ export default function DonateConfirmContent() {
 
                 <div>
                   <label htmlFor="proofFile" className="block font-semibold mb-0.5 text-xs">
-                    Payment proof screenshot *
+                    Receipt screenshot *
                   </label>
                   <input
                     id="proofFile"
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={(e) => handleProofSelect(e.target.files?.[0] || null)}
                     className="w-full border border-neutral-300 rounded-md px-2.5 py-2 text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-neutral-100 file:text-xs"
                     required
                   />
                   {proofPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={proofPreview}
                       alt="Proof preview"
                       className="mt-2 max-h-36 rounded border object-contain"
                     />
                   ) : null}
-                  <p className="text-[10px] text-neutral-500 mt-1">
-                    Image uploads to Firebase Storage; only the URL is saved in Firestore.
-                  </p>
-                </div>
-
-                <div className="bg-amber-50 border border-amber-200 rounded-md p-2.5 text-xs text-amber-900">
-                  Ensure the screenshot clearly shows amount, reference, and timestamp.
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -338,7 +305,7 @@ export default function DonateConfirmContent() {
                     className={`${btnPrimary} flex items-center justify-center gap-1.5 disabled:opacity-50`}
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    {uploading ? 'Uploading…' : loading ? 'Submitting…' : 'Submit Proof'}
+                    {uploading ? 'Uploading…' : loading ? 'Submitting…' : 'Submit for review'}
                   </button>
                 </div>
               </form>

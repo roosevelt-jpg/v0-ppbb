@@ -480,6 +480,16 @@ export function EventDetailView({
 
                 <div className="pt-4 border-t border-gray-200 space-y-2 text-xs text-gray-600 break-words">
                   <p>{locationLabel}</p>
+                  {mapsUrl ? (
+                    <a
+                      href={mapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-neutral-700 underline inline-block"
+                    >
+                      Open map
+                    </a>
+                  ) : null}
                   <p>{formatEventDate(event.startDate, 'MMM dd, yyyy HH:mm')}</p>
                   {event.endDate && <p>Ends {formatEventDate(event.endDate, 'HH:mm')}</p>}
                 </div>
