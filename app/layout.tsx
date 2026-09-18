@@ -6,6 +6,7 @@ import { ChatWidget } from '@/components/chat/chat-widget'
 import { EUDataProtectionPopup } from '@/components/eu-data-protection-popup'
 import { PublicExtras } from '@/components/public-extras'
 import { PublicContentGuard } from '@/components/content-protection'
+import { PwaInstallPrompt } from '@/components/pwa-install-prompt'
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -44,7 +45,21 @@ export const metadata: Metadata = {
         type: 'image/png',
       },
     ],
-    apple: '/api/favicon',
+    apple: [
+      {
+        url: '/api/pwa-icon?size=192',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+    statusBarStyle: 'default',
+  },
+  formatDetection: {
+    telephone: false,
   },
   openGraph: {
     title: SITE_NAME,
@@ -113,6 +128,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         <PublicContentGuard />
         <PublicExtras />
+        <PwaInstallPrompt />
         <EUDataProtectionPopup />
         <ChatWidget />
       </body>

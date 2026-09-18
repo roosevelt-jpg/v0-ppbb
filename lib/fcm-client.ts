@@ -2,10 +2,10 @@
 
 import { getApps } from 'firebase/app'
 import { getMessaging, getToken, isSupported } from 'firebase/messaging'
-import { auth } from '@/lib/firebase'
 import { storeFCMToken } from '@/lib/fcm-service'
+import { registerPbServiceWorker } from '@/components/pwa-provider'
 
-/** Register FCM token after login when permission is granted. */
+/** Register FCM token after login when permission is already granted. */
 export async function registerFCMTokenIfPossible(userId: string): Promise<void> {
   if (typeof window === 'undefined') return
 
@@ -25,8 +25,12 @@ export async function registerFCMTokenIfPossible(userId: string): Promise<void> 
     const app = getApps()[0]
     if (!app) return
 
+    const registration = await registerPbServiceWorker()
     const messaging = getMessaging(app)
-    const token = await getToken(messaging, { vapidKey })
+    const token = await getToken(messaging, {
+      vapidKey,
+      ...(registration ? { serviceWorkerRegistration: registration } : {}),
+    })
     if (!token) return
 
     await storeFCMToken(userId, token)

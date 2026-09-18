@@ -9,7 +9,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { updateProfile } from 'firebase/auth'
 import { Card } from '@/components/ui/card'
 import { User } from '@/lib/types'
-import { Bell, Shield, UserX, Upload, Loader2 } from 'lucide-react'
+import { Bell, Shield, UserX, Upload, Loader2, Download, Smartphone } from 'lucide-react'
 import { UserAvatar } from '@/components/user-avatar'
 import { getUserProfilePictureURL } from '@/lib/user-profile'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
@@ -577,6 +577,40 @@ function SettingsContent() {
 
         <Card className="p-6 border border-neutral-200 dark:border-border w-full">
           <div className="flex items-center gap-2 mb-4">
+            <Smartphone className="w-5 h-5" />
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">
+              Install as an app
+            </h2>
+          </div>
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground mb-4">
+            Add Passive Blessings to your phone or computer home screen. It opens like an app and can
+            send alerts when new events or news are posted (turn on Push Notifications below).
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem('pb-pwa-prompt-dismissed-v1')
+                } catch {
+                  /* ignore */
+                }
+                window.dispatchEvent(new Event('pb-show-install-prompt'))
+              }}
+              className="inline-flex items-center gap-2 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+            >
+              <Download className="w-4 h-4" />
+              Show install instructions
+            </button>
+          </div>
+          <p className="text-xs text-neutral-500 mt-3">
+            On iPhone: Safari → Share → Add to Home Screen. On Android Chrome: use the install banner
+            or browser menu → Install app.
+          </p>
+        </Card>
+
+        <Card className="p-6 border border-neutral-200 dark:border-border w-full">
+          <div className="flex items-center gap-2 mb-4">
             <Bell className="w-5 h-5" />
             <h2 className="text-xl font-bold text-neutral-900 dark:text-foreground">Notification Preferences</h2>
           </div>
@@ -594,7 +628,7 @@ function SettingsContent() {
                   ['eventReminders', 'Event Reminders', 'Upcoming events and activities'],
                   ['newsletter', 'Newsletter', 'Periodic community newsletters'],
                   ['memberMessages', 'Community Messages', 'New messages in communities'],
-                  ['communityUpdates', 'Community Updates', 'New communities and groups'],
+                  ['communityUpdates', 'Community Updates', 'News posts, new communities and groups'],
                   ['systemAlerts', 'System Alerts', 'Important security notifications'],
                 ] as const
               ).map(([key, title, desc]) => (

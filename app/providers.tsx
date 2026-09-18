@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { ReferralAttributionCapture } from '@/components/referral-attribution-capture'
 import { SiteThemeApplier } from '@/components/site-theme-applier'
 import { SessionIdleTimeout } from '@/components/session-idle-timeout'
+import { PwaProvider } from '@/components/pwa-provider'
 import {
   PREFERRED_LANGUAGE_KEY,
   SUPPORTED_LOCALE_CODES,
@@ -64,6 +65,7 @@ export function Providers({ children }: ProvidersProps) {
           <ReferralAttributionCapture />
           <SiteThemeApplier />
           <SessionIdleTimeout />
+          <PwaProvider />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>

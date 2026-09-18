@@ -65,6 +65,14 @@ const nextConfig = {
       { source: '/business/dashboard/network', destination: '/business/marketplace', permanent: false },
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/firebase-messaging-sw.js',
+        destination: '/api/firebase-messaging-sw',
+      },
+    ]
+  },
 };
 
 module.exports = nextConfig;

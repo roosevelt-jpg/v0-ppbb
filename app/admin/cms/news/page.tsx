@@ -17,6 +17,7 @@ import {
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { BUTTON_OUTLINE, BUTTON_PRIMARY } from '@/lib/admin-design-system'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import {
   formatNewsDate,
   newsArticleHref,
@@ -24,6 +25,22 @@ import {
   subscribeToAllNews,
   type NewsArticle,
 } from '@/lib/news'
+
+async function notifyNewsPush(params: {
+  newsId: string
+  title: string
+  slug?: string
+  summary?: string
+}) {
+  try {
+    await adminApiFetch('/api/admin/news/notify-published', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    })
+  } catch (error) {
+    console.warn('[news] push notify failed:', error)
+  }
+}
 
 export default function AdminCmsNewsPage() {
   const audit = useAdminAudit()
@@ -89,6 +106,14 @@ export default function AdminCmsNewsPage() {
           entityName: form.title.trim(),
           status: 'success',
         })
+        if (form.isPublished) {
+          void notifyNewsPush({
+            newsId: ref.id,
+            title: form.title.trim(),
+            slug,
+            summary: form.summary.trim(),
+          })
+        }
       })
       setForm({
         title: '',
@@ -124,6 +149,14 @@ export default function AdminCmsNewsPage() {
         entityName: article.title,
         status: 'success',
       })
+      if (next) {
+        void notifyNewsPush({
+          newsId: article.id,
+          title: article.title,
+          slug: article.slug,
+          summary: article.summary,
+        })
+      }
     } catch (error: unknown) {
       showMessage('error', error instanceof Error ? error.message : 'Update failed')
     }

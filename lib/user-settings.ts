@@ -290,6 +290,7 @@ export function mapNotificationTypeToPreference(
     case 'community_update':
     case 'group_joined':
     case 'community_joined':
+    case 'news_published':
       return 'communityUpdates'
     case 'event_created':
       return 'eventReminders'

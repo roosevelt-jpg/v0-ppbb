@@ -11,6 +11,7 @@ export type PushNotificationType =
   | 'group_joined'
   | 'group_message'
   | 'event_created'
+  | 'news_published'
   | 'newsletter'
   | 'job_application'
   | 'marketplace_purchase'
@@ -28,6 +29,8 @@ function fcmTypeEnabled(settings: FCMSettings, type: PushNotificationType): bool
       return settings.newGroupMessageNotification !== false
     case 'event_created':
       return settings.newEventNotification !== false
+    case 'news_published':
+      return settings.newCommunityNotification !== false
     case 'newsletter':
       return settings.newsletterNotification !== false
     case 'job_application':
@@ -140,10 +143,44 @@ export async function notifyGroupMessage(params: {
   )
 }
 
-export async function notifyNewEventPublished(eventTitle: string, eventId: string) {
+async function collectMemberUserIds(limit = 2000): Promise<string[]> {
   const db = getAdminDb()
-  const usersSnap = await db.collection('users').limit(300).get()
-  const userIds = usersSnap.docs.map((d) => d.id)
+  const ids: string[] = []
+
+  try {
+    let snap = await db
+      .collection('users')
+      .where('fcmToken', '>', '')
+      .orderBy('fcmToken')
+      .limit(Math.min(300, limit))
+      .get()
+
+    while (!snap.empty) {
+      for (const docSnap of snap.docs) ids.push(docSnap.id)
+      if (ids.length >= limit || snap.size < 300) break
+      const last = snap.docs[snap.docs.length - 1]
+      snap = await db
+        .collection('users')
+        .where('fcmToken', '>', '')
+        .orderBy('fcmToken')
+        .startAfter(last)
+        .limit(Math.min(300, limit - ids.length))
+        .get()
+    }
+  } catch (error) {
+    console.warn('[push] token query failed, falling back to user scan:', error)
+  }
+
+  if (ids.length === 0) {
+    const snap = await db.collection('users').limit(Math.min(500, limit)).get()
+    return snap.docs.map((d) => d.id)
+  }
+
+  return ids
+}
+
+export async function notifyNewEventPublished(eventTitle: string, eventId: string) {
+  const userIds = await collectMemberUserIds()
   return sendPushToUsers(
     userIds,
     {
@@ -154,6 +191,30 @@ export async function notifyNewEventPublished(eventTitle: string, eventId: strin
       type: 'event_created',
       eventId,
       click_action: `/events/${eventId}`,
+    }
+  )
+}
+
+export async function notifyNewsPublished(params: {
+  title: string
+  newsId: string
+  slug?: string
+  summary?: string
+}) {
+  const userIds = await collectMemberUserIds()
+  const path = params.slug
+    ? `/news/${encodeURIComponent(params.slug)}`
+    : `/news/${params.newsId}`
+  return sendPushToUsers(
+    userIds,
+    {
+      title: 'New from Passive Blessings',
+      body: params.summary?.trim() || params.title,
+    },
+    {
+      type: 'news_published',
+      newsId: params.newsId,
+      click_action: path,
     }
   )
 }
