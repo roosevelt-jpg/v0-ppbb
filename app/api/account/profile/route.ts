@@ -82,6 +82,21 @@ export async function PATCH(request: NextRequest) {
 
     await userRef.set(firestoreUpdates, { merge: true })
 
+    // Keep linked business listing in sync when the member updates their name/email
+    const businessRef = db.collection('businesses').doc(uid)
+    const businessSnap = await businessRef.get()
+    if (businessSnap.exists) {
+      await businessRef.set(
+        sanitizeForFirestore({
+          ownerName: displayName,
+          email,
+          phone: phone || undefined,
+          updatedAt: now,
+        }),
+        { merge: true }
+      )
+    }
+
     // Keep admin mirror docs in sync so admin UI never shows stale name/email
     const adminPatch = sanitizeForFirestore({
       name: displayName,

@@ -33,11 +33,23 @@ function ContactPageInner() {
   const sourceParam = searchParams.get('source') || 'contact'
   const subjectParam = searchParams.get('subject') || ''
 
+  const normalizeSubject = (raw: string) => {
+    const s = raw.trim().toLowerCase()
+    if (!s) return ''
+    if (s === 'feedback' || s.includes('feedback')) return 'Feedback'
+    if (s === 'partnerships' || s.includes('partner')) return 'Partnerships'
+    if (s === 'sponsorship' || s.includes('sponsor')) return 'Sponsorship'
+    if (s.includes('charity')) return 'Charity Support'
+    if (s === 'general' || s.includes('general') || s.includes('enquiry')) return 'General'
+    if ((PARTNERS_CONTACT_SUBJECTS as readonly string[]).includes(raw)) return raw
+    return raw
+  }
+
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
-    subject: subjectParam,
+    subject: normalizeSubject(subjectParam),
     message: '',
   })
   const [loading, setLoading] = useState(false)
@@ -52,7 +64,7 @@ function ContactPageInner() {
 
   useEffect(() => {
     if (subjectParam) {
-      setFormData((prev) => ({ ...prev, subject: subjectParam }))
+      setFormData((prev) => ({ ...prev, subject: normalizeSubject(subjectParam) }))
     }
   }, [subjectParam])
 

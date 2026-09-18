@@ -70,17 +70,19 @@ function FileField({
   label,
   required,
   accept = 'image/*,.pdf,.doc,.docx',
-  file,
+  files,
   error,
+  multiple,
   onChange,
 }: {
   id: string
   label: string
   required?: boolean
   accept?: string
-  file: File | null
+  files: File[]
   error?: string
-  onChange: (file: File | null) => void
+  multiple?: boolean
+  onChange: (files: File[]) => void
 }) {
   return (
     <div>
@@ -88,7 +90,7 @@ function FileField({
         {label} {required ? <span className="text-red-600">*</span> : null}
       </label>
       <div
-        className={`flex flex-col sm:flex-row sm:items-center gap-2 border rounded px-3 py-2 min-h-[44px] ${
+        className={`flex flex-col gap-2 border rounded px-3 py-2 min-h-[44px] ${
           error ? 'border-red-500' : 'border-neutral-300'
         }`}
       >
@@ -96,22 +98,40 @@ function FileField({
           id={id}
           type="file"
           accept={accept}
+          multiple={multiple}
           className="w-full text-sm file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:bg-neutral-100 file:text-sm file:font-medium file:min-h-[40px]"
-          onChange={(e) => onChange(e.target.files?.[0] || null)}
+          onChange={(e) => {
+            const next = e.target.files ? Array.from(e.target.files) : []
+            if (multiple) {
+              onChange([...files, ...next])
+            } else {
+              onChange(next.slice(0, 1))
+            }
+            e.target.value = ''
+          }}
         />
-        {file ? (
-          <div className="flex items-center gap-2 text-xs text-neutral-600 shrink-0">
-            <FileUp className="w-4 h-4" />
-            <span className="truncate max-w-[160px]">{file.name}</span>
-            <button
-              type="button"
-              className="text-red-600 min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
-              aria-label="Remove file"
-              onClick={() => onChange(null)}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
+        {files.length > 0 ? (
+          <ul className="space-y-1">
+            {files.map((file, i) => (
+              <li
+                key={`${id}-${file.name}-${i}`}
+                className="flex items-center gap-2 text-xs text-neutral-700 bg-neutral-50 rounded px-2 py-1.5 min-h-[40px]"
+              >
+                <FileUp className="w-4 h-4 shrink-0" />
+                <span className="truncate flex-1 min-w-0">
+                  {label}: {file.name}
+                </span>
+                <button
+                  type="button"
+                  className="text-red-600 min-h-[40px] min-w-[40px] inline-flex items-center justify-center shrink-0"
+                  aria-label={`Remove ${file.name}`}
+                  onClick={() => onChange(files.filter((_, idx) => idx !== i))}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
         ) : null}
       </div>
       {error ? <p className={errorClass}>{error}</p> : null}
@@ -140,11 +160,11 @@ export function BeneficiarySupportForm({
   const [referralSource, setReferralSource] = useState('')
   const [consentAccepted, setConsentAccepted] = useState(false)
 
-  const [emiratesId, setEmiratesId] = useState<File | null>(null)
-  const [passport, setPassport] = useState<File | null>(null)
-  const [visa, setVisa] = useState<File | null>(null)
-  const [salaryCertificate, setSalaryCertificate] = useState<File | null>(null)
-  const [bankStatement, setBankStatement] = useState<File | null>(null)
+  const [emiratesId, setEmiratesId] = useState<File[]>([])
+  const [passport, setPassport] = useState<File[]>([])
+  const [visa, setVisa] = useState<File[]>([])
+  const [salaryCertificate, setSalaryCertificate] = useState<File[]>([])
+  const [bankStatement, setBankStatement] = useState<File[]>([])
   const [supportingDocuments, setSupportingDocuments] = useState<File[]>([])
 
   const [errors, setErrors] = useState<FormErrors>({})
@@ -166,10 +186,10 @@ export function BeneficiarySupportForm({
     if (!nationality.trim()) next.nationality = 'Nationality is required'
     if (!emirate) next.emirate = 'Please select your emirate / area'
     if (!supportType) next.supportType = 'Please select the type of support needed'
-    if (!emiratesId) next.emiratesId = 'Emirates ID upload is required'
-    if (!passport) next.passport = 'Passport copy upload is required'
-    if (!visa) next.visa = 'Visa copy upload is required'
-    if (!salaryCertificate) next.salaryCertificate = 'Salary certificate upload is required'
+    if (!emiratesId.length) next.emiratesId = 'Emirates ID upload is required'
+    if (!passport.length) next.passport = 'Passport copy upload is required'
+    if (!visa.length) next.visa = 'Visa copy upload is required'
+    if (!salaryCertificate.length) next.salaryCertificate = 'Salary certificate upload is required'
     if (!reason.trim()) next.reason = 'Reason for request is required'
     if (!emergencyLevel) next.emergencyLevel = 'Please select an emergency level'
     if (!consentAccepted) next.consent = 'You must accept the consent statement to continue'
@@ -231,11 +251,11 @@ export function BeneficiarySupportForm({
       fd.append('emergencyLevel', emergencyLevel)
       fd.append('referralSource', referralSource.trim())
       fd.append('consentAccepted', 'true')
-      fd.append('emiratesId', emiratesId!)
-      fd.append('passport', passport!)
-      fd.append('visa', visa!)
-      fd.append('salaryCertificate', salaryCertificate!)
-      if (bankStatement) fd.append('bankStatement', bankStatement)
+      emiratesId.forEach((file) => fd.append('emiratesId', file))
+      passport.forEach((file) => fd.append('passport', file))
+      visa.forEach((file) => fd.append('visa', file))
+      salaryCertificate.forEach((file) => fd.append('salaryCertificate', file))
+      bankStatement.forEach((file) => fd.append('bankStatement', file))
       supportingDocuments.forEach((file) => fd.append('supportingDocuments', file))
 
       const res = await fetch('/api/beneficiary-requests', {
@@ -380,7 +400,7 @@ export function BeneficiarySupportForm({
 
       <section className="space-y-4">
         <h3 className="text-xs uppercase tracking-wider text-neutral-500">Personal details</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
           <div className="md:col-span-2">
             <label htmlFor="fullName" className={labelClass}>
               Full Name <span className="text-red-600">*</span>
@@ -464,7 +484,7 @@ export function BeneficiarySupportForm({
               <p className={errorClass}>{currentErrors.emirate}</p>
             ) : null}
           </div>
-          <div>
+          <div className="md:col-span-2 mt-1">
             <label htmlFor="familySize" className={labelClass}>
               Household size (optional)
             </label>
@@ -527,7 +547,8 @@ export function BeneficiarySupportForm({
             id="emiratesId"
             label="Emirates ID Upload"
             required
-            file={emiratesId}
+            multiple
+            files={emiratesId}
             error={touched ? currentErrors.emiratesId : undefined}
             onChange={setEmiratesId}
           />
@@ -535,7 +556,8 @@ export function BeneficiarySupportForm({
             id="passport"
             label="Passport Copy Upload"
             required
-            file={passport}
+            multiple
+            files={passport}
             error={touched ? currentErrors.passport : undefined}
             onChange={setPassport}
           />
@@ -543,7 +565,8 @@ export function BeneficiarySupportForm({
             id="visa"
             label="Visa Copy Upload"
             required
-            file={visa}
+            multiple
+            files={visa}
             error={touched ? currentErrors.visa : undefined}
             onChange={setVisa}
           />
@@ -551,14 +574,16 @@ export function BeneficiarySupportForm({
             id="salaryCertificate"
             label="Salary Certificate"
             required
-            file={salaryCertificate}
+            multiple
+            files={salaryCertificate}
             error={touched ? currentErrors.salaryCertificate : undefined}
             onChange={setSalaryCertificate}
           />
           <FileField
             id="bankStatement"
             label="Bank Statement (optional)"
-            file={bankStatement}
+            multiple
+            files={bankStatement}
             onChange={setBankStatement}
           />
           <div>
@@ -584,7 +609,7 @@ export function BeneficiarySupportForm({
                     key={`${file.name}-${i}`}
                     className="flex items-center justify-between gap-2 text-sm text-neutral-700 bg-neutral-50 rounded px-3 py-2 min-h-[44px]"
                   >
-                    <span className="truncate">{file.name}</span>
+                    <span className="truncate">Supporting Documents: {file.name}</span>
                     <button
                       type="button"
                       className="text-red-600 shrink-0 min-h-[44px] min-w-[44px] inline-flex items-center justify-center"

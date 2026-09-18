@@ -39,6 +39,10 @@ export async function POST(request: NextRequest) {
         code: result.promo.code,
         benefitDurationMonths: result.promo.benefitDurationMonths,
         trialEnabled: result.promo.trialEnabled,
+        percentOff: result.promo.percentOff,
+        promoType: result.promo.type,
+        grantsFreeAccess:
+          result.promo.type === 'free_access' || result.promo.percentOff >= 100,
       },
     })
   } catch (error) {

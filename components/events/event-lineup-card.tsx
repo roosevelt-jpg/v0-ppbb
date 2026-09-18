@@ -35,6 +35,8 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
   const timeLabel = getEventTimeRangeLabel(event)
   const whenLabel = `${format(startDate, 'MMM d')}${timeLabel ? ` · ${timeLabel}` : ''}`
   const location = getEventLocationLabel(event)
+  const recurringBadge = (event as NormalizedEvent & { recurringSeriesBadge?: string })
+    .recurringSeriesBadge
 
   const detailsHref = `/events/${event.id}`
 
@@ -57,6 +59,11 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           {genderLabel && genderLabel !== 'Mixed' ? (
             <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-black/75 text-white">
               {genderLabel}
+            </span>
+          ) : null}
+          {recurringBadge ? (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-700 text-white">
+              {recurringBadge}
             </span>
           ) : null}
         </div>

@@ -127,8 +127,21 @@ export function EventDetailView({
     event.maxAttendees != null && event.currentAttendees >= event.maxAttendees
   const canWaitlist = isFull && enableWaitlist
 
-  const shareUrl =
-    typeof window !== 'undefined' ? window.location.href : `/events/${event.id}`
+  const shareUrl = React.useMemo(() => {
+    if (typeof window !== 'undefined' && window.location?.href) {
+      return window.location.href
+    }
+    const base =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.passive-blessings.com'
+    return `${base.replace(/\/$/, '')}/events/${event.id}`
+  }, [event.id])
+
+  const whatsappShareHref = React.useMemo(() => {
+    const text = `${event.title}\n${shareUrl}`
+    return `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`
+  }, [event.title, shareUrl])
 
   const copyShare = async () => {
     try {
@@ -443,7 +456,7 @@ export function EventDetailView({
                     <Copy size={14} /> Copy share link
                   </button>
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`${event.title} ${shareUrl}`)}`}
+                    href={whatsappShareHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"

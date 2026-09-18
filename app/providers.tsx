@@ -9,6 +9,8 @@ import { ReferralAttributionCapture } from '@/components/referral-attribution-ca
 import { SiteThemeApplier } from '@/components/site-theme-applier'
 import { SessionIdleTimeout } from '@/components/session-idle-timeout'
 import { PwaProvider } from '@/components/pwa-provider'
+import { SiteTranslator } from '@/components/site-translator'
+import { setGoogTransCookie } from '@/lib/site-translate'
 import {
   PREFERRED_LANGUAGE_KEY,
   SUPPORTED_LOCALE_CODES,
@@ -51,6 +53,9 @@ export function Providers({ children }: ProvidersProps) {
     const dir = isRtlLocale(resolved) ? 'rtl' : 'ltr'
     document.documentElement.setAttribute('dir', dir)
     document.documentElement.setAttribute('lang', resolved)
+    document.documentElement.classList.toggle('pb-rtl', isRtlLocale(resolved))
+    document.documentElement.classList.toggle('pb-translated', resolved !== 'en')
+    setGoogTransCookie(resolved)
 
     if (resolved !== 'en') {
       void loadMessages(resolved).then(setMessages)
@@ -66,6 +71,7 @@ export function Providers({ children }: ProvidersProps) {
           <SiteThemeApplier />
           <SessionIdleTimeout />
           <PwaProvider />
+          <SiteTranslator />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>

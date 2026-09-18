@@ -38,17 +38,27 @@ export async function POST(request: NextRequest, context: Ctx) {
     )
   }
 
+  const eligibleStatuses = new Set([
+    'confirmed',
+    'registered',
+    'approved',
+    'attending',
+    'pending',
+    'waitlisted',
+  ])
+
   const doc =
-    snap.docs.find((d) => d.data().status === 'confirmed') ||
+    snap.docs.find((d) => eligibleStatuses.has(String(d.data().status || ''))) ||
     snap.docs.find((d) => d.data().status !== 'cancelled' && d.data().status !== 'rejected') ||
     snap.docs[0]
 
   const data = doc.data()
-  if (data.status !== 'confirmed') {
+  const status = String(data.status || '')
+  if (!eligibleStatuses.has(status)) {
     return NextResponse.json(
       {
         success: false,
-        error: `Registration status is ${data.status}. Confirm your ticket first, then confirm attendance.`,
+        error: `Registration status is ${status || 'unknown'}. Confirm your ticket first, then confirm attendance.`,
       },
       { status: 400 }
     )

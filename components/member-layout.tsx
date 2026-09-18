@@ -46,7 +46,7 @@ const memberMenuItems = [
   { label: 'Opportunities', href: '/dashboard/opportunities', icon: Users },
   { label: 'Marketplace', href: '/dashboard/marketplace', icon: ShoppingBag },
   { label: 'Business Directory', href: '/directory', icon: Store },
-  { label: 'Orders', href: '/dashboard/orders', icon: Package },
+  { label: 'My Orders', href: '/dashboard/orders', icon: Package },
   { label: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   { label: 'Learning', href: '/dashboard/learning', icon: BookOpen },
   { label: 'Certificates', href: '/dashboard/certificates', icon: Award },
@@ -72,13 +72,13 @@ export function MemberSidebar({
     <>
       {open && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-[45] md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed md:relative w-64 bg-card border-r border-border min-h-screen flex flex-col transform transition-transform z-40 md:translate-x-0 ${
+        className={`fixed md:relative w-64 bg-card border-r border-border min-h-screen flex flex-col transform transition-transform z-[50] md:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

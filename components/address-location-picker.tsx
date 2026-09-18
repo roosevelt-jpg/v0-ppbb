@@ -61,8 +61,22 @@ function matchEmirate(stateOrCity: string): string {
 function matchCityForEmirate(emirate: string, cityHint: string): string {
   const cities = UAE_CITIES_BY_EMIRATE[emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || ['Other']
   const hay = cityHint.trim().toLowerCase()
+  if (!hay) return cities[0] || 'Other'
   const hit = cities.find((c) => c.toLowerCase() === hay || hay.includes(c.toLowerCase()))
-  return hit || cities[0] || 'Other'
+  // Prefer "Other" over forcing the first city when Places returns an unmatched area
+  if (hit) return hit
+  return cities.includes('Other') ? 'Other' : cities[0] || 'Other'
+}
+
+function friendlyMapsError(raw: string): string {
+  const msg = String(raw || '')
+  if (/not authorized|REQUEST_DENIED|ApiNotActivated|API key/i.test(msg)) {
+    return 'Location lookup is temporarily unavailable. You can still enter your address manually below.'
+  }
+  if (/OVER_QUERY_LIMIT|quota/i.test(msg)) {
+    return 'Location lookup is busy right now. Enter your address manually and continue.'
+  }
+  return msg || 'Could not resolve your location. Enter your address manually.'
 }
 
 export function AddressLocationPicker({
@@ -161,7 +175,7 @@ export function AddressLocationPicker({
       const res = await fetch(`/api/places/geocode?lat=${latitude}&lng=${longitude}`)
       const data = await res.json()
       if (!data.success || !data.place) {
-        setDetectError(data.error || 'Could not resolve your location')
+        setDetectError(friendlyMapsError(data.error || 'Could not resolve your location'))
         return
       }
 
@@ -182,20 +196,30 @@ export function AddressLocationPicker({
         countryCode: place.countryCode || value.countryCode,
         emirate,
         city: isUae ? city : value.city,
-        customCity: isUae ? '' : city || value.customCity,
+        customCity: isUae
+          ? city === 'Other'
+            ? place.city || value.customCity
+            : ''
+          : city || value.customCity,
         address: place.formattedAddress || value.address,
         lat: place.lat ?? latitude,
         lng: place.lng ?? longitude,
         placeId: value.placeId,
       })
     } catch {
-      setDetectError('Location detection failed. Select country/city and search your address.')
+      setDetectError(
+        'Location detection failed. Select country/city and type your street address below.'
+      )
     } finally {
       setDetecting(false)
     }
   }
 
-  const resolvedCityLabel = uae ? value.city : value.customCity || value.city
+  const resolvedCityLabel = uae
+    ? value.city === 'Other'
+      ? value.customCity || 'Other'
+      : value.city
+    : value.customCity || value.city
 
   return (
     <div className={`space-y-3 ${className}`}>
@@ -256,7 +280,13 @@ export function AddressLocationPicker({
             <label className="block text-xs font-semibold text-neutral-800 mb-1">City / Area *</label>
             <select
               value={value.city}
-              onChange={(e) => patch({ city: e.target.value })}
+              onChange={(e) => {
+                const city = e.target.value
+                patch({
+                  city,
+                  customCity: city === 'Other' ? value.customCity : '',
+                })
+              }}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-white text-sm"
             >
               {(UAE_CITIES_BY_EMIRATE[value.emirate as keyof typeof UAE_CITIES_BY_EMIRATE] || [
@@ -267,6 +297,15 @@ export function AddressLocationPicker({
                 </option>
               ))}
             </select>
+            {value.city === 'Other' ? (
+              <input
+                type="text"
+                value={value.customCity}
+                onChange={(e) => patch({ customCity: e.target.value })}
+                placeholder="Enter your city / area"
+                className="mt-2 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+              />
+            ) : null}
           </div>
         </div>
       ) : (
@@ -318,15 +357,18 @@ export function AddressLocationPicker({
             const isUrl = /^https?:\/\//i.test(label) || /maps\.(google|app\.goo)/i.test(label)
             if (isUrl) return
 
-            const nextCountry =
-              COUNTRY_OPTIONS.find((c) => c.code === place.countryCode)?.name ||
-              place.country ||
-              value.country
+            // Keep the user's country/emirate unless Places returns a clear country code.
+            const placeCountry = place.countryCode
+              ? COUNTRY_OPTIONS.find((c) => c.code === place.countryCode)?.name ||
+                place.country ||
+                ''
+              : ''
+            const nextCountry = placeCountry || value.country
             const nextUae = isUaeCountry(nextCountry)
             const emirate = nextUae
               ? matchEmirate(place.state || place.city || value.emirate) || value.emirate || 'Dubai'
               : ''
-            const city = nextUae
+            const matchedCity = nextUae
               ? matchCityForEmirate(emirate, place.city || '')
               : place.city || value.customCity
 
@@ -339,8 +381,12 @@ export function AddressLocationPicker({
               country: nextCountry,
               countryCode: place.countryCode || value.countryCode,
               emirate,
-              city: nextUae ? city : value.city,
-              customCity: nextUae ? '' : city,
+              city: nextUae ? matchedCity : value.city,
+              customCity: nextUae
+                ? matchedCity === 'Other'
+                  ? place.city || value.customCity
+                  : ''
+                : matchedCity || value.customCity,
               venueName:
                 variant === 'venue' && !value.venueName
                   ? place.secondaryText
@@ -400,7 +446,11 @@ export function addressValueToEventFields(v: AddressLocationValue) {
     locationCountry: v.country,
     locationCountryCode: v.countryCode,
     locationEmirate: isUaeCountry(v.country) ? v.emirate : '',
-    locationCity: isUaeCountry(v.country) ? v.city : v.customCity || v.city,
+    locationCity: isUaeCountry(v.country)
+      ? v.city === 'Other'
+        ? v.customCity || v.city
+        : v.city
+      : v.customCity || v.city,
   }
 }
 

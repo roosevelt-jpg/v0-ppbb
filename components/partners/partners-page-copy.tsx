@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   subscribeToPartnersConfig,
   DEFAULT_PARTNERS_CONFIG,
@@ -11,6 +12,7 @@ import {
 import { PartnersLogosGrid } from '@/components/partners/partners-logos-grid'
 import { PartnersFeaturedProjects } from '@/components/partners/partners-featured-projects'
 import { PartnershipInquiryForm } from '@/components/partners/partnership-inquiry-form'
+import { parseStorageObject, toMediaProxyUrl } from '@/lib/media-url'
 
 function isCharityCategory(id: string, label: string) {
   const i = id.toLowerCase()
@@ -22,6 +24,12 @@ function isCharityCategory(id: string, label: string) {
   )
 }
 
+function isFeedbackCategory(id: string, label: string) {
+  const i = id.toLowerCase()
+  const l = label.toLowerCase()
+  return i.includes('feedback') || /community\s*feedback|feedback/i.test(l)
+}
+
 function partnershipTypeFromCategory(id: string, label: string): string {
   const i = id.toLowerCase()
   const l = label.toLowerCase()
@@ -31,12 +39,23 @@ function partnershipTypeFromCategory(id: string, label: string): string {
   return 'partnership'
 }
 
+function resolveSponsorshipDeckHref(url: string): string {
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+  const parsed = parseStorageObject(trimmed)
+  if (parsed && !parsed.hasToken) {
+    return toMediaProxyUrl(trimmed) || trimmed
+  }
+  return trimmed
+}
+
 export function PartnersPageCopy() {
   const router = useRouter()
   const [config, setConfig] = useState<PartnersPlatformConfig>(DEFAULT_PARTNERS_CONFIG)
   const [ready, setReady] = useState(false)
   const [inquiryCategoryId, setInquiryCategoryId] = useState('')
   const [formKey, setFormKey] = useState(0)
+  const [deckError, setDeckError] = useState<string | null>(null)
 
   useEffect(
     () =>
@@ -47,7 +66,21 @@ export function PartnersPageCopy() {
     []
   )
 
-  const categories = config.pageConfig.inquiryCategories
+  const categories = useMemo(() => {
+    const base = config.pageConfig.inquiryCategories
+    const hasFeedback = base.some((c) => isFeedbackCategory(c.id, c.label))
+    if (hasFeedback) return base
+    return [
+      ...base,
+      {
+        id: 'community-feedback',
+        label: 'Community Feedback',
+        formId: '',
+        formSlug: '',
+        formUrl: '',
+      },
+    ]
+  }, [config.pageConfig.inquiryCategories])
 
   useEffect(() => {
     if (categories.length > 0 && !inquiryCategoryId) {
@@ -62,6 +95,9 @@ export function PartnersPageCopy() {
 
   const charitySelected = selected
     ? isCharityCategory(selected.id, selected.label)
+    : false
+  const feedbackSelected = selected
+    ? isFeedbackCategory(selected.id, selected.label)
     : false
   const linkedFormHref = selected ? getInquiryCategoryHref(selected) : null
 
@@ -84,11 +120,18 @@ export function PartnersPageCopy() {
   }
 
   const pc = config.pageConfig
+  const deckHref = pc.sponsorshipDeckPDFUrl
+    ? resolveSponsorshipDeckHref(pc.sponsorshipDeckPDFUrl)
+    : ''
 
   const openLinkedOrCharity = () => {
     if (!selected) return
     if (charitySelected) {
       router.push('/dashboard/charity-requests?apply=1')
+      return
+    }
+    if (feedbackSelected) {
+      router.push('/contact?subject=feedback')
       return
     }
     if (linkedFormHref) {
@@ -103,6 +146,25 @@ export function PartnersPageCopy() {
   const inquiryType = selected
     ? partnershipTypeFromCategory(selected.id, selected.label)
     : 'partnership'
+
+  const openDeck = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!deckHref) return
+    setDeckError(null)
+    // Soft-check proxy / media availability for tokenless GCS URLs
+    if (deckHref.startsWith('/api/media')) {
+      e.preventDefault()
+      try {
+        const res = await fetch(deckHref, { method: 'HEAD' })
+        if (!res.ok) {
+          setDeckError('Deck unavailable — contact us')
+          return
+        }
+        window.open(deckHref, '_blank', 'noopener,noreferrer')
+      } catch {
+        setDeckError('Deck unavailable — contact us')
+      }
+    }
+  }
 
   return (
     <div className="space-y-12 sm:space-y-16 md:space-y-20 min-w-0">
@@ -126,15 +188,26 @@ export function PartnersPageCopy() {
         <p className="font-body text-base text-muted-foreground leading-relaxed mb-6 max-w-[42rem] break-words">
           {pc.sponsorshipDeckBody}
         </p>
-        {pc.sponsorshipDeckPDFUrl ? (
-          <a
-            href={pc.sponsorshipDeckPDFUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
-          >
-            {pc.sponsorshipDeckCTA}
-          </a>
+        {deckHref ? (
+          <div className="space-y-2">
+            <a
+              href={deckHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => void openDeck(e)}
+              className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800 transition-colors"
+            >
+              {pc.sponsorshipDeckCTA}
+            </a>
+            {deckError ? (
+              <p className="text-sm text-red-700">
+                {deckError}.{' '}
+                <Link href="/contact?subject=Sponsorship" className="underline font-medium">
+                  Contact us
+                </Link>
+              </p>
+            ) : null}
+          </div>
         ) : (
           <a
             href="#inquiry"
@@ -197,17 +270,35 @@ export function PartnersPageCopy() {
           </div>
 
           {charitySelected ? (
-            <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">
+            <div className="rounded-lg border-2 border-black bg-white p-5 space-y-3">
+              <h3 className="font-headline text-lg font-bold text-foreground">
+                Seeking Charity Support?
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Charity support uses our beneficiary request form — not the general contact form.
+                Charity support uses our dedicated beneficiary request form — not the partnership
+                inquiry form.
               </p>
-              <button
-                type="button"
-                onClick={openLinkedOrCharity}
-                className="min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+              <Link
+                href="/dashboard/charity-requests"
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
               >
-                {pc.inquiryCTA}
-              </button>
+                Go to Charity Requests
+              </Link>
+            </div>
+          ) : feedbackSelected ? (
+            <div className="rounded-lg border-2 border-black bg-white p-5 space-y-3">
+              <h3 className="font-headline text-lg font-bold text-foreground">
+                Community Feedback
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Share feedback through our contact form so it reaches the right inbox.
+              </p>
+              <Link
+                href="/contact?subject=feedback"
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-3 bg-black text-white rounded-lg font-body text-sm font-semibold hover:bg-gray-800"
+              >
+                Send feedback
+              </Link>
             </div>
           ) : linkedFormHref ? (
             <div className="rounded-lg border border-[#e4e1da] bg-white p-4 space-y-3">

@@ -134,7 +134,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const form = await request.formData()
+    let form: FormData
+    try {
+      form = await request.formData()
+    } catch (parseErr) {
+      console.error('[beneficiary-requests] FormData parse failed:', parseErr)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Upload failed — try smaller files or fewer attachments.',
+        },
+        { status: 400 }
+      )
+    }
     const fullName = String(form.get('fullName') || '').trim()
     const phoneNumber = String(form.get('phoneNumber') || '').trim()
     const email = String(form.get('email') || '').trim()
@@ -148,14 +160,15 @@ export async function POST(request: NextRequest) {
     const referralSource = String(form.get('referralSource') || '').trim()
     const consentAccepted = String(form.get('consentAccepted') || '') === 'true'
 
-    const emiratesIdFile = form.get('emiratesId') as File | null
-    const passportFile = form.get('passport') as File | null
-    const visaFile = form.get('visa') as File | null
-    const salaryCertificateFile = form.get('salaryCertificate') as File | null
-    const bankStatementFile = form.get('bankStatement') as File | null
-    const supportingFiles = form
-      .getAll('supportingDocuments')
-      .filter((f): f is File => f instanceof File && f.size > 0)
+    const asFiles = (key: string) =>
+      form.getAll(key).filter((f): f is File => f instanceof File && f.size > 0)
+
+    const emiratesIdFiles = asFiles('emiratesId')
+    const passportFiles = asFiles('passport')
+    const visaFiles = asFiles('visa')
+    const salaryCertificateFiles = asFiles('salaryCertificate')
+    const bankStatementFiles = asFiles('bankStatement')
+    const supportingFiles = asFiles('supportingDocuments')
 
     const errors: string[] = []
     if (!fullName) errors.push('Full name is required')
@@ -169,22 +182,10 @@ export async function POST(request: NextRequest) {
       errors.push('Emergency level must be Low, Medium, High, or Critical')
     }
     if (!consentAccepted) errors.push('Consent is required')
-    if (!emiratesIdFile || !(emiratesIdFile instanceof File) || !emiratesIdFile.size) {
-      errors.push('Emirates ID upload is required')
-    }
-    if (!passportFile || !(passportFile instanceof File) || !passportFile.size) {
-      errors.push('Passport copy upload is required')
-    }
-    if (!visaFile || !(visaFile instanceof File) || !visaFile.size) {
-      errors.push('Visa copy upload is required')
-    }
-    if (
-      !salaryCertificateFile ||
-      !(salaryCertificateFile instanceof File) ||
-      !salaryCertificateFile.size
-    ) {
-      errors.push('Salary certificate upload is required')
-    }
+    if (!emiratesIdFiles.length) errors.push('Emirates ID upload is required')
+    if (!passportFiles.length) errors.push('Passport copy upload is required')
+    if (!visaFiles.length) errors.push('Visa copy upload is required')
+    if (!salaryCertificateFiles.length) errors.push('Salary certificate upload is required')
 
     if (errors.length) {
       return NextResponse.json({ success: false, error: errors.join('. '), errors }, { status: 400 })
@@ -194,15 +195,24 @@ export async function POST(request: NextRequest) {
     const requestId = randomUUID()
     const consentId = randomUUID()
 
-    const [emiratesId, passport, visa, salaryCertificate, bankStatement] = await Promise.all([
-      uploadPrivateDoc(emiratesIdFile!, requestId, 'emirates_id'),
-      uploadPrivateDoc(passportFile!, requestId, 'passport'),
-      uploadPrivateDoc(visaFile!, requestId, 'visa'),
-      uploadPrivateDoc(salaryCertificateFile!, requestId, 'salary_certificate'),
-      bankStatementFile && bankStatementFile instanceof File && bankStatementFile.size > 0
-        ? uploadPrivateDoc(bankStatementFile, requestId, 'bank_statement')
-        : Promise.resolve(null),
+    const uploadMany = async (files: File[], documentType: string) =>
+      Promise.all(files.map((file, i) => uploadPrivateDoc(file, requestId, `${documentType}_${i + 1}`)))
+
+    const [emiratesIdDocs, passportDocs, visaDocs, salaryDocs, bankDocs] = await Promise.all([
+      uploadMany(emiratesIdFiles, 'emirates_id'),
+      uploadMany(passportFiles, 'passport'),
+      uploadMany(visaFiles, 'visa'),
+      uploadMany(salaryCertificateFiles, 'salary_certificate'),
+      bankStatementFiles.length
+        ? uploadMany(bankStatementFiles, 'bank_statement')
+        : Promise.resolve([] as UploadedDoc[]),
     ])
+
+    const emiratesId = emiratesIdDocs[0]
+    const passport = passportDocs[0]
+    const visa = visaDocs[0]
+    const salaryCertificate = salaryDocs[0]
+    const bankStatement = bankDocs[0] || null
 
     const supportingDocumentUrls: string[] = []
     const supportingDocumentPaths: string[] = []
@@ -265,14 +275,24 @@ export async function POST(request: NextRequest) {
 
         emiratesIdUrl: emiratesId.url,
         emiratesIdStoragePath: emiratesId.storagePath,
+        emiratesIdUrls: emiratesIdDocs.map((d) => d.url),
+        emiratesIdStoragePaths: emiratesIdDocs.map((d) => d.storagePath),
         passportUrl: passport.url,
         passportStoragePath: passport.storagePath,
+        passportUrls: passportDocs.map((d) => d.url),
+        passportStoragePaths: passportDocs.map((d) => d.storagePath),
         visaUrl: visa.url,
         visaStoragePath: visa.storagePath,
+        visaUrls: visaDocs.map((d) => d.url),
+        visaStoragePaths: visaDocs.map((d) => d.storagePath),
         salaryCertificateUrl: salaryCertificate.url,
         salaryCertificateStoragePath: salaryCertificate.storagePath,
+        salaryCertificateUrls: salaryDocs.map((d) => d.url),
+        salaryCertificateStoragePaths: salaryDocs.map((d) => d.storagePath),
         bankStatementUrl: bankStatement?.url || null,
         bankStatementStoragePath: bankStatement?.storagePath || null,
+        bankStatementUrls: bankDocs.map((d) => d.url),
+        bankStatementStoragePaths: bankDocs.map((d) => d.storagePath),
         supportingDocumentUrls,
         supportingDocumentPaths,
 
@@ -298,10 +318,16 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[beneficiary-requests POST]', error)
+    const raw = error instanceof Error ? error.message : 'Failed to submit request'
+    const friendly = /Failed to parse body as FormData|FormData|body.*too large|PayloadTooLarge/i.test(
+      raw
+    )
+      ? 'Upload failed — try smaller files or fewer attachments.'
+      : raw
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to submit request',
+        error: friendly,
       },
       { status: 500 }
     )

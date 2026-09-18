@@ -30,10 +30,81 @@ import {
   normalizeGenderRestriction,
 } from './community-governance'
 
+async function fetchCommunitiesByIds(ids: string[]): Promise<Community[]> {
+  const unique = Array.from(new Set(ids.filter(Boolean)))
+  if (unique.length === 0) return []
+
+  const communities: Community[] = []
+  await Promise.all(
+    unique.map(async (id) => {
+      const snap = await getDoc(doc(db, 'communities', id))
+      if (snap.exists()) {
+        communities.push({
+          id: snap.id,
+          ...snap.data(),
+          createdAt: snap.data().createdAt?.toDate?.() || snap.data().createdAt,
+          updatedAt: snap.data().updatedAt?.toDate?.() || snap.data().updatedAt,
+        } as Community)
+      }
+    })
+  )
+  communities.sort(
+    (a, b) =>
+      new Date(String(b.updatedAt || 0)).getTime() -
+      new Date(String(a.updatedAt || 0)).getTime()
+  )
+  return communities
+}
+
+/** Last-resort scan when collectionGroup + communityIds are unavailable. */
+async function scanUserCommunityMemberships(userId: string): Promise<Community[]> {
+  const communitiesSnap = await getDocs(
+    query(collection(db, 'communities'), orderBy('createdAt', 'desc'), limit(100))
+  )
+  const matched: Community[] = []
+  await Promise.all(
+    communitiesSnap.docs.map(async (communityDoc) => {
+      const memberSnap = await getDocs(
+        query(
+          collection(db, 'communities', communityDoc.id, 'members'),
+          where('userId', '==', userId),
+          limit(1)
+        )
+      )
+      if (memberSnap.empty) return
+      const data = memberSnap.docs[0].data()
+      if (data.memberStatus === 'banned' || data.memberStatus === 'removed') return
+      if (data.isActive === false && data.joinStatus !== 'active') return
+      matched.push({
+        id: communityDoc.id,
+        ...communityDoc.data(),
+        createdAt: communityDoc.data().createdAt?.toDate?.() || communityDoc.data().createdAt,
+        updatedAt: communityDoc.data().updatedAt?.toDate?.() || communityDoc.data().updatedAt,
+      } as Community)
+    })
+  )
+  matched.sort(
+    (a, b) =>
+      new Date(String(b.updatedAt || 0)).getTime() -
+      new Date(String(a.updatedAt || 0)).getTime()
+  )
+  return matched
+}
+
+async function rememberUserCommunityId(userId: string, communityId: string) {
+  try {
+    await updateDoc(doc(db, 'users', userId), {
+      communityIds: arrayUnion(communityId),
+    })
+  } catch (error) {
+    console.warn('[v0] Could not persist communityIds on user:', error)
+  }
+}
+
 // COMMUNITY SUBSCRIPTIONS
 export function subscribeToAllCommunities(
   onData: (communities: Community[]) => void,
-  options?: { featured?: boolean; category?: string }
+  options?: { featured?: boolean; category?: string; onError?: (error: Error) => void }
 ) {
   try {
     let q = query(collection(db, 'communities'), orderBy('createdAt', 'desc'), limit(100))
@@ -56,6 +127,7 @@ export function subscribeToAllCommunities(
       },
       (error) => {
         console.error('[v0] Error in subscribeToAllCommunities:', error)
+        options?.onError?.(error instanceof Error ? error : new Error(String(error)))
         onData([])
       }
     )
@@ -63,6 +135,7 @@ export function subscribeToAllCommunities(
     return unsubscribe
   } catch (error) {
     console.error('[v0] Error subscribing to communities:', error)
+    options?.onError?.(error instanceof Error ? error : new Error(String(error)))
     return () => {}
   }
 }
@@ -109,57 +182,88 @@ export function subscribeToUserCommunities(
     return () => {}
   }
 
+  let cancelled = false
+  let primaryUnsub: (() => void) | null = null
+  let groupUnsub: (() => void) | null = null
+
+  const safeEmit = (communities: Community[]) => {
+    if (!cancelled) onData(communities)
+  }
+
+  // Primary path: users/{uid}.communityIds — no collectionGroup index required.
+  // Kept in sync by joinCommunity / leaveCommunity.
   try {
-    const unsubscribe = onSnapshot(
-      query(collectionGroup(db, 'members'), where('userId', '==', userId)),
-      async (snapshot) => {
-        const communityIds = new Set<string>()
-        for (const memberDoc of snapshot.docs) {
-          const path = memberDoc.ref.path
-          if (!path.includes('/communities/') || path.includes('/groups/')) continue
-          const data = memberDoc.data()
-          if (data.memberStatus === 'banned' || data.memberStatus === 'removed') continue
-          if (data.isActive === false && data.joinStatus !== 'active') continue
-          const communityId = memberDoc.ref.parent.parent?.id
-          if (communityId) communityIds.add(communityId)
+    primaryUnsub = onSnapshot(
+      doc(db, 'users', userId),
+      async (userSnap) => {
+        try {
+          const rawIds = userSnap.data()?.communityIds
+          const ids = Array.isArray(rawIds) ? rawIds.map(String).filter(Boolean) : []
+          if (ids.length > 0) {
+            safeEmit(await fetchCommunitiesByIds(ids))
+            return
+          }
+          // Legacy accounts without communityIds — scan memberships once
+          safeEmit(await scanUserCommunityMemberships(userId))
+        } catch (scanError) {
+          console.error('[v0] Error in user communities primary path:', scanError)
+          safeEmit([])
         }
-
-        if (communityIds.size === 0) {
-          onData([])
-          return
-        }
-
-        const communities: Community[] = []
-        await Promise.all(
-          Array.from(communityIds).map(async (id) => {
-            const snap = await getDoc(doc(db, 'communities', id))
-            if (snap.exists()) {
-              communities.push({
-                id: snap.id,
-                ...snap.data(),
-                createdAt: snap.data().createdAt?.toDate?.() || snap.data().createdAt,
-                updatedAt: snap.data().updatedAt?.toDate?.() || snap.data().updatedAt,
-              } as Community)
-            }
-          })
-        )
-        communities.sort(
-          (a, b) =>
-            new Date(String(b.updatedAt || 0)).getTime() -
-            new Date(String(a.updatedAt || 0)).getTime()
-        )
-        onData(communities)
       },
-      (error) => {
-        console.error('[v0] Error in subscribeToUserCommunities:', error)
-        onData([])
+      async (error) => {
+        console.error('[v0] Error reading users communityIds:', error)
+        try {
+          safeEmit(await scanUserCommunityMemberships(userId))
+        } catch {
+          safeEmit([])
+        }
       }
     )
-
-    return unsubscribe
   } catch (error) {
-    console.error('[v0] Error subscribing to user communities:', error)
-    return () => {}
+    console.error('[v0] Error subscribing to user communityIds:', error)
+    void scanUserCommunityMemberships(userId)
+      .then(safeEmit)
+      .catch(() => safeEmit([]))
+  }
+
+  // Optional enhancement: collectionGroup query (uses members.userId index when available).
+  // If the index is missing, this errors silently and communityIds path remains authoritative.
+  try {
+    groupUnsub = onSnapshot(
+      query(collectionGroup(db, 'members'), where('userId', '==', userId)),
+      async (snapshot) => {
+        try {
+          const communityIds = new Set<string>()
+          for (const memberDoc of snapshot.docs) {
+            const path = memberDoc.ref.path
+            if (!path.includes('/communities/') || path.includes('/groups/')) continue
+            const data = memberDoc.data()
+            if (data.memberStatus === 'banned' || data.memberStatus === 'removed') continue
+            if (data.isActive === false && data.joinStatus !== 'active') continue
+            const communityId = memberDoc.ref.parent.parent?.id
+            if (communityId) communityIds.add(communityId)
+          }
+          if (communityIds.size === 0) return
+          safeEmit(await fetchCommunitiesByIds(Array.from(communityIds)))
+        } catch (error) {
+          console.warn('[v0] collectionGroup members merge skipped:', error)
+        }
+      },
+      (error) => {
+        console.warn(
+          '[v0] collectionGroup members.userId unavailable (deploy index if needed):',
+          (error as { message?: string })?.message || error
+        )
+      }
+    )
+  } catch (error) {
+    console.warn('[v0] collectionGroup subscribe skipped:', error)
+  }
+
+  return () => {
+    cancelled = true
+    primaryUnsub?.()
+    groupUnsub?.()
   }
 }
 
@@ -441,10 +545,17 @@ export async function joinCommunity(
       })
     )
 
-    await updateDoc(communityRef, {
-      memberCount: increment(1),
-      updatedAt: Timestamp.now(),
-    })
+    // memberCount updates are admin-only in rules; join must still succeed
+    try {
+      await updateDoc(communityRef, {
+        memberCount: increment(1),
+        updatedAt: Timestamp.now(),
+      })
+    } catch (countError) {
+      console.warn('[v0] memberCount update skipped after join:', countError)
+    }
+
+    await rememberUserCommunityId(userId, communityId)
 
     void triggerCommunityNotification({
       type: 'community_joined',
@@ -589,10 +700,15 @@ export async function joinGroup(
           memberStatus: 'active',
         })
       )
-      await updateDoc(communityRef, {
-        memberCount: increment(1),
-        updatedAt: Timestamp.now(),
-      })
+      try {
+        await updateDoc(communityRef, {
+          memberCount: increment(1),
+          updatedAt: Timestamp.now(),
+        })
+      } catch (countError) {
+        console.warn('[v0] community memberCount update skipped:', countError)
+      }
+      await rememberUserCommunityId(userId, communityId)
     } else {
       const communityMember = communityMemberSnap.docs[0].data()
       if (communityMember.memberStatus === 'banned') throw new Error('You are banned from this community.')
@@ -639,11 +755,17 @@ export async function joinGroup(
     )
 
     if (joinStatus === 'active') {
-      await updateDoc(groupRef, {
-        memberCount: increment(1),
-        updatedAt: Timestamp.now(),
-      })
+      try {
+        await updateDoc(groupRef, {
+          memberCount: increment(1),
+          updatedAt: Timestamp.now(),
+        })
+      } catch (countError) {
+        console.warn('[v0] group memberCount update skipped after join:', countError)
+      }
     }
+
+    await rememberUserCommunityId(userId, communityId)
 
     void triggerCommunityNotification({
       type: 'group_joined',

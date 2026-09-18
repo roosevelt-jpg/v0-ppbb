@@ -86,9 +86,28 @@ export function subscribeToMemberDonations(
     userId: [],
     submissions: [],
   }
+  const ready = { donorId: false, userId: false, submissions: false }
+  let emittedOnce = false
+  let lastError: string | null = null
 
   const emit = () => {
+    emittedOnce = true
     onData(mergeDonationRows(buckets.donorId, buckets.userId, buckets.submissions))
+  }
+
+  const markReady = (key: keyof typeof ready) => {
+    ready[key] = true
+    if (ready.donorId && ready.userId && ready.submissions) {
+      emit()
+      if (lastError && buckets.donorId.length + buckets.userId.length + buckets.submissions.length === 0) {
+        onError?.(lastError)
+      }
+    } else if (!emittedOnce) {
+      // Emit as soon as the first source responds so the UI is never stuck loading
+      emit()
+    } else {
+      emit()
+    }
   }
 
   const unsubs = [
@@ -96,25 +115,38 @@ export function subscribeToMemberDonations(
       query(collection(db, 'donations'), where('donorId', '==', userId)),
       (snap) => {
         buckets.donorId = snap?.docs?.map((d) => ({ id: d.id, ...d.data() } as DonationRow)) ?? []
-        emit()
+        markReady('donorId')
       },
-      (err) => onError?.(err.message)
+      (err) => {
+        lastError = err.message
+        buckets.donorId = []
+        markReady('donorId')
+      }
     ),
     onSnapshot(
       query(collection(db, 'donations'), where('userId', '==', userId)),
       (snap) => {
         buckets.userId = snap?.docs?.map((d) => ({ id: d.id, ...d.data() } as DonationRow)) ?? []
-        emit()
+        markReady('userId')
       },
-      (err) => onError?.(err.message)
+      (err) => {
+        lastError = err.message
+        buckets.userId = []
+        markReady('userId')
+      }
     ),
     onSnapshot(
       query(collection(db, 'donationSubmissions'), where('userId', '==', userId)),
       (snap) => {
-        buckets.submissions = snap?.docs?.map((d) => ({ id: d.id, ...d.data() } as DonationRow)) ?? []
-        emit()
+        buckets.submissions =
+          snap?.docs?.map((d) => ({ id: d.id, ...d.data() } as DonationRow)) ?? []
+        markReady('submissions')
       },
-      (err) => onError?.(err.message)
+      (err) => {
+        lastError = err.message
+        buckets.submissions = []
+        markReady('submissions')
+      }
     ),
   ]
 

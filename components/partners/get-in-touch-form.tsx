@@ -5,9 +5,9 @@ import React, { useState } from 'react'
 export const PARTNERS_CONTACT_SUBJECTS = [
   'Partnerships',
   'Sponsorship',
-  'Seeking Charity Support',
-  'Community Feedback',
-  'General Enquiry',
+  'Charity Support',
+  'Feedback',
+  'General',
 ] as const
 
 export type PartnersContactSubject = (typeof PARTNERS_CONTACT_SUBJECTS)[number]

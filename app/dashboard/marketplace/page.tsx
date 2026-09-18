@@ -58,19 +58,32 @@ export default function MarketplacePage() {
   const isBusinessMember = hasBusinessAccess(user)
 
   useEffect(() => {
+    let cancelled = false
+    const finish = (rows?: BusinessOffer[], err?: string) => {
+      if (cancelled) return
+      if (rows) setProducts(rows)
+      if (err) setError(err)
+      else if (rows) setError(null)
+      setLoading(false)
+    }
+
     const unsubscribe = subscribeToMarketplaceOffers(
-      (rows) => {
-        setProducts(rows)
-        setLoading(false)
-        setError(null)
-      },
+      (rows) => finish(rows),
       (msg) => {
         console.error('[v0] Marketplace error:', msg)
-        setError('Failed to load marketplace.')
-        setLoading(false)
+        finish([], 'Failed to load marketplace.')
       }
     )
-    return () => unsubscribe()
+
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setLoading(false)
+    }, 10000)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeout)
+      unsubscribe()
+    }
   }, [])
 
   const filtered = useMemo(() => filterMarketplaceOffers(products, filter), [products, filter])

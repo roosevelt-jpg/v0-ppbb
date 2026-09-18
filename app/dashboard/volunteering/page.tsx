@@ -224,6 +224,11 @@ export default function VolunteeringPage() {
     loadRegisteredCharity()
     loadApplications()
 
+    // Never leave the page stuck on skeleton if volunteerRecords hangs
+    const loadingTimeout = window.setTimeout(() => {
+      if (!cancelled) setLoading(false)
+    }, 10000)
+
     const q = query(collection(db, 'volunteerRecords'), where('userId', '==', user.id))
     const unsubscribe = onSnapshot(
       q,
@@ -287,6 +292,7 @@ export default function VolunteeringPage() {
 
     return () => {
       cancelled = true
+      window.clearTimeout(loadingTimeout)
       unsubscribe()
     }
   }, [authLoading, user?.id])

@@ -20,6 +20,8 @@ import {
   matchesCategoryFilter,
   isSameMonth,
   getEventStartDate,
+  getEventLocationLabel,
+  dedupeUpcomingEventsBySeries,
   type NormalizedEvent,
 } from '@/lib/event-utils'
 import { isSameDay, startOfMonth, endOfMonth } from 'date-fns'
@@ -128,16 +130,24 @@ export default function EventsPage() {
   )
 
   const lineupEvents = useMemo(() => {
+    let list: NormalizedEvent[]
     if (timeScope === 'upcoming') {
-      return selectedDate
+      list = selectedDate
         ? scopedEvents.filter((event) => isSameDay(getEventStartDate(event), selectedDate))
         : scopedEvents
+    } else {
+      const base = selectedDate
+        ? monthEvents.filter((event) => isSameDay(getEventStartDate(event), selectedDate))
+        : monthEvents
+      list = [...base].sort(
+        (a, b) => getEventStartDate(a).getTime() - getEventStartDate(b).getTime()
+      )
     }
-    const base = selectedDate
-      ? monthEvents.filter((event) => isSameDay(getEventStartDate(event), selectedDate))
-      : monthEvents
-    return [...base].sort(
-      (a, b) => getEventStartDate(a).getTime() - getEventStartDate(b).getTime()
+    if (timeScope !== 'upcoming' || selectedDate) return list
+    return dedupeUpcomingEventsBySeries(
+      list,
+      (e) => getEventStartDate(e),
+      (e) => getEventLocationLabel(e)
     )
   }, [timeScope, scopedEvents, monthEvents, selectedDate])
 
@@ -184,28 +194,30 @@ export default function EventsPage() {
               >
                 <button
                   type="button"
+                  data-dashboard-control
                   onClick={() => {
                     setTimeScope('upcoming')
                     setSelectedDate(null)
                   }}
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-semibold transition-colors border ${
                     timeScope === 'upcoming'
-                      ? 'bg-black text-white'
-                      : 'bg-transparent text-neutral-700 hover:bg-neutral-50'
+                      ? 'bg-black text-white border-black'
+                      : 'bg-transparent text-neutral-700 border-transparent hover:bg-neutral-50'
                   }`}
                 >
                   Upcoming events
                 </button>
                 <button
                   type="button"
+                  data-dashboard-control
                   onClick={() => {
                     setTimeScope('month')
                     setSelectedDate(null)
                   }}
-                  className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
+                  className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-semibold transition-colors border ${
                     timeScope === 'month'
-                      ? 'bg-black text-white'
-                      : 'bg-transparent text-neutral-700 hover:bg-neutral-50'
+                      ? 'bg-black text-white border-black'
+                      : 'bg-transparent text-neutral-700 border-transparent hover:bg-neutral-50'
                   }`}
                 >
                   Per month
@@ -264,11 +276,12 @@ export default function EventsPage() {
                 <button
                   key={id}
                   type="button"
+                  data-dashboard-control
                   onClick={() => setPriceFilter(id)}
-                  className={`pb-compact-btn px-4 py-2 rounded-lg text-sm font-semibold border ${
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold border ${
                     priceFilter === id
-                      ? 'bg-black !text-white border-black'
-                      : 'bg-white text-black border-neutral-300 hover:bg-neutral-50'
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50'
                   }`}
                 >
                   {label}

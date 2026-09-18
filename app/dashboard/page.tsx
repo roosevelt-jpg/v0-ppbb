@@ -5,15 +5,9 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth-context'
 import { db } from '@/lib/firebase'
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
   updateDoc,
-  where,
 } from 'firebase/firestore'
 import { Calendar, Heart, Briefcase, Clock, ArrowRight, Bell, X, Crown } from 'lucide-react'
 import {
@@ -23,7 +17,6 @@ import {
 } from '@/components/dashboard-states'
 import { getMemberApplications } from '@/lib/business-queries'
 import {
-  eventVisibleToUser,
   fetchMemberDonationTotal,
   parseFirestoreDate,
   subscribeToMemberNotifications,
@@ -74,36 +67,39 @@ export default function DashboardPage() {
         const member = user as User
         const now = new Date()
 
-        const [eventsResult, appsResult, donationTotal, profileResult] = await Promise.allSettled([
-          getDocs(
-            query(
-              collection(db, 'events'),
-              where('status', '==', 'published'),
-              orderBy('startDate', 'asc'),
-              limit(20)
-            )
-          ),
-          getMemberApplications(user.id),
-          fetchMemberDonationTotal(user.id),
-          getDoc(doc(db, 'users', user.id)),
-        ])
+        const [registeredResult, appsResult, donationTotal, profileResult] =
+          await Promise.allSettled([
+            fetch(`/api/user/events?userId=${encodeURIComponent(user.id)}`).then(async (res) => {
+              const json = await res.json()
+              if (!json.success) return [] as Record<string, unknown>[]
+              const raw = json.data
+              return (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(Boolean) as Record<
+                string,
+                unknown
+              >[]
+            }),
+            getMemberApplications(user.id),
+            fetchMemberDonationTotal(user.id),
+            getDoc(doc(db, 'users', user.id)),
+          ])
 
         if (cancelled) return
 
-        const allEvents =
-          eventsResult.status === 'fulfilled'
-            ? (eventsResult.value?.docs?.map((d) => ({ id: d.id, ...d.data() })) ?? [])
-            : eventsResult.status === 'rejected'
-              ? (console.warn('[v0] events query failed:', eventsResult.reason), [])
-              : []
+        const registeredEvents =
+          registeredResult.status === 'fulfilled' ? registeredResult.value : []
 
-        const futureEvents = allEvents
+        const registeredUpcoming = registeredEvents
           .filter((e) => {
             const startDate = parseFirestoreDate(e.startDate)
             return startDate && startDate >= now
           })
-          .filter((e) => eventVisibleToUser(e, member.gender))
-          .slice(0, 3)
+          .sort((a, b) => {
+            const ad = parseFirestoreDate(a.startDate)?.getTime() ?? 0
+            const bd = parseFirestoreDate(b.startDate)?.getTime() ?? 0
+            return ad - bd
+          })
+
+        const displayUpcoming = registeredUpcoming.slice(0, 3)
 
         const apps = appsResult.status === 'fulfilled' ? (appsResult.value ?? []).slice(0, 3) : []
 
@@ -125,7 +121,7 @@ export default function DashboardPage() {
           }
         }
 
-        setUpcomingEvents(futureEvents)
+        setUpcomingEvents(displayUpcoming)
         setApplications(
           apps.map((a) => ({
             id: a.id,
@@ -136,7 +132,7 @@ export default function DashboardPage() {
           }))
         )
         setStats({
-          upcomingEvents: futureEvents.length,
+          upcomingEvents: registeredUpcoming.length,
           applications: appsResult.status === 'fulfilled' ? appsResult.value.length : 0,
           donations: donationTotal.status === 'fulfilled' ? donationTotal.value : 0,
           volunteerHours: profileHours,
@@ -164,7 +160,7 @@ export default function DashboardPage() {
       cancelled = true
       unsubNotifications?.()
     }
-  }, [authLoading, user?.id, firebaseUser, (user as User | null)?.gender])
+  }, [authLoading, user?.id, firebaseUser])
 
   const dismissNotification = async (id: string) => {
     if (!user?.id) return
@@ -197,7 +193,7 @@ export default function DashboardPage() {
       title="Dashboard"
       subtitle={`${member?.firstName ?? 'Member'} • Active member`}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
         {[
           { label: 'Upcoming Events', value: stats.upcomingEvents, icon: Calendar, href: '/dashboard/events' },
           { label: 'My Applications', value: stats.applications, icon: Briefcase, href: '/dashboard/opportunities' },
@@ -210,14 +206,21 @@ export default function DashboardPage() {
             <Link
               key={card.label}
               href={card.href}
-              className="block rounded-xl border border-neutral-200 dark:border-border bg-white dark:bg-card p-5 hover:shadow-md transition-shadow"
+              className="block rounded-xl border border-neutral-200 dark:border-border bg-white dark:bg-card p-5 hover:shadow-md transition-shadow overflow-hidden min-w-0"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">{card.label}</p>
-                  <p className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-2">{card.value}</p>
+              <div className="flex items-start justify-between gap-3 min-w-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-muted-foreground">
+                    {card.label}
+                  </p>
+                  <p
+                    className="text-2xl font-bold text-neutral-900 dark:text-foreground mt-2 truncate"
+                    title={String(card.value)}
+                  >
+                    {card.value}
+                  </p>
                 </div>
-                <Icon className="w-5 h-5 text-neutral-400 dark:text-neutral-500" />
+                <Icon className="w-5 h-5 text-neutral-400 dark:text-neutral-500 shrink-0" />
               </div>
             </Link>
           )
@@ -267,7 +270,7 @@ export default function DashboardPage() {
         </div>
         {upcomingEvents.length === 0 ? (
           <p className="text-sm text-neutral-500 dark:text-muted-foreground border border-neutral-200 dark:border-border rounded-xl p-6 bg-white dark:bg-card">
-            No upcoming events right now. Check back soon.
+            No upcoming registered events. Browse events to RSVP.
           </p>
         ) : (
           <div className="grid gap-4 md:grid-cols-3">

@@ -7,7 +7,7 @@ import { Footer } from '@/components/footer'
 import Link from 'next/link'
 import { subscribeToAllCommunities, joinCommunity, subscribeToUserCommunities } from '@/lib/community-queries'
 import type { Community } from '@/lib/community-types'
-import { genderRestrictionLabel } from '@/lib/community-governance'
+import { genderRestrictionLabel, isCommunityPublicVisibility, isCommunityVisible } from '@/lib/community-governance'
 import { useAuth } from '@/lib/auth-context'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { CommunityListSkeleton } from '@/components/community-list-skeleton'
@@ -134,13 +134,29 @@ export default function CommunitiesPage() {
   const [joining, setJoining] = React.useState<string | null>(null)
   const [joinedIds, setJoinedIds] = React.useState<Set<string>>(new Set())
   const [listTab, setListTab] = React.useState<ListTab>('suggestions')
+  const [listError, setListError] = React.useState(false)
+  const [joinError, setJoinError] = React.useState('')
   const categoriesRailRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
-    const unsubscribe = subscribeToAllCommunities((data) => {
-      setCommunities(data.filter((c) => c.status === 'active' && c.visibility === 'public'))
-      setLoading(false)
-    })
+    const unsubscribe = subscribeToAllCommunities(
+      (data) => {
+        setCommunities(
+          data.filter(
+            (c) => isCommunityVisible(c.status) && isCommunityPublicVisibility(c.visibility)
+          )
+        )
+        setListError(false)
+        setLoading(false)
+      },
+      {
+        onError: () => {
+          setCommunities([])
+          setListError(true)
+          setLoading(false)
+        },
+      }
+    )
     return () => unsubscribe()
   }, [])
 
@@ -183,11 +199,12 @@ export default function CommunitiesPage() {
 
   const handleJoinCommunity = async (community: Community) => {
     if (!user) {
-      alert('Please log in to join communities')
+      setJoinError('Please log in to join communities.')
       return
     }
 
     setJoining(community.id!)
+    setJoinError('')
     try {
       await joinCommunity(
         community.id!,
@@ -200,7 +217,12 @@ export default function CommunitiesPage() {
       setJoinedIds((prev) => new Set(prev).add(community.id!))
     } catch (error) {
       console.error('[v0] Error joining community:', error)
-      alert(error instanceof Error ? error.message : 'Failed to join community')
+      const raw = error instanceof Error ? error.message : 'Failed to join community'
+      setJoinError(
+        /insufficient permissions|permission-denied|Missing or insufficient/i.test(raw)
+          ? 'You do not have permission to join this community right now. Try again or contact support.'
+          : raw
+      )
     } finally {
       setJoining(null)
     }
@@ -261,6 +283,22 @@ export default function CommunitiesPage() {
           </p>
         </div>
 
+        {joinError ? (
+          <div
+            role="alert"
+            className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex items-start justify-between gap-3"
+          >
+            <p>{joinError}</p>
+            <button
+              type="button"
+              onClick={() => setJoinError('')}
+              className="shrink-0 text-amber-800 underline text-xs font-semibold"
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
+
         <div className="bg-white rounded-xl sm:rounded-2xl border border-[#e4e1da] p-3 sm:p-4 md:p-5 space-y-3 sm:space-y-4 min-w-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
@@ -306,7 +344,9 @@ export default function CommunitiesPage() {
 
             <div className="flex items-end sm:col-span-2 lg:col-span-1">
               <p className="text-sm text-neutral-500 pb-2">
-                {listedCommunities.length} communities found
+                {listError
+                  ? 'Unable to load communities'
+                  : `${listedCommunities.length} communities found`}
               </p>
             </div>
           </div>
@@ -347,6 +387,12 @@ export default function CommunitiesPage() {
 
         {loading ? (
           <CommunityListSkeleton count={8} />
+        ) : listError ? (
+          <div className="text-center py-10 sm:py-14 bg-white rounded-xl sm:rounded-2xl border border-[#e4e1da] px-4">
+            <p className="text-neutral-500 text-sm sm:text-base">
+              Unable to load communities. Please try again later.
+            </p>
+          </div>
         ) : listedCommunities.length === 0 ? (
           <div className="text-center py-10 sm:py-14 bg-white rounded-xl sm:rounded-2xl border border-[#e4e1da] px-4">
             <p className="text-neutral-500 text-sm sm:text-base">
@@ -354,7 +400,9 @@ export default function CommunitiesPage() {
                 ? user
                   ? 'You have not joined any communities yet.'
                   : 'Sign in to see communities you have joined.'
-                : 'No communities found. Try adjusting your filters.'}
+                : searchTerm || selectedCategory || selectedGender !== 'all'
+                  ? 'No communities found. Try adjusting your filters.'
+                  : 'No communities available yet'}
             </p>
           </div>
         ) : (

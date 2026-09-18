@@ -184,6 +184,15 @@ export default function EducationalResourcesPage() {
             </p>
           </header>
 
+          {!loading && articles.length === 0 ? (
+            <div
+              role="status"
+              className="rounded-lg border border-[#e4e1da] bg-[#faf9f6] px-4 py-3 text-sm text-muted-foreground font-body"
+            >
+              No learning articles available yet — check back soon.
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 border border-[#e4e1da] rounded-lg p-4 bg-white">
             <input
               type="search"
@@ -292,7 +301,9 @@ export default function EducationalResourcesPage() {
             </div>
             {filteredArticles.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No articles match these filters. Content is managed in Admin → CMS → Learning.
+                {articles.length === 0
+                  ? 'No learning articles available yet — check back soon.'
+                  : 'No articles match these filters. Try clearing your search or filters.'}
               </p>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">

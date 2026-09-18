@@ -63,7 +63,16 @@ export async function GET(request: NextRequest) {
       break
     }
 
-    return NextResponse.json({ success: false, error: lastError }, { status: 502 })
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          /REQUEST_DENIED|not authorized|ApiNotActivated/i.test(lastError)
+            ? 'Location lookup is temporarily unavailable. Enter your address manually.'
+            : lastError,
+      },
+      { status: 502 }
+    )
   } catch (error) {
     console.error('[places/geocode]', error)
     return NextResponse.json({ success: false, error: 'Geocode failed' }, { status: 500 })

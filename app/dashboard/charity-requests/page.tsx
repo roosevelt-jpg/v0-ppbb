@@ -198,7 +198,7 @@ function CharityRequestsContent() {
             </p>
             <button type="button" className={btnPrimary} onClick={() => setShowForm(true)}>
               <Plus className="w-4 h-4" />
-              Apply for Support
+              Start your first application
             </button>
           </div>
         ) : (

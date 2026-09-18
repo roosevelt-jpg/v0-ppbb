@@ -47,17 +47,21 @@ function DonationsContent() {
     }
 
     setLoading(true)
+    let settled = false
+    const finish = (rows?: DonationRow[], err?: string) => {
+      if (rows) setDonations(rows)
+      if (err) setError(err)
+      else if (rows) setError(null)
+      settled = true
+      setLoading(false)
+    }
+
     const unsub = subscribeToMemberDonations(
       user.id,
-      (rows) => {
-        setDonations(rows)
-        setLoading(false)
-        setError(null)
-      },
+      (rows) => finish(rows),
       (msg) => {
         console.error('[v0] Donations error:', msg)
-        setError('Failed to load donations.')
-        setLoading(false)
+        finish([], 'Failed to load donations.')
       }
     )
 
@@ -69,7 +73,14 @@ function DonationsContent() {
       (err) => console.error('[v0] charityCases error:', err)
     )
 
+    // Unblock UI if Firestore is slow; late snapshots can still update rows
+    const timeout = window.setTimeout(() => {
+      if (!settled) setLoading(false)
+    }, 10000)
+
     return () => {
+      settled = true
+      window.clearTimeout(timeout)
       unsub()
       charityUnsub()
     }
@@ -134,11 +145,19 @@ function DonationsContent() {
         donations.length === 0 ? (
           <DashboardEmptyState
             title="No donations yet"
-            description="Browse charity cases to make your first donation."
+            description="Your giving history will appear here once you support a cause. Browse charity cases to make your first donation."
             action={
-              <Link href="/donate" className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                Browse Charity Cases
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2 items-center">
+                <Link
+                  href="/donate"
+                  className="!bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold"
+                >
+                  Browse Charity Cases
+                </Link>
+                <p className="text-xs text-neutral-500">
+                  Total donated: AED {totalDonated.toLocaleString()}
+                </p>
+              </div>
             }
           />
         ) : (

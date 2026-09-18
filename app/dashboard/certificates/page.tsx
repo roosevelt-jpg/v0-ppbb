@@ -120,9 +120,12 @@ export default function CertificatesPage() {
       }
     )
 
+    const timeoutId = window.setTimeout(() => setLoading(false), 10_000)
+
     return () => {
       certUnsub()
       badgeUnsub()
+      window.clearTimeout(timeoutId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per user session
   }, [authLoading, user?.id])

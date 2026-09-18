@@ -263,25 +263,23 @@ export default function OpportunityDetailPage() {
               {/* Body: description + sidebar */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 <div className="lg:col-span-2 space-y-5">
-                  <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
-                    <h2 className="text-lg font-bold text-neutral-900 mb-3">Job Description</h2>
-                    {opportunity.description ? (
+                  {opportunity.description ? (
+                    <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                      <h2 className="text-lg font-bold text-neutral-900 mb-3">Job Description</h2>
                       <div
                         className="prose prose-sm max-w-none text-neutral-700 [&_p]:mb-3 [&_br]:block"
                         dangerouslySetInnerHTML={{
                           __html: cmsContentToHtml(opportunity.description, opportunity.title),
                         }}
                       />
-                    ) : (
-                      <p className="text-sm text-neutral-500">No description provided.</p>
-                    )}
-                  </section>
+                    </section>
+                  ) : null}
 
-                  <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
-                    <h2 className="text-lg font-bold text-neutral-900 mb-3">
-                      6. Key Responsibilities
-                    </h2>
-                    {responsibilities.length ? (
+                  {responsibilities.length ? (
+                    <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                      <h2 className="text-lg font-bold text-neutral-900 mb-3">
+                        Key Responsibilities
+                      </h2>
                       <ul className="space-y-2 text-sm text-neutral-700">
                         {responsibilities.map((item) => (
                           <li key={item} className="flex gap-2">
@@ -290,16 +288,14 @@ export default function OpportunityDetailPage() {
                           </li>
                         ))}
                       </ul>
-                    ) : (
-                      <p className="text-sm text-neutral-500">Not specified.</p>
-                    )}
-                  </section>
+                    </section>
+                  ) : null}
 
-                  <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
-                    <h2 className="text-lg font-bold text-neutral-900 mb-3">
-                      7. Requirements / Skills Needed
-                    </h2>
-                    {requirements.length ? (
+                  {requirements.length ? (
+                    <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
+                      <h2 className="text-lg font-bold text-neutral-900 mb-3">
+                        Requirements / Skills Needed
+                      </h2>
                       <ul className="space-y-2 text-sm text-neutral-700">
                         {requirements.map((item) => (
                           <li key={item} className="flex gap-2">
@@ -308,10 +304,8 @@ export default function OpportunityDetailPage() {
                           </li>
                         ))}
                       </ul>
-                    ) : (
-                      <p className="text-sm text-neutral-500">Not specified.</p>
-                    )}
-                  </section>
+                    </section>
+                  ) : null}
 
                   {opportunity.benefits?.length ? (
                     <section className="bg-white border border-neutral-200 rounded-lg shadow-sm p-4 sm:p-5">
@@ -336,71 +330,77 @@ export default function OpportunityDetailPage() {
                     </h2>
                     <p className="text-xs text-neutral-500 mb-2">Work opportunity details</p>
 
-                    <InfoRow
-                      icon={Briefcase}
-                      label="1. Job Title"
-                      value={opportunity.title}
-                    />
+                    <InfoRow icon={Briefcase} label="Job Title" value={opportunity.title} />
                     <InfoRow
                       icon={Building2}
-                      label="2. Company / Organization"
+                      label="Company / Organization"
                       value={companyName}
                     />
-                    <InfoRow
-                      icon={Clock}
-                      label="3. Role Type"
-                      value={ROLE_TYPE_LABELS[roleType] || roleType}
-                    />
+                    {(ROLE_TYPE_LABELS[roleType] || roleType) ? (
+                      <InfoRow
+                        icon={Clock}
+                        label="Role Type"
+                        value={ROLE_TYPE_LABELS[roleType] || roleType}
+                      />
+                    ) : null}
                     <InfoRow
                       icon={Laptop}
-                      label="4. Work Type"
+                      label="Work Type"
                       value={getWorkTypeLabel(opportunity)}
                     />
-                    <InfoRow
-                      icon={MapPin}
-                      label="5. Location"
-                      value={
-                        locationIsLink ? (
-                          <a
-                            href={locationRaw}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline"
-                          >
-                            Open map link
-                          </a>
-                        ) : (
-                          locationRaw || 'TBA'
-                        )
-                      }
-                    />
-                    <InfoRow icon={Banknote} label="8. Salary / Compensation" value={salary} />
-                    <InfoRow
-                      icon={Users}
-                      label="9. Suitability"
-                      value={suitability.length ? suitability.join(', ') : 'Open to all'}
-                    />
-                    <InfoRow
-                      icon={Calendar}
-                      label="10. Application Deadline"
-                      value={
-                        deadline
-                          ? `${format(deadline, 'MMM d, yyyy')}${
-                              daysLeft != null && daysLeft >= 0 ? ` (${daysLeft} days left)` : ''
-                            }`
-                          : 'Open'
-                      }
-                    />
-                    <InfoRow
-                      icon={CalendarCheck}
-                      label="11. Hiring By"
-                      value={hiringBy ? format(hiringBy, 'MMM d, yyyy') : 'TBA'}
-                    />
-                    <InfoRow
-                      icon={Layers}
-                      label="12. Industry / Category"
-                      value={opportunity.category || 'TBA'}
-                    />
+                    {locationRaw ? (
+                      <InfoRow
+                        icon={MapPin}
+                        label="Location"
+                        value={
+                          locationIsLink ? (
+                            <a
+                              href={locationRaw}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline"
+                            >
+                              Open map link
+                            </a>
+                          ) : (
+                            locationRaw
+                          )
+                        }
+                      />
+                    ) : null}
+                    {salary && salary !== 'TBA' && salary !== 'Not specified' ? (
+                      <InfoRow icon={Banknote} label="Salary / Compensation" value={salary} />
+                    ) : null}
+                    {suitability.length ? (
+                      <InfoRow
+                        icon={Users}
+                        label="Suitability"
+                        value={suitability.join(', ')}
+                      />
+                    ) : null}
+                    {deadline ? (
+                      <InfoRow
+                        icon={Calendar}
+                        label="Application Deadline"
+                        value={`${format(deadline, 'MMM d, yyyy')}${
+                          daysLeft != null && daysLeft >= 0 ? ` (${daysLeft} days left)` : ''
+                        }`}
+                      />
+                    ) : null}
+                    {hiringBy ? (
+                      <InfoRow
+                        icon={CalendarCheck}
+                        label="Hiring By"
+                        value={format(hiringBy, 'MMM d, yyyy')}
+                      />
+                    ) : null}
+                    {opportunity.category ? (
+                      <InfoRow
+                        icon={Layers}
+                        label="Industry / Category"
+                        value={opportunity.category}
+                      />
+                    ) : null}
 
                     <div className="mt-4 pt-3 border-t border-neutral-100">{applyButton}</div>
                   </div>

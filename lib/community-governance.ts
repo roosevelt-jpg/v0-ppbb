@@ -84,7 +84,15 @@ export function canJoinByGenderRestriction(
 }
 
 export function isCommunityVisible(status: unknown): boolean {
-  return String(status || '') === 'active'
+  const s = String(status || 'active').toLowerCase().trim()
+  // Missing status defaults to active; "approved" kept for legacy docs
+  return s === 'active' || s === 'approved'
+}
+
+/** Missing visibility defaults to public for listing. */
+export function isCommunityPublicVisibility(visibility: unknown): boolean {
+  if (visibility == null || visibility === '') return true
+  return String(visibility).toLowerCase().trim() === 'public'
 }
 
 export function isGroupVisible(status: unknown): boolean {

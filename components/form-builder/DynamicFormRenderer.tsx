@@ -270,21 +270,40 @@ export default function DynamicFormRenderer({
                   )}
 
                   {field.type === 'multiselect' && (
-                    <select
-                      multiple
-                      value={Array.isArray(responses[field.id]) ? (responses[field.id] as string[]) : []}
-                      onChange={(e) => {
-                        const values = Array.from(e.target.selectedOptions, (o) => o.value)
-                        handleChange(field.id, values)
-                      }}
-                      className={`${inputClass(field.id)} min-h-28`}
-                    >
-                      {field.options?.map((opt) => (
-                        <option key={opt.id} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="space-y-2">
+                      {(!Array.isArray(responses[field.id]) ||
+                        (responses[field.id] as string[]).length === 0) && (
+                        <p className="font-body text-sm text-muted-foreground">Select options</p>
+                      )}
+                      {field.options?.map((opt) => {
+                        const selected = Array.isArray(responses[field.id])
+                          ? (responses[field.id] as string[]).includes(opt.value)
+                          : false
+                        return (
+                          <label
+                            key={opt.id}
+                            className="flex items-center gap-2 font-body text-sm min-h-[40px]"
+                          >
+                            <input
+                              type="checkbox"
+                              value={opt.value}
+                              checked={selected}
+                              onChange={(e) => {
+                                const current = Array.isArray(responses[field.id])
+                                  ? (responses[field.id] as string[])
+                                  : []
+                                const newValue = e.target.checked
+                                  ? [...current, opt.value]
+                                  : current.filter((v) => v !== opt.value)
+                                handleChange(field.id, newValue)
+                              }}
+                              className="w-4 h-4"
+                            />
+                            {opt.label}
+                          </label>
+                        )
+                      })}
+                    </div>
                   )}
 
                   {field.type === 'checkbox' && (

@@ -100,6 +100,67 @@ export function isMapsOrWebUrl(value: string): boolean {
 }
 
 /**
+ * Collapse recurring / duplicate upcoming events to one card per series.
+ * Prefers `seriesId`; falls back to title+location when seriesId is missing.
+ * Keeps the soonest upcoming occurrence.
+ */
+export function dedupeUpcomingEventsBySeries<T extends { id: string }>(
+  events: T[],
+  getStart: (event: T) => Date | null,
+  getLocation: (event: T) => string = () => ''
+): Array<T & { recurringSeriesBadge?: string }> {
+  const now = Date.now()
+  const sorted = [...events].sort((a, b) => {
+    const at = getStart(a)?.getTime() ?? Number.POSITIVE_INFINITY
+    const bt = getStart(b)?.getTime() ?? Number.POSITIVE_INFINITY
+    return at - bt
+  })
+
+  const byKey = new Map<string, { event: T; count: number; hasSeriesId: boolean }>()
+  for (const event of sorted) {
+    const start = getStart(event)
+    if (!start || start.getTime() < now) continue
+    const raw = event as Record<string, unknown>
+    const seriesId =
+      typeof raw.seriesId === 'string' && raw.seriesId.trim() ? raw.seriesId.trim() : ''
+    const title = String(raw.title || '')
+      .trim()
+      .toLowerCase()
+    const location = getLocation(event).trim().toLowerCase()
+    const key = seriesId
+      ? `series:${seriesId}`
+      : title
+        ? `title:${title}|${location}`
+        : `id:${event.id}`
+    const existing = byKey.get(key)
+    if (!existing) {
+      byKey.set(key, { event, count: 1, hasSeriesId: Boolean(seriesId) })
+    } else {
+      existing.count += 1
+    }
+  }
+
+  return Array.from(byKey.values())
+    .map(({ event, count, hasSeriesId }) => {
+      const start = getStart(event)
+      const isRecurring = hasSeriesId || count > 1
+      if (!isRecurring || !start) return event as T & { recurringSeriesBadge?: string }
+      return {
+        ...event,
+        recurringSeriesBadge: `Recurring · next ${start.toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+        })}`,
+      }
+    })
+    .sort((a, b) => {
+      const at = getStart(a)?.getTime() ?? 0
+      const bt = getStart(b)?.getTime() ?? 0
+      return at - bt
+    })
+}
+
+/**
  * Prefer a human-readable place label as admin selected it.
  * Shows "Venue — full address" when both differ; otherwise the best single line.
  */

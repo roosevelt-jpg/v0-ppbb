@@ -17,6 +17,7 @@ import {
   type AddressLocationValue,
 } from '@/components/address-location-picker'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
+import { formatAuthError } from '@/lib/auth-errors'
 import type { LocationData } from '@/lib/types'
 import type { PricingPlan } from '@/lib/pricing-types'
 import {
@@ -109,6 +110,15 @@ export default function SignupClient() {
   const [activeIntent, setActiveIntent] = useState<{
     clientSecret: string
     mode: 'payment' | 'setup'
+  } | null>(null)
+  const [promoApplied, setPromoApplied] = useState<{
+    code: string
+    percentOff: number
+    trialEnabled: boolean
+    grantsFreeAccess: boolean
+    planId?: string
+    planName?: string
+    benefitDurationMonths?: number
   } | null>(null)
   const [businessAddress, setBusinessAddress] = useState<AddressLocationValue>({
     country: 'United Arab Emirates',
@@ -326,10 +336,16 @@ export default function SignupClient() {
         return false
       }
       const resolvedCity = isUaeCountry(formData.country)
-        ? formData.city
+        ? formData.city === 'Other'
+          ? (formData.customCity || '').trim()
+          : formData.city
         : (formData.customCity || formData.city).trim()
       if (!resolvedCity) {
-        setError('Please enter your city')
+        setError(
+          formData.city === 'Other'
+            ? 'Please enter your city / area'
+            : 'Please enter your city'
+        )
         return false
       }
       if (isUaeCountry(formData.country) && !formData.emirate) {
@@ -376,8 +392,35 @@ export default function SignupClient() {
   }
 
   type PromoRedeemOutcome =
-    | { ok: true; kind: 'redirect'; url: string }
-    | { ok: true; kind: 'card'; clientSecret: string; mode: 'payment' | 'setup' }
+    | {
+        ok: true
+        kind: 'redirect'
+        url: string
+        promoMeta?: {
+          code: string
+          percentOff: number
+          trialEnabled: boolean
+          grantsFreeAccess: boolean
+          planId?: string
+          planName?: string
+          benefitDurationMonths?: number
+        }
+      }
+    | {
+        ok: true
+        kind: 'card'
+        clientSecret: string
+        mode: 'payment' | 'setup'
+        promoMeta?: {
+          code: string
+          percentOff: number
+          trialEnabled: boolean
+          grantsFreeAccess: boolean
+          planId?: string
+          planName?: string
+          benefitDurationMonths?: number
+        }
+      }
     | { ok: false; error: string }
 
   const tryRedeemPromo = async (userId: string): Promise<PromoRedeemOutcome> => {
@@ -405,21 +448,42 @@ export default function SignupClient() {
       setFormData((prev) => ({ ...prev, planId: data.data.planId }))
       if (data.data.planName) setPlanName(String(data.data.planName))
     }
+    const promoMeta = {
+      code: String(data.data?.code || code),
+      percentOff: Number(data.data?.percentOff) || 0,
+      trialEnabled: Boolean(data.data?.trialEnabled),
+      grantsFreeAccess: Boolean(data.data?.grantsFreeAccess),
+      planId: data.data?.planId ? String(data.data.planId) : undefined,
+      planName: data.data?.planName ? String(data.data.planName) : undefined,
+      benefitDurationMonths:
+        data.data?.benefitDurationMonths != null
+          ? Number(data.data.benefitDurationMonths)
+          : undefined,
+    }
+    setPromoApplied(promoMeta)
     // A trial-enabled code isn't active yet — show the embedded card form.
     // Otherwise the code granted the plan directly.
     if (data.data?.clientSecret) {
-      return { ok: true, kind: 'card', clientSecret: data.data.clientSecret, mode: data.data.intentMode || 'setup' }
+      return {
+        ok: true,
+        kind: 'card',
+        clientSecret: data.data.clientSecret,
+        mode: data.data.intentMode || 'setup',
+        promoMeta,
+      }
     }
     return {
       ok: true,
       kind: 'redirect',
       url: data.data?.membershipUrl || '/dashboard/membership?status=success',
+      promoMeta,
     }
   }
 
   /** Shared handling for a successful tryRedeemPromo() result — shows the
    * embedded card form for a trial code, or redirects for a direct grant. */
   const applyPromoOutcome = (redeemed: Extract<PromoRedeemOutcome, { ok: true }>) => {
+    if (redeemed.promoMeta) setPromoApplied(redeemed.promoMeta)
     if (redeemed.kind === 'card') {
       setActiveIntent({ clientSecret: redeemed.clientSecret, mode: redeemed.mode })
       return
@@ -437,17 +501,22 @@ export default function SignupClient() {
     setCheckingOut(true)
     setError('')
     try {
-      if (formData.promoCode.trim()) {
+      const enteredPromo = formData.promoCode.trim()
+      if (enteredPromo) {
         const redeemed = await tryRedeemPromo(userId)
         if (redeemed.ok) {
           applyPromoOutcome(redeemed)
           setCheckingOut(false)
           return
         }
-        // Promo failed — show message, still allow paid checkout
-        if (redeemed.error) {
-          setError(`${redeemed.error}. You can still subscribe with payment below, or fix the code and try again.`)
-        }
+        // Promo was entered — do not fall through to full-price checkout.
+        setError(
+          redeemed.error
+            ? `${redeemed.error}. Fix the code or clear it to pay full price.`
+            : 'Promo code could not be applied. Fix the code or clear it to pay full price.'
+        )
+        setCheckingOut(false)
+        return
       }
 
       const plan = selectedPlan || plans.find((p) => p.id === formData.planId)
@@ -463,11 +532,25 @@ export default function SignupClient() {
           userId,
           gateway,
           referralCode: getReferralCodeFromDocument(),
+          ...(promoApplied?.code ? { promoCode: promoApplied.code } : {}),
         }),
       })
       const data = await response.json()
       if (!response.ok) {
         throw new Error(data.error || 'Checkout failed')
+      }
+
+      if (data.discountApplied && data.percentOff) {
+        setPromoApplied((prev) =>
+          prev
+            ? { ...prev, percentOff: Number(data.percentOff) || prev.percentOff }
+            : {
+                code: promoApplied?.code || '',
+                percentOff: Number(data.percentOff) || 0,
+                trialEnabled: false,
+                grantsFreeAccess: false,
+              }
+        )
       }
 
       if (gateway === 'stripe') {
@@ -491,7 +574,9 @@ export default function SignupClient() {
   const buildUserPayload = (uid: string) => {
     const now = new Date()
     const resolvedCity = isUaeCountry(formData.country)
-      ? formData.city
+      ? formData.city === 'Other'
+        ? (formData.customCity || '').trim()
+        : formData.city
       : (formData.customCity || formData.city).trim()
 
     const location: LocationData = sanitizeForFirestore({
@@ -649,11 +734,26 @@ export default function SignupClient() {
         return
       }
 
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email.toLowerCase(),
-        formData.password
-      )
+      const userCredential = await (async () => {
+        let lastErr: unknown
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            return await createUserWithEmailAndPassword(
+              auth,
+              formData.email.toLowerCase(),
+              formData.password
+            )
+          } catch (err) {
+            lastErr = err
+            const msg = String((err as { message?: string })?.message || err || '')
+            const transient =
+              /Database is closing|closing\/hidden|IndexedDB|connection is closing/i.test(msg)
+            if (!transient || attempt === 2) throw err
+            await new Promise((r) => setTimeout(r, 400 * (attempt + 1)))
+          }
+        }
+        throw lastErr
+      })()
       const firebaseUser = userCredential.user
       await updateProfile(firebaseUser, {
         displayName: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -713,7 +813,7 @@ export default function SignupClient() {
       } else if (err.code === 'permission-denied') {
         setError('Could not save your profile. Please refresh and try again, or contact support.')
       } else {
-        setError(err.message || 'An error occurred during signup. Please try again.')
+        setError(formatAuthError(err))
       }
     } finally {
       setIsLoading(false)
@@ -1316,6 +1416,27 @@ export default function SignupClient() {
                     {plans.map((plan) => {
                       const { amount, period } = formatPlanPriceDetailed(plan)
                       const selected = formData.planId === plan.id
+                      const promoForPlan =
+                        promoApplied &&
+                        (!promoApplied.planId || promoApplied.planId === plan.id)
+                          ? promoApplied
+                          : null
+                      const discountedLabel = (() => {
+                        if (!promoForPlan || !selected) return null
+                        if (promoForPlan.grantsFreeAccess) {
+                          return promoForPlan.trialEnabled
+                            ? 'Free during promo period'
+                            : 'Covered by promo'
+                        }
+                        if (promoForPlan.percentOff > 0 && promoForPlan.percentOff < 100) {
+                          const cents = Number(plan.price) || 0
+                          const after =
+                            Math.round(cents * (1 - promoForPlan.percentOff / 100)) / 100
+                          const currency = plan.currency || 'AED'
+                          return `${currency} ${after.toFixed(0)} (${promoForPlan.percentOff}% off)`
+                        }
+                        return null
+                      })()
                       return (
                         <div
                           key={plan.id}
@@ -1342,9 +1463,23 @@ export default function SignupClient() {
                               </p>
                             </div>
                             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                              <p style={{ fontWeight: 700, margin: 0 }}>{amount}</p>
+                              <p
+                                style={{
+                                  fontWeight: 700,
+                                  margin: 0,
+                                  textDecoration: discountedLabel ? 'line-through' : undefined,
+                                  color: discountedLabel ? '#888' : undefined,
+                                }}
+                              >
+                                {amount}
+                              </p>
+                              {discountedLabel ? (
+                                <p style={{ fontWeight: 700, margin: 0, color: '#111', fontSize: '0.85rem' }}>
+                                  {discountedLabel}
+                                </p>
+                              ) : null}
                               <p style={{ fontSize: '0.7rem', color: '#888', margin: 0 }}>/{period}</p>
-                              {planTrialCopy(plan) ? (
+                              {planTrialCopy(plan) && !discountedLabel ? (
                                 <p style={{ fontSize: '0.65rem', fontWeight: 700, color: '#111', marginTop: '0.25rem', marginBottom: 0, maxWidth: '8rem' }}>
                                   {planTrialCopy(plan)}
                                 </p>
@@ -1361,12 +1496,14 @@ export default function SignupClient() {
                       <input
                         type="text"
                         value={formData.promoCode}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const next = e.target.value.toUpperCase()
                           setFormData((prev) => ({
                             ...prev,
-                            promoCode: e.target.value.toUpperCase(),
+                            promoCode: next,
                           }))
-                        }
+                          if (!next.trim()) setPromoApplied(null)
+                        }}
                         placeholder="e.g. FOUNDERS500"
                         autoComplete="off"
                         style={{
@@ -1380,9 +1517,23 @@ export default function SignupClient() {
                           boxSizing: 'border-box',
                         }}
                       />
-                      <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.35rem', marginBottom: 0 }}>
-                        Free-access codes skip payment and unlock the plan tied to the code.
-                      </p>
+                      {promoApplied ? (
+                        <p style={{ fontSize: '0.75rem', color: '#2e7d32', marginTop: '0.35rem', marginBottom: 0 }}>
+                          Promo {promoApplied.code} applied
+                          {promoApplied.percentOff > 0 && promoApplied.percentOff < 100
+                            ? ` — ${promoApplied.percentOff}% off`
+                            : promoApplied.grantsFreeAccess
+                              ? promoApplied.trialEnabled
+                                ? ' — free trial period'
+                                : ' — free access'
+                              : ''}
+                          .
+                        </p>
+                      ) : (
+                        <p style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.35rem', marginBottom: 0 }}>
+                          Free-access codes skip payment and unlock the plan tied to the code.
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1489,6 +1640,23 @@ export default function SignupClient() {
             <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '1.25rem' }}>
               {(() => {
                 const { amount, period } = formatPlanPriceDetailed(selectedPlan)
+                if (
+                  promoApplied &&
+                  (!promoApplied.planId || promoApplied.planId === selectedPlan.id)
+                ) {
+                  if (promoApplied.grantsFreeAccess) {
+                    return promoApplied.trialEnabled
+                      ? `Promo ${promoApplied.code}: free trial, then ${amount} per ${period}`
+                      : `Promo ${promoApplied.code}: covered — no charge`
+                  }
+                  if (promoApplied.percentOff > 0) {
+                    const cents = Number(selectedPlan.price) || 0
+                    const after =
+                      Math.round(cents * (1 - promoApplied.percentOff / 100)) / 100
+                    const currency = selectedPlan.currency || 'AED'
+                    return `${currency} ${after.toFixed(0)} per ${period} (${promoApplied.percentOff}% off with ${promoApplied.code})`
+                  }
+                }
                 return `${amount} per ${period}`
               })()}
             </p>

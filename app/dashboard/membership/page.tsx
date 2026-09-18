@@ -105,9 +105,12 @@ export default function MembershipPage() {
       }
     )
 
+    const timeoutId = window.setTimeout(() => setLoading(false), 10_000)
+
     return () => {
       unsubProfile()
       unsub()
+      window.clearTimeout(timeoutId)
     }
   }, [authLoading, user?.id])
 
@@ -165,6 +168,34 @@ export default function MembershipPage() {
 
   const handleCheckout = async (plan: PricingPlan) => {
     if (!user?.id) return
+
+    const memberForConfirm = {
+      ...(profile ?? {}),
+      id: user.id,
+      membershipTier: profile?.membershipTier ?? user.membershipTier,
+      membershipPlanId: profile?.membershipPlanId,
+      membershipPlanName: profile?.membershipPlanName,
+      membershipStatus: profile?.membershipStatus,
+      membershipRenewDate: profile?.membershipRenewDate,
+      membershipLifetimeForever: profile?.membershipLifetimeForever,
+    }
+    const activeMembership = hasActiveMembership(memberForConfirm)
+    const switchingAway =
+      activeMembership && !memberMatchesPlan(memberForConfirm, plan)
+    if (switchingAway) {
+      const currentName =
+        (typeof profile?.membershipPlanName === 'string' && profile.membershipPlanName) ||
+        (typeof profile?.membershipTier === 'string' && profile.membershipTier) ||
+        'your current plan'
+      if (
+        !window.confirm(
+          `Switch from ${currentName} to ${plan.name}? Billing will update.`
+        )
+      ) {
+        return
+      }
+    }
+
     setCheckingOut(plan.id)
     try {
       const gateway = resolveActiveGateway(plan, gateways)
@@ -179,6 +210,7 @@ export default function MembershipPage() {
           userId: user.id,
           gateway,
           referralCode: getReferralCodeFromDocument(),
+          ...(promoCode.trim() ? { promoCode: promoCode.trim() } : {}),
         }),
       })
       const data = await response.json()
@@ -218,8 +250,12 @@ export default function MembershipPage() {
     membershipTier: profile?.membershipTier ?? user?.membershipTier,
     membershipPlanId: profile?.membershipPlanId,
     membershipPlanName: profile?.membershipPlanName,
+    membershipStatus: profile?.membershipStatus,
+    membershipRenewDate: profile?.membershipRenewDate,
+    membershipLifetimeForever: profile?.membershipLifetimeForever,
   }
   const alreadyUsedPromo = Boolean(profile?.membershipPromoCodeId || profile?.promoCodeId)
+  const memberActive = hasActiveMembership(memberRecord)
 
   const handleCardSuccess = () => {
     setActiveIntent(null)
@@ -331,7 +367,8 @@ export default function MembershipPage() {
             // an expired member still has membershipPlanId set to their old
             // plan, and without this check they'd see a disabled "Current
             // Plan" button instead of a working Subscribe button.
-            const isCurrentPlan = memberMatchesPlan(memberRecord, plan) && hasActiveMembership(memberRecord)
+            const isCurrentPlan = memberMatchesPlan(memberRecord, plan) && memberActive
+            const isChangePlan = memberActive && !isCurrentPlan
             return (
               <Card key={plan.id} className="p-6 border-2 border-neutral-200 dark:border-border flex flex-col">
                 <div className="flex items-center gap-2 mb-2">
@@ -375,7 +412,9 @@ export default function MembershipPage() {
                       <Loader2 className="w-4 h-4 animate-spin" /> Processing...
                     </span>
                   ) : isCurrentPlan ? (
-                    'Current Plan'
+                    'Current plan'
+                  ) : isChangePlan ? (
+                    'Change plan'
                   ) : planTrialCopy(plan) ? (
                     'Add card — start free period'
                   ) : (

@@ -39,6 +39,17 @@ async function resolveGoogleMapsApiKey(): Promise<string | null> {
     return envKey
   }
 
+  // Prefer dedicated public endpoint (Integrations vault → locationConfig → env)
+  try {
+    const res = await fetch('/api/maps/browser-key', { cache: 'no-store' })
+    if (res.ok) {
+      const data = await res.json()
+      if (data?.apiKey) return String(data.apiKey)
+    }
+  } catch {
+    /* fall through */
+  }
+
   try {
     const res = await fetch('/api/admin/location-config', { cache: 'no-store' })
     if (!res.ok) return null

@@ -151,7 +151,7 @@ export default function LearningPage() {
       return (
         <DashboardEmptyState
           title="Nothing published yet"
-          description="Your team can add content in Admin → CMS → Learning Resources."
+          description="No learning articles available yet — check back soon."
         />
       )
     }
@@ -212,7 +212,7 @@ export default function LearningPage() {
         {displayResources.length === 0 ? (
           <DashboardEmptyState
             title={`No ${filter === 'all' ? '' : filter + ' '}resources`}
-            description="Published resources appear here. Admins can post content under CMS → Learning Resources."
+            description="No learning articles available yet — check back soon."
           />
         ) : (
           renderResourceCards(displayResources)

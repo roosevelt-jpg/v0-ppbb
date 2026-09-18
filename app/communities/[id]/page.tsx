@@ -11,6 +11,31 @@ import { useAuth } from '@/lib/auth-context'
 import { ChevronLeft, Users, Tag, MessageCircle, Lock } from 'lucide-react'
 import { canJoinByGenderRestriction, genderRestrictionBadgeClass, genderRestrictionLabel } from '@/lib/community-governance'
 
+function GroupIconAvatar({ name, iconURL }: { name: string; iconURL?: string }) {
+  const [failed, setFailed] = React.useState(false)
+  const initial = (name || 'G').charAt(0).toUpperCase()
+
+  if (!iconURL || failed) {
+    return (
+      <div
+        className="h-16 w-16 rounded bg-neutral-200 text-neutral-700 flex items-center justify-center text-lg font-bold shrink-0"
+        aria-hidden
+      >
+        {initial}
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={iconURL}
+      alt=""
+      className="h-16 w-16 rounded object-contain bg-neutral-50 shrink-0"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 export default function CommunityDetailPage() {
   const router = useRouter()
   const params = useParams()
@@ -22,6 +47,7 @@ export default function CommunityDetailPage() {
   const [userGroups, setUserGroups] = React.useState<Record<string, 'active' | 'pending' | 'rejected'>>({})
   const [loading, setLoading] = React.useState(true)
   const [joiningGroup, setJoiningGroup] = React.useState<string | null>(null)
+  const [joinError, setJoinError] = React.useState('')
 
   React.useEffect(() => {
     const unsubCommunity = subscribeToCommunity(communityId, (data) => {
@@ -47,11 +73,12 @@ export default function CommunityDetailPage() {
 
   const handleJoinGroup = async (group: Group) => {
     if (!user) {
-      alert('Please log in to join groups')
+      setJoinError('Please log in to join groups')
       return
     }
 
     setJoiningGroup(group.id!)
+    setJoinError('')
     try {
       const status = await joinGroup(
         communityId,
@@ -65,7 +92,15 @@ export default function CommunityDetailPage() {
       setUserGroups((prev) => ({ ...prev, [group.id!]: status }))
     } catch (error) {
       console.error('[v0] Error joining group:', error)
-      alert(error instanceof Error ? error.message : 'Failed to join group')
+      setJoinError(
+        /insufficient permissions|permission-denied|Missing or insufficient/i.test(
+          error instanceof Error ? error.message : ''
+        )
+          ? 'You do not have permission to join this group right now. Try again or contact support.'
+          : error instanceof Error
+            ? error.message
+            : 'Failed to join group'
+      )
     } finally {
       setJoiningGroup(null)
     }
@@ -200,6 +235,15 @@ export default function CommunityDetailPage() {
         <div className="space-y-4 sm:space-y-6 min-w-0">
           <h2 className="text-xl sm:text-2xl font-bold text-black">Discussion Groups</h2>
 
+          {joinError ? (
+            <div
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+            >
+              {joinError}
+            </div>
+          ) : null}
+
           {groups.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
               <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -220,13 +264,7 @@ export default function CommunityDetailPage() {
                     key={group.id}
                     className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-2.5 overflow-hidden"
                   >
-                    {group.iconURL && (
-                      <img
-                        src={group.iconURL}
-                        alt={group.name}
-                        className="w-full h-20 sm:h-24 object-cover rounded-md"
-                      />
-                    )}
+                    <GroupIconAvatar name={group.name} iconURL={group.iconURL} />
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-black text-sm sm:text-base mb-0.5 line-clamp-1">

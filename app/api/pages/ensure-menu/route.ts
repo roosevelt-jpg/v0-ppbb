@@ -18,7 +18,11 @@ const FORCE_MENU_REFRESH_SLUGS = new Set([
   'terms-of-service',
   'code-of-conduct',
   'data-protection',
+  'community-guidelines',
 ])
+
+/** Fill empty body when a seed ships starter copy (e.g. Community Guidelines). */
+const FILL_EMPTY_CONTENT_SLUGS = new Set(['community-guidelines'])
 
 /**
  * Idempotent menu seed + dedupe:
@@ -142,6 +146,14 @@ export async function GET() {
             externalHref: seed.externalHref || '',
             status: seed.status,
             updatedAt: now,
+            ...(FILL_EMPTY_CONTENT_SLUGS.has(seed.slug) &&
+            !(typeof data?.content === 'string' && data.content.trim()) &&
+            seedContent
+              ? {
+                  content: seedContent,
+                  description: seed.description || data?.description || '',
+                }
+              : {}),
           })
           await docRef.set(menuOnlyPayload, { merge: true })
           updated++

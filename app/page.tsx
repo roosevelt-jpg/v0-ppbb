@@ -133,9 +133,9 @@ export default function HomePage() {
 
       {/* ACTIVE CAUSES - Mobile First */}
       {causes.length > 0 && (
-        <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-[#f7f6f2]">
+        <section className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 bg-[#f7f6f2] dark:bg-neutral-900">
           <div className="max-w-[72rem] mx-auto w-full min-w-0">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-5 sm:mb-6 md:mb-7 font-headline">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-5 sm:mb-6 md:mb-7 font-headline text-neutral-900 dark:text-neutral-50">
               Active Causes
             </h2>
 
@@ -143,33 +143,41 @@ export default function HomePage() {
               {causes.map((cause) => {
                 const percentage = progressPercent(cause.amountRaised, cause.targetAmount)
                 return (
-                  <div key={cause.id} className="bg-white rounded-lg overflow-hidden border border-[#e4e1da]">
+                  <div
+                    key={cause.id}
+                    className="bg-white dark:bg-neutral-950 rounded-lg overflow-hidden border border-[#e4e1da] dark:border-neutral-700"
+                  >
                     {cause.bannerImage ? (
                       <img src={cause.bannerImage} alt={cause.title} className="w-full h-32 sm:h-40 object-cover" />
                     ) : null}
                     <div className="p-3 sm:p-4">
-                      <h3 className="font-bold text-base sm:text-lg mb-1">{cause.title}</h3>
-                      <p className="text-xs sm:text-sm text-[#888888] mb-2 line-clamp-2">
+                      <h3 className="font-bold text-base sm:text-lg mb-1 text-neutral-900 dark:text-neutral-50">
+                        {cause.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#888888] dark:text-neutral-400 mb-2 line-clamp-2">
                         {truncateAtWord(cause.description, 120)}
                       </p>
 
                       <div className="mb-2">
-                        <div className="flex justify-between text-xs mb-1">
+                        <div className="flex justify-between text-xs mb-1 text-neutral-800 dark:text-neutral-200">
                           <span>AED {cause.amountRaised.toLocaleString()}</span>
-                          <span className="text-[#888888]">
+                          <span className="text-[#888888] dark:text-neutral-400">
                             of AED {cause.targetAmount.toLocaleString()}
                           </span>
                         </div>
-                        <div className="w-full bg-[#e4e1da] rounded-full h-1.5">
+                        <div className="w-full bg-[#e4e1da] dark:bg-neutral-700 rounded-full h-1.5">
                           <div
-                            className="bg-[#111111] h-1.5 rounded-full"
+                            className="bg-[#111111] dark:bg-neutral-100 h-1.5 rounded-full"
                             style={{ width: `${Math.min(percentage, 100)}%` }}
                           />
                         </div>
                       </div>
 
                       <Link href="/donate">
-                        <Button size="sm" className="w-full bg-[#111111] hover:bg-[#333333] text-white text-xs py-1">
+                        <Button
+                          size="sm"
+                          className="w-full min-h-[44px] bg-[#111111] hover:bg-[#333333] text-white text-xs py-2 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                        >
                           Support
                         </Button>
                       </Link>
@@ -181,7 +189,10 @@ export default function HomePage() {
 
             <div className="text-center mt-5">
               <Link href="/donate">
-                <Button size="sm" className="bg-[#111111] hover:bg-[#333333] text-white text-sm">
+                <Button
+                  size="sm"
+                  className="min-h-[44px] bg-[#111111] hover:bg-[#333333] text-white text-sm dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                >
                   View All Causes
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

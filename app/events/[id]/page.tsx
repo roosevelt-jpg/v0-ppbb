@@ -70,7 +70,10 @@ function EventDetailInner() {
 
   const handleRegister = async () => {
     if (!user) {
-      router.push('/login')
+      const returnUrl = encodeURIComponent(
+        typeof window !== 'undefined' ? window.location.pathname + window.location.search : `/events/${eventId}`
+      )
+      router.push(`/login?returnUrl=${returnUrl}`)
       return
     }
 

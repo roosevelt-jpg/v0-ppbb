@@ -10,6 +10,20 @@ function sanitizeHtml(html: string): string {
     .replace(/javascript:/gi, '')
 }
 
+/** Collapse placeholder numbered lists like "1 2 3 4 5" / empty digit-only <li>s. */
+function scrubPlaceholderLists(html: string): string {
+  const stripped = html
+    .replace(/<li[^>]*>\s*(?:<a[^>]*>)?\s*\d+\s*(?:<\/a>)?\s*<\/li>/gi, '')
+    .replace(/<ol[^>]*>\s*<\/ol>/gi, '')
+    .replace(/<ul[^>]*>\s*<\/ul>/gi, '')
+
+  const textOnly = stripped.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  if (/^(\d+\s*){2,}$/.test(textOnly)) {
+    return ''
+  }
+  return stripped
+}
+
 interface RichTextContentProps {
   html: string
   className?: string
@@ -20,12 +34,22 @@ const baseClass =
 
 export function RichTextContent({ html, className = '' }: RichTextContentProps) {
   const safe = useMemo(() => {
-    const trimmed = html.trim()
+    const trimmed = (html || '').trim()
+    if (!trimmed) return ''
     if (!trimmed.includes('<')) {
+      if (/^(\d+\s*){2,}$/.test(trimmed)) return ''
       return trimmed.replace(/\n/g, '<br />')
     }
-    return sanitizeHtml(trimmed)
+    return scrubPlaceholderLists(sanitizeHtml(trimmed)).trim()
   }, [html])
+
+  if (!safe) {
+    return (
+      <div className={`${baseClass} ${className}`.trim()}>
+        <p className="text-neutral-500">No description provided.</p>
+      </div>
+    )
+  }
 
   return (
     <div

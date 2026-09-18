@@ -376,6 +376,7 @@ export async function createDefaultForms() {
         updatedAt: new Date(),
       })
 
+      // Only create missing forms — never overwrite existing sections/edits
       if (existingForm.empty) {
         await addDoc(formRef, {
           ...payload,
@@ -383,9 +384,6 @@ export async function createDefaultForms() {
           submissionCount: 0,
           createdAt: new Date(),
         })
-      } else {
-        // Refresh template fields so dropdown/multiselect options stay in sync
-        await updateDoc(existingForm.docs[0].ref, payload)
       }
     }
 

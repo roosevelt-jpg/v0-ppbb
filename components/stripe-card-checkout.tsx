@@ -22,10 +22,13 @@ const CARD_ELEMENT_OPTIONS = {
       fontSize: '16px',
       color: '#171717',
       '::placeholder': { color: '#a3a3a3' },
+      lineHeight: '24px',
     },
     invalid: { color: '#e11d48' },
   },
   hidePostalCode: true,
+  // Keep card fields English and hide Link autofill (French "Enregistrer" button).
+  disableLink: true,
 } as const
 
 interface StripeCardCheckoutProps {
@@ -33,7 +36,8 @@ interface StripeCardCheckoutProps {
   clientSecret: string
   /** payment = charge now; setup = save card for trial (no charge yet). */
   mode: 'payment' | 'setup'
-  onSuccess: () => void
+  /** For payment mode, receives the PaymentIntent id when available. */
+  onSuccess: (paymentIntentId?: string) => void
   onCancel?: () => void
   submitLabel?: string
 }
@@ -53,7 +57,13 @@ export function StripeCardCheckout({
   const stripePromise = React.useMemo(() => getStripePromise(publishableKey), [publishableKey])
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        locale: 'en',
+      }}
+    >
       <CardOnlyForm
         clientSecret={clientSecret}
         mode={mode}
@@ -74,7 +84,7 @@ function CardOnlyForm({
 }: {
   clientSecret: string
   mode: 'payment' | 'setup'
-  onSuccess: () => void
+  onSuccess: (paymentIntentId?: string) => void
   onCancel?: () => void
   submitLabel: string
 }) {
@@ -108,10 +118,26 @@ function CardOnlyForm({
       billing_details: { name: cardholderName },
     }
 
-    const { error: confirmError } =
-      mode === 'setup'
-        ? await stripe.confirmCardSetup(clientSecret, { payment_method })
-        : await stripe.confirmCardPayment(clientSecret, { payment_method })
+    if (mode === 'setup') {
+      const { error: confirmError } = await stripe.confirmCardSetup(clientSecret, {
+        payment_method,
+      })
+      if (confirmError) {
+        setError(
+          confirmError.message ||
+            'Payment could not be confirmed. Please check your card details and try again.'
+        )
+        setSubmitting(false)
+        return
+      }
+      onSuccess()
+      return
+    }
+
+    const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
+      clientSecret,
+      { payment_method }
+    )
 
     if (confirmError) {
       setError(
@@ -122,7 +148,7 @@ function CardOnlyForm({
       return
     }
 
-    onSuccess()
+    onSuccess(paymentIntent?.id)
   }
 
   return (
@@ -140,9 +166,13 @@ function CardOnlyForm({
       </div>
       <div>
         <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Card details</label>
-        <div className="rounded-lg border border-neutral-300 bg-white px-3 py-3">
+        <div className="rounded-lg border border-neutral-300 bg-white px-3 py-3 min-h-[48px]">
           <CardElement options={CARD_ELEMENT_OPTIONS} />
         </div>
+        <p className="mt-1.5 text-[11px] text-neutral-500">
+          Enter card number, expiry, and CVV in the field above. Use the button below when ready —
+          you do not need any other save button inside the card field.
+        </p>
       </div>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <div className="flex gap-3">

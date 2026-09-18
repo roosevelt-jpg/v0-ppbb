@@ -27,6 +27,12 @@ function getDashboardHref(user: User | BusinessProfile): string {
   return '/dashboard'
 }
 
+function getDashboardLabel(user: User | BusinessProfile): string {
+  const href = getDashboardHref(user)
+  if (href.startsWith('/business')) return 'Business Dashboard'
+  return 'Dashboard'
+}
+
 function headerChildrenForLink(pages: Page[], href: string): Page[] {
   return pages
     .filter((p) => p.headerSection === href || p.headerSection === href.replace(/\/$/, ''))
@@ -67,15 +73,19 @@ export function Navbar() {
     }
   }
 
+  const dashboardLabel = user
+    ? getDashboardLabel(user as User | BusinessProfile)
+    : 'Dashboard'
+
   const authActions = authLoading ? null : user ? (
     <div className="relative group">
       <button
         type="button"
         className="pb-compact-btn px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-neutral-300 hover:text-white transition-colors whitespace-nowrap inline-flex items-center gap-1 !bg-transparent shadow-none min-h-0"
       >
-        Dashboard <ChevronDown className="w-3.5 h-3.5" />
+        {dashboardLabel} <ChevronDown className="w-3.5 h-3.5" />
       </button>
-      <div className="absolute right-0 top-full mt-1 hidden group-hover:block group-focus-within:block min-w-[160px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-50 py-1">
+      <div className="absolute end-0 top-full mt-1 hidden group-hover:block group-focus-within:block min-w-[160px] bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg z-50 py-1">
         <Link
           href={getDashboardHref(user as User | BusinessProfile)}
           className="block px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
@@ -136,7 +146,7 @@ export function Navbar() {
             <Link
               key={child.id}
               href={getCmsPageHref(child)}
-              className="block px-6 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-700 font-body"
+              className="block px-4 py-2.5 text-sm text-neutral-300 hover:text-white hover:bg-neutral-700 font-body"
               onClick={() => setMobileMenuOpen(false)}
             >
               {getCmsPageLabel(child)}
@@ -186,7 +196,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
+    <nav className="sticky top-0 z-50 w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
       <div className="hidden lg:block px-4 sm:px-6 lg:px-8 py-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-6 h-14">
           <div className="flex-shrink-0 h-full flex items-center py-1.5">
@@ -216,8 +226,13 @@ export function Navbar() {
       </div>
 
       <div className="lg:hidden px-3 sm:px-4 py-0 flex items-center justify-between gap-2 h-14">
-        <div className="h-full flex items-center min-w-0 flex-1 py-1.5">
-          <SiteLogo background="dark" variant="navbar" href="/" />
+        <div className="h-full flex items-center min-w-0 flex-1 py-1">
+          <SiteLogo
+            background="dark"
+            variant="custom"
+            heightClass="h-11 max-h-11"
+            href="/"
+          />
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <LanguageSwitcherWithFlags onDark />
@@ -240,24 +255,26 @@ export function Navbar() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-neutral-800 dark:bg-neutral-900 border-t border-neutral-700 max-h-[min(24rem,70dvh)] overflow-y-auto">
-          {visibleLinks.map((item) => renderNavItem(item, true))}
-          {topLevelHeaderPages.map((page) => (
-            <Link
-              key={page.id}
-              href={getCmsPageHref(page)}
-              className="block px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 font-body"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {getCmsPageLabel(page)}
-            </Link>
-          ))}
+        <div className="lg:hidden flex flex-col max-h-[min(85dvh,40rem)] bg-neutral-800 dark:bg-neutral-900 border-t border-neutral-700">
+          <div className="overflow-y-auto flex-1 min-h-0">
+            {visibleLinks.map((item) => renderNavItem(item, true))}
+            {topLevelHeaderPages.map((page) => (
+              <Link
+                key={page.id}
+                href={getCmsPageHref(page)}
+                className="block px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 font-body"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {getCmsPageLabel(page)}
+              </Link>
+            ))}
 
-          <div className="border-t border-neutral-700 px-4 py-3">
-            <LanguageSwitcherWithFlags mobile onDark />
+            <div className="border-t border-neutral-700 px-4 py-3">
+              <LanguageSwitcherWithFlags mobile onDark />
+            </div>
           </div>
 
-          <div className="border-t border-neutral-700">
+          <div className="sticky bottom-0 shrink-0 border-t border-neutral-600 bg-neutral-800 dark:bg-neutral-900 shadow-[0_-4px_12px_rgba(0,0,0,0.25)]">
             {!authLoading && user ? (
               <>
                 <Link
@@ -265,7 +282,7 @@ export function Navbar() {
                   className="block w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-white hover:bg-neutral-700 transition-colors border-b border-neutral-700 text-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Dashboard
+                  {dashboardLabel}
                 </Link>
                 <button
                   type="button"

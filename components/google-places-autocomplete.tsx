@@ -97,7 +97,12 @@ export default function GooglePlacesAutocomplete({
       if (requestId !== requestIdRef.current) return
 
       if (!data.success) {
-        setError(data.error || 'Location suggestions are unavailable')
+        const raw = data.error || 'Location suggestions are unavailable'
+        setError(
+          /not authorized|REQUEST_DENIED|ApiNotActivated|API key/i.test(raw)
+            ? 'Address suggestions are temporarily unavailable — type your address and continue'
+            : raw
+        )
         setPredictions([])
         setIsOpen(true)
         return

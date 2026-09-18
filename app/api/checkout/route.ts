@@ -21,7 +21,7 @@ type Gateway = 'stripe' | 'paypal' | 'ziina'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { planId, userId, referralCode: bodyReferralCode } = body
+    const { planId, userId, referralCode: bodyReferralCode, promoCode: bodyPromoCode } = body
     const gateway = (body.gateway || 'stripe') as Gateway
 
     if (!planId || !userId) {
@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
     if (referralCode) {
       void persistUserReferralAttribution(userId, referralCode).catch(console.error)
     }
+
+    const promoCode =
+      typeof bodyPromoCode === 'string' && bodyPromoCode.trim()
+        ? bodyPromoCode.trim()
+        : ''
 
     const db = getAdminDb()
     const planDoc = await db.collection('pricingPlans').doc(planId).get()
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     switch (selected) {
       case 'stripe':
-        return handleStripeCheckout(plan, userId, planId)
+        return handleStripeCheckout(plan, userId, planId, promoCode)
       case 'paypal':
         return handlePayPalCheckout(plan, userId, planId)
       case 'ziina':
@@ -83,16 +88,78 @@ export async function POST(req: NextRequest) {
 async function handleStripeCheckout(
   plan: Record<string, unknown>,
   userId: string,
-  planId: string
+  planId: string,
+  promoCode = ''
 ) {
   try {
     const trialDays = planTrialDays(plan)
     const trialMonths = normalizePlanTrialMonths(plan.trialMonths)
+
+    let couponId: string | undefined
+    const extraMetadata: Record<string, string> = trialMonths
+      ? { trialMonths: String(trialMonths) }
+      : {}
+
+    const {
+      findPromoByCode,
+      mapPromoDoc,
+      MEMBERSHIP_PROMO_COLLECTION,
+      promoGrantsFreeAccess,
+      ensurePromoStripeCoupon,
+      resolvePromoStatus,
+      normalizePromoCode,
+    } = await import('@/lib/membership-promo')
+
+    const db = getAdminDb()
+    const userSnap = await db.collection('users').doc(userId).get()
+    const userData = userSnap.data() || {}
+
+    // Prefer an explicit code from the client; otherwise reuse a reserved promo on the user.
+    const reservedCode = String(userData.membershipPromoCode || userData.promoCode || '').trim()
+    const codeToApply = normalizePromoCode(promoCode || reservedCode)
+
+    if (codeToApply) {
+      let promo = await findPromoByCode(codeToApply)
+      if (!promo && userData.membershipPromoCodeId) {
+        const promoSnap = await db
+          .collection(MEMBERSHIP_PROMO_COLLECTION)
+          .doc(String(userData.membershipPromoCodeId))
+          .get()
+        if (promoSnap.exists) {
+          promo = mapPromoDoc(promoSnap.id, promoSnap.data() as Record<string, unknown>)
+        }
+      }
+      if (promo) {
+        const status = resolvePromoStatus(promo)
+        // Reserved codes may already be marked exhausted for this user — still apply discount.
+        const reservedForUser =
+          userData.membershipPromoCodeId === promo.id ||
+          normalizePromoCode(userData.membershipPromoCode) === promo.code
+        if (status === 'active' || reservedForUser) {
+          if (!promoGrantsFreeAccess(promo) && promo.type === 'percent_off') {
+            const id = await ensurePromoStripeCoupon(promo)
+            if (id) {
+              couponId = id
+              extraMetadata.promoCodeId = promo.id
+              extraMetadata.promoCode = promo.code
+              extraMetadata.percentOff = String(promo.percentOff)
+              extraMetadata.discountMonths = String(promo.benefitDurationMonths)
+            }
+          } else if (promoGrantsFreeAccess(promo) && promo.trialEnabled) {
+            // Free trial promo — billing starts after benefit duration; no coupon needed.
+            extraMetadata.promoCodeId = promo.id
+            extraMetadata.promoCode = promo.code
+          }
+        }
+      }
+    }
+
     const { clientSecret, mode, subscriptionId, alreadyComplete } = await createStripeMembershipIntent({
       planId,
       userId,
       trialDays,
-      extraMetadata: trialMonths ? { trialMonths: String(trialMonths) } : undefined,
+      couponId,
+      extraMetadata: Object.keys(extraMetadata).length ? extraMetadata : undefined,
     })
     return NextResponse.json({
       clientSecret,
@@ -100,6 +167,12 @@ async function handleStripeCheckout(
       subscriptionId,
       alreadyComplete: Boolean(alreadyComplete),
       gateway: 'stripe',
+      ...(couponId
+        ? {
+            discountApplied: true,
+            percentOff: Number(extraMetadata.percentOff) || undefined,
+          }
+        : {}),
     })
   } catch (error) {
     console.error('[checkout] Stripe:', error)

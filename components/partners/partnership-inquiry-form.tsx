@@ -39,12 +39,15 @@ export function PartnershipInquiryForm({
   initialValues,
 }: Props) {
   const { user, firebaseUser } = useAuth()
+  const isSponsorship = type === 'sponsorship'
   const [form, setForm] = useState({
     submitterName: '',
     submitterEmail: '',
     phone: '',
     title: initialValues?.title || '',
     description: initialValues?.description || '',
+    /** Sponsorship: budget band; Partnership: collaboration focus */
+    typeSpecific: '',
   })
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -70,6 +73,9 @@ export function PartnershipInquiryForm({
     setError('')
     try {
       const token = firebaseUser ? await firebaseUser.getIdToken() : null
+      const typeNote = form.typeSpecific.trim()
+        ? `\n\n${isSponsorship ? 'Sponsorship budget / package interest' : 'Partnership focus'}: ${form.typeSpecific.trim()}`
+        : ''
       const res = await fetch('/api/partnerships/apply', {
         method: 'POST',
         headers: {
@@ -82,7 +88,7 @@ export function PartnershipInquiryForm({
           phone: form.phone,
           type,
           title: form.title,
-          description: form.description,
+          description: `${form.description}${typeNote}`,
         } satisfies PartnershipInquiryPayload),
       })
       const json = await res.json()
@@ -99,8 +105,8 @@ export function PartnershipInquiryForm({
   if (success) {
     return (
       <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-        Thank you — your partnership inquiry was submitted. Our partnerships team will respond
-        within 48 hours.
+        Thank you — your {isSponsorship ? 'sponsorship' : 'partnership'} inquiry was submitted. Our
+        partnerships team will respond within 48 hours.
       </div>
     )
   }
@@ -110,6 +116,17 @@ export function PartnershipInquiryForm({
       onSubmit={handleSubmit}
       className={`rounded-lg border border-[#e4e1da] bg-white p-4 sm:p-5 space-y-4 ${className}`}
     >
+      <div className="space-y-1">
+        <h3 className="font-headline text-lg font-bold text-foreground">
+          {isSponsorship ? 'Sponsorship inquiry' : 'Partnership inquiry'}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {isSponsorship
+            ? 'Tell us about sponsoring an initiative, event, or campaign. Share budget range and goals if you can.'
+            : 'Tell us about a collaboration, co-host, CSR, or long-term partnership. Brief us on your vision.'}
+        </p>
+      </div>
+
       {error ? (
         <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
           {error}
@@ -149,25 +166,54 @@ export function PartnershipInquiryForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1 font-body">Organisation / subject *</label>
+        <label className="block text-sm font-medium mb-1 font-body">
+          {isSponsorship ? 'Brand / organisation *' : 'Organisation / subject *'}
+        </label>
         <input
           required
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
           className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg text-sm"
-          placeholder="e.g. Brand partnership proposal"
+          placeholder={
+            isSponsorship
+              ? 'e.g. Brand sponsorship for Ramadan campaign'
+              : 'e.g. Brand partnership proposal'
+          }
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1 font-body">Your vision *</label>
+        <label className="block text-sm font-medium mb-1 font-body">
+          {isSponsorship ? 'Sponsorship budget / package interest *' : 'Partnership focus *'}
+        </label>
+        <input
+          required
+          value={form.typeSpecific}
+          onChange={(e) => setForm((f) => ({ ...f, typeSpecific: e.target.value }))}
+          className="w-full min-h-[44px] px-3 py-2 border border-[#e4e1da] rounded-lg text-sm"
+          placeholder={
+            isSponsorship
+              ? 'e.g. AED 10–25k · event naming rights'
+              : 'e.g. Co-host events · product placement · CSR'
+          }
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1 font-body">
+          {isSponsorship ? 'What you want to sponsor *' : 'Your vision *'}
+        </label>
         <textarea
           required
           rows={4}
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           className="w-full px-3 py-2 border border-[#e4e1da] rounded-lg text-sm"
-          placeholder="Brief us on what you have in mind…"
+          placeholder={
+            isSponsorship
+              ? 'Describe the initiative, audience, and outcomes you care about…'
+              : 'Brief us on what you have in mind…'
+          }
         />
       </div>
 

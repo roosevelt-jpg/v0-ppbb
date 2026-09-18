@@ -95,7 +95,7 @@ export const DEFAULT_PARTNERS_PAGE_CONFIG: PartnersPageConfig = {
   inquiryEyebrow: 'INQUIRY',
   inquiryHeadline: 'Tell us what you have in mind.',
   inquiryBody: 'Brief us on your vision and our partnerships team will respond within 48 hours.',
-  inquiryCTA: 'Start a conversation',
+  inquiryCTA: 'Send us a message',
   inquiryCategories: [
     {
       id: 'partnerships',

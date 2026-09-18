@@ -52,15 +52,21 @@ export function memberMatchesPlan(
 ): boolean {
   if (!memberHasAssignedPlan(member)) return false
 
-  const assigned = normalizeTierKey(
-    String(member.membershipPlanId || member.membershipTier || '')
-  )
-
   const planId = normalizeTierKey(plan.id)
   const planName = normalizeTierKey(plan.name)
   const planSlug = planName.replace(/\s+/g, '-')
 
-  return assigned === planId || assigned === planName || assigned === planSlug
+  const candidates = [
+    member.membershipPlanId,
+    member.membershipPlanName,
+    member.membershipTier,
+  ]
+    .map((v) => normalizeTierKey(String(v || '')))
+    .filter(Boolean)
+
+  return candidates.some(
+    (assigned) => assigned === planId || assigned === planName || assigned === planSlug
+  )
 }
 
 export function countUnassignedMembers(members: Record<string, unknown>[]): number {

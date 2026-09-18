@@ -270,8 +270,9 @@ service cloud.firestore {
 
     // Nested communities (groups, chat, members)
     match /communities/{communityId} {
-      allow read: if resource.data.visibility == 'public'
-        && resource.data.status == 'active';
+      // Missing visibility defaults to public; missing/legacy status may be active|approved
+      allow read: if resource.data.get('visibility', 'public') == 'public'
+        && resource.data.get('status', 'active') in ['active', 'approved'];
       allow read: if isAuth();
       allow create, update, delete: if isAdmin();
 

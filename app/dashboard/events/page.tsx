@@ -23,14 +23,17 @@ import {
   eventVisibleToUser,
   parseFirestoreDate,
 } from '@/lib/member-dashboard'
-import { getEventLocationLabel } from '@/lib/event-utils'
+import { dedupeUpcomingEventsBySeries, getEventLocationLabel } from '@/lib/event-utils'
 import { EventBannerThumb } from '@/components/events/event-banner-thumb'
 
 function parseEventDate(value: unknown): Date | null {
   return parseFirestoreDate(value)
 }
 
-type BrowseEvent = Record<string, unknown> & { id: string }
+type BrowseEvent = Record<string, unknown> & {
+  id: string
+  recurringSeriesBadge?: string
+}
 
 type RegisteredEvent = Event & {
   registrationId?: string
@@ -39,6 +42,15 @@ type RegisteredEvent = Event & {
   checkedInAt?: Date | string | null
   attendanceConfirmedByMember?: boolean
 }
+
+const ATTENDANCE_CONFIRM_STATUSES = new Set([
+  'confirmed',
+  'registered',
+  'approved',
+  'attending',
+  'pending',
+  'waitlisted',
+])
 
 function isAwaitingPayment(event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus'>) {
   return (
@@ -51,6 +63,30 @@ function isFullyRegistered(event: Pick<RegisteredEvent, 'registrationStatus' | '
   if (isAwaitingPayment(event)) return false
   const status = String(event.registrationStatus || '')
   return status === 'confirmed' || status === 'pending' || status === 'waitlisted'
+}
+
+function canConfirmAttendanceStatus(
+  event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus'>
+) {
+  if (isAwaitingPayment(event)) return false
+  const status = String(event.registrationStatus || '')
+  return ATTENDANCE_CONFIRM_STATUSES.has(status) || isFullyRegistered(event)
+}
+
+function attendanceConfirmDisabledReason(
+  event: Pick<RegisteredEvent, 'registrationStatus' | 'paymentStatus' | 'startDate'>
+): string | null {
+  if (!canConfirmAttendanceStatus(event)) {
+    return 'Registration must be confirmed before you can confirm attendance.'
+  }
+  const start = parseEventDate(event.startDate)
+  if (start) {
+    const earliest = start.getTime() - 2 * 60 * 60 * 1000
+    if (Date.now() < earliest) {
+      return 'Attendance can be confirmed from 2 hours before the event starts.'
+    }
+  }
+  return null
 }
 
 export default function MyEventsPage() {
@@ -133,12 +169,12 @@ export default function MyEventsPage() {
             return start && start >= now
           })
           .filter((e) => eventVisibleToUser(e, member.gender))
-          .sort((a, b) => {
-            const ad = parseEventDate(a.startDate)?.getTime() ?? 0
-            const bd = parseEventDate(b.startDate)?.getTime() ?? 0
-            return ad - bd
-          })
-        setBrowseEvents(filtered)
+        const deduped = dedupeUpcomingEventsBySeries(
+          filtered,
+          (e) => parseEventDate(e.startDate),
+          (e) => getEventLocationLabel(e as never)
+        )
+        setBrowseEvents(deduped)
         setLoadingBrowse(false)
         setError(null)
       },
@@ -153,7 +189,12 @@ export default function MyEventsPage() {
   }, [authLoading, user?.id, user, loadRegistered])
 
   const handleRegister = async (event: BrowseEvent, couponOverride?: string) => {
-    if (!user?.id) return
+    if (!user?.id) {
+      alert('Please sign in to register for this event.')
+      const returnUrl = encodeURIComponent('/dashboard/events')
+      window.location.href = `/login?returnUrl=${returnUrl}`
+      return
+    }
     setRegisteringId(event.id)
     try {
       const { auth } = await import('@/lib/firebase')
@@ -230,14 +271,16 @@ export default function MyEventsPage() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        alert(json.error || 'Could not confirm attendance')
+        alert(json.error || json.message || 'Could not confirm attendance')
         return
       }
       alert(json.message || 'Attendance confirmed')
+      // Clear before reload so the button never stays stuck on "Confirming…"
+      setConfirmingId(null)
       await loadRegistered()
     } catch (err) {
       console.error('[v0] Confirm attendance error:', err)
-      alert('Could not confirm attendance')
+      alert(err instanceof Error ? err.message : 'Could not confirm attendance')
     } finally {
       setConfirmingId(null)
     }
@@ -399,11 +442,18 @@ export default function MyEventsPage() {
                       </span>
                     </div>
                   </div>
-                  {event.genderRestriction ? (
-                    <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 capitalize">
-                      {String(event.genderRestriction).replace(/-/g, ' ')}
-                    </span>
-                  ) : null}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {event.genderRestriction ? (
+                      <span className="inline-block text-xs px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 capitalize">
+                        {String(event.genderRestriction).replace(/-/g, ' ')}
+                      </span>
+                    ) : null}
+                    {event.recurringSeriesBadge ? (
+                      <span className="inline-block text-xs px-2 py-1 rounded bg-blue-50 text-blue-800">
+                        {event.recurringSeriesBadge}
+                      </span>
+                    ) : null}
+                  </div>
                   <div className="mt-4 flex flex-wrap items-center gap-2">
                     {awaiting ? (
                       <button
@@ -548,26 +598,33 @@ export default function MyEventsPage() {
                           <CheckCircle2 size={16} /> Hours credited
                         </span>
                       ) : (
-                        <button
-                          type="button"
-                          disabled={
-                            confirmingId === event.id || event.registrationStatus !== 'confirmed'
-                          }
-                          onClick={() => event.id && void handleConfirmAttendance(event.id)}
-                          className="!bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
-                        >
-                          {confirmingId === event.id ? 'Confirming…' : 'Confirm attendance'}
-                        </button>
+                        (() => {
+                          const disabledReason = attendanceConfirmDisabledReason(event)
+                          const isDisabled =
+                            confirmingId === event.id || Boolean(disabledReason)
+                          return (
+                            <button
+                              type="button"
+                              disabled={isDisabled}
+                              title={disabledReason || undefined}
+                              onClick={() => event.id && void handleConfirmAttendance(event.id)}
+                              className="!bg-black !text-white px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                            >
+                              {confirmingId === event.id ? 'Confirming…' : 'Confirm attendance'}
+                            </button>
+                          )
+                        })()
                       )
                     ) : null}
                     {canCancel && event.id ? (
                       <button
                         type="button"
                         onClick={() => handleCancel(event.id!)}
-                        className="!bg-black !text-white px-3 py-2 rounded-lg text-sm"
+                        className="inline-flex items-center gap-2 !bg-black !text-white px-3 py-2 rounded-lg text-sm"
                         aria-label="Cancel registration"
                       >
                         <Trash2 size={16} />
+                        Cancel registration
                       </button>
                     ) : null}
                   </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Cormorant_Garamond } from 'next/font/google'
+import { Inter, Cormorant_Garamond, Noto_Sans_Arabic } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import { ChatWidget } from '@/components/chat/chat-widget'
@@ -25,6 +25,12 @@ const cormorantGaramond = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600'],
   style: ['normal', 'italic'],
+})
+
+const notoSansArabic = Noto_Sans_Arabic({
+  variable: '--font-arabic',
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
 })
 
 const siteUrl = getSiteUrl()
@@ -113,7 +119,11 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${inter.variable} ${cormorantGaramond.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${cormorantGaramond.variable} ${notoSansArabic.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="utf-8" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

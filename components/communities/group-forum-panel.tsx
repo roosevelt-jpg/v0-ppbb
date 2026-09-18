@@ -76,21 +76,51 @@ export function GroupForumPanel({
   const loadPosts = React.useCallback(async () => {
     setLoading(true)
     setError('')
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), 10_000)
+
     try {
+      if (!auth.currentUser && !currentUserId) {
+        setError('signin')
+        setPosts([])
+        return
+      }
+
       const headers = await authHeaders()
       const res = await fetch(`/api/groups/${groupId}/posts?communityId=${communityId}`, {
         headers,
         cache: 'no-store',
+        signal: controller.signal,
       })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error || 'Failed to load posts')
+
+      if (res.status === 401) {
+        setError('signin')
+        setPosts([])
+        return
+      }
+      if (res.status === 403) {
+        setError('You do not have permission to view this forum.')
+        setPosts([])
+        return
+      }
+
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Failed to load posts')
+      }
       setPosts(json.data || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load forum')
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('Request timed out. Please try again.')
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load forum')
+      }
+      setPosts([])
     } finally {
+      window.clearTimeout(timeoutId)
       setLoading(false)
     }
-  }, [authHeaders, communityId, groupId])
+  }, [authHeaders, communityId, currentUserId, groupId])
 
   React.useEffect(() => {
     void loadPosts()
@@ -368,10 +398,19 @@ export function GroupForumPanel({
           </form>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error === 'signin' ? (
+          <div className="text-center py-14 px-4 border border-dashed border-[#e4e1da] rounded-2xl bg-white/60 space-y-2">
+            <p className="text-sm text-neutral-600 font-medium">Sign in to view discussions</p>
+            <p className="text-sm text-neutral-500">
+              Join this group and sign in to load the forum.
+            </p>
+          </div>
+        ) : error ? (
+          <p className="text-sm text-red-600">{error}</p>
+        ) : null}
         {loading ? (
           <p className="text-sm text-neutral-500 py-10 text-center">Loading discussions…</p>
-        ) : posts.length === 0 ? (
+        ) : error === 'signin' || error ? null : posts.length === 0 ? (
           <div className="text-center py-14 px-4 border border-dashed border-[#e4e1da] rounded-2xl bg-white/60">
             <p className="text-sm text-neutral-500">No forum posts yet. Start the first discussion.</p>
           </div>

@@ -11,10 +11,12 @@ const CARD_ELEMENT_OPTIONS = {
       fontSize: '16px',
       color: '#171717',
       '::placeholder': { color: '#a3a3a3' },
+      lineHeight: '24px',
     },
     invalid: { color: '#e11d48' },
   },
   hidePostalCode: true,
+  disableLink: true,
 } as const
 
 type StripeCardFormInnerProps = {
@@ -153,7 +155,10 @@ export function StripeCardForm({ publishableKey, ...props }: StripeCardFormProps
   }
 
   return (
-    <Elements stripe={stripePromise as Promise<Stripe | null>} options={{ clientSecret: props.clientSecret }}>
+    <Elements
+      stripe={stripePromise as Promise<Stripe | null>}
+      options={{ clientSecret: props.clientSecret, locale: 'en' }}
+    >
       <StripeCardFormInner {...props} />
     </Elements>
   )

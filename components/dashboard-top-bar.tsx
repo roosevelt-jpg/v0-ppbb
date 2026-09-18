@@ -69,7 +69,10 @@ export function DashboardTopBar({
         {/* Welcome + toolbar — right */}
         <div className="flex items-center gap-2 sm:gap-3 justify-end sm:justify-self-end col-span-1 sm:col-span-1">
           {welcome ? (
-            <p className="hidden md:block text-sm text-neutral-600 whitespace-nowrap truncate max-w-[200px]">
+            <p
+              className="hidden md:block text-sm text-neutral-600 whitespace-nowrap truncate max-w-[200px]"
+              dir="ltr"
+            >
               {welcome}
             </p>
           ) : null}
@@ -84,7 +87,10 @@ export function DashboardTopBar({
           {dateTime || '…'}
         </p>
         {welcome ? (
-          <p className="md:hidden text-xs text-neutral-600 dark:text-neutral-300 text-center truncate w-full">
+          <p
+            className="md:hidden text-xs text-neutral-600 dark:text-neutral-300 text-center truncate w-full"
+            dir="ltr"
+          >
             {welcome}
           </p>
         ) : null}

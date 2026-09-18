@@ -36,6 +36,14 @@ export function formatAuthError(error: unknown): string {
   if (code.includes('auth/network-request-failed')) {
     return 'Network error. Check your connection and try again.'
   }
+  if (
+    code.includes('Database is closing') ||
+    code.includes('database connection is closing') ||
+    code.includes('IndexedDB') ||
+    /closing\/hidden/i.test(code)
+  ) {
+    return 'Sign-in storage on this device was interrupted. Close other tabs of this site, refresh the page, and try again.'
+  }
   if (code.includes('auth/invalid-action-code') || code.includes('auth/expired-action-code')) {
     return 'This reset link is invalid or has expired. Request a new password reset email.'
   }

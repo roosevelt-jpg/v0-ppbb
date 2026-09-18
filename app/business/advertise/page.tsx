@@ -7,7 +7,8 @@ import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { auth } from '@/lib/firebase'
 import { Card } from '@/components/ui/card'
-import { StripeCardForm } from '@/components/payments/stripe-card-form'
+import { Dialog } from '@/components/dialog'
+import { StripeCardCheckout } from '@/components/stripe-card-checkout'
 import { Loader2, Upload } from 'lucide-react'
 
 type AdRequest = {
@@ -129,50 +130,58 @@ function AdvertiseInner() {
     }
   }
 
+  const confirmAdvertisingPayment = async (paymentIntentId: string) => {
+    if (!stripeCheckout) return
+    const res = await fetch('/api/payments/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'advertising',
+        paymentIntentId,
+        advertisingRequestId: stripeCheckout.advertisingRequestId,
+      }),
+    })
+    const confirmJson = await res.json()
+    if (!res.ok || !confirmJson.success) {
+      setMessage(confirmJson.error || 'Payment confirmation failed')
+      return
+    }
+    setStripeCheckout(null)
+    setImageURL('')
+    setHref('')
+    setMessage('Payment received. Admin will publish your banner after review.')
+    void load()
+  }
+
   return (
     <div className="min-h-screen bg-[#faf9f7] dark:bg-neutral-950 p-4 sm:p-8">
-      {stripeCheckout ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <Card className="w-full max-w-md p-6 bg-white space-y-3">
-            <h2 className="text-lg font-semibold">Pay for advertising</h2>
-            <p className="text-sm text-neutral-600">Enter card details — you stay on Passive Blessings.</p>
-            <StripeCardForm
-              publishableKey={stripeCheckout.publishableKey}
-              clientSecret={stripeCheckout.clientSecret}
-              submitLabel="Pay & submit"
-              onSuccess={async (paymentIntentId) => {
-                const res = await fetch('/api/payments/confirm', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    type: 'advertising',
-                    paymentIntentId,
-                    advertisingRequestId: stripeCheckout.advertisingRequestId,
-                  }),
-                })
-                const confirmJson = await res.json()
-                if (!res.ok || !confirmJson.success) {
-                  setMessage(confirmJson.error || 'Payment confirmation failed')
-                  return
-                }
-                setStripeCheckout(null)
-                setImageURL('')
-                setHref('')
-                setMessage('Payment received. Admin will publish your banner after review.')
-                void load()
-              }}
-              onError={(msg) => setMessage(msg)}
-            />
-            <button
-              type="button"
-              className="text-xs underline text-neutral-600"
-              onClick={() => setStripeCheckout(null)}
-            >
-              Cancel
-            </button>
-          </Card>
-        </div>
-      ) : null}
+      <Dialog
+        open={Boolean(stripeCheckout)}
+        onOpenChange={(open) => {
+          if (!open) setStripeCheckout(null)
+        }}
+        title="Pay for advertising"
+        description="Enter card details below. Payment stays on this page — card fields only."
+        maxWidth="26rem"
+        compact={false}
+      >
+        {stripeCheckout ? (
+          <StripeCardCheckout
+            publishableKey={stripeCheckout.publishableKey}
+            clientSecret={stripeCheckout.clientSecret}
+            mode="payment"
+            submitLabel="Pay & submit"
+            onSuccess={(paymentIntentId) => {
+              if (!paymentIntentId) {
+                setMessage('Payment completed but confirmation id was missing. Contact support.')
+                return
+              }
+              void confirmAdvertisingPayment(paymentIntentId)
+            }}
+            onCancel={() => setStripeCheckout(null)}
+          />
+        ) : null}
+      </Dialog>
 
       <div className="max-w-2xl mx-auto space-y-6">
         <div>

@@ -98,4 +98,17 @@ export const CMS_MENU_SEEDS: MenuPageSeed[] = [
     content:
       'Add your UAE data protection policy here.\n\nPaste plain text in Admin → Pages. Line breaks become paragraphs on the public page.',
   },
+  {
+    slug: 'community-guidelines',
+    title: 'Community Guidelines',
+    menuLabel: 'Community Guidelines',
+    menuLocation: 'navbar',
+    menuOrder: 0,
+    showInMenu: true,
+    status: 'published',
+    headerSection: '/communities',
+    description: 'Our community standards help everyone participate respectfully.',
+    content:
+      'Welcome to the Passive Blessings community.\n\n1. Be respectful\nTreat every member with kindness. Disagreement is fine; personal attacks are not.\n\n2. Keep it safe\nDo not share private information about others without consent. Report harmful content to moderators.\n\n3. Stay on topic\nUse groups and threads for their intended purpose. Spam, scams, and off-topic promotions are not allowed.\n\n4. Follow the law\nDo not post illegal content or encourage illegal activity.\n\n5. Support one another\nEncourage constructive participation. When in doubt, ask an organizer before posting.\n\nEditors can expand these guidelines in Admin → Pages.',
+  },
 ]

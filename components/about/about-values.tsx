@@ -63,8 +63,8 @@ export function AboutValues() {
               key={`${item.title}-${i}`}
               className="bg-white p-4 sm:p-5 rounded-lg border border-[#e4e1da] min-w-0"
             >
-              <h4 className="font-bold text-base sm:text-lg mb-1.5 break-words">{item.title}</h4>
-              <p className="text-xs sm:text-sm text-muted-foreground break-words">{item.description}</p>
+              <h4 className="font-headline font-bold text-base sm:text-lg mb-1.5 break-words">{item.title}</h4>
+              <p className="font-body text-xs sm:text-sm text-muted-foreground break-words">{item.description}</p>
             </div>
           ))}
         </div>

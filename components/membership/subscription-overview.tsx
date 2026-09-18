@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, doc, onSnapshot, query, where } from 'firebase/firestore'
 import { Crown } from 'lucide-react'
 import { useAuth } from '@/lib/auth-context'
 import { db } from '@/lib/firebase'
@@ -59,12 +59,38 @@ export function MembershipSubscriptionOverview({
 
   useEffect(() => {
     if (!user?.id) return
-    getDoc(doc(db, 'users', user.id))
-      .then((snap) => {
+    const unsub = onSnapshot(
+      doc(db, 'users', user.id),
+      (snap) => {
         if (snap.exists()) setProfile(snap.data())
-      })
-      .catch(() => {})
+      },
+      () => {}
+    )
+    return () => unsub()
   }, [user?.id])
+
+  const reloadInvoices = useCallback(async (subscriptionId: string | null) => {
+    if (!subscriptionId) {
+      setInvoices([])
+      return
+    }
+    try {
+      const { getDocs: getDocsFn } = await import('firebase/firestore')
+      const charges = await getDocsFn(collection(db, 'subscriptions', subscriptionId, 'charges'))
+      setInvoices(
+        charges.docs
+          .map((c) => ({ id: c.id, ...c.data() } as Record<string, unknown> & { id: string }))
+          .sort((a, b) => {
+            const aD = toDate(a.paidAt || a.createdAt)?.getTime() || 0
+            const bD = toDate(b.paidAt || b.createdAt)?.getTime() || 0
+            return bD - aD
+          })
+          .slice(0, 12)
+      )
+    } catch {
+      setInvoices([])
+    }
+  }, [])
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -102,26 +128,7 @@ export function MembershipSubscriptionOverview({
           docs.find((s) => String(s.status) === 'active' || s.cancelAtPeriodEnd) || docs[0] || null
         setSubscription(active)
         if (active?.cancelAtPeriodEnd) setCancelDone(true)
-        if (active?.id) {
-          try {
-            const { getDocs: getDocsFn } = await import('firebase/firestore')
-            const charges = await getDocsFn(collection(db, 'subscriptions', String(active.id), 'charges'))
-            setInvoices(
-              charges.docs
-                .map((c): SubRow => ({ id: c.id, ...c.data() }))
-                .sort((a, b) => {
-                  const aD = toDate(a.paidAt || a.createdAt)?.getTime() || 0
-                  const bD = toDate(b.paidAt || b.createdAt)?.getTime() || 0
-                  return bD - aD
-                })
-                .slice(0, 12)
-            )
-          } catch {
-            setInvoices([])
-          }
-        } else {
-          setInvoices([])
-        }
+        await reloadInvoices(active?.id ? String(active.id) : null)
       },
       () => {
         setSubscription(null)
@@ -129,7 +136,7 @@ export function MembershipSubscriptionOverview({
       }
     )
     return () => unsub()
-  }, [user?.id])
+  }, [user?.id, reloadInvoices])
 
   const memberRecord = {
     ...(profile ?? {}),
@@ -146,10 +153,11 @@ export function MembershipSubscriptionOverview({
       ? String(memberRecord.membershipTier)
       : null)
 
+  const renewFromProfile = toDate(profile?.membershipRenewDate)
   const renewFromSub = toDate(
     subscription?.nextBillingDate || subscription?.currentPeriodEnd || subscription?.renewsAt
   )
-  const renewDateObj = renewFromSub || toDate(profile?.membershipRenewDate)
+  const renewDateObj = renewFromProfile || renewFromSub
   const isLifetime =
     profile?.membershipLifetimeForever === true ||
     subscription?.lifetime === true ||
@@ -320,7 +328,21 @@ export function MembershipSubscriptionOverview({
       <Card className="p-5 border border-[#e4e1da] bg-white">
         <h3 className="font-semibold text-neutral-900 mb-3">Invoices</h3>
         {invoices.length === 0 ? (
-          <p className="text-sm text-neutral-500">No invoices yet for this subscription.</p>
+          <div className="space-y-3">
+            <p className="text-sm text-neutral-500">
+              Invoices appear after Stripe confirms payment (usually within a minute). Refresh
+              shortly.
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                void reloadInvoices(subscription?.id ? String(subscription.id) : null)
+              }
+              className="min-h-[40px] px-4 border border-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50"
+            >
+              Refresh
+            </button>
+          </div>
         ) : (
           <ul className="divide-y divide-neutral-200 text-sm">
             {invoices.map((inv) => {

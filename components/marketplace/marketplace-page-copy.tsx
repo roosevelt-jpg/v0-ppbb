@@ -61,10 +61,10 @@ export function MarketplacePageCopy() {
           </BusinessFeatureLink>
         </div>
         <div className="rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 min-h-[200px] flex items-center justify-center">
-          {pc.heroImageURL || pc.membershipImageURL ? (
+          {pc.heroImageURL && pc.heroImageURL !== pc.membershipImageURL ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={pc.heroImageURL || pc.membershipImageURL}
+              src={pc.heroImageURL}
               alt=""
               className="w-full h-full min-h-[200px] max-h-72 object-cover"
             />

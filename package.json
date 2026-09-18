@@ -10,6 +10,8 @@
     "deploy:firestore-rules": "firebase deploy --only firestore:rules",
     "deploy:storage-rules": "firebase deploy --only storage",
     "deploy:firestore-indexes": "firebase deploy --only firestore:indexes",
+    "ops:qa-complete": "tsx --env-file=.env.local scripts/complete-qa-ops.ts",
+    "ops:members-index": "node --env-file=.env.local scripts/deploy-members-index.mjs",
     "seed:businesses": "node --env-file=.env.local scripts/seed-businesses.mjs",
     "seed:shop": "node --env-file=.env.local scripts/seed-shop-merch.mjs",
     "postinstall": "node scripts/patch-next-themes-react19.mjs"
