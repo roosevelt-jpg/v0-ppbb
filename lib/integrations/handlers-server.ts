@@ -173,6 +173,18 @@ export async function saveIntegrationServer(
       updatedAt: new Date(),
     }, { merge: true })
 
+    // Web Push VAPID public key also lives in Global Settings for the chat/FCM client.
+    if (serviceId === 'firebaseCloudMessaging') {
+      const vapid = typeof credentials.vapidKey === 'string' ? credentials.vapidKey.trim() : ''
+      if (vapid) {
+        await db
+          .collection('platformConfig')
+          .doc('globalSettings')
+          .set({ firebaseVapidKey: vapid, updatedAt: new Date() }, { merge: true })
+        console.log('[v0] Synced FCM vapidKey to platformConfig/globalSettings')
+      }
+    }
+
     console.log('[v0] Integration saved (server):', integrationId)
     return integration
   } catch (error) {

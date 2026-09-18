@@ -204,9 +204,31 @@ export default function IntegrationModal({ service, integration, onClose }: Inte
                     resize: 'vertical',
                   }}
                 />
+              ) : field.type === 'checkbox' ? (
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.875rem',
+                    color: '#111111',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={credentials[field.name] === 'true' || credentials[field.name] === '1'}
+                    onChange={(e) =>
+                      setCredentials({
+                        ...credentials,
+                        [field.name]: e.target.checked ? 'true' : 'false',
+                      })
+                    }
+                  />
+                  Enabled
+                </label>
               ) : (
                 <input
-                  type={field.type}
+                  type={field.type === 'password' ? 'password' : 'text'}
                   value={credentials[field.name] || ''}
                   onChange={(e) => setCredentials({ ...credentials, [field.name]: e.target.value })}
                   placeholder={field.placeholder}
