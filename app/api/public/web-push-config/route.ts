@@ -25,6 +25,22 @@ export async function GET() {
       console.warn('[web-push-config] Firestore read failed:', error)
     }
 
+    // Fallback: Integrations → Firebase Cloud Messaging → vapidKey
+    if (!fromEnv && !fromStore) {
+      try {
+        const { getIntegrationServer } = await import('@/lib/integrations/handlers-server')
+        const { INTEGRATION_OWNER_USER_ID } = await import('@/lib/integrations/constants')
+        const integration = await getIntegrationServer(
+          INTEGRATION_OWNER_USER_ID,
+          'firebaseCloudMessaging'
+        )
+        const vapid = integration?.credentials?.vapidKey
+        if (typeof vapid === 'string' && vapid.trim()) fromStore = vapid.trim()
+      } catch (error) {
+        console.warn('[web-push-config] FCM integration read failed:', error)
+      }
+    }
+
     const vapidKey = fromEnv || fromStore
     return NextResponse.json(
       {

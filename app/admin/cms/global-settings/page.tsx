@@ -261,6 +261,55 @@ export default function AdminCmsGlobalSettingsPage() {
           </div>
         )}
 
+        {/* Web Push — placed first so it is impossible to miss */}
+        <Card className="p-4 sm:p-6 space-y-3 w-full min-w-0 border-2 border-neutral-900">
+          <div>
+            <p
+              className="text-xs uppercase tracking-[0.15em] text-neutral-500 mb-1"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Phone alerts
+            </p>
+            <h2
+              className="text-xl text-neutral-900"
+              style={{ fontFamily: 'Cormorant Garamond, serif' }}
+            >
+              Web Push certificate (VAPID key)
+            </h2>
+            <p className="text-sm text-neutral-600 mt-1">
+              Paste your Firebase Web Push key below and click Save key. This enables phone alerts for
+              new events and news.
+            </p>
+          </div>
+          <input
+            type="text"
+            value={settings.firebaseVapidKey || ''}
+            onChange={(e) => handleChange('firebaseVapidKey', e.target.value.trim())}
+            placeholder="BA...."
+            className={fieldClass}
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving}
+              className="inline-flex items-center gap-2 !bg-black !text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              {saving ? 'Saving…' : 'Save key'}
+            </button>
+            {settings.firebaseVapidKey ? (
+              <p className="text-xs text-neutral-600">Key is in the form — click Save key to store it.</p>
+            ) : (
+              <p className="text-xs text-amber-700">
+                No key yet. Firebase → Project settings → Cloud Messaging → Web Push certificates.
+              </p>
+            )}
+          </div>
+        </Card>
+
         {migrationReport && (
           <p className="text-xs text-neutral-600" style={{ fontFamily: 'Inter, sans-serif' }}>
             {migrationReport}
@@ -383,25 +432,6 @@ export default function AdminCmsGlobalSettingsPage() {
                 }}
               />
             </label>
-          </div>
-
-          <div className="mt-4 border border-neutral-200 rounded-lg p-4 max-w-xl">
-            <label className="block text-sm font-medium mb-1">
-              Web Push certificate (VAPID key)
-            </label>
-            <p className="text-xs text-neutral-500 mb-2">
-              Firebase Console → Project settings → Cloud Messaging → Web Push certificates. Required
-              for phone/browser alerts when members install the app.
-            </p>
-            <input
-              type="text"
-              value={settings.firebaseVapidKey || ''}
-              onChange={(e) => handleChange('firebaseVapidKey', e.target.value.trim())}
-              placeholder="BAxxxx..."
-              className={fieldClass}
-              autoComplete="off"
-              spellCheck={false}
-            />
           </div>
         </Card>
 

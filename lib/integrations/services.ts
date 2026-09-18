@@ -273,6 +273,15 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     description: 'Push notifications for web & mobile',
     icon: '🔔',
     fields: [
+      {
+        name: 'vapidKey',
+        label: 'Web Push certificate (VAPID key)',
+        type: 'text',
+        required: false,
+        encrypt: false,
+        placeholder: 'BA....',
+        help: 'From Firebase → Project settings → Cloud Messaging → Web Push certificates. Also editable under CMS → Global Settings.',
+      },
       { name: 'serverKey', label: 'Server Key (Legacy)', type: 'password', required: false, encrypt: true, placeholder: 'AAAA...' },
       { name: 'senderId', label: 'Sender ID', type: 'text', required: true, placeholder: '1234567890', help: 'Project number from Firebase Console' },
       { name: 'serviceAccountJson', label: 'Service Account JSON', type: 'textarea', required: true, encrypt: true, placeholder: '{"type":"service_account",...}', help: 'Firebase service account with FCM permissions' },
