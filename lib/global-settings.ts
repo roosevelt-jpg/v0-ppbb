@@ -28,6 +28,8 @@ export interface GlobalSettings {
   logoUrlLight: string
   logoUrlDark: string
   faviconUrl: string
+  /** Firebase Web Push VAPID public key (safe to expose to browsers). */
+  firebaseVapidKey: string
   socialLinks: GlobalSocialLinks
   footerText: string
   /** Site-wide fonts & colors (admin typography panel) */
@@ -44,6 +46,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   logoUrlLight: '',
   logoUrlDark: '',
   faviconUrl: '/favicon.ico',
+  firebaseVapidKey: '',
   socialLinks: {},
   footerText: 'Passive Blessings © 2025. All rights reserved.',
   theme: DEFAULT_SITE_THEME,
@@ -87,6 +90,7 @@ export function mergeGlobalSettings(data: Record<string, unknown> | undefined): 
     logoUrlLight: asString(data.logoUrlLight || data.logoUrl, defaults.logoUrlLight),
     logoUrlDark: asString(data.logoUrlDark, defaults.logoUrlDark),
     faviconUrl: asString(data.faviconUrl, defaults.faviconUrl),
+    firebaseVapidKey: asString(data.firebaseVapidKey, defaults.firebaseVapidKey),
     socialLinks: mergeSocialLinks(data.socialLinks || data.social),
     footerText: asString(data.footerText, defaults.footerText),
     theme: mergeSiteTheme(data.theme),

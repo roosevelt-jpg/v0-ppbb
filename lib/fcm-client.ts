@@ -5,6 +5,30 @@ import { getMessaging, getToken, isSupported } from 'firebase/messaging'
 import { storeFCMToken } from '@/lib/fcm-service'
 import { registerPbServiceWorker } from '@/components/pwa-provider'
 
+let cachedVapidKey: string | null | undefined
+
+async function resolveVapidKey(): Promise<string | null> {
+  const fromEnv = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY?.trim()
+  if (fromEnv) return fromEnv
+
+  if (cachedVapidKey !== undefined) return cachedVapidKey
+
+  try {
+    const res = await fetch('/api/public/web-push-config', { cache: 'no-store' })
+    if (!res.ok) {
+      cachedVapidKey = null
+      return null
+    }
+    const data = (await res.json()) as { vapidKey?: string | null }
+    cachedVapidKey = typeof data.vapidKey === 'string' && data.vapidKey.trim() ? data.vapidKey.trim() : null
+    return cachedVapidKey
+  } catch (error) {
+    console.warn('[fcm] Failed to load VAPID key:', error)
+    cachedVapidKey = null
+    return null
+  }
+}
+
 /** Register FCM token after login when permission is already granted. */
 export async function registerFCMTokenIfPossible(userId: string): Promise<void> {
   if (typeof window === 'undefined') return
@@ -16,9 +40,9 @@ export async function registerFCMTokenIfPossible(userId: string): Promise<void> 
     if (!('Notification' in window)) return
     if (Notification.permission !== 'granted') return
 
-    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+    const vapidKey = await resolveVapidKey()
     if (!vapidKey) {
-      console.warn('[fcm] NEXT_PUBLIC_FIREBASE_VAPID_KEY not set — skipping token registration')
+      console.warn('[fcm] VAPID key not configured — skipping token registration')
       return
     }
 

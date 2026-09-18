@@ -384,6 +384,25 @@ export default function AdminCmsGlobalSettingsPage() {
               />
             </label>
           </div>
+
+          <div className="mt-4 border border-neutral-200 rounded-lg p-4 max-w-xl">
+            <label className="block text-sm font-medium mb-1">
+              Web Push certificate (VAPID key)
+            </label>
+            <p className="text-xs text-neutral-500 mb-2">
+              Firebase Console → Project settings → Cloud Messaging → Web Push certificates. Required
+              for phone/browser alerts when members install the app.
+            </p>
+            <input
+              type="text"
+              value={settings.firebaseVapidKey || ''}
+              onChange={(e) => handleChange('firebaseVapidKey', e.target.value.trim())}
+              placeholder="BAxxxx..."
+              className={fieldClass}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </div>
         </Card>
 
         {/* Contact */}

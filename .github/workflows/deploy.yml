@@ -37,6 +37,18 @@ jobs:
         run: |
           echo "${{ secrets.PROD_ENV_FILE_B64 }}" | base64 -d > .env.production.local
           test -s .env.production.local
+          # Optional dedicated secret — preferred so VAPID can be rotated without re-encoding the whole env blob
+          if [ -n "${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY }}" ]; then
+            # Remove any prior line, then append the live key
+            grep -v '^NEXT_PUBLIC_FIREBASE_VAPID_KEY=' .env.production.local > .env.production.local.tmp || true
+            mv .env.production.local.tmp .env.production.local
+            echo "NEXT_PUBLIC_FIREBASE_VAPID_KEY=${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY }}" >> .env.production.local
+          fi
+          if grep -q '^NEXT_PUBLIC_FIREBASE_VAPID_KEY=.\+' .env.production.local; then
+            echo "VAPID key present for web push"
+          else
+            echo "WARNING: NEXT_PUBLIC_FIREBASE_VAPID_KEY missing — PWA install works, push tokens will not register"
+          fi
 
       - name: Build
         env:
