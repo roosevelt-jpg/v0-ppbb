@@ -151,6 +151,16 @@ export async function sendPasswordResetBranded(opts: {
   }
 }
 
+function membershipPush(userId: string, title: string, body: string) {
+  void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+    pushToUserSafe(
+      userId,
+      { title, body },
+      { type: 'membership', click_action: '/dashboard/membership' }
+    )
+  })
+}
+
 export function notifyMembershipActivated(opts: {
   userId: string
   planName: string
@@ -184,6 +194,7 @@ export function notifyMembershipActivated(opts: {
       ),
       cta: { label: 'View membership', url: membershipUrl },
     })
+    membershipPush(opts.userId, 'Membership upgraded', `Your plan is now ${planName}.`)
     return
   }
 
@@ -207,6 +218,7 @@ export function notifyMembershipActivated(opts: {
     ),
     cta: { label: 'Open membership', url: membershipUrl },
   })
+  membershipPush(opts.userId, 'Membership activated', `${planName} is now active.`)
 }
 
 export function notifyMembershipRenewed(opts: {
@@ -240,6 +252,7 @@ export function notifyMembershipRenewed(opts: {
     ),
     cta: { label: 'Manage membership', url: membershipDashboardUrl() },
   })
+  membershipPush(opts.userId, 'Membership renewed', `${plan} renewed successfully.`)
 }
 
 export function notifyMembershipExpiring(opts: {
@@ -268,6 +281,11 @@ export function notifyMembershipExpiring(opts: {
     ),
     cta: { label: 'Renew membership', url: membershipDashboardUrl() },
   })
+  membershipPush(
+    opts.userId,
+    'Membership expiring soon',
+    `Your ${plan} expires ${days}.`
+  )
 }
 
 export function notifyMembershipPaymentFailed(opts: {
@@ -301,6 +319,7 @@ export function notifyMembershipPaymentFailed(opts: {
     ),
     cta: { label: 'Update membership', url: membershipDashboardUrl() },
   })
+  membershipPush(opts.userId, 'Payment failed', `Action needed for ${plan}.`)
 }
 
 export function notifyMembershipCancelled(opts: {
@@ -327,6 +346,7 @@ export function notifyMembershipCancelled(opts: {
     ),
     cta: { label: 'View membership', url: membershipDashboardUrl() },
   })
+  membershipPush(opts.userId, 'Subscription cancelled', `${plan} will not renew.`)
 }
 
 export function notifyMembershipExpired(opts: {
@@ -348,6 +368,7 @@ export function notifyMembershipExpired(opts: {
     ),
     cta: { label: 'Subscribe again', url: membershipDashboardUrl() },
   })
+  membershipPush(opts.userId, 'Membership expired', `${plan} is no longer active.`)
 }
 
 /** Resolve userId from a Stripe subscription Firestore doc or customer email. */

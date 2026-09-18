@@ -156,6 +156,19 @@ export async function POST(request: NextRequest) {
       })
     )
 
+    void import('@/lib/push-notifications-server').then(({ notifyAdminsPushSafe }) => {
+      notifyAdminsPushSafe(
+        {
+          title: 'New opportunity pending review',
+          body: title,
+        },
+        {
+          jobId: id,
+          click_action: '/admin/opportunities',
+        }
+      )
+    })
+
     return NextResponse.json({ success: true, data: { id, status } })
   } catch (error) {
     console.error('[v0] Error creating opportunity:', error)

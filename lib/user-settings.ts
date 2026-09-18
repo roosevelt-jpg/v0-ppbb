@@ -276,14 +276,18 @@ export function mapNotificationTypeToPreference(
 ): NotificationPreferenceKey {
   switch (type) {
     case 'job_approved':
+    case 'job_published':
     case 'listing_published':
-      return 'systemAlerts'
+    case 'offer_published':
+    case 'discount_published':
+      return 'communityUpdates'
     case 'group_join_approved':
     case 'group_join_rejected':
     case 'group_message':
       return 'memberMessages'
     case 'event_reminder':
     case 'event_registration':
+    case 'event_created':
       return 'eventReminders'
     case 'newsletter':
       return 'newsletter'
@@ -292,11 +296,14 @@ export function mapNotificationTypeToPreference(
     case 'community_joined':
     case 'news_published':
       return 'communityUpdates'
-    case 'event_created':
-      return 'eventReminders'
     case 'job_application':
     case 'marketplace_purchase':
     case 'offer_approved':
+    case 'membership':
+    case 'donation':
+    case 'approval_outcome':
+    case 'admin_alert':
+    case 'system_alert':
       return 'systemAlerts'
     default:
       return 'systemAlerts'

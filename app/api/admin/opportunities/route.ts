@@ -2,12 +2,11 @@ import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore'
-import { getMessaging } from 'firebase-admin/messaging'
-import { getApps } from 'firebase-admin/app'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { auditAdminApiAction } from '@/lib/audit-api-helper'
 import { serializeFirestoreDoc } from '@/lib/serialize-firestore'
 import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
+import { notifyOpportunityPublished } from '@/lib/push-notifications-server'
 
 async function requireAdmin(request: NextRequest): Promise<string | null> {
   return requireAdminFromRequest(request)
@@ -47,36 +46,9 @@ async function notifyBusinessListingLive(businessId: string, title: string, jobI
     cta: { label: 'View opportunities', url: `${site}/business/opportunities` },
   })
 
-  try {
-    const userSnap = await db.collection('users').doc(businessId).get()
-    const userData = userSnap.data() || {}
-    const fcmToken = userData.fcmToken
-    if (typeof fcmToken !== 'string' || fcmToken.length < 10) return
-
-    const { shouldNotifyUser } = await import('@/lib/user-settings')
-    if (!shouldNotifyUser({ ...userData, id: businessId }, 'push', 'systemAlerts')) return
-
-    const fcmSettings = userData.fcmSettings || {}
-    if (fcmSettings.enabled === false) return
-
-    const app = getApps()[0]
-    if (!app) return
-    const messaging = getMessaging(app)
-    await messaging.send({
-      token: fcmToken,
-      notification: {
-        title: 'Listing published',
-        body: message,
-      },
-      data: {
-        type: 'job_approved',
-        jobId,
-        click_action: '/business/opportunities',
-      },
-    })
-  } catch (err) {
-    console.warn('[admin/opportunities] FCM notify failed:', err)
-  }
+  void notifyOpportunityPublished({ title, jobId, businessId }).catch((err) =>
+    console.warn('[admin/opportunities] push broadcast failed:', err)
+  )
 }
 
 /**

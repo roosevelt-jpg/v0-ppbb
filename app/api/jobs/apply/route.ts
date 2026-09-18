@@ -175,6 +175,26 @@ export async function POST(request: NextRequest) {
         ),
         cta: { label: 'View applications', url: `${site}/business/opportunities` },
       })
+      void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+        pushToUserSafe(
+          businessId,
+          { title: 'New job application', body: `${applicantName} applied to “${jobTitle}”.` },
+          {
+            type: 'job_application',
+            jobId: opportunityId,
+            click_action: '/business/opportunities',
+          }
+        )
+        pushToUserSafe(
+          uid,
+          { title: 'Application submitted', body: `Your application for “${jobTitle}” was sent.` },
+          {
+            type: 'job_application',
+            jobId: opportunityId,
+            click_action: '/dashboard/opportunities',
+          }
+        )
+      })
     }
 
     sendBrandedEmailToUserSafe({

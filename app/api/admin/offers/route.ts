@@ -74,6 +74,12 @@ async function notifyBusinessOfferLive(businessId: string, title: string, offerI
     bodyHtml: paragraphs('Assalamu alaikum,', message),
     cta: { label: 'View offers', url: `${site}/business/offers` },
   })
+
+  void import('@/lib/push-notifications-server').then(({ notifyOfferPublished }) =>
+    notifyOfferPublished({ title, offerId, businessId }).catch((err) =>
+      console.warn('[admin/offers] push broadcast failed:', err)
+    )
+  )
 }
 
 export async function GET(request: NextRequest) {

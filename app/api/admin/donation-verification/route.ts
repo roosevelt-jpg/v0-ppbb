@@ -55,6 +55,13 @@ async function notifyDonor(
     bodyHtml: paragraphs('Assalamu alaikum,', bodyText),
     cta: { label: 'View donations', url: `${site}/dashboard/donations` },
   })
+  void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+    pushToUserSafe(
+      userId,
+      { title, body: bodyText },
+      { type: 'donation', submissionId, click_action: '/dashboard/donations' }
+    )
+  })
 }
 
 async function generateAndStoreReceipt(

@@ -12,6 +12,7 @@ export async function sendEventRegistrationEmail(opts: {
   status: string
   checkInCode?: string | null
   waitlistPosition?: number | null
+  userId?: string | null
 }): Promise<boolean> {
   if (!opts.to) return false
 
@@ -49,6 +50,26 @@ export async function sendEventRegistrationEmail(opts: {
     )
   } else if (opts.checkInCode) {
     lines.push(`Your check-in code: ${opts.checkInCode}`)
+  }
+
+  if (opts.userId) {
+    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+      const path = (() => {
+        try {
+          return new URL(opts.eventUrl).pathname
+        } catch {
+          return '/events'
+        }
+      })()
+      pushToUserSafe(
+        opts.userId!,
+        { title: headline, body: opts.eventTitle },
+        {
+          type: 'event_registration',
+          click_action: path,
+        }
+      )
+    })
   }
 
   try {

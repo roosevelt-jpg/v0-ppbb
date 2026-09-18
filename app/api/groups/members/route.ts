@@ -44,6 +44,17 @@ async function notifyUser(
       bodyHtml: paragraphs('Assalamu alaikum,', message),
       cta: { label: 'Open Passive Blessings', url: `${site}/dashboard` },
     })
+
+    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+      pushToUserSafe(
+        userId,
+        { title, body: message },
+        {
+          type,
+          click_action: '/dashboard',
+        }
+      )
+    })
   } catch (error) {
     console.warn('[v0] Could not notify user:', error)
   }

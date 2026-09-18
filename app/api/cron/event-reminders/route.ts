@@ -171,6 +171,23 @@ export async function GET(request: NextRequest) {
           checkInCode: typeof reg.checkInCode === 'string' ? reg.checkInCode : null,
         })
 
+        if (userId) {
+          void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+            pushToUserSafe(
+              userId,
+              {
+                title: kind === 'day_before' ? 'Event tomorrow' : 'Event starting soon',
+                body: title,
+              },
+              {
+                type: 'event_reminder',
+                eventId: eventDoc.id,
+                click_action: `/events/${eventDoc.id}`,
+              }
+            )
+          })
+        }
+
         if (ok) {
           await regDoc.ref.set(
             {

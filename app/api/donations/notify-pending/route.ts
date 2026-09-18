@@ -52,6 +52,24 @@ export async function POST(request: NextRequest) {
       })
     )
 
+    void import('@/lib/push-notifications-server').then(({ notifyAdminsPushSafe, pushToUserSafe }) => {
+      notifyAdminsPushSafe(
+        {
+          title: 'New donation proof pending',
+          body: `${typeLabel} AED ${amount} for ${causeName}`,
+        },
+        { submissionId, click_action: '/admin/donation-verification' }
+      )
+      pushToUserSafe(
+        uid,
+        {
+          title: 'Donation proof received',
+          body: `We received your ${typeLabel} proof of AED ${amount}.`,
+        },
+        { type: 'donation', submissionId, click_action: '/dashboard/donations' }
+      )
+    })
+
     const { paragraphs, sendBrandedEmailToUserSafe } = await import('@/lib/platform-email')
     const site = (
       process.env.NEXT_PUBLIC_SITE_URL ||

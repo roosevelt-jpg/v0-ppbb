@@ -435,6 +435,7 @@ export async function POST(request: NextRequest) {
           eventUrl: `${origin}/events/${eventId}`,
           status: 'waitlisted',
           waitlistPosition,
+          userId,
         })
       }
       return NextResponse.json({
@@ -474,6 +475,7 @@ export async function POST(request: NextRequest) {
           eventTitle: String(event.title || 'Event'),
           eventUrl: `${origin}/events/${eventId}`,
           status: 'pending_payment',
+          userId,
         })
       }
 
@@ -622,6 +624,7 @@ export async function POST(request: NextRequest) {
         eventUrl: `${origin}/events/${eventId}/confirmation?registrationId=${regRef.id}`,
         status: String(registration.status),
         checkInCode: registration.checkInCode as string | null,
+        userId,
       })
     }
 

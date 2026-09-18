@@ -91,6 +91,13 @@ export async function POST(request: NextRequest) {
             url: `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.passive-blessings.com').replace(/\/$/, '')}/admin/approvals`,
           },
         })
+        void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+          pushToUserSafe(
+            adminDoc.id,
+            { title: 'New partnership request', body: `${submitterName}: ${title}` },
+            { type: 'admin_alert', click_action: '/admin/approvals' }
+          )
+        })
       }
     } catch (notifyErr) {
       console.warn('[business/partnerships] admin notify failed:', notifyErr)
@@ -109,6 +116,13 @@ export async function POST(request: NextRequest) {
         label: 'Open business dashboard',
         url: `${(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.passive-blessings.com').replace(/\/$/, '')}/business/dashboard`,
       },
+    })
+    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+      pushToUserSafe(
+        uid,
+        { title: 'Partnership request received', body: title },
+        { type: 'approval_outcome', click_action: '/business/dashboard' }
+      )
     })
 
     return NextResponse.json({ success: true, data: { id: ref.id } })

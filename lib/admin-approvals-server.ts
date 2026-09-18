@@ -317,6 +317,16 @@ function notifyApprovalOutcome(opts: {
       bodyHtml,
       cta,
     })
+    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+      pushToUserSafe(
+        userId,
+        { title: opts.headline, body: opts.body },
+        {
+          type: 'approval_outcome',
+          click_action: opts.ctaPath,
+        }
+      )
+    })
     return
   }
   if (opts.email && opts.email.includes('@')) {
@@ -499,6 +509,11 @@ export async function processApprovalAction(
           ctaPath: '/business/offers',
         })
       }
+      if (action === 'approve') {
+        void import('@/lib/push-notifications-server').then(({ notifyOfferPublished }) =>
+          notifyOfferPublished({ title, offerId: id, businessId, notifyOwner: false }).catch(console.warn)
+        )
+      }
       return { success: true }
     }
 
@@ -535,6 +550,13 @@ export async function processApprovalAction(
           ctaPath: '/business/opportunities',
         })
       }
+      if (action === 'approve') {
+        void import('@/lib/push-notifications-server').then(({ notifyOpportunityPublished }) =>
+          notifyOpportunityPublished({ title, jobId: id, businessId, notifyOwner: false }).catch(
+            console.warn
+          )
+        )
+      }
       return { success: true }
     }
 
@@ -550,6 +572,7 @@ export async function processApprovalAction(
         })
       )
       const businessId = String(d.businessId || d.ownerId || '')
+      const discountTitle = String(d.title || d.code || id)
       if (businessId) {
         notifyApprovalOutcome({
           userId: businessId,
@@ -559,11 +582,21 @@ export async function processApprovalAction(
           headline: action === 'approve' ? 'Discount active' : 'Discount not approved',
           body:
             action === 'approve'
-              ? `Your discount “${String(d.title || d.code || id)}” is now active.`
-              : `Your discount “${String(d.title || d.code || id)}” was not approved.`,
+              ? `Your discount “${discountTitle}” is now active.`
+              : `Your discount “${discountTitle}” was not approved.`,
           ctaLabel: 'Open business dashboard',
           ctaPath: '/business/dashboard',
         })
+      }
+      if (action === 'approve') {
+        void import('@/lib/push-notifications-server').then(({ notifyDiscountPublished }) =>
+          notifyDiscountPublished({
+            title: discountTitle,
+            discountId: id,
+            businessId,
+            notifyOwner: false,
+          }).catch(console.warn)
+        )
       }
       return { success: true }
     }
@@ -600,6 +633,11 @@ export async function processApprovalAction(
           ctaLabel: 'View my events',
           ctaPath: '/dashboard/events',
         })
+      }
+      if (action === 'approve') {
+        void import('@/lib/push-notifications-server').then(({ notifyNewEventPublished }) =>
+          notifyNewEventPublished(title, id).catch(console.warn)
+        )
       }
       return { success: true }
     }
