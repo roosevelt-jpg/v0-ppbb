@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@/lib/firebase'
@@ -111,6 +111,7 @@ export default function SignupClient() {
     clientSecret: string
     mode: 'payment' | 'setup'
   } | null>(null)
+  const skipPromoReleaseRef = useRef(false)
   const [promoApplied, setPromoApplied] = useState<{
     code: string
     percentOff: number
@@ -822,10 +823,34 @@ export default function SignupClient() {
 
   return (
     <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
+  const releasePromoReservation = () => {
+    if (skipPromoReleaseRef.current) {
+      skipPromoReleaseRef.current = false
+      setActiveIntent(null)
+      return
+    }
+    setActiveIntent(null)
+    void (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        if (!token) return
+        await fetch('/api/membership/cancel-promo-reservation', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setPromoApplied(null)
+      } catch {
+        /* best-effort release */
+      }
+    })()
+  }
+
+  return (
+    <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
       <Dialog
         open={Boolean(activeIntent)}
         onOpenChange={(open) => {
-          if (!open) setActiveIntent(null)
+          if (!open) releasePromoReservation()
         }}
         title={activeIntent?.mode === 'setup' ? 'Save your card' : 'Enter card details'}
         description={
@@ -842,9 +867,10 @@ export default function SignupClient() {
             clientSecret={activeIntent.clientSecret}
             mode={activeIntent.mode}
             onSuccess={() => {
+              skipPromoReleaseRef.current = true
               window.location.href = '/dashboard/membership?status=success'
             }}
-            onCancel={() => setActiveIntent(null)}
+            onCancel={releasePromoReservation}
           />
         ) : activeIntent ? (
           <p style={{ fontSize: '0.875rem', color: '#c62828' }}>

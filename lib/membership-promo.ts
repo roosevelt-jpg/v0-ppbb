@@ -210,13 +210,22 @@ export async function createMembershipPromoCode(
   const plan = planSnap.data() || {}
 
   const type = input.type === 'percent_off' ? 'percent_off' : 'free_access'
-  const percentOff = type === 'free_access' ? 100 : Math.min(100, Math.max(0, Number(input.percentOff) || 0))
-  if (type === 'percent_off' && percentOff <= 0) {
-    throw new Error('percentOff must be greater than 0')
+  let percentOff: number
+  if (type === 'free_access') {
+    percentOff = 100
+  } else {
+    percentOff = Math.floor(Number(input.percentOff) || 0)
+    if (percentOff < 1 || percentOff > 99) {
+      throw new Error('percentOff must be an integer from 1 to 99 for percent-off codes')
+    }
   }
 
   const benefitDurationMonths = normalizeBenefitDurationMonths(input.benefitDurationMonths)
-  const trialEnabled = benefitDurationMonths > 0 && input.trialEnabled === true
+  if (type === 'percent_off' && benefitDurationMonths <= 0) {
+    throw new Error('Percent-off codes require a duration of 1–12 months')
+  }
+  const trialEnabled =
+    type === 'free_access' && benefitDurationMonths > 0 && input.trialEnabled === true
   const maxRedemptions =
     input.maxRedemptions === null || input.maxRedemptions === undefined
       ? null
@@ -299,6 +308,8 @@ export type RedeemMembershipPromoResult = {
   clientSecret: string | null
   intentMode: 'payment' | 'setup' | null
   renewDate: string | null
+  /** True when an existing Stripe subscription already has the discount applied. */
+  alreadyComplete?: boolean
 }
 
 /** Undo a reservation made by redeemMembershipPromo's transaction below — used both by

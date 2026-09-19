@@ -156,8 +156,7 @@ function SettingsContent() {
     setSuccess(null)
     try {
       const url = await uploadImageToFirebase(file, `users/${current.uid}/profile`, {
-        preset: 'content',
-        maxDimension: 512,
+        preset: 'avatar',
       })
 
       await updateDoc(

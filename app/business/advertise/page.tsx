@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Dialog } from '@/components/dialog'
 import { StripeCardCheckout } from '@/components/stripe-card-checkout'
 import { Loader2, Upload } from 'lucide-react'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 type AdRequest = {
   id: string
@@ -54,20 +55,13 @@ function AdvertiseInner() {
   }, [searchParams])
 
   const uploadBanner = async (file: File) => {
-    if (file.size > 25 * 1024 * 1024) {
-      setMessage('Image too large. Maximum 25 MB.')
-      return
-    }
     setUploading(true)
     setMessage(null)
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      fd.append('folder', 'advertising')
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error || 'Upload failed')
-      setImageURL(json.url)
+      const url = await uploadImageToFirebase(file, 'advertising', {
+        preset: 'banner',
+      })
+      setImageURL(url)
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Upload failed')
     } finally {

@@ -9,33 +9,13 @@ type Props = {
   params: Promise<{ id: string }>
 }
 
-/** Prefer absolute http(s) banner URL for WhatsApp / OG crawlers. */
-function resolveEventOgImage(
-  data: Record<string, unknown>,
-  site: string,
-  fallback: string
-): string {
-  const candidates = [
-    data.bannerURL,
-    data.bannerImage,
-    data.bannerImageUrl,
-    data.coverImage,
-    data.imageURL,
-  ]
-  for (const raw of candidates) {
-    const value = typeof raw === 'string' ? raw.trim() : ''
-    if (!value) continue
-    if (/^https?:\/\//i.test(value)) return value
-    if (value.startsWith('//')) return `https:${value}`
-    if (value.startsWith('/')) return `${site}${value}`
-  }
-  return fallback
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const site = getSiteUrl()
   const fallbackImage = `${site}/opengraph-image`
+  // Same-origin compressed JPEG under WhatsApp's ~600KB limit.
+  // Raw Firebase/GCS banners are often 1–2MB+ and get dropped from previews.
+  const image = `${site}/api/og/event/${encodeURIComponent(id)}`
 
   try {
     const snap = await getAdminDb().collection('events').doc(id).get()
@@ -50,11 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description =
       (typeof data.description === 'string' && data.description.slice(0, 160)) ||
       'Join this event on Passive Blessings'
-    const image = resolveEventOgImage(data, site, fallbackImage)
     const url = `${site}/events/${id}`
 
-    // Single og:image only — WhatsApp often prefers a later logo over the banner
-    // when multiple images are listed.
     return {
       title,
       description,
@@ -64,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: 'website',
         url,
         siteName: 'Passive Blessings',
-        images: [{ url: image, alt: title, width: 1200, height: 630 }],
+        images: [{ url: image, alt: title, width: 1200, height: 630, type: 'image/jpeg' }],
       },
       twitter: {
         card: 'summary_large_image',

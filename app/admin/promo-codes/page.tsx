@@ -202,11 +202,9 @@ export default function AdminPromoCodesPage() {
     >
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-neutral-600 dark:text-muted-foreground">
-            Free access (100%) or percent off (e.g. 30% / 50% for 3 months via Stripe).
-            </p>
-          <p className="text-sm text-neutral-600">
-            Codes grant 100% free access for forever or any duration from 1–12 months.
+          <p className="text-sm text-neutral-600 dark:text-muted-foreground max-w-2xl">
+            Create <strong>100% free access</strong> codes (no card) or <strong>percent-off</strong>{' '}
+            codes (1–99% via Stripe for 1–12 months). Each code is tied to one pricing plan.
           </p>
           <button
             type="button"
@@ -344,6 +342,7 @@ export default function AdminPromoCodesPage() {
                   Choose forever, or any duration from 1–12 months.
                 </p>
               </div>
+              {form.type === 'free_access' ? (
               <div className="sm:col-span-2">
                 <label
                   className={`flex items-start gap-2 rounded-lg border p-3 ${
@@ -365,16 +364,15 @@ export default function AdminPromoCodesPage() {
                     </span>
                     <span className="block text-neutral-500 mt-0.5">
                       On: the member enters a card at checkout and Stripe automatically bills the
-                      plan price the moment the trial ends — a genuine free-trial-then-pay flow.
-                      Off (default): the plan is granted directly for the duration above, no card
-                      collected, no billing — access simply lapses when the duration is up.
+                      plan price when the trial ends. Off (default): free grant with no card.
                       {form.benefitDurationMonths === 'forever'
-                        ? ' Not available for a forever/lifetime duration — there is nothing to bill.'
+                        ? ' Not available for forever/lifetime.'
                         : ''}
                     </span>
                   </span>
                 </label>
               </div>
+              ) : null}
               <div>
                 <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Max redemptions (blank = unlimited)
@@ -437,7 +435,7 @@ export default function AdminPromoCodesPage() {
                   <p className="text-xs text-neutral-600">
                     {row.type === 'free_access' || row.percentOff >= 100
                       ? '100% free'
-                      : `${row.percentOff}% off`}{' '}
+                      : `${Math.round(Number(row.percentOff) || 0)}% off`}{' '}
                     ·{' '}
                     {row.benefitDurationMonths === 0
                       ? 'Forever'
@@ -449,15 +447,25 @@ export default function AdminPromoCodesPage() {
                   </p>
                   {row.benefitDurationMonths > 0 ? (
                     <p className="text-xs">
-                      {row.trialEnabled ? (
+                      {row.type === 'percent_off' ||
+                      (row.percentOff > 0 && row.percentOff < 100) ? (
                         <span className="text-amber-700">
-                          Real trial — card required, auto-bills via Stripe after {row.benefitDurationMonths}{' '}
-                          month{row.benefitDurationMonths === 1 ? '' : 's'}
+                          Stripe discount — card required · then full price after{' '}
+                          {row.benefitDurationMonths} month
+                          {row.benefitDurationMonths === 1 ? '' : 's'}
+                        </span>
+                      ) : row.trialEnabled ? (
+                        <span className="text-amber-700">
+                          Real trial — card required, auto-bills via Stripe after{' '}
+                          {row.benefitDurationMonths} month
+                          {row.benefitDurationMonths === 1 ? '' : 's'}
                         </span>
                       ) : (
                         <span className="text-neutral-500">Free grant only — no card, no billing</span>
                       )}
                     </p>
+                  ) : row.type === 'free_access' || row.percentOff >= 100 ? (
+                    <p className="text-xs text-neutral-500">Free grant only — no card, no billing</p>
                   ) : null}
                   {row.codeExpiresAt ? (
                     <p className="text-xs text-neutral-500">

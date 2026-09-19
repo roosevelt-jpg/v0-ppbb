@@ -513,9 +513,8 @@ function BusinessEventForm() {
                   try {
                     setBannerProgress(40)
                     const url = await uploadImageToFirebase(file, `events/${user.id}/banner`, {
-                      preset: 'hero',
-                      maxDimension: 1920,
-                      aspectRatio: 16 / 9,
+                      preset: 'eventBanner',
+                      onProgress: (p) => setBannerProgress(p.progress),
                     })
                     setBannerProgress(100)
                     setFormData((p) => ({ ...p, bannerURL: url }))

@@ -22,6 +22,7 @@ import type { EventTag, GenderRestriction } from '@/lib/types'
 import type { EventCoupon, EventRecurrence, EventStatus, TicketType } from '@/lib/event-types'
 import { EventHostingFields } from '@/components/events/event-hosting-fields'
 import { BUTTON_BACK, BUTTON_PRIMARY } from '@/lib/admin-design-system'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 import {
   subscribeToEventsConfig,
   DEFAULT_EVENTS_CONFIG,
@@ -213,14 +214,9 @@ function CreateEventForm() {
   const handleUploadImage = async (): Promise<string | null> => {
     if (!imageFile) return formData.bannerURL
     try {
-      const fd = new FormData()
-      fd.append('file', imageFile)
-      // Unique object per upload — a fixed path reused the same URL + year-long CDN cache
-      fd.append('folder', 'events/banners')
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (!json.success) throw new Error(json.error || 'Upload failed')
-      return json.url
+      return await uploadImageToFirebase(imageFile, 'events/banners', {
+        preset: 'eventBanner',
+      })
     } catch (err) {
       console.error('[v0] Upload error:', err)
       throw err
@@ -235,13 +231,10 @@ function CreateEventForm() {
     try {
       const uploaded: string[] = []
       for (const file of files) {
-        const fd = new FormData()
-        fd.append('file', file)
-        fd.append('folder', 'events/gallery')
-        const res = await fetch('/api/upload', { method: 'POST', body: fd })
-        const json = await res.json()
-        if (!json.success || !json.url) throw new Error(json.error || 'Gallery upload failed')
-        uploaded.push(json.url)
+        const url = await uploadImageToFirebase(file, 'events/gallery', {
+          preset: 'content',
+        })
+        uploaded.push(url)
       }
       setFormData((prev) => ({
         ...prev,

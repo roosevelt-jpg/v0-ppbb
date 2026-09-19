@@ -1,8 +1,10 @@
-import {
+﻿import {
   compressImageToFile,
   CmsImagePreset,
   CompressImageOptions,
 } from '@/lib/image-service'
+import { uploadToFirebaseStorage, type UploadProgress } from '@/lib/firebase-storage'
+import { auth } from '@/lib/firebase'
 
 const UPLOAD_MAX_BYTES = 5 * 1024 * 1024
 
@@ -17,12 +19,37 @@ const FAVICON_TYPES = [
 
 export interface UploadImageOptions extends CompressImageOptions {
   preset?: CmsImagePreset
+  onProgress?: (progress: UploadProgress) => void
+}
+
+function sanitizeExt(name: string, mimeType: string): string {
+  const fromName = name.includes('.') ? name.split('.').pop() || '' : ''
+  const fromMime = mimeType.split('/')[1]?.split('+')[0] || ''
+  const raw = (fromName || fromMime || 'bin').toLowerCase()
+  return raw.replace(/[^a-z0-9]/g, '') || 'bin'
+}
+
+function buildObjectPath(folder: string, file: File, exactPath?: string): string {
+  if (exactPath?.trim()) return exactPath.replace(/^\/+/, '')
+  const cleanFolder = folder.replace(/^\/+|\/+$/g, '') || 'uploads'
+  const id =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return `${cleanFolder}/${Date.now()}-${id}.${sanitizeExt(file.name, file.type)}`
+}
+
+async function ensureSignedIn(): Promise<void> {
+  if (!auth?.currentUser) {
+    throw new Error('Sign in required to upload files')
+  }
+  // Refresh token so Storage rules see a valid auth session
+  await auth.currentUser.getIdToken(true).catch(() => undefined)
 }
 
 /**
- * Uploads an image to Firebase Storage (via the server upload route) and
- * returns its public download URL. Images are resized/compressed client-side
- * before upload. Only the URL is stored in Firestore.
+ * Compress/resize in the browser, then upload directly to Firebase Storage
+ * (client SDK — no /api/upload round-trip). Only the download URL is stored.
  */
 export async function uploadImageToFirebase(
   file: File,
@@ -32,6 +59,8 @@ export async function uploadImageToFirebase(
   if (!file) {
     throw new Error('No file selected')
   }
+
+  await ensureSignedIn()
 
   const preset = options.preset ?? 'content'
   const allowSvg =
@@ -58,41 +87,37 @@ export async function uploadImageToFirebase(
     )
   }
 
-  const fd = new FormData()
-  fd.append('file', prepared)
-  fd.append('folder', path)
-  const res = await fetch('/api/upload', { method: 'POST', body: fd })
-  const json = await res.json()
-  if (!res.ok || !json.success) {
-    throw new Error(json.error || 'Image upload failed')
-  }
-  return json.url as string
+  const objectPath = buildObjectPath(path, prepared)
+  return uploadToFirebaseStorage(prepared, objectPath, options.onProgress)
 }
 
 /**
- * Uploads any file (image, video, etc.) to Firebase Storage via the server
- * upload route. Only the returned URL should be stored in Firestore.
- * Pass `exactPath` for a deterministic Storage object (e.g. partners/{id}/logo.png).
+ * Uploads any file directly to Firebase Storage. Images should prefer
+ * {@link uploadImageToFirebase} so they are resized first.
  */
 export async function uploadFileToFirebase(
   file: File,
   folder: string,
-  exactPath?: string
+  exactPath?: string,
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<string> {
   if (!file) {
     throw new Error('No file selected')
   }
 
-  const fd = new FormData()
-  fd.append('file', file)
-  fd.append('folder', folder)
-  if (exactPath) fd.append('path', exactPath)
-  const res = await fetch('/api/upload', { method: 'POST', body: fd })
-  const json = await res.json()
-  if (!res.ok || !json.success) {
-    throw new Error(json.error || 'File upload failed')
+  await ensureSignedIn()
+
+  // Images go through resize/compress automatically
+  if (file.type.startsWith('image/') && file.type !== 'image/svg+xml') {
+    return uploadImageToFirebase(file, folder, { preset: 'content', onProgress })
   }
-  return json.url as string
+
+  if (file.size > 25 * 1024 * 1024) {
+    throw new Error('File is too large (25MB max)')
+  }
+
+  const objectPath = buildObjectPath(folder, file, exactPath)
+  return uploadToFirebaseStorage(file, objectPath, onProgress)
 }
 
 export function validateImageFile(

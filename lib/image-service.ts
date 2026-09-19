@@ -124,13 +124,18 @@ export async function processImageFile(
 
 export const CMS_IMAGE_PRESETS = {
   /** Hero, mission, and other large CMS imagery */
-  content: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024 },
+  content: { maxDimension: 1920, maxBytes: 900_000 },
   /** Homepage hero column — landscape 4:3 center-crop matches the hero frame */
-  hero: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 4 / 3 },
+  hero: { maxDimension: 1600, maxBytes: 700_000, aspectRatio: 4 / 3 },
+  /**
+   * Event / share banners — 16:9 cover-crop, kept under WhatsApp's ~600KB OG limit.
+   * Prefer this for event bannerURL uploads.
+   */
+  eventBanner: { maxDimension: 1600, maxBytes: 450_000, aspectRatio: 16 / 9 },
   /** Wide advertising / promo banners — landscape ~3:1, auto-resized */
-  banner: { maxDimension: 1920, maxBytes: 3 * 1024 * 1024, aspectRatio: 3 / 1 },
+  banner: { maxDimension: 1920, maxBytes: 450_000, aspectRatio: 3 / 1 },
   /** About Story founder headshot — portrait 3:4 center-crop */
-  founder: { maxDimension: 1920, maxBytes: 5 * 1024 * 1024, aspectRatio: 3 / 4 },
+  founder: { maxDimension: 1200, maxBytes: 500_000, aspectRatio: 3 / 4 },
   /** Partner / logo thumbnails (flexible max) */
   logo: { maxDimension: 500, maxBytes: 2 * 1024 * 1024 },
   /** Site brand logos — always exported at 268×95 transparent PNG */
@@ -147,6 +152,8 @@ export const CMS_IMAGE_PRESETS = {
     exactWidth: 64,
     exactHeight: 64,
   },
+  /** Square avatars / profile photos */
+  avatar: { maxDimension: 512, maxBytes: 350_000, aspectRatio: 1 },
 } as const
 
 export type CmsImagePreset = keyof typeof CMS_IMAGE_PRESETS
@@ -752,7 +759,12 @@ export async function compressImageToFile(
       const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
       targetWidth = Math.round(targetWidth * scale)
       targetHeight = Math.round(targetHeight * scale)
-    } else if (file.size <= maxBytes && file.type !== 'image/gif') {
+    } else if (
+      file.size <= maxBytes &&
+      file.type !== 'image/gif' &&
+      !aspectRatio
+    ) {
+      // Already fits — skip re-encode unless we need an aspect crop
       return file
     }
 

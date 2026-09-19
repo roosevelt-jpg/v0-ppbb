@@ -130,11 +130,33 @@ async function handleStripeCheckout(
         }
       }
       if (promo) {
-        const status = resolvePromoStatus(promo)
-        // Reserved codes may already be marked exhausted for this user — still apply discount.
+        // Only apply if this user already reserved the code via redeem-promo.
+        // Never apply a raw code that was never atomically reserved (would skip usedCount).
         const reservedForUser =
           userData.membershipPromoCodeId === promo.id ||
           normalizePromoCode(userData.membershipPromoCode) === promo.code
+
+        if (!reservedForUser) {
+          return NextResponse.json(
+            {
+              error:
+                'Apply this promo with Redeem first, then complete payment. Unreserved codes cannot be used at checkout.',
+            },
+            { status: 400 }
+          )
+        }
+
+        if (promo.planId && promo.planId !== planId) {
+          return NextResponse.json(
+            {
+              error: `This promo is for plan "${promo.planName || promo.planId}", not the selected plan.`,
+            },
+            { status: 400 }
+          )
+        }
+
+        const status = resolvePromoStatus(promo)
+        // Reserved codes may already be marked exhausted for this user — still apply discount.
         if (status === 'active' || reservedForUser) {
           if (!promoGrantsFreeAccess(promo) && promo.type === 'percent_off') {
             const id = await ensurePromoStripeCoupon(promo)

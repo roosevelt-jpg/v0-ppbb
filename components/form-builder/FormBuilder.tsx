@@ -14,6 +14,7 @@ import {
   ImageIcon,
 } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_ICON_DANGER } from '@/lib/admin-design-system'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 const FIELD_TYPES: { type: FormFieldType; label: string; icon: string }[] = [
   { type: 'text', label: 'Text', icon: 'T' },
@@ -53,18 +54,12 @@ export default function FormBuilder({
   const uploadBanner = async (file: File) => {
     setBannerUploading(true)
     try {
-      const body = new FormData()
-      body.append('file', file)
-      body.append('folder', 'forms/banners')
-      const res = await fetch('/api/upload', { method: 'POST', body })
-      const json = await res.json()
-      if (json.success && json.url) {
-        setCurrentForm({ ...currentForm, bannerImageUrl: json.url })
-      } else {
-        alert(json.error || 'Banner upload failed')
-      }
-    } catch {
-      alert('Banner upload failed')
+      const url = await uploadImageToFirebase(file, 'forms/banners', {
+        preset: 'banner',
+      })
+      setCurrentForm({ ...currentForm, bannerImageUrl: url })
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Banner upload failed')
     } finally {
       setBannerUploading(false)
     }

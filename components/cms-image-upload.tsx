@@ -29,7 +29,7 @@ export function CmsImageUpload({
   folder,
   preset = 'content',
   accept = 'image/*,image/gif',
-  helpText = 'Upload an image (auto-resized). JPG, PNG, WebP, or GIF — not a URL.',
+  helpText = 'Direct upload only — image is auto-resized to fit before saving. JPG, PNG, WebP, or GIF.',
   alt = 'Preview',
   className = '',
 }: Props) {

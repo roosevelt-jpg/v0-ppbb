@@ -127,10 +127,8 @@ export function EventDetailView({
     event.maxAttendees != null && event.currentAttendees >= event.maxAttendees
   const canWaitlist = isFull && enableWaitlist
 
+  // Canonical public URL (no query params) so WhatsApp/Facebook cache the OG banner.
   const shareUrl = React.useMemo(() => {
-    if (typeof window !== 'undefined' && window.location?.href) {
-      return window.location.href
-    }
     const base =
       process.env.NEXT_PUBLIC_SITE_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||

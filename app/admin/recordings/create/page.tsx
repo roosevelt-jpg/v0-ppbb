@@ -8,6 +8,7 @@ import { Upload, ArrowLeft, Loader2, X } from 'lucide-react'
 import Link from 'next/link'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_BACK } from '@/lib/admin-design-system'
 import { uploadToFirebaseStorage } from '@/lib/firebase-storage'
+import { uploadImageToFirebase } from '@/lib/upload-utils'
 
 const MAX_MEDIA_BYTES = 500 * 1024 * 1024 // 500 MB — not GB; use a hosted link for larger files
 const MAX_THUMB_BYTES = 10 * 1024 * 1024
@@ -78,13 +79,11 @@ export default function CreateRecordingPage() {
 
       let thumbnailUrl = formData.thumbnailUrl
       if (thumbnailFile) {
-        const fd = new FormData()
-        fd.append('file', thumbnailFile)
-        fd.append('folder', 'recordings/thumbnails')
-        const res = await fetch('/api/upload', { method: 'POST', body: fd })
-        const json = await res.json()
-        if (!json.success) throw new Error(json.error || 'Thumbnail upload failed')
-        thumbnailUrl = json.url || json.data?.url || ''
+        thumbnailUrl = await uploadImageToFirebase(thumbnailFile, 'recordings/thumbnails', {
+          preset: 'content',
+          aspectRatio: 16 / 9,
+          maxBytes: 450_000,
+        })
       }
 
       const res = await fetch('/api/recordings', {

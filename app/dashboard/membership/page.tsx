@@ -43,6 +43,7 @@ export default function MembershipPage() {
     clientSecret: string
     mode: 'payment' | 'setup'
   } | null>(null)
+  const skipPromoReleaseRef = React.useRef(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -146,6 +147,20 @@ export default function MembershipPage() {
       // form; membership activates via webhook once the card is confirmed.
       if (data.data?.clientSecret) {
         setActiveIntent({ clientSecret: data.data.clientSecret, mode: data.data.intentMode || 'setup' })
+        setPromoMessage(
+          data.data?.percentOff > 0 && data.data?.percentOff < 100
+            ? `${data.data.percentOff}% off applied — enter your card to start.`
+            : 'Enter your card to start the free period.'
+        )
+        return
+      }
+
+      if (data.data?.promoType === 'percent_off' || (data.data?.percentOff > 0 && data.data?.percentOff < 100)) {
+        setPromoMessage(
+          `Discount reserved (${data.data.percentOff}% off). Choose the matching plan and complete checkout if payment did not open automatically.`
+        )
+        setStatusBanner('Promo reserved. Complete payment to activate the discount.')
+        await refreshProfile()
         return
       }
 
@@ -258,6 +273,7 @@ export default function MembershipPage() {
   const memberActive = hasActiveMembership(memberRecord)
 
   const handleCardSuccess = () => {
+    skipPromoReleaseRef.current = true
     setActiveIntent(null)
     setPromoCode('')
     setStatusBanner(
@@ -265,6 +281,31 @@ export default function MembershipPage() {
         ? 'Card saved. Your membership is active for the free period — billing starts when it ends.'
         : 'Payment confirmed. Your membership is updating.'
     )
+    void refreshProfile()
+  }
+
+  const releasePromoReservation = () => {
+    if (skipPromoReleaseRef.current) {
+      skipPromoReleaseRef.current = false
+      setActiveIntent(null)
+      return
+    }
+    setActiveIntent(null)
+    void (async () => {
+      try {
+        const firebaseUser = auth.currentUser
+        const token = await firebaseUser?.getIdToken()
+        if (!token || !firebaseUser) return
+        await fetch('/api/membership/cancel-promo-reservation', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const snap = await getDoc(doc(db, 'users', firebaseUser.uid))
+        if (snap.exists()) setProfile(snap.data())
+      } catch {
+        /* best-effort release */
+      }
+    })()
   }
 
   return (
@@ -272,7 +313,7 @@ export default function MembershipPage() {
       <Dialog
         open={Boolean(activeIntent)}
         onOpenChange={(open) => {
-          if (!open) setActiveIntent(null)
+          if (!open) releasePromoReservation()
         }}
         title={activeIntent?.mode === 'setup' ? 'Save your card' : 'Enter card details'}
         description={
@@ -289,7 +330,7 @@ export default function MembershipPage() {
             clientSecret={activeIntent.clientSecret}
             mode={activeIntent.mode}
             onSuccess={handleCardSuccess}
-            onCancel={() => setActiveIntent(null)}
+            onCancel={releasePromoReservation}
           />
         ) : activeIntent ? (
           <p className="text-sm text-red-600 dark:text-red-400">
@@ -312,7 +353,8 @@ export default function MembershipPage() {
       <Card className="p-4 sm:p-6 mb-8 border border-neutral-200 dark:border-border">
         <h3 className="text-sm font-semibold text-neutral-900 dark:text-foreground mb-1">Have a promo code?</h3>
         <p className="text-xs text-neutral-600 dark:text-muted-foreground mb-3">
-          Redeem a free-access membership code. Each account can redeem one promo.
+        <p className="text-xs text-neutral-600 dark:text-muted-foreground mb-3">
+          Redeem a free-access or percent-off membership code. Each account can redeem one promo.
         </p>
         {alreadyUsedPromo ? (
           <p className="text-sm text-neutral-700 dark:text-neutral-200">
