@@ -32,6 +32,9 @@ export default function NewOffer() {
     targetAudience: 'members',
     memberBenefit: 0,
     isMemberOnly: false,
+    paymentCollection: 'payment_link' as 'payment_link' | 'whatsapp',
+    paymentLink: '',
+    whatsapp: '',
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -340,6 +343,102 @@ export default function NewOffer() {
                 />
               </div>
             </div>
+
+            {formData.price > 0 && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+                <p className="text-sm font-semibold text-amber-950">
+                  You collect payment from buyers
+                </p>
+                <p className="text-xs text-amber-900">
+                  Passive Blessings does not process card payments for business listings. After you
+                  confirm payment, prepare delivery.
+                </p>
+                <div>
+                  <label
+                    style={{
+                      color: 'var(--foreground)',
+                      fontWeight: 600,
+                      display: 'block',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    How buyers pay you
+                  </label>
+                  <select
+                    name="paymentCollection"
+                    value={formData.paymentCollection}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      minHeight: '44px',
+                    }}
+                  >
+                    <option value="payment_link">My payment link</option>
+                    <option value="whatsapp">WhatsApp — buyer requests payment details</option>
+                  </select>
+                </div>
+                {formData.paymentCollection === 'payment_link' ? (
+                  <div>
+                    <label
+                      style={{
+                        color: 'var(--foreground)',
+                        fontWeight: 600,
+                        display: 'block',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Payment link *
+                    </label>
+                    <input
+                      type="url"
+                      name="paymentLink"
+                      value={formData.paymentLink}
+                      onChange={handleChange}
+                      required={formData.price > 0}
+                      placeholder="https://…"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        minHeight: '44px',
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label
+                      style={{
+                        color: 'var(--foreground)',
+                        fontWeight: 600,
+                        display: 'block',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      WhatsApp number *
+                    </label>
+                    <input
+                      type="tel"
+                      name="whatsapp"
+                      value={formData.whatsapp}
+                      onChange={handleChange}
+                      required={formData.price > 0}
+                      placeholder="+971…"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        minHeight: '44px',
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Discount and Valid Until */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

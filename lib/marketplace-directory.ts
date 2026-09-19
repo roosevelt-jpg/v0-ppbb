@@ -125,6 +125,9 @@ export interface DirectoryOffer {
   discountPercentage?: number
   phone?: string
   isAvailable?: boolean
+  paymentCollection?: 'payment_link' | 'whatsapp' | string
+  paymentLink?: string
+  hostWhatsapp?: string
 }
 
 export interface DirectoryJob {
@@ -310,6 +313,11 @@ export function normalizeDirectoryOffer(
       typeof data.discountPercentage === 'number' ? data.discountPercentage : memberBenefit,
     phone: asString(data.phone),
     isAvailable: data.isAvailable !== false,
+    paymentCollection:
+      asString(data.paymentCollection) ||
+      (asString(data.paymentLink) ? 'payment_link' : asString(data.hostWhatsapp) || asString(data.whatsapp) ? 'whatsapp' : ''),
+    paymentLink: asString(data.paymentLink) || asString(data.hostPaymentLink),
+    hostWhatsapp: asString(data.hostWhatsapp) || asString(data.whatsapp),
   }
 }
 

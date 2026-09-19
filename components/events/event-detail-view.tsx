@@ -363,6 +363,36 @@ export function EventDetailView({
                   </div>
                 )}
 
+                {(event.pricingType === 'paid_by_business' ||
+                  event.createdByRole === 'business') &&
+                  event.pricingType !== 'free' && (
+                  <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg space-y-2">
+                    <p className="text-xs font-medium text-neutral-900">
+                      Host collects payment
+                    </p>
+                    <p className="text-xs text-neutral-700">
+                      Ticket fees go to the event host — not Passive Blessings.
+                      {event.hostPaymentCollection === 'cash_at_door'
+                        ? ' Pay cash at the door.'
+                        : event.hostPaymentCollection === 'whatsapp'
+                          ? ' Message the host on WhatsApp for payment details after registering.'
+                          : event.hostPaymentLink
+                            ? ' You will be directed to the host payment link after registering.'
+                            : ''}
+                    </p>
+                    {event.hostPaymentLink ? (
+                      <a
+                        href={event.hostPaymentLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold underline text-neutral-900"
+                      >
+                        Host payment link
+                      </a>
+                    ) : null}
+                  </div>
+                )}
+
                 {ticketTypes.length > 0 && onTicketChange && (
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Ticket type</p>

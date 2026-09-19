@@ -169,6 +169,56 @@ export async function POST(request: NextRequest) {
     const isPublished = status === 'published'
     const isPending = status === 'pending_approval'
 
+    const pricingType = body.pricingType || (body.isPaid ? 'paid_by_pb' : 'free')
+    const isBusinessPaid =
+      isBusiness &&
+      (pricingType === 'paid_by_business' ||
+        (body.isPaid === true && pricingType !== 'free' && pricingType !== 'member_only'))
+
+    if (isBusinessPaid) {
+      const { normalizeHostPaymentCollection } = await import('@/lib/pb-payment-policy')
+      const collection = normalizeHostPaymentCollection(
+        body.hostPaymentCollection || body.paymentCollection
+      )
+      const link = String(body.hostPaymentLink || body.paymentLink || '').trim()
+      const wa = String(body.hostWhatsapp || body.whatsapp || '').trim()
+      if (collection === 'payment_link' && !link) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'Add your payment link so attendees can pay you directly. Passive Blessings does not collect ticket money for business events.',
+          },
+          { status: 400 }
+        )
+      }
+      if (collection === 'whatsapp' && !wa) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Add a WhatsApp number so buyers can request payment details from you.',
+          },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Load posting fee for business paid events
+    let postingFeeAmount = 0
+    let postingFeeStatus: 'not_required' | 'pending' | 'paid' | 'waived' = 'not_required'
+    if (isBusinessPaid) {
+      try {
+        const cfgSnap = await db.collection('platformConfig').doc('events').get()
+        const fee = Number(cfgSnap.data()?.businessPaidEventPostingFee)
+        if (Number.isFinite(fee) && fee > 0) {
+          postingFeeAmount = fee
+          postingFeeStatus = 'pending'
+        }
+      } catch {
+        /* keep not_required */
+      }
+    }
+
     let cohostIds: string[] = Array.isArray(body.cohostIds) ? body.cohostIds : []
     if (Array.isArray(body.cohostEmails) && body.cohostEmails.length) {
       const { resolveCohostIds } = await import('@/lib/event-luma-server')
@@ -200,11 +250,40 @@ export async function POST(request: NextRequest) {
       pricingType: body.pricingType || (body.isPaid ? 'paid_by_pb' : 'free'),
       price: body.price ?? null,
       currency: body.currency || 'AED',
-      revenueModel: body.revenueModel || (body.isPaid ? 'pb_full' : null),
+      revenueModel:
+        body.revenueModel ||
+        (createdByRole === 'business' && body.pricingType === 'paid_by_business'
+          ? null
+          : body.isPaid
+            ? 'pb_full'
+            : null),
       pbCommissionPercent: body.pbCommissionPercent || null,
       businessPayoutPercent: body.businessPayoutPercent || null,
       pbCommissionOverride: body.pbCommissionOverride || false,
-      paymentGateway: body.paymentGateway || null,
+      paymentGateway:
+        createdByRole === 'business' &&
+        (body.pricingType === 'paid_by_business' || (body.isPaid && createdByRole === 'business'))
+          ? 'host_direct'
+          : body.paymentGateway || null,
+      hostPaymentCollection:
+        createdByRole === 'business'
+          ? body.hostPaymentCollection || body.paymentCollection || 'payment_link'
+          : null,
+      hostPaymentLink:
+        typeof body.hostPaymentLink === 'string'
+          ? body.hostPaymentLink.trim()
+          : typeof body.paymentLink === 'string'
+            ? body.paymentLink.trim()
+            : null,
+      hostWhatsapp:
+        typeof body.hostWhatsapp === 'string'
+          ? body.hostWhatsapp.trim()
+          : typeof body.whatsapp === 'string'
+            ? body.whatsapp.trim()
+            : null,
+      postingFeeAmount: postingFeeAmount || null,
+      postingFeeStatus,
+      postingFeePaymentIntentId: null,
 
       ticketTypes: Array.isArray(body.ticketTypes)
         ? body.ticketTypes.map((t: Record<string, unknown>) => ({
@@ -281,6 +360,43 @@ export async function POST(request: NextRequest) {
 
     if (isPublished) {
       void notifyNewEventPublished(String(body.title || 'New event'), docRef.id).catch(console.error)
+    }
+
+    // Business paid-event posting fee via PB Stripe
+    if (postingFeeStatus === 'pending' && postingFeeAmount > 0) {
+      try {
+        const { resolveStripeConfig } = await import('@/lib/resolve-stripe-key')
+        const { createEmbeddedPaymentIntent } = await import('@/lib/stripe-embedded')
+        const stripeConfig = await resolveStripeConfig()
+        if (stripeConfig?.secretKey && stripeConfig.publishableKey) {
+          const embedded = await createEmbeddedPaymentIntent({
+            amountMinor: Math.round(postingFeeAmount * 100),
+            currency: 'aed',
+            description: `Event posting fee — ${String(body.title || 'Event')}`,
+            metadata: {
+              type: 'event_posting',
+              eventId: docRef.id,
+              userId: uid,
+              amount: String(postingFeeAmount),
+            },
+          })
+          await docRef.update({ postingFeePaymentIntentId: embedded.paymentIntentId })
+          return NextResponse.json({
+            success: true,
+            data: { id: docRef.id, ...eventData, postingFeePaymentIntentId: embedded.paymentIntentId },
+            postingFee: {
+              required: true,
+              amount: postingFeeAmount,
+              currency: 'AED',
+              clientSecret: embedded.clientSecret,
+              publishableKey: embedded.publishableKey,
+              paymentIntentId: embedded.paymentIntentId,
+            },
+          })
+        }
+      } catch (err) {
+        console.error('[events] posting fee intent failed:', err)
+      }
     }
 
     return NextResponse.json({

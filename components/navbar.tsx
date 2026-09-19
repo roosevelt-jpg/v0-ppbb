@@ -198,8 +198,8 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full bg-neutral-900 dark:bg-neutral-950 border-b border-neutral-800 dark:border-neutral-700">
       <div className="hidden lg:block px-4 sm:px-6 lg:px-8 py-0">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-6 h-14">
-          <div className="flex-shrink-0 h-full flex items-center py-1.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 lg:gap-6 min-h-[5.5rem] h-[5.5rem]">
+          <div className="flex-shrink-0 h-full flex items-center py-1 overflow-visible">
             <SiteLogo background="dark" variant="navbar" href="/" />
           </div>
 
@@ -225,14 +225,9 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="lg:hidden px-3 sm:px-4 py-0 flex items-center justify-between gap-2 h-14">
-        <div className="h-full flex items-center min-w-0 flex-1 py-1">
-          <SiteLogo
-            background="dark"
-            variant="custom"
-            heightClass="h-11 max-h-11"
-            href="/"
-          />
+      <div className="lg:hidden px-3 sm:px-4 py-0 flex items-center justify-between gap-2 min-h-[4.75rem] h-[4.75rem]">
+        <div className="h-full flex items-center min-w-0 flex-1 py-1 overflow-visible">
+          <SiteLogo background="dark" variant="navbar" href="/" />
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <LanguageSwitcherWithFlags onDark />

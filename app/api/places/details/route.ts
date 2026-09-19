@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       const params = new URLSearchParams({
         place_id: placeId,
         key: apiKey,
-        fields: 'geometry,formatted_address,address_components',
+        fields: 'geometry,formatted_address,address_components,name,place_id',
       })
 
       const googleRes = await fetch(
@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
           success: true,
           place: {
             placeId,
+            name: result.name || '',
             formattedAddress: result.formatted_address || '',
             lat: result.geometry?.location?.lat ?? 0,
             lng: result.geometry?.location?.lng ?? 0,

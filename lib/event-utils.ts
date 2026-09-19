@@ -281,6 +281,24 @@ export function mapEventDoc(id: string, data: Record<string, unknown>): Normaliz
     businessPayoutPercent: typeof data.businessPayoutPercent === 'number' ? data.businessPayoutPercent : null,
     pbCommissionOverride: data.pbCommissionOverride === true,
     paymentGateway: typeof data.paymentGateway === 'string' ? data.paymentGateway : null,
+    hostPaymentCollection:
+      data.hostPaymentCollection === 'whatsapp' ||
+      data.hostPaymentCollection === 'cash_at_door' ||
+      data.hostPaymentCollection === 'payment_link'
+        ? data.hostPaymentCollection
+        : null,
+    hostPaymentLink:
+      typeof data.hostPaymentLink === 'string'
+        ? data.hostPaymentLink
+        : typeof data.paymentLink === 'string'
+          ? data.paymentLink
+          : null,
+    hostWhatsapp:
+      typeof data.hostWhatsapp === 'string'
+        ? data.hostWhatsapp
+        : typeof data.whatsapp === 'string'
+          ? data.whatsapp
+          : null,
     bannerURL: getEventBannerURL(data),
     maxAttendees: typeof data.maxAttendees === 'number' ? data.maxAttendees : null,
     currentAttendees: typeof data.currentAttendees === 'number' ? data.currentAttendees : 0,

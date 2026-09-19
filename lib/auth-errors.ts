@@ -1,59 +1,114 @@
 /** Map Firebase Auth error codes to user-friendly login messages. */
-export function formatAuthError(error: unknown): string {
-  const code =
-    (error as { code?: string })?.code ||
-    (typeof error === 'object' && error !== null && 'message' in error
-      ? String((error as { message?: string }).message || '')
-      : '')
+function extractAuthParts(error: unknown): { code: string; message: string } {
+  if (error == null) return { code: '', message: '' }
 
-  if (code.includes('auth/invalid-credential') || code.includes('auth/wrong-password')) {
+  if (typeof error === 'string') {
+    return { code: error, message: error }
+  }
+
+  if (error instanceof Error) {
+    return {
+      code: typeof (error as { code?: string }).code === 'string'
+        ? String((error as { code?: string }).code)
+        : error.message,
+      message: error.message || '',
+    }
+  }
+
+  if (typeof error === 'object') {
+    const obj = error as Record<string, unknown>
+    const nested =
+      obj.error && typeof obj.error === 'object'
+        ? (obj.error as Record<string, unknown>)
+        : null
+
+    const codeRaw = obj.code ?? nested?.code
+    const messageRaw = obj.message ?? nested?.message ?? obj.error
+
+    const code =
+      typeof codeRaw === 'string'
+        ? codeRaw
+        : typeof codeRaw === 'number'
+          ? String(codeRaw)
+          : ''
+    const message =
+      typeof messageRaw === 'string'
+        ? messageRaw
+        : typeof messageRaw === 'number'
+          ? String(messageRaw)
+          : code
+
+    return { code: code || message, message: message || code }
+  }
+
+  return { code: '', message: 'Sign in failed. Please try again.' }
+}
+
+export function formatAuthError(error: unknown): string {
+  const { code, message } = extractAuthParts(error)
+  const haystack = `${code} ${message}`
+
+  if (haystack.includes('auth/invalid-credential') || haystack.includes('auth/wrong-password')) {
     return 'Incorrect email or password. If you signed up with Google, use Continue with Google. Otherwise try Forgot password.'
   }
-  if (code.includes('auth/user-not-found')) {
+  if (haystack.includes('auth/user-not-found')) {
     return 'No account found with this email. Sign up first or check the spelling.'
   }
-  if (code.includes('auth/invalid-email')) {
+  if (haystack.includes('auth/invalid-email')) {
     return 'Please enter a valid email address.'
   }
-  if (code.includes('auth/too-many-requests')) {
+  if (haystack.includes('auth/too-many-requests')) {
     return 'Too many attempts. Please wait a few minutes or reset your password.'
   }
-  if (code.includes('auth/user-disabled')) {
+  if (haystack.includes('auth/user-disabled')) {
     return 'This account has been disabled. Contact support for help.'
   }
-  if (code.includes('auth/popup-closed-by-user')) {
+  if (haystack.includes('auth/popup-closed-by-user')) {
     return 'Sign-in was cancelled. Please try again.'
   }
-  if (code.includes('auth/popup-blocked')) {
+  if (haystack.includes('auth/popup-blocked')) {
     return 'Pop-up was blocked by your browser. Allow pop-ups for this site and try again.'
   }
-  if (code.includes('auth/operation-not-allowed')) {
+  if (haystack.includes('auth/operation-not-allowed')) {
     return 'This sign-in method is not enabled yet. Ask an admin to configure it under Integrations and Firebase Authentication.'
   }
-  if (code.includes('auth/account-exists-with-different-credential')) {
+  if (haystack.includes('auth/account-exists-with-different-credential')) {
     return 'An account already exists with this email using a different sign-in method. Try Continue with Google, or reset your password.'
   }
-  if (code.includes('auth/network-request-failed')) {
+  if (haystack.includes('auth/network-request-failed')) {
     return 'Network error. Check your connection and try again.'
   }
   if (
-    code.includes('Database is closing') ||
-    code.includes('database connection is closing') ||
-    code.includes('IndexedDB') ||
-    /closing\/hidden/i.test(code)
+    haystack.includes('Database is closing') ||
+    haystack.includes('database connection is closing') ||
+    haystack.includes('IndexedDB') ||
+    /closing\/hidden/i.test(haystack)
   ) {
     return 'Sign-in storage on this device was interrupted. Close other tabs of this site, refresh the page, and try again.'
   }
-  if (code.includes('auth/invalid-action-code') || code.includes('auth/expired-action-code')) {
+  if (haystack.includes('auth/invalid-action-code') || haystack.includes('auth/expired-action-code')) {
     return 'This reset link is invalid or has expired. Request a new password reset email.'
   }
-  if (code.includes('permission-denied') || code.includes('Missing or insufficient permissions')) {
+  if (haystack.includes('permission-denied') || haystack.includes('Missing or insufficient permissions')) {
     return 'Signed in, but your profile could not be loaded. Ask an admin to verify your account exists in Firestore, or try again in a moment.'
   }
+  if (haystack.includes('auth/unauthorized-domain')) {
+    return 'This domain is not authorized for Google Sign-In. Ask an admin to add it in Firebase Authentication → Settings → Authorized domains.'
+  }
+  if (haystack.includes('auth/internal-error')) {
+    return 'Google Sign-In failed due to a configuration issue. Ask an admin to check Google Sign-In under Admin → Integrations and Firebase Authentication.'
+  }
 
-  const message = error instanceof Error ? error.message : String(error)
   if (message.includes('Firebase:')) {
     return formatAuthError({ code: message })
   }
-  return message || 'Sign in failed. Please try again.'
+
+  // Never surface "[object Object]" to users
+  if (!message || message === '[object Object]' || message.trim() === '') {
+    return 'Sign in failed. Please try again.'
+  }
+  if (message.startsWith('[object ')) {
+    return 'Sign in failed. Please try again.'
+  }
+  return message
 }

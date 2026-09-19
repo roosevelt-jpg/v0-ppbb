@@ -106,6 +106,16 @@ export async function POST(request: NextRequest) {
       targetAudience: body.targetAudience || 'members',
       memberBenefit: typeof body.memberBenefit === 'number' ? body.memberBenefit : null,
       isMemberOnly: Boolean(body.isMemberOnly),
+      paymentCollection:
+        body.paymentCollection === 'whatsapp' ? 'whatsapp' : 'payment_link',
+      paymentLink:
+        typeof body.paymentLink === 'string' ? body.paymentLink.trim() || null : null,
+      hostWhatsapp:
+        typeof body.whatsapp === 'string'
+          ? body.whatsapp.trim() || null
+          : typeof body.hostWhatsapp === 'string'
+            ? body.hostWhatsapp.trim() || null
+            : null,
       status,
       views: 0,
       conversions: 0,
@@ -136,6 +146,16 @@ export async function POST(request: NextRequest) {
         memberBenefit: typeof body.memberBenefit === 'number' ? body.memberBenefit : null,
         discountPercentage:
           typeof body.discountPercentage === 'number' ? body.discountPercentage : null,
+        paymentCollection:
+          body.paymentCollection === 'whatsapp' ? 'whatsapp' : 'payment_link',
+        paymentLink:
+          typeof body.paymentLink === 'string' ? body.paymentLink.trim() || null : null,
+        hostWhatsapp:
+          typeof body.whatsapp === 'string'
+            ? body.whatsapp.trim() || null
+            : typeof body.hostWhatsapp === 'string'
+              ? body.hostWhatsapp.trim() || null
+              : null,
         createdAt: now,
         updatedAt: now,
       })

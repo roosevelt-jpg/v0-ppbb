@@ -7,6 +7,8 @@ interface PlacePrediction {
   placeId: string
   mainText: string
   secondaryText?: string
+  /** Establishment / venue name when available from Place Details */
+  name?: string
   lat?: number
   lng?: number
   city?: string
@@ -152,6 +154,7 @@ export default function GooglePlacesAutocomplete({
         placeId: prediction.placeId,
         mainText: data.place.formattedAddress || formatPlaceLabel(prediction),
         secondaryText: data.place.city || prediction.secondaryText,
+        name: data.place.name || prediction.mainText,
         lat: data.place.lat,
         lng: data.place.lng,
         city: data.place.city || '',
@@ -229,7 +232,7 @@ export default function GooglePlacesAutocomplete({
   }
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-full">
       {error && (
         <div className="mb-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
           {error}. You can still type a location and continue.
@@ -263,7 +266,7 @@ export default function GooglePlacesAutocomplete({
       {isOpen && (
         <div
           role="listbox"
-          className="absolute top-full left-0 z-50 mt-1 w-full max-w-sm overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg max-h-56"
+          className="absolute top-full left-0 z-50 mt-1 w-full overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg max-h-64"
         >
           {loading && (
             <div className="p-3 text-center text-neutral-500 text-sm">

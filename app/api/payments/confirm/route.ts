@@ -117,6 +117,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, confirmationUrl: result.confirmationUrl })
     }
 
+    if (type === 'event_posting' || meta.type === 'event_posting') {
+      const eventId = String(body.eventId || meta.eventId || '')
+      if (!eventId) {
+        return NextResponse.json({ success: false, error: 'Missing event for posting fee' }, { status: 400 })
+      }
+      const db = getAdminDb()
+      await db.collection('events').doc(eventId).set(
+        {
+          postingFeeStatus: 'paid',
+          postingFeePaidAt: Timestamp.now(),
+          postingFeePaymentIntentId: paymentIntentId,
+          postingFeeAmount: (pi.amount_received || pi.amount) / 100,
+          updatedAt: Timestamp.now(),
+        },
+        { merge: true }
+      )
+      return NextResponse.json({
+        success: true,
+        eventId,
+        message: 'Posting fee paid. Your event is awaiting admin approval.',
+      })
+    }
+
     if (type === 'advertising' || meta.type === 'advertising') {
       const advertisingRequestId = String(body.advertisingRequestId || meta.advertisingRequestId || '')
       if (!advertisingRequestId) {

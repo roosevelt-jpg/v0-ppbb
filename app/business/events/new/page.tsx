@@ -17,6 +17,7 @@ import {
 } from '@/components/address-location-picker'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { EventHostingFields } from '@/components/events/event-hosting-fields'
+import { StripeCardForm } from '@/components/payments/stripe-card-form'
 import type { EventCoupon, EventRecurrence, TicketType } from '@/lib/event-types'
 import {
   subscribeToEventsConfig,
@@ -64,6 +65,9 @@ function BusinessEventForm() {
     pricingType: 'free',
     price: '',
     currency: 'AED',
+    hostPaymentCollection: 'payment_link' as 'payment_link' | 'whatsapp' | 'cash_at_door',
+    hostPaymentLink: '',
+    hostWhatsapp: '',
     timezone: 'Asia/Dubai',
     bannerURL: '',
     galleryURLs: [] as string[],
@@ -92,6 +96,13 @@ function BusinessEventForm() {
   const [saving, setSaving] = React.useState(false)
   const [loading, setLoading] = React.useState(isEditing)
   const [error, setError] = React.useState<string | null>(null)
+  const [postingFeeCheckout, setPostingFeeCheckout] = React.useState<{
+    eventId: string
+    clientSecret: string
+    publishableKey: string
+    paymentIntentId: string
+    amount: number
+  } | null>(null)
   const [approvalNotes, setApprovalNotes] = React.useState<string | null>(null)
   const [existingStatus, setExistingStatus] = React.useState<string | null>(null)
 
@@ -147,6 +158,11 @@ function BusinessEventForm() {
           pricingType: event.pricingType === 'free' ? 'free' : 'paid_by_business',
           price: event.price != null ? String(event.price) : '',
           currency: event.currency || 'AED',
+          hostPaymentCollection:
+            (event.hostPaymentCollection as 'payment_link' | 'whatsapp' | 'cash_at_door') ||
+            'payment_link',
+          hostPaymentLink: event.hostPaymentLink || '',
+          hostWhatsapp: event.hostWhatsapp || '',
           timezone: event.timezone || 'Asia/Dubai',
           bannerURL: event.bannerURL || '',
           galleryURLs: Array.isArray(event.galleryURLs) ? event.galleryURLs : [],
@@ -273,6 +289,16 @@ function BusinessEventForm() {
 
       const json = await res.json()
       if (json.success) {
+        if (json.postingFee?.required && json.postingFee.clientSecret) {
+          setPostingFeeCheckout({
+            eventId: json.data?.id || eventId || '',
+            clientSecret: json.postingFee.clientSecret,
+            publishableKey: json.postingFee.publishableKey,
+            paymentIntentId: json.postingFee.paymentIntentId,
+            amount: json.postingFee.amount,
+          })
+          return
+        }
         router.push(
           status === 'pending_approval'
             ? '/business/events?tab=pending_approval'
@@ -294,6 +320,42 @@ function BusinessEventForm() {
 
   return (
     <div className="min-h-full bg-[#fafafa] dark:bg-neutral-950">
+      {postingFeeCheckout ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="text-lg font-semibold mb-2">Pay event posting fee</h2>
+            <p className="text-sm text-neutral-600 mb-4">
+              AED {postingFeeCheckout.amount.toFixed(2)} — this is Passive Blessings&apos; fee to
+              list your paid event. Attendee ticket money is collected by you, not PB.
+            </p>
+            <StripeCardForm
+              key={postingFeeCheckout.clientSecret}
+              publishableKey={postingFeeCheckout.publishableKey}
+              clientSecret={postingFeeCheckout.clientSecret}
+              submitLabel="Pay posting fee"
+              onSuccess={async (paymentIntentId) => {
+                const res = await fetch('/api/payments/confirm', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    type: 'event_posting',
+                    paymentIntentId,
+                    eventId: postingFeeCheckout.eventId,
+                  }),
+                })
+                const confirmJson = await res.json()
+                if (!res.ok || !confirmJson.success) {
+                  setError(confirmJson.error || 'Posting fee confirmation failed')
+                  return
+                }
+                setPostingFeeCheckout(null)
+                router.push('/business/events?tab=pending_approval')
+              }}
+              onError={(msg) => setError(msg)}
+            />
+          </div>
+        </div>
+      ) : null}
       <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href="/business/events"
@@ -985,6 +1047,74 @@ function BusinessEventForm() {
                 (formData.ticketTypes || []).filter((t) => t.isActive !== false).length > 0 && (
                 <div className="sm:col-span-2 text-sm text-neutral-600">
                   Ticket prices are set on each ticket type below. Use those prices at checkout.
+                </div>
+              )}
+              {formData.pricingType !== 'free' && (
+                <div className="sm:col-span-2 space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-semibold text-amber-950">
+                    You collect attendee payments yourself
+                  </p>
+                  <p className="text-xs text-amber-900">
+                    Passive Blessings does not charge buyers for your tickets. Add a payment link,
+                    WhatsApp number, or choose cash at the door. Admin may also charge a posting fee
+                    via PB Stripe when you submit a paid event.
+                  </p>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-neutral-800">
+                      How attendees pay you
+                    </label>
+                    <select
+                      value={formData.hostPaymentCollection}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          hostPaymentCollection: e.target.value as
+                            | 'payment_link'
+                            | 'whatsapp'
+                            | 'cash_at_door',
+                        })
+                      }
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    >
+                      <option value="payment_link">My payment link</option>
+                      <option value="whatsapp">WhatsApp — buyer requests payment details</option>
+                      <option value="cash_at_door">Cash at the door</option>
+                    </select>
+                  </div>
+                  {formData.hostPaymentCollection === 'payment_link' && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-neutral-800">
+                        Payment link *
+                      </label>
+                      <input
+                        type="url"
+                        value={formData.hostPaymentLink}
+                        onChange={(e) =>
+                          setFormData({ ...formData, hostPaymentLink: e.target.value })
+                        }
+                        placeholder="https://…"
+                        className="w-full px-3 py-2 border rounded-lg text-sm"
+                        required
+                      />
+                    </div>
+                  )}
+                  {formData.hostPaymentCollection === 'whatsapp' && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-neutral-800">
+                        WhatsApp number *
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.hostWhatsapp}
+                        onChange={(e) =>
+                          setFormData({ ...formData, hostWhatsapp: e.target.value })
+                        }
+                        placeholder="+971…"
+                        className="w-full px-3 py-2 border rounded-lg text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -65,6 +65,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const { canUsePbStripeForMarketplaceOffer, isPlatformSeller } = await import(
+      '@/lib/pb-payment-policy'
+    )
+    const businessId = String(offer.businessId || '')
+    const isPbMerch = canUsePbStripeForMarketplaceOffer({
+      businessId,
+      category: String(offer.category || ''),
+    })
+
+    // Business sellers collect themselves — PB Stripe is only for platform merchandise
+    if (!isPbMerch && paymentMethod === 'card') {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'This seller collects payment directly. Use their payment link or WhatsApp — Passive Blessings does not charge their buyers.',
+          hostPaymentLink: typeof offer.paymentLink === 'string' ? offer.paymentLink : null,
+          hostWhatsapp: typeof offer.hostWhatsapp === 'string' ? offer.hostWhatsapp : typeof offer.whatsapp === 'string' ? offer.whatsapp : null,
+        },
+        { status: 400 }
+      )
+    }
+
+    // Non-PB listings: COD/bank only if seller is platform; otherwise reject card paths above
+    if (!isPlatformSeller(businessId) && (paymentMethod === 'cod' || paymentMethod === 'bank_transfer')) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'Pay the seller directly via their payment link or WhatsApp. After they confirm payment, they will prepare delivery.',
+          hostPaymentLink: typeof offer.paymentLink === 'string' ? offer.paymentLink : null,
+          hostWhatsapp: typeof offer.hostWhatsapp === 'string' ? offer.hostWhatsapp : typeof offer.whatsapp === 'string' ? offer.whatsapp : null,
+        },
+        { status: 400 }
+      )
+    }
+
     // COD / bank transfer — no Stripe; complete order immediately as awaiting fulfillment
     if (paymentMethod === 'cod' || paymentMethod === 'bank_transfer') {
       const { completeMarketplacePurchase } = await import('@/lib/marketplace-purchase-server')
@@ -91,7 +128,6 @@ export async function POST(request: NextRequest) {
 
     const currency = String(offer.currency || 'AED').toLowerCase()
     const title = String(offer.title || 'Marketplace listing')
-    const businessId = String(offer.businessId || '')
 
     const orderId = await createPendingMarketplaceOrder({
       offerId,

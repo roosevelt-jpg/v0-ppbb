@@ -110,6 +110,14 @@ export interface Event {
   businessPayoutPercent: number | null
   pbCommissionOverride: boolean
   paymentGateway: string | null
+  /** How a business host collects attendee fees (not via PB Stripe). */
+  hostPaymentCollection?: 'payment_link' | 'whatsapp' | 'cash_at_door' | null
+  hostPaymentLink?: string | null
+  hostWhatsapp?: string | null
+  /** Fee business pays PB to post a paid event */
+  postingFeeAmount?: number | null
+  postingFeeStatus?: 'not_required' | 'pending' | 'paid' | 'waived' | null
+  postingFeePaymentIntentId?: string | null
 
   /** Luma-parity hosting fields */
   ticketTypes: TicketType[]

@@ -448,7 +448,6 @@ export async function POST(request: NextRequest) {
     }
 
     if (needsPayment) {
-      const gateway = ((event.paymentGateway as string) || 'stripe').toLowerCase()
       const origin =
         request.headers.get('origin') ||
         process.env.NEXT_PUBLIC_SITE_URL ||
@@ -456,6 +455,76 @@ export async function POST(request: NextRequest) {
         'https://www.passive-blessings.com'
       const currency = (ticket.currency || (event.currency as string) || 'AED').toString()
       const description = `${String(event.title || 'Event')} — ${ticket.name}`
+
+      const { isBusinessSelfCollectEvent, isPbHostedPaidEvent, normalizeHostPaymentCollection } =
+        await import('@/lib/pb-payment-policy')
+
+      // Business-hosted paid events: host collects via payment link / WhatsApp / cash at door
+      if (isBusinessSelfCollectEvent(event) && !isPbHostedPaidEvent(event)) {
+        const hostPaymentCollection = normalizeHostPaymentCollection(
+          event.hostPaymentCollection || event.paymentCollection
+        )
+        const hostPaymentLink =
+          typeof event.hostPaymentLink === 'string'
+            ? event.hostPaymentLink.trim()
+            : typeof event.paymentLink === 'string'
+              ? event.paymentLink.trim()
+              : ''
+        const hostWhatsapp =
+          typeof event.hostWhatsapp === 'string'
+            ? event.hostWhatsapp.trim()
+            : typeof event.whatsapp === 'string'
+              ? event.whatsapp.trim()
+              : ''
+
+        await regRef.update({
+          paymentGateway: 'host_direct',
+          paymentStatus: 'pending_host',
+          hostPaymentCollection,
+          hostPaymentLink: hostPaymentLink || null,
+          hostWhatsapp: hostWhatsapp || null,
+          amountPaid: 0,
+        })
+
+        if (userEmail) {
+          const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
+          void sendEventRegistrationEmail({
+            to: userEmail,
+            eventTitle: String(event.title || 'Event'),
+            eventUrl: `${origin}/events/${eventId}`,
+            status: 'pending_payment',
+            userId,
+          })
+        }
+
+        return NextResponse.json({
+          success: true,
+          registrationId: regRef.id,
+          status: registration.status,
+          externalPayment: true,
+          hostPayment: {
+            collection: hostPaymentCollection,
+            paymentLink: hostPaymentLink || null,
+            whatsapp: hostWhatsapp || null,
+            amount: price,
+            currency,
+            note:
+              hostPaymentCollection === 'cash_at_door'
+                ? 'Pay cash at the door. The host confirms your payment on arrival.'
+                : hostPaymentCollection === 'whatsapp'
+                  ? 'Message the host on WhatsApp for payment details. They prepare your spot after payment is confirmed.'
+                  : 'Pay the host via their payment link. They confirm your registration after payment.',
+          },
+          registration: {
+            id: regRef.id,
+            ...registration,
+            paymentGateway: 'host_direct',
+            paymentStatus: 'pending_host',
+          },
+        })
+      }
+
+      const gateway = ((event.paymentGateway as string) || 'stripe').toLowerCase()
 
       if (price > 0) {
         void recordReferralConversion({

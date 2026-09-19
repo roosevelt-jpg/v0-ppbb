@@ -43,6 +43,11 @@ export interface EventsPlatformConfig {
   categories: EventsCategory[]
   filterTabs: EventsFilterTab[]
   pbCommissionPercent: number
+  /**
+   * AED fee charged via PB Stripe when a business submits a paid event.
+   * Attendee ticket money is collected by the business, not PB.
+   */
+  businessPaidEventPostingFee: number
 }
 
 export const DEFAULT_EVENTS_CONFIG: EventsPlatformConfig = {
@@ -81,6 +86,7 @@ export const DEFAULT_EVENTS_CONFIG: EventsPlatformConfig = {
   ],
   filterTabs: [],
   pbCommissionPercent: 10,
+  businessPaidEventPostingFee: 0,
 }
 
 export function slugifyCategoryId(name: string): string {
@@ -203,6 +209,10 @@ function mergeEventsConfig(data: Record<string, unknown> | undefined): EventsPla
       typeof data.pbCommissionPercent === 'number'
         ? data.pbCommissionPercent
         : DEFAULT_EVENTS_CONFIG.pbCommissionPercent,
+    businessPaidEventPostingFee:
+      typeof data.businessPaidEventPostingFee === 'number' && data.businessPaidEventPostingFee >= 0
+        ? data.businessPaidEventPostingFee
+        : DEFAULT_EVENTS_CONFIG.businessPaidEventPostingFee,
   }
 }
 

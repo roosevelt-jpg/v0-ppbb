@@ -287,6 +287,29 @@ export default function AdminCmsEventsPage() {
                 className="w-full min-h-20"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Business paid-event posting fee (AED)
+              </label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={config.businessPaidEventPostingFee ?? 0}
+                onChange={(e) =>
+                  setConfig((p) => ({
+                    ...p,
+                    businessPaidEventPostingFee: Math.max(0, Number(e.target.value) || 0),
+                  }))
+                }
+                className="w-full max-w-xs"
+              />
+              <p className="text-xs text-neutral-500 mt-1">
+                Charged via Passive Blessings Stripe when a business submits a paid event. Attendee
+                ticket money is collected by the business (payment link / WhatsApp / cash at door).
+                Set to 0 to waive.
+              </p>
+            </div>
           </div>
         </Card>
 

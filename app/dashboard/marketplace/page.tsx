@@ -20,15 +20,19 @@ import { BusinessDirectorySection } from '@/components/marketplace/business-dire
 import { MarketplaceCheckoutPanel } from '@/components/marketplace/marketplace-checkout-panel'
 import { useAuth } from '@/lib/auth-context'
 import { hasBusinessAccess } from '@/lib/roles'
+import { isPlatformSeller } from '@/lib/pb-payment-policy'
 
 type CartItem = {
   key: string
   productId: string
   title: string
   businessName: string
+  businessId?: string
   price: number
   imageUrl?: string
   qty: number
+  paymentLink?: string
+  hostWhatsapp?: string
 }
 
 function cartKeyFor(product: BusinessOffer): string {
@@ -102,9 +106,14 @@ export default function MarketplacePage() {
           productId: String(product.id || key),
           title: product.title || 'Product',
           businessName: product.businessName || '',
+          businessId: product.businessId,
           price: unitPrice(product),
           imageUrl: product.imageUrl || product.image?.url,
           qty: 1,
+          paymentLink: (product as { paymentLink?: string }).paymentLink,
+          hostWhatsapp:
+            (product as { hostWhatsapp?: string }).hostWhatsapp ||
+            (product as { whatsapp?: string }).whatsapp,
         },
       ]
     })
@@ -381,18 +390,50 @@ export default function MarketplacePage() {
                       be removed from your cart once the order is placed.
                     </p>
                   ) : null}
-                  <MarketplaceCheckoutPanel
-                    offerId={cart[0].productId}
-                    price={cart[0].price}
-                    currency="AED"
-                    onCancel={() => setCheckoutOpen(false)}
-                    onSuccessMessage={(msg) => {
-                      setOrderMessage(msg)
-                      setCheckoutOpen(false)
-                      handleRemoveFromCart(cart[0].key)
-                    }}
-                    getToken={async () => firebaseUser?.getIdToken()}
-                  />
+                  {isPlatformSeller(cart[0].businessId) ? (
+                    <MarketplaceCheckoutPanel
+                      offerId={cart[0].productId}
+                      price={cart[0].price}
+                      currency="AED"
+                      onCancel={() => setCheckoutOpen(false)}
+                      onSuccessMessage={(msg) => {
+                        setOrderMessage(msg)
+                        setCheckoutOpen(false)
+                        handleRemoveFromCart(cart[0].key)
+                      }}
+                      getToken={async () => firebaseUser?.getIdToken()}
+                    />
+                  ) : (
+                    <div className="mt-3 space-y-2 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
+                      <p>
+                        {cart[0].businessName || 'This seller'} collects payment directly. Passive
+                        Blessings does not charge you for this item.
+                      </p>
+                      {cart[0].paymentLink ? (
+                        <a
+                          href={cart[0].paymentLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex font-semibold underline"
+                        >
+                          Open seller payment link
+                        </a>
+                      ) : null}
+                      <Link
+                        href={`/marketplace/${cart[0].productId}`}
+                        className="inline-flex font-semibold underline"
+                      >
+                        View listing for WhatsApp / payment options
+                      </Link>
+                      <button
+                        type="button"
+                        className="block text-xs underline text-neutral-600"
+                        onClick={() => setCheckoutOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : null}
             </div>

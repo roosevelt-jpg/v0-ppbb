@@ -110,7 +110,9 @@ export function EventLineupCard({ event, pageConfig, categories }: EventLineupCa
           </div>
           <div className="flex items-start gap-1 min-w-0">
             <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
-            <span className="line-clamp-2 leading-snug">{location}</span>
+            <span className="line-clamp-3 leading-snug" title={location}>
+              {location}
+            </span>
           </div>
         </div>
 

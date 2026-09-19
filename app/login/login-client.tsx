@@ -4,6 +4,7 @@ import React, { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser, loginWithGoogle } from '@/lib/auth'
+import { formatAuthError } from '@/lib/auth-errors'
 import { auth } from '@/lib/firebase'
 import { getCommunityStats, formatDonations, CommunityStats } from '@/lib/community-stats'
 import { Logo } from '@/components/logo'
@@ -194,7 +195,7 @@ function LoginPageContent() {
     const { user, error: loginError } = await loginWithGoogle()
 
     if (loginError) {
-      setError(loginError)
+      setError(typeof loginError === 'string' ? loginError : formatAuthError(loginError))
       setOauthLoading(null)
       return
     }

@@ -14,6 +14,8 @@ import { auth } from '@/lib/firebase'
 import { RichTextContent } from '@/components/rich-text-content'
 import { BUTTON_PRIMARY, BUTTON_OUTLINE } from '@/lib/admin-design-system'
 import { MarketplaceCheckoutPanel } from '@/components/marketplace/marketplace-checkout-panel'
+import { PLATFORM_BUSINESS_ID } from '@/lib/marketplace-directory'
+import { isPlatformSeller } from '@/lib/pb-payment-policy'
 
 export function MarketplaceOfferDetail() {
   const params = useParams()
@@ -207,38 +209,85 @@ export function MarketplaceOfferDetail() {
               </p>
             )}
 
-            {showCheckout && offer.price != null && offer.price > 0 && user ? (
-              <MarketplaceCheckoutPanel
-                offerId={offerId}
-                price={offer.price}
-                currency={'AED'}
-                onCancel={() => setShowCheckout(false)}
-                onSuccessMessage={setMessage}
-                getToken={async () => {
-                  const t = await auth.currentUser?.getIdToken()
-                  return t
-                }}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={
-                  offer.price != null && offer.price > 0
-                    ? startPurchase
-                    : () => void handleEnquire()
-                }
-                disabled={acting}
-                className={BUTTON_PRIMARY}
-              >
-                {acting
-                  ? 'Processing…'
-                  : user
-                    ? offer.price != null && offer.price > 0
-                      ? 'Buy now'
-                      : 'Enquire'
-                    : 'Sign in to Purchase / Enquire'}
-              </button>
-            )}
+            {(() => {
+              const isPbListing = isPlatformSeller(offer.businessId) || offer.businessId === PLATFORM_BUSINESS_ID
+              const priced = offer.price != null && offer.price > 0
+
+              if (priced && !isPbListing) {
+                const waDigits = (offer.hostWhatsapp || '').replace(/[^\d+]/g, '')
+                const waHref = waDigits
+                  ? `https://api.whatsapp.com/send?phone=${waDigits.replace(/^\+/, '')}&text=${encodeURIComponent(
+                      `Assalamu alaikum — I want to buy "${offer.title}" on Passive Blessings. Please share payment details.`
+                    )}`
+                  : null
+                return (
+                  <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+                    <p className="text-sm text-neutral-800">
+                      This seller collects payment directly. Passive Blessings does not charge you
+                      for this listing. After the seller confirms payment, they prepare delivery.
+                    </p>
+                    {offer.paymentLink ? (
+                      <a
+                        href={offer.paymentLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={BUTTON_PRIMARY}
+                      >
+                        Pay seller
+                      </a>
+                    ) : null}
+                    {waHref ? (
+                      <a href={waHref} target="_blank" rel="noopener noreferrer" className={BUTTON_OUTLINE}>
+                        WhatsApp seller for payment
+                      </a>
+                    ) : null}
+                    {!offer.paymentLink && !waHref ? (
+                      <button
+                        type="button"
+                        onClick={() => void handleEnquire()}
+                        disabled={acting}
+                        className={BUTTON_PRIMARY}
+                      >
+                        {acting ? 'Opening…' : 'Enquire about payment'}
+                      </button>
+                    ) : null}
+                  </div>
+                )
+              }
+
+              if (showCheckout && priced && user) {
+                return (
+                  <MarketplaceCheckoutPanel
+                    offerId={offerId}
+                    price={offer.price!}
+                    currency={'AED'}
+                    onCancel={() => setShowCheckout(false)}
+                    onSuccessMessage={setMessage}
+                    getToken={async () => {
+                      const t = await auth.currentUser?.getIdToken()
+                      return t
+                    }}
+                  />
+                )
+              }
+
+              return (
+                <button
+                  type="button"
+                  onClick={priced ? startPurchase : () => void handleEnquire()}
+                  disabled={acting}
+                  className={BUTTON_PRIMARY}
+                >
+                  {acting
+                    ? 'Processing…'
+                    : user
+                      ? priced
+                        ? 'Buy now'
+                        : 'Enquire'
+                      : 'Sign in to Purchase / Enquire'}
+                </button>
+              )
+            })()}
           </div>
         )}
       </main>

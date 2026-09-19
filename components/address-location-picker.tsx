@@ -63,7 +63,6 @@ function matchCityForEmirate(emirate: string, cityHint: string): string {
   const hay = cityHint.trim().toLowerCase()
   if (!hay) return cities[0] || 'Other'
   const hit = cities.find((c) => c.toLowerCase() === hay || hay.includes(c.toLowerCase()))
-  // Prefer "Other" over forcing the first city when Places returns an unmatched area
   if (hit) return hit
   return cities.includes('Other') ? 'Other' : cities[0] || 'Other'
 }
@@ -109,7 +108,13 @@ export function AddressLocationPicker({
       : []
 
   const mapVisible =
-    showMapPin ?? (variant === 'venue' && value.lat !== 0 && value.lng !== 0)
+    showMapPin ?? (variant === 'venue' ? true : value.lat !== 0 && value.lng !== 0)
+
+  const resolvedCityLabel = uae
+    ? value.city === 'Other'
+      ? value.customCity || 'Other'
+      : value.city
+    : value.customCity || value.city
 
   useEffect(() => {
     let cancelled = false
@@ -128,7 +133,6 @@ export function AddressLocationPicker({
             value.address === '' &&
             value.placeId === ''
           ) {
-            // Only seed default country when still on empty defaults
             if (value.country === EMPTY_ADDRESS_LOCATION.country || !value.country) {
               onChange({
                 ...value,
@@ -148,7 +152,6 @@ export function AddressLocationPicker({
     return () => {
       cancelled = true
     }
-    // intentionally once on mount for settings
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -215,14 +218,94 @@ export function AddressLocationPicker({
     }
   }
 
-  const resolvedCityLabel = uae
-    ? value.city === 'Other'
-      ? value.customCity || 'Other'
-      : value.city
-    : value.customCity || value.city
+  const applyPlaceSelection = (place: {
+    placeId: string
+    mainText: string
+    secondaryText?: string
+    name?: string
+    lat?: number
+    lng?: number
+    city?: string
+    state?: string
+    country?: string
+    countryCode?: string
+  }) => {
+    const label = place.mainText || ''
+    const isUrl = /^https?:\/\//i.test(label) || /maps\.(google|app\.goo)/i.test(label)
+    if (isUrl) return
+
+    const placeCountry = place.countryCode
+      ? COUNTRY_OPTIONS.find((c) => c.code === place.countryCode)?.name || place.country || ''
+      : ''
+    const nextCountry = placeCountry || value.country
+    const nextUae = isUaeCountry(nextCountry)
+    const emirate = nextUae
+      ? matchEmirate(place.state || place.city || value.emirate) || value.emirate || 'Dubai'
+      : ''
+    const matchedCity = nextUae
+      ? matchCityForEmirate(emirate, place.city || '')
+      : place.city || value.customCity
+
+    const venueFromPlace =
+      (place.name && place.name.trim()) ||
+      (place.secondaryText ? place.mainText.split(',')[0]?.trim() : '') ||
+      ''
+
+    onChange({
+      ...value,
+      address: label,
+      placeId: place.placeId?.startsWith('manual-') ? '' : place.placeId || '',
+      lat: place.lat || 0,
+      lng: place.lng || 0,
+      country: nextCountry,
+      countryCode: place.countryCode || value.countryCode,
+      emirate,
+      city: nextUae ? matchedCity : value.city,
+      customCity: nextUae
+        ? matchedCity === 'Other'
+          ? place.city || value.customCity
+          : ''
+        : matchedCity || value.customCity,
+      venueName:
+        variant === 'venue'
+          ? value.venueName?.trim() || venueFromPlace || value.venueName
+          : value.venueName,
+    })
+  }
+
+  const placesSearchBlock = (
+    <div>
+      <label className="block text-xs font-semibold text-neutral-800 mb-1">
+        {addressLabel ||
+          (variant === 'venue'
+            ? `Search exact venue or street address${addressRequired || true ? ' *' : ''}`
+            : `Street address${addressRequired ? ' *' : ' (optional)'}`)}
+      </label>
+      <GooglePlacesAutocomplete
+        value={value.address}
+        countryRestrictions={countryRestriction}
+        placeholder={
+          addressPlaceholder ||
+          (variant === 'venue'
+            ? 'Start typing a place, mall, hotel, or street address…'
+            : resolvedCityLabel
+              ? `Search near ${resolvedCityLabel}…`
+              : 'Search address or place…')
+        }
+        onTextChange={(text) => patch({ address: text })}
+        onChange={applyPlaceSelection}
+      />
+      <p className="mt-1 text-[11px] text-neutral-500">
+        Powered by Google Places (Admin → Integrations → Google Maps). Pick a suggestion for an
+        exact pin — the same address shows on public event cards.
+      </p>
+    </div>
+  )
 
   return (
     <div className={`space-y-3 ${className}`}>
+      {variant === 'venue' ? placesSearchBlock : null}
+
       {showAutoDetect && autoDetectEnabled ? (
         <button
           type="button"
@@ -324,82 +407,19 @@ export function AddressLocationPicker({
       {variant === 'venue' ? (
         <div>
           <label className="block text-xs font-semibold text-neutral-800 mb-1">
-            Venue name (optional display label)
+            Venue display name (optional)
           </label>
           <input
             type="text"
             value={value.venueName}
             onChange={(e) => patch({ venueName: e.target.value })}
-            placeholder="e.g. Community Hall"
+            placeholder="e.g. Community Hall — shown on event cards with the street address"
             className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
           />
         </div>
       ) : null}
 
-      <div>
-        <label className="block text-xs font-semibold text-neutral-800 mb-1">
-          {addressLabel ||
-            (variant === 'venue' ? 'Venue address' : 'Street address') +
-              (addressRequired ? ' *' : variant === 'venue' ? ' *' : ' (optional)')}
-        </label>
-        <GooglePlacesAutocomplete
-          value={value.address}
-          countryRestrictions={countryRestriction}
-          placeholder={
-            addressPlaceholder ||
-            (resolvedCityLabel
-              ? `Search near ${resolvedCityLabel}…`
-              : 'Search address or place…')
-          }
-          onTextChange={(text) => patch({ address: text })}
-          onChange={(place) => {
-            const label = place.mainText || ''
-            const isUrl = /^https?:\/\//i.test(label) || /maps\.(google|app\.goo)/i.test(label)
-            if (isUrl) return
-
-            // Keep the user's country/emirate unless Places returns a clear country code.
-            const placeCountry = place.countryCode
-              ? COUNTRY_OPTIONS.find((c) => c.code === place.countryCode)?.name ||
-                place.country ||
-                ''
-              : ''
-            const nextCountry = placeCountry || value.country
-            const nextUae = isUaeCountry(nextCountry)
-            const emirate = nextUae
-              ? matchEmirate(place.state || place.city || value.emirate) || value.emirate || 'Dubai'
-              : ''
-            const matchedCity = nextUae
-              ? matchCityForEmirate(emirate, place.city || '')
-              : place.city || value.customCity
-
-            onChange({
-              ...value,
-              address: label,
-              placeId: place.placeId?.startsWith('manual-') ? '' : place.placeId || '',
-              lat: place.lat || 0,
-              lng: place.lng || 0,
-              country: nextCountry,
-              countryCode: place.countryCode || value.countryCode,
-              emirate,
-              city: nextUae ? matchedCity : value.city,
-              customCity: nextUae
-                ? matchedCity === 'Other'
-                  ? place.city || value.customCity
-                  : ''
-                : matchedCity || value.customCity,
-              venueName:
-                variant === 'venue' && !value.venueName
-                  ? place.secondaryText
-                    ? place.mainText.split(',')[0] || value.venueName
-                    : value.venueName
-                  : value.venueName,
-            })
-          }}
-        />
-        <p className="mt-1 text-[11px] text-neutral-500">
-          Suggestions use Google Places and follow your country / city selection above.
-        </p>
-      </div>
+      {variant !== 'venue' ? placesSearchBlock : null}
 
       {value.address && !/^https?:\/\//i.test(value.address) ? (
         <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-200 flex gap-2">
@@ -416,9 +436,13 @@ export function AddressLocationPicker({
             </p>
             {value.lat !== 0 && value.lng !== 0 ? (
               <p className="text-xs text-neutral-500 mt-0.5">
-                Pin: {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
+                Exact pin: {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
               </p>
-            ) : null}
+            ) : (
+              <p className="text-xs text-amber-700 mt-0.5">
+                Tip: pick a Google suggestion so the map pin and public card get the exact address.
+              </p>
+            )}
           </div>
         </div>
       ) : null}
@@ -430,6 +454,11 @@ export function AddressLocationPicker({
           draggable={pinDraggable || variant === 'venue'}
           onPinChange={(lat, lng) => patch({ lat, lng })}
         />
+      ) : variant === 'venue' ? (
+        <p className="text-xs text-neutral-500 rounded-lg border border-dashed border-neutral-300 p-3">
+          Map preview appears after you select a Google Places suggestion (or drag a pin once
+          coordinates are set).
+        </p>
       ) : null}
     </div>
   )
@@ -437,9 +466,11 @@ export function AddressLocationPicker({
 
 /** Helpers for wiring into existing form shapes */
 export function addressValueToEventFields(v: AddressLocationValue) {
+  const address = v.address.trim()
+  const venue = v.venueName.trim()
   return {
-    locationName: (v.venueName || v.address || '').trim(),
-    locationAddress: v.address.trim(),
+    locationName: venue || address,
+    locationAddress: address || venue,
     locationPlaceId: v.placeId || '',
     locationLat: v.lat || 0,
     locationLng: v.lng || 0,
@@ -467,6 +498,12 @@ export function eventFieldsToAddressValue(fields: {
 }): AddressLocationValue {
   const country = fields.locationCountry || EMPTY_ADDRESS_LOCATION.country
   const uae = isUaeCountry(country)
+  const address = fields.locationAddress || ''
+  const name = fields.locationName || ''
+  // Avoid duplicating the street address into venueName when they match
+  const venueName =
+    name && address && name.trim().toLowerCase() === address.trim().toLowerCase() ? '' : name
+
   return {
     ...EMPTY_ADDRESS_LOCATION,
     country,
@@ -474,8 +511,8 @@ export function eventFieldsToAddressValue(fields: {
     emirate: fields.locationEmirate || (uae ? 'Dubai' : ''),
     city: uae ? fields.locationCity || 'Dubai' : '',
     customCity: uae ? '' : fields.locationCity || '',
-    address: fields.locationAddress || '',
-    venueName: fields.locationName || '',
+    address: address || name,
+    venueName,
     placeId: fields.locationPlaceId || '',
     lat: fields.locationLat || 0,
     lng: fields.locationLng || 0,
