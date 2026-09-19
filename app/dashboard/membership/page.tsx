@@ -353,7 +353,6 @@ export default function MembershipPage() {
       <Card className="p-4 sm:p-6 mb-8 border border-neutral-200 dark:border-border">
         <h3 className="text-sm font-semibold text-neutral-900 dark:text-foreground mb-1">Have a promo code?</h3>
         <p className="text-xs text-neutral-600 dark:text-muted-foreground mb-3">
-        <p className="text-xs text-neutral-600 dark:text-muted-foreground mb-3">
           Redeem a free-access or percent-off membership code. Each account can redeem one promo.
         </p>
         {alreadyUsedPromo ? (

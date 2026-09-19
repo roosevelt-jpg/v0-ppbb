@@ -821,8 +821,6 @@ export default function SignupClient() {
     }
   }
 
-  return (
-    <div data-signup-page style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff' }}>
   const releasePromoReservation = () => {
     if (skipPromoReleaseRef.current) {
       skipPromoReleaseRef.current = false
