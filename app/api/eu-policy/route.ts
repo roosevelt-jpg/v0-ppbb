@@ -26,7 +26,19 @@ export async function GET() {
     if (!snap.exists) {
       return NextResponse.json({ success: true, data: null })
     }
-    return NextResponse.json({ success: true, data: { id: snap.id, ...serialize(snap.data() as any) } })
+    return NextResponse.json({
+      success: true,
+      data: {
+        id: snap.id,
+        ...serialize(snap.data() as Record<string, unknown>),
+        // Prefer explicit requiresAcceptance; fall back to legacy acceptanceRequired
+        requiresAcceptance: Boolean(
+          (snap.data() as { requiresAcceptance?: boolean; acceptanceRequired?: boolean })
+            ?.requiresAcceptance ??
+            (snap.data() as { acceptanceRequired?: boolean })?.acceptanceRequired
+        ),
+      },
+    })
   } catch (error) {
     console.error('[v0] /api/eu-policy GET error:', error)
     return NextResponse.json({ success: false, error: 'Failed to load policy', data: null }, { status: 500 })

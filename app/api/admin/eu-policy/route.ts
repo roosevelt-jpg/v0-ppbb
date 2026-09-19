@@ -86,6 +86,12 @@ export async function POST(request: NextRequest) {
 
     await ref.set(payload, { merge: true })
 
+    // Keep a versioned snapshot so history is auditable
+    await db.collection('euDataProtectionPolicyVersions').doc(`v${nextVersion}`).set({
+      ...payload,
+      snapshotAt: FieldValue.serverTimestamp(),
+    })
+
     await auditAdminApiAction(request, admin.uid, {
       actionType: publish ? 'update' : 'update',
       action: publish ? 'Published EU Data Protection policy' : 'Updated EU Data Protection policy',

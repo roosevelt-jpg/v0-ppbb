@@ -39,9 +39,27 @@ export async function POST(request: NextRequest) {
     // whatever the client sends — the current doc is the only source of truth.
     const currentSnap = await db.collection('euDataProtectionPolicy').doc('current').get()
     const current = currentSnap.exists ? currentSnap.data() : null
-    if (!current || current.id !== policyId || Number(current.version) !== policyVersion) {
+    if (!currentSnap.exists || !current) {
+      return NextResponse.json(
+        { success: false, error: 'No active policy found' },
+        { status: 404 }
+      )
+    }
+
+    const canonicalId = String(current.id || currentSnap.id || 'current')
+    const canonicalVersion = Number(current.version)
+    const incomingId = policyId === 'current' || policyId === canonicalId ? canonicalId : policyId
+
+    if (incomingId !== canonicalId || !Number.isFinite(canonicalVersion) || canonicalVersion !== policyVersion) {
       return NextResponse.json(
         { success: false, error: 'Policy is out of date, please reload and try again' },
+        { status: 409 }
+      )
+    }
+
+    if (String(current.status || '') !== 'active') {
+      return NextResponse.json(
+        { success: false, error: 'Policy is not active' },
         { status: 409 }
       )
     }
@@ -49,9 +67,9 @@ export async function POST(request: NextRequest) {
     const uid = await getAuthUidFromRequest(request)
 
     await db.collection('policyAcceptances').add({
-      policyId,
-      policyVersion,
-      userId: uid,
+      policyId: canonicalId,
+      policyVersion: canonicalVersion,
+      userId: uid || null,
       acceptedAt: FieldValue.serverTimestamp(),
       userAgent: request.headers.get('user-agent') || '',
       ipAddress: getClientIpFromRequest(request),

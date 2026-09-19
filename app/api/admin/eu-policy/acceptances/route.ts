@@ -5,7 +5,7 @@ import { requireAdminFromRequest } from '@/lib/admin-api-auth'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/** Acceptance counts for the current policy, so admins can see the tracking this page promises. */
+/** Acceptance counts for the current policy. */
 export async function GET(request: NextRequest) {
   try {
     const uid = await requireAdminFromRequest(request)
@@ -15,33 +15,74 @@ export async function GET(request: NextRequest) {
 
     const db = getAdminDb()
     const currentSnap = await db.collection('euDataProtectionPolicy').doc('current').get()
-    const current = currentSnap.exists ? currentSnap.data() : null
-    if (!current) {
-      return NextResponse.json({ success: true, data: { total: 0, currentVersion: 0, recent: [] } })
+    if (!currentSnap.exists) {
+      return NextResponse.json({
+        success: true,
+        data: { total: 0, currentVersion: 0, version: null, recent: [] },
+      })
     }
 
-    const acceptancesRef = db.collection('policyAcceptances').where('policyId', '==', current.id)
-    const [totalSnap, currentVersionSnap, recentSnap] = await Promise.all([
-      acceptancesRef.count().get(),
-      acceptancesRef.where('policyVersion', '==', current.version).count().get(),
-      acceptancesRef.orderBy('acceptedAt', 'desc').limit(10).get(),
-    ])
+    const current = currentSnap.data() || {}
+    const policyId = String(current.id || currentSnap.id || 'current')
+    const version = Number(current.version) || 0
 
-    const recent = recentSnap.docs.map((doc) => {
-      const data = doc.data()
-      return {
-        id: doc.id,
-        policyVersion: data.policyVersion ?? null,
-        userId: data.userId ?? null,
-        acceptedAt: data.acceptedAt?.toDate?.()?.toISOString?.() ?? null,
-      }
-    })
+    // Prefer simple queries so missing composite indexes don't blank the admin page
+    let total = 0
+    let currentVersionCount = 0
+    let recent: Array<{
+      id: string
+      policyVersion: number | null
+      userId: string | null
+      acceptedAt: string | null
+    }> = []
+
+    try {
+      const allSnap = await db
+        .collection('policyAcceptances')
+        .where('policyId', '==', policyId)
+        .get()
+
+      total = allSnap.size
+      currentVersionCount = allSnap.docs.filter(
+        (doc) => Number(doc.data().policyVersion) === version
+      ).length
+
+      recent = allSnap.docs
+        .map((doc) => {
+          const data = doc.data()
+          const acceptedAt =
+            data.acceptedAt?.toDate?.()?.toISOString?.() ||
+            (typeof data.acceptedAt === 'string' ? data.acceptedAt : null)
+          return {
+            id: doc.id,
+            policyVersion: data.policyVersion != null ? Number(data.policyVersion) : null,
+            userId: typeof data.userId === 'string' ? data.userId : null,
+            acceptedAt,
+          }
+        })
+        .sort((a, b) => {
+          const ta = a.acceptedAt ? new Date(a.acceptedAt).getTime() : 0
+          const tb = b.acceptedAt ? new Date(b.acceptedAt).getTime() : 0
+          return tb - ta
+        })
+        .slice(0, 10)
+    } catch (queryError) {
+      console.warn('[admin/eu-policy/acceptances] query fallback:', queryError)
+      // Last resort: collection scan limited
+      const fallback = await db.collection('policyAcceptances').limit(500).get()
+      const matched = fallback.docs.filter((doc) => String(doc.data().policyId) === policyId)
+      total = matched.length
+      currentVersionCount = matched.filter(
+        (doc) => Number(doc.data().policyVersion) === version
+      ).length
+    }
 
     return NextResponse.json({
       success: true,
       data: {
-        total: totalSnap.data().count,
-        currentVersion: currentVersionSnap.data().count,
+        total,
+        currentVersion: currentVersionCount,
+        version,
         recent,
       },
     })
