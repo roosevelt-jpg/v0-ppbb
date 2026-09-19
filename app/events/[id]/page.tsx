@@ -144,19 +144,10 @@ function EventDetailInner() {
             amount?: number
             currency?: string
           }
-          if (hp.collection === 'payment_link' && hp.paymentLink) {
+          // Open payment link; confirmation page shows WhatsApp “I’ve paid” step
+          if (hp.paymentLink) {
             window.open(hp.paymentLink, '_blank', 'noopener,noreferrer')
-          } else if (hp.collection === 'whatsapp' && hp.whatsapp) {
-            const digits = String(hp.whatsapp).replace(/[^\d]/g, '')
-            const text = encodeURIComponent(
-              `Assalamu alaikum — I registered for "${event?.title || 'your event'}" on Passive Blessings. Please share payment details.`
-            )
-            window.open(`https://api.whatsapp.com/send?phone=${digits}&text=${text}`, '_blank')
           }
-          setError(
-            hp.note ||
-              'Registered. Pay the host directly — Passive Blessings does not collect this ticket fee.'
-          )
           router.push(`/events/${eventId}/confirmation?registrationId=${json.registrationId}`)
         } else if (json.checkoutUrl) {
           window.location.href = json.checkoutUrl

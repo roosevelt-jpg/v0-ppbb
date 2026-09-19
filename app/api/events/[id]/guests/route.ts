@@ -117,7 +117,13 @@ export async function POST(request: NextRequest, context: Ctx) {
     return NextResponse.json({ success: true, data: { id: ref.id, ...registration } })
   }
 
-  if (action === 'approve' || action === 'reject' || action === 'checkin' || action === 'uncheckin') {
+  if (
+    action === 'approve' ||
+    action === 'reject' ||
+    action === 'checkin' ||
+    action === 'uncheckin' ||
+    action === 'mark_paid'
+  ) {
     const regId = body.registrationId as string
     if (!regId) {
       return NextResponse.json({ success: false, error: 'registrationId required' }, { status: 400 })
@@ -128,10 +134,67 @@ export async function POST(request: NextRequest, context: Ctx) {
       return NextResponse.json({ success: false, error: 'Registration not found' }, { status: 404 })
     }
 
+    if (action === 'mark_paid') {
+      const data = doc.data()!
+      const pay = String(data.paymentStatus || '')
+      if (pay === 'paid' || pay === 'free') {
+        return NextResponse.json({ success: true, message: 'Already paid' })
+      }
+      const code = data.checkInCode || generateCheckInCode()
+      const token = data.qrToken || generateQrToken()
+      const amount = Number(data.ticketPrice) || Number(data.amountPaid) || 0
+      const wasConfirmed = data.status === 'confirmed'
+      await ref.update({
+        status: data.status === 'pending' ? 'pending' : 'confirmed',
+        paymentStatus: 'paid',
+        paidAt: Timestamp.now(),
+        amountPaid: amount,
+        checkInCode: code,
+        qrToken: token,
+        paymentGateway: data.paymentGateway || 'host_direct',
+        paymentReference: `host_marked_${Date.now()}`,
+      })
+      if (!wasConfirmed && data.status !== 'pending') {
+        await getAdminDb()
+          .collection('events')
+          .doc(eventId)
+          .update({
+            currentAttendees: FieldValue.increment(1),
+            totalRevenue: FieldValue.increment(amount),
+            updatedAt: Timestamp.now(),
+          })
+      }
+      const origin =
+        request.headers.get('origin') ||
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        'https://www.passive-blessings.com'
+      if (data.userEmail && data.status !== 'pending') {
+        const startRaw = event.startDate
+        let startDate: Date | null = null
+        if (startRaw && typeof (startRaw as { toDate?: () => Date }).toDate === 'function') {
+          startDate = (startRaw as { toDate: () => Date }).toDate()
+        }
+        const { sendEventPaymentConfirmationEmail } = await import('@/lib/event-confirmation-email')
+        void sendEventPaymentConfirmationEmail({
+          to: String(data.userEmail),
+          eventTitle: String(event.title || 'Event'),
+          eventUrl: `${origin}/events/${eventId}/confirmation?registrationId=${regId}`,
+          amount,
+          currency: String(data.currency || event.currency || 'AED'),
+          checkInCode: code,
+          paymentReference: `host_marked_${regId}`,
+          userId: typeof data.userId === 'string' ? data.userId : null,
+          startDate,
+        })
+      }
+      return NextResponse.json({ success: true })
+    }
+
     if (action === 'approve') {
       const data = doc.data()!
       const unpaid =
-        data.paymentStatus === 'pending' &&
+        (data.paymentStatus === 'pending' || data.paymentStatus === 'pending_host') &&
         (Number(data.ticketPrice) > 0 || Number(data.amountPaid) > 0 || Number(data.pbCut) > 0)
 
       if (unpaid) {

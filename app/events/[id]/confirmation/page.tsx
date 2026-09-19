@@ -9,7 +9,7 @@ import { Footer } from '@/components/footer'
 import { StripeCardForm } from '@/components/payments/stripe-card-form'
 import { Card } from '@/components/ui/card'
 import { auth } from '@/lib/firebase'
-import { CalendarPlus, CheckCircle, Clock, Download } from 'lucide-react'
+import { CalendarPlus, CheckCircle, Clock, Download, ExternalLink, MessageCircle } from 'lucide-react'
 
 type RegView = {
   status?: string
@@ -17,8 +17,13 @@ type RegView = {
   checkInCode?: string | null
   qrToken?: string | null
   paymentStatus?: string | null
+  paymentGateway?: string | null
   eventId?: string
   userId?: string
+  hostPaymentLink?: string | null
+  hostWhatsapp?: string | null
+  ticketPrice?: number | null
+  currency?: string | null
 }
 
 function ConfirmationInner() {
@@ -27,6 +32,7 @@ function ConfirmationInner() {
   const registrationId = searchParams.get('registrationId')
   const eventId = params.id as string
   const [reg, setReg] = React.useState<RegView | null>(null)
+  const [eventTitle, setEventTitle] = React.useState('this event')
   const [loading, setLoading] = React.useState(true)
   const [paying, setPaying] = React.useState(false)
   const [payError, setPayError] = React.useState<string | null>(null)
@@ -61,36 +67,56 @@ function ConfirmationInner() {
             `event-reg-${registrationId}`,
             JSON.stringify(json.registration)
           )
-          setLoading(false)
-          return
         }
       } catch {
-        /* fall through to cache */
-      }
-
-      const cached = sessionStorage.getItem(`event-reg-${registrationId}`)
-      if (!cancelled && cached) {
-        try {
-          setReg(JSON.parse(cached))
-        } catch {
-          /* ignore */
+        const cached = sessionStorage.getItem(`event-reg-${registrationId}`)
+        if (!cancelled && cached) {
+          try {
+            setReg(JSON.parse(cached))
+          } catch {
+            /* ignore */
+          }
         }
       }
+
+      try {
+        const ev = await fetch(`/api/events/${eventId}?publishedOnly=true`)
+        const evJson = await ev.json()
+        if (!cancelled && evJson.success && evJson.data?.title) {
+          setEventTitle(String(evJson.data.title))
+          // Fill host payment fields from event if registration snapshot is missing them
+          setReg((prev) => {
+            if (!prev) return prev
+            return {
+              ...prev,
+              hostPaymentLink: prev.hostPaymentLink || evJson.data.hostPaymentLink || null,
+              hostWhatsapp: prev.hostWhatsapp || evJson.data.hostWhatsapp || null,
+            }
+          })
+        }
+      } catch {
+        /* ignore */
+      }
+
       if (!cancelled) setLoading(false)
     })()
 
     return () => {
       cancelled = true
     }
-  }, [registrationId])
+  }, [registrationId, eventId])
 
   const status = String(reg?.status || '')
   const paymentStatus = String(reg?.paymentStatus || '')
   const isPendingApproval = status === 'pending'
   const isWaitlisted = status === 'waitlisted'
-  const isPendingPayment =
-    status === 'pending_payment' ||
-    (paymentStatus === 'pending' && status !== 'confirmed' && status !== 'waitlisted')
+  const isHostCollect =
+    paymentStatus === 'pending_host' || String(reg?.paymentGateway || '') === 'host_direct'
+  const isPendingPbPayment =
+    !isHostCollect &&
+    (status === 'pending_payment' ||
+      (paymentStatus === 'pending' && status !== 'confirmed' && status !== 'waitlisted'))
+  const isPendingPayment = isPendingPbPayment || isHostCollect
   const isConfirmed =
     status === 'confirmed' && (paymentStatus === 'paid' || paymentStatus === 'free' || !paymentStatus)
 
@@ -99,6 +125,19 @@ function ConfirmationInner() {
     qrValue && isConfirmed
       ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`
       : ''
+
+  const whatsappHref = React.useMemo(() => {
+    const digits = String(reg?.hostWhatsapp || '').replace(/[^\d]/g, '')
+    if (!digits) return null
+    const amount =
+      reg?.ticketPrice != null && Number(reg.ticketPrice) > 0
+        ? ` (${String(reg.currency || 'AED').toUpperCase()} ${Number(reg.ticketPrice).toFixed(2)})`
+        : ''
+    const text = encodeURIComponent(
+      `Assalamu alaikum — I registered for "${eventTitle}" on Passive Blessings and have paid${amount}. Please confirm my attendance. Registration: ${registrationId || ''}`
+    )
+    return `https://api.whatsapp.com/send?phone=${digits}&text=${text}`
+  }, [reg?.hostWhatsapp, reg?.ticketPrice, reg?.currency, eventTitle, registrationId])
 
   const handlePayNow = async () => {
     if (!registrationId) return
@@ -154,6 +193,10 @@ function ConfirmationInner() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <Card className="w-full max-w-md p-6 bg-white">
             <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
+            <p className="text-xs text-neutral-600 mb-3">
+              Payment is required during registration. You are confirmed only after the card
+              payment succeeds.
+            </p>
             <div className="mb-3">
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Coupon / unlock code
@@ -180,7 +223,7 @@ function ConfirmationInner() {
               key={stripeCheckout.clientSecret}
               publishableKey={stripeCheckout.publishableKey}
               clientSecret={stripeCheckout.clientSecret}
-              submitLabel="Pay & register"
+              submitLabel="Pay & confirm"
               onSuccess={async (paymentIntentId) => {
                 const res = await fetch('/api/payments/confirm', {
                   method: 'POST',
@@ -227,22 +270,26 @@ function ConfirmationInner() {
                 ? "You're on the waitlist"
                 : isPendingApproval
                   ? 'Registration pending approval'
-                  : isPendingPayment
-                    ? 'Complete payment'
-                    : isConfirmed
-                      ? 'Registration confirmed'
-                      : 'Registration received'}
+                  : isHostCollect
+                    ? 'Pay the host, then message WhatsApp'
+                    : isPendingPbPayment
+                      ? 'Complete payment to confirm'
+                      : isConfirmed
+                        ? 'Registration confirmed'
+                        : 'Registration received'}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm">
               {isWaitlisted
                 ? `Position #${reg?.waitlistPosition || '—'}. We'll notify you if a spot opens.`
                 : isPendingApproval
-                  ? 'The host will review your registration shortly. You will get a QR code after approval and payment (if required).'
-                  : isPendingPayment
-                    ? 'Your spot is reserved until payment is completed. You will receive a check-in QR code after payment succeeds.'
-                    : isConfirmed
-                      ? 'Show this QR code at the door for check-in.'
-                      : 'We received your registration.'}
+                  ? 'The host will review your registration shortly.'
+                  : isHostCollect
+                    ? 'Passive Blessings does not collect this ticket fee. Pay the host, tell them on WhatsApp that you paid, then wait for them to confirm your attendance.'
+                    : isPendingPbPayment
+                      ? 'Pay now during registration. Your check-in QR appears only after payment succeeds.'
+                      : isConfirmed
+                        ? 'Show this QR code at the door for check-in.'
+                        : 'We received your registration.'}
             </p>
 
             {qrUrl ? (
@@ -257,8 +304,37 @@ function ConfirmationInner() {
 
             {payError ? <p className="text-sm text-red-600">{payError}</p> : null}
 
-            <div className="space-y-3 pt-2">
-              {isPendingPayment ? (
+            <div className="space-y-3 pt-2 text-left">
+              {isHostCollect ? (
+                <>
+                  {reg?.hostPaymentLink ? (
+                    <a
+                      href={reg.hostPaymentLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-neutral-800"
+                    >
+                      <ExternalLink size={18} /> 1. Open payment link
+                    </a>
+                  ) : null}
+                  {whatsappHref ? (
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-700 text-white rounded-lg font-semibold hover:bg-emerald-800"
+                    >
+                      <MessageCircle size={18} /> 2. WhatsApp: I paid
+                    </a>
+                  ) : null}
+                  <p className="text-xs text-neutral-600 text-center">
+                    3. Host confirms your attendance in their Guests list — then you get a
+                    confirmation.
+                  </p>
+                </>
+              ) : null}
+
+              {isPendingPbPayment ? (
                 <button
                   type="button"
                   disabled={paying}
@@ -268,33 +344,34 @@ function ConfirmationInner() {
                   {paying ? 'Opening payment…' : 'Pay now'}
                 </button>
               ) : null}
+
               {!isPendingPayment && (
-              <a
-                href={`/api/events/${eventId}/google-calendar`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-neutral-800"
-              >
-                <CalendarPlus size={18} /> Add to Google Calendar
-              </a>
-              )}
-              {!isPendingPayment && (
-              <a
-                href={`/api/events/${eventId}/ics`}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-100 text-black rounded-lg font-semibold hover:bg-neutral-200"
-              >
-                <Download size={18} /> Download .ics
-              </a>
+                <>
+                  <a
+                    href={`/api/events/${eventId}/google-calendar`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-3 bg-black text-white rounded-lg font-semibold hover:bg-neutral-800"
+                  >
+                    <CalendarPlus size={18} /> Add to Google Calendar
+                  </a>
+                  <a
+                    href={`/api/events/${eventId}/ics`}
+                    className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-100 text-black rounded-lg font-semibold hover:bg-neutral-200"
+                  >
+                    <Download size={18} /> Download .ics
+                  </a>
+                </>
               )}
               <Link
                 href={`/events/${eventId}`}
-                className="block w-full py-3 border border-gray-200 text-black rounded-lg font-semibold hover:bg-gray-50"
+                className="block w-full py-3 border border-gray-200 text-black rounded-lg font-semibold hover:bg-gray-50 text-center"
               >
                 Back to Event
               </Link>
               <Link
                 href="/dashboard/events"
-                className="block w-full py-3 border border-gray-200 text-black rounded-lg font-semibold hover:bg-gray-50"
+                className="block w-full py-3 border border-gray-200 text-black rounded-lg font-semibold hover:bg-gray-50 text-center"
               >
                 My Events
               </Link>

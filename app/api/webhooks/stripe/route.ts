@@ -126,6 +126,7 @@ export async function POST(req: NextRequest) {
                 currency,
                 checkInCode: (updated?.checkInCode as string) || null,
                 paymentReference: session.id,
+                userId: session.metadata.userId || (reg.userId as string) || null,
               })
             }
           }

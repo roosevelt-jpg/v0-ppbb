@@ -369,25 +369,37 @@ export function EventDetailView({
                       Host collects payment
                     </p>
                     <p className="text-xs text-neutral-700">
-                      Ticket fees go to the event host — not Passive Blessings.
-                      {event.hostPaymentCollection === 'cash_at_door'
-                        ? ' Pay cash at the door.'
-                        : event.hostPaymentCollection === 'whatsapp'
-                          ? ' Message the host on WhatsApp for payment details after registering.'
-                          : event.hostPaymentLink
-                            ? ' You will be directed to the host payment link after registering.'
-                            : ''}
+                      Ticket fees go to the event host — not Passive Blessings. After you register:
+                      pay via their payment link, message them on WhatsApp that you paid, then they
+                      confirm your attendance.
                     </p>
                     {event.hostPaymentLink ? (
                       <a
                         href={event.hostPaymentLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-semibold underline text-neutral-900"
+                        className="text-xs font-semibold underline text-neutral-900 block"
                       >
                         Host payment link
                       </a>
                     ) : null}
+                    {event.hostWhatsapp ? (
+                      <p className="text-xs text-neutral-600">
+                        WhatsApp after paying: {event.hostWhatsapp}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+
+                {event.createdByRole === 'admin' &&
+                  event.pricingType !== 'free' &&
+                  event.pricingType !== 'member_only' && (
+                  <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg">
+                    <p className="text-xs font-medium text-neutral-900">Pay during registration</p>
+                    <p className="text-xs text-neutral-700 mt-1">
+                      Paid Passive Blessings events collect payment on this page before your spot is
+                      confirmed.
+                    </p>
                   </div>
                 )}
 

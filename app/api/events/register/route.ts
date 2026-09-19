@@ -52,7 +52,14 @@ export async function GET(request: NextRequest) {
         checkInCode: data.checkInCode || null,
         qrToken: data.qrToken || null,
         paymentStatus: data.paymentStatus || null,
+        paymentGateway: data.paymentGateway || null,
         eventId: data.eventId,
+        amountPaid: data.amountPaid ?? null,
+        ticketPrice: data.ticketPrice ?? null,
+        currency: data.currency || 'AED',
+        hostPaymentCollection: data.hostPaymentCollection || null,
+        hostPaymentLink: data.hostPaymentLink || null,
+        hostWhatsapp: data.hostWhatsapp || null,
       },
     })
   } catch (error) {
@@ -459,10 +466,11 @@ export async function POST(request: NextRequest) {
       const { isBusinessSelfCollectEvent, isPbHostedPaidEvent, normalizeHostPaymentCollection } =
         await import('@/lib/pb-payment-policy')
 
-      // Business-hosted paid events: host collects via payment link / WhatsApp / cash at door
+      // Business-hosted paid events: host collects via payment link; attendee
+      // messages WhatsApp after paying; host confirms attendance (Mark paid).
       if (isBusinessSelfCollectEvent(event) && !isPbHostedPaidEvent(event)) {
         const hostPaymentCollection = normalizeHostPaymentCollection(
-          event.hostPaymentCollection || event.paymentCollection
+          event.hostPaymentCollection || event.paymentCollection || 'payment_link'
         )
         const hostPaymentLink =
           typeof event.hostPaymentLink === 'string'
@@ -477,25 +485,28 @@ export async function POST(request: NextRequest) {
               ? event.whatsapp.trim()
               : ''
 
+        if (!hostPaymentLink || !hostWhatsapp) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                'This business event is missing a payment link or WhatsApp number. Ask the host to update the event.',
+            },
+            { status: 400 }
+          )
+        }
+
         await regRef.update({
           paymentGateway: 'host_direct',
           paymentStatus: 'pending_host',
           hostPaymentCollection,
-          hostPaymentLink: hostPaymentLink || null,
-          hostWhatsapp: hostWhatsapp || null,
+          hostPaymentLink,
+          hostWhatsapp,
           amountPaid: 0,
         })
 
-        if (userEmail) {
-          const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
-          void sendEventRegistrationEmail({
-            to: userEmail,
-            eventTitle: String(event.title || 'Event'),
-            eventUrl: `${origin}/events/${eventId}`,
-            status: 'pending_payment',
-            userId,
-          })
-        }
+        // No confirmation email until the host marks payment received.
+        // Attendee pays via host link, messages WhatsApp, then host confirms attendance.
 
         return NextResponse.json({
           success: true,
@@ -504,22 +515,21 @@ export async function POST(request: NextRequest) {
           externalPayment: true,
           hostPayment: {
             collection: hostPaymentCollection,
-            paymentLink: hostPaymentLink || null,
-            whatsapp: hostWhatsapp || null,
+            paymentLink: hostPaymentLink,
+            whatsapp: hostWhatsapp,
             amount: price,
             currency,
             note:
-              hostPaymentCollection === 'cash_at_door'
-                ? 'Pay cash at the door. The host confirms your payment on arrival.'
-                : hostPaymentCollection === 'whatsapp'
-                  ? 'Message the host on WhatsApp for payment details. They prepare your spot after payment is confirmed.'
-                  : 'Pay the host via their payment link. They confirm your registration after payment.',
+              '1) Pay via the host payment link. 2) Message them on WhatsApp that you paid. 3) They confirm your attendance.',
           },
           registration: {
             id: regRef.id,
             ...registration,
             paymentGateway: 'host_direct',
             paymentStatus: 'pending_host',
+            hostPaymentCollection,
+            hostPaymentLink,
+            hostWhatsapp,
           },
         })
       }
@@ -537,16 +547,8 @@ export async function POST(request: NextRequest) {
         }).catch((err) => console.error('[referral] event conversion:', err))
       }
 
-      if (userEmail) {
-        const { sendEventRegistrationEmail } = await import('@/lib/event-confirmation-email')
-        void sendEventRegistrationEmail({
-          to: userEmail,
-          eventTitle: String(event.title || 'Event'),
-          eventUrl: `${origin}/events/${eventId}`,
-          status: 'pending_payment',
-          userId,
-        })
-      }
+      // Paid PB-hosted tickets: confirmation email/push only after payment succeeds
+      // (see completeEventTicketPayment → sendEventPaymentConfirmationEmail).
 
       if (gateway === 'paypal') {
         const { resolvePayPalConfig } = await import('@/lib/resolve-paypal-config')

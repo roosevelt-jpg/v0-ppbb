@@ -132,14 +132,17 @@ jobs:
 
           echo "Deploy healthy."
 
-          # Schedule platform cron routes (idempotent — replaces its own
-          # marked block each deploy, so a CRON_SECRET rotation is picked up
-          # automatically and reruns never duplicate entries).
+          # Schedule platform cron routes on this AWS host (idempotent —
+          # replaces its own marked block each deploy, so a CRON_SECRET
+          # rotation is picked up and reruns never duplicate entries).
+          # vercel.json crons are unused — production runs here via crontab.
           #
-          # Values (CRON_TZ=UTC):
+          # Values (CRON_TZ=UTC on the server):
           #   0 9 * * *     membership-reminders  — expiry emails at 7/3/1 days left
           #   5 9 * * *     membership-expire     — downgrade + expired email
-          #   15 * * * *    event-reminders       — ~1 day before + ~3 hours before
+          #   15 * * * *    event-reminders       — hourly: daily countdown
+          #                                         (09:00 Asia/Dubai ≈ 05:15 UTC),
+          #                                         ~1 day before, ~3 hours before
           {
             CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
             if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi
@@ -159,7 +162,7 @@ jobs:
             } >> /tmp/crontab.new
             crontab /tmp/crontab.new
             rm -f /tmp/crontab.new
-            echo "Platform crons scheduled."
+            echo "Platform crons scheduled on AWS host."
           } || echo "Warning: could not schedule platform crons (continuing deploy)." >&2
           REMOTE_SCRIPT
 

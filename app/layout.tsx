@@ -129,6 +129,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+        {/* Capture install prompt before React hydrates — otherwise Chrome fires once and we miss it */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{window.__pbDeferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pbDeferredInstallPrompt=e;window.dispatchEvent(new CustomEvent('pb-install-prompt-ready',{detail:e}));});}catch(e){}})();`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

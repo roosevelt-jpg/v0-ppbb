@@ -89,7 +89,7 @@ export async function sendEventRegistrationEmail(opts: {
   }
 }
 
-/** Sent after ticket payment succeeds (separate from registration confirmation). */
+/** Sent after ticket payment succeeds — this is the confirmation (pay first). */
 export async function sendEventPaymentConfirmationEmail(opts: {
   to: string
   eventTitle: string
@@ -98,6 +98,8 @@ export async function sendEventPaymentConfirmationEmail(opts: {
   currency?: string
   checkInCode?: string | null
   paymentReference?: string | null
+  userId?: string | null
+  startDate?: Date | null
 }): Promise<boolean> {
   if (!opts.to) return false
 
@@ -107,24 +109,48 @@ export async function sendEventPaymentConfirmationEmail(opts: {
   const refLine = opts.paymentReference?.trim()
     ? `Payment reference: ${opts.paymentReference.trim()}.`
     : ''
+  const whenLine = opts.startDate
+    ? `When: ${opts.startDate.toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })}.`
+    : ''
   const lines = [
-    `Your payment for "${opts.eventTitle}" has been received.`,
+    `You're confirmed for "${opts.eventTitle}".`,
     amountLine,
     refLine,
-    'Your registration is confirmed.',
+    whenLine,
+    'Payment received — your spot is secured.',
   ].filter(Boolean)
 
   if (opts.checkInCode) {
     lines.push(`Your check-in code: ${opts.checkInCode}`)
   }
 
+  if (opts.userId) {
+    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+      const path = (() => {
+        try {
+          return new URL(opts.eventUrl).pathname
+        } catch {
+          return '/events'
+        }
+      })()
+      pushToUserSafe(
+        opts.userId!,
+        { title: 'Payment confirmed', body: opts.eventTitle },
+        {
+          type: 'event_registration',
+          click_action: path,
+        }
+      )
+    })
+  }
+
   try {
     const result = await sendBrandedEmail({
       to: opts.to,
-      subject: `Payment confirmed: ${opts.eventTitle}`,
+      subject: `Confirmed: ${opts.eventTitle}`,
       purpose: 'Event payment confirmation',
       department: 'events',
-      headline: 'Payment confirmed',
+      headline: 'You’re confirmed',
       bodyHtml: paragraphs(...lines),
       cta: { label: 'View event details', url: opts.eventUrl },
     })
@@ -135,9 +161,9 @@ export async function sendEventPaymentConfirmationEmail(opts: {
   }
 }
 
-export type EventReminderKind = 'day_before' | 'hours_before'
+export type EventReminderKind = 'daily' | 'day_before' | 'hours_before'
 
-/** Reminder before an event starts (day before or a few hours before). */
+/** Reminder before an event starts (daily countdown, day before, or hours before). */
 export async function sendEventReminderEmail(opts: {
   to: string
   eventTitle: string
@@ -146,6 +172,7 @@ export async function sendEventReminderEmail(opts: {
   locationLabel?: string | null
   kind: EventReminderKind
   checkInCode?: string | null
+  daysUntil?: number | null
 }): Promise<boolean> {
   if (!opts.to) return false
 
@@ -155,14 +182,46 @@ export async function sendEventReminderEmail(opts: {
   })
   const location = opts.locationLabel?.trim()
   const isHours = opts.kind === 'hours_before'
+  const isDayBefore = opts.kind === 'day_before'
+  const daysUntil =
+    typeof opts.daysUntil === 'number' && Number.isFinite(opts.daysUntil)
+      ? Math.max(0, Math.ceil(opts.daysUntil))
+      : null
 
-  const subject = isHours
-    ? `Starting soon: ${opts.eventTitle}`
-    : `Tomorrow: ${opts.eventTitle}`
-  const headline = isHours ? 'Your event starts soon' : 'Event reminder'
-  const lead = isHours
-    ? `Just a heads-up — "${opts.eventTitle}" starts in a few hours.`
-    : `Friendly reminder — "${opts.eventTitle}" is coming up tomorrow.`
+  let subject: string
+  let headline: string
+  let lead: string
+  let purpose: string
+
+  if (isHours) {
+    subject = `Starting soon: ${opts.eventTitle}`
+    headline = 'Your event starts soon'
+    lead = `Just a heads-up — "${opts.eventTitle}" starts in a few hours.`
+    purpose = 'Event starting soon reminder'
+  } else if (isDayBefore) {
+    subject = `Tomorrow: ${opts.eventTitle}`
+    headline = 'Event reminder'
+    lead = `Friendly reminder — "${opts.eventTitle}" is coming up tomorrow.`
+    purpose = 'Event day-before reminder'
+  } else {
+    const dayLabel =
+      daysUntil === 0
+        ? 'today'
+        : daysUntil === 1
+          ? 'tomorrow'
+          : daysUntil != null
+            ? `in ${daysUntil} days`
+            : 'soon'
+    subject = `Reminder: ${opts.eventTitle} ${dayLabel}`
+    headline = daysUntil === 0 ? 'Event day' : 'Upcoming event'
+    lead =
+      daysUntil === 0
+        ? `"${opts.eventTitle}" is today — see you there.`
+        : daysUntil === 1
+          ? `"${opts.eventTitle}" is tomorrow.`
+          : `"${opts.eventTitle}" is ${dayLabel}.`
+    purpose = 'Event countdown reminder'
+  }
 
   const lines = [
     lead,
@@ -176,7 +235,7 @@ export async function sendEventReminderEmail(opts: {
     const result = await sendBrandedEmail({
       to: opts.to,
       subject,
-      purpose: isHours ? 'Event starting soon reminder' : 'Event day-before reminder',
+      purpose,
       department: 'events',
       headline,
       bodyHtml: paragraphs(...lines),

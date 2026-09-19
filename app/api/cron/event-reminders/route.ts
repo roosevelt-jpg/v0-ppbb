@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { sendEventReminderEmail, type EventReminderKind } from '@/lib/event-confirmation-email'
@@ -7,6 +7,7 @@ import { getEventLocationLabel } from '@/lib/event-utils'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 60
 
 function toDate(value: unknown): Date | null {
   if (!value) return null
@@ -45,24 +46,89 @@ function siteUrl(): string {
   ).replace(/\/$/, '')
 }
 
-function resolveReminderKind(hoursUntil: number): EventReminderKind | null {
-  // ~1 day before (hourly cron catches this window)
-  if (hoursUntil >= 20 && hoursUntil <= 28) return 'day_before'
-  // ~3 hours before
-  if (hoursUntil >= 2.5 && hoursUntil <= 3.75) return 'hours_before'
-  return null
+function dubaiParts(d: Date): { dayKey: string; hour: number } {
+  const dayKey = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Dubai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d)
+  const hourStr = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Dubai',
+    hour: 'numeric',
+    hour12: false,
+  }).format(d)
+  return { dayKey, hour: Number(hourStr) }
+}
+
+function hoursUntil(start: Date, now: Date): number {
+  return (start.getTime() - now.getTime()) / (1000 * 60 * 60)
+}
+
+function daysUntilCeil(start: Date, now: Date): number {
+  return Math.max(0, Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+}
+
+/**
+ * - hours_before: ~3h window (any hour the cron runs in that window)
+ * - day_before: ~24h window
+ * - daily: once per Dubai calendar day at 09:00 Asia/Dubai until event time
+ */
+function resolveReminder(
+  startDate: Date,
+  now: Date
+): { kind: EventReminderKind; markerKey: string; daysUntil: number } | null {
+  const hrs = hoursUntil(startDate, now)
+  if (hrs <= 0) return null
+
+  const days = daysUntilCeil(startDate, now)
+  const { dayKey, hour } = dubaiParts(now)
+
+  if (hrs >= 2.5 && hrs <= 3.75) {
+    return {
+      kind: 'hours_before',
+      markerKey: `hours_before_${startDate.toISOString()}`,
+      daysUntil: days,
+    }
+  }
+  if (hrs >= 20 && hrs <= 28) {
+    return {
+      kind: 'day_before',
+      markerKey: `day_before_${startDate.toISOString()}`,
+      daysUntil: days,
+    }
+  }
+
+  // Daily countdown at 9am Dubai (hourly cron catches this hour)
+  if (hour !== 9) return null
+
+  return {
+    kind: 'daily',
+    markerKey: `daily_${dayKey}`,
+    daysUntil: days,
+  }
 }
 
 function isEligibleRegistration(data: Record<string, unknown>): boolean {
   const status = String(data.status || '')
   if (status !== 'confirmed') return false
   const pay = String(data.paymentStatus || '')
-  if (pay === 'pending') return false
+  if (pay === 'pending' || pay === 'pending_host') return false
   return true
 }
 
+function pushTitle(kind: EventReminderKind, daysUntil: number): string {
+  if (kind === 'hours_before') return 'Event starting soon'
+  if (kind === 'day_before') return 'Event tomorrow'
+  if (daysUntil === 0) return 'Event today'
+  if (daysUntil === 1) return 'Event tomorrow'
+  return `Event in ${daysUntil} days`
+}
+
 /**
- * Hourly: email confirmed registrants for events starting ~1 day or ~3 hours out.
+ * Hourly job (AWS host crontab via .github/workflows/deploy.yml — not Vercel).
+ * Confirmed registrants get a daily countdown at 09:00 Asia/Dubai, plus
+ * day-before and ~3-hour reminders. Auth: Authorization Bearer CRON_SECRET.
  */
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
@@ -72,14 +138,14 @@ export async function GET(request: NextRequest) {
   try {
     const db = getAdminDb()
     const now = new Date()
-    const windowEnd = new Date(now.getTime() + 30 * 60 * 60 * 1000) // 30h ahead
+    const windowEnd = new Date(now.getTime() + 120 * 24 * 60 * 60 * 1000)
 
     const eventsSnap = await db
       .collection('events')
       .where('status', '==', 'published')
       .where('startDate', '>=', Timestamp.fromDate(now))
       .where('startDate', '<=', Timestamp.fromDate(windowEnd))
-      .limit(100)
+      .limit(200)
       .get()
 
     let scannedEvents = 0
@@ -96,17 +162,18 @@ export async function GET(request: NextRequest) {
         continue
       }
 
-      const hoursUntil = (startDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-      const kind = resolveReminderKind(hoursUntil)
-      if (!kind) {
+      const reminder = resolveReminder(startDate, now)
+      if (!reminder) {
         skipped++
         continue
       }
 
-      const markerKey = `${kind}_${startDate.toISOString()}`
+      const { kind, markerKey, daysUntil } = reminder
       const title = String(event.title || 'Your event')
       const eventUrl = `${siteUrl()}/events/${eventDoc.id}`
-      const locationLabel = getEventLocationLabel(event as Parameters<typeof getEventLocationLabel>[0])
+      const locationLabel = getEventLocationLabel(
+        event as Parameters<typeof getEventLocationLabel>[0]
+      )
 
       const regsSnap = await db
         .collection('eventRegistrations')
@@ -131,6 +198,16 @@ export async function GET(request: NextRequest) {
           continue
         }
 
+        // Skip first daily within 6h of confirmation (avoid stacking on pay email)
+        if (kind === 'daily') {
+          const registeredAt =
+            toDate(reg.paidAt) || toDate(reg.confirmedAt) || toDate(reg.createdAt)
+          if (registeredAt && now.getTime() - registeredAt.getTime() < 6 * 60 * 60 * 1000) {
+            skipped++
+            continue
+          }
+        }
+
         const userId = String(reg.userId || '').trim()
         let to = String(reg.userEmail || '').trim()
 
@@ -152,7 +229,7 @@ export async function GET(request: NextRequest) {
             const profileEmail = String(userData?.email || '').trim()
             if (profileEmail.includes('@')) to = profileEmail
           } catch {
-            /* fall through with registration email */
+            /* fall through */
           }
         }
 
@@ -168,6 +245,7 @@ export async function GET(request: NextRequest) {
           startDate,
           locationLabel,
           kind,
+          daysUntil,
           checkInCode: typeof reg.checkInCode === 'string' ? reg.checkInCode : null,
         })
 
@@ -176,7 +254,7 @@ export async function GET(request: NextRequest) {
             pushToUserSafe(
               userId,
               {
-                title: kind === 'day_before' ? 'Event tomorrow' : 'Event starting soon',
+                title: pushTitle(kind, daysUntil),
                 body: title,
               },
               {

@@ -288,7 +288,9 @@ export function EventGuestManager({
                     {g.ticketTypeName || '—'}
                     {g.paymentStatus === 'paid' && g.amountPaid != null && g.amountPaid > 0 ? (
                       <div className="text-xs text-neutral-500">{g.amountPaid} paid</div>
-                    ) : g.paymentStatus === 'pending' ? (
+                    ) : g.paymentStatus === 'pending' ||
+                      g.paymentStatus === 'pending_host' ||
+                      g.status === 'pending_payment' ? (
                       <div className="text-xs text-amber-600">Awaiting payment</div>
                     ) : null}
                   </td>
@@ -308,6 +310,17 @@ export function EventGuestManager({
                   <td className="p-3 font-mono text-xs">{g.checkInCode || '—'}</td>
                   <td className="p-3">
                     <div className={ACTION_ROW}>
+                      {(g.status === 'pending_payment' ||
+                        g.paymentStatus === 'pending' ||
+                        g.paymentStatus === 'pending_host') && (
+                        <button
+                          type="button"
+                          className={BTN_COMPACT}
+                          onClick={() => runAction('mark_paid', g.id)}
+                        >
+                          Confirm payment
+                        </button>
+                      )}
                       {g.status === 'pending' && (
                         <>
                           <button

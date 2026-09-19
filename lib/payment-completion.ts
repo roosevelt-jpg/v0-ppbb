@@ -330,9 +330,20 @@ export async function completeEventTicketPayment(params: {
   const email = (reg.userEmail as string) || ''
   if (email) {
     const eventSnap = await db.collection('events').doc(params.eventId).get()
-    const title = (eventSnap.data()?.title as string) || 'Event'
+    const eventData = eventSnap.data() || {}
+    const title = (eventData.title as string) || 'Event'
     const updated = (await regRef.get()).data()
-    const currency = String(eventSnap.data()?.currency || 'AED')
+    const currency = String(eventData.currency || 'AED')
+    const startRaw = eventData.startDate
+    let startDate: Date | null = null
+    if (startRaw) {
+      if (typeof (startRaw as { toDate?: () => Date }).toDate === 'function') {
+        startDate = (startRaw as { toDate: () => Date }).toDate()
+      } else {
+        const d = new Date(String(startRaw))
+        startDate = Number.isNaN(d.getTime()) ? null : d
+      }
+    }
     const { sendEventPaymentConfirmationEmail } = await import('@/lib/event-confirmation-email')
     void sendEventPaymentConfirmationEmail({
       to: email,
@@ -342,6 +353,8 @@ export async function completeEventTicketPayment(params: {
       currency,
       checkInCode: (updated?.checkInCode as string) || null,
       paymentReference: params.paymentReference,
+      userId: userId || null,
+      startDate,
     })
   }
 

@@ -212,6 +212,15 @@ function BusinessEventForm() {
         throw new Error('Please select a location from the suggestions')
       }
 
+      if (formData.pricingType !== 'free') {
+        if (!String(formData.hostPaymentLink || '').trim()) {
+          throw new Error('Add your payment link so attendees can pay you')
+        }
+        if (!String(formData.hostWhatsapp || '').trim()) {
+          throw new Error('Add a WhatsApp number so attendees can message you after paying')
+        }
+      }
+
       const startDateTime = formData.startTime
         ? `${formData.startDate}T${formData.startTime}:00`
         : `${formData.startDate}T09:00:00`
@@ -256,6 +265,11 @@ function BusinessEventForm() {
           .filter(Boolean),
         recurrence: formData.recurrence,
         applyChangesToFuture: formData.applyChangesToFuture === true,
+        hostPaymentCollection: formData.pricingType === 'free' ? null : 'payment_link',
+        hostPaymentLink:
+          formData.pricingType === 'free' ? null : String(formData.hostPaymentLink || '').trim(),
+        hostWhatsapp:
+          formData.pricingType === 'free' ? null : String(formData.hostWhatsapp || '').trim(),
         status,
         createdBy: user?.id,
         createdByRole: 'business' as const,
@@ -1054,66 +1068,48 @@ function BusinessEventForm() {
                     You collect attendee payments yourself
                   </p>
                   <p className="text-xs text-amber-900">
-                    Passive Blessings does not charge buyers for your tickets. Add a payment link,
-                    WhatsApp number, or choose cash at the door. Admin may also charge a posting fee
-                    via PB Stripe when you submit a paid event.
+                    Passive Blessings does not charge ticket fees for your events. Attendees pay via
+                    your payment link, then message you on WhatsApp that they paid. You confirm
+                    their attendance in Guests. Admin may also charge a posting fee via PB Stripe
+                    when you submit a paid event.
                   </p>
                   <div>
                     <label className="block text-sm font-medium mb-1 text-neutral-800">
-                      How attendees pay you
+                      Payment link *
                     </label>
-                    <select
-                      value={formData.hostPaymentCollection}
+                    <input
+                      type="url"
+                      value={formData.hostPaymentLink}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          hostPaymentCollection: e.target.value as
-                            | 'payment_link'
-                            | 'whatsapp'
-                            | 'cash_at_door',
+                          hostPaymentLink: e.target.value,
+                          hostPaymentCollection: 'payment_link',
                         })
                       }
+                      placeholder="https://…"
                       className="w-full px-3 py-2 border rounded-lg text-sm"
-                    >
-                      <option value="payment_link">My payment link</option>
-                      <option value="whatsapp">WhatsApp — buyer requests payment details</option>
-                      <option value="cash_at_door">Cash at the door</option>
-                    </select>
+                      required
+                    />
                   </div>
-                  {formData.hostPaymentCollection === 'payment_link' && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1 text-neutral-800">
-                        Payment link *
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.hostPaymentLink}
-                        onChange={(e) =>
-                          setFormData({ ...formData, hostPaymentLink: e.target.value })
-                        }
-                        placeholder="https://…"
-                        className="w-full px-3 py-2 border rounded-lg text-sm"
-                        required
-                      />
-                    </div>
-                  )}
-                  {formData.hostPaymentCollection === 'whatsapp' && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1 text-neutral-800">
-                        WhatsApp number *
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.hostWhatsapp}
-                        onChange={(e) =>
-                          setFormData({ ...formData, hostWhatsapp: e.target.value })
-                        }
-                        placeholder="+971…"
-                        className="w-full px-3 py-2 border rounded-lg text-sm"
-                        required
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-neutral-800">
+                      WhatsApp number *
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.hostWhatsapp}
+                      onChange={(e) =>
+                        setFormData({ ...formData, hostWhatsapp: e.target.value })
+                      }
+                      placeholder="+971…"
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                      required
+                    />
+                    <p className="text-xs text-neutral-600 mt-1">
+                      Attendees use this to tell you they paid — then you confirm them in Guests.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

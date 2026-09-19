@@ -176,30 +176,31 @@ export async function POST(request: NextRequest) {
         (body.isPaid === true && pricingType !== 'free' && pricingType !== 'member_only'))
 
     if (isBusinessPaid) {
-      const { normalizeHostPaymentCollection } = await import('@/lib/pb-payment-policy')
-      const collection = normalizeHostPaymentCollection(
-        body.hostPaymentCollection || body.paymentCollection
-      )
       const link = String(body.hostPaymentLink || body.paymentLink || '').trim()
       const wa = String(body.hostWhatsapp || body.whatsapp || '').trim()
-      if (collection === 'payment_link' && !link) {
+      if (!link) {
         return NextResponse.json(
           {
             success: false,
             error:
-              'Add your payment link so attendees can pay you directly. Passive Blessings does not collect ticket money for business events.',
+              'Add your payment link so attendees can pay you. Passive Blessings does not collect ticket money for business events.',
           },
           { status: 400 }
         )
       }
-      if (collection === 'whatsapp' && !wa) {
+      if (!wa) {
         return NextResponse.json(
           {
             success: false,
-            error: 'Add a WhatsApp number so buyers can request payment details from you.',
+            error:
+              'Add a WhatsApp number so attendees can message you after they pay. You then confirm their attendance.',
           },
           { status: 400 }
         )
+      }
+      // Prefer payment_link when both are present; WhatsApp is for pay-confirmation messaging
+      if (!body.hostPaymentCollection) {
+        body.hostPaymentCollection = 'payment_link'
       }
     }
 
@@ -442,6 +443,45 @@ export async function PUT(request: NextRequest) {
     }
     if (updates.endDate && typeof updates.endDate === 'string') {
       updates.endDate = new Date(updates.endDate)
+    }
+
+    const mergedRole = String(updates.createdByRole || existing.createdByRole || '')
+    const mergedPricing = String(
+      updates.pricingType || existing.pricingType || (updates.isPaid || existing.isPaid ? 'paid_by_pb' : 'free')
+    )
+    const isBusinessPaidUpdate =
+      mergedRole === 'business' &&
+      (mergedPricing === 'paid_by_business' ||
+        (mergedPricing !== 'free' && mergedPricing !== 'member_only' && mergedPricing !== 'paid_by_pb'))
+    if (isBusinessPaidUpdate) {
+      const link = String(
+        updates.hostPaymentLink ?? existing.hostPaymentLink ?? updates.paymentLink ?? ''
+      ).trim()
+      const wa = String(
+        updates.hostWhatsapp ?? existing.hostWhatsapp ?? updates.whatsapp ?? ''
+      ).trim()
+      if (!link) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Add your payment link so attendees can pay you for this paid event.',
+          },
+          { status: 400 }
+        )
+      }
+      if (!wa) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              'Add a WhatsApp number so attendees can message you after paying. You then confirm attendance.',
+          },
+          { status: 400 }
+        )
+      }
+      updates.hostPaymentLink = link
+      updates.hostWhatsapp = wa
+      if (!updates.hostPaymentCollection) updates.hostPaymentCollection = 'payment_link'
     }
 
     if (updates.status === 'published' && !updates.pbCommissionPercent) {
