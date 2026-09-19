@@ -591,6 +591,7 @@ function SettingsContent() {
               type="button"
               onClick={() => {
                 try {
+                  sessionStorage.removeItem('pb-pwa-prompt-session-hide')
                   localStorage.removeItem('pb-pwa-prompt-dismissed-v1')
                 } catch {
                   /* ignore */

@@ -1,14 +1,13 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import { Download, Bell, X, Smartphone } from 'lucide-react'
-import { useAuth } from '@/lib/auth-context'
-import { requestAndRegisterFCM } from '@/lib/fcm-client'
+import { usePathname } from 'next/navigation'
+import { Download, X, Smartphone } from 'lucide-react'
 import { registerPbServiceWorker } from '@/components/pwa-provider'
+import { isDashboardRoute } from '@/lib/dashboard-routes'
 
 const INSTALLED_KEY = 'pb-pwa-installed'
-const ALERTS_KEY = 'pb-pwa-alerts-enabled'
-/** Session-only hide — prompt returns on the next visit / tab focus */
+/** Session-only hide — returns on the next visit */
 const SESSION_HIDE_KEY = 'pb-pwa-prompt-session-hide'
 
 type BeforeInstallPromptEvent = Event & {
@@ -42,52 +41,27 @@ function readInstalled(): boolean {
   }
 }
 
-function readAlertsEnabled(): boolean {
-  try {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      localStorage.setItem(ALERTS_KEY, '1')
-      return true
-    }
-    return localStorage.getItem(ALERTS_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-function onboardingComplete(): boolean {
-  return readInstalled() && readAlertsEnabled()
-}
-
+/** Compact install-only chip — alerts are enabled from the member Dashboard. */
 export function PwaInstallPrompt() {
-  const { user } = useAuth()
+  const pathname = usePathname()
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null)
   const [open, setOpen] = useState(false)
   const [iosHelp, setIosHelp] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [installed, setInstalled] = useState(false)
-  const [notifDone, setNotifDone] = useState(false)
 
   const maybeShow = useCallback(() => {
     if (typeof window === 'undefined') return
-    const doneInstall = readInstalled()
-    const doneAlerts = readAlertsEnabled()
-    setInstalled(doneInstall)
-    setNotifDone(doneAlerts)
-
-    if (doneInstall && doneAlerts) {
+    if (readInstalled()) {
       setOpen(false)
       return
     }
-
-    // Session hide only — returning to the site clears this and shows again
     try {
       if (sessionStorage.getItem(SESSION_HIDE_KEY) === '1') return
     } catch {
       /* ignore */
     }
-
     setOpen(true)
-    if (isIosSafari() && !doneInstall) setIosHelp(true)
+    if (isIosSafari()) setIosHelp(true)
   }, [])
 
   useEffect(() => {
@@ -99,13 +73,8 @@ export function PwaInstallPrompt() {
       } catch {
         /* ignore */
       }
-    }
-
-    // Clear session hide when the user returns to the tab / navigates back
-    try {
-      sessionStorage.removeItem(SESSION_HIDE_KEY)
-    } catch {
-      /* ignore */
+      setOpen(false)
+      return
     }
 
     maybeShow()
@@ -113,7 +82,7 @@ export function PwaInstallPrompt() {
     const onBip = (e: Event) => {
       e.preventDefault()
       setDeferred(e as BeforeInstallPromptEvent)
-      window.setTimeout(() => maybeShow(), 1200)
+      window.setTimeout(() => maybeShow(), 1000)
     }
 
     const onManualShow = () => {
@@ -125,41 +94,23 @@ export function PwaInstallPrompt() {
       maybeShow()
     }
 
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        try {
-          sessionStorage.removeItem(SESSION_HIDE_KEY)
-        } catch {
-          /* ignore */
-        }
-        maybeShow()
-      }
-    }
-
-    const onPageShow = () => {
-      try {
-        sessionStorage.removeItem(SESSION_HIDE_KEY)
-      } catch {
-        /* ignore */
-      }
-      maybeShow()
+    const onReturn = () => {
+      if (document.visibilityState === 'visible') maybeShow()
     }
 
     window.addEventListener('beforeinstallprompt', onBip)
     window.addEventListener('pb-show-install-prompt', onManualShow)
-    document.addEventListener('visibilitychange', onVisibility)
-    window.addEventListener('pageshow', onPageShow)
-    window.addEventListener('focus', onPageShow)
+    document.addEventListener('visibilitychange', onReturn)
+    window.addEventListener('pageshow', onReturn)
 
-    const delayed = window.setTimeout(() => maybeShow(), 2500)
+    const delayed = window.setTimeout(() => maybeShow(), 2800)
 
     return () => {
       window.clearTimeout(delayed)
       window.removeEventListener('beforeinstallprompt', onBip)
       window.removeEventListener('pb-show-install-prompt', onManualShow)
-      document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('pageshow', onPageShow)
-      window.removeEventListener('focus', onPageShow)
+      document.removeEventListener('visibilitychange', onReturn)
+      window.removeEventListener('pageshow', onReturn)
     }
   }, [maybeShow])
 
@@ -184,12 +135,8 @@ export function PwaInstallPrompt() {
       const choice = await deferred.userChoice
       if (choice.outcome === 'accepted') {
         localStorage.setItem(INSTALLED_KEY, '1')
-        setInstalled(true)
         setDeferred(null)
-        // Keep prompt open until alerts are also enabled
-        if (readAlertsEnabled()) {
-          setOpen(false)
-        }
+        setOpen(false)
       }
     } catch (error) {
       console.warn('[pwa] install prompt failed:', error)
@@ -198,145 +145,58 @@ export function PwaInstallPrompt() {
     }
   }
 
-  const handleEnableAlerts = async () => {
-    setBusy(true)
-    try {
-      await registerPbServiceWorker()
-      let ok = false
-      if (user?.id) {
-        ok = await requestAndRegisterFCM(user.id)
-      } else {
-        const permission =
-          'Notification' in window ? await Notification.requestPermission() : 'denied'
-        ok = permission === 'granted'
-      }
-      setNotifDone(ok)
-      if (ok) {
-        localStorage.setItem(ALERTS_KEY, '1')
-        if (readInstalled()) {
-          setOpen(false)
-        }
-      }
-    } catch (error) {
-      console.warn('[pwa] notification enable failed:', error)
-      setNotifDone(false)
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  // Mark installed when running as PWA after install
-  useEffect(() => {
-    if (!open) return
-    if (isStandaloneDisplay()) {
-      localStorage.setItem(INSTALLED_KEY, '1')
-      setInstalled(true)
-      if (readAlertsEnabled()) setOpen(false)
-    }
-  }, [open])
-
-  if (!open || onboardingComplete()) return null
+  // Never block admin / dashboard / business workspaces
+  if (isDashboardRoute(pathname)) return null
+  if (!open || readInstalled()) return null
 
   return (
     <div
-      className="fixed inset-x-3 bottom-[5.5rem] z-[60] sm:inset-x-auto sm:right-6 sm:bottom-24 sm:max-w-sm"
-      role="dialog"
+      className="fixed inset-x-3 bottom-4 z-[60] sm:inset-x-auto sm:right-5 sm:bottom-5 sm:max-w-xs"
+      role="status"
       aria-label="Install Passive Blessings"
     >
-      <div className="rounded-xl border border-neutral-200 bg-white shadow-2xl overflow-hidden">
-        <div
-          className="flex items-start justify-between gap-2 px-4 pt-4 pb-2"
-          style={{ backgroundColor: '#111111' }}
+      <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white pl-2 pr-1.5 py-1.5 shadow-lg">
+        <img
+          src="/api/pwa-icon?size=96"
+          alt=""
+          className="h-8 w-8 rounded-full bg-neutral-100 object-contain p-0.5 shrink-0"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold text-neutral-900 leading-tight truncate">
+            Install app
+          </p>
+          {iosHelp ? (
+            <p className="text-[10px] text-neutral-500 leading-tight truncate">
+              Share → Add to Home Screen
+            </p>
+          ) : null}
+        </div>
+
+        {deferred ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleInstall()}
+            className="inline-flex items-center gap-1 rounded-full bg-black text-white text-xs font-semibold px-3 py-1.5 shrink-0 disabled:opacity-50"
+          >
+            <Download className="h-3.5 w-3.5" />
+            {busy ? '…' : 'Install'}
+          </button>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 text-neutral-800 text-[10px] font-semibold px-2.5 py-1.5 shrink-0">
+            <Smartphone className="h-3.5 w-3.5" />
+            Menu
+          </span>
+        )}
+
+        <button
+          type="button"
+          onClick={hideForSession}
+          className="p-1.5 rounded-full text-neutral-400 hover:text-neutral-800 hover:bg-neutral-100 shrink-0"
+          aria-label="Dismiss"
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <img
-              src="/api/pwa-icon?size=192"
-              alt=""
-              className="h-11 w-11 rounded-xl bg-white object-contain p-1 shrink-0"
-            />
-            <div className="min-w-0 text-white">
-              <p className="font-semibold text-sm truncate">Install Passive Blessings</p>
-              <p className="text-[11px] opacity-70 leading-snug">
-                Install the app and enable alerts — we&apos;ll remind you until both are done.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={hideForSession}
-            className="p-1 rounded hover:bg-white/10 text-white shrink-0"
-            aria-label="Dismiss for now"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="px-4 py-3 space-y-3">
-          {iosHelp && !installed ? (
-            <p className="text-xs text-neutral-600 leading-relaxed">
-              On iPhone/iPad: tap <strong>Share</strong> in Safari, then{' '}
-              <strong>Add to Home Screen</strong>. Then enable alerts below.
-            </p>
-          ) : deferred && !installed ? (
-            <p className="text-xs text-neutral-600 leading-relaxed">
-              Add a home-screen icon, then turn on alerts for events and community updates.
-            </p>
-          ) : !installed ? (
-            <p className="text-xs text-neutral-600 leading-relaxed">
-              On Android Chrome: browser menu → <strong>Install app</strong>. On iPhone: Safari Share
-              → <strong>Add to Home Screen</strong>. Then enable alerts below.
-            </p>
-          ) : (
-            <p className="text-xs text-neutral-600 leading-relaxed">
-              App installed. Enable phone alerts so you don&apos;t miss events and updates.
-            </p>
-          )}
-
-          <div className="flex flex-col gap-2">
-            {!installed ? (
-              !iosHelp && deferred ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void handleInstall()}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-black text-white text-sm font-semibold px-3 py-2.5 disabled:opacity-40"
-                >
-                  <Download className="h-4 w-4" />
-                  {busy ? 'Working…' : 'Install app'}
-                </button>
-              ) : (
-                <div className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-200 text-neutral-800 text-sm font-semibold px-3 py-2.5">
-                  <Smartphone className="h-4 w-4" />
-                  {iosHelp
-                    ? 'Use Share → Add to Home Screen'
-                    : 'Use your browser Install / Add to Home Screen'}
-                </div>
-              )
-            ) : (
-              <div className="inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 text-green-900 text-sm font-semibold px-3 py-2.5">
-                App installed
-              </div>
-            )}
-
-            <button
-              type="button"
-              disabled={busy || notifDone}
-              onClick={() => void handleEnableAlerts()}
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-300 text-neutral-900 text-sm font-semibold px-3 py-2.5 disabled:opacity-50"
-            >
-              <Bell className="h-4 w-4" />
-              {notifDone ? 'Alerts enabled' : 'Enable phone alerts'}
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={hideForSession}
-            className="w-full text-center text-[11px] text-neutral-500 hover:text-neutral-800 py-1"
-          >
-            Not now — remind me when I return
-          </button>
-        </div>
+          <X className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   )
