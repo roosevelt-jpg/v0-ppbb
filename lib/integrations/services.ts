@@ -251,8 +251,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     id: 'gmailSmtp',
     name: 'Gmail SMTP',
     category: 'messaging',
-    description:
-      'Legacy fallback for admin invites when SendGrid is unavailable. Prefer SendGrid with an authenticated passive-blessings.com From address — consumer Gmail often sends branded mail to Spam.',
+    description: 'Primary email path for transactional mail (orders, events, membership, invites) via Gmail SMTP',
     icon: '📧',
     fields: [
       { name: 'gmailEmail', label: 'Gmail Email Address', type: 'email', required: true, placeholder: 'your-email@gmail.com' },
@@ -260,7 +259,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'fromName', label: 'From Name', type: 'text', required: false, placeholder: 'Passive Blessings' },
     ],
     docs: 'https://support.google.com/accounts/answer/185833',
-    help: 'Use an App Password (not your Gmail password). Enable 2FA on your Google account, then generate an App Password in Security settings. For inbox delivery, configure SendGrid Domain Authentication instead.',
+    help: 'Use an App Password (not your Gmail password). Enable 2FA on your Google account, then generate an App Password in Security settings. Note: Gmail may still place high-volume automated mail in recipients’ Spam folders even when SMTP accepts the send.',
   },
   twilio: {
     id: 'twilio',

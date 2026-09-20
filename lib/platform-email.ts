@@ -1,7 +1,6 @@
 /**
- * Branded transactional email.
- * Prefers authenticated SendGrid (brand domain) — Gmail SMTP is a legacy fallback
- * and often lands in spam when From is a personal @gmail.com with a brand display name.
+ * Branded transactional email via Gmail SMTP (primary production path).
+ * Layout: Logo → Greeting → Body → department signature
  */
 
 import nodemailer from 'nodemailer'
@@ -174,7 +173,7 @@ async function sendViaGmailSmtp(
 
   if (isConsumerGmailAddress(config.gmailEmail)) {
     console.warn(
-      '[platform-email] Sending via consumer Gmail SMTP — Gmail often files these as spam. Authenticate SendGrid for passive-blessings.com.'
+      '[platform-email] Sending via consumer Gmail SMTP. High volume to Gmail inboxes can land in Spam even when SMTP accepts the message.'
     )
   }
 
@@ -187,9 +186,11 @@ async function sendViaGmailSmtp(
       },
     })
 
+    // Keep Reply-To on the same mailbox as From so recipients can reply
+    // and Gmail does not see a mismatched brand domain.
     await transporter.sendMail({
       from: `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.gmailEmail}>`,
-      replyTo: DEFAULT_MAIL_REPLY_TO,
+      replyTo: config.gmailEmail,
       to: input.to,
       subject: input.subject,
       html: prepared.html,
@@ -204,8 +205,8 @@ async function sendViaGmailSmtp(
 }
 
 /**
- * Send a branded platform email.
- * Prefers SendGrid (authenticated brand From). Falls back to Gmail SMTP.
+ * Send a branded platform email via Gmail SMTP (primary).
+ * SendGrid is only used if Gmail SMTP is not configured.
  * Returns ok:false (does not throw) when no provider is configured.
  * Always writes an emailSendLogs CRM activity row (success or failure).
  */
@@ -234,22 +235,24 @@ export async function sendBrandedEmail(
   try {
     const prepared = await prepareMail({ ...input, to })
 
-    const viaSendGrid = await sendViaSendGrid({ ...input, to }, prepared)
-    if (viaSendGrid.ok) {
-      await recordEmailSendLog({ ...logBase, status: 'sent' })
-      return { ok: true }
-    }
-
+    // Primary path: Gmail SMTP (Integrations / env) — what production uses today.
     const viaGmail = await sendViaGmailSmtp({ ...input, to }, prepared)
     if (viaGmail.ok) {
       await recordEmailSendLog({ ...logBase, status: 'sent' })
       return { ok: true }
     }
 
+    // Fallback only when Gmail SMTP is missing or fails.
+    const viaSendGrid = await sendViaSendGrid({ ...input, to }, prepared)
+    if (viaSendGrid.ok) {
+      await recordEmailSendLog({ ...logBase, status: 'sent' })
+      return { ok: true }
+    }
+
     const error =
-      viaSendGrid.error && viaGmail.error
-        ? `SendGrid: ${viaSendGrid.error}; Gmail: ${viaGmail.error}`
-        : viaSendGrid.error || viaGmail.error || 'No email provider configured'
+      viaGmail.error && viaSendGrid.error
+        ? `Gmail: ${viaGmail.error}; SendGrid: ${viaSendGrid.error}`
+        : viaGmail.error || viaSendGrid.error || 'No email provider configured'
     console.warn('[platform-email] all providers failed:', input.subject, error)
     await recordEmailSendLog({ ...logBase, status: 'skipped', error })
     return { ok: false, error }
