@@ -41,7 +41,7 @@ export async function getGmailSmtpConfig(): Promise<{
       return {
         gmailEmail: email,
         gmailAppPassword: appPassword,
-        fromName: integration.credentials.fromName?.trim() || 'Passive Blessings',
+        fromName: integration?.credentials?.fromName?.trim() || 'Passive Blessings',
       }
     }
     console.warn('[v0] Gmail SMTP integration missing email or app password')
