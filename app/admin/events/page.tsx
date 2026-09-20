@@ -107,25 +107,23 @@ function EventsPageContent() {
   const filteredEvents = React.useMemo(() => {
     let list = getEventsByStatus(activeTab)
 
-    if (activeTab === 'published') {
-      if (publishedFrom || publishedTo) {
-        const fromMs = publishedFrom ? new Date(`${publishedFrom}T00:00:00`).getTime() : null
-        const toMs = publishedTo ? new Date(`${publishedTo}T23:59:59`).getTime() : null
-        list = list.filter((e) => {
-          const pub =
-            toEventDate(e.publishedAt)?.getTime() ??
-            toEventDate(e.submittedAt)?.getTime() ??
-            toEventDate(e.createdAt)?.getTime() ??
-            0
-          if (fromMs != null && pub < fromMs) return false
-          if (toMs != null && pub > toMs) return false
-          return true
-        })
-      }
-      return sortPublishedUpcomingFirst(list)
+    if (activeTab === 'published' && (publishedFrom || publishedTo)) {
+      const fromMs = publishedFrom ? new Date(`${publishedFrom}T00:00:00`).getTime() : null
+      const toMs = publishedTo ? new Date(`${publishedTo}T23:59:59`).getTime() : null
+      list = list.filter((e) => {
+        const pub =
+          toEventDate(e.publishedAt)?.getTime() ??
+          toEventDate(e.submittedAt)?.getTime() ??
+          toEventDate(e.createdAt)?.getTime() ??
+          0
+        if (fromMs != null && pub < fromMs) return false
+        if (toMs != null && pub > toMs) return false
+        return true
+      })
     }
 
-    return list
+    // All tabs: upcoming event dates first (soonest first), then past (most recent past first).
+    return sortPublishedUpcomingFirst(list)
   }, [events, activeTab, publishedFrom, publishedTo])
 
   const pendingCount = events.filter((e) => e.status === 'pending_approval').length
