@@ -73,14 +73,26 @@ export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSend
     try {
       await sgMail.send({
         from: { email: config.fromAddress, name: config.fromName },
+        replyTo: { email: config.replyTo, name: config.fromName },
         subject: input.subject,
         html: htmlBase,
-        personalizations: batch.map((r) => ({
-          to: [{ email: r.email, name: r.name }],
-          substitutions: {
-            [UNSUB_TAG]: buildUnsubscribeUrl(r.email),
-          },
-        })),
+        text: String(input.content || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim(),
+        personalizations: batch.map((r) => {
+          const unsub = buildUnsubscribeUrl(r.email)
+          return {
+            to: [{ email: r.email, name: r.name }],
+            headers: {
+              'List-Unsubscribe': `<${unsub}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            },
+            substitutions: {
+              [UNSUB_TAG]: unsub,
+            },
+          }
+        }),
       } as sgMail.MailDataRequired)
       sentCount += batch.length
     } catch (error) {

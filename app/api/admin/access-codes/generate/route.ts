@@ -9,25 +9,36 @@ export const dynamic = 'force-dynamic'
 
 async function sendAccessCodeEmail(email: string, code: string, adminName: string) {
   try {
-    const sendgridApiKey = process.env.SENDGRID_API_KEY
-    if (!sendgridApiKey) {
-      console.warn('[v0] SendGrid API key not configured, skipping email')
+    const { resolveSendGridConfig } = await import('@/lib/resolve-sendgrid-key')
+    const { DEFAULT_MAIL_FROM, DEFAULT_MAIL_FROM_NAME } = await import('@/lib/mail-identity')
+    const config = await resolveSendGridConfig()
+    if (!config) {
+      console.warn('[v0] SendGrid not configured, skipping access-code email')
       return false
     }
 
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${sendgridApiKey}`,
+        Authorization: `Bearer ${config.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email, name: adminName }], subject: 'Your Passive Blessings Admin Access Code' }],
-        from: { email: 'noreply@passiveblessings.com', name: 'Passive Blessings' },
-        content: [{
-          type: 'text/html',
-          value: `<h2>Admin Access Code</h2><p>Hello ${adminName},</p><p>Your access code to log in to the admin dashboard is:</p><h1 style="color: #111111; font-size: 32px; letter-spacing: 2px;">${code}</h1><p><strong>This code will expire in 24 hours.</strong></p><p>If you did not request this code, please ignore this email.</p><p>For security, this code is unique and single-use.</p><hr/><p><small>Do not share this code with anyone. Our team will never ask you for your access code.</small></p>`,
-        }],
+        from: {
+          email: config.fromAddress || DEFAULT_MAIL_FROM,
+          name: config.fromName || DEFAULT_MAIL_FROM_NAME,
+        },
+        content: [
+          {
+            type: 'text/plain',
+            value: `Hello ${adminName},\n\nYour admin access code is: ${code}\n\nThis code expires in 24 hours. Do not share it.`,
+          },
+          {
+            type: 'text/html',
+            value: `<h2>Admin Access Code</h2><p>Hello ${adminName},</p><p>Your access code to log in to the admin dashboard is:</p><h1 style="color: #111111; font-size: 32px; letter-spacing: 2px;">${code}</h1><p><strong>This code will expire in 24 hours.</strong></p><p>If you did not request this code, please ignore this email.</p><p>For security, this code is unique and single-use.</p><hr/><p><small>Do not share this code with anyone. Our team will never ask you for your access code.</small></p>`,
+          },
+        ],
       }),
     })
 

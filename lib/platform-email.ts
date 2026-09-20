@@ -1,12 +1,20 @@
 /**
- * Branded transactional email via Gmail SMTP.
- * Layout: Logo → Greeting → Body → department signature
+ * Branded transactional email.
+ * Prefers authenticated SendGrid (brand domain) — Gmail SMTP is a legacy fallback
+ * and often lands in spam when From is a personal @gmail.com with a brand display name.
  */
 
 import nodemailer from 'nodemailer'
+import sgMail from '@sendgrid/mail'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getGmailSmtpConfig, getEmailBrandLogoUrl } from '@/lib/gmail-service'
+import { resolveSendGridConfig } from '@/lib/resolve-sendgrid-key'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
+import {
+  DEFAULT_MAIL_FROM_NAME,
+  DEFAULT_MAIL_REPLY_TO,
+  isConsumerGmailAddress,
+} from '@/lib/mail-identity'
 import {
   type EmailDepartmentKey,
   type EmailSignature,
@@ -92,13 +100,6 @@ export function renderBrandedEmailHtml(opts: {
 
 async function resolveLogoUrl(): Promise<string> {
   try {
-    // Prefer the site's own hosted logo (custom logoUrlDark, or the built-in
-    // /images/pb-logo-black.png fallback that getEmailBrandLogoUrl() returns).
-    // This used to explicitly skip the local fallback in favor of a
-    // third-party Vercel Blob Storage URL left over from the original v0
-    // project; that external URL is no longer reliably reachable (it showed
-    // as a broken image in delivered emails, e.g. the admin login OTP mail),
-    // while the self-hosted asset is served from our own production domain.
     const logo = await getEmailBrandLogoUrl()
     if (logo && /^https?:\/\//i.test(logo)) {
       return logo
@@ -109,9 +110,103 @@ async function resolveLogoUrl(): Promise<string> {
   return DEFAULT_LOGO_ON_LIGHT_BG
 }
 
+type PreparedMail = {
+  html: string
+  text: string
+}
+
+async function prepareMail(input: SendBrandedEmailInput): Promise<PreparedMail> {
+  const logoUrl = await resolveLogoUrl()
+  const signature = resolveSignature(input)
+  const html = renderBrandedEmailHtml({
+    logoUrl,
+    purpose: input.purpose,
+    department: input.department,
+    signature: input.signature,
+    greeting: input.greeting,
+    headline: input.headline,
+    bodyHtml: input.bodyHtml,
+    cta: input.cta,
+  })
+  const text = [
+    input.greeting || '',
+    input.headline || '',
+    input.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+    '',
+    ...signatureText(signature),
+  ]
+    .filter(Boolean)
+    .join('\n')
+  return { html, text }
+}
+
+async function sendViaSendGrid(
+  input: SendBrandedEmailInput,
+  prepared: PreparedMail
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const config = await resolveSendGridConfig()
+  if (!config) return { ok: false, error: 'SendGrid not configured' }
+
+  try {
+    sgMail.setApiKey(config.apiKey)
+    await sgMail.send({
+      to: input.to,
+      from: { email: config.fromAddress, name: config.fromName || DEFAULT_MAIL_FROM_NAME },
+      replyTo: { email: config.replyTo || DEFAULT_MAIL_REPLY_TO, name: DEFAULT_MAIL_FROM_NAME },
+      subject: input.subject,
+      html: prepared.html,
+      text: prepared.text,
+    })
+    return { ok: true }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[platform-email] SendGrid send failed:', message)
+    return { ok: false, error: message }
+  }
+}
+
+async function sendViaGmailSmtp(
+  input: SendBrandedEmailInput,
+  prepared: PreparedMail
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const config = await getGmailSmtpConfig()
+  if (!config) return { ok: false, error: 'Gmail SMTP not configured' }
+
+  if (isConsumerGmailAddress(config.gmailEmail)) {
+    console.warn(
+      '[platform-email] Sending via consumer Gmail SMTP — Gmail often files these as spam. Authenticate SendGrid for passive-blessings.com.'
+    )
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: config.gmailEmail,
+        pass: config.gmailAppPassword,
+      },
+    })
+
+    await transporter.sendMail({
+      from: `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.gmailEmail}>`,
+      replyTo: DEFAULT_MAIL_REPLY_TO,
+      to: input.to,
+      subject: input.subject,
+      html: prepared.html,
+      text: prepared.text,
+    })
+    return { ok: true }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[platform-email] Gmail SMTP send failed:', message)
+    return { ok: false, error: message }
+  }
+}
+
 /**
- * Send a branded platform email via Gmail SMTP.
- * Returns ok:false (does not throw) when SMTP is not configured.
+ * Send a branded platform email.
+ * Prefers SendGrid (authenticated brand From). Falls back to Gmail SMTP.
+ * Returns ok:false (does not throw) when no provider is configured.
  * Always writes an emailSendLogs CRM activity row (success or failure).
  */
 export async function sendBrandedEmail(
@@ -136,58 +231,28 @@ export async function sendBrandedEmail(
     return { ok: false, error: 'Invalid recipient' }
   }
 
-  const config = await getGmailSmtpConfig()
-  if (!config) {
-    console.warn('[platform-email] Gmail SMTP not configured — skipped:', input.subject)
-    await recordEmailSendLog({
-      ...logBase,
-      status: 'skipped',
-      error: 'Gmail SMTP not configured',
-    })
-    return { ok: false, error: 'Gmail SMTP not configured' }
-  }
-
   try {
-    const logoUrl = await resolveLogoUrl()
-    const signature = resolveSignature(input)
-    const html = renderBrandedEmailHtml({
-      logoUrl,
-      purpose: input.purpose,
-      department: input.department,
-      signature: input.signature,
-      greeting: input.greeting,
-      headline: input.headline,
-      bodyHtml: input.bodyHtml,
-      cta: input.cta,
-    })
-    const text = [
-      input.greeting || '',
-      input.headline || '',
-      input.bodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
-      '',
-      ...signatureText(signature),
-    ]
-      .filter(Boolean)
-      .join('\n')
+    const prepared = await prepareMail({ ...input, to })
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: config.gmailEmail,
-        pass: config.gmailAppPassword,
-      },
-    })
+    const viaSendGrid = await sendViaSendGrid({ ...input, to }, prepared)
+    if (viaSendGrid.ok) {
+      await recordEmailSendLog({ ...logBase, status: 'sent' })
+      return { ok: true }
+    }
 
-    await transporter.sendMail({
-      from: `"${config.fromName || 'Passive Blessings'}" <${config.gmailEmail}>`,
-      to,
-      subject: input.subject,
-      html,
-      text,
-    })
+    const viaGmail = await sendViaGmailSmtp({ ...input, to }, prepared)
+    if (viaGmail.ok) {
+      await recordEmailSendLog({ ...logBase, status: 'sent' })
+      return { ok: true }
+    }
 
-    await recordEmailSendLog({ ...logBase, status: 'sent' })
-    return { ok: true }
+    const error =
+      viaSendGrid.error && viaGmail.error
+        ? `SendGrid: ${viaSendGrid.error}; Gmail: ${viaGmail.error}`
+        : viaSendGrid.error || viaGmail.error || 'No email provider configured'
+    console.warn('[platform-email] all providers failed:', input.subject, error)
+    await recordEmailSendLog({ ...logBase, status: 'skipped', error })
+    return { ok: false, error }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('[platform-email] send failed:', message)

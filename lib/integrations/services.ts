@@ -204,14 +204,21 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     id: 'sendgrid',
     name: 'SendGrid',
     category: 'messaging',
-    description: 'Bulk newsletter & campaign email via SendGrid (separate from Gmail SMTP for admin invites)',
+    description:
+      'Primary email provider for transactional mail (orders, events, membership) and newsletters. Authenticate passive-blessings.com in SendGrid so mail reaches the inbox.',
     icon: '📧',
     fields: [
       { name: 'provider', label: 'Provider', type: 'select', required: true, options: [{ label: 'SendGrid', value: 'sendgrid' }, { label: 'SMTP', value: 'smtp' }] },
       { name: 'apiKey', label: 'SendGrid API Key', type: 'password', required: true, encrypt: true },
-      { name: 'fromAddress', label: 'From Address', type: 'text', required: true, placeholder: 'noreply@passiveblessings.ae' },
+      {
+        name: 'fromAddress',
+        label: 'From Address',
+        type: 'text',
+        required: true,
+        placeholder: 'noreply@passive-blessings.com',
+      },
     ],
-    help: 'Emails are sent with display name "Passive Blessings". Verify your from address in SendGrid.',
+    help: 'Use noreply@passive-blessings.com (or another address on that domain). Complete Domain Authentication in SendGrid (SPF + DKIM) or Gmail will send mail to Spam.',
   },
   anthropic: {
     id: 'anthropic',
@@ -244,7 +251,8 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     id: 'gmailSmtp',
     name: 'Gmail SMTP',
     category: 'messaging',
-    description: 'Gmail SMTP for admin invitations & notifications',
+    description:
+      'Legacy fallback for admin invites when SendGrid is unavailable. Prefer SendGrid with an authenticated passive-blessings.com From address — consumer Gmail often sends branded mail to Spam.',
     icon: '📧',
     fields: [
       { name: 'gmailEmail', label: 'Gmail Email Address', type: 'email', required: true, placeholder: 'your-email@gmail.com' },
@@ -252,7 +260,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'fromName', label: 'From Name', type: 'text', required: false, placeholder: 'Passive Blessings' },
     ],
     docs: 'https://support.google.com/accounts/answer/185833',
-    help: 'Use an App Password (not your Gmail password). Enable 2FA on your Google account, then generate an App Password in Security settings.',
+    help: 'Use an App Password (not your Gmail password). Enable 2FA on your Google account, then generate an App Password in Security settings. For inbox delivery, configure SendGrid Domain Authentication instead.',
   },
   twilio: {
     id: 'twilio',

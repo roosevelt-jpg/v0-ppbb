@@ -1,31 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { resolveSendGridConfig } from '@/lib/resolve-sendgrid-key'
+import { DEFAULT_MAIL_FROM, DEFAULT_MAIL_FROM_NAME } from '@/lib/mail-identity'
 
 // Email transporter (using SendGrid or Gmail)
-const getEmailTransporter = () => {
-  const sendgridApiKey = process.env.SENDGRID_API_KEY
+const getEmailTransporter = async () => {
+  const sendgrid = await resolveSendGridConfig()
+  if (sendgrid) {
+    return {
+      transporter: nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        auth: {
+          user: 'apikey',
+          pass: sendgrid.apiKey,
+        },
+      }),
+      from: `"${sendgrid.fromName || DEFAULT_MAIL_FROM_NAME}" <${sendgrid.fromAddress || DEFAULT_MAIL_FROM}>`,
+    }
+  }
+
   const gmailUser = process.env.GMAIL_USER
   const gmailPassword = process.env.GMAIL_APP_PASSWORD
-
-  if (sendgridApiKey) {
-    return nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-        user: 'apikey',
-        pass: sendgridApiKey,
-      },
-    })
-  } else if (gmailUser && gmailPassword) {
-    return nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: gmailUser,
-        pass: gmailPassword,
-      },
-    })
+  if (gmailUser && gmailPassword) {
+    return {
+      transporter: nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: gmailUser,
+          pass: gmailPassword,
+        },
+      }),
+      from: process.env.EMAIL_FROM || `"${DEFAULT_MAIL_FROM_NAME}" <${gmailUser}>`,
+    }
   }
 
   return null
@@ -35,7 +44,6 @@ export async function POST(request: NextRequest) {
   try {
     const { adminEmail, adminName, accessCode } = await request.json()
 
-    // Validate input
     if (!adminEmail || !adminName || !accessCode) {
       return NextResponse.json(
         { error: 'Missing required fields: adminEmail, adminName, accessCode' },
@@ -43,9 +51,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get email transporter
-    const transporter = getEmailTransporter()
-    if (!transporter) {
+    const mail = await getEmailTransporter()
+    if (!mail) {
       console.error('[v0] Email service not configured')
       return NextResponse.json(
         { error: 'Email service not available. Contact support.' },
@@ -53,11 +60,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email
     const mailOptions = {
-      from: process.env.EMAIL_FROM || 'noreply@passiveblessings.com',
+      from: mail.from,
       to: adminEmail,
       subject: 'Your Passive Blessings Admin Access Code',
+      text: `Hi ${adminName},\n\nYour admin access code is: ${accessCode}\n\nUse it to sign in to the Passive Blessings admin dashboard.`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #111111; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -109,7 +116,7 @@ export async function POST(request: NextRequest) {
       `,
     }
 
-    await transporter.sendMail(mailOptions)
+    await mail.transporter.sendMail(mailOptions)
 
     console.log('[v0] Access code email sent to:', adminEmail)
 

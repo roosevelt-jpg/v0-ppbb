@@ -59,11 +59,23 @@ SENDGRID_API_KEY=SG.....
 4. Create a webhook endpoint pointing to `/api/webhooks/stripe`
 5. Copy the webhook signing secret
 
-### SendGrid
-1. Go to [SendGrid](https://sendgrid.com)
-2. Navigate to Settings → API Keys
-3. Create a new API key
-4. Can also be configured in Admin Dashboard (/admin/settings)
+### SendGrid (required for inbox delivery)
+1. Go to [SendGrid](https://sendgrid.com) → Settings → API Keys → create a key
+2. **Domain Authentication** (Settings → Sender Authentication) for `passive-blessings.com`
+   - Add the SPF / DKIM CNAME records SendGrid shows
+   - Optional but recommended: DMARC TXT on `_dmarc.passive-blessings.com`  
+     `v=DMARC1; p=none; rua=mailto:support@passive-blessings.com`
+3. Set From to an address on that domain, e.g. `noreply@passive-blessings.com`
+4. Env (or Admin → Integrations → SendGrid):
+```
+SENDGRID_API_KEY=
+SENDGRID_FROM_ADDRESS=noreply@passive-blessings.com
+SENDGRID_REPLY_TO=support@passive-blessings.com
+```
+5. Transactional mail (orders, events, membership, group welcomes) prefers SendGrid.  
+   Gmail SMTP alone (especially a personal `@gmail.com`) commonly lands in Spam when the display name is “Passive Blessings”.
+
+Can also be configured in Admin Dashboard (`/admin` → Integrations).
 
 ## Important Notes
 

@@ -3,6 +3,8 @@
  */
 
 import type { EmailSignature } from '@/lib/email-departments'
+import { MAIL_PHYSICAL_ADDRESS } from '@/lib/mail-identity'
+import { getSiteUrl } from '@/lib/site-metadata'
 
 export function escapeEmailHtml(value: string): string {
   return String(value || '')
@@ -68,6 +70,10 @@ export function renderSimpleEmailHtml(opts: {
         ${sig.signerName ? `<p style="margin:8px 0 0 0;font-weight:700;color:#111;">${escapeEmailHtml(sig.signerName)}</p>` : ''}
         ${sig.signerTitle ? `<p style="margin:2px 0 0 0;font-size:13px;color:#666;">${escapeEmailHtml(sig.signerTitle)}</p>` : ''}
         <p style="margin:12px 0 0 0;font-size:12px;color:#888;">Passive Blessings</p>
+        <p style="margin:4px 0 0 0;font-size:11px;color:#999;">${escapeEmailHtml(MAIL_PHYSICAL_ADDRESS)}</p>
+        <p style="margin:4px 0 0 0;font-size:11px;color:#999;">
+          <a href="${escapeEmailHtml(getSiteUrl())}" style="color:#888;text-decoration:underline;">${escapeEmailHtml(getSiteUrl().replace(/^https?:\/\//, ''))}</a>
+        </p>
       </td>
     </tr>
   </table>

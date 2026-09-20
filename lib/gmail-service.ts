@@ -8,6 +8,7 @@ import { SiteSettings } from './types'
 import { getIntegrationServer } from '@/lib/integrations/handlers-server'
 import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
+import { getSiteUrl } from '@/lib/site-metadata'
 import {
   emailParagraphs,
   escapeEmailHtml,
@@ -151,7 +152,8 @@ function formatInviteRoleLabel(role: string): string {
  * emails don't end up rendering a stale or broken logo URL.
  */
 export async function getEmailBrandLogoUrl(): Promise<string> {
-  return DEFAULT_LOGO_ON_LIGHT_BG
+  // Prefer same-origin icon so inbox clients don't block a third-party blob host.
+  return `${getSiteUrl()}/api/pwa-icon?size=192`
 }
 
 export const sendAdminInviteEmail = async (
