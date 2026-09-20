@@ -32,7 +32,7 @@ function membershipDashboardUrl(): string {
   return `${memberSiteUrl()}/dashboard/membership`
 }
 
-/** Sign-in security alert (every successful login). */
+/** Sign-in security alert (throttled — not on every login). */
 export async function sendLoginAlertEmail(opts: {
   userId: string
   email?: string
@@ -40,6 +40,16 @@ export async function sendLoginAlertEmail(opts: {
   userAgent?: string
   ip?: string
 }): Promise<{ ok: boolean; error?: string }> {
+  const { claimEmailSlot, EMAIL_COOLDOWN } = await import('@/lib/email-throttle')
+  const slot = await claimEmailSlot({
+    userId: opts.userId,
+    bucket: 'login-alert',
+    cooldownMs: EMAIL_COOLDOWN.LOGIN_ALERT_MS,
+  })
+  if (!slot.allowed) {
+    return { ok: false, error: slot.reason || 'Login alert throttled' }
+  }
+
   const when = new Date().toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',

@@ -6,6 +6,7 @@ import {
   sendPushToUser,
 } from '@/lib/push-notifications-server'
 import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
+import { claimEmailSlot, EMAIL_COOLDOWN } from '@/lib/email-throttle'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,17 +62,24 @@ export async function POST(request: NextRequest) {
           click_action: `/communities/${communityId}`,
         }
       )
-      sendBrandedEmailToUserSafe({
+      const welcomeSlot = await claimEmailSlot({
         userId: uid,
-        subject: `Welcome to ${name}`,
-        purpose: 'Community join confirmation',
-        headline: 'Welcome to the community',
-        bodyHtml: paragraphs(
-          'Assalamu alaikum,',
-          `You joined ${name}. Explore groups and start connecting with members.`
-        ),
-        cta: { label: 'Open community', url: `${site}/communities/${communityId}` },
+        bucket: `community-welcome:${communityId}`,
+        cooldownMs: EMAIL_COOLDOWN.COMMUNITY_WELCOME_MS,
       })
+      if (welcomeSlot.allowed) {
+        sendBrandedEmailToUserSafe({
+          userId: uid,
+          subject: `Welcome to ${name}`,
+          purpose: 'Community join confirmation',
+          headline: 'Welcome to the community',
+          bodyHtml: paragraphs(
+            'Assalamu alaikum,',
+            `You joined ${name}. Explore groups and start connecting with members.`
+          ),
+          cta: { label: 'Open community', url: `${site}/communities/${communityId}` },
+        })
+      }
       return NextResponse.json({ success: true })
     }
 
@@ -94,19 +102,26 @@ export async function POST(request: NextRequest) {
             : `/communities/${communityId}`,
         }
       )
-      sendBrandedEmailToUserSafe({
+      const groupWelcomeSlot = await claimEmailSlot({
         userId: uid,
-        subject: `Welcome to ${gName}`,
-        purpose: 'Group join confirmation',
-        headline: 'Welcome to the group',
-        bodyHtml: paragraphs('Assalamu alaikum,', `You joined ${gName} in ${cName}.`),
-        cta: {
-          label: 'Open group',
-          url: groupId
-            ? `${site}/communities/${communityId}/groups/${groupId}`
-            : `${site}/communities/${communityId}`,
-        },
+        bucket: `group-welcome:${communityId}:${groupId || gName}`,
+        cooldownMs: EMAIL_COOLDOWN.GROUP_WELCOME_MS,
       })
+      if (groupWelcomeSlot.allowed) {
+        sendBrandedEmailToUserSafe({
+          userId: uid,
+          subject: `Welcome to ${gName}`,
+          purpose: 'Group join confirmation',
+          headline: 'Welcome to the group',
+          bodyHtml: paragraphs('Assalamu alaikum,', `You joined ${gName} in ${cName}.`),
+          cta: {
+            label: 'Open group',
+            url: groupId
+              ? `${site}/communities/${communityId}/groups/${groupId}`
+              : `${site}/communities/${communityId}`,
+          },
+        })
+      }
 
       if (groupId) {
         const groupSnap = await db
@@ -136,17 +151,24 @@ export async function POST(request: NextRequest) {
               click_action: `/communities/${communityId}/groups/${groupId}`,
             }
           )
-          sendBrandedEmailToUserSafe({
+          const ownerSlot = await claimEmailSlot({
             userId: createdBy,
-            subject: `New member in ${gName}`,
-            purpose: 'New group member notification',
-            headline: 'New group member',
-            bodyHtml: paragraphs('Assalamu alaikum,', `${joinerName} joined ${gName}.`),
-            cta: {
-              label: 'Open group',
-              url: `${site}/communities/${communityId}/groups/${groupId}`,
-            },
+            bucket: `group-owner-new-member:${communityId}:${groupId}`,
+            cooldownMs: EMAIL_COOLDOWN.GROUP_OWNER_NEW_MEMBER_MS,
           })
+          if (ownerSlot.allowed) {
+            sendBrandedEmailToUserSafe({
+              userId: createdBy,
+              subject: `New member in ${gName}`,
+              purpose: 'New group member notification',
+              headline: 'New group member',
+              bodyHtml: paragraphs('Assalamu alaikum,', `${joinerName} joined ${gName}.`),
+              cta: {
+                label: 'Open group',
+                url: `${site}/communities/${communityId}/groups/${groupId}`,
+              },
+            })
+          }
         }
       }
 

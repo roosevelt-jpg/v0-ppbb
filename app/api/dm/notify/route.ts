@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/admin-access-server'
 import { sendPushToUser } from '@/lib/push-notifications-server'
 import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
+import { claimEmailSlot, EMAIL_COOLDOWN } from '@/lib/email-throttle'
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,25 +38,35 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    const site = (
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      'https://www.passive-blessings.com'
-    ).replace(/\/$/, '')
-    sendBrandedEmailToUserSafe({
+    // Push every message; email at most once per 6 hours so chat does not flood Spam.
+    const emailSlot = await claimEmailSlot({
       userId: recipientId,
-      subject: `New message from ${senderName}`,
-      purpose: 'Direct message notification',
-      headline: 'New message',
-      bodyHtml: paragraphs(
-        'Assalamu alaikum,',
-        `${senderName} sent you a message:`,
-        preview
-      ),
-      cta: { label: 'Open messages', url: `${site}${clickAction}` },
+      bucket: threadId ? `dm:${threadId}` : 'dm',
+      cooldownMs: EMAIL_COOLDOWN.DM_EMAIL_MS,
     })
 
-    return NextResponse.json({ success: true })
+    if (emailSlot.allowed) {
+      const site = (
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        'https://www.passive-blessings.com'
+      ).replace(/\/$/, '')
+      sendBrandedEmailToUserSafe({
+        userId: recipientId,
+        subject: `New message from ${senderName}`,
+        purpose: 'Direct message notification',
+        headline: 'New message',
+        bodyHtml: paragraphs(
+          'Assalamu alaikum,',
+          `${senderName} sent you a message:`,
+          preview,
+          'You may have more unread messages in the app.'
+        ),
+        cta: { label: 'Open messages', url: `${site}${clickAction}` },
+      })
+    }
+
+    return NextResponse.json({ success: true, emailSent: emailSlot.allowed })
   } catch (error) {
     console.error('[dm/notify] error:', error)
     return NextResponse.json({ success: false, error: 'Notify failed' }, { status: 500 })

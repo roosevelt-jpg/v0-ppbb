@@ -7,6 +7,7 @@ import { verifyIdToken } from '@/lib/admin-access-server'
 import { hasAdminAccessServer } from '@/lib/roles-server'
 import { shouldNotifyUser, mapNotificationTypeToPreference } from '@/lib/user-settings'
 import { paragraphs, sendBrandedEmailToUserSafe } from '@/lib/platform-email'
+import { claimEmailSlot, EMAIL_COOLDOWN } from '@/lib/email-throttle'
 
 async function notifyUser(
   userId: string,
@@ -19,8 +20,9 @@ async function notifyUser(
     const db = getAdminDb()
     const userSnap = await db.collection('users').doc(userId).get()
     const userData = userSnap.data() || {}
+    const userLike = { ...userData, id: userId }
     const pref = mapNotificationTypeToPreference(type)
-    if (shouldNotifyUser({ ...userData, id: userId }, 'in_app', pref)) {
+    if (shouldNotifyUser(userLike, 'in_app', pref)) {
       await db.collection('users').doc(userId).collection('notifications').add({
         type,
         title,
@@ -36,25 +38,36 @@ async function notifyUser(
       'https://www.passive-blessings.com'
     ).replace(/\/$/, '')
 
-    sendBrandedEmailToUserSafe({
-      userId,
-      subject: title,
-      purpose: title,
-      headline: title,
-      bodyHtml: paragraphs('Assalamu alaikum,', message),
-      cta: { label: 'Open Passive Blessings', url: `${site}/dashboard` },
-    })
-
-    void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
-      pushToUserSafe(
+    if (shouldNotifyUser(userLike, 'email', pref)) {
+      const slot = await claimEmailSlot({
         userId,
-        { title, body: message },
-        {
-          type,
-          click_action: '/dashboard',
-        }
-      )
-    })
+        bucket: `group-admin-notify:${type}`,
+        cooldownMs: EMAIL_COOLDOWN.GROUP_ADMIN_NOTIFY_MS,
+      })
+      if (slot.allowed) {
+        sendBrandedEmailToUserSafe({
+          userId,
+          subject: title,
+          purpose: title,
+          headline: title,
+          bodyHtml: paragraphs('Assalamu alaikum,', message),
+          cta: { label: 'Open Passive Blessings', url: `${site}/dashboard` },
+        })
+      }
+    }
+
+    if (shouldNotifyUser(userLike, 'push', pref)) {
+      void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
+        pushToUserSafe(
+          userId,
+          { title, body: message },
+          {
+            type,
+            click_action: '/dashboard',
+          }
+        )
+      })
+    }
   } catch (error) {
     console.warn('[v0] Could not notify user:', error)
   }
