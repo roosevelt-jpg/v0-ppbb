@@ -45,6 +45,11 @@ export interface TransparencyConfig {
   joinHref: string
   getInvolvedTitle: string
   getInvolvedItems: TransparencyGetInvolvedItem[]
+  /**
+   * AED raised before platform tracking (not individual donation rows).
+   * Public totals = this baseline + completed donations in Firestore.
+   */
+  historicalDonationsBaselineAed: number
 }
 
 export const DEFAULT_TRANSPARENCY_CONFIG: TransparencyConfig = {
@@ -98,6 +103,7 @@ export const DEFAULT_TRANSPARENCY_CONFIG: TransparencyConfig = {
     { title: 'Volunteer', description: 'Contribute your time and skills' },
     { title: 'Partner', description: 'Collaborate with us for greater impact' },
   ],
+  historicalDonationsBaselineAed: 1_800_000,
 }
 
 const WRONG_EMAIL_HOSTS = ['passiveblessings.ae', 'passiveblessing.ae', 'passiveblessings.com']
@@ -121,6 +127,12 @@ function asStringArray(value: unknown, fallback: string[]): string[] {
   if (!Array.isArray(value)) return fallback
   const items = value.filter((item): item is string => typeof item === 'string' && item.trim())
   return items.length > 0 ? items : fallback
+}
+
+function asNonNegativeNumber(value: unknown, fallback: number): number {
+  const n = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(n) || n < 0) return fallback
+  return Math.round(n)
 }
 
 function asGetInvolvedItems(
@@ -214,6 +226,10 @@ export function mergeTransparencyConfig(data: unknown): TransparencyConfig {
     getInvolvedItems: asGetInvolvedItems(
       d.getInvolvedItems,
       DEFAULT_TRANSPARENCY_CONFIG.getInvolvedItems
+    ),
+    historicalDonationsBaselineAed: asNonNegativeNumber(
+      d.historicalDonationsBaselineAed,
+      DEFAULT_TRANSPARENCY_CONFIG.historicalDonationsBaselineAed
     ),
   }
 }

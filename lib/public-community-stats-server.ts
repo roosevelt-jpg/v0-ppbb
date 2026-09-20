@@ -1,6 +1,10 @@
 import { getAdminDb } from '@/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import type { CommunityStats } from '@/lib/community-stats'
+import {
+  getHistoricalDonationsBaselineAed,
+  sumTrackedDonationsFromDb,
+} from '@/lib/donation-stats-baseline-server'
 
 function readHours(data: Record<string, unknown>): number {
   const hours = Number(data.volunteeredHours ?? data.volunteerHours ?? 0)
@@ -19,10 +23,11 @@ function isAdminRole(role: unknown): boolean {
 export async function computePublicCommunityStats(): Promise<CommunityStats> {
   const db = getAdminDb()
 
-  const [usersSnap, businessesSnap, donationsSnap] = await Promise.all([
+  const [usersSnap, businessesSnap, trackedDonations, baselineAed] = await Promise.all([
     db.collection('users').get(),
     db.collection('businesses').where('isApproved', '==', true).where('isActive', '==', true).get(),
-    db.collection('donations').where('status', '==', 'completed').get(),
+    sumTrackedDonationsFromDb(),
+    getHistoricalDonationsBaselineAed(),
   ])
 
   let volunteersSnap: { docs: Array<{ data: () => Record<string, unknown> }> } | null = null
@@ -50,17 +55,11 @@ export async function computePublicCommunityStats(): Promise<CommunityStats> {
     }
   }
 
-  let totalDonations = 0
-  for (const doc of donationsSnap.docs) {
-    const amount = Number(doc.data().amount ?? 0)
-    if (Number.isFinite(amount)) totalDonations += amount
-  }
-
   return {
     totalMembers,
     volunteerHours: Math.round(volunteerHours),
     businessPartners: businessesSnap.size,
-    totalDonations: Math.round(totalDonations),
+    totalDonations: Math.round(baselineAed + trackedDonations.amount),
   }
 }
 

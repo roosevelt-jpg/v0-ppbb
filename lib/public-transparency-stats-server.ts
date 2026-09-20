@@ -1,5 +1,9 @@
 import { getAdminDb } from '@/lib/firebase-admin'
 import { normalizeCharityCase } from '@/lib/charity-cases'
+import {
+  getHistoricalDonationsBaselineAed,
+  sumTrackedDonationsFromDb,
+} from '@/lib/donation-stats-baseline-server'
 
 export type PublicTransparencyCause = {
   id: string
@@ -32,20 +36,15 @@ function toCauseRow(id: string, data: Record<string, unknown>): PublicTransparen
 export async function computePublicTransparencyStats(): Promise<PublicTransparencyStats> {
   const db = getAdminDb()
 
-  const [donationsSnap, beneficiariesSnap, charityCasesSnap, legacyCausesSnap, volunteersSnap] =
+  const [trackedDonations, baselineAed, beneficiariesSnap, charityCasesSnap, legacyCausesSnap, volunteersSnap] =
     await Promise.all([
-      db.collection('donations').where('status', '==', 'completed').get(),
+      sumTrackedDonationsFromDb(),
+      getHistoricalDonationsBaselineAed(),
       db.collection('beneficiaryRequests').where('status', '==', 'approved').get(),
       db.collection('charityCases').where('status', '==', 'active').get(),
       db.collection('causes').where('status', '==', 'active').get(),
       db.collection('volunteers').get().catch(() => null),
     ])
-
-  let totalDonations = 0
-  for (const doc of donationsSnap.docs) {
-    const amount = Number(doc.data().amount ?? 0)
-    if (Number.isFinite(amount)) totalDonations += amount
-  }
 
   const byId = new Map<string, PublicTransparencyCause>()
   for (const doc of legacyCausesSnap.docs) {
@@ -68,8 +67,8 @@ export async function computePublicTransparencyStats(): Promise<PublicTransparen
   }
 
   return {
-    totalDonations: Math.round(totalDonations),
-    completedDonations: donationsSnap.size,
+    totalDonations: Math.round(baselineAed + trackedDonations.amount),
+    completedDonations: trackedDonations.count,
     totalBeneficiaries: beneficiariesSnap.size,
     activeCauses: causes.length,
     totalVolunteers,

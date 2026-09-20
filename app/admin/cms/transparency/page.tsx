@@ -110,7 +110,7 @@ export default function AdminCmsTransparencyPage() {
   return (
     <AdminPageLayout
       title="Transparency Page CMS"
-      subtitle="Edit all copy on /transparency. Live donation and impact numbers stay automatic."
+      subtitle="Edit copy on /transparency. Donation totals = historical baseline + live DB amounts."
     >
       <div className="w-full min-w-0 max-w-3xl space-y-6">
         <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -156,6 +156,29 @@ export default function AdminCmsTransparencyPage() {
         <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="text-lg font-semibold text-neutral-900">Impact metrics labels</h2>
           {field('metricsHeading', 'Metrics section heading')}
+          <div className="space-y-1">
+            <label className="block text-xs uppercase tracking-wider text-neutral-500">
+              Historical donations baseline (AED)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={config.historicalDonationsBaselineAed}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  historicalDonationsBaselineAed: Math.max(0, Math.round(Number(e.target.value) || 0)),
+                })
+              }
+              className="w-full border border-neutral-300 rounded px-3 py-2.5 min-h-[44px] text-sm"
+            />
+            <p className="text-xs text-neutral-500">
+              Pre-platform fundraising not stored as individual rows. Public totals =
+              this amount + completed donations already in the database (and future ones
+              automatically).
+            </p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {field('metricDonationsLabel', 'Donations label')}
             {field('metricDonationsSubtext', 'Donations subtext suffix')}
