@@ -4,11 +4,13 @@ import {
   doc,
   getDocs,
   getDoc,
+  getCountFromServer,
   updateDoc,
   deleteDoc,
   query,
   where,
   orderBy,
+  limit,
   onSnapshot,
   QueryConstraint,
   addDoc,
@@ -64,20 +66,51 @@ export async function getAllForms(filters?: {
   }
 }
 
-export function subscribeToForms(callback: (forms: CustomForm[]) => void) {
+export function subscribeToForms(
+  callback: (forms: CustomForm[]) => void,
+  onError?: (error: Error) => void
+) {
   try {
     const q = query(collection(db, 'customForms'), orderBy('createdAt', 'desc'))
-    return onSnapshot(q, snapshot => {
-      const forms = snapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id,
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate() || new Date(),
-      })) as CustomForm[]
-      callback(forms)
-    })
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const forms = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+          createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+          updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+        })) as CustomForm[]
+        callback(forms)
+      },
+      (error) => {
+        console.error('[v0] Error subscribing to forms:', error)
+        onError?.(error)
+        // Fall back to unordered read so missing indexes / bad docs don't block the UI
+        void getDocs(collection(db, 'customForms'))
+          .then((snapshot) => {
+            const forms = snapshot.docs.map((docSnap) => ({
+              ...docSnap.data(),
+              id: docSnap.id,
+              createdAt: docSnap.data().createdAt?.toDate?.() || docSnap.data().createdAt || new Date(),
+              updatedAt: docSnap.data().updatedAt?.toDate?.() || docSnap.data().updatedAt || new Date(),
+            })) as CustomForm[]
+            forms.sort((a, b) => {
+              const aMs = a.createdAt instanceof Date ? a.createdAt.getTime() : 0
+              const bMs = b.createdAt instanceof Date ? b.createdAt.getTime() : 0
+              return bMs - aMs
+            })
+            callback(forms)
+          })
+          .catch((fallbackError) => {
+            console.error('[v0] Forms fallback fetch failed:', fallbackError)
+            callback([])
+          })
+      }
+    )
   } catch (error) {
     console.error('[v0] Error subscribing to forms:', error)
+    onError?.(error instanceof Error ? error : new Error(String(error)))
     return () => {}
   }
 }
@@ -320,24 +353,33 @@ export async function updateSubmissionStatus(
 export async function getFormStatistics(): Promise<FormStatistics> {
   try {
     const formsSnapshot = await getDocs(collection(db, 'customForms'))
-    const submissionsSnapshot = await getDocs(collection(db, 'formSubmissions'))
 
     const activeForms = formsSnapshot.docs.filter(
-      doc => doc.data().status === 'active'
+      (docSnap) => docSnap.data().status === 'active'
     ).length
 
-    const pendingSubmissions = submissionsSnapshot.docs.filter(
-      doc => doc.data().status === 'pending'
-    ).length
-
-    const totalSubmissions = submissionsSnapshot.size
+    // Avoid scanning the entire submissions collection (that can hang the admin UI).
+    let totalSubmissions = 0
+    let pendingReviews = 0
+    try {
+      const totalSnap = await getCountFromServer(collection(db, 'formSubmissions'))
+      totalSubmissions = totalSnap.data().count
+      const pendingSnap = await getCountFromServer(
+        query(collection(db, 'formSubmissions'), where('status', '==', 'pending'))
+      )
+      pendingReviews = pendingSnap.data().count
+    } catch {
+      const sample = await getDocs(query(collection(db, 'formSubmissions'), limit(200)))
+      totalSubmissions = sample.size
+      pendingReviews = sample.docs.filter((d) => d.data().status === 'pending').length
+    }
 
     return {
       totalForms: formsSnapshot.size,
       activeForms,
       totalSubmissions,
-      pendingReviews: pendingSubmissions,
-      averageResponseRate: totalSubmissions > 0 ? (totalSubmissions / activeForms) || 0 : 0,
+      pendingReviews,
+      averageResponseRate: activeForms > 0 ? totalSubmissions / activeForms : 0,
     }
   } catch (error) {
     console.error('[v0] Error calculating statistics:', error)
@@ -374,6 +416,8 @@ export async function createDefaultForms() {
         slug,
         bannerImageUrl: form.bannerImageUrl || '',
         updatedAt: new Date(),
+        // Ensure orderBy('createdAt') subscriptions always have a sortable field.
+        createdAt: new Date(),
       })
 
       // Only create missing forms — never overwrite existing sections/edits
@@ -382,7 +426,6 @@ export async function createDefaultForms() {
           ...payload,
           createdBy: 'system',
           submissionCount: 0,
-          createdAt: new Date(),
         })
       }
     }

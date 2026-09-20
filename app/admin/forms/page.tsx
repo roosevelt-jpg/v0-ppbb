@@ -31,22 +31,44 @@ export default function FormsPage() {
   const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
     let unsub = () => {}
-    const loadData = async () => {
+
+    // Clear loading as soon as forms arrive (or error) — do not wait on seed/stats.
+    unsub = subscribeToForms(
+      (nextForms) => {
+        if (cancelled) return
+        setForms(nextForms)
+        setLoading(false)
+      },
+      () => {
+        if (!cancelled) setLoading(false)
+      }
+    )
+
+    void (async () => {
       try {
+        // Seed templates in the background; never block the list UI on this.
         await createDefaultForms()
+        if (cancelled) return
         const statistics = await getFormStatistics()
-        setStats(statistics)
-        unsub = subscribeToForms(setForms)
+        if (!cancelled) setStats(statistics)
       } catch (error) {
         console.error('[v0] Error loading forms:', error)
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
-    }
+    })()
 
-    void loadData()
-    return () => unsub()
+    const safety = window.setTimeout(() => {
+      if (!cancelled) setLoading(false)
+    }, 10000)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(safety)
+      unsub()
+    }
   }, [])
 
   const syncPbTemplates = async () => {

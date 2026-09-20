@@ -3,9 +3,10 @@
 import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { Button } from '@/components/ui/button'
-import { updateDocument, deleteDocument } from '@/lib/admin-queries'
+import { updateDocument } from '@/lib/admin-queries'
 import { auth } from '@/lib/firebase'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { softDeleteMemberAccount } from '@/lib/admin-soft-delete-member'
 import { Trash2, Save, Clock, Users } from 'lucide-react'
 
 interface EditVolunteerModalProps {
@@ -68,7 +69,11 @@ export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }:
 
     setDeleteLoading(true)
     try {
-      await deleteDocument('users', volunteer.id)
+      const result = await softDeleteMemberAccount(volunteer.id)
+      if (!result.success) {
+        alert(result.error || 'Failed to delete volunteer. Please try again.')
+        return
+      }
       audit({
         actionType: 'delete',
         action: `Deleted volunteer: ${volunteer.id}`,
@@ -80,6 +85,7 @@ export function EditVolunteerModal({ open, onOpenChange, volunteer, onSuccess }:
       onSuccess?.()
     } catch (error) {
       console.error('[v0] Error deleting volunteer:', error)
+      alert('Failed to delete volunteer. Please try again.')
     } finally {
       setDeleteLoading(false)
     }

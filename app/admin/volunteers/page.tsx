@@ -13,8 +13,9 @@ import type { AdminProfileViewData } from '@/lib/admin-profile-view'
 import { db } from '@/lib/firebase'
 import { collection, onSnapshot, query, where } from 'firebase/firestore'
 import { formatDistanceToNow } from 'date-fns'
-import { deleteDocument } from '@/lib/admin-queries'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { isAccountDeleted } from '@/lib/user-settings'
+import { softDeleteMemberAccount } from '@/lib/admin-soft-delete-member'
 
 export default function VolunteersPage() {
   const audit = useAdminAudit()
@@ -37,10 +38,12 @@ export default function VolunteersPage() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const volunteerData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as any[]
+        const volunteerData = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((row) => !isAccountDeleted(row as { status?: string; active?: boolean; accountDeleted?: boolean })) as any[]
         setVolunteers(volunteerData.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)))
         setLoading(false)
       },
@@ -140,9 +143,14 @@ export default function VolunteersPage() {
   const handleDeleteVolunteer = async (volunteer: any) => {
     if (!confirm(`Are you sure you want to delete ${volunteer.firstName || 'this volunteer'}?`)) return
 
-    const result = await deleteDocument('users', volunteer.id)
+    if (isAccountDeleted(volunteer)) {
+      alert('This volunteer is already deleted.')
+      return
+    }
+
+    const result = await softDeleteMemberAccount(volunteer.id)
     if (!result.success) {
-      alert('Failed to delete volunteer. Please try again.')
+      alert(result.error || 'Failed to delete volunteer. Please try again.')
       return
     }
     audit({
