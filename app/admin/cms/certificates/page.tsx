@@ -18,7 +18,6 @@ import { db } from '@/lib/firebase'
 import {
   addDoc,
   collection,
-  deleteDoc,
   doc,
   serverTimestamp,
   updateDoc,
@@ -131,14 +130,17 @@ export default function AdminCmsCertificatesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this certificate template? Already-issued member certificates are kept.')) return
     try {
-      await deleteDoc(doc(db, 'certificateTemplates', id))
+      const json = await adminApiFetch(`/api/admin/certificates/templates/${id}`, {
+        method: 'DELETE',
+      })
+      if (!json.success) throw new Error(json.error || 'Failed to delete template')
       if (selectedId === id) {
         setSelectedId(null)
         handleNew()
       }
       showMsg('success', 'Template deleted.')
-    } catch {
-      showMsg('error', 'Failed to delete template')
+    } catch (error: unknown) {
+      showMsg('error', error instanceof Error ? error.message : 'Failed to delete template')
     }
   }
 
@@ -171,6 +173,14 @@ export default function AdminCmsCertificatesPage() {
   }
 
   const runEvaluateAll = async () => {
+    const activeCount = templates.filter((t) => t.status === 'active').length
+    if (activeCount === 0) {
+      showMsg(
+        'error',
+        'No active templates. Set a template Status to “Active (auto-award)” and save before awarding.'
+      )
+      return
+    }
     setEvaluating(true)
     try {
       const json = await adminApiFetch<{ membersChecked: number; certificatesIssued: number }>(

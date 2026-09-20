@@ -76,6 +76,14 @@ import { useAuth } from '@/lib/auth-context'
 import { filterAdminMenuByPermissions } from '@/lib/admin-invite-permissions'
 import { clearAdminMfaSession } from '@/lib/admin-mfa-session'
 
+/** Overview is `/admin` — must not match every `/admin/*` via startsWith. */
+export function isAdminNavItemActive(pathname: string, href: string): boolean {
+  if (href === '/admin') {
+    return pathname === '/admin' || pathname === '/admin/'
+  }
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
 export const adminMenuItems = [
   // Dashboard & System
   { label: 'Overview', href: '/admin', icon: BarChart3, group: 'Dashboard' },
@@ -245,7 +253,7 @@ export function AdminSidebar({
               <div className="space-y-1">
                 {groupedItems[group].map((item) => {
                   const Icon = item.icon
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  const isActive = isAdminNavItemActive(pathname, item.href)
                   return (
                     <Link
                       key={item.href}
@@ -316,7 +324,7 @@ export function AdminSidebar({
                   <div className="space-y-1">
                     {groupedItems[group].map((item) => {
                       const Icon = item.icon
-                      const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                      const isActive = isAdminNavItemActive(pathname, item.href)
                       return (
                         <Link
                           key={item.href}

@@ -22,6 +22,7 @@ import {
 import { CmsImageUpload } from '@/components/cms-image-upload'
 import { uploadImageToFirebase } from '@/lib/upload-utils'
 import { auth } from '@/lib/firebase'
+import { adminApiFetch } from '@/lib/admin-api-client'
 import { Save, CheckCircle2, AlertCircle, Plus, Trash2 } from 'lucide-react'
 import { BUTTON_PRIMARY, BUTTON_OUTLINE, BUTTON_DANGER } from '@/lib/admin-design-system'
 
@@ -110,12 +111,10 @@ export default function AdminCmsVolunteerPage() {
     setSaving(true)
     setMessage(null)
     try {
-      const res = await fetch('/api/platform-config/volunteer', {
+      const json = await adminApiFetch('/api/platform-config/volunteer', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
       })
-      const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Save failed')
       showMsg('success', 'Volunteer page config saved.')
     } catch (error: unknown) {
@@ -140,12 +139,10 @@ export default function AdminCmsVolunteerPage() {
             '/forms/volunteer-unpaid-service',
         },
       }
-      const res = await fetch('/api/platform-config/events', {
+      const json = await adminApiFetch('/api/platform-config/events', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),
       })
-      const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Save failed')
       setEventsConfig(next)
       showMsg(
@@ -163,12 +160,10 @@ export default function AdminCmsVolunteerPage() {
     setSaving(true)
     setMessage(null)
     try {
-      const res = await fetch('/api/platform-config/homepage', {
+      const json = await adminApiFetch('/api/platform-config/homepage', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ advertisingBanner: banner }),
       })
-      const json = await res.json()
       if (!json.success) throw new Error(json.error || 'Save failed')
       setHomeBanner(banner)
       showMsg('success', 'Homepage advertising banner updated (free admin placement).')
@@ -459,34 +454,42 @@ export default function AdminCmsVolunteerPage() {
                   </div>
                 ))}
               </div>
-              <input
-                type="file"
-                accept="image/*,image/gif"
-                multiple
-                onChange={async (e) => {
-                  const files = Array.from(e.target.files || [])
-                  if (!files.length) return
-                  try {
-                    const uploaded: string[] = []
-                    for (const file of files) {
-                      const url = await uploadImageToFirebase(file, 'events/hero-gallery', {
-                        preset: 'content',
-                      })
-                      uploaded.push(url)
+              {(epc.heroGalleryURLs || []).length === 0 ? (
+                <p className="text-sm text-neutral-500">No gallery images yet — add up to 12.</p>
+              ) : null}
+              <label className={`${BUTTON_OUTLINE} inline-flex cursor-pointer w-fit`}>
+                <Plus className="w-3.5 h-3.5" />
+                Add gallery images
+                <input
+                  type="file"
+                  accept="image/*,image/gif"
+                  multiple
+                  className="hidden"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || [])
+                    if (!files.length) return
+                    try {
+                      const uploaded: string[] = []
+                      for (const file of files) {
+                        const url = await uploadImageToFirebase(file, 'events/hero-gallery', {
+                          preset: 'content',
+                        })
+                        uploaded.push(url)
+                      }
+                      updateEventsPage(
+                        'heroGalleryURLs',
+                        [...(epc.heroGalleryURLs || []), ...uploaded].slice(0, 12)
+                      )
+                    } catch (err) {
+                      showMsg(
+                        'error',
+                        err instanceof Error ? err.message : 'Gallery upload failed'
+                      )
                     }
-                    updateEventsPage(
-                      'heroGalleryURLs',
-                      [...(epc.heroGalleryURLs || []), ...uploaded].slice(0, 12)
-                    )
-                  } catch (err) {
-                    showMsg(
-                      'error',
-                      err instanceof Error ? err.message : 'Gallery upload failed'
-                    )
-                  }
-                  e.target.value = ''
-                }}
-              />
+                    e.target.value = ''
+                  }}
+                />
+              </label>
             </div>
 
             <div className="border-t border-neutral-200 pt-5 space-y-3">
