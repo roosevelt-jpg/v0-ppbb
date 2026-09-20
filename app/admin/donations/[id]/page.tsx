@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
@@ -9,7 +9,7 @@ import { adminApiFetch } from '@/lib/admin-api-client'
 import { useAdminAudit } from '@/lib/use-admin-audit'
 import { AdminPageLayout } from '@/components/admin-page-layout'
 
-export default function DonationDetailPage() {
+function DonationDetailInner() {
   const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
@@ -295,5 +295,19 @@ export default function DonationDetailPage() {
         </div>
       </div>
     </AdminPageLayout>
+  )
+}
+
+export default function DonationDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <AdminPageLayout title="Donation Details" subtitle="Loading…">
+          <div className="py-12 text-center text-neutral-500">Loading donation details…</div>
+        </AdminPageLayout>
+      }
+    >
+      <DonationDetailInner />
+    </Suspense>
   )
 }
