@@ -1,21 +1,22 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, User, Calendar } from 'lucide-react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 import { adminApiFetch } from '@/lib/admin-api-client'
 import { useAdminAudit } from '@/lib/use-admin-audit'
+import { AdminPageLayout } from '@/components/admin-page-layout'
 
 export default function DonationDetailPage() {
   const audit = useAdminAudit()
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const donationId = params.id as string
-  
+  const sourceHint = searchParams.get('source') || ''
+
   const [donation, setDonation] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -31,26 +32,30 @@ export default function DonationDetailPage() {
           return
         }
 
-        const donationDoc = await getDoc(doc(db, 'donations', donationId))
-        if (donationDoc.exists()) {
-          const data = donationDoc.data()
-          setDonation(data)
-          setFormData(data)
-        } else {
-          setError('Donation not found')
+        const qs = new URLSearchParams({ id: donationId })
+        if (sourceHint) qs.set('source', sourceHint)
+        const json = await adminApiFetch(`/api/admin/donations?${qs.toString()}`)
+        if (!json.success || !json.data) {
+          setError(json.error || 'Donation not found')
+          return
         }
+
+        setDonation(json.data)
+        setFormData(json.data)
       } catch (err) {
         console.error('[v0] Error fetching donation:', err)
-        setError('Failed to load donation details')
+        setError(err instanceof Error ? err.message : 'Failed to load donation details')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchDonation()
-  }, [donationId])
+    void fetchDonation()
+  }, [donationId, sourceHint])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target
     setFormData((prev: any) => ({ ...prev, [name]: value }))
   }
@@ -64,8 +69,9 @@ export default function DonationDetailPage() {
         method: 'PATCH',
         body: JSON.stringify({
           id: donationId,
+          source: donation?._source || sourceHint || undefined,
           donorName: formData.donorName || '',
-          donorEmail: formData.donorEmail || '',
+          donorEmail: formData.donorEmail || formData.email || '',
           amount: formData.amount,
           type: formData.type || 'monetary',
           purpose: formData.purpose || '',
@@ -95,52 +101,58 @@ export default function DonationDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
-        <div className="text-center">Loading donation details...</div>
-      </div>
+      <AdminPageLayout title="Donation Details" subtitle="Loading…">
+        <div className="py-12 text-center text-neutral-500">Loading donation details…</div>
+      </AdminPageLayout>
     )
   }
 
   if (error && !donation) {
     return (
-      <div className="min-h-screen bg-neutral-50 p-8">
-        <div className="text-center text-red-600">{error}</div>
-      </div>
+      <AdminPageLayout title="Donation Details" subtitle="Not found">
+        <div className="py-12 text-center text-red-600 space-y-4">
+          <p>{error}</p>
+          <button type="button" onClick={() => router.push('/admin/donations')} className={BUTTON_SECONDARY}>
+            Back to donations
+          </button>
+        </div>
+      </AdminPageLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+    <AdminPageLayout title="Donation Details" subtitle="View and manage donation information">
+      <div className="max-w-4xl space-y-6">
+        <div className="flex items-center gap-4">
           <button
-            onClick={() => router.back()}
+            type="button"
+            onClick={() => router.push('/admin/donations')}
             className="p-2 hover:bg-neutral-200 rounded-lg transition"
+            aria-label="Back"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Donation Details</h1>
-            <p className="text-neutral-600">View and manage donation information</p>
+            <h1 className="text-2xl font-bold text-neutral-900">Donation Details</h1>
+            <p className="text-sm text-neutral-600">
+              {donation?._source === 'donationSubmissions' ? 'Bank / form submission' : 'Donation record'}
+            </p>
           </div>
         </div>
 
-        {/* Alerts */}
-        {error && (
+        {error ? (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
             <AlertCircle className="w-5 h-5" />
             {error}
           </div>
-        )}
-        {success && (
+        ) : null}
+        {success ? (
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
             <CheckCircle className="w-5 h-5" />
             {success}
           </div>
-        )}
+        ) : null}
 
-        {/* Donation Info */}
         <Card className="p-6 border border-neutral-200">
           <h2 className="text-xl font-bold text-neutral-900 mb-4">Donation Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -158,8 +170,8 @@ export default function DonationDetailPage() {
               <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
               <input
                 type="email"
-                name="email"
-                value={formData.email || ''}
+                name="donorEmail"
+                value={formData.donorEmail || formData.email || ''}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               />
@@ -185,11 +197,11 @@ export default function DonationDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Date</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Target case</label>
               <input
-                type="date"
-                name="date"
-                value={formData.date || ''}
+                type="text"
+                name="targetCase"
+                value={formData.targetCase || ''}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               />
@@ -198,19 +210,19 @@ export default function DonationDetailPage() {
               <label className="block text-sm font-medium text-neutral-700 mb-1">Status</label>
               <select
                 name="status"
-                value={formData.status || ''}
+                value={formData.status || 'pending'}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm"
               >
                 <option value="pending">Pending</option>
-                <option value="verified">Verified</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
+                <option value="archived">Archived</option>
               </select>
             </div>
           </div>
           <div className="mt-4">
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Purpose/Notes</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Purpose / Notes</label>
             <textarea
               name="purpose"
               value={formData.purpose || ''}
@@ -221,8 +233,7 @@ export default function DonationDetailPage() {
           </div>
         </Card>
 
-        {/* Donation Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="p-4 border border-neutral-200">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="w-4 h-4 text-green-600" />
@@ -235,10 +246,18 @@ export default function DonationDetailPage() {
           <Card className="p-4 border border-neutral-200">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-neutral-600">Date</span>
+              <span className="text-sm text-neutral-600">Created</span>
             </div>
             <p className="text-sm font-semibold text-neutral-900">
-              {formData.date ? new Date(formData.date).toLocaleDateString() : 'N/A'}
+              {formData.createdAt
+                ? new Date(
+                    formData.createdAt?.toDate
+                      ? formData.createdAt.toDate()
+                      : formData.createdAt?.seconds
+                        ? formData.createdAt.seconds * 1000
+                        : formData.createdAt
+                  ).toLocaleString()
+                : 'N/A'}
             </p>
           </Card>
           <Card className="p-4 border border-neutral-200">
@@ -246,42 +265,35 @@ export default function DonationDetailPage() {
               <CheckCircle className="w-4 h-4 text-orange-600" />
               <span className="text-sm text-neutral-600">Status</span>
             </div>
-            <p className="text-lg font-semibold text-orange-600 capitalize">{formData.status || 'Pending'}</p>
+            <p className="text-lg font-semibold text-orange-600 capitalize">
+              {formData.status || 'Pending'}
+            </p>
           </Card>
         </div>
 
-        {/* Receipt Info */}
-        {donation?.receiptUrl && (
+        {donation?.receiptUrl ? (
           <Card className="p-6 border border-neutral-200">
-            <h3 className="font-semibold text-neutral-900 mb-2">Receipt Generated</h3>
+            <h3 className="font-semibold text-neutral-900 mb-2">Receipt / proof</h3>
             <a
               href={donation.receiptUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700 underline text-sm"
             >
-              Download Receipt
+              Open file
             </a>
           </Card>
-        )}
+        ) : null}
 
-        {/* Save Button */}
         <div className="flex gap-2">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className={`${BUTTON_PRIMARY} px-6 py-2`}
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
+          <button type="button" onClick={() => void handleSave()} disabled={saving} className={`${BUTTON_PRIMARY} px-6 py-2`}>
+            {saving ? 'Saving…' : 'Save Changes'}
           </button>
-          <button
-            onClick={() => router.back()}
-            className={`${BUTTON_SECONDARY} px-6 py-2`}
-          >
-            Cancel
+          <button type="button" onClick={() => router.push('/admin/donations')} className={`${BUTTON_SECONDARY} px-6 py-2`}>
+            Back
           </button>
         </div>
       </div>
-    </div>
+    </AdminPageLayout>
   )
 }

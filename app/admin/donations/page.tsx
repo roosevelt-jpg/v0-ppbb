@@ -169,7 +169,7 @@ export default function DonationsPage() {
       width: '120px',
       render: (_: any, row: any) => (
         <a
-          href={`/admin/donations/${row.id}`}
+          href={`/admin/donations/${row.id}${row._source ? `?source=${encodeURIComponent(row._source)}` : ''}`}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -195,7 +195,11 @@ export default function DonationsPage() {
     try {
       const json = await adminApiFetch('/api/admin/donations', {
         method: 'PATCH',
-        body: JSON.stringify({ id: item.id, action: 'archive' }),
+        body: JSON.stringify({
+          id: item.id,
+          source: item._source,
+          action: 'archive',
+        }),
       })
       if (!json.success) throw new Error(json.error || 'Archive failed')
     } catch (err) {
@@ -211,7 +215,7 @@ export default function DonationsPage() {
     try {
       const json = await adminApiFetch('/api/admin/donations', {
         method: 'DELETE',
-        body: JSON.stringify({ id: item.id }),
+        body: JSON.stringify({ id: item.id, source: item._source }),
       })
       if (!json.success) throw new Error(json.error || 'Delete failed')
     } catch (err) {
