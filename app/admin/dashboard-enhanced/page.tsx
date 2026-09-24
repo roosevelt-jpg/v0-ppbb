@@ -236,24 +236,27 @@ export default function AdminDashboardEnhanced() {
               href={action.href}
               style={{
                 padding: '1rem',
-                backgroundColor: 'var(--secondary)',
-                border: '1px solid var(--border)',
+                backgroundColor: '#111111',
+                border: '1px solid #111111',
                 borderRadius: '0.375rem',
                 textAlign: 'center',
                 fontSize: '0.875rem',
                 fontWeight: '600',
-                color: 'var(--foreground)',
+                color: '#ffffff',
                 textDecoration: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'background-color 0.2s, color 0.2s, border-color 0.2s',
+                display: 'block',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--muted)'
-                e.currentTarget.style.borderColor = 'var(--muted-foreground)'
+                e.currentTarget.style.backgroundColor = '#262626'
+                e.currentTarget.style.borderColor = '#262626'
+                e.currentTarget.style.color = '#ffffff'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--secondary)'
-                e.currentTarget.style.borderColor = 'var(--border)'
+                e.currentTarget.style.backgroundColor = '#111111'
+                e.currentTarget.style.borderColor = '#111111'
+                e.currentTarget.style.color = '#ffffff'
               }}
             >
               {action.label}

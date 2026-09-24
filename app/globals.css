@@ -790,15 +790,57 @@ a.pb-outline-btn svg {
   stroke-width: 2.25 !important;
 }
 
-/* Ensure branded black CTAs always keep white labels/icons */
+/*
+ * System-wide button contrast (default + hover):
+ * - Black / near-black surfaces → white text
+ * - White / near-white surfaces → black text
+ */
 button.bg-black,
 a.bg-black,
 button.bg-\[\#111111\],
 a.bg-\[\#111111\],
 button.bg-\[\#111\],
 a.bg-\[\#111\],
+button.bg-neutral-900,
+a.bg-neutral-900,
+button.bg-neutral-800,
+a.bg-neutral-800,
+button.bg-gray-900,
+a.bg-gray-900,
+button.bg-gray-800,
+a.bg-gray-800,
 button.pb-compact-btn,
-a.pb-compact-btn {
+a.pb-compact-btn,
+[data-slot='button'].bg-black,
+[data-slot='button'].bg-neutral-900,
+[data-slot='button'].bg-neutral-800,
+button.bg-black:hover,
+a.bg-black:hover,
+button.bg-\[\#111111\]:hover,
+a.bg-\[\#111111\]:hover,
+button.bg-\[\#111\]:hover,
+a.bg-\[\#111\]:hover,
+button.bg-neutral-900:hover,
+a.bg-neutral-900:hover,
+button.bg-neutral-800:hover,
+a.bg-neutral-800:hover,
+button.bg-gray-900:hover,
+a.bg-gray-900:hover,
+button.bg-gray-800:hover,
+a.bg-gray-800:hover,
+button.hover\:bg-neutral-800:hover,
+a.hover\:bg-neutral-800:hover,
+button.hover\:bg-neutral-900:hover,
+a.hover\:bg-neutral-900:hover,
+button.hover\:bg-gray-800:hover,
+a.hover\:bg-gray-800:hover,
+button.hover\:bg-gray-900:hover,
+a.hover\:bg-gray-900:hover,
+button.pb-compact-btn:hover,
+a.pb-compact-btn:hover,
+[data-slot='button'].bg-black:hover,
+[data-slot='button'].bg-neutral-900:hover,
+[data-slot='button'].bg-neutral-800:hover {
   color: #ffffff !important;
 }
 
@@ -808,33 +850,57 @@ button.bg-\[\#111111\] svg,
 a.bg-\[\#111111\] svg,
 button.bg-\[\#111\] svg,
 a.bg-\[\#111\] svg,
+button.bg-neutral-900 svg,
+a.bg-neutral-900 svg,
+button.bg-neutral-800 svg,
+a.bg-neutral-800 svg,
 button.pb-compact-btn svg,
-a.pb-compact-btn svg {
+a.pb-compact-btn svg,
+[data-slot='button'].bg-black svg,
+button.bg-black:hover svg,
+a.bg-black:hover svg,
+button.hover\:bg-neutral-800:hover svg,
+a.hover\:bg-neutral-800:hover svg,
+button.pb-compact-btn:hover svg,
+a.pb-compact-btn:hover svg {
   color: #ffffff !important;
   stroke: currentColor !important;
 }
 
-/*
- * System-wide button contrast:
- * - White / near-white button surfaces → black text (light + dark mode)
- * - Black button surfaces that flip to a light surface in dark mode → black text
- * (Fixes white-on-white filter pills & hero CTAs in dark mode.)
- */
 button.bg-white,
 a.bg-white,
 [data-slot='button'].bg-white,
-label.bg-white {
+label.bg-white,
+button.bg-neutral-50,
+a.bg-neutral-50,
+button.bg-neutral-100,
+a.bg-neutral-100,
+button.bg-white:hover,
+a.bg-white:hover,
+[data-slot='button'].bg-white:hover,
+label.bg-white:hover,
+button.hover\:bg-white:hover,
+a.hover\:bg-white:hover,
+button.hover\:bg-neutral-50:hover,
+a.hover\:bg-neutral-50:hover,
+button.hover\:bg-neutral-100:hover,
+a.hover\:bg-neutral-100:hover {
   color: #111111 !important;
 }
 
 button.bg-white svg,
 a.bg-white svg,
 [data-slot='button'].bg-white svg,
-label.bg-white svg {
+label.bg-white svg,
+button.bg-white:hover svg,
+a.bg-white:hover svg,
+button.hover\:bg-white:hover svg,
+a.hover\:bg-white:hover svg {
   color: #111111 !important;
   stroke: currentColor !important;
 }
 
+/* Dark mode: black buttons that flip to a light surface → black text */
 html.dark button.bg-black.dark\:bg-white,
 html.dark a.bg-black.dark\:bg-white,
 html.dark button.bg-black.dark\:bg-neutral-50,
@@ -844,7 +910,10 @@ html.dark a.bg-black.dark\:bg-neutral-100,
 html.dark button.bg-black.dark\:bg-neutral-200,
 html.dark a.bg-black.dark\:bg-neutral-200,
 html.dark [data-slot='button'].bg-black.dark\:bg-white,
-html.dark [data-slot='button'].bg-black.dark\:bg-neutral-50 {
+html.dark [data-slot='button'].bg-black.dark\:bg-neutral-50,
+html.dark button.dark\:bg-white,
+html.dark a.dark\:bg-white,
+html.dark [data-slot='button'].dark\:bg-white {
   color: #111111 !important;
 }
 
@@ -857,18 +926,7 @@ html.dark a.bg-black.dark\:bg-neutral-100 svg,
 html.dark button.bg-black.dark\:bg-neutral-200 svg,
 html.dark a.bg-black.dark\:bg-neutral-200 svg,
 html.dark [data-slot='button'].bg-black.dark\:bg-white svg,
-html.dark [data-slot='button'].bg-black.dark\:bg-neutral-50 svg {
-  color: #111111 !important;
-  stroke: currentColor !important;
-}
-
-/* Dark mode: any interactive control that keeps a white surface stays black text */
-html.dark button.dark\:bg-white,
-html.dark a.dark\:bg-white,
-html.dark [data-slot='button'].dark\:bg-white {
-  color: #111111 !important;
-}
-
+html.dark [data-slot='button'].bg-black.dark\:bg-neutral-50 svg,
 html.dark button.dark\:bg-white svg,
 html.dark a.dark\:bg-white svg,
 html.dark [data-slot='button'].dark\:bg-white svg {
