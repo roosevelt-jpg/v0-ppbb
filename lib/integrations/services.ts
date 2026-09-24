@@ -251,7 +251,8 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     id: 'gmailSmtp',
     name: 'Gmail SMTP',
     category: 'messaging',
-    description: 'Primary email path for transactional mail (orders, events, membership, invites) via Gmail SMTP',
+    description:
+      'Fallback email path when Zoho Mail SMTP is not configured. Prefer Zoho Mail SMTP for Passive Blessings domain mail.',
     icon: '📧',
     fields: [
       { name: 'gmailEmail', label: 'Gmail Email Address', type: 'email', required: true, placeholder: 'your-email@gmail.com' },
@@ -259,7 +260,64 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'fromName', label: 'From Name', type: 'text', required: false, placeholder: 'Passive Blessings' },
     ],
     docs: 'https://support.google.com/accounts/answer/185833',
-    help: 'Use an App Password (not your Gmail password). Enable 2FA on your Google account, then generate an App Password in Security settings. Note: Gmail may still place high-volume automated mail in recipients’ Spam folders even when SMTP accepts the send.',
+    help: 'Use only as backup. Primary production mail should use Zoho Mail SMTP with a @passive-blessings.com mailbox.',
+  },
+  zohoSmtp: {
+    id: 'zohoSmtp',
+    name: 'Zoho Mail SMTP',
+    category: 'messaging',
+    description:
+      'Primary email path for all platform notifications (orders, events, membership, invites, OTPs) via Zoho Mail',
+    icon: '📨',
+    fields: [
+      {
+        name: 'zohoEmail',
+        label: 'Zoho mailbox (full email)',
+        type: 'email',
+        required: true,
+        placeholder: 'noreply@passive-blessings.com',
+        help: 'Must be the full address of a mailbox in Passive Blessings Zoho Mail (e.g. tech@… or noreply@…).',
+      },
+      {
+        name: 'zohoAppPassword',
+        label: 'Application-specific password',
+        type: 'password',
+        required: true,
+        encrypt: true,
+        placeholder: '12-character Zoho app password',
+        help: 'Zoho Accounts → Security → Application Specific Passwords → Generate. Paste without spaces. Required when MFA is on.',
+      },
+      {
+        name: 'fromName',
+        label: 'From Name',
+        type: 'text',
+        required: false,
+        placeholder: 'Passive Blessings',
+      },
+      {
+        name: 'smtpHost',
+        label: 'SMTP host',
+        type: 'select',
+        required: true,
+        options: [
+          { label: 'smtppro.zoho.com (paid org / custom domain)', value: 'smtppro.zoho.com' },
+          { label: 'smtp.zoho.com (personal / free org)', value: 'smtp.zoho.com' },
+          { label: 'smtp.zoho.eu (EU data center)', value: 'smtp.zoho.eu' },
+        ],
+      },
+      {
+        name: 'smtpPort',
+        label: 'SMTP port',
+        type: 'select',
+        required: true,
+        options: [
+          { label: '465 (SSL)', value: '465' },
+          { label: '587 (TLS)', value: '587' },
+        ],
+      },
+    ],
+    docs: 'https://www.zoho.com/mail/help/zoho-smtp.html',
+    help: 'From Zoho Admin / Accounts: copy the mailbox email + generate an Application Specific Password. Use smtppro.zoho.com + 465 for paid org domains like passive-blessings.com. Enable SMTP access for that mailbox if Zoho requires it.',
   },
   twilio: {
     id: 'twilio',

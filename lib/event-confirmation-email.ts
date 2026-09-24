@@ -163,7 +163,7 @@ export async function sendEventPaymentConfirmationEmail(opts: {
 
 export type EventReminderKind = 'daily' | 'day_before' | 'hours_before'
 
-/** Reminder before an event starts (daily countdown, day before, or hours before). */
+/** Reminder before an event starts (daily countdown, ~2 days out, or ~6 hours). */
 export async function sendEventReminderEmail(opts: {
   to: string
   eventTitle: string
@@ -182,7 +182,7 @@ export async function sendEventReminderEmail(opts: {
   })
   const location = opts.locationLabel?.trim()
   const isHours = opts.kind === 'hours_before'
-  const isDayBefore = opts.kind === 'day_before'
+  const isTwoDays = opts.kind === 'day_before'
   const daysUntil =
     typeof opts.daysUntil === 'number' && Number.isFinite(opts.daysUntil)
       ? Math.max(0, Math.ceil(opts.daysUntil))
@@ -194,15 +194,15 @@ export async function sendEventReminderEmail(opts: {
   let purpose: string
 
   if (isHours) {
-    subject = `Starting soon: ${opts.eventTitle}`
+    subject = `In about 6 hours: ${opts.eventTitle}`
     headline = 'Your event starts soon'
-    lead = `Just a heads-up — "${opts.eventTitle}" starts in a few hours.`
-    purpose = 'Event starting soon reminder'
-  } else if (isDayBefore) {
-    subject = `Tomorrow: ${opts.eventTitle}`
+    lead = `Just a heads-up — "${opts.eventTitle}" starts in about 6 hours.`
+    purpose = 'Event 6-hour reminder'
+  } else if (isTwoDays) {
+    subject = `In 2 days: ${opts.eventTitle}`
     headline = 'Event reminder'
-    lead = `Friendly reminder — "${opts.eventTitle}" is coming up tomorrow.`
-    purpose = 'Event day-before reminder'
+    lead = `Friendly reminder — "${opts.eventTitle}" is coming up in 2 days.`
+    purpose = 'Event 2-day reminder'
   } else {
     const dayLabel =
       daysUntil === 0

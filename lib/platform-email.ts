@@ -1,5 +1,5 @@
 /**
- * Branded transactional email via Gmail SMTP (primary production path).
+ * Branded transactional email via Zoho Mail SMTP (primary), then Gmail, then SendGrid.
  * Layout: Logo → Greeting → Body → department signature
  */
 
@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer'
 import sgMail from '@sendgrid/mail'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getGmailSmtpConfig, getEmailBrandLogoUrl } from '@/lib/gmail-service'
+import { createZohoTransporter, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { resolveSendGridConfig } from '@/lib/resolve-sendgrid-key'
 import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
 import {
@@ -164,6 +165,31 @@ async function sendViaSendGrid(
   }
 }
 
+async function sendViaZohoSmtp(
+  input: SendBrandedEmailInput,
+  prepared: PreparedMail
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const config = await getZohoSmtpConfig()
+  if (!config) return { ok: false, error: 'Zoho Mail SMTP not configured' }
+
+  try {
+    const transporter = createZohoTransporter(config)
+    await transporter.sendMail({
+      from: `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.email}>`,
+      replyTo: config.email,
+      to: input.to,
+      subject: input.subject,
+      html: prepared.html,
+      text: prepared.text,
+    })
+    return { ok: true }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error('[platform-email] Zoho SMTP send failed:', message)
+    return { ok: false, error: message }
+  }
+}
+
 async function sendViaGmailSmtp(
   input: SendBrandedEmailInput,
   prepared: PreparedMail
@@ -205,8 +231,7 @@ async function sendViaGmailSmtp(
 }
 
 /**
- * Send a branded platform email via Gmail SMTP (primary).
- * SendGrid is only used if Gmail SMTP is not configured.
+ * Send a branded platform email via Zoho Mail SMTP (primary), then Gmail, then SendGrid.
  * Returns ok:false (does not throw) when no provider is configured.
  * Always writes an emailSendLogs CRM activity row (success or failure).
  */
@@ -235,24 +260,31 @@ export async function sendBrandedEmail(
   try {
     const prepared = await prepareMail({ ...input, to })
 
-    // Primary path: Gmail SMTP (Integrations / env) — what production uses today.
+    const viaZoho = await sendViaZohoSmtp({ ...input, to }, prepared)
+    if (viaZoho.ok) {
+      await recordEmailSendLog({ ...logBase, status: 'sent' })
+      return { ok: true }
+    }
+
     const viaGmail = await sendViaGmailSmtp({ ...input, to }, prepared)
     if (viaGmail.ok) {
       await recordEmailSendLog({ ...logBase, status: 'sent' })
       return { ok: true }
     }
 
-    // Fallback only when Gmail SMTP is missing or fails.
     const viaSendGrid = await sendViaSendGrid({ ...input, to }, prepared)
     if (viaSendGrid.ok) {
       await recordEmailSendLog({ ...logBase, status: 'sent' })
       return { ok: true }
     }
 
-    const error =
-      viaGmail.error && viaSendGrid.error
-        ? `Gmail: ${viaGmail.error}; SendGrid: ${viaSendGrid.error}`
-        : viaGmail.error || viaSendGrid.error || 'No email provider configured'
+    const error = [
+      viaZoho.error && `Zoho: ${viaZoho.error}`,
+      viaGmail.error && `Gmail: ${viaGmail.error}`,
+      viaSendGrid.error && `SendGrid: ${viaSendGrid.error}`,
+    ]
+      .filter(Boolean)
+      .join('; ') || 'No email provider configured'
     console.warn('[platform-email] all providers failed:', input.subject, error)
     await recordEmailSendLog({ ...logBase, status: 'skipped', error })
     return { ok: false, error }

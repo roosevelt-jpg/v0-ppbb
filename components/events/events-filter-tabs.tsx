@@ -22,7 +22,7 @@ export function EventsFilterTabs({ tabs, active, onChange }: EventsFilterTabsPro
             className={`min-h-[44px] px-3 py-2 rounded-md font-body text-xs sm:text-sm font-semibold tracking-wide transition-colors whitespace-nowrap ${
               active === tab.id
                 ? 'bg-black text-white'
-                : 'bg-white text-foreground border border-[#e4e1da] hover:bg-neutral-50'
+                : 'bg-white text-neutral-900 border border-[#e4e1da] hover:bg-neutral-50'
             }`}
           >
             {tab.label}

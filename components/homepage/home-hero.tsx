@@ -16,7 +16,7 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
     return (
       <Link
         href={button.href}
-        className={`${base} px-5 py-3 min-h-[44px] bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-200`}
+        className={`${base} px-5 py-3 min-h-[44px] bg-black text-white rounded-lg hover:bg-gray-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200`}
       >
         {button.label}
       </Link>
@@ -26,7 +26,7 @@ function HeroButtonLink({ button }: { button: HeroButton }) {
     return (
       <Link
         href={button.href}
-        className={`${base} px-5 py-3 min-h-[44px] bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-neutral-900 dark:text-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800`}
+        className={`${base} px-5 py-3 min-h-[44px] bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-neutral-900 dark:text-white dark:border-neutral-700 dark:hover:bg-neutral-800`}
       >
         {button.label}
       </Link>

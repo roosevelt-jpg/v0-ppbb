@@ -69,10 +69,14 @@ function daysUntilCeil(start: Date, now: Date): number {
   return Math.max(0, Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
 }
 
+/** Daily countdown emails only within this many days of the event (not months out). */
+const DAILY_COUNTDOWN_MAX_DAYS = 14
+
 /**
- * - hours_before: ~3h window (any hour the cron runs in that window)
- * - day_before: ~24h window
- * - daily: once per Dubai calendar day at 09:00 Asia/Dubai until event time
+ * - hours_before: ~6h window (hourly cron catches this once)
+ * - day_before: ~2 days out (~48h window)
+ * - daily: once per Dubai calendar day at 09:00 Asia/Dubai when the event
+ *   is within DAILY_COUNTDOWN_MAX_DAYS (stops far-out December spam)
  */
 function resolveReminder(
   startDate: Date,
@@ -84,23 +88,26 @@ function resolveReminder(
   const days = daysUntilCeil(startDate, now)
   const { dayKey, hour } = dubaiParts(now)
 
-  if (hrs >= 2.5 && hrs <= 3.75) {
+  // ~6 hours before
+  if (hrs >= 5.5 && hrs <= 6.75) {
     return {
       kind: 'hours_before',
       markerKey: `hours_before_${startDate.toISOString()}`,
       daysUntil: days,
     }
   }
-  if (hrs >= 20 && hrs <= 28) {
+  // ~2 days before (~48 hours)
+  if (hrs >= 46 && hrs <= 50) {
     return {
       kind: 'day_before',
-      markerKey: `day_before_${startDate.toISOString()}`,
+      markerKey: `two_days_before_${startDate.toISOString()}`,
       daysUntil: days,
     }
   }
 
-  // Daily countdown at 9am Dubai (hourly cron catches this hour)
+  // Daily countdown at 9am Dubai — only for events within the near window
   if (hour !== 9) return null
+  if (days > DAILY_COUNTDOWN_MAX_DAYS) return null
 
   return {
     kind: 'daily',
@@ -118,8 +125,8 @@ function isEligibleRegistration(data: Record<string, unknown>): boolean {
 }
 
 function pushTitle(kind: EventReminderKind, daysUntil: number): string {
-  if (kind === 'hours_before') return 'Event starting soon'
-  if (kind === 'day_before') return 'Event tomorrow'
+  if (kind === 'hours_before') return 'Event in about 6 hours'
+  if (kind === 'day_before') return 'Event in 2 days'
   if (daysUntil === 0) return 'Event today'
   if (daysUntil === 1) return 'Event tomorrow'
   return `Event in ${daysUntil} days`
@@ -127,8 +134,9 @@ function pushTitle(kind: EventReminderKind, daysUntil: number): string {
 
 /**
  * Hourly job (AWS host crontab via .github/workflows/deploy.yml — not Vercel).
- * Confirmed registrants get a daily countdown at 09:00 Asia/Dubai, plus
- * day-before and ~3-hour reminders. Auth: Authorization Bearer CRON_SECRET.
+ * Confirmed registrants get a daily countdown at 09:00 Asia/Dubai only when
+ * the event is within 14 days, plus ~2-day and ~6-hour reminders.
+ * Auth: Authorization Bearer CRON_SECRET.
  */
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) {
@@ -138,7 +146,8 @@ export async function GET(request: NextRequest) {
   try {
     const db = getAdminDb()
     const now = new Date()
-    const windowEnd = new Date(now.getTime() + 120 * 24 * 60 * 60 * 1000)
+    // Only near-term events: daily countdown ≤14d; day-before / 3h are closer still.
+    const windowEnd = new Date(now.getTime() + (DAILY_COUNTDOWN_MAX_DAYS + 1) * 24 * 60 * 60 * 1000)
 
     const eventsSnap = await db
       .collection('events')

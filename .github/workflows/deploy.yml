@@ -141,8 +141,8 @@ jobs:
           #   0 9 * * *     membership-reminders  — expiry emails at 7/3/1 days left
           #   5 9 * * *     membership-expire     — downgrade + expired email
           #   15 * * * *    event-reminders       — hourly: daily countdown
-          #                                         (09:00 Asia/Dubai ≈ 05:15 UTC),
-          #                                         ~1 day before, ~3 hours before
+          #                                         (≤14 days, 09:00 Asia/Dubai),
+          #                                         ~2 days before, ~6 hours before
           {
             CRON_TOKEN=$(grep -m1 "^CRON_SECRET=" ~/app/.env.production.local 2>/dev/null | cut -d= -f2- | tr -d "\"")
             if [ -z "$CRON_TOKEN" ]; then CRON_TOKEN="no-shared-secret-set"; fi

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       expiresAt: result.expiresAt,
       emailSkipped: Boolean(result.emailSkipped),
       message: result.emailSkipped
-        ? 'Gmail SMTP is not configured — login code skipped. Configure Admin → Integrations → Gmail SMTP.'
+        ? 'Email SMTP is not configured — login code skipped. Configure Admin → Integrations → Zoho Mail SMTP.'
         : 'Login code sent to your email',
     })
   } catch (error) {

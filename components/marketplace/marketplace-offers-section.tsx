@@ -111,7 +111,7 @@ export function MarketplaceOffersSection() {
               className={`min-h-[44px] px-4 py-2 rounded-lg font-body text-xs sm:text-sm font-semibold tracking-wide whitespace-nowrap ${
                 tab === item.id
                   ? 'bg-black text-white'
-                  : 'bg-white text-foreground border border-[#e4e1da] hover:bg-neutral-50'
+                  : 'bg-white text-neutral-900 border border-[#e4e1da] hover:bg-neutral-50'
               }`}
             >
               {item.label}

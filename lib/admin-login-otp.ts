@@ -7,6 +7,7 @@ import { createHash, randomInt } from 'crypto'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
 import { getGmailSmtpConfig } from '@/lib/gmail-service'
+import { getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
 export const ADMIN_LOGIN_OTP_COLLECTION = 'adminLoginOtps'
@@ -44,7 +45,7 @@ export async function createAndSendAdminLoginOtp(opts: {
   ok: boolean
   error?: string
   expiresAt?: string
-  /** True when Gmail SMTP is not configured — email OTP is skipped so admins can still sign in. */
+  /** True when no SMTP is configured — email OTP is skipped so admins can still sign in. */
   emailSkipped?: boolean
 }> {
   const email = String(opts.email || '')
@@ -56,11 +57,11 @@ export async function createAndSendAdminLoginOtp(opts: {
   }
 
   // If SMTP is not set up yet (new Firebase / AWS), skip email OTP so super-admins are not locked out.
-  const smtp = await getGmailSmtpConfig()
-  if (!smtp) {
+  const [zoho, gmail] = await Promise.all([getZohoSmtpConfig(), getGmailSmtpConfig()])
+  if (!zoho && !gmail) {
     await markAdminMfaVerified(uid)
     console.warn(
-      '[admin-login-otp] Gmail SMTP not configured — skipping email OTP for',
+      '[admin-login-otp] Zoho/Gmail SMTP not configured — skipping email OTP for',
       email
     )
     return {

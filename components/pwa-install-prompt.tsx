@@ -33,6 +33,12 @@ function isIosSafari(): boolean {
   return iOS && webkit && !chromeIos
 }
 
+function isAndroidChrome(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  return /Android/i.test(ua) && /Chrome\//i.test(ua) && !/EdgA|OPR|SamsungBrowser/i.test(ua)
+}
+
 function readInstalled(): boolean {
   try {
     if (isStandaloneDisplay()) return true
@@ -47,7 +53,7 @@ export function PwaInstallPrompt() {
   const pathname = usePathname()
   const [deferred, setDeferred] = useState<PbBeforeInstallPromptEvent | null>(null)
   const [open, setOpen] = useState(false)
-  const [helpMode, setHelpMode] = useState<'none' | 'ios' | 'desktop'>('none')
+  const [helpMode, setHelpMode] = useState<'none' | 'ios' | 'android' | 'desktop'>('none')
   const [busy, setBusy] = useState(false)
 
   const maybeShow = useCallback(() => {
@@ -145,16 +151,10 @@ export function PwaInstallPrompt() {
     setBusy(true)
     setHelpMode('none')
     try {
-      await registerPbServiceWorker()
-
+      // Critical: call prompt() in the same user gesture. Do NOT await SW
+      // registration first — that drops Chrome's transient activation and
+      // the install dialog never appears.
       let promptEvent = deferred || getDeferredInstallPrompt()
-
-      // Chrome may fire beforeinstallprompt only after SW is ready
-      if (!promptEvent) {
-        await new Promise((r) => window.setTimeout(r, 600))
-        promptEvent = getDeferredInstallPrompt()
-        if (promptEvent) setDeferred(promptEvent)
-      }
 
       if (promptEvent) {
         await promptEvent.prompt()
@@ -173,10 +173,36 @@ export function PwaInstallPrompt() {
         return
       }
 
-      setHelpMode(isIosSafari() ? 'ios' : 'desktop')
+      // No native prompt yet — ensure SW is registered, then retry briefly
+      void registerPbServiceWorker()
+      await new Promise((r) => window.setTimeout(r, 400))
+      promptEvent = getDeferredInstallPrompt()
+      if (promptEvent) {
+        setDeferred(promptEvent)
+        await promptEvent.prompt()
+        const choice = await promptEvent.userChoice
+        if (choice.outcome === 'accepted') {
+          try {
+            localStorage.setItem(INSTALLED_KEY, '1')
+          } catch {
+            /* ignore */
+          }
+          clearDeferredInstallPrompt()
+          setDeferred(null)
+          setOpen(false)
+          setHelpMode('none')
+        }
+        return
+      }
+
+      if (isIosSafari()) setHelpMode('ios')
+      else if (isAndroidChrome() || /Android/i.test(navigator.userAgent)) setHelpMode('android')
+      else setHelpMode('desktop')
     } catch (error) {
       console.warn('[pwa] install prompt failed:', error)
-      setHelpMode(isIosSafari() ? 'ios' : 'desktop')
+      if (isIosSafari()) setHelpMode('ios')
+      else if (/Android/i.test(navigator.userAgent)) setHelpMode('android')
+      else setHelpMode('desktop')
     } finally {
       setBusy(false)
     }
@@ -241,7 +267,19 @@ export function PwaInstallPrompt() {
             <p className="font-semibold text-white inline-flex items-center gap-1">
               <Share className="h-3 w-3" /> iPhone / iPad
             </p>
-            <p>Tap Share → Add to Home Screen → Add.</p>
+            <p>Tap the Share button → <strong className="text-white">Add to Home Screen</strong> → Add.</p>
+            <p className="text-neutral-500">Safari only — Chrome on iOS cannot install PWAs.</p>
+          </div>
+        ) : null}
+
+        {helpMode === 'android' ? (
+          <div className="border-t border-neutral-800 px-3 py-2 text-[11px] text-neutral-300 space-y-1">
+            <p className="font-semibold text-white">Android</p>
+            <p>
+              Chrome menu (⋮) → <strong className="text-white">Install app</strong> or{' '}
+              <strong className="text-white">Add to Home screen</strong>.
+            </p>
+            <p className="text-neutral-500">Use Chrome (not incognito). Reload once if Install is missing.</p>
           </div>
         ) : null}
 
@@ -249,7 +287,8 @@ export function PwaInstallPrompt() {
           <div className="border-t border-neutral-800 px-3 py-2 text-[11px] text-neutral-300 space-y-1">
             <p className="font-semibold text-white">Install from your browser</p>
             <p>
-              Chrome / Edge: open the menu (⋮) → <strong className="text-white">Install Passive Blessings</strong>.
+              Chrome / Edge: menu (⋮) → <strong className="text-white">Install Passive Blessings</strong>, or the
+              install icon in the address bar.
             </p>
             <p>Use a normal (non-incognito) window. If Install is missing, the app may already be installed.</p>
           </div>
