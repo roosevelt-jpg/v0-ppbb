@@ -205,7 +205,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     name: 'SendGrid',
     category: 'messaging',
     description:
-      'Primary email provider for transactional mail (orders, events, membership) and newsletters. Authenticate passive-blessings.com in SendGrid so mail reaches the inbox.',
+      'Disabled — all platform email (transactional + newsletters) now uses Zoho Mail SMTP. Credentials here are ignored.',
     icon: '📧',
     fields: [
       { name: 'provider', label: 'Provider', type: 'select', required: true, options: [{ label: 'SendGrid', value: 'sendgrid' }, { label: 'SMTP', value: 'smtp' }] },
@@ -218,7 +218,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
         placeholder: 'noreply@passive-blessings.com',
       },
     ],
-    help: 'Use noreply@passive-blessings.com (or another address on that domain). Complete Domain Authentication in SendGrid (SPF + DKIM) or Gmail will send mail to Spam.',
+    help: 'Not used. Configure Zoho Mail SMTP instead for all outbound mail.',
   },
   anthropic: {
     id: 'anthropic',
@@ -252,7 +252,7 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
     name: 'Gmail SMTP',
     category: 'messaging',
     description:
-      'Fallback email path when Zoho Mail SMTP is not configured. Prefer Zoho Mail SMTP for Passive Blessings domain mail.',
+      'Disabled — Gmail SMTP is no longer used. All notifications route through Zoho Mail SMTP only.',
     icon: '📧',
     fields: [
       { name: 'gmailEmail', label: 'Gmail Email Address', type: 'email', required: true, placeholder: 'your-email@gmail.com' },
@@ -260,14 +260,14 @@ export const INTEGRATION_SERVICES: Record<string, IntegrationService> = {
       { name: 'fromName', label: 'From Name', type: 'text', required: false, placeholder: 'Passive Blessings' },
     ],
     docs: 'https://support.google.com/accounts/answer/185833',
-    help: 'Use only as backup. Primary production mail should use Zoho Mail SMTP with a @passive-blessings.com mailbox.',
+    help: 'Not used. Configure and use Zoho Mail SMTP for all outbound mail. Saved Gmail credentials are ignored by the app.',
   },
   zohoSmtp: {
     id: 'zohoSmtp',
     name: 'Zoho Mail SMTP',
     category: 'messaging',
     description:
-      'Primary email path for all platform notifications (orders, events, membership, invites, OTPs) via Zoho Mail',
+      'Sole email path for all platform notifications (orders, events, membership, invites, OTPs, newsletters, contact replies) via Zoho Mail',
     icon: '📨',
     fields: [
       {

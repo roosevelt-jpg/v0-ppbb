@@ -1,10 +1,15 @@
-import sgMail from '@sendgrid/mail'
-import { resolveSendGridConfig } from '@/lib/resolve-sendgrid-key'
+/**
+ * Bulk newsletter send via Zoho Mail SMTP.
+ * (Filename kept for import stability; SendGrid is no longer used.)
+ */
+
+import { createZohoTransporter, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { renderNewsletterHtmlForSend, type NewsletterTemplateId } from '@/lib/newsletter-templates'
 import { buildUnsubscribeUrl } from '@/lib/newsletter-unsubscribe'
 import type { NewsletterRecipient } from '@/lib/newsletter-recipients'
+import { DEFAULT_MAIL_FROM_NAME } from '@/lib/mail-identity'
 
-const BATCH_SIZE = 500
+const CONCURRENCY = 5
 const UNSUB_TAG = '-unsubscribeUrl-'
 
 export interface BulkSendInput {
@@ -29,7 +34,7 @@ export interface BulkSendResult {
 }
 
 export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSendResult> {
-  const config = await resolveSendGridConfig()
+  const config = await getZohoSmtpConfig()
   if (!config) {
     return {
       success: false,
@@ -37,7 +42,9 @@ export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSend
       failedCount: input.recipients.length,
       totalRecipients: input.recipients.length,
       status: 'failed',
-      errors: ['SendGrid is not configured. Add API key in Admin → Integrations or SENDGRID_API_KEY env.'],
+      errors: [
+        'Zoho Mail SMTP is not configured. Add credentials in Admin → Integrations → Zoho Mail SMTP.',
+      ],
     }
   }
 
@@ -52,8 +59,6 @@ export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSend
     }
   }
 
-  sgMail.setApiKey(config.apiKey)
-
   const htmlBase = renderNewsletterHtmlForSend({
     subject: input.subject,
     content: input.content,
@@ -65,41 +70,43 @@ export async function sendNewsletterBulk(input: BulkSendInput): Promise<BulkSend
     logoUrl: input.logoUrl,
   })
 
-  let sentCount = 0
-  const errors: string[] = []
+  const textBase = String(input.content || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 
-  for (let i = 0; i < input.recipients.length; i += BATCH_SIZE) {
-    const batch = input.recipients.slice(i, i + BATCH_SIZE)
+  const transporter = createZohoTransporter(config)
+  const from = `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.email}>`
+  const errors: string[] = []
+  let sentCount = 0
+
+  async function sendOne(r: NewsletterRecipient): Promise<void> {
+    const unsub = buildUnsubscribeUrl(r.email)
+    const html = htmlBase.split(UNSUB_TAG).join(unsub)
     try {
-      await sgMail.send({
-        from: { email: config.fromAddress, name: config.fromName },
-        replyTo: { email: config.replyTo, name: config.fromName },
+      await transporter.sendMail({
+        from,
+        replyTo: config.email,
+        to: r.name ? `"${r.name}" <${r.email}>` : r.email,
         subject: input.subject,
-        html: htmlBase,
-        text: String(input.content || '')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim(),
-        personalizations: batch.map((r) => {
-          const unsub = buildUnsubscribeUrl(r.email)
-          return {
-            to: [{ email: r.email, name: r.name }],
-            headers: {
-              'List-Unsubscribe': `<${unsub}>`,
-              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-            },
-            substitutions: {
-              [UNSUB_TAG]: unsub,
-            },
-          }
-        }),
-      } as sgMail.MailDataRequired)
-      sentCount += batch.length
+        html,
+        text: `${textBase}\n\nUnsubscribe: ${unsub}`,
+        headers: {
+          'List-Unsubscribe': `<${unsub}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
+      })
+      sentCount += 1
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error)
-      console.error('[v0] SendGrid batch error:', msg)
-      errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${msg}`)
+      console.error('[newsletter] Zoho send error:', r.email, msg)
+      errors.push(`${r.email}: ${msg}`)
     }
+  }
+
+  for (let i = 0; i < input.recipients.length; i += CONCURRENCY) {
+    const batch = input.recipients.slice(i, i + CONCURRENCY)
+    await Promise.all(batch.map(sendOne))
   }
 
   const failedCount = input.recipients.length - sentCount

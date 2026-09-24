@@ -6,7 +6,6 @@
 import { createHash, randomInt } from 'crypto'
 import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { getAdminDb } from '@/lib/firebase-admin'
-import { getGmailSmtpConfig } from '@/lib/gmail-service'
 import { getZohoSmtpConfig } from '@/lib/zoho-mail-service'
 import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
 
@@ -56,12 +55,12 @@ export async function createAndSendAdminLoginOtp(opts: {
     return { ok: false, error: 'Invalid admin account' }
   }
 
-  // If SMTP is not set up yet (new Firebase / AWS), skip email OTP so super-admins are not locked out.
-  const [zoho, gmail] = await Promise.all([getZohoSmtpConfig(), getGmailSmtpConfig()])
-  if (!zoho && !gmail) {
+  // If Zoho SMTP is not set up yet, skip email OTP so super-admins are not locked out.
+  const zoho = await getZohoSmtpConfig()
+  if (!zoho) {
     await markAdminMfaVerified(uid)
     console.warn(
-      '[admin-login-otp] Zoho/Gmail SMTP not configured — skipping email OTP for',
+      '[admin-login-otp] Zoho Mail SMTP not configured — skipping email OTP for',
       email
     )
     return {

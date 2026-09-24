@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resolveSendGridConfig } from '@/lib/resolve-sendgrid-key'
-import { DEFAULT_MAIL_FROM, DEFAULT_MAIL_FROM_NAME, DEFAULT_MAIL_REPLY_TO } from '@/lib/mail-identity'
+import { sendRawZohoEmail } from '@/lib/gmail-service'
 import { getSiteUrl } from '@/lib/site-metadata'
 
 export async function POST(request: NextRequest) {
@@ -15,48 +14,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const config = await resolveSendGridConfig()
-    if (!config) {
-      console.error('[v0] SendGrid not configured')
-      return NextResponse.json(
-        {
-          error:
-            'SendGrid not configured. Add SENDGRID_API_KEY or configure Admin → Integrations.',
-        },
-        { status: 500 }
-      )
-    }
-
-    const fromEmail = config.fromAddress || DEFAULT_MAIL_FROM
-    const replyTo = config.replyTo || DEFAULT_MAIL_REPLY_TO
     const siteUrl = getSiteUrl()
-
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        personalizations: [
-          {
-            to: [{ email: toEmail, name: toName }],
-            subject,
-          },
-        ],
-        from: {
-          email: fromEmail,
-          name: config.fromName || `${DEFAULT_MAIL_FROM_NAME} Team`,
-        },
-        reply_to: {
-          email: replyTo,
-          name: `${DEFAULT_MAIL_FROM_NAME} Support`,
-        },
-        content: [
-          { type: 'text/plain', value: message },
-          {
-            type: 'text/html',
-            value: `
+    const html = `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <div style="background-color: #f7f6f2; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                   <h2 style="color: #111111; margin: 0 0 10px 0;">Response to Your Inquiry</h2>
@@ -75,18 +34,25 @@ export async function POST(request: NextRequest) {
                   </p>
                 </div>
               </div>
-            `,
-          },
-        ],
-      }),
-    })
+            `
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      console.error('[v0] SendGrid error:', errorData)
+    try {
+      await sendRawZohoEmail({
+        to: toEmail,
+        subject,
+        html,
+        text: message,
+      })
+    } catch (error) {
+      console.error('[v0] Zoho contact reply failed:', error)
       return NextResponse.json(
-        { error: 'Failed to send email via SendGrid', details: errorData },
-        { status: response.status }
+        {
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Failed to send email via Zoho Mail SMTP. Configure Admin → Integrations → Zoho Mail SMTP.',
+        },
+        { status: 500 }
       )
     }
 
@@ -95,6 +61,7 @@ export async function POST(request: NextRequest) {
       message: 'Email sent successfully',
       contactRequestId,
       replyDocId,
+      toName: toName || null,
     })
   } catch (error) {
     console.error('[v0] Error sending email:', error)

@@ -1,19 +1,13 @@
 /**
- * Gmail SMTP Email Service
- * Sends emails via Gmail using Nodemailer
+ * Legacy email helpers (admin invite / password reset / certificate).
+ * All sends go through Zoho Mail SMTP via platform-email / zoho-mail-service.
+ * Gmail SMTP is disabled — do not use getGmailSmtpConfig for sending.
  */
 
-import nodemailer from 'nodemailer'
-import { SiteSettings } from './types'
-import { getIntegrationServer } from '@/lib/integrations/handlers-server'
-import { INTEGRATION_OWNER_USER_ID } from '@/lib/integrations/constants'
-import { DEFAULT_LOGO_ON_LIGHT_BG } from '@/lib/brand-assets'
+import type { SiteSettings } from './types'
 import { getSiteUrl } from '@/lib/site-metadata'
-import {
-  emailParagraphs,
-  escapeEmailHtml,
-  renderSimpleEmailHtml,
-} from '@/lib/email-template'
+import { createZohoTransporter, getZohoSmtpConfig } from '@/lib/zoho-mail-service'
+import { DEFAULT_MAIL_FROM_NAME } from '@/lib/mail-identity'
 
 function getPublicSiteUrl(): string {
   return (
@@ -24,84 +18,23 @@ function getPublicSiteUrl(): string {
 }
 
 /**
- * Load Gmail SMTP credentials from Integrations vault (decrypted)
- * with optional env fallback.
+ * @deprecated Gmail SMTP is disabled. Always returns null.
+ * Kept so Integrations vault UI / old imports do not break.
  */
 export async function getGmailSmtpConfig(): Promise<{
   gmailEmail: string
   gmailAppPassword: string
   fromName: string
 } | null> {
-  try {
-    const integration = await getIntegrationServer(INTEGRATION_OWNER_USER_ID, 'gmailSmtp')
-    const email = integration?.credentials?.gmailEmail?.trim()
-    const appPassword = integration?.credentials?.gmailAppPassword?.trim()
-    if (email && appPassword) {
-      console.log('[v0] Loaded decrypted Gmail SMTP from integrations vault')
-      return {
-        gmailEmail: email,
-        gmailAppPassword: appPassword,
-        fromName: integration?.credentials?.fromName?.trim() || 'Passive Blessings',
-      }
-    }
-    console.warn('[v0] Gmail SMTP integration missing email or app password')
-  } catch (error) {
-    console.error(
-      '[v0] Failed to load Gmail SMTP from integrations:',
-      error instanceof Error ? error.message : String(error)
-    )
-  }
-
-  const envEmail = process.env.GMAIL_USER?.trim() || process.env.GMAIL_EMAIL?.trim()
-  const envPassword = process.env.GMAIL_APP_PASSWORD?.trim()
-  if (envEmail && envPassword) {
-    console.log('[v0] Using Gmail SMTP from environment variables')
-    return {
-      gmailEmail: envEmail,
-      gmailAppPassword: envPassword,
-      fromName: process.env.GMAIL_FROM_NAME?.trim() || 'Passive Blessings',
-    }
-  }
-
   return null
 }
 
 /**
- * Create Nodemailer transporter with Gmail credentials
+ * @deprecated Gmail SMTP is disabled. Always returns null.
  */
-export const createGmailTransporter = (emailConfig?: SiteSettings['emailConfig']) => {
-  if (!emailConfig?.enabled || !emailConfig.gmailEmail || !emailConfig.gmailAppPassword) {
-    console.warn('[v0] Gmail email config not properly configured:', {
-      enabled: emailConfig?.enabled,
-      hasEmail: !!emailConfig?.gmailEmail,
-      hasPassword: !!emailConfig?.gmailAppPassword,
-    })
-    return null
-  }
-
-  try {
-    console.log('[v0] Creating Gmail transporter with:', {
-      email: emailConfig.gmailEmail,
-      hasAppPassword: !!emailConfig.gmailAppPassword,
-    })
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: emailConfig.gmailEmail,
-        pass: emailConfig.gmailAppPassword,
-      },
-    })
-
-    console.log('[v0] Gmail transporter created successfully')
-    return transporter
-  } catch (error) {
-    console.error('[v0] Failed to create Gmail transporter:', {
-      error: error instanceof Error ? error.message : String(error),
-      email: emailConfig.gmailEmail,
-    })
-    return null
-  }
+export const createGmailTransporter = (_emailConfig?: SiteSettings['emailConfig']) => {
+  console.warn('[email] Gmail SMTP is disabled — use Zoho Mail SMTP')
+  return null
 }
 
 /**
@@ -156,81 +89,19 @@ export async function getEmailBrandLogoUrl(): Promise<string> {
   return `${getSiteUrl()}/api/pwa-icon?size=192`
 }
 
+/**
+ * @deprecated Prefer dispatchAdminInviteEmail (Zoho). Kept for call sites that pass a transporter.
+ */
 export const sendAdminInviteEmail = async (
-  transporter: ReturnType<typeof createGmailTransporter>,
-  gmailEmail: string,
+  _transporter: ReturnType<typeof createGmailTransporter>,
+  _gmailEmail: string,
   details: AdminInviteDetails
 ) => {
-  if (!transporter) {
-    throw new Error('Gmail transporter not available')
-  }
-
-  const logoUrl = await getEmailBrandLogoUrl()
-  const roleLabel = formatInviteRoleLabel(details.role)
-  const greeting = `Hi ${details.adminName},`
-  const bodyHtml = emailParagraphs(
-    `You've been invited to join Passive Blessings as ${roleLabel}.`,
-    `Your 6-digit access code is ${details.accessCode}.`,
-    `Complete setup here: ${details.setupUrl}`,
-    `This code expires ${details.expiresAt.toLocaleString()}.`
-  )
-
-  const html = renderSimpleEmailHtml({
-    logoUrl,
-    greeting,
-    bodyHtml,
-    purpose: 'Admin invitation',
-    cta: { label: 'Go to Setup', url: details.setupUrl },
-  })
-
-  const text = [
-    greeting,
-    '',
-    `You've been invited to join Passive Blessings as ${roleLabel}.`,
-    `Your 6-digit access code is ${details.accessCode}.`,
-    `Complete setup here: ${details.setupUrl}`,
-    `This code expires ${details.expiresAt.toLocaleString()}.`,
-    '',
-    'Admin invitation',
-    'PB Admin',
-  ].join('\n')
-
-  try {
-    const mailOptions = {
-      from: `"${details.fromName || 'Passive Blessings'}" <${gmailEmail}>`,
-      to: details.adminEmail,
-      subject: `Admin invite — ${roleLabel}`,
-      html,
-      text,
-    }
-
-    console.log('[v0] Sending admin invite email with config:', {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      transporterExists: !!transporter,
-    })
-
-    const info = await transporter.sendMail(mailOptions)
-    console.log('[v0] Admin invite email sent successfully:', {
-      messageId: info.messageId,
-      to: details.adminEmail,
-      timestamp: new Date().toISOString(),
-    })
-    return { success: true, messageId: info.messageId }
-  } catch (error) {
-    console.error('[v0] Failed to send admin invite email:', {
-      error: error instanceof Error ? error.message : String(error),
-      to: details.adminEmail,
-      from: gmailEmail,
-      timestamp: new Date().toISOString(),
-    })
-    throw error
-  }
+  return dispatchAdminInviteEmail(details)
 }
 
 /**
- * Full invite send: load vault credentials → transporter → branded email.
+ * Full invite send via Zoho Mail SMTP.
  */
 export async function dispatchAdminInviteEmail(
   details: Omit<AdminInviteDetails, 'setupUrl' | 'fromName'> & {
@@ -238,29 +109,31 @@ export async function dispatchAdminInviteEmail(
     fromName?: string
   }
 ): Promise<{ success: true; messageId?: string }> {
-  const gmailConfig = await getGmailSmtpConfig()
-  if (!gmailConfig) {
+  const { paragraphs, sendBrandedEmail } = await import('@/lib/platform-email')
+  const setupUrl = details.setupUrl || `${getPublicSiteUrl()}/admin/setup`
+  const roleLabel = formatInviteRoleLabel(details.role)
+  const result = await sendBrandedEmail({
+    to: details.adminEmail,
+    subject: `Admin invite — ${roleLabel}`,
+    purpose: 'Admin invitation',
+    greeting: `Hi ${details.adminName},`,
+    bodyHtml: paragraphs(
+      `You've been invited to join Passive Blessings as ${roleLabel}.`,
+      `Your 6-digit access code is ${details.accessCode}.`,
+      `Complete setup here: ${setupUrl}`,
+      `This code expires ${details.expiresAt.toLocaleString()}.`
+    ),
+    cta: { label: 'Go to Setup', url: setupUrl },
+  })
+
+  if (!result.ok) {
     throw new Error(
-      'Email service not configured. Please configure Gmail SMTP in Admin → Integrations.'
+      result.error ||
+        'Email service not configured. Please configure Zoho Mail SMTP in Admin → Integrations.'
     )
   }
 
-  const transporter = createGmailTransporter({
-    enabled: true,
-    gmailEmail: gmailConfig.gmailEmail,
-    gmailAppPassword: gmailConfig.gmailAppPassword,
-  } as SiteSettings['emailConfig'])
-
-  if (!transporter) {
-    throw new Error('Failed to initialize Gmail SMTP. Check your Gmail App Password.')
-  }
-
-  const setupUrl = details.setupUrl || `${getPublicSiteUrl()}/admin/setup`
-  return sendAdminInviteEmail(transporter, gmailConfig.gmailEmail, {
-    ...details,
-    setupUrl,
-    fromName: details.fromName || gmailConfig.fromName,
-  })
+  return { success: true }
 }
 
 /**
@@ -277,40 +150,28 @@ export interface CertificateMilestoneEmailDetails {
 }
 
 export async function sendCertificateMilestoneEmail(
-  transporter: ReturnType<typeof createGmailTransporter>,
-  gmailEmail: string,
+  _transporter: ReturnType<typeof createGmailTransporter>,
+  _gmailEmail: string,
   details: CertificateMilestoneEmailDetails
 ): Promise<{ success: boolean; messageId?: string }> {
-  if (!transporter) {
-    throw new Error('Email transporter not configured')
-  }
-
-  const paragraphs = details.bodyText
+  const { paragraphs, sendBrandedEmail } = await import('@/lib/platform-email')
+  const bodyLines = details.bodyText
     .split(/\n+/)
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<p style="margin:0 0 10px 0;line-height:1.55;color:#333;">${escapeEmailHtml(p)}</p>`)
-    .join('')
-
-  const logoUrl = await getEmailBrandLogoUrl()
-  const html = renderSimpleEmailHtml({
-    logoUrl,
-    greeting: `Hi ${details.memberName},`,
-    bodyHtml:
-      paragraphs +
-      `<p style="margin:0 0 10px 0;">${escapeEmailHtml(details.certificateTitle)} · ${details.hours} volunteer hours.</p>`,
-    purpose: 'Certificate milestone',
-  })
-
-  const info = await transporter.sendMail({
-    from: `"${details.fromName || 'Passive Blessings'}" <${gmailEmail}>`,
+  const result = await sendBrandedEmail({
     to: details.to,
     subject: details.subject,
-    html,
-    text: details.bodyText,
+    purpose: 'Certificate milestone',
+    greeting: `Hi ${details.memberName},`,
+    bodyHtml:
+      paragraphs(...bodyLines) +
+      paragraphs(`${details.certificateTitle} · ${details.hours} volunteer hours.`),
   })
-
-  return { success: true, messageId: info.messageId }
+  if (!result.ok) {
+    throw new Error(result.error || 'Failed to send certificate email via Zoho Mail SMTP')
+  }
+  return { success: true }
 }
 
 /**
@@ -327,77 +188,65 @@ export async function dispatchAdminPasswordResetEmail(details: {
     initials: string
   }
 }): Promise<{ success: true; messageId?: string }> {
-  const gmailConfig = await getGmailSmtpConfig()
-  if (!gmailConfig) {
-    throw new Error(
-      'Email service not configured. Please configure Gmail SMTP in Admin → Integrations.'
-    )
-  }
-
-  const transporter = createGmailTransporter({
-    enabled: true,
-    gmailEmail: gmailConfig.gmailEmail,
-    gmailAppPassword: gmailConfig.gmailAppPassword,
-  } as SiteSettings['emailConfig'])
-
-  if (!transporter) {
-    throw new Error('Failed to initialize Gmail SMTP. Check your Gmail App Password.')
-  }
-
-  const logoUrl = await getEmailBrandLogoUrl()
+  const { paragraphs, sendBrandedEmail } = await import('@/lib/platform-email')
   const name = details.adminName?.trim() || 'there'
   const loginUrl = `${getPublicSiteUrl()}/admin/login`
-  const subject = 'Reset your Passive Blessings admin password'
-  const greeting = `Hi ${name},`
-  const text = `${greeting}
-
-A super admin requested a password reset for your admin account.
-
-Choose a new password: ${details.resetLink}
-
-Then sign in at: ${loginUrl}
-
-Password reset
-PB Admin`
-
-  const html = renderSimpleEmailHtml({
-    logoUrl,
-    greeting,
-    bodyHtml: emailParagraphs(
+  const result = await sendBrandedEmail({
+    to: details.to,
+    subject: 'Reset your Passive Blessings admin password',
+    purpose: 'Password reset',
+    greeting: `Hi ${name},`,
+    bodyHtml: paragraphs(
       'A super admin requested a password reset for your admin account.',
       `Then sign in at: ${loginUrl}`
     ),
-    purpose: 'Password reset',
     cta: { label: 'Choose a new password', url: details.resetLink },
   })
 
-  const info = await transporter.sendMail({
-    from: `"${gmailConfig.fromName || 'Passive Blessings'}" <${gmailConfig.gmailEmail}>`,
-    to: details.to,
-    subject,
-    html,
-    text,
-  })
+  if (!result.ok) {
+    throw new Error(
+      result.error ||
+        'Email service not configured. Please configure Zoho Mail SMTP in Admin → Integrations.'
+    )
+  }
 
-  return { success: true, messageId: info.messageId }
+  return { success: true }
 }
 
 /**
- * Verify Gmail credentials are valid
+ * Low-level Zoho send for callers that need a raw HTML payload (e.g. contact reply).
  */
-export const verifyGmailCredentials = async (
-  transporter: ReturnType<typeof createGmailTransporter>
-): Promise<boolean> => {
-  if (!transporter) {
-    return false
+export async function sendRawZohoEmail(opts: {
+  to: string
+  subject: string
+  html: string
+  text: string
+  replyTo?: string
+}): Promise<{ success: true }> {
+  const config = await getZohoSmtpConfig()
+  if (!config) {
+    throw new Error(
+      'Email service not configured. Please configure Zoho Mail SMTP in Admin → Integrations.'
+    )
   }
 
-  try {
-    await transporter.verify()
-    console.log('[v0] Gmail credentials verified successfully')
-    return true
-  } catch (error) {
-    console.error('[v0] Gmail credentials verification failed:', error)
-    return false
-  }
+  const transporter = createZohoTransporter(config)
+  await transporter.sendMail({
+    from: `"${config.fromName || DEFAULT_MAIL_FROM_NAME}" <${config.email}>`,
+    replyTo: opts.replyTo || config.email,
+    to: opts.to,
+    subject: opts.subject,
+    html: opts.html,
+    text: opts.text,
+  })
+  return { success: true }
+}
+
+/**
+ * @deprecated Gmail verification is disabled.
+ */
+export const verifyGmailCredentials = async (
+  _transporter: ReturnType<typeof createGmailTransporter>
+): Promise<boolean> => {
+  return false
 }
