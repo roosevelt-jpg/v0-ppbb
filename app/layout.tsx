@@ -132,7 +132,7 @@ export default function RootLayout({
         {/* Capture install prompt before React hydrates — otherwise Chrome fires once and we miss it */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{window.__pbDeferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pbDeferredInstallPrompt=e;window.dispatchEvent(new CustomEvent('pb-install-prompt-ready',{detail:e}));});}catch(e){}})();`,
+            __html: `(function(){try{if(window.__pbInstallPromptHooked)return;window.__pbInstallPromptHooked=true;if(typeof window.__pbDeferredInstallPrompt==='undefined')window.__pbDeferredInstallPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pbDeferredInstallPrompt=e;window.dispatchEvent(new CustomEvent('pb-install-prompt-ready',{detail:e}));});}catch(e){}})();`,
           }}
         />
         <script

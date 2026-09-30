@@ -447,7 +447,8 @@ function BusinessEventForm() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
+                  placeholder="Press Enter between paragraphs so they stay spaced on the event page."
+                  rows={8}
                   style={{
                     width: '100%',
                     padding: '12px',

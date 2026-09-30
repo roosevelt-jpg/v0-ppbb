@@ -435,8 +435,8 @@ function CreateEventForm() {
               <textarea
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
-                placeholder="Event description"
-                rows={4}
+                placeholder="Event description. Press Enter to start a new paragraph."
+                rows={8}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 required
               />

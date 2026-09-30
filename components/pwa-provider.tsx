@@ -82,6 +82,25 @@ export function PwaProvider({ children }: { children?: React.ReactNode }) {
       const registration = await registerPbServiceWorker()
       if (!registration) return
 
+      // Chrome only fires the install prompt after a service worker controls the page.
+      if (!navigator.serviceWorker.controller) {
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          try {
+            if (sessionStorage.getItem('pb-sw-claimed') === '1') return
+            sessionStorage.setItem('pb-sw-claimed', '1')
+          } catch {
+            return
+          }
+          window.location.reload()
+        })
+      }
+
+      try {
+        await registration.update()
+      } catch {
+        /* ignore */
+      }
+
       try {
         const supported = await isSupported()
         if (!supported) return

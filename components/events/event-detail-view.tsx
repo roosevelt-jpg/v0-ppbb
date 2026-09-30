@@ -15,6 +15,7 @@ import {
   Download,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { EventDescriptionBody } from '@/components/events/event-description'
 import type { Event, TicketType } from '@/lib/event-types'
 import {
   getEventBannerURL,
@@ -222,7 +223,7 @@ export function EventDetailView({
                   </div>
                 </div>
               ) : null}
-              <p className="text-gray-700 text-base sm:text-lg break-words">{event.description}</p>
+              <EventDescriptionBody text={event.description || ''} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

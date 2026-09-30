@@ -173,9 +173,21 @@ export function PwaInstallPrompt() {
         return
       }
 
-      // No native prompt yet — ensure SW is registered, then retry briefly
+      // No native prompt yet. Register the worker; if it is not controlling
+      // this page, reload once so Chrome can offer the real install dialog.
       void registerPbServiceWorker()
-      await new Promise((r) => window.setTimeout(r, 400))
+      if (!navigator.serviceWorker.controller) {
+        try {
+          if (sessionStorage.getItem('pb-install-reload') !== '1') {
+            sessionStorage.setItem('pb-install-reload', '1')
+            window.location.reload()
+            return
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+
       promptEvent = getDeferredInstallPrompt()
       if (promptEvent) {
         setDeferred(promptEvent)
@@ -288,9 +300,9 @@ export function PwaInstallPrompt() {
             <p className="font-semibold text-white">Install from your browser</p>
             <p>
               Chrome / Edge: menu (⋮) → <strong className="text-white">Install Passive Blessings</strong>, or the
-              install icon in the address bar.
+              install icon in the address bar. Then tap Install here again.
             </p>
-            <p>Use a normal (non-incognito) window. If Install is missing, the app may already be installed.</p>
+            <p>Use a normal window (not incognito). Reload the page once if the install dialog does not open.</p>
           </div>
         ) : null}
       </div>

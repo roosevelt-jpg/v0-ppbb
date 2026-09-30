@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { format } from 'date-fns'
 import type { Event } from '@/lib/event-types'
 import { CheckCircle, XCircle, AlertCircle, ChevronLeft, Edit2 } from 'lucide-react'
+import { EventDescriptionBody } from '@/components/events/event-description'
 
 export default function EventDetailPage() {
   const router = useRouter()
@@ -159,7 +160,10 @@ export default function EventDetailPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-black">{event.title}</h1>
-            <p className="text-gray-600 mt-1">{event.description}</p>
+            <EventDescriptionBody
+              text={event.description || ''}
+              className="space-y-3 text-gray-600 mt-2 leading-relaxed break-words"
+            />
           </div>
           <span className={`px-4 py-2 rounded-full font-medium text-sm ${getStatusColor(event.status)}`}>
             {event.status?.replace(/_/g, ' ').toUpperCase()}

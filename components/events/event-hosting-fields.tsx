@@ -193,6 +193,29 @@ export function EventHostingFields({
         </button>
       </div>
 
+      <div className="rounded-lg border border-neutral-300 bg-neutral-50 p-4 space-y-2">
+        <p className="text-sm font-semibold text-neutral-900">Who can register and pay</p>
+        <p className="text-xs text-neutral-600">
+          Members only is the default. Turn this on for a public launch or open event so people without a membership can register and pay.
+        </p>
+        <label className="text-sm flex items-start gap-2 pt-1">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={allowNonMemberGuests}
+            onChange={(e) => onChange({ allowNonMemberGuests: e.target.checked })}
+          />
+          <span>
+            <span className="font-medium">Allow non-members to register and pay</span>
+            <span className="block text-xs text-neutral-500 mt-0.5">
+              {allowNonMemberGuests
+                ? 'On — anyone with an account can get tickets and pay. Membership is not required.'
+                : 'Off — only active members (and admins) can register or pay.'}
+            </span>
+          </span>
+        </label>
+      </div>
+
       <div className="grid sm:grid-cols-2 gap-3">
         <label className="text-sm flex items-start gap-2">
           <input
@@ -215,20 +238,6 @@ export function EventHostingFields({
             onChange={(e) => onChange({ enableWaitlist: e.target.checked })}
           />
           Enable waitlist when full
-        </label>
-        <label className="text-sm flex items-start gap-2">
-          <input
-            type="checkbox"
-            className="mt-1"
-            checked={allowNonMemberGuests}
-            onChange={(e) => onChange({ allowNonMemberGuests: e.target.checked })}
-          />
-          <span>
-            Allow non-member guests to book
-            <span className="block text-xs text-neutral-500 mt-0.5">
-              Off by default — only paying members can register. Turn on for public / charity events.
-            </span>
-          </span>
         </label>
         <label className="text-sm flex items-center gap-2">
           <input

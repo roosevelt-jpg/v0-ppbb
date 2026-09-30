@@ -18,12 +18,17 @@ export async function GET() {
   }
 
   const body = `/* Passive Blessings PWA + FCM service worker */
-importScripts('https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging-compat.js');
+try {
+  importScripts('https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js');
+  importScripts('https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging-compat.js');
+} catch (err) {
+  console.warn('[pb-sw] FCM scripts unavailable:', err);
+}
 
 const FIREBASE_CONFIG = ${JSON.stringify(config)};
 
 try {
+  if (typeof firebase === 'undefined') throw new Error('firebase missing');
   firebase.initializeApp(FIREBASE_CONFIG);
   const messaging = firebase.messaging();
 
@@ -79,9 +84,13 @@ self.addEventListener('activate', function (event) {
 });
 
 self.addEventListener('fetch', function (event) {
+  var request = event.request;
+  if (!request || request.method !== 'GET') return;
+  var url = request.url || '';
+  if (url.indexOf('http') !== 0) return;
   event.respondWith(
-    fetch(event.request).catch(function () {
-      return caches.match(event.request);
+    fetch(request).catch(function () {
+      return new Response('', { status: 504, statusText: 'offline' });
     })
   );
 });
