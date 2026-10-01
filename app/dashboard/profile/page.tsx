@@ -8,6 +8,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { sanitizeForFirestore } from '@/lib/firestore-utils'
 import { User } from '@/lib/types'
 import { AlertCircle, CheckCircle } from 'lucide-react'
+import { DobTextInput } from '@/components/dob-text-input'
 
 const SKILLS = ['Tech/IT', 'Marketing', 'Design', 'Finance', 'Teaching/Training', 'Medical/Health', 'Legal', 'Events Management', 'Media/PR', 'Logistics', 'Admin/Operations', 'Social work', 'Other']
 const DEPARTMENTS = ['Community Support', 'Event Management', 'Volunteer Training', 'Fundraising', 'Administration', 'Marketing', 'Operations']
@@ -163,7 +164,11 @@ export default function ProfileEditPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Date of Birth</label>
-              <input type="date" name="dateOfBirth" value={formData.dateOfBirth || ''} onChange={handleInputChange} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', fontSize: '1rem', boxSizing: 'border-box' }} />
+              <DobTextInput
+                value={formData.dateOfBirth || ''}
+                onChange={(isoDate) => setFormData((prev) => ({ ...prev, dateOfBirth: isoDate }))}
+                style={{ border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '0.75rem 1rem' }}
+              />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Gender</label>

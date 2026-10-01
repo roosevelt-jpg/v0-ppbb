@@ -31,6 +31,7 @@ import {
 import { getReferralCodeFromDocument } from '@/lib/referral-cookie'
 import { Dialog } from '@/components/dialog'
 import { StripeCardCheckout } from '@/components/stripe-card-checkout'
+import { DobTextInput } from '@/components/dob-text-input'
 
 const STEPS = [
   { id: 1, label: 'Choose membership' },
@@ -229,11 +230,12 @@ export default function SignupClient() {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as any
+    const { name, value, type } = e.target as HTMLInputElement
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as any).checked : value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }))
+    setError('')
   }
 
   const handleSkillToggle = (skill: string) => {
@@ -324,12 +326,21 @@ export default function SignupClient() {
     }
 
     if (step === 3) {
-      if (!formData.phone.trim()) {
+      let phone = formData.phone.trim()
+      if (typeof document !== 'undefined') {
+        const phoneField = document.querySelector<HTMLInputElement>('input[name="phone"]')
+        const typed = phoneField?.value.trim() || ''
+        if (typed) phone = typed
+      }
+      if (phone && phone !== formData.phone) {
+        setFormData((prev) => ({ ...prev, phone }))
+      }
+      if (!phone) {
         setError('Phone number is required')
         return false
       }
       if (!formData.dateOfBirth) {
-        setError('Date of birth is required')
+        setError('Enter your date of birth as DD/MM/YYYY')
         return false
       }
       if (!formData.country.trim()) {
@@ -1211,13 +1222,33 @@ export default function SignupClient() {
                     {/* Phone */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Phone Number *</label>
-                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="+971 50 1234567" style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
+                      <input
+                        type="tel"
+                        name="phone"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        onInput={(e) => {
+                          const value = e.currentTarget.value
+                          setFormData((prev) => ({ ...prev, phone: value }))
+                          setError('')
+                        }}
+                        placeholder="+971 50 1234567"
+                        style={{ width: '100%', padding: '0.75rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '16px', boxSizing: 'border-box' }}
+                      />
                     </div>
 
                     {/* Date of Birth */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 600, marginBottom: '0.375rem', color: '#111111' }}>Date of Birth *</label>
-                      <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleInputChange} max={new Date().toISOString().split('T')[0]} style={{ width: '100%', padding: '0.625rem', border: '1px solid #e4e1da', borderRadius: '0.375rem', fontSize: '0.875rem', boxSizing: 'border-box' }} />
+                      <DobTextInput
+                        value={formData.dateOfBirth}
+                        onChange={(isoDate) => {
+                          setFormData((prev) => ({ ...prev, dateOfBirth: isoDate }))
+                          setError('')
+                        }}
+                      />
                     </div>
 
                     <AddressLocationPicker
