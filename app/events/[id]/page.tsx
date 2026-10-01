@@ -194,7 +194,9 @@ function EventDetailInner() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <Card className="w-full max-w-md p-6 bg-white">
             <h2 className="text-lg font-semibold mb-2">Pay for your ticket</h2>
-            <p className="text-sm text-neutral-600 mb-4">Enter card details — you stay on Passive Blessings.</p>
+            <p className="text-sm text-neutral-600 mb-4">
+              Pay with Apple Pay, Google Pay, or card. You stay on Passive Blessings.
+            </p>
             <div className="mb-3">
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
                 Coupon / unlock code

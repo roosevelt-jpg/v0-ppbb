@@ -9,7 +9,7 @@ import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-/** Confirm embedded Stripe card payment after client-side confirmCardPayment succeeds. */
+/** Confirm embedded Stripe payment after the on-site Payment Element succeeds. */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()

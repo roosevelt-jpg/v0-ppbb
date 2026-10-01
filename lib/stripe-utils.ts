@@ -25,7 +25,6 @@ export async function createCheckoutSession(params: {
   if (!stripe) throw new Error('Stripe not configured')
   
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
     mode: params.interval ? 'subscription' : 'payment',
     customer_email: params.email,
     line_items: [

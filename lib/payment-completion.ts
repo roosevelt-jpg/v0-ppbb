@@ -136,7 +136,6 @@ export async function createStripeMembershipIntent(params: {
     payment_behavior: 'default_incomplete',
     payment_settings: {
       save_default_payment_method: 'on_subscription',
-      payment_method_types: ['card'],
     },
     trial_period_days: params.trialDays && params.trialDays > 0 ? params.trialDays : undefined,
     expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],

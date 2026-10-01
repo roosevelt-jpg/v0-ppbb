@@ -2,22 +2,8 @@
 
 import React, { useMemo, useState } from 'react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
-import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { Loader2, Lock } from 'lucide-react'
-
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#171717',
-      '::placeholder': { color: '#a3a3a3' },
-      lineHeight: '24px',
-    },
-    invalid: { color: '#e11d48' },
-  },
-  hidePostalCode: true,
-  disableLink: true,
-} as const
 
 type StripeCardFormInnerProps = {
   clientSecret: string
@@ -29,8 +15,6 @@ type StripeCardFormInnerProps = {
 }
 
 function StripeCardFormInner({
-  clientSecret,
-  cardholderName: initialName = '',
   submitLabel = 'Pay securely',
   onSuccess,
   onError,
@@ -38,7 +22,6 @@ function StripeCardFormInner({
 }: StripeCardFormInnerProps) {
   const stripe = useStripe()
   const elements = useElements()
-  const [name, setName] = useState(initialName)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -46,28 +29,24 @@ function StripeCardFormInner({
     e.preventDefault()
     if (!stripe || !elements) return
 
-    const cardholderName = name.trim()
-    if (!cardholderName) {
-      setError('Enter the cardholder name')
-      return
-    }
-
-    const card = elements.getElement(CardElement)
-    if (!card) {
-      setError('Card field is not ready. Refresh and try again.')
-      return
-    }
-
     setSubmitting(true)
     setError(null)
 
     try {
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card,
-          billing_details: { name: cardholderName },
+      const { error: submitError } = await elements.submit()
+      if (submitError) {
+        const message = submitError.message || 'Payment could not be started'
+        setError(message)
+        onError?.(message)
+        return
+      }
+
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: returnUrl || window.location.href,
         },
-        ...(returnUrl ? { return_url: returnUrl } : {}),
+        redirect: 'if_required',
       })
 
       if (result.error) {
@@ -78,7 +57,7 @@ function StripeCardFormInner({
       }
 
       const piId = result.paymentIntent?.id
-      if (!piId || result.paymentIntent.status !== 'succeeded') {
+      if (!piId || (result.paymentIntent.status !== 'succeeded' && result.paymentIntent.status !== 'processing')) {
         const message = 'Payment was not completed. Please try again.'
         setError(message)
         onError?.(message)
@@ -97,23 +76,12 @@ function StripeCardFormInner({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Cardholder name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name on card"
-          autoComplete="cc-name"
-          className="w-full px-3 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900"
-        />
-      </div>
-      <div>
-        <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Card details</label>
-        <div className="rounded-lg border border-neutral-300 bg-white px-3 py-3">
-          <CardElement options={CARD_ELEMENT_OPTIONS} />
-        </div>
-      </div>
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          wallets: { applePay: 'auto', googlePay: 'auto' },
+        }}
+      />
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <button
         type="submit"
@@ -134,7 +102,7 @@ function StripeCardFormInner({
       </button>
       <p className="text-xs text-neutral-500 text-center flex items-center justify-center gap-1">
         <Lock className="h-3 w-3" />
-        Card details are processed securely — no redirect to Stripe.
+        Apple Pay, Google Pay, and cards stay on this page. Open the site in Safari on iPhone or Chrome on Android.
       </p>
     </form>
   )

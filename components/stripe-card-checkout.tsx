@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { loadStripe, type Stripe as StripeJS } from '@stripe/stripe-js'
-import { CardElement, Elements, useElements, useStripe } from '@stripe/react-stripe-js'
+import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { Loader2, Lock } from 'lucide-react'
 
 let stripePromiseCache: Promise<StripeJS | null> | null = null
@@ -16,21 +16,6 @@ function getStripePromise(publishableKey: string) {
   return stripePromiseCache
 }
 
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#171717',
-      '::placeholder': { color: '#a3a3a3' },
-      lineHeight: '24px',
-    },
-    invalid: { color: '#e11d48' },
-  },
-  hidePostalCode: true,
-  // Keep card fields English and hide Link autofill (French "Enregistrer" button).
-  disableLink: true,
-} as const
-
 interface StripeCardCheckoutProps {
   publishableKey: string
   clientSecret: string
@@ -43,8 +28,8 @@ interface StripeCardCheckoutProps {
 }
 
 /**
- * Embedded card-only form — CardElement fields only (no Stripe Checkout page,
- * no Payment Element wallets/Link tabs). 3DS may still show a bank challenge modal.
+ * On-site Stripe payment form. Shows Apple Pay and Google Pay when the phone
+ * and Stripe dashboard allow them, plus the card form.
  */
 export function StripeCardCheckout({
   publishableKey,
@@ -64,8 +49,7 @@ export function StripeCardCheckout({
         locale: 'en',
       }}
     >
-      <CardOnlyForm
-        clientSecret={clientSecret}
+      <WalletCheckoutForm
         mode={mode}
         onSuccess={onSuccess}
         onCancel={onCancel}
@@ -75,14 +59,12 @@ export function StripeCardCheckout({
   )
 }
 
-function CardOnlyForm({
-  clientSecret,
+function WalletCheckoutForm({
   mode,
   onSuccess,
   onCancel,
   submitLabel,
 }: {
-  clientSecret: string
   mode: 'payment' | 'setup'
   onSuccess: (paymentIntentId?: string) => void
   onCancel?: () => void
@@ -90,7 +72,6 @@ function CardOnlyForm({
 }) {
   const stripe = useStripe()
   const elements = useElements()
-  const [name, setName] = React.useState('')
   const [submitting, setSubmitting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -98,35 +79,26 @@ function CardOnlyForm({
     e.preventDefault()
     if (!stripe || !elements) return
 
-    const cardholderName = name.trim()
-    if (!cardholderName) {
-      setError('Enter the cardholder name')
-      return
-    }
-
-    const card = elements.getElement(CardElement)
-    if (!card) {
-      setError('Card field is not ready. Refresh and try again.')
-      return
-    }
-
     setSubmitting(true)
     setError(null)
 
-    const payment_method = {
-      card,
-      billing_details: { name: cardholderName },
+    const { error: submitError } = await elements.submit()
+    if (submitError) {
+      setError(submitError.message || 'Payment could not be started')
+      setSubmitting(false)
+      return
     }
 
+    const confirmParams = { return_url: window.location.href }
+
     if (mode === 'setup') {
-      const { error: confirmError } = await stripe.confirmCardSetup(clientSecret, {
-        payment_method,
+      const { error: confirmError } = await stripe.confirmSetup({
+        elements,
+        confirmParams,
+        redirect: 'if_required',
       })
       if (confirmError) {
-        setError(
-          confirmError.message ||
-            'Payment could not be confirmed. Please check your card details and try again.'
-        )
+        setError(confirmError.message || 'Payment could not be confirmed. Please try again.')
         setSubmitting(false)
         return
       }
@@ -134,16 +106,14 @@ function CardOnlyForm({
       return
     }
 
-    const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
-      clientSecret,
-      { payment_method }
-    )
+    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams,
+      redirect: 'if_required',
+    })
 
     if (confirmError) {
-      setError(
-        confirmError.message ||
-          'Payment could not be confirmed. Please check your card details and try again.'
-      )
+      setError(confirmError.message || 'Payment could not be confirmed. Please try again.')
       setSubmitting(false)
       return
     }
@@ -153,27 +123,12 @@ function CardOnlyForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Cardholder name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name on card"
-          autoComplete="cc-name"
-          className="w-full px-3 py-2.5 text-sm border border-neutral-300 rounded-lg bg-white text-neutral-900"
-        />
-      </div>
-      <div>
-        <label className="block text-xs font-semibold text-neutral-700 mb-1.5">Card details</label>
-        <div className="rounded-lg border border-neutral-300 bg-white px-3 py-3 min-h-[48px]">
-          <CardElement options={CARD_ELEMENT_OPTIONS} />
-        </div>
-        <p className="mt-1.5 text-[11px] text-neutral-500">
-          Enter card number, expiry, and CVV in the field above. Use the button below when ready —
-          you do not need any other save button inside the card field.
-        </p>
-      </div>
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          wallets: { applePay: 'auto', googlePay: 'auto' },
+        }}
+      />
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <div className="flex gap-3">
         {onCancel ? (
@@ -206,7 +161,7 @@ function CardOnlyForm({
       </div>
       <p className="text-xs text-neutral-500 text-center flex items-center justify-center gap-1">
         <Lock className="h-3 w-3" />
-        Card details are processed securely — no redirect to a branded checkout page.
+        Apple Pay, Google Pay, and cards are processed on this page.
       </p>
     </form>
   )

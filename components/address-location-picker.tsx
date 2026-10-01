@@ -295,10 +295,11 @@ export function AddressLocationPicker({
         onTextChange={(text) => patch({ address: text })}
         onChange={applyPlaceSelection}
       />
-      <p className="mt-1 text-[11px] text-neutral-500">
-        Powered by Google Places (Admin → Integrations → Google Maps). Pick a suggestion for an
-        exact pin — the same address shows on public event cards.
-      </p>
+      {variant === 'venue' ? (
+        <p className="mt-1 text-[11px] text-neutral-500">
+          Pick a suggestion for an exact pin. The same address shows on the event card.
+        </p>
+      ) : null}
     </div>
   )
 

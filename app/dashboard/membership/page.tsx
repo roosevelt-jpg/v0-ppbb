@@ -315,7 +315,7 @@ export default function MembershipPage() {
         onOpenChange={(open) => {
           if (!open) releasePromoReservation()
         }}
-        title={activeIntent?.mode === 'setup' ? 'Save your card' : 'Enter card details'}
+        title={activeIntent?.mode === 'setup' ? 'Save your card' : 'Pay with Apple Pay, Google Pay, or card'}
         description={
           activeIntent?.mode === 'setup'
             ? 'Your card is saved securely. You will not be charged until the free period ends, then billing starts automatically.'

@@ -87,7 +87,6 @@ export async function createEmbeddedMembershipCheckout(opts: {
     payment_behavior: 'default_incomplete',
     payment_settings: {
       save_default_payment_method: 'on_subscription',
-      payment_method_types: ['card'],
     },
     trial_period_days: trialDays,
     expand: ['latest_invoice.payment_intent', 'pending_setup_intent'],
@@ -140,8 +139,8 @@ export async function createEmbeddedPaymentIntent(opts: {
     currency: opts.currency.toLowerCase(),
     description: opts.description,
     metadata: opts.metadata,
-    automatic_payment_methods: { enabled: false },
-    payment_method_types: ['card'],
+    // Dashboard toggles (Apple Pay, Google Pay, Link, cards) decide what the phone can use.
+    automatic_payment_methods: { enabled: true },
   })
 
   if (!paymentIntent.client_secret) {

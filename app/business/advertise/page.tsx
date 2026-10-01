@@ -155,7 +155,7 @@ function AdvertiseInner() {
           if (!open) setStripeCheckout(null)
         }}
         title="Pay for advertising"
-        description="Enter card details below. Payment stays on this page — card fields only."
+        description="Pay with Apple Pay, Google Pay, or card. Payment stays on this page."
         maxWidth="26rem"
         compact={false}
       >

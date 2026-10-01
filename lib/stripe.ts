@@ -33,6 +33,7 @@ export async function createPaymentIntent(
       amount: Math.round(amount * 100), // Stripe expects amount in cents
       currency,
       metadata,
+      automatic_payment_methods: { enabled: true },
     })
     return paymentIntent
   } catch (error) {
