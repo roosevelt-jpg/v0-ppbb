@@ -8,6 +8,7 @@ import { ThemeToggle } from './theme-toggle'
 import { LanguageSwitcherWithFlags } from './language-switcher-flags'
 import { SiteLogo } from './site-logo'
 import { ProfileMenuButton } from './profile-quick-edit'
+import { NotificationBell } from './notification-bell'
 import { useAuth } from '@/lib/auth-context'
 import { logoutUser } from '@/lib/auth'
 import { hasAdminAccess, hasBusinessAccess } from '@/lib/roles'
@@ -217,6 +218,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {user ? <NotificationBell onDark /> : null}
             <LanguageSwitcherWithFlags onDark />
             <ThemeToggle onDark />
             <ProfileMenuButton compact />
@@ -230,6 +232,7 @@ export function Navbar() {
           <SiteLogo background="dark" variant="navbar" href="/" />
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          {user ? <NotificationBell onDark compact /> : null}
           <LanguageSwitcherWithFlags onDark />
           <ThemeToggle onDark />
           <ProfileMenuButton compact />

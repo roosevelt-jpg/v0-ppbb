@@ -231,6 +231,18 @@ export async function notifyAdminsPush(
   notification: { title: string; body: string },
   data: Record<string, string> = {}
 ): Promise<{ sent: number; skipped: number }> {
+  if (data.skipInApp !== '1') {
+    void import('@/lib/in-app-notifications')
+      .then(({ addAdminAlert }) =>
+        addAdminAlert({
+          title: notification.title,
+          message: notification.body,
+          href: data.click_action || '/admin',
+          type: data.type || 'admin_alert',
+        })
+      )
+      .catch((err) => console.warn('[push] admin in-app alert failed:', err))
+  }
   const adminIds = await collectAdminUserIds()
   return sendPushToUsers(adminIds, notification, {
     type: 'admin_alert',
@@ -285,6 +297,16 @@ export async function notifyGroupMessage(params: {
 }
 
 export async function notifyNewEventPublished(eventTitle: string, eventId: string) {
+  void import('@/lib/in-app-notifications')
+    .then(({ notifyMembersInApp }) =>
+      notifyMembersInApp({
+        title: 'New community event',
+        message: eventTitle,
+        href: `/events/${eventId}`,
+        type: 'event_created',
+      })
+    )
+    .catch((err) => console.warn('[push] event in-app fan-out failed:', err))
   return notifyAllSubscribers(
     {
       title: 'New community event',

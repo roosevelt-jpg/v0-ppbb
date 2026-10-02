@@ -462,12 +462,51 @@ export default function AdminNewslettersPage() {
                       <label className={`${TEXT_LABEL} min-w-0 shrink`}>Content</label>
                       <AiAssistButton field="content" label="content" onGenerate={openAiModal} disabled={loading} />
                     </div>
+                    <p className="text-xs text-neutral-600 mb-2">
+                      Paste images, links, or a YouTube URL. You can also insert them below. HTML is supported.
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      <button
+                        type="button"
+                        className={`${BUTTON_SECONDARY} ${BUTTON_SMALL}`}
+                        onClick={() => {
+                          const url = window.prompt('Image URL')
+                          if (!url?.trim()) return
+                          setContent((current) => `${current}${current ? '\n\n' : ''}<img src="${url.trim()}" alt="" />`)
+                        }}
+                      >
+                        Add image
+                      </button>
+                      <button
+                        type="button"
+                        className={`${BUTTON_SECONDARY} ${BUTTON_SMALL}`}
+                        onClick={() => {
+                          const url = window.prompt('YouTube URL')
+                          if (!url?.trim()) return
+                          setContent((current) => `${current}${current ? '\n\n' : ''}${url.trim()}`)
+                        }}
+                      >
+                        Add YouTube
+                      </button>
+                      <button
+                        type="button"
+                        className={`${BUTTON_SECONDARY} ${BUTTON_SMALL}`}
+                        onClick={() => {
+                          const label = window.prompt('Link text')
+                          const url = window.prompt('Link URL')
+                          if (!label?.trim() || !url?.trim()) return
+                          setContent((current) => `${current}${current ? '\n\n' : ''}<a href="${url.trim()}">${label.trim()}</a>`)
+                        }}
+                      >
+                        Add link
+                      </button>
+                    </div>
                     <textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      placeholder="Write your newsletter content here..."
+                      placeholder="Write your newsletter. Add a YouTube link, an image URL, or HTML."
                       className={TEXTAREA_STYLE}
-                      rows={6}
+                      rows={8}
                     />
                   </div>
 

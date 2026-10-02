@@ -5,6 +5,7 @@ import { LogOut } from 'lucide-react'
 import { LanguageSelector } from '@/components/language-selector'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ProfileMenuButton } from '@/components/profile-quick-edit'
+import { NotificationBell } from '@/components/notification-bell'
 
 interface DashboardHeaderActionsProps {
   onLogout: () => void | Promise<void>
@@ -24,6 +25,7 @@ export function DashboardHeaderActions({
 }: DashboardHeaderActionsProps) {
   return (
     <div className={`flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ${className}`}>
+      <NotificationBell compact />
       <LanguageSelector compact />
       <ThemeToggle compact />
       <ProfileMenuButton compact />

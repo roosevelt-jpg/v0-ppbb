@@ -342,6 +342,187 @@ input[type='checkbox'] {
   --sidebar-accent-foreground: #f7f6f2;
   --sidebar-border: #3a3a3a;
   --sidebar-ring: #888888;
+  --muted-foreground: #d0d0d0;
+}
+
+/*
+ * Dark mode contrast.
+ * Many screens hard-code a light surface (bg-white) while text inherits the
+ * dark-theme foreground, so labels disappear. Light surfaces keep dark text.
+ * Gray/black utilities written for a light page are lightened on the dark
+ * page background, then darkened again inside those light surfaces.
+ */
+html.dark :is(
+  .bg-white,
+  .bg-neutral-50,
+  .bg-neutral-100,
+  .bg-neutral-200,
+  .bg-gray-50,
+  .bg-stone-50,
+  .bg-zinc-50,
+  .bg-slate-50,
+  .bg-red-50,
+  .bg-amber-50,
+  .bg-green-50,
+  .bg-emerald-50,
+  .bg-blue-50,
+  .bg-yellow-50,
+  .bg-orange-50,
+  .bg-\[\#ffffff\],
+  .bg-\[\#fff\],
+  .bg-\[\#f7f6f2\],
+  .bg-\[\#fafafa\],
+  .bg-\[\#fff8e6\],
+  .bg-\[\#e4e1da\]
+):not([class*='dark:bg-']) {
+  --foreground: #171717;
+  --card-foreground: #171717;
+  --muted-foreground: #525252;
+  --primary: #171717;
+  --primary-foreground: #ffffff;
+  color: #171717;
+}
+
+html.dark .bg-white:not([class*='dark:bg-']) {
+  background-color: #ffffff !important;
+}
+
+html.dark :is(.text-black, .text-neutral-950, .text-neutral-900, .text-neutral-800, .text-gray-950, .text-gray-900, .text-gray-800, .text-gray-700) {
+  color: #f4f4f4;
+}
+
+html.dark :is(.text-neutral-700, .text-neutral-600, .text-gray-600, .text-gray-500, .text-neutral-500) {
+  color: #e4e4e4;
+}
+
+html.dark :is(.text-neutral-400, .text-gray-400, .text-neutral-300, .text-gray-300) {
+  color: #d4d4d4;
+}
+
+html.dark :is(
+  .bg-white,
+  .bg-neutral-50,
+  .bg-neutral-100,
+  .bg-neutral-200,
+  .bg-gray-50,
+  .bg-stone-50,
+  .bg-zinc-50,
+  .bg-slate-50,
+  .bg-red-50,
+  .bg-amber-50,
+  .bg-green-50,
+  .bg-emerald-50,
+  .bg-blue-50,
+  .bg-yellow-50,
+  .bg-orange-50,
+  .bg-\[\#ffffff\],
+  .bg-\[\#fff\],
+  .bg-\[\#f7f6f2\],
+  .bg-\[\#fafafa\],
+  .bg-\[\#fff8e6\],
+  .bg-\[\#e4e1da\]
+):not([class*='dark:bg-']) :is(
+  .text-black,
+  .text-neutral-950,
+  .text-neutral-900,
+  .text-neutral-800,
+  .text-neutral-700,
+  .text-neutral-600,
+  .text-gray-950,
+  .text-gray-900,
+  .text-gray-800,
+  .text-gray-700,
+  .text-gray-600,
+  .text-foreground,
+  .text-card-foreground
+) {
+  color: #171717;
+}
+
+html.dark :is(
+  .bg-white,
+  .bg-neutral-50,
+  .bg-neutral-100,
+  .bg-neutral-200,
+  .bg-gray-50,
+  .bg-stone-50,
+  .bg-\[\#f7f6f2\],
+  .bg-\[\#ffffff\],
+  .bg-\[\#fff\]
+):not([class*='dark:bg-']) :is(.text-gray-500, .text-neutral-500, .text-gray-400, .text-neutral-400, .text-neutral-300, .text-gray-300, .text-muted-foreground) {
+  color: #525252;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #171717;
+  background-color: #ffffff;
+}
+
+/* Dark bars nested inside a light page (navbar, footer, black sections) keep light text. */
+html.dark :is(
+  .bg-neutral-800,
+  .bg-neutral-900,
+  .bg-neutral-950,
+  .bg-black,
+  .bg-\[\#111111\],
+  .bg-\[\#1a1a1a\],
+  footer
+) {
+  --foreground: #f7f6f2;
+  --card-foreground: #f7f6f2;
+  --muted-foreground: #e4e4e4;
+  color: #f5f5f5;
+}
+
+html.dark :is(
+  .bg-neutral-800,
+  .bg-neutral-900,
+  .bg-neutral-950,
+  .bg-black,
+  .bg-\[\#111111\],
+  .bg-\[\#1a1a1a\],
+  footer
+) :is(
+  .text-neutral-200,
+  .text-neutral-300,
+  .text-neutral-400,
+  .text-neutral-500,
+  .text-neutral-600,
+  .text-gray-300,
+  .text-gray-400,
+  .text-gray-500,
+  .text-white,
+  a
+) {
+  color: #f4f4f4 !important;
+}
+
+html.dark :is(.bg-white, .bg-neutral-50, .bg-neutral-100):not([class*='dark:bg-']) :is(
+  a,
+  p,
+  label,
+  h1,
+  h2,
+  h3,
+  li,
+  .text-black,
+  .text-neutral-900,
+  .text-neutral-800,
+  .text-neutral-700,
+  .text-neutral-600,
+  .text-gray-700,
+  .text-gray-600,
+  .text-foreground,
+  .text-card-foreground
+) {
+  color: #171717 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #737373;
 }
 
 .font-headline { font-family: var(--pb-font-heading, var(--font-headline)); }

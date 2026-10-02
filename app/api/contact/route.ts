@@ -50,6 +50,16 @@ export async function POST(request: NextRequest) {
 
     const docRef = await db.collection('contactSubmissions').add(contactData)
 
+    void import('@/lib/push-notifications-server').then(({ notifyAdminsPushSafe }) => {
+      notifyAdminsPushSafe(
+        {
+          title: 'New contact message',
+          body: String(contactData.subject || contactData.name || 'Website inquiry'),
+        },
+        { type: 'contact', click_action: '/admin/contact-submissions' }
+      )
+    })
+
     try {
       await db.collection('contact-messages').add({
         ...contactData,

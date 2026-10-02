@@ -73,6 +73,13 @@ export async function POST(request: NextRequest) {
       console.warn('[partnerships/apply] contactSubmissions mirror skipped:', mirrorErr)
     }
 
+    void import('@/lib/push-notifications-server').then(({ notifyAdminsPushSafe }) => {
+      notifyAdminsPushSafe(
+        { title: 'New partnership request', body: title },
+        { type: 'contact', click_action: '/admin/contact-submissions' }
+      )
+    })
+
     return NextResponse.json({ success: true, id: ref.id })
   } catch (error) {
     console.error('[partnerships/apply] error:', error)

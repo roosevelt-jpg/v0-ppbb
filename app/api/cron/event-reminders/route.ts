@@ -259,6 +259,14 @@ export async function GET(request: NextRequest) {
         })
 
         if (userId) {
+          void import('@/lib/in-app-notifications').then(({ addUserNotification }) => {
+            addUserNotification(userId, {
+              title: pushTitle(kind, daysUntil),
+              message: title,
+              href: `/events/${eventDoc.id}`,
+              type: 'event_reminder',
+            }).catch(() => undefined)
+          })
           void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
             pushToUserSafe(
               userId,

@@ -46,6 +46,20 @@ export async function recordNewsletterUnsubscribe(email: string): Promise<void> 
     },
     { merge: true }
   )
+
+  const subs = await db.collection('newsletter_subscribers').where('email', '==', normalized).get()
+  await Promise.all(subs.docs.map((doc) => doc.ref.set({ isActive: false }, { merge: true })))
+
+  const users = await db.collection('users').where('email', '==', normalized).limit(5).get()
+  await Promise.all(
+    users.docs.map((doc) =>
+      doc.ref.update({
+        newsletterOptOut: true,
+        newsletterSubscribed: false,
+        'notificationPreferences.newsletter': false,
+      })
+    )
+  )
 }
 
 /** Load all opted-out emails for recipient filtering. */

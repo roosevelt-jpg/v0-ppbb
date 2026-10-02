@@ -4,7 +4,7 @@
  */
 export function EventDescriptionBody({
   text,
-  className = 'space-y-4 text-gray-700 text-base sm:text-lg break-words leading-relaxed',
+  className = 'space-y-4 text-neutral-800 dark:text-neutral-100 text-base sm:text-lg break-words leading-relaxed',
 }: {
   text: string
   className?: string

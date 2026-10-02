@@ -303,7 +303,7 @@ export function MembershipSubscriptionOverview({
           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
             <Link
               href={manageHref}
-              className="inline-flex items-center justify-center min-h-[44px] px-4 border border-neutral-300 rounded-lg text-sm font-semibold hover:bg-neutral-50"
+              className="inline-flex items-center justify-center min-h-[44px] px-4 border border-neutral-300 rounded-lg text-sm font-semibold text-neutral-900 bg-white hover:bg-neutral-50"
             >
               Change plan
             </Link>
@@ -311,7 +311,7 @@ export function MembershipSubscriptionOverview({
               type="button"
               disabled={cancelling || !hasBillableSub || renewalStopped || isLifetime || isPromoSub}
               onClick={() => void handleCancelRenewal()}
-              className="min-h-[44px] px-4 border border-red-300 text-red-700 rounded-lg text-sm font-semibold hover:bg-red-50 disabled:opacity-50"
+              className="pb-outline-btn min-h-[44px] px-4 border border-neutral-300 text-neutral-900 bg-neutral-100 rounded-lg text-sm font-semibold hover:bg-neutral-200 disabled:opacity-100 disabled:bg-neutral-200 disabled:text-neutral-800"
             >
               {isLifetime || isPromoSub
                 ? 'Promo access'

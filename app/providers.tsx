@@ -10,6 +10,7 @@ import { SiteThemeApplier } from '@/components/site-theme-applier'
 import { SessionIdleTimeout } from '@/components/session-idle-timeout'
 import { PwaProvider } from '@/components/pwa-provider'
 import { SiteTranslator } from '@/components/site-translator'
+import { NewsletterPopup } from '@/components/newsletter-popup'
 import { setGoogTransCookie } from '@/lib/site-translate'
 import {
   PREFERRED_LANGUAGE_KEY,
@@ -72,6 +73,7 @@ export function Providers({ children }: ProvidersProps) {
           <SessionIdleTimeout />
           <PwaProvider />
           <SiteTranslator />
+          <NewsletterPopup />
           {children}
         </NextIntlClientProvider>
       </AuthProvider>

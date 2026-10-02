@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
           title: 'New donation proof pending',
           body: `${typeLabel} AED ${amount} for ${causeName}`,
         },
-        { submissionId, click_action: '/admin/donation-verification' }
+        { submissionId, click_action: '/admin/donation-verification', skipInApp: '1' }
       )
       pushToUserSafe(
         uid,

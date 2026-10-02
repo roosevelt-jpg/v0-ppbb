@@ -781,6 +781,22 @@ export default function SignupClient() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
         }
+        try {
+          const subscribedEmail = localStorage.getItem('pb-newsletter-email')
+          if (subscribedEmail && subscribedEmail === formData.email.toLowerCase()) {
+            void fetch('/api/newsletters/subscribe', {
+              method: 'POST',
+              headers: authHeaders,
+              body: JSON.stringify({
+                email: formData.email,
+                name: `${formData.firstName} ${formData.lastName}`.trim(),
+                source: 'signup',
+              }),
+            })
+          }
+        } catch {
+          /* newsletter attach is optional */
+        }
         void fetch('/api/email/welcome', {
           method: 'POST',
           headers: authHeaders,

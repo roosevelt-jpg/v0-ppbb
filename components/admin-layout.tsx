@@ -63,9 +63,11 @@ import {
   Newspaper,
   Ticket,
   Gauge,
+  Lightbulb,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { NotificationBell } from '@/components/notification-bell'
 import { LanguageSwitcherWithFlags } from '@/components/language-switcher-flags'
 import { SiteLogo } from '@/components/site-logo'
 import { ProfileMenuButton } from '@/components/profile-quick-edit'
@@ -107,6 +109,7 @@ export const adminMenuItems = [
   // Community & Events
   { label: 'Community', href: '/admin/communities', icon: UsersRound, group: 'Community' },
   { label: 'Events', href: '/admin/events', icon: Calendar, group: 'Community' },
+  { label: 'Event Suggestions', href: '/admin/event-suggestions', icon: Lightbulb, group: 'Community' },
   { label: 'Opportunities', href: '/admin/opportunities', icon: Briefcase, group: 'Community' },
   { label: 'Marketplace', href: '/admin/marketplace', icon: Store, group: 'Community' },
   { label: 'Recordings', href: '/admin/recordings', icon: Play, group: 'Community' },
@@ -399,14 +402,14 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
   }
 
   return (
-    <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+    <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800">
       <div className="flex-1 min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold truncate font-headline" style={{ color: '#111111', fontWeight: 700 }}>
+        <h1 className="text-xl sm:text-2xl font-bold truncate font-headline text-neutral-900 dark:text-neutral-50">
           {title}
         </h1>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
-          {subtitle && <p className="text-xs" style={{ color: '#888888' }}>{subtitle}</p>}
-          <div className="flex items-center gap-1 text-xs" style={{ color: '#888888' }}>
+          {subtitle && <p className="text-xs text-neutral-600 dark:text-neutral-300">{subtitle}</p>}
+          <div className="flex items-center gap-1 text-xs text-neutral-600 dark:text-neutral-300">
             <svg className="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -415,6 +418,7 @@ export function AdminHeader({ title, subtitle }: { title: string; subtitle?: str
         </div>
       </div>
       <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap justify-end">
+        <NotificationBell />
         <LanguageSwitcherWithFlags />
         <ThemeToggle />
         <ProfileMenuButton compact />

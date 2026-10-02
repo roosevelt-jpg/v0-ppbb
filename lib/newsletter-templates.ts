@@ -27,27 +27,116 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function youtubeBlock(id: string): string {
+  const watch = `https://www.youtube.com/watch?v=${id}`
+  const thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`
+  return `<p style="margin:16px 0;"><a href="${watch}" style="text-decoration:none;"><img src="${thumb}" alt="Watch on YouTube" width="520" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:8px;" /></a><a href="${watch}" style="display:inline-block;margin-top:8px;color:#111111;font-weight:700;text-decoration:underline;">Watch on YouTube</a></p>`
+}
+
+function embedRichMedia(html: string): string {
+  let next = html.replace(
+    /<iframe\b[^>]*src=["'](?:https?:)?\/\/(?:www\.)?(?:youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)([\w-]{11})[^"']*["'][^>]*>\s*<\/iframe>/gi,
+    (_, id: string) => youtubeBlock(id)
+  )
+  next = next.replace(
+    /(?<![\w"'=])(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})\b/gi,
+    (_, id: string) => youtubeBlock(id)
+  )
+  next = next.replace(/<img\b([^>]*?)>/gi, (tag) => {
+    if (/style=/i.test(tag)) return tag
+    return tag.replace('<img', '<img style="display:block;max-width:100%;height:auto;border:0;border-radius:8px;margin:12px 0;"')
+  })
+  return next
+}
+
+function plainToHtml(content: string): string {
+  const tokens: string[] = []
+  const stash = (html: string) => {
+    const key = `%%PB${tokens.length}%%`
+    tokens.push(html)
+    return key
+  }
+
+  let text = content.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, (_, alt: string, url: string) =>
+    stash(
+      `<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" style="display:block;max-width:100%;height:auto;border:0;border-radius:8px;margin:12px 0;" />`
+    )
+  )
+  text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, label: string, url: string) =>
+    stash(
+      `<a href="${escapeHtml(url)}" style="color:#111111;font-weight:600;text-decoration:underline;">${escapeHtml(label)}</a>`
+    )
+  )
+  text = text.replace(
+    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{11})\b/gi,
+    (_, id: string) => stash(youtubeBlock(id))
+  )
+
+  const html = text
+    .split(/\n\n+/)
+    .map((paragraph) => {
+      const trimmed = paragraph.trim()
+      if (/^%%PB\d+%%$/.test(trimmed)) return trimmed
+      return `<p style="margin:0 0 16px 0;line-height:1.6;color:#333333;">${escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`
+    })
+    .join('')
+
+  return tokens.reduce((acc, token, index) => acc.replaceAll(`%%PB${index}%%`, token), html)
+}
+
 function contentToHtml(content: string): string {
   const trimmed = content.trim()
   if (!trimmed) return '<p style="margin:0;color:#333333;">&nbsp;</p>'
-  if (/<[a-z][\s\S]*>/i.test(trimmed)) return trimmed
-  return trimmed
-    .split(/\n\n+/)
-    .map((p) => `<p style="margin:0 0 16px 0;line-height:1.6;color:#333333;">${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+  const html = /<[a-z][\s\S]*>/i.test(trimmed) ? trimmed : plainToHtml(trimmed)
+  return embedRichMedia(html)
+}
+
+function socialPills(settings: GlobalSettings): string {
+  const links = settings.socialLinks || {}
+  const items: Array<[string, string | undefined]> = [
+    ['Facebook', links.facebook],
+    ['Instagram', links.instagram],
+    ['X', links.twitter],
+    ['LinkedIn', links.linkedin],
+    ['YouTube', links.youtube],
+    ['TikTok', links.tiktok],
+    ['Snapchat', links.snapchat],
+    ['Discord', links.discord],
+    ['WhatsApp', settings.whatsappLink],
+  ]
+  const cells = items
+    .filter((entry): entry is [string, string] => Boolean(entry[1]?.trim()))
+    .map(
+      ([label, url]) => `
+        <td style="padding:4px;">
+          <a href="${escapeHtml(url)}" style="display:inline-block;padding:8px 12px;background:#111111;color:#ffffff;border-radius:999px;font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:700;text-decoration:none;line-height:1;">${escapeHtml(label)}</a>
+        </td>`
+    )
     .join('')
+  if (!cells) return ''
+  return `<table align="center" cellpadding="0" cellspacing="0" border="0" style="margin:12px auto;"><tr>${cells}</tr></table>`
 }
 
 function buildFooter(settings: GlobalSettings, unsubscribeUrl: string): string {
   const year = new Date().getFullYear()
   const address = escapeHtml(settings.address || 'Dubai, UAE')
   const platform = escapeHtml(settings.platformName || 'Passive Blessings')
+  const phone = settings.phone?.trim()
+    ? `<p style="margin:0 0 8px 0;">${escapeHtml(settings.phone.trim())}</p>`
+    : ''
+  const email = settings.contactEmail?.trim()
+    ? `<p style="margin:0 0 8px 0;"><a href="mailto:${escapeHtml(settings.contactEmail.trim())}" style="color:#111111;text-decoration:underline;">${escapeHtml(settings.contactEmail.trim())}</a></p>`
+    : ''
   return `
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:32px;">
       <tr>
         <td style="border-top:1px solid #e5e5e5;padding-top:24px;font-family:Inter,Arial,sans-serif;font-size:12px;line-height:1.6;color:#666666;text-align:center;">
-          <p style="margin:0 0 8px 0;">&copy; ${year} ${platform}. All rights reserved.</p>
-          <p style="margin:0 0 12px 0;">${address}</p>
-          <p style="margin:0;">
+          ${socialPills(settings)}
+          <p style="margin:8px 0;">&copy; ${year} ${platform}. All rights reserved.</p>
+          <p style="margin:0 0 8px 0;">${address}</p>
+          ${phone}
+          ${email}
+          <p style="margin:8px 0 0 0;">
             <a href="${escapeHtml(unsubscribeUrl)}" style="color:#111111;text-decoration:underline;">Unsubscribe</a>
             from these emails
           </p>

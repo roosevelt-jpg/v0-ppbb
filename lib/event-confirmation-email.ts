@@ -4,6 +4,20 @@
  */
 
 import { paragraphs, sendBrandedEmail } from '@/lib/platform-email'
+import { addUserNotification } from '@/lib/in-app-notifications'
+
+function siteOrigin(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'https://www.passive-blessings.com'
+  ).replace(/\/$/, '')
+}
+
+function suggestEventHtml(): string {
+  const url = `${siteOrigin()}/events/suggest`
+  return `<p style="margin:16px 0 0 0;">Have an idea for a community event? <a href="${url}" style="color:#111111;font-weight:700;text-decoration:underline;">Suggest an event</a> and the team will review it.</p>`
+}
 
 export async function sendEventRegistrationEmail(opts: {
   to: string
@@ -53,14 +67,20 @@ export async function sendEventRegistrationEmail(opts: {
   }
 
   if (opts.userId) {
+    const path = (() => {
+      try {
+        return new URL(opts.eventUrl).pathname
+      } catch {
+        return '/events'
+      }
+    })()
+    void addUserNotification(opts.userId, {
+      title: headline,
+      message: opts.eventTitle,
+      href: path,
+      type: 'event_registration',
+    }).catch(() => undefined)
     void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
-      const path = (() => {
-        try {
-          return new URL(opts.eventUrl).pathname
-        } catch {
-          return '/events'
-        }
-      })()
       pushToUserSafe(
         opts.userId!,
         { title: headline, body: opts.eventTitle },
@@ -79,7 +99,7 @@ export async function sendEventRegistrationEmail(opts: {
       purpose,
       department: 'events',
       headline,
-      bodyHtml: paragraphs(...lines),
+      bodyHtml: paragraphs(...lines) + suggestEventHtml(),
       cta: { label: 'View event', url: opts.eventUrl },
     })
     return result.ok
@@ -125,14 +145,20 @@ export async function sendEventPaymentConfirmationEmail(opts: {
   }
 
   if (opts.userId) {
+    const path = (() => {
+      try {
+        return new URL(opts.eventUrl).pathname
+      } catch {
+        return '/events'
+      }
+    })()
+    void addUserNotification(opts.userId, {
+      title: 'Payment confirmed',
+      message: opts.eventTitle,
+      href: path,
+      type: 'event_registration',
+    }).catch(() => undefined)
     void import('@/lib/push-notifications-server').then(({ pushToUserSafe }) => {
-      const path = (() => {
-        try {
-          return new URL(opts.eventUrl).pathname
-        } catch {
-          return '/events'
-        }
-      })()
       pushToUserSafe(
         opts.userId!,
         { title: 'Payment confirmed', body: opts.eventTitle },
@@ -151,7 +177,7 @@ export async function sendEventPaymentConfirmationEmail(opts: {
       purpose: 'Event payment confirmation',
       department: 'events',
       headline: 'You’re confirmed',
-      bodyHtml: paragraphs(...lines),
+      bodyHtml: paragraphs(...lines) + suggestEventHtml(),
       cta: { label: 'View event details', url: opts.eventUrl },
     })
     return result.ok
@@ -238,7 +264,7 @@ export async function sendEventReminderEmail(opts: {
       purpose,
       department: 'events',
       headline,
-      bodyHtml: paragraphs(...lines),
+      bodyHtml: paragraphs(...lines) + suggestEventHtml(),
       cta: { label: 'View event', url: opts.eventUrl },
     })
     return result.ok

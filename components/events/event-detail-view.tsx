@@ -200,7 +200,7 @@ export function EventDetailView({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4 break-words">
+              <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-50 mb-4 break-words">
                 {event.title}
               </h1>
               {hostName ? (
@@ -231,21 +231,21 @@ export function EventDetailView({
                 <Calendar className="text-gray-600 shrink-0" size={20} />
                 <div>
                   <p className="text-xs text-gray-500">Date</p>
-                  <p className="font-semibold">{formatEventDate(event.startDate, 'MMM dd, yyyy')}</p>
+                  <p className="font-semibold text-neutral-900">{formatEventDate(event.startDate, 'MMM dd, yyyy')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
                 <Clock className="text-gray-600 shrink-0" size={20} />
                 <div>
                   <p className="text-xs text-gray-500">Time</p>
-                  <p className="font-semibold">{timeLabel || 'TBA'}</p>
+                  <p className="font-semibold text-neutral-900">{timeLabel || 'TBA'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
                 <MapPin className="text-gray-600 shrink-0 mt-0.5" size={20} />
                 <div className="min-w-0">
                   <p className="text-xs text-gray-500">Location</p>
-                  <p className="font-semibold break-words">{locationLabel}</p>
+                  <p className="font-semibold text-neutral-900 break-words">{locationLabel}</p>
                   {mapsUrl ? (
                     <a
                       href={mapsUrl}
@@ -263,7 +263,7 @@ export function EventDetailView({
                   <Users className="text-gray-600 shrink-0" size={20} />
                   <div>
                     <p className="text-xs text-gray-500">Attending</p>
-                    <p className="font-semibold">
+                    <p className="font-semibold text-neutral-900">
                       {event.currentAttendees}/{event.maxAttendees || '∞'}
                     </p>
                   </div>
@@ -273,7 +273,7 @@ export function EventDetailView({
                 <DollarSign className="text-gray-600 shrink-0" size={20} />
                 <div>
                   <p className="text-xs text-gray-500">From</p>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-neutral-900">
                     {selected
                       ? selected.price > 0
                         ? `${selected.currency} ${selected.price}`
@@ -492,7 +492,7 @@ export function EventDetailView({
                   <button
                     type="button"
                     onClick={copyShare}
-                    className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                    className="pb-outline-btn inline-flex items-center justify-center gap-2 w-full py-2 border border-neutral-300 rounded-lg text-sm text-neutral-900 bg-white"
                   >
                     <Copy size={14} /> Copy share link
                   </button>
@@ -500,7 +500,7 @@ export function EventDetailView({
                     href={whatsappShareHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                    className="inline-flex items-center justify-center gap-2 w-full py-2 border border-neutral-300 rounded-lg text-sm text-neutral-900 bg-white"
                   >
                     <Share2 size={14} /> Share on WhatsApp
                   </a>
@@ -518,13 +518,13 @@ export function EventDetailView({
                         })}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2 border border-neutral-300 rounded-lg text-sm text-neutral-900 bg-white"
                       >
                         <CalendarPlus size={14} /> Add to Google Calendar
                       </a>
                       <a
                         href={`/api/events/${event.id}/ics`}
-                        className="inline-flex items-center justify-center gap-2 w-full py-2 border rounded-lg text-sm"
+                        className="inline-flex items-center justify-center gap-2 w-full py-2 border border-neutral-300 rounded-lg text-sm text-neutral-900 bg-white"
                       >
                         <Download size={14} /> Download .ics
                       </a>

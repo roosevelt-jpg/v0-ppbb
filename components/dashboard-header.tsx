@@ -44,15 +44,15 @@ export function DashboardHeader({ title, subtitle, showDateTime = true }: Dashbo
   }
 
   return (
-    <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3" style={{ backgroundColor: '#ffffff', borderColor: '#e4e1da' }}>
+    <div className="border-b px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800">
       <div className="flex-1">
-        <h1 className="text-2xl font-bold font-headline" style={{ color: '#111111', fontWeight: 700 }}>
+        <h1 className="text-2xl font-bold font-headline text-neutral-900 dark:text-neutral-50">
           {title}
         </h1>
         <div className="flex items-center gap-4 mt-2">
-          {subtitle && <p className="text-xs" style={{ color: '#888888' }}>{subtitle}</p>}
+          {subtitle && <p className="text-xs text-neutral-600 dark:text-neutral-300">{subtitle}</p>}
           {showDateTime && (
-            <div className="flex items-center gap-1 text-xs" style={{ color: '#888888' }}>
+            <div className="flex items-center gap-1 text-xs text-neutral-600 dark:text-neutral-300">
               <Clock className="h-3 w-3" />
               <span>{dateTime}</span>
             </div>
