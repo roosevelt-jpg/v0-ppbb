@@ -1,0 +1,17 @@
+{
+  "name": "PPBB Platform (Next.js 16 + Firebase)",
+  "install": "pnpm install --frozen-lockfile",
+  "terminals": [
+    {
+      "name": "next-dev",
+      "command": "pnpm dev",
+      "description": "Next.js development server on http://localhost:3000 (Turbopack)."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
