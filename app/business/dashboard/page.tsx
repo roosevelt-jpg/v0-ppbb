@@ -14,7 +14,7 @@ import {
   Briefcase,
   TrendingUp,
   Users,
-  DollarSign,
+  Banknote,
   Star,
   Settings,
   Calendar,
@@ -436,7 +436,7 @@ export default function BusinessDashboard() {
           <StatCard
             label="Referral Earnings"
             value={`AED ${stats?.referralEarnings || 0}`}
-            icon={DollarSign}
+            icon={Banknote}
             subtext={`AED ${stats?.pendingCommission || 0} pending`}
             onClick={() => router.push('/business/referrals')}
           />
@@ -455,7 +455,7 @@ export default function BusinessDashboard() {
           <StatCard
             label="Completed Payments"
             value={`${stats?.completedPayments || 0}/${stats?.totalPayments || 0}`}
-            icon={DollarSign}
+            icon={Banknote}
             onClick={() => router.push('/business/payments')}
           />
         </div>
@@ -632,7 +632,7 @@ export default function BusinessDashboard() {
               {
                 label: 'Referrals',
                 description: 'Monitor commission earnings',
-                icon: DollarSign,
+                icon: Banknote,
                 href: '/business/referrals',
               },
               {
@@ -662,7 +662,7 @@ export default function BusinessDashboard() {
               {
                 label: 'Payments',
                 description: 'Manage subscriptions and payouts',
-                icon: DollarSign,
+                icon: Banknote,
                 href: '/business/payments',
               },
               {

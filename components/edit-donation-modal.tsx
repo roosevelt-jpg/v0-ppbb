@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Dialog } from '@/components/dialog'
 import { adminApiFetch } from '@/lib/admin-api-client'
-import { Trash2, Save, DollarSign } from 'lucide-react'
+import { Trash2, Save, Banknote } from 'lucide-react'
 
 interface EditDonationModalProps {
   open: boolean
@@ -159,7 +159,7 @@ export function EditDonationModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-neutral-700 flex items-center gap-1">
-              <DollarSign className="w-4 h-4" />
+              <Banknote className="w-4 h-4" />
               Amount (AED)
             </label>
             <input

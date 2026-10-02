@@ -251,7 +251,7 @@ export default function PricingManagementPage() {
                 value={formData.price || 0}
                 onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
                 className="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-neutral-900"
-                placeholder="e.g., 9900 for $99.00"
+                placeholder="e.g., 9900 for AED 99.00"
               />
             </div>
 

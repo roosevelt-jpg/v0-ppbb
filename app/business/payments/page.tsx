@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { subscribeToBusinessPayments } from '@/lib/business-queries'
 import { BusinessPayment } from '@/lib/types'
-import { DollarSign } from 'lucide-react'
+import { Banknote } from 'lucide-react'
 import { MembershipSubscriptionOverview } from '@/components/membership/subscription-overview'
 
 export default function Payments() {
@@ -85,7 +85,7 @@ export default function Payments() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
             <div className="flex items-center gap-4">
-              <DollarSign className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
+              <Banknote className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
               <div>
                 <p className="text-neutral-500 dark:text-muted-foreground text-sm">Total Payments</p>
                 <p className="text-neutral-900 dark:text-foreground text-2xl font-semibold">{payments.length}</p>
@@ -94,7 +94,7 @@ export default function Payments() {
           </Card>
           <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
             <div className="flex items-center gap-4">
-              <DollarSign className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
+              <Banknote className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
               <div>
                 <p className="text-neutral-500 dark:text-muted-foreground text-sm">Completed</p>
                 <p className="text-neutral-900 dark:text-foreground text-2xl font-semibold">AED {completedAmount}</p>
@@ -103,7 +103,7 @@ export default function Payments() {
           </Card>
           <Card className="p-4 sm:p-6 border-[#e4e1da] dark:border-border bg-white dark:bg-card text-neutral-900 dark:text-foreground">
             <div className="flex items-center gap-4">
-              <DollarSign className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
+              <Banknote className="w-8 h-8 text-neutral-900 dark:text-foreground opacity-30" />
               <div>
                 <p className="text-neutral-500 dark:text-muted-foreground text-sm">Pending</p>
                 <p className="text-red-600 text-2xl font-semibold">AED {pendingAmount}</p>

@@ -13,7 +13,7 @@ import {
   DashboardEmptyState,
   DashboardTabButton,
 } from '@/components/dashboard-states'
-import { Users, TrendingUp, DollarSign, CheckCircle } from 'lucide-react'
+import { Users, TrendingUp, Banknote, CheckCircle } from 'lucide-react'
 import {
   LineChart,
   Line,
@@ -189,7 +189,7 @@ export default function LeadsPage() {
           { label: 'Total Leads', value: inRange.length, icon: Users },
           { label: 'Converted', value: converted, icon: CheckCircle },
           { label: 'Conversion Rate', value: `${conversionRate}%`, icon: TrendingUp },
-          { label: 'Avg Value', value: `AED ${avgValue.toFixed(0)}`, icon: DollarSign },
+          { label: 'Avg Value', value: `AED ${avgValue.toFixed(0)}`, icon: Banknote },
         ].map((stat) => (
           <div key={stat.label} className="bg-white dark:bg-card border border-[#e4e1da] dark:border-border rounded-xl p-5">
             <div className="flex items-center gap-3">

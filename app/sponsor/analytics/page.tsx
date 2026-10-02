@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { TrendingUp, DollarSign, Target, Award, Calendar, Users, PieChart, BarChart3 } from 'lucide-react'
+import { TrendingUp, Banknote, Target, Award, Calendar, Users, PieChart, BarChart3 } from 'lucide-react'
 
 export default function SponsorAnalyticsPage() {
   const { user } = useAuth()
@@ -84,7 +84,7 @@ export default function SponsorAnalyticsPage() {
                   AED {stats.totalSponsored.toLocaleString()}
                 </p>
               </div>
-              <DollarSign className="w-10 h-10 text-green-500 opacity-20" />
+              <Banknote className="w-10 h-10 text-green-500 opacity-20" />
             </div>
           </Card>
 

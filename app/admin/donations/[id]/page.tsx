@@ -2,7 +2,7 @@
 
 import React, { Suspense, useEffect, useState } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { AlertCircle, CheckCircle, ArrowLeft, DollarSign, Calendar } from 'lucide-react'
+import { AlertCircle, CheckCircle, ArrowLeft, Banknote, Calendar } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY } from '@/lib/admin-design-system'
 import { adminApiFetch } from '@/lib/admin-api-client'
@@ -236,7 +236,7 @@ function DonationDetailInner() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="p-4 border border-neutral-200">
             <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="w-4 h-4 text-green-600" />
+              <Banknote className="w-4 h-4 text-green-600" />
               <span className="text-sm text-neutral-600">Amount</span>
             </div>
             <p className="text-2xl font-bold text-neutral-900">

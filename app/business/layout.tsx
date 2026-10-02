@@ -22,7 +22,7 @@ import {
   ShoppingBag,
   Package,
   Zap,
-  DollarSign,
+  Banknote,
   Heart,
   Share2,
   Menu,
@@ -56,7 +56,7 @@ const businessMenuItems = [
   { label: 'Advertise', href: '/business/advertise', icon: Megaphone },
   { label: 'Communities', href: '/business/communities', icon: Users2 },
   { label: 'Certificates', href: '/business/certificates', icon: Award },
-  { label: 'Payments & Subscription', href: '/business/payments', icon: DollarSign },
+  { label: 'Payments & Subscription', href: '/business/payments', icon: Banknote },
   { label: 'Membership', href: '/business/membership', icon: Crown },
 ]
 

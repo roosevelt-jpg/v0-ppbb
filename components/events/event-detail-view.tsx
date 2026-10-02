@@ -7,7 +7,7 @@ import {
   Calendar,
   Clock,
   Users,
-  DollarSign,
+  Banknote,
   Loader2,
   Share2,
   CalendarPlus,
@@ -153,6 +153,16 @@ export function EventDetailView({
 
   const selected =
     ticketTypes.find((t) => t.id === selectedTicketId) || ticketTypes[0] || null
+  const priceCurrency = String(selected?.currency || event.currency || 'AED')
+    .trim()
+    .toUpperCase() || 'AED'
+  const priceLabel = selected
+    ? selected.price > 0
+      ? `${priceCurrency} ${selected.price}`
+      : 'Free'
+    : event.pricingType === 'free'
+      ? 'Free'
+      : `${priceCurrency} ${event.price}`
 
   const bannerSrc = getEventBannerURL(event as unknown as Record<string, unknown>)
   const locationLabel = getEventLocationLabel(event)
@@ -270,18 +280,10 @@ export function EventDetailView({
                 </div>
               )}
               <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
-                <DollarSign className="text-gray-600 shrink-0" size={20} />
+                <Banknote className="text-gray-600 shrink-0" size={20} aria-hidden />
                 <div>
                   <p className="text-xs text-gray-500">From</p>
-                  <p className="font-semibold text-neutral-900">
-                    {selected
-                      ? selected.price > 0
-                        ? `${selected.currency} ${selected.price}`
-                        : 'Free'
-                      : event.pricingType === 'free'
-                        ? 'Free'
-                        : `${event.currency || 'AED'} ${event.price}`}
-                  </p>
+                  <p className="font-semibold text-neutral-900">{priceLabel}</p>
                 </div>
               </div>
             </div>

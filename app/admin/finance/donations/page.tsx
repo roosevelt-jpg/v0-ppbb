@@ -8,7 +8,7 @@ import { AdminPageLayout } from '@/components/admin-page-layout'
 import { db, auth } from '@/lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import {
-  DollarSign,
+  Banknote,
   ImageIcon,
   CheckCircle2,
   AlertCircle,
@@ -500,7 +500,7 @@ export default function FinanceDonationsPage() {
                           {s.proofImage ? (
                             <ProofThumb submissionId={s.id} hasProof />
                           ) : (
-                            <DollarSign className="w-5 h-5 text-neutral-300" />
+                            <Banknote className="w-5 h-5 text-neutral-300" />
                           )}
                         </div>
                       </td>
