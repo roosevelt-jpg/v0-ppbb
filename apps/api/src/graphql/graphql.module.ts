@@ -16,6 +16,7 @@ import { ModelTrainingPlatformApplicationModule } from '../model-training-platfo
 import { ModelEvaluationPlatformApplicationModule } from '../model-evaluation-platform/application/model-evaluation-platform-application.module';
 import { ModelRegistryApplicationModule } from '../model-registry/application/model-registry-application.module';
 import { AtlasApplicationModule } from '../atlas/application/atlas-application.module';
+import { AiFabricApplicationModule } from '../ai-fabric/application/ai-fabric-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -85,6 +86,7 @@ import { ModelTrainingPlatformGraphqlResolver } from './model-training-platform.
 import { ModelEvaluationPlatformGraphqlResolver } from './model-evaluation-platform.resolver';
 import { ModelRegistryGraphqlResolver } from './model-registry.resolver';
 import { AtlasGraphqlResolver } from './atlas.resolver';
+import { AiFabricGraphqlResolver } from './ai-fabric.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -174,6 +176,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ModelEvaluationPlatformApplicationModule,
     ModelRegistryApplicationModule,
     AtlasApplicationModule,
+    AiFabricApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -251,6 +254,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     ModelEvaluationPlatformGraphqlResolver,
     ModelRegistryGraphqlResolver,
     AtlasGraphqlResolver,
+    AiFabricGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,

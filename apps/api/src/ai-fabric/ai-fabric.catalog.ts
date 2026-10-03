@@ -1,0 +1,225 @@
+export type FabricBusStatus = 'shipped' | 'partial' | 'deferred';
+
+export type FabricBusRow = {
+  id: string;
+  name: string;
+  status: FabricBusStatus;
+  api: string | null;
+  console: string | null;
+  notes: string;
+};
+
+/**
+ * Library Phase 106 → AI Fabric Foundation (VL-239).
+ * Internal communication hub connecting VerbaLab clouds — not a Kafka hyperscaler OS.
+ * Volume 10 README: buildable event/message-bus architecture; Policy Fabric must hard-gate.
+ */
+export function aiFabricBusCatalog(): FabricBusRow[] {
+  return [
+    {
+      id: 'ai-fabric',
+      name: 'AI Fabric',
+      status: 'shipped',
+      api: 'GET /v1/ai-fabric/products',
+      console: '/ai-fabric',
+      notes:
+        'Internal communication hub (VL-239). Extends AI Kernel + Inference Cloud — does not regenerate Volumes 1–9. Not a customer product mesh OS.',
+    },
+    {
+      id: 'event-fabric',
+      name: 'Event Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Kafka/NATS/RabbitMQ/Redis Streams bus (Phase 107 / VL-240).',
+    },
+    {
+      id: 'context-fabric',
+      name: 'Context Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Cross-cloud context propagation (Phase 108 / VL-241). Extends Context Runtime.',
+    },
+    {
+      id: 'knowledge-fabric',
+      name: 'Knowledge Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Knowledge routing across clouds (Phase 109 / VL-242).',
+    },
+    {
+      id: 'prompt-fabric',
+      name: 'Prompt Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Prompt routing across clouds (Phase 110 / VL-243).',
+    },
+    {
+      id: 'reasoning-fabric',
+      name: 'Reasoning Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Reasoning routing (Phase 111 / VL-244). Extends Reasoning Runtime.',
+    },
+    {
+      id: 'memory-fabric',
+      name: 'Memory Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Memory routing (Phase 112 / VL-245). Extends Memory Runtime.',
+    },
+    {
+      id: 'agent-fabric',
+      name: 'Agent Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes: 'Agent coordination (Phase 113 / VL-246). Must stay sandboxed + Policy-gated.',
+    },
+    {
+      id: 'policy-fabric',
+      name: 'Policy Fabric',
+      status: 'deferred',
+      api: null,
+      console: null,
+      notes:
+        'Fabric-wide hard gate (Phase 114 / VL-247). Volume 10 README: must enforce, not log-only.',
+    },
+    {
+      id: 'workflow-bus',
+      name: 'Workflow Bus',
+      status: 'partial',
+      api: 'GET /v1/workflow-runtime/engine',
+      console: '/workflow-runtime',
+      notes: 'Discovery link to Workflow Runtime until dedicated fabric bus ships.',
+    },
+    {
+      id: 'identity-bus',
+      name: 'Identity Bus',
+      status: 'partial',
+      api: 'GET /v1/ai-fabric/routing',
+      console: '/ai-fabric',
+      notes: 'Identity propagation via existing Clerk/session + request IDs — not a new IdP.',
+    },
+    {
+      id: 'inference-bus',
+      name: 'Inference Bus',
+      status: 'partial',
+      api: 'GET /v1/ai-router/engine',
+      console: '/ai-router',
+      notes: 'Discovery link to AI Router / Inference Cloud.',
+    },
+    {
+      id: 'telemetry-bus',
+      name: 'Telemetry Bus',
+      status: 'partial',
+      api: 'GET /v1/ai-fabric/monitoring',
+      console: '/ai-fabric',
+      notes: 'Uses existing observability/request IDs — not a new APM OS.',
+    },
+    {
+      id: 'billing-bus',
+      name: 'Billing Bus',
+      status: 'partial',
+      api: 'GET /v1/cost-optimization/engine',
+      console: '/billing',
+      notes: 'Discovery link to billing/cost surfaces — not a ledger rewrite.',
+    },
+    {
+      id: 'plugin-bus',
+      name: 'Plugin Bus',
+      status: 'partial',
+      api: 'GET /v1/plugin-runtime/engine',
+      console: '/plugin-runtime',
+      notes: 'Discovery link to Plugin Runtime (sandboxed).',
+    },
+    {
+      id: 'security-bus',
+      name: 'Security Bus',
+      status: 'partial',
+      api: 'GET /v1/policy-runtime/engine',
+      console: '/policy-runtime',
+      notes: 'Policy Runtime hard-gate today; Policy Fabric extends fabric-wide later.',
+    },
+    {
+      id: 'streaming-bus',
+      name: 'Streaming Bus',
+      status: 'partial',
+      api: 'GET /v1/streaming-runtime/engine',
+      console: '/streaming-runtime',
+      notes: 'Discovery link to Streaming Runtime.',
+    },
+    {
+      id: 'service-discovery',
+      name: 'Service Discovery',
+      status: 'partial',
+      api: 'GET /v1/ai-fabric/routing',
+      console: '/ai-fabric',
+      notes: 'Static catalog of cloud/runtime routes — not Consul/etcd OS.',
+    },
+  ];
+}
+
+export function aiFabricArchitectureNotes() {
+  return {
+    style: 'nest_modular_monolith',
+    ddd: 'bounded_ai_fabric_hub',
+    cqrs: true,
+    hexagonalRewrite: false,
+    repositoryPattern: 'prisma_and_existing_buses',
+    eventDriven: 'audit_jobs_and_future_event_fabric',
+    solid: true,
+    terraform: true,
+    terraformPath: 'infra/DEPLOY.md',
+    kubernetes: true,
+    kubernetesPath: 'infra/AWS_EKS.md',
+    primaryRegion: 'af-south-1',
+    extendsAiKernel: true,
+    extendsInferenceCloud: true,
+    regeneratesVolumes1to9: false,
+    customerFacingProduct: false,
+    kafkaHyperscalerOs: false,
+    serviceMeshOs: false,
+    fabricWidePolicyHardGateRequired: true,
+    policyLogOnlyForbidden: true,
+    brokerBackendsDeferred: true,
+    note:
+      'Volume 10 README: buildable internal bus architecture. Foundation ships discovery/routing hub; Event Fabric (Kafka/NATS/Rabbit/Redis Streams) deferred to VL-240. Policy Fabric must hard-gate when shipped.',
+  };
+}
+
+export function aiFabricHonesty() {
+  return {
+    customerFacingProduct: false,
+    kafkaHyperscalerOs: false,
+    natsClusterOs: false,
+    serviceMeshOs: false,
+    regeneratesVolumes1to9: false,
+    regeneratesAiKernel: false,
+    fabricWidePolicyHardGateRequired: true,
+    policyLogOnlyForbidden: true,
+    brokerBackendsDeferred: true,
+    staticRoutingCatalog: true,
+  };
+}
+
+export function aiFabricRoutingTable() {
+  return [
+    { cloud: 'language', path: '/language', api: '/v1/language-cloud/products' },
+    { cloud: 'speech', path: '/speech', api: '/v1/speech-cloud/products' },
+    { cloud: 'voice', path: '/voice-cloud', api: '/v1/voice-cloud/products' },
+    { cloud: 'intelligence', path: '/intelligence-cloud', api: '/v1/intelligence-cloud/products' },
+    { cloud: 'knowledge', path: '/knowledge-cloud', api: '/v1/knowledge-cloud/products' },
+    { cloud: 'inference', path: '/inference-cloud', api: '/v1/inference-cloud/products' },
+    { cloud: 'ai-kernel', path: '/ai-kernel', api: '/v1/ai-kernel/products' },
+    { cloud: 'foundation-model-cloud', path: '/foundation-model-cloud', api: '/v1/foundation-model-cloud/products' },
+    { cloud: 'enterprise', path: '/enterprise', api: null },
+    { cloud: 'developer', path: '/developers', api: null },
+    { cloud: 'gateway', path: '/gateway', api: '/v1/gateway/products' },
+  ];
+}

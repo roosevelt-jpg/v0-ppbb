@@ -1211,6 +1211,25 @@ export class VerbaLab {
     return this.requestJson('/v1/atlas/engine', { method: 'GET' });
   }
 
+  async aiFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      console: string | null;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    safety: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/ai-fabric/products', { method: 'GET' });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

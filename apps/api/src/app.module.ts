@@ -68,6 +68,7 @@ import { ModelTrainingPlatformModule } from './model-training-platform/model-tra
 import { ModelEvaluationPlatformModule } from './model-evaluation-platform/model-evaluation-platform.module';
 import { ModelRegistryModule } from './model-registry/model-registry.module';
 import { AtlasModule } from './atlas/atlas.module';
+import { AiFabricModule } from './ai-fabric/ai-fabric.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -154,6 +155,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     ModelEvaluationPlatformModule,
     ModelRegistryModule,
     AtlasModule,
+    AiFabricModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,

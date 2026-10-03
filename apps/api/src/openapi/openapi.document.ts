@@ -3108,6 +3108,59 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/ai-fabric/products': {
+      get: {
+        summary: 'AI Fabric bus catalog',
+        operationId: 'listAiFabricBuses',
+        responses: {
+          '200': {
+            description:
+              'Internal fabric buses, architecture, and policy hard-gate honesty',
+          },
+        },
+      },
+    },
+    '/v1/ai-fabric/engine': {
+      get: {
+        summary: 'AI Fabric engine (alias of products)',
+        operationId: 'getAiFabricEngine',
+        responses: {
+          '200': { description: 'Fabric catalog + honesty' },
+        },
+      },
+    },
+    '/v1/ai-fabric/routing': {
+      get: {
+        summary: 'AI Fabric service-discovery routing table',
+        operationId: 'getAiFabricRouting',
+        responses: {
+          '200': { description: 'Static cloud/runtime route catalog' },
+        },
+      },
+    },
+    '/v1/ai-fabric/overview': {
+      get: {
+        summary: 'AI Fabric org overview',
+        operationId: 'getAiFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, deferred buses, safety notes' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/ai-fabric/monitoring': {
+      get: {
+        summary: 'AI Fabric foundation monitoring',
+        operationId: 'getAiFabricMonitoring',
+        responses: {
+          '200': { description: 'Bus status snapshot + honesty' },
+        },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

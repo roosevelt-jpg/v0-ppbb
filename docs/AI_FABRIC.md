@@ -1,0 +1,57 @@
+# VerbaLab AI Fabric
+
+**Status:** Foundation hub shipped (VL-239 / library Phase 106)  
+**Rule:** AI Fabric is the **internal** communication layer connecting VerbaLab clouds — **not** a customer-facing product, Kafka hyperscaler, or service-mesh OS. Extends AI Kernel + Inference Cloud. Do **not** regenerate Volumes 1–9. Roadmap: [`docs/roadmap/volume10-ai-fabric/`](./roadmap/volume10-ai-fabric/).
+
+Volume 10 README: this volume is buildable bus/messaging infrastructure (Kafka/NATS/RabbitMQ/Redis Streams/CloudEvents named for Event Fabric). Policy Fabric must be a **hard gate**, not log-only.
+
+---
+
+## Library term → VerbaLab
+
+| Library ask | VerbaLab reality |
+| --- | --- |
+| AI Fabric Foundation | **VL-239** — `/ai-fabric` + bus catalog / routing |
+| Event Fabric | **Deferred** — Phase 107 / VL-240 |
+| Context / Knowledge / Prompt / Reasoning / Memory / Agent Fabric | **Deferred** — VL-241–246 |
+| Policy Fabric | **Deferred** — VL-247; hard-gate required when shipped |
+| Service Discovery | **Partial** — static routing catalog |
+| Identity Propagation | **Partial** — Clerk session + request IDs |
+| Observability / Telemetry | **Partial** — existing platform logs/metrics |
+| DDD / CQRS / Hexagonal | Bounded catalog CQRS slice — `hexagonalRewrite: false` |
+| Terraform / Kubernetes | Shared platform — Fly default; optional EKS `af-south-1` |
+
+---
+
+## Surfaces
+
+| Surface | Path |
+| --- | --- |
+| Console (internal) | `/ai-fabric` |
+| REST catalog | `GET /v1/ai-fabric/products` (public) |
+| REST engine | `GET /v1/ai-fabric/engine` |
+| REST routing | `GET /v1/ai-fabric/routing` |
+| REST overview | `GET /v1/ai-fabric/overview` (Clerk session) |
+| Monitoring | `GET /v1/ai-fabric/monitoring` |
+| GraphQL | `aiFabricBuses` |
+| SDK | `aiFabricProducts()` |
+| CLI | `verbalab ai-fabric-products` |
+
+## Action safety (README)
+
+1. **Policy Fabric (Phase 114)** — must hard-gate across fabric buses (requests blocked), not log/flag-only.
+2. Until Policy Fabric ships, **Policy Runtime** remains the hard gate for Agent/Workflow/Plugin.
+
+## Honesty
+
+| Flag | Value |
+| --- | --- |
+| `customerFacingProduct` | false |
+| `kafkaHyperscalerOs` | false |
+| `serviceMeshOs` | false |
+| `regeneratesVolumes1to9` | false |
+| `fabricWidePolicyHardGateRequired` | true |
+| `policyLogOnlyForbidden` | true |
+| `brokerBackendsDeferred` | true |
+
+See ADR-0141.
