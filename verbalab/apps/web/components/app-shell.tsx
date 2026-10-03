@@ -29,6 +29,7 @@ const links = [
   { href: '/workflow-marketplace', label: 'Workflow market' },
   { href: '/connector-marketplace', label: 'Connector market' },
   { href: '/voice-language-marketplace', label: 'Voice/Lang market' },
+  { href: '/creator-economy', label: 'Creator Economy' },
   { href: '/ai-fabric', label: 'AI Fabric' },
   { href: '/event-fabric', label: 'Event Fabric' },
   { href: '/context-fabric', label: 'Context Fabric' },

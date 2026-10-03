@@ -3893,6 +3893,117 @@ export const openApiDocument = {
         responses: { '200': { description: 'Capability status snapshot' } },
       },
     },
+    '/v1/creator-economy/engine': {
+      get: {
+        summary: 'Creator Economy engine catalog',
+        operationId: 'getCreatorEconomyEngine',
+        responses: {
+          '200': {
+            description:
+              'Creator Economy capabilities, royalty hand-checks, Stripe honesty, tax/dispute gaps',
+          },
+        },
+      },
+    },
+    '/v1/creator-economy/products': {
+      get: {
+        summary: 'Creator Economy products (alias of engine)',
+        operationId: 'listCreatorEconomyProducts',
+        responses: { '200': { description: 'Creator Economy catalog + honesty' } },
+      },
+    },
+    '/v1/creator-economy/royalty/scenarios': {
+      get: {
+        summary: 'Hand-checkable royalty split scenarios',
+        operationId: 'getCreatorEconomyRoyaltyScenarios',
+        responses: { '200': { description: 'Scenario table with computed pass/fail' } },
+      },
+    },
+    '/v1/creator-economy/royalty/preview': {
+      post: {
+        summary: 'Preview royalty split for an amount',
+        operationId: 'previewCreatorEconomyRoyalty',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Fee + publisher net preview' } },
+      },
+    },
+    '/v1/creator-economy/sales': {
+      get: {
+        summary: 'Aggregated marketplace sales for the org',
+        operationId: 'listCreatorEconomySales',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Sale receipts' } },
+      },
+    },
+    '/v1/creator-economy/invoices': {
+      get: {
+        summary: 'Invoice-style views over MarketplaceSale',
+        operationId: 'listCreatorEconomyInvoices',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Invoice-style receipts' } },
+      },
+    },
+    '/v1/creator-economy/profiles/creator': {
+      get: {
+        summary: 'Creator/publisher profile',
+        operationId: 'getCreatorEconomyCreatorProfile',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Creator profile + Connect readiness' } },
+      },
+    },
+    '/v1/creator-economy/profiles/organization': {
+      get: {
+        summary: 'Organization economy profile',
+        operationId: 'getCreatorEconomyOrganizationProfile',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Org buyer/publisher summary' } },
+      },
+    },
+    '/v1/creator-economy/profiles/partner': {
+      get: {
+        summary: 'Partner / Connect readiness',
+        operationId: 'getCreatorEconomyPartnerProfile',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Stripe Connect Express partner status' } },
+      },
+    },
+    '/v1/creator-economy/licensing': {
+      get: {
+        summary: 'Workspace marketplace entitlements',
+        operationId: 'listCreatorEconomyLicensing',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Installed entitlements' } },
+      },
+    },
+    '/v1/creator-economy/tax': {
+      get: {
+        summary: 'Tax reporting honesty (gaps)',
+        operationId: 'getCreatorEconomyTax',
+        responses: { '200': { description: 'Explicit tax coverage gaps' } },
+      },
+    },
+    '/v1/creator-economy/disputes': {
+      get: {
+        summary: 'Dispute/chargeback honesty (gaps)',
+        operationId: 'getCreatorEconomyDisputes',
+        responses: { '200': { description: 'Explicit dispute coverage gaps' } },
+      },
+    },
+    '/v1/creator-economy/analytics': {
+      get: {
+        summary: 'Creator Economy analytics',
+        operationId: 'getCreatorEconomyAnalytics',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: { '200': { description: 'Aggregates' } },
+      },
+    },
+    '/v1/creator-economy/monitoring': {
+      get: {
+        summary: 'Creator Economy monitoring',
+        operationId: 'getCreatorEconomyMonitoring',
+        responses: { '200': { description: 'Capability + hand-check snapshot' } },
+      },
+    },
     '/v1/event-fabric/products': {
       get: {
         summary: 'Event Fabric capability catalog',

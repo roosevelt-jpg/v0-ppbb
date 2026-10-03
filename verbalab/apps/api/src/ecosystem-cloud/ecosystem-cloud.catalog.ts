@@ -119,11 +119,11 @@ export function ecosystemProductCatalog(): EcosystemProductRow[] {
     {
       id: 'creator-economy',
       name: 'Creator Economy',
-      status: 'partial',
-      api: 'GET /v1/marketplace/sales',
-      console: '/marketplace',
+      status: 'shipped',
+      api: 'GET /v1/creator-economy/engine',
+      console: '/creator-economy',
       notes:
-        'VL-092 Stripe Connect Express + platform fee already ships. VL-258 / Phase 125 expands royalty math, payouts, tax/dispute honesty — hand-check payout math before live creators.',
+        'VL-258 / Phase 125. Extends VL-092 Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit. Stripe-only — not a payment-processor OS.',
     },
     {
       id: 'sdk-marketplace',
@@ -251,6 +251,11 @@ export function ecosystemRoutingTable() {
       surface: 'voice-language-marketplace',
       path: '/voice-language-marketplace',
       api: '/v1/voice-language-marketplace/engine',
+    },
+    {
+      surface: 'creator-economy',
+      path: '/creator-economy',
+      api: '/v1/creator-economy/engine',
     },
     { surface: 'creator-sales', path: '/marketplace', api: '/v1/marketplace/sales' },
     { surface: 'billing', path: '/billing', api: '/v1/billing/summary' },

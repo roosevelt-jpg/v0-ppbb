@@ -69,7 +69,7 @@ export class EcosystemCloudService {
         pluginAgentSandboxRequired: true,
         realMoneyRiskCategory: true,
         note:
-          'Real-money volume. Stripe Connect already backs VL-092 creator payouts. Tax/dispute/1099 flows remain gaps until Creator Economy (VL-258) documents coverage. Plugin/Agent listings must stay sandboxed.',
+          'Real-money volume. Stripe Connect backs VL-092/VL-258 creator payouts. Tax/dispute/1099 flows remain documented gaps (taxHandlingComplete=false). Plugin/Agent listings must stay sandboxed.',
       },
       deferred: {
         pluginMarketplace: false,
@@ -80,7 +80,7 @@ export class EcosystemCloudService {
         workflowMarketplace: false,
         connectorMarketplace: false,
         voiceLanguageMarketplace: false,
-        creatorEconomyExpansion: true,
+        creatorEconomyExpansion: false,
         sdkMarketplace: true,
         templateMarketplace: true,
         extensionMarketplace: true,
@@ -101,6 +101,7 @@ export class EcosystemCloudService {
         workflowMarketplace: '/workflow-marketplace',
         connectorMarketplace: '/connector-marketplace',
         voiceLanguageMarketplace: '/voice-language-marketplace',
+        creatorEconomy: '/creator-economy',
         billing: '/billing',
         pluginRuntime: '/plugin-runtime',
         agentRuntime: '/agent-runtime',
@@ -112,7 +113,7 @@ export class EcosystemCloudService {
       },
       docs: '/docs/ECOSYSTEM_CLOUD.md',
       note:
-        'Ecosystem Foundation (VL-249). Discovery hub over existing marketplaces; dedicated marketplaces VL-250–257 and Creator Economy VL-258 deferred with honest catalog.',
+        'Ecosystem Foundation (VL-249). Discovery hub over marketplaces VL-250–257 + Creator Economy VL-258; Production Audit VL-259 remains.',
     };
   }
 

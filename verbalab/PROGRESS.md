@@ -287,7 +287,7 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | VL-255 | Workflow Marketplace (Phase 122) | Done | `/workflow-marketplace` over Workflow Runtime; FabricPolicyGate + WorkflowPolicyGate sandbox run; ADR-0157. Not Zapier/Temporal OS. |
 | VL-256 | Connector Marketplace (Phase 123) | Done | `/connector-marketplace` entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS. |
 | VL-257 | Voice & Language Marketplace (Phase 124) | Done | `/voice-language-marketplace` pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS. |
-| VL-258 | Creator Economy (Phase 125) | Not Started | Revenue sharing/payouts expansion over VL-092; hand-check payout math; tax/dispute honesty. |
+| VL-258 | Creator Economy (Phase 125) | Done | `/creator-economy` over VL-092 Connect + MarketplaceSale; hand-checked royalty math; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |
 | VL-259 | Ecosystem Production Audit (Phase 126) | Not Started | Hardening pass — review, don't add features. |
 
 ---
@@ -451,3 +451,4 @@ Last updated: 2026-10-03 (VL-248 Done — AI Fabric Production Audit)
 | 2026-10-03 | VL-255 Done: Workflow Marketplace (Phase 122) — publish/install/run over Workflow Runtime; FabricPolicyGate + WorkflowPolicyGate; ADR-0157. Not Zapier/Temporal OS / live steps. |
 | 2026-10-03 | VL-256 Done: Connector Marketplace (Phase 123) — entitlement SKUs over connector catalog + Slack; FabricPolicyGate + Stripe honesty; ADR-0158. Not Zapier/iPaaS OS / live outbound. |
 | 2026-10-03 | VL-257 Done: Voice & Language Marketplace (Phase 124) — pack entitlements over VL-177 + Volume 1; FabricPolicyGate + Stripe honesty; ADR-0159. Not ElevenLabs/voice CDN OS / celebrity without rights. |
+| 2026-10-03 | VL-258 Done: Creator Economy (Phase 125) — royalty math + profiles/invoices over VL-092 Connect; hand-checked scenarios; tax/dispute gaps explicit; ADR-0160. Not payment-processor OS. |

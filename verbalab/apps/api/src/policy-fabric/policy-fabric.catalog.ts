@@ -51,6 +51,7 @@ export const FABRIC_BUSES = [
   'workflow-marketplace',
   'connector-marketplace',
   'voice-language-marketplace',
+  'creator-economy',
 ] as const;
 
 /**

@@ -919,6 +919,57 @@ export class GqlVoiceLanguageMarketplaceEngine {
 }
 
 @ObjectType()
+export class GqlCreatorEconomyCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlCreatorEconomyEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlCreatorEconomyCapability])
+  capabilities!: GqlCreatorEconomyCapability[];
+
+  @Field()
+  paymentProcessorOs!: boolean;
+
+  @Field()
+  taxHandlingComplete!: boolean;
+
+  @Field()
+  disputeChargebackComplete!: boolean;
+
+  @Field()
+  creatorPayoutMathVerifiedLive!: boolean;
+
+  @Field()
+  creatorPayoutMathHandCheckedInTests!: boolean;
+
+  @Field()
+  storesRawCardData!: boolean;
+
+  @Field()
+  stripeOrEquivalentRequired!: boolean;
+}
+
+@ObjectType()
 export class GqlEventFabricCapability {
   @Field()
   id!: string;

@@ -34,6 +34,7 @@ import { AgentMarketplaceApplicationModule } from '../agent-marketplace/applicat
 import { WorkflowMarketplaceApplicationModule } from '../workflow-marketplace/application/workflow-marketplace-application.module';
 import { ConnectorMarketplaceApplicationModule } from '../connector-marketplace/application/connector-marketplace-application.module';
 import { VoiceLanguageMarketplaceApplicationModule } from '../voice-language-marketplace/application/voice-language-marketplace-application.module';
+import { CreatorEconomyApplicationModule } from '../creator-economy/application/creator-economy-application.module';
 import { MemoryRuntimeModule } from '../memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from '../prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from '../context-runtime/context-runtime.module';
@@ -121,6 +122,7 @@ import { AgentMarketplaceGraphqlResolver } from './agent-marketplace.resolver';
 import { WorkflowMarketplaceGraphqlResolver } from './workflow-marketplace.resolver';
 import { ConnectorMarketplaceGraphqlResolver } from './connector-marketplace.resolver';
 import { VoiceLanguageMarketplaceGraphqlResolver } from './voice-language-marketplace.resolver';
+import { CreatorEconomyGraphqlResolver } from './creator-economy.resolver';
 import { MemoryRuntimeGraphqlResolver } from './memory-runtime.resolver';
 import { PromptRuntimeGraphqlResolver } from './prompt-runtime.resolver';
 import { ContextRuntimeGraphqlResolver } from './context-runtime.resolver';
@@ -228,6 +230,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     WorkflowMarketplaceApplicationModule,
     ConnectorMarketplaceApplicationModule,
     VoiceLanguageMarketplaceApplicationModule,
+    CreatorEconomyApplicationModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
@@ -323,6 +326,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     WorkflowMarketplaceGraphqlResolver,
     ConnectorMarketplaceGraphqlResolver,
     VoiceLanguageMarketplaceGraphqlResolver,
+    CreatorEconomyGraphqlResolver,
     MemoryRuntimeGraphqlResolver,
     PromptRuntimeGraphqlResolver,
     ContextRuntimeGraphqlResolver,
