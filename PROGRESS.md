@@ -6,7 +6,7 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-241 Done — Context Fabric)
+Last updated: 2026-10-03 (VL-242 Done — Knowledge Fabric)
 
 ---
 
@@ -271,7 +271,7 @@ Last updated: 2026-10-03 (VL-241 Done — Context Fabric)
 | VL-239 | AI Fabric Foundation (Phase 106) | Done | `/ai-fabric` internal hub + routing catalog; ADR-0141. Not Kafka OS/customer mesh. Policy hard-gate required for VL-247. |
 | VL-240 | Event Fabric (Phase 107) | Done | Redis Streams + CloudEvents (DLQ/retries/replay/snapshots); Kafka/NATS/Rabbit adapters deferred; ADR-0142. |
 | VL-241 | Context Fabric (Phase 108) | Done | Router over Context Runtime + optional Event Fabric propagate; SSE ticks; ADR-0143. Not infinite-context/WebSocket OS. |
-| VL-242 | Knowledge Fabric (Phase 109) | Not Started | |
+| VL-242 | Knowledge Fabric (Phase 109) | Done | Router over Knowledge Cloud; same-org distribute/sync + federation handoffs; ADR-0144. Not Confluence/Neo4j OS. |
 | VL-243 | Prompt Fabric (Phase 110) | Not Started | |
 | VL-244 | Reasoning Fabric (Phase 111) | Not Started | |
 | VL-245 | Memory Fabric (Phase 112) | Not Started | |
@@ -424,3 +424,4 @@ Last updated: 2026-10-03 (VL-241 Done — Context Fabric)
 | 2026-10-03 | VL-239 Done: AI Fabric Foundation (Phase 106) — internal bus hub/routing; ADR-0141. Not Kafka hyperscaler; Policy Fabric hard-gate required later. |
 | 2026-10-03 | VL-240 Done: Event Fabric (Phase 107) — Redis Streams + CloudEvents; DLQ/retries/replay/snapshots; ADR-0142. Kafka/NATS/Rabbit deferred adapters. |
 | 2026-10-03 | VL-241 Done: Context Fabric (Phase 108) — router over Context Runtime; optional Event Fabric propagate; ADR-0143. Not infinite-context/WebSocket OS. |
+| 2026-10-03 | VL-242 Done: Knowledge Fabric (Phase 109) — router over Knowledge Cloud; same-org distribute/sync; ADR-0144. Not Confluence/Neo4j federation OS. |

@@ -140,7 +140,7 @@ export class EventFabricService {
         natsAdapter: true,
         rabbitmqAdapter: true,
         contextFabric: false,
-        knowledgeFabric: true,
+        knowledgeFabric: false,
         promptFabric: true,
         reasoningFabric: true,
         memoryFabric: true,

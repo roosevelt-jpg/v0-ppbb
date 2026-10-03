@@ -3346,6 +3346,95 @@ export const openApiDocument = {
         responses: { '200': { description: 'Counters + honesty' } },
       },
     },
+    '/v1/knowledge-fabric/products': {
+      get: {
+        summary: 'Knowledge Fabric capability catalog',
+        operationId: 'listKnowledgeFabricProducts',
+        responses: {
+          '200': {
+            description:
+              'Knowledge router capabilities, routes, Knowledge Cloud handoff honesty',
+          },
+        },
+      },
+    },
+    '/v1/knowledge-fabric/engine': {
+      get: {
+        summary: 'Knowledge Fabric engine (alias of products)',
+        operationId: 'getKnowledgeFabricEngine',
+        responses: { '200': { description: 'Catalog + honesty' } },
+      },
+    },
+    '/v1/knowledge-fabric/routes': {
+      get: {
+        summary: 'Knowledge Fabric routing table',
+        operationId: 'listKnowledgeFabricRoutes',
+        responses: { '200': { description: 'kind → Knowledge Cloud/Search/RAG handoffs' } },
+      },
+    },
+    '/v1/knowledge-fabric/route': {
+      post: {
+        summary: 'Plan knowledge routing for selected kinds',
+        operationId: 'planKnowledgeFabricRoute',
+        responses: { '200': { description: 'Router plan' } },
+      },
+    },
+    '/v1/knowledge-fabric/distribute': {
+      post: {
+        summary: 'Plan knowledge distribution to same-org workspaces',
+        operationId: 'distributeKnowledgeFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Distribution plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-fabric/sync': {
+      post: {
+        summary: 'Plan knowledge sync between same-org workspaces',
+        operationId: 'syncKnowledgeFabric',
+        security: [{ ClerkAuth: [] }, { ApiKeyAuth: [] }],
+        responses: {
+          '200': { description: 'Sync cursor/plan + optional Event Fabric event' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-fabric/federate': {
+      post: {
+        summary: 'List knowledge federation handoff targets',
+        operationId: 'federateKnowledgeFabric',
+        responses: { '200': { description: 'Federation handoff catalog' } },
+      },
+    },
+    '/v1/knowledge-fabric/overview': {
+      get: {
+        summary: 'Knowledge Fabric org overview',
+        operationId: 'getKnowledgeFabricOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session + routes + peer workspaces' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/knowledge-fabric/monitoring': {
+      get: {
+        summary: 'Knowledge Fabric monitoring',
+        operationId: 'getKnowledgeFabricMonitoring',
+        responses: { '200': { description: 'Counters + recent plans + honesty' } },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

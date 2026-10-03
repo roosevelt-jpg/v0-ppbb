@@ -46,10 +46,11 @@ export function aiFabricBusCatalog(): FabricBusRow[] {
     {
       id: 'knowledge-fabric',
       name: 'Knowledge Fabric',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Knowledge routing across clouds (Phase 109 / VL-242).',
+      status: 'shipped',
+      api: 'GET /v1/knowledge-fabric/products',
+      console: '/knowledge-fabric',
+      notes:
+        'Knowledge router over Knowledge Cloud (VL-242). Same-org distribute/sync — not Confluence/Neo4j OS.',
     },
     {
       id: 'prompt-fabric',

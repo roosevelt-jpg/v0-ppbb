@@ -1348,6 +1348,75 @@ export class VerbaLab {
     });
   }
 
+  async knowledgeFabricProducts(): Promise<{
+    product: string;
+    products: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    routes: Array<{
+      kind: string;
+      name: string;
+      target: string;
+      api: string;
+      cloud: string;
+      notes: string;
+    }>;
+    architecture: Record<string, unknown>;
+    honesty: Record<string, unknown>;
+    docs: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/knowledge-fabric/products', { method: 'GET' });
+  }
+
+  async knowledgeFabricRoute(body?: { kinds?: string[] }): Promise<{
+    plan: Array<Record<string, unknown>>;
+    missing: string[];
+  }> {
+    return this.requestJson('/v1/knowledge-fabric/route', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async knowledgeFabricFederate(body?: { kinds?: string[] }): Promise<{
+    federation: Array<Record<string, unknown>>;
+    missing: string[];
+  }> {
+    return this.requestJson('/v1/knowledge-fabric/federate', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async knowledgeFabricDistribute(body?: {
+    kinds?: string[];
+    targetWorkspaceIds?: string[];
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/knowledge-fabric/distribute', {
+      method: 'POST',
+      body: JSON.stringify(body ?? {}),
+    });
+  }
+
+  async knowledgeFabricSync(body: {
+    targetWorkspaceId: string;
+    kinds?: string[];
+    publishEvent?: boolean;
+    topic?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/knowledge-fabric/sync', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
   async memoryRuntimeEngine(): Promise<{
     product: string;
     note: string;

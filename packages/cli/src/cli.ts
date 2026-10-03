@@ -30,6 +30,9 @@ function usage(): never {
   verbalab event-fabric-poll [--topic <topic>] [--count <n>]
   verbalab context-fabric-products
   verbalab context-fabric-route [--kind <kind>]...
+  verbalab knowledge-fabric-products
+  verbalab knowledge-fabric-route [--kind <kind>]...
+  verbalab knowledge-fabric-federate [--kind <kind>]...
   verbalab memory-runtime-engine
   verbalab memory-runtime-put --content <text> [--scope workspace] [--kind short_term]
   verbalab prompt-runtime-engine
@@ -280,6 +283,39 @@ async function main() {
     }
     console.log(
       JSON.stringify(await vl.contextFabricRoute(kinds.length ? { kinds } : {}), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'knowledge-fabric-products') {
+    console.log(JSON.stringify(await vl.knowledgeFabricProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'knowledge-fabric-route') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(await vl.knowledgeFabricRoute(kinds.length ? { kinds } : {}), null, 2),
+    );
+    return;
+  }
+
+  if (command === 'knowledge-fabric-federate') {
+    const kinds: string[] = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (rest[i] === '--kind' && rest[i + 1]) {
+        kinds.push(rest[i + 1]!);
+        i += 1;
+      }
+    }
+    console.log(
+      JSON.stringify(await vl.knowledgeFabricFederate(kinds.length ? { kinds } : {}), null, 2),
     );
     return;
   }
