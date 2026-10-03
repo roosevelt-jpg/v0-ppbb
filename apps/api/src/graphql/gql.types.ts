@@ -448,6 +448,27 @@ export class GqlFoundationModelCloudProduct {
 }
 
 @ObjectType()
+export class GqlModelTrainingMethod {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field()
+  launchable!: boolean;
+
+  @Field(() => String, { nullable: true })
+  existingApi!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
 export class GqlMemoryRuntimeCapability {
   @Field()
   id!: string;

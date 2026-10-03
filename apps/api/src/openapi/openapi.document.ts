@@ -2774,6 +2774,81 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/model-training-platform/engine': {
+      get: {
+        summary: 'Model Training Platform engine catalog',
+        operationId: 'getModelTrainingPlatformEngine',
+        responses: {
+          '200': {
+            description:
+              'Training methods, ceilings, launchers, honesty (no distributed/RLHF lab)',
+          },
+        },
+      },
+    },
+    '/v1/model-training-platform/methods': {
+      get: {
+        summary: 'Model Training Platform methods',
+        operationId: 'listModelTrainingMethods',
+        responses: {
+          '200': { description: 'LoRA/instruction launchable; RLHF/DPO deferred' },
+        },
+      },
+    },
+    '/v1/model-training-platform/overview': {
+      get: {
+        summary: 'Model Training Platform org overview',
+        operationId: 'getModelTrainingPlatformOverview',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Session usage, experiments, deferred methods' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-training-platform/experiments': {
+      get: {
+        summary: 'List training experiment plans',
+        operationId: 'listModelTrainingExperiments',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Org-scoped sandbox experiments' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+      post: {
+        summary: 'Create training experiment plan',
+        operationId: 'createModelTrainingExperiment',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Experiment plan created' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
+    '/v1/model-training-platform/monitoring': {
+      get: {
+        summary: 'Model Training Platform monitoring',
+        operationId: 'getModelTrainingPlatformMonitoring',
+        security: [{ ClerkAuth: [] }],
+        responses: {
+          '200': { description: 'Experiment status snapshot + honesty' },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+          },
+        },
+      },
+    },
     '/v1/memory-runtime/engine': {
       get: {
         summary: 'Memory Runtime catalog',

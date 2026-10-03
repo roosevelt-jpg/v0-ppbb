@@ -154,6 +154,12 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     const atlas = res.body.products.find((p: { id: string }) => p.id === 'atlas');
     expect(atlas.status).toBe('deferred');
     expect(atlas.api).toBeNull();
+
+    const training = res.body.products.find(
+      (p: { id: string }) => p.id === 'model-training-platform',
+    );
+    expect(training.status).toBe('partial');
+    expect(training.console).toBe('/model-training-platform');
   });
 
   it('returns org overview with deferred families', async () => {
@@ -168,7 +174,7 @@ describe('Foundation Model Cloud Foundation (VL-224)', () => {
     expect(overview.usage.chat).toBeDefined();
     expect(overview.deferred.atlas).toBe(true);
     expect(overview.deferred.baobab).toBe(true);
-    expect(overview.deferred.modelTrainingPlatform).toBe(true);
+    expect(overview.deferred.modelTrainingPlatform).toBe(false);
     expect(overview.deferred.modelEvaluationPlatform).toBe(true);
     expect(overview.deferred.modelRegistry).toBe(true);
     expect(overview.deferred.regeneratesVolumes1to8).toBe(false);

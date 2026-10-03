@@ -120,11 +120,12 @@ export function foundationModelCloudCatalog(): FmcProductRow[] {
     {
       id: 'model-training-platform',
       name: 'Model Training Platform',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/model-training-platform/engine',
+      console: '/model-training-platform',
       modality: 'mlops',
-      notes: 'Generic training orchestration (Phase 102 / VL-235). Highest-value MLOps track per Volume 9 README.',
+      notes:
+        'Training orchestration over VL-111 (Phase 102 / VL-235). Experiment plans + LoRA/instruction handoff — not distributed/RLHF lab.',
     },
     {
       id: 'model-evaluation-platform',
@@ -184,6 +185,7 @@ export function foundationModelCloudHonesty() {
     regeneratesAiKernel: false,
     modelFamilyScaffoldCatalog: true,
     mLOpsPlatformShipped: false,
+    modelTrainingPlatformPartial: true,
     hexagonalRewrite: false,
     linuxOsRewrite: false,
   };

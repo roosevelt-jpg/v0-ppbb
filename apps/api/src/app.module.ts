@@ -64,6 +64,7 @@ import { CostOptimizationModule } from './cost-optimization/cost-optimization.mo
 import { AiRuntimeAnalyticsModule } from './ai-runtime-analytics/ai-runtime-analytics.module';
 import { AiKernelModule } from './ai-kernel/ai-kernel.module';
 import { FoundationModelCloudModule } from './foundation-model-cloud/foundation-model-cloud.module';
+import { ModelTrainingPlatformModule } from './model-training-platform/model-training-platform.module';
 import { MemoryRuntimeModule } from './memory-runtime/memory-runtime.module';
 import { PromptRuntimeModule } from './prompt-runtime/prompt-runtime.module';
 import { ContextRuntimeModule } from './context-runtime/context-runtime.module';
@@ -146,6 +147,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     AiRuntimeAnalyticsModule,
     AiKernelModule,
     FoundationModelCloudModule,
+    ModelTrainingPlatformModule,
     MemoryRuntimeModule,
     PromptRuntimeModule,
     ContextRuntimeModule,
