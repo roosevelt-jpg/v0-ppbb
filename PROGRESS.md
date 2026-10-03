@@ -235,7 +235,7 @@ Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 | VL-203 | Knowledge Cloud Production Audit (Phase 70) | Done | Audit gate + reports under `docs/knowledge-cloud-audit/`; ADR-0114. Rejects enterprise knowledge OS / Inference Cloud here. |
 | VL-204 | Inference Cloud Foundation (Phase 71) | Done | `/inference-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0115. Maps onto AI Gateway; GPU hyperscaler deferred. Spend-safety constraints carried for VL-205/211. |
 | VL-205 | GPU Platform (Phase 72) | Done | `/v1/gpu-platform/*` sandbox pools/allocate/scale with hard instance+spend ceilings; ADR-0116. No cloud GPU APIs; MIG/distributed deferred. |
-| VL-206 | Model Serving (Phase 73) | Not Started | |
+| VL-206 | Model Serving (Phase 73) | Done | `/v1/model-serving/*` hub over Gateway + registry; sandbox versioning/canary/blue-green/rollback; ADR-0117. Not vLLM/KServe OS. |
 | VL-207 | AI Router (Phase 74) | Not Started | |
 | VL-208 | Streaming Runtime (Phase 75) | Not Started | |
 | VL-209 | Batch Runtime (Phase 76) | Not Started | |

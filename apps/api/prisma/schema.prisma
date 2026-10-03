@@ -87,6 +87,7 @@ model Organization {
   taxonomyTerms                TaxonomyTerm[]
   taxonomyAssignments          TaxonomyAssignment[]
   gpuAllocations               GpuAllocation[]
+  modelServingDeployments      ModelServingDeployment[]
 
   @@map("organizations")
 }
@@ -166,6 +167,7 @@ model Workspace {
   taxonomyTerms          TaxonomyTerm[]
   taxonomyAssignments    TaxonomyAssignment[]
   gpuAllocations         GpuAllocation[]
+  modelServingDeployments ModelServingDeployment[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1407,6 +1409,37 @@ model GpuAllocation {
   @@index([organizationId, workspaceId, status])
   @@index([workspaceId, vendor])
   @@map("gpu_allocations")
+}
+
+/// Sandbox model-serving deployment (VL-206). Logical record only — traffic still via AI Gateway.
+model ModelServingDeployment {
+  id               String   @id @default(cuid())
+  organizationId   String   @map("organization_id")
+  workspaceId      String   @map("workspace_id")
+  /// llm | speech | voice | ocr | embedding | vision | reasoning
+  kind             String
+  modelSlug        String   @map("model_slug")
+  modelId          String   @map("model_id")
+  version          String   @default("v1")
+  /// rolling | canary | blue_green
+  strategy         String   @default("rolling")
+  trafficPercent   Int      @default(100) @map("traffic_percent")
+  /// none | blue | green
+  slot             String   @default("none")
+  /// pending | active | canary | blue | green | standby | released
+  status           String   @default("pending")
+  label            String   @default("")
+  previousVersion  String?  @map("previous_version")
+  metadata         Json     @default("{}")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@index([workspaceId, kind, modelSlug])
+  @@map("model_serving_deployments")
 }
 
 

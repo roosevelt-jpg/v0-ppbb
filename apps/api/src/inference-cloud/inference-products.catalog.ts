@@ -33,10 +33,11 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'model-serving',
       name: 'Model Serving',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Serving infrastructure for deployed models (Phase 73 / VL-206). Vendor APIs today via Gateway.',
+      status: 'partial',
+      api: 'GET /v1/model-serving/engine',
+      console: '/model-serving',
+      notes:
+        'Serving hub over Gateway + /v1/models with sandbox versioning/canary/blue-green/rollback (VL-206). Not vLLM/KServe OS.',
     },
     {
       id: 'ai-router',

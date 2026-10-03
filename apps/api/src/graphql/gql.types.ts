@@ -460,6 +460,69 @@ export class GqlGpuPlatformEngine {
 }
 
 @ObjectType()
+export class GqlModelServingCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlModelServingEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlModelServingCapability])
+  capabilities!: GqlModelServingCapability[];
+
+  @Field()
+  vllmOs!: boolean;
+
+  @Field()
+  kserveOs!: boolean;
+
+  @Field()
+  tritonOs!: boolean;
+
+  @Field()
+  selfHostedGpuServingOs!: boolean;
+
+  @Field()
+  regeneratesAiGateway!: boolean;
+
+  @Field()
+  extendsAiGateway!: boolean;
+
+  @Field()
+  extendsModelRegistry!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  sandboxDeploymentsOnly!: boolean;
+
+  @Field()
+  maxActiveDeployments!: number;
+
+  @Field()
+  servingMode!: string;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

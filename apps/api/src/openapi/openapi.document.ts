@@ -2806,6 +2806,150 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring + spend-safety snapshot' } },
       },
     },
+    '/v1/model-serving/engine': {
+      get: {
+        summary: 'Model Serving catalog',
+        operationId: 'getModelServingEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, honesty, and sandbox deployment ceilings',
+          },
+        },
+      },
+    },
+    '/v1/model-serving/kinds': {
+      get: {
+        summary: 'Serving model kinds',
+        operationId: 'listModelServingKinds',
+        responses: {
+          '200': {
+            description: 'LLM/speech/voice/OCR/embedding/vision/reasoning map',
+          },
+        },
+      },
+    },
+    '/v1/model-serving/modes': {
+      get: {
+        summary: 'Serving modes',
+        operationId: 'listModelServingModes',
+        responses: {
+          '200': {
+            description: 'Streaming/batch/realtime/canary/blue-green/rollback/versioning',
+          },
+        },
+      },
+    },
+    '/v1/model-serving/ceilings': {
+      get: {
+        summary: 'Model Serving active-deployment ceilings',
+        operationId: 'getModelServingCeilings',
+        responses: { '200': { description: 'maxActiveDeployments + mode' } },
+      },
+    },
+    '/v1/model-serving/endpoints': {
+      get: {
+        summary: 'Discoverable Gateway serving endpoints',
+        operationId: 'listModelServingEndpoints',
+        responses: { '200': { description: 'Gateway API + registry model map' } },
+      },
+    },
+    '/v1/model-serving/deployments': {
+      get: {
+        summary: 'List sandbox model deployments',
+        operationId: 'listModelServingDeployments',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace deployments' } },
+      },
+      post: {
+        summary: 'Create sandbox model deployment',
+        operationId: 'createModelServingDeployment',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Logical deployment created' },
+          '402': { description: 'Hard active-deployment ceiling exceeded' },
+          '403': { description: 'Serving mode disabled' },
+        },
+      },
+    },
+    '/v1/model-serving/deployments/{id}/traffic': {
+      post: {
+        summary: 'Update sandbox canary traffic percent',
+        operationId: 'setModelServingTraffic',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Traffic percent updated' } },
+      },
+    },
+    '/v1/model-serving/deployments/{id}/promote': {
+      post: {
+        summary: 'Promote canary/blue-green deployment to active',
+        operationId: 'promoteModelServingDeployment',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Promoted to active@100%' } },
+      },
+    },
+    '/v1/model-serving/deployments/{id}/rollback': {
+      post: {
+        summary: 'Rollback to previous sandbox version',
+        operationId: 'rollbackModelServingDeployment',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Prior version activated' } },
+      },
+    },
+    '/v1/model-serving/deployments/{id}/release': {
+      post: {
+        summary: 'Release sandbox model deployment',
+        operationId: 'releaseModelServingDeployment',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Released' } },
+      },
+    },
+    '/v1/model-serving/deployments/{id}/redeploy': {
+      post: {
+        summary: 'Deploy a new version with previousVersion pointer',
+        operationId: 'redeployModelServingDeployment',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '201': { description: 'New version created' } },
+      },
+    },
+    '/v1/model-serving/health': {
+      get: {
+        summary: 'Model Serving health',
+        operationId: 'getModelServingHealth',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Sandbox health snapshot' } },
+      },
+    },
+    '/v1/model-serving/analytics': {
+      get: {
+        summary: 'Model Serving analytics',
+        operationId: 'getModelServingAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Deployment aggregates' } },
+      },
+    },
+    '/v1/model-serving/monitoring': {
+      get: {
+        summary: 'Model Serving monitoring',
+        operationId: 'getModelServingMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + honesty snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

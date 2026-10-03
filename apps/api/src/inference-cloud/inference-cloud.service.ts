@@ -36,7 +36,7 @@ export class InferenceCloudService {
       architecture: inferenceArchitectureNotes(),
       deferred: {
         gpuPlatform: false,
-        modelServing: true,
+        modelServing: false,
         aiRouter: true,
         streamingRuntimeProduct: true,
         batchRuntimeProduct: true,
@@ -58,6 +58,7 @@ export class InferenceCloudService {
       links: {
         inferenceCloud: '/inference-cloud',
         gpuPlatform: '/gpu-platform',
+        modelServing: '/model-serving',
         gateway: '/gateway',
         models: '/models',
         chat: '/chat',

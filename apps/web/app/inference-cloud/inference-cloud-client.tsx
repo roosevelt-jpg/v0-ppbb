@@ -112,6 +112,9 @@ export function InferenceCloudClient() {
               <Link href={data.links.gateway ?? '/gateway'} style={secondary}>
                 Gateway
               </Link>
+              <Link href={data.links.modelServing ?? '/model-serving'} style={secondary}>
+                Model Serving
+              </Link>
               <Link href={data.links.models ?? '/models'} style={secondary}>
                 Models
               </Link>

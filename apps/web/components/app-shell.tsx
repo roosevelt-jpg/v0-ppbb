@@ -15,6 +15,7 @@ const links = [
   { href: '/knowledge-cloud', label: 'Knowledge Cloud' },
   { href: '/inference-cloud', label: 'Inference Cloud' },
   { href: '/gpu-platform', label: 'GPU Platform' },
+  { href: '/model-serving', label: 'Model Serving' },
   { href: '/knowledge-base', label: 'Knowledge Base' },
   { href: '/enterprise-search', label: 'Enterprise Search' },
   { href: '/ontology', label: 'Ontology' },

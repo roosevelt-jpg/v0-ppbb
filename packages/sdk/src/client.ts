@@ -1156,6 +1156,82 @@ export class VerbaLab {
     });
   }
 
+  async modelServingEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      vllmOs: boolean;
+      kserveOs: boolean;
+      tritonOs: boolean;
+      selfHostedGpuServingOs: boolean;
+      regeneratesAiGateway: boolean;
+      extendsAiGateway: boolean;
+      extendsModelRegistry: boolean;
+      orgWorkspaceScoped: boolean;
+      sandboxDeploymentsOnly: boolean;
+    };
+    ceilings: {
+      maxActiveDeployments: number;
+      mode: string;
+    };
+  }> {
+    return this.requestJson('/v1/model-serving/engine', { method: 'GET' });
+  }
+
+  async modelServingKinds(): Promise<{
+    kinds: Array<{
+      id: string;
+      name: string;
+      status: string;
+      registryFeatures: string[];
+      gatewayApis: string[];
+    }>;
+  }> {
+    return this.requestJson('/v1/model-serving/kinds', { method: 'GET' });
+  }
+
+  async modelServingEndpoints(params?: { kind?: string }): Promise<{
+    endpoints: Array<{
+      kind: string;
+      api: string;
+      status: string;
+    }>;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.kind) q.set('kind', params.kind);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/model-serving/endpoints${suffix}`, { method: 'GET' });
+  }
+
+  async modelServingDeploy(input: {
+    kind: string;
+    modelSlug: string;
+    version?: string;
+    strategy?: string;
+    trafficPercent?: number;
+    slot?: string;
+    label?: string;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/model-serving/deployments', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async modelServingPromote(id: string): Promise<Record<string, unknown>> {
+    return this.requestJson(`/v1/model-serving/deployments/${id}/promote`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

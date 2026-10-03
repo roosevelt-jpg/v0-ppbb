@@ -1,6 +1,6 @@
 # VerbaLab Inference Cloud
 
-**Status:** Foundation + GPU Platform partial (VL-204–205 / library Phases 71–72); Volume 7 continues through VL-213  
+**Status:** Foundation + GPU Platform + Model Serving partial (VL-204–206 / library Phases 71–73); Volume 7 continues through VL-213  
 **Rule:** Shared model runtime layer underneath AI Orchestration and every product cloud that calls a model. Extends **AI Gateway (VL-021)** + chat/embeddings. Do **not** regenerate Gateway, Intelligence, Knowledge, or invent a GPU hyperscaler / multi-region Inference OS. Follow the [12-layer Cloud Blueprint](./CLOUD_BLUEPRINT.md) (ADR-0080). Roadmap: [`docs/roadmap/volume7-inference-cloud/`](./roadmap/volume7-inference-cloud/).
 
 Volumes 1–6 already ship Language, Speech, Voice, Intelligence, and Knowledge clouds. They call vendor models through the Gateway today — this volume layers a discoverable Inference hub without cloning those products.
@@ -13,7 +13,7 @@ Volumes 1–6 already ship Language, Speech, Voice, Intelligence, and Knowledge 
 | --- | --- |
 | Inference Cloud Foundation | **VL-204** — `/inference-cloud` + product catalog / overview |
 | GPU Platform | **Partial** — **VL-205** `/gpu-platform` sandbox + hard ceilings; no cloud GPU APIs |
-| Model Serving | **Deferred** — Phase 73 / VL-206 (vendor APIs via Gateway today) |
+| Model Serving | **Partial** — **VL-206** `/model-serving` hub + sandbox canary/blue-green/rollback; not vLLM OS |
 | AI Router | **Deferred** — Phase 74 / VL-207 |
 | Streaming Runtime | **Partial** — existing chat/TTS SSE; dedicated product Phase 75 / VL-208 |
 | Batch Runtime | **Partial** — BullMQ jobs; dedicated product Phase 76 / VL-209 |
@@ -41,6 +41,7 @@ Volumes 1–6 already ship Language, Speech, Voice, Intelligence, and Knowledge 
 | SDK | `inferenceProducts()` on `@verbalab/sdk` |
 | CLI | `verbalab inference-products` |
 | GPU Platform | `/gpu-platform` · `GET /v1/gpu-platform/engine` (VL-205) |
+| Model Serving | `/model-serving` · `GET /v1/model-serving/engine` (VL-206) |
 | Existing Gateway | `/gateway` · VL-021 |
 | Existing models | `/models` |
 

@@ -21,6 +21,10 @@ function usage(): never {
   verbalab gpu-platform-engine
   verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
   verbalab gpu-platform-allocate --pool <id> [--instances <n>]
+  verbalab model-serving-engine
+  verbalab model-serving-kinds
+  verbalab model-serving-endpoints [--kind llm|speech|voice|ocr|embedding|reasoning]
+  verbalab model-serving-deploy --kind <kind> --model <slug> [--version <v>] [--strategy rolling|canary|blue_green]
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -172,6 +176,46 @@ async function main() {
         await vl.gpuPlatformAllocate({
           poolId,
           instances: instancesRaw ? Number(instancesRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'model-serving-engine') {
+    console.log(JSON.stringify(await vl.modelServingEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'model-serving-kinds') {
+    console.log(JSON.stringify(await vl.modelServingKinds(), null, 2));
+    return;
+  }
+
+  if (command === 'model-serving-endpoints') {
+    console.log(
+      JSON.stringify(
+        await vl.modelServingEndpoints({ kind: argValue(rest, '--kind') ?? undefined }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'model-serving-deploy') {
+    const kind = argValue(rest, '--kind');
+    const modelSlug = argValue(rest, '--model');
+    if (!kind || !modelSlug) usage();
+    console.log(
+      JSON.stringify(
+        await vl.modelServingDeploy({
+          kind,
+          modelSlug,
+          version: argValue(rest, '--version') ?? undefined,
+          strategy: argValue(rest, '--strategy') ?? undefined,
         }),
         null,
         2,
