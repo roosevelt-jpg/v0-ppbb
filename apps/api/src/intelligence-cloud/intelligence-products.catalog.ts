@@ -69,10 +69,11 @@ export function intelligenceProductCatalog(): IntelligenceProductRow[] {
     {
       id: 'reasoning',
       name: 'Reasoning Cloud',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Multi-step reasoning via LLM gateway prompts — VL-186. Not a custom reasoner kernel.',
+      status: 'partial',
+      api: 'GET /v1/reasoning-cloud/engine',
+      console: '/reasoning-cloud',
+      notes:
+        'LLM-gateway strategies (VL-186). Not a custom reasoner kernel; shallow ToT; no tool execution.',
     },
     {
       id: 'recommendations',

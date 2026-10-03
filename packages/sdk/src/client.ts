@@ -1276,6 +1276,46 @@ export class VerbaLab {
     });
   }
 
+  async reasoningCloudEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      customReasonerKernel: boolean;
+      symbolicReasonerOs: boolean;
+      fullTreeOfThought: boolean;
+      agentOs: boolean;
+      toolExecution: boolean;
+      llmGateway: boolean;
+    };
+  }> {
+    return this.requestJson('/v1/reasoning-cloud/engine', { method: 'GET' });
+  }
+
+  async reasoningCloudReason(body: {
+    problem: string;
+    strategy?: string;
+    language?: string;
+    retrieve?: boolean;
+  }): Promise<{
+    strategy: string;
+    steps: string[];
+    answer: string;
+    provider: string;
+    note: string;
+  }> {
+    return this.requestJson('/v1/reasoning-cloud/reason', {
+      method: 'POST',
+      body,
+    });
+  }
+
   async neuralTtsEngine(): Promise<{
     product: string;
     note: string;

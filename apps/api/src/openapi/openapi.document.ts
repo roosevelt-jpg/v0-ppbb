@@ -2916,6 +2916,44 @@ export const openApiDocument = {
         responses: { '200': { description: 'Monitoring snapshot' } },
       },
     },
+    '/v1/reasoning-cloud/engine': {
+      get: {
+        summary: 'Reasoning Cloud engine catalog',
+        operationId: 'getReasoningCloudEngine',
+        responses: { '200': { description: 'Strategies and reasoner-kernel honesty notes' } },
+      },
+    },
+    '/v1/reasoning-cloud/strategies': {
+      get: {
+        summary: 'Reasoning strategies catalog',
+        operationId: 'listReasoningCloudStrategies',
+        responses: { '200': { description: 'Prompt strategies + tool catalog' } },
+      },
+    },
+    '/v1/reasoning-cloud/reason': {
+      post: {
+        summary: 'Run multi-step reasoning',
+        operationId: 'reasonReasoningCloud',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Steps, answer, optional branches/tools' } },
+      },
+    },
+    '/v1/reasoning-cloud/analytics': {
+      get: {
+        summary: 'Reasoning Cloud analytics',
+        operationId: 'getReasoningCloudAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Reason audits + chat token proxy' } },
+      },
+    },
+    '/v1/reasoning-cloud/monitoring': {
+      get: {
+        summary: 'Reasoning Cloud monitoring snapshot',
+        operationId: 'getReasoningCloudMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring snapshot' } },
+      },
+    },
     '/v1/tts/engine': {
       get: {
         summary: 'Neural TTS engine catalog',

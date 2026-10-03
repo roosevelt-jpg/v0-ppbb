@@ -553,6 +553,45 @@ export class GqlContextEngine {
 }
 
 @ObjectType()
+export class GqlReasoningCloudCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlReasoningCloudEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlReasoningCloudCapability])
+  capabilities!: GqlReasoningCloudCapability[];
+
+  @Field()
+  customReasonerKernel!: boolean;
+
+  @Field()
+  symbolicReasonerOs!: boolean;
+
+  @Field()
+  llmGateway!: boolean;
+}
+
+@ObjectType()
 export class GqlSpeechCapability {
   @Field()
   id!: string;

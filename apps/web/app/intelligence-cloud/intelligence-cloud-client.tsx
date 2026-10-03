@@ -106,6 +106,9 @@ export function IntelligenceCloudClient() {
               <Link href={data.links.contextEngine ?? '/context-engine'} style={secondary}>
                 Context Engine
               </Link>
+              <Link href={data.links.reasoningCloud ?? '/reasoning-cloud'} style={secondary}>
+                Reasoning Cloud
+              </Link>
               <Link href={data.links.knowledge ?? '/knowledge'} style={secondary}>
                 Knowledge / RAG
               </Link>

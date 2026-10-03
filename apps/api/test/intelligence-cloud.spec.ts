@@ -126,6 +126,11 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(context.status).toBe('partial');
     expect(context.api).toContain('/v1/context-engine/engine');
     expect(context.console).toBe('/context-engine');
+
+    const reasoning = res.body.products.find((p: { id: string }) => p.id === 'reasoning');
+    expect(reasoning.status).toBe('partial');
+    expect(reasoning.api).toContain('/v1/reasoning-cloud/engine');
+    expect(reasoning.console).toBe('/reasoning-cloud');
   });
 
   it('returns org intelligence overview with chat/embeddings usage + deferred flags', async () => {
@@ -150,6 +155,7 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.deferred.knowledgeGraphProduct).toBe(false);
     expect(overview.deferred.knowledgeGraphOs).toBe(true);
     expect(overview.deferred.contextEngine).toBe(false);
+    expect(overview.deferred.reasoningCloudProduct).toBe(false);
     expect(overview.deferred.customReasoner).toBe(true);
     expect(overview.links.intelligenceCloud).toBe('/intelligence-cloud');
     expect(overview.links.embeddingCloud).toBe('/embedding-cloud');
@@ -157,6 +163,7 @@ describe('Intelligence Cloud Foundation (VL-180)', () => {
     expect(overview.links.memoryCloud).toBe('/memory-cloud');
     expect(overview.links.knowledgeGraph).toBe('/knowledge-graph');
     expect(overview.links.contextEngine).toBe('/context-engine');
+    expect(overview.links.reasoningCloud).toBe('/reasoning-cloud');
     expect(overview.links.knowledge).toBe('/knowledge');
     expect(overview.links.chat).toBe('/chat');
     expect(overview.architecture.hexagonalRewrite).toBe(false);

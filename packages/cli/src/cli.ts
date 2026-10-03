@@ -25,6 +25,8 @@ function usage(): never {
   verbalab knowledge-graph-engine
   verbalab context-engine
   verbalab context-assemble [--query <text>] [--max-chars <n>]
+  verbalab reasoning-cloud-engine
+  verbalab reasoning-cloud-reason --problem <text> [--strategy <id>]
   verbalab neural-tts-engine
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
@@ -169,6 +171,27 @@ async function main() {
         await vl.contextAssemble({
           query: argValue(rest, '--query'),
           maxChars: maxRaw ? Number(maxRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'reasoning-cloud-engine') {
+    console.log(JSON.stringify(await vl.reasoningCloudEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'reasoning-cloud-reason') {
+    const problem = argValue(rest, '--problem');
+    if (!problem) usage();
+    console.log(
+      JSON.stringify(
+        await vl.reasoningCloudReason({
+          problem,
+          strategy: argValue(rest, '--strategy'),
         }),
         null,
         2,
