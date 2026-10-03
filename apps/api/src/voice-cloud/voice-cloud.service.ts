@@ -53,7 +53,8 @@ export class VoiceCloudService {
         neuralTtsProductization: false,
         streamingTts: true,
         professionalVoiceCloning: true, // same vendor path; multi-hour pro training still deferred
-        emotionVoiceSynthesis: true,
+        emotionVoiceSynthesis: false,
+        trainedExpressiveTts: true,
         voiceConversion: true,
         voiceRestoration: true,
         audioMastering: true,
@@ -68,6 +69,7 @@ export class VoiceCloudService {
         voiceCloud: '/voice-cloud',
         neuralTts: '/neural-tts',
         voiceCloning: '/voice-cloning',
+        emotionVoice: '/emotion-voice',
         audio: '/audio',
         voiceClones: '/voice-cloning',
         speakers: '/speaker-intelligence',

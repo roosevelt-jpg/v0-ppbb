@@ -2771,6 +2771,36 @@ export const openApiDocument = {
         responses: { '200': { description: 'text/event-stream enrollment progress' } },
       },
     },
+    '/v1/emotion-voice/engine': {
+      get: {
+        summary: 'Emotion Voice engine catalog',
+        operationId: 'getEmotionVoiceEngine',
+        responses: { '200': { description: 'Capabilities and honesty notes' } },
+      },
+    },
+    '/v1/emotion-voice/profiles': {
+      get: {
+        summary: 'Emotion and domain voice profiles',
+        operationId: 'listEmotionVoiceProfiles',
+        responses: { '200': { description: 'Happy/sad/… and domain tones' } },
+      },
+    },
+    '/v1/emotion-voice/synthesize': {
+      post: {
+        summary: 'Synthesize speech with an emotion/domain profile',
+        operationId: 'synthesizeEmotionVoice',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Raw audio bytes' } },
+      },
+    },
+    '/v1/emotion-voice/stream': {
+      post: {
+        summary: 'Emotion voice chunk SSE stream',
+        operationId: 'streamEmotionVoice',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'text/event-stream' } },
+      },
+    },
     '/v1/audio/transcriptions': {
       post: {
         summary: 'Transcribe audio (speech-to-text)',

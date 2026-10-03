@@ -1118,6 +1118,32 @@ export class VerbaLab {
     return this.requestJson('/v1/voice-cloning/consent/policy', { method: 'GET' });
   }
 
+  async emotionVoiceEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/emotion-voice/engine', { method: 'GET' });
+  }
+
+  async emotionVoiceProfiles(): Promise<{
+    profiles: Array<{
+      id: string;
+      name: string;
+      category: string;
+      description: string;
+      preferredVoice: string;
+    }>;
+  }> {
+    return this.requestJson('/v1/emotion-voice/profiles', { method: 'GET' });
+  }
+
   async speechEngine(): Promise<{
     product: string;
     note: string;

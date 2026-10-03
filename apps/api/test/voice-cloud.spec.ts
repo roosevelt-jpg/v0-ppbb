@@ -113,7 +113,8 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(cloning.api).toContain('/v1/voice-cloning/engine');
 
     const emotion = res.body.products.find((p: { id: string }) => p.id === 'emotion-voice');
-    expect(emotion.status).toBe('deferred');
+    expect(emotion.status).toBe('partial');
+    expect(emotion.api).toContain('/v1/emotion-voice/engine');
 
     const marketplace = res.body.products.find((p: { id: string }) => p.id === 'voice-marketplace');
     expect(marketplace.status).toBe('deferred');
@@ -138,7 +139,9 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     expect(overview.workspace.speakerProfiles).toBeGreaterThanOrEqual(0);
     expect(overview.deferred.neuralTtsProductization).toBe(false);
     expect(overview.deferred.streamingTts).toBe(true);
-    expect(overview.deferred.emotionVoiceSynthesis).toBe(true);
+    expect(overview.deferred.emotionVoiceSynthesis).toBe(false);
+    expect(overview.deferred.trainedExpressiveTts).toBe(true);
+    expect(overview.links.emotionVoice).toBe('/emotion-voice');
     expect(overview.links.neuralTts).toBe('/neural-tts');
     expect(overview.deferred.voiceMarketplace).toBe(true);
     expect(overview.deferred.nistVoiceBiometrics).toBe(true);
@@ -161,6 +164,6 @@ describe('Voice Cloud Foundation (VL-170)', () => {
     const products = res.body.data.voiceProducts as Array<{ id: string; status: string }>;
     expect(products.length).toBeGreaterThan(5);
     expect(products.some((p) => p.id === 'neural-tts' && p.status === 'shipped')).toBe(true);
-    expect(products.some((p) => p.id === 'emotion-voice' && p.status === 'deferred')).toBe(true);
+    expect(products.some((p) => p.id === 'emotion-voice' && p.status === 'partial')).toBe(true);
   });
 });

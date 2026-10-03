@@ -100,7 +100,16 @@ export class ElevenLabsVoiceCloneAdapter implements TtsProvider {
     return { providerVoiceId: json.voice_id, provider: this.name };
   }
 
-  async synthesize(input: TtsInput & { providerVoiceId: string }): Promise<TtsOutput> {
+  async synthesize(
+    input: TtsInput & {
+      providerVoiceId: string;
+      voiceSettings?: {
+        stability: number;
+        similarity_boost: number;
+        style: number;
+      };
+    },
+  ): Promise<TtsOutput> {
     if (!this.apiKey) {
       throw new ApiException(
         'provider_not_configured',
@@ -111,6 +120,18 @@ export class ElevenLabsVoiceCloneAdapter implements TtsProvider {
 
     const started = Date.now();
     const format = input.format ?? 'mp3';
+    const body: Record<string, unknown> = {
+      text: input.text,
+      model_id: process.env.ELEVENLABS_TTS_MODEL ?? 'eleven_multilingual_v2',
+    };
+    if (input.voiceSettings) {
+      body.voice_settings = {
+        stability: input.voiceSettings.stability,
+        similarity_boost: input.voiceSettings.similarity_boost,
+        style: input.voiceSettings.style,
+        use_speaker_boost: true,
+      };
+    }
     const response = await this.fetchImpl(
       `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(input.providerVoiceId)}`,
       {
@@ -120,10 +141,7 @@ export class ElevenLabsVoiceCloneAdapter implements TtsProvider {
           'Content-Type': 'application/json',
           Accept: format === 'mp3' ? 'audio/mpeg' : 'audio/wav',
         },
-        body: JSON.stringify({
-          text: input.text,
-          model_id: process.env.ELEVENLABS_TTS_MODEL ?? 'eleven_multilingual_v2',
-        }),
+        body: JSON.stringify(body),
         signal: AbortSignal.timeout(Number(process.env.TTS_TIMEOUT_MS ?? 30_000)),
       },
     );
@@ -174,8 +192,17 @@ export class FixtureVoiceCloneAdapter {
     voice: string;
     providerVoiceId: string;
     format?: string;
+    voiceSettings?: {
+      stability: number;
+      similarity_boost: number;
+      style: number;
+    };
   }): Promise<TtsOutput> {
-    const payload = Buffer.from(`FIXTURE_CLONE:${input.providerVoiceId}:${input.text}`, 'utf8');
+    const styleTag = input.voiceSettings ? `:style=${input.voiceSettings.style}` : '';
+    const payload = Buffer.from(
+      `FIXTURE_CLONE:${input.providerVoiceId}:${input.text}${styleTag}`,
+      'utf8',
+    );
     return {
       audio: payload,
       mimeType: 'audio/mpeg',

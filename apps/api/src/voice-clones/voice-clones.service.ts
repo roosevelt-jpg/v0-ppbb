@@ -599,12 +599,18 @@ export class VoiceClonesService {
     voice: string;
     providerVoiceId: string;
     format?: 'mp3' | 'wav' | 'opus' | 'aac' | 'flac';
+    voiceSettings?: {
+      stability: number;
+      similarity_boost: number;
+      style: number;
+    };
   }) {
     return this.provider().synthesize({
       text: input.text,
       voice: input.voice,
       providerVoiceId: input.providerVoiceId,
       format: input.format ?? 'mp3',
+      voiceSettings: input.voiceSettings,
     });
   }
 }

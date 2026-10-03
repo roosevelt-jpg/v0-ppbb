@@ -369,3 +369,4 @@ Public surfaces: `/`, `/docs`, `/playground`, `/coverage`. Console: `/dashboard`
 - Voice Cloud Foundation shipped (VL-170 / Phase 27). See VOICE_CLOUD + ADR-0081. Extends TTS/clones/studio; does not regenerate Speech Cloud.
 - Neural Text-to-Speech shipped (VL-171 / Phase 28). See NEURAL_TTS + ADR-0082. Batch + chunk SSE; children voices deferred.
 - Voice Cloning Platform shipped (VL-172 / Phase 29). See VOICE_CLONING + ADR-0083. Extends VL-064 consent/review/watermark with ownership/licensing/permissions.
+- Emotion Voice Engine partial (VL-173 / Phase 30). See EMOTION_VOICE + ADR-0084. Soft prosody + clone style settings; distinct from VL-154 detection.

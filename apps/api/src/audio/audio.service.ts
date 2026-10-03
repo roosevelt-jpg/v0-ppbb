@@ -115,6 +115,12 @@ export class AudioService {
     apiKeyId?: string;
     userId?: string;
     ip?: string;
+    /** Optional ElevenLabs expressive settings for clone:{id} only (VL-173). */
+    expressiveSettings?: {
+      stability: number;
+      similarity_boost: number;
+      style: number;
+    };
   }) {
     const text = input.text.trim();
     if (!text) {
@@ -148,6 +154,7 @@ export class AudioService {
         voice: input.voice,
         providerVoiceId: resolved.providerVoiceId,
         format: input.format ?? 'mp3',
+        voiceSettings: input.expressiveSettings,
       });
       watermarkApplied = true;
     } else {

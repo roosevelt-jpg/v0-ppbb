@@ -14,7 +14,7 @@
 | Streaming / Batch TTS productization | **Partial streaming** — chunk SSE `POST /v1/tts/stream`; batch shipped |
 | Voice Cloning / Instant Cloning | **Shipped hub** — **VL-172** `/voice-cloning` over **VL-064** consent + review + watermark |
 | Professional Voice Studio | **VL-120** — `/audio` African studio UX |
-| Emotion Voice | **Deferred** — Phase 30 (VL-173). VL-154 is speech emotion *detection*, not synthesis |
+| Emotion Voice | **Partial** — **VL-173** `/emotion-voice` soft prosody + voice profiles; trained expressive TTS deferred. Distinct from VL-154 detection |
 | Voice Conversion | **Deferred** |
 | Voice Enhancement | **Partial** — Audio Intelligence enhance (VL-155); Phase 32 expands |
 | Voice Restoration / Audio Mastering | **Deferred** — Phase 32 |

@@ -67,10 +67,11 @@ export function voiceProductCatalog(): VoiceProductRow[] {
     {
       id: 'emotion-voice',
       name: 'Emotion Voice',
-      status: 'deferred',
-      api: null,
-      console: null,
-      notes: 'Expressive/emotion-conditioned TTS (Phase 30). Speech Emotion AI (VL-154) is detection, not synthesis.',
+      status: 'partial',
+      api: 'GET /v1/emotion-voice/engine',
+      console: '/emotion-voice',
+      notes:
+        'Emotion/domain synthesis profiles (VL-173): soft prosody + voice pick; clone style settings partial. Not trained expressive TTS. Distinct from VL-154 detection.',
     },
     {
       id: 'voice-conversion',

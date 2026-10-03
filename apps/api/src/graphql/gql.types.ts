@@ -469,6 +469,57 @@ export class GqlVoiceCloningEngine {
 }
 
 @ObjectType()
+export class GqlEmotionVoiceCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlEmotionVoiceEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlEmotionVoiceCapability])
+  capabilities!: GqlEmotionVoiceCapability[];
+
+  @Field()
+  trainedExpressiveModel!: boolean;
+}
+
+@ObjectType()
+export class GqlEmotionVoiceProfile {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  category!: string;
+
+  @Field()
+  description!: string;
+
+  @Field()
+  preferredVoice!: string;
+}
+
+@ObjectType()
 export class GqlSpeechVocabPack {
   @Field()
   id!: string;

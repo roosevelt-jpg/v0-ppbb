@@ -202,6 +202,7 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | VL-170 | Voice Cloud Foundation (Phase 27) | Done | `/voice-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0081. Maps onto VL-042/064/120/121; emotion/marketplace deferred. |
 | VL-171 | Neural Text-to-Speech (Phase 28) | Done | `/v1/tts/*` engine + batch/stream + enriched voices + `/neural-tts`; ADR-0082. Chunk SSE not vendor streaming; children deferred. |
 | VL-172 | Voice Cloning Platform (Phase 29) | Done | `/v1/voice-cloning/*` hub + ownership/license/permissions/enroll verify; ADR-0083. Extends VL-064 consent/watermark; pro = stricter enrollment. |
+| VL-173 | Emotion Voice Engine (Phase 30) | Done | `/v1/emotion-voice/*` profiles + synthesize/stream; ADR-0084. Soft prosody + clone style settings; not trained expressive TTS; ≠ VL-154 detect. |
 
 ---
 
@@ -288,3 +289,4 @@ Last updated: 2026-09-07 (VL-160 Done — Speech Cloud volume closed)
 | 2026-10-03 | VL-170 Done: Voice Cloud Foundation (Phase 27) — `/voice-cloud` hub + catalog/overview + CQRS/GraphQL slice; ADR-0081. Extends TTS/clones/studio; Volume 3 started. |
 | 2026-10-03 | VL-171 Done: Neural Text-to-Speech (Phase 28) — `/v1/tts` synthesize/stream/voices + `/neural-tts`; ADR-0082. Chunk SSE after synthesis. |
 | 2026-10-03 | VL-172 Done: Voice Cloning Platform (Phase 29) — governance hub + ownership/license/permissions; ADR-0083. Consent/watermark retained. |
+| 2026-10-03 | VL-173 Done: Emotion Voice Engine (Phase 30) — profiles + synthesize/stream; ADR-0084. Soft prosody façade; trained expressive TTS not claimed. |

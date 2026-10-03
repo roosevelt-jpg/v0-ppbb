@@ -19,6 +19,8 @@ function usage(): never {
   verbalab neural-tts-voices
   verbalab voice-cloning-engine
   verbalab voice-cloning-consent
+  verbalab emotion-voice-engine
+  verbalab emotion-voice-profiles
   verbalab speech-engine
   verbalab speaker-engine
   verbalab accent-engine
@@ -103,6 +105,16 @@ async function main() {
 
   if (command === 'voice-cloning-consent') {
     console.log(JSON.stringify(await vl.voiceCloningConsentPolicy(), null, 2));
+    return;
+  }
+
+  if (command === 'emotion-voice-engine') {
+    console.log(JSON.stringify(await vl.emotionVoiceEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'emotion-voice-profiles') {
+    console.log(JSON.stringify(await vl.emotionVoiceProfiles(), null, 2));
     return;
   }
 
