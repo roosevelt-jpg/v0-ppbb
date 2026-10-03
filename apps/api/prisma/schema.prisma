@@ -86,6 +86,7 @@ model Organization {
   kgRelationships              KgRelationship[]
   taxonomyTerms                TaxonomyTerm[]
   taxonomyAssignments          TaxonomyAssignment[]
+  gpuAllocations               GpuAllocation[]
 
   @@map("organizations")
 }
@@ -164,6 +165,7 @@ model Workspace {
   kgRelationships        KgRelationship[]
   taxonomyTerms          TaxonomyTerm[]
   taxonomyAssignments    TaxonomyAssignment[]
+  gpuAllocations         GpuAllocation[]
 
   @@index([organizationId])
   @@map("workspaces")
@@ -1379,6 +1381,32 @@ model TaxonomyAssignment {
   @@index([organizationId, workspaceId])
   @@index([documentId])
   @@map("taxonomy_assignments")
+}
+
+/// Sandbox GPU allocation record (VL-205). Logical inventory only — never calls a cloud GPU API.
+model GpuAllocation {
+  id                 String    @id @default(cuid())
+  organizationId     String    @map("organization_id")
+  workspaceId        String    @map("workspace_id")
+  /// nvidia | amd | intel
+  vendor             String
+  poolId             String    @map("pool_id")
+  instances          Int       @default(1)
+  estimatedHourlyUsd Float     @map("estimated_hourly_usd")
+  /// pending | active | released | rejected
+  status             String    @default("pending")
+  purpose            String    @default("")
+  reservationUntil   DateTime? @map("reservation_until")
+  metadata           Json      @default("{}")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, workspaceId, status])
+  @@index([workspaceId, vendor])
+  @@map("gpu_allocations")
 }
 
 

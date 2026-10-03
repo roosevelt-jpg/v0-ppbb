@@ -6,14 +6,14 @@ Track **executable** phases from `ROADMAP.md` only. Vision-backlog items from th
 
 **Rule:** at most one row `In Progress`. `Done` requires passing tests and a real integration (no mocked provider pretending to be production).
 
-Last updated: 2026-10-03 (VL-204 Done — Inference Cloud Foundation)
+Last updated: 2026-10-03 (VL-205 Done — GPU Platform)
 
 ---
 
 ## Current
 
 | In flight | — |
-| Next up | VL-205 GPU Platform (Phase 72) |
+| Next up | VL-206 Model Serving (Phase 73) |
 
 ---
 
@@ -234,7 +234,7 @@ Last updated: 2026-10-03 (VL-204 Done — Inference Cloud Foundation)
 | VL-202 | Knowledge Analytics (Phase 69) | Done | `/v1/knowledge-analytics/*` growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS; ≠ sibling analytics. |
 | VL-203 | Knowledge Cloud Production Audit (Phase 70) | Done | Audit gate + reports under `docs/knowledge-cloud-audit/`; ADR-0114. Rejects enterprise knowledge OS / Inference Cloud here. |
 | VL-204 | Inference Cloud Foundation (Phase 71) | Done | `/inference-cloud` hub + catalog/overview + bounded CQRS/GraphQL; ADR-0115. Maps onto AI Gateway; GPU hyperscaler deferred. Spend-safety constraints carried for VL-205/211. |
-| VL-205 | GPU Platform (Phase 72) | Not Started | Hard spend ceilings + sandbox billing required. |
+| VL-205 | GPU Platform (Phase 72) | Done | `/v1/gpu-platform/*` sandbox pools/allocate/scale with hard instance+spend ceilings; ADR-0116. No cloud GPU APIs; MIG/distributed deferred. |
 | VL-206 | Model Serving (Phase 73) | Not Started | |
 | VL-207 | AI Router (Phase 74) | Not Started | |
 | VL-208 | Streaming Runtime (Phase 75) | Not Started | |
@@ -361,3 +361,4 @@ Last updated: 2026-10-03 (VL-204 Done — Inference Cloud Foundation)
 | 2026-10-03 | VL-202 Done: Knowledge Analytics (Phase 69) — growth/usage/quality/search/gaps/confidence/relationships; ADR-0113. Not BI OS. |
 | 2026-10-03 | VL-203 Done: Knowledge Cloud Production Audit (Phase 70) — checklist/tests/reports; ADR-0114. Volume closed. |
 | 2026-10-03 | VL-204 Done: Inference Cloud Foundation (Phase 71) — hub/catalog/overview; ADR-0115. Extends AI Gateway; no GPU hyperscaler. Spend-safety notes for GPU/Cost phases. |
+| 2026-10-03 | VL-205 Done: GPU Platform (Phase 72) — sandbox allocations + hard ceilings; ADR-0116. No cloud GPU APIs; open-ended autoscale forbidden. |

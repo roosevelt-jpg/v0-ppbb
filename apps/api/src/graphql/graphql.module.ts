@@ -10,6 +10,7 @@ import { VoiceCloudApplicationModule } from '../voice-cloud/application/voice-cl
 import { IntelligenceCloudApplicationModule } from '../intelligence-cloud/application/intelligence-cloud-application.module';
 import { KnowledgeCloudApplicationModule } from '../knowledge-cloud/application/knowledge-cloud-application.module';
 import { InferenceCloudApplicationModule } from '../inference-cloud/application/inference-cloud-application.module';
+import { GpuPlatformModule } from '../gpu-platform/gpu-platform.module';
 import { KnowledgeBaseModule } from '../knowledge-base/knowledge-base.module';
 import { EnterpriseSearchModule } from '../enterprise-search/enterprise-search.module';
 import { OntologyPlatformModule } from '../ontology-platform/ontology-platform.module';
@@ -57,6 +58,7 @@ import { VoiceCloudGraphqlResolver } from './voice-cloud.resolver';
 import { IntelligenceCloudGraphqlResolver } from './intelligence-cloud.resolver';
 import { KnowledgeCloudGraphqlResolver } from './knowledge-cloud.resolver';
 import { InferenceCloudGraphqlResolver } from './inference-cloud.resolver';
+import { GpuPlatformGraphqlResolver } from './gpu-platform.resolver';
 import { KnowledgeBaseGraphqlResolver } from './knowledge-base.resolver';
 import { EnterpriseSearchGraphqlResolver } from './enterprise-search.resolver';
 import { OntologyPlatformGraphqlResolver } from './ontology-platform.resolver';
@@ -124,6 +126,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     IntelligenceCloudApplicationModule,
     KnowledgeCloudApplicationModule,
     InferenceCloudApplicationModule,
+    GpuPlatformModule,
     KnowledgeBaseModule,
     EnterpriseSearchModule,
     OntologyPlatformModule,
@@ -179,6 +182,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     IntelligenceCloudGraphqlResolver,
     KnowledgeCloudGraphqlResolver,
     InferenceCloudGraphqlResolver,
+    GpuPlatformGraphqlResolver,
     KnowledgeBaseGraphqlResolver,
     EnterpriseSearchGraphqlResolver,
     OntologyPlatformGraphqlResolver,

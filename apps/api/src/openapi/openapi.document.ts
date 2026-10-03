@@ -2699,6 +2699,113 @@ export const openApiDocument = {
         },
       },
     },
+    '/v1/gpu-platform/engine': {
+      get: {
+        summary: 'GPU Platform catalog',
+        operationId: 'getGpuPlatformEngine',
+        responses: {
+          '200': {
+            description: 'Capabilities, ceilings, and spend-safety honesty',
+          },
+        },
+      },
+    },
+    '/v1/gpu-platform/vendors': {
+      get: {
+        summary: 'GPU vendors',
+        operationId: 'listGpuVendors',
+        responses: { '200': { description: 'NVIDIA/AMD/Intel sandbox vendor tags' } },
+      },
+    },
+    '/v1/gpu-platform/pools': {
+      get: {
+        summary: 'Sandbox GPU pools',
+        operationId: 'listGpuPools',
+        responses: { '200': { description: 'Logical sandbox pool catalog' } },
+      },
+    },
+    '/v1/gpu-platform/ceilings': {
+      get: {
+        summary: 'Hard GPU instance/spend ceilings',
+        operationId: 'getGpuCeilings',
+        responses: { '200': { description: 'maxInstances + maxSpendUsd + provisionMode' } },
+      },
+    },
+    '/v1/gpu-platform/allocations': {
+      get: {
+        summary: 'List sandbox GPU allocations',
+        operationId: 'listGpuAllocations',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Org/workspace allocations' } },
+      },
+      post: {
+        summary: 'Create sandbox GPU allocation (ceiling-enforced)',
+        operationId: 'createGpuAllocation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: {
+          '201': { description: 'Logical allocation created' },
+          '402': { description: 'Hard instance or spend ceiling exceeded' },
+          '403': { description: 'Provision mode disabled' },
+        },
+      },
+    },
+    '/v1/gpu-platform/allocations/{id}/scale': {
+      post: {
+        summary: 'Scale allocation toward target (hard-clamped)',
+        operationId: 'scaleGpuAllocation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'Scaled or clamped to ceiling' },
+          '402': { description: 'Hard ceiling prevents scale' },
+        },
+      },
+    },
+    '/v1/gpu-platform/allocations/{id}/release': {
+      post: {
+        summary: 'Release sandbox GPU allocation',
+        operationId: 'releaseGpuAllocation',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: { '200': { description: 'Released' } },
+      },
+    },
+    '/v1/gpu-platform/health': {
+      get: {
+        summary: 'GPU Platform health',
+        operationId: 'getGpuPlatformHealth',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Sandbox health snapshot' } },
+      },
+    },
+    '/v1/gpu-platform/costs': {
+      get: {
+        summary: 'Estimated GPU costs',
+        operationId: 'getGpuPlatformCosts',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Estimated USD from sandbox rates' } },
+      },
+    },
+    '/v1/gpu-platform/analytics': {
+      get: {
+        summary: 'GPU Platform analytics',
+        operationId: 'getGpuPlatformAnalytics',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Allocation aggregates' } },
+      },
+    },
+    '/v1/gpu-platform/monitoring': {
+      get: {
+        summary: 'GPU Platform monitoring',
+        operationId: 'getGpuPlatformMonitoring',
+        security: [{ ApiKeyAuth: [] }, { ClerkAuth: [] }],
+        responses: { '200': { description: 'Monitoring + spend-safety snapshot' } },
+      },
+    },
     '/v1/knowledge-base/engine': {
       get: {
         summary: 'Enterprise Knowledge Base engine catalog',

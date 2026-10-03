@@ -403,6 +403,63 @@ export class GqlInferenceProduct {
 }
 
 @ObjectType()
+export class GqlGpuPlatformCapability {
+  @Field()
+  id!: string;
+
+  @Field()
+  name!: string;
+
+  @Field()
+  status!: string;
+
+  @Field(() => String, { nullable: true })
+  api!: string | null;
+
+  @Field()
+  notes!: string;
+}
+
+@ObjectType()
+export class GqlGpuPlatformEngine {
+  @Field()
+  product!: string;
+
+  @Field()
+  note!: string;
+
+  @Field(() => [GqlGpuPlatformCapability])
+  capabilities!: GqlGpuPlatformCapability[];
+
+  @Field()
+  gpuHyperscalerOs!: boolean;
+
+  @Field()
+  callsCloudGpuApis!: boolean;
+
+  @Field()
+  openEndedGpuAutoscale!: boolean;
+
+  @Field()
+  hardSpendCeilingsRequired!: boolean;
+
+  @Field()
+  sandboxLogicalOnly!: boolean;
+
+  @Field()
+  orgWorkspaceScoped!: boolean;
+
+  @Field()
+  maxInstances!: number;
+
+  @Field()
+  maxSpendUsd!: number;
+
+  @Field()
+  provisionMode!: string;
+}
+
+@ObjectType()
 export class GqlKnowledgeBaseCapability {
   @Field()
   id!: string;

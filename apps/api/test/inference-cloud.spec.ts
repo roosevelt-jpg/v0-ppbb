@@ -116,7 +116,9 @@ describe('Inference Cloud Foundation (VL-204)', () => {
     expect(hub.status).toBe('shipped');
 
     const gpu = res.body.products.find((p: { id: string }) => p.id === 'gpu-platform');
-    expect(gpu.status).toBe('deferred');
+    expect(gpu.status).toBe('partial');
+    expect(gpu.api).toContain('/v1/gpu-platform/engine');
+    expect(gpu.console).toBe('/gpu-platform');
     expect(gpu.notes).toMatch(/spend|ceiling/i);
 
     const cost = res.body.products.find((p: { id: string }) => p.id === 'cost-optimization');
@@ -137,7 +139,8 @@ describe('Inference Cloud Foundation (VL-204)', () => {
 
     expect(overview.usage.chat).toBeDefined();
     expect(overview.usage.embeddings).toBeDefined();
-    expect(overview.deferred.gpuPlatform).toBe(true);
+    expect(overview.deferred.gpuPlatform).toBe(false);
+    expect(overview.links.gpuPlatform).toBe('/gpu-platform');
     expect(overview.deferred.modelServing).toBe(true);
     expect(overview.deferred.costOptimization).toBe(true);
     expect(overview.deferred.gpuHyperscalerOs).toBe(true);

@@ -18,6 +18,9 @@ function usage(): never {
   verbalab intelligence-products
   verbalab knowledge-products
   verbalab inference-products
+  verbalab gpu-platform-engine
+  verbalab gpu-platform-pools [--vendor nvidia|amd|intel]
+  verbalab gpu-platform-allocate --pool <id> [--instances <n>]
   verbalab knowledge-base-engine
   verbalab enterprise-search-engine
   verbalab enterprise-search --query <text> [--mode keyword|semantic|hybrid]
@@ -141,6 +144,39 @@ async function main() {
 
   if (command === 'inference-products') {
     console.log(JSON.stringify(await vl.inferenceProducts(), null, 2));
+    return;
+  }
+
+  if (command === 'gpu-platform-engine') {
+    console.log(JSON.stringify(await vl.gpuPlatformEngine(), null, 2));
+    return;
+  }
+
+  if (command === 'gpu-platform-pools') {
+    console.log(
+      JSON.stringify(
+        await vl.gpuPlatformPools({ vendor: argValue(rest, '--vendor') ?? undefined }),
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
+  if (command === 'gpu-platform-allocate') {
+    const poolId = argValue(rest, '--pool');
+    if (!poolId) usage();
+    const instancesRaw = argValue(rest, '--instances');
+    console.log(
+      JSON.stringify(
+        await vl.gpuPlatformAllocate({
+          poolId,
+          instances: instancesRaw ? Number(instancesRaw) : undefined,
+        }),
+        null,
+        2,
+      ),
+    );
     return;
   }
 

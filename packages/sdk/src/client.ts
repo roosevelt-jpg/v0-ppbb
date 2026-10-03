@@ -1093,6 +1093,69 @@ export class VerbaLab {
     return this.requestJson('/v1/inference-cloud/products', { method: 'GET' });
   }
 
+  async gpuPlatformEngine(): Promise<{
+    product: string;
+    note: string;
+    capabilities: Array<{
+      id: string;
+      name: string;
+      status: string;
+      api: string | null;
+      notes: string;
+    }>;
+    honesty: {
+      gpuHyperscalerOs: boolean;
+      callsCloudGpuApis: boolean;
+      openEndedGpuAutoscale: boolean;
+      hardSpendCeilingsRequired: boolean;
+      sandboxLogicalOnly: boolean;
+    };
+    ceilings: {
+      maxInstances: number;
+      maxSpendUsd: number;
+      provisionMode: string;
+    };
+  }> {
+    return this.requestJson('/v1/gpu-platform/engine', { method: 'GET' });
+  }
+
+  async gpuPlatformPools(params?: { vendor?: string }): Promise<{
+    pools: Array<{
+      id: string;
+      vendor: string;
+      name: string;
+      estimatedHourlyUsd: number;
+      status: string;
+    }>;
+  }> {
+    const q = new URLSearchParams();
+    if (params?.vendor) q.set('vendor', params.vendor);
+    const suffix = q.toString() ? `?${q}` : '';
+    return this.requestJson(`/v1/gpu-platform/pools${suffix}`, { method: 'GET' });
+  }
+
+  async gpuPlatformAllocate(input: {
+    poolId: string;
+    instances?: number;
+    purpose?: string;
+    reservationHours?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.requestJson('/v1/gpu-platform/allocations', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async gpuPlatformScale(
+    id: string,
+    input: { targetInstances: number },
+  ): Promise<Record<string, unknown>> {
+    return this.requestJson(`/v1/gpu-platform/allocations/${id}/scale`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
   async knowledgeBaseEngine(): Promise<{
     product: string;
     note: string;

@@ -24,11 +24,11 @@ export function inferenceProductCatalog(): InferenceProductRow[] {
     {
       id: 'gpu-platform',
       name: 'GPU Platform',
-      status: 'deferred',
-      api: null,
-      console: null,
+      status: 'partial',
+      api: 'GET /v1/gpu-platform/engine',
+      console: '/gpu-platform',
       notes:
-        'GPU provisioning/scheduling (Phase 72 / VL-205). Hard spend ceilings required; sandbox/dev only until Cost Optimization ships.',
+        'Sandbox pools/schedule/quotas/autoscale with hard ceilings (VL-205). No cloud GPU APIs; MIG/distributed deferred.',
     },
     {
       id: 'model-serving',
